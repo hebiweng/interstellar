@@ -1,0 +1,1043 @@
+schema_version: 1.0.0
+document_version: 1.0.0-draft.1
+product: interstellar
+baseline_date: 2026-07-17
+license_strategy: agpl_open_source
+
+policy:
+  v1_duration_months: 24
+  professional_alpha_month: 6
+  zero_crawler: true
+  anonymous_calculation_persistence: none_by_default
+  canonical_schema_owner: interstellar
+  stable_gate:
+    - approved_algorithm_card_when_required
+    - unit_and_property_tests
+    - gold_fixture_tests
+    - independent_differential_tests
+    - professional_review
+    - reproducible_version_metadata
+    - public_documentation
+  maturity_levels:
+    stable: Public API compatibility and professional validation are complete.
+    beta: Implemented and tested, but some boundary validation or professional review remains.
+    experimental: Research capability with explicit warnings and no compatibility promise.
+
+phases:
+  foundation:
+    months: [0, 1]
+    release: internal
+  alpha:
+    months: [2, 6]
+    release: professional_alpha
+  beta:
+    months: [7, 12]
+    release: professional_beta
+  pro:
+    months: [13, 18]
+    release: professional_pro
+  v1:
+    months: [19, 24]
+    release: v1
+  post_v1:
+    months: null
+    release: future
+
+data_sources:
+  swiss_ephemeris:
+    name: Swiss Ephemeris
+    url: https://www.astro.com/swisseph/swephinfo_e.htm
+    acquisition: official_release
+    runtime_mode: local_versioned_files
+    license: AGPL-3.0-or-later OR Professional License
+    v1_choice: AGPL-3.0-or-later
+    cost_v1: free
+    required_for_v1: true
+    notes: Closed-source or AGPL-incompatible operation requires the professional license.
+  jpl_spice:
+    name: NASA/JPL NAIF SPICE
+    url: https://naif.jpl.nasa.gov/naif/public.html
+    acquisition: official_kernel
+    runtime_mode: local_validation_kernel
+    license: publicly_available_with_credit_requirements
+    cost_v1: free
+    required_for_v1: true
+    notes: Independent astronomical validation; not the astrology semantic engine.
+  iana_tzdb:
+    name: IANA Time Zone Database
+    url: https://www.iana.org/time-zones
+    acquisition: official_release
+    runtime_mode: local_versioned_database
+    license: public_tzdb_distribution
+    cost_v1: free
+    required_for_v1: true
+    baseline_version: 2026c
+  timezone_boundary_builder:
+    name: Timezone Boundary Builder
+    url: https://github.com/evansiroky/timezone-boundary-builder
+    acquisition: github_release
+    runtime_mode: postgis_local
+    license: ODbL-1.0-output_AND_MIT-code
+    cost_v1: free
+    required_for_v1: true
+  geonames:
+    name: GeoNames
+    url: https://download.geonames.org/export/dump/
+    acquisition: official_dump
+    runtime_mode: postgresql_local
+    license: CC-BY-4.0
+    cost_v1: free
+    required_for_v1: true
+  natural_earth:
+    name: Natural Earth
+    url: https://www.naturalearthdata.com/about/terms-of-use/
+    acquisition: official_package
+    runtime_mode: local_map_assets
+    license: public_domain
+    cost_v1: free
+    required_for_v1: true
+  openstreetmap:
+    name: OpenStreetMap
+    url: https://www.openstreetmap.org/copyright
+    acquisition: self_hosted_extract_or_replaceable_provider
+    runtime_mode: replaceable_map_adapter
+    license: ODbL-1.0
+    cost_v1: data_free_service_may_cost
+    required_for_v1: false
+    notes: Public Nominatim is not used for autocomplete, bulk geocoding, or production dependency.
+  iers:
+    name: IERS Bulletins
+    url: https://data.iers.org/bulletins.php
+    acquisition: official_bulletin
+    runtime_mode: local_versioned_data
+    license: official_public_data
+    cost_v1: free
+    required_for_v1: true
+  minor_planet_center:
+    name: Minor Planet Center mpc_orb
+    url: https://docs.minorplanetcenter.net/software/
+    acquisition: official_json_or_api
+    runtime_mode: common_local_long_tail_cache
+    license: official_data_terms
+    cost_v1: free
+    required_for_v1: false
+  gaia_dr3:
+    name: ESA Gaia DR3
+    url: https://gea.esac.esa.int/archive/documentation/GDR3/index.html
+    acquisition: official_tap_or_archive
+    runtime_mode: common_local_long_tail_cache
+    license: open_with_ESA_Gaia_DPAC_credit
+    cost_v1: free
+    required_for_v1: false
+  nasa_eclipse:
+    name: NASA Eclipse Catalogs
+    url: https://eclipse.gsfc.nasa.gov/eclipse.html
+    acquisition: official_catalog
+    runtime_mode: validation_fixture
+    license: reproducible_with_required_acknowledgement
+    cost_v1: free
+    required_for_v1: false
+  wikidata:
+    name: Wikidata
+    url: https://www.wikidata.org/wiki/Wikidata:Licensing
+    acquisition: official_dump_or_api
+    runtime_mode: curated_reference_cases
+    license: CC0-1.0-structured-data
+    cost_v1: free
+    required_for_v1: false
+  authorized_birth_data:
+    name: Authorized exact birth-time dataset
+    url: null
+    acquisition: written_authorization_only
+    runtime_mode: curated_reference_cases
+    license: to_be_negotiated
+    cost_v1: unavailable
+    required_for_v1: false
+    phase: post_v1
+  commercial_map_service:
+    name: Commercial map and geocoding service
+    url: null
+    acquisition: procurement
+    runtime_mode: replaceable_map_adapter
+    license: commercial_contract
+    cost_v1: optional
+    required_for_v1: false
+
+validation_profiles:
+  platform_stable:
+    - unit
+    - contract
+    - integration
+    - security
+    - e2e
+  astronomy_stable:
+    - unit
+    - property
+    - gold
+    - differential_jpl
+    - professional_review
+  astrology_stable:
+    - unit
+    - property
+    - gold
+    - differential_astrology
+    - professional_review
+  astrology_beta:
+    - unit
+    - property
+    - gold
+    - differential_astrology
+  rendering_stable:
+    - unit
+    - visual_regression
+    - accessibility
+    - export_round_trip
+  research_experimental:
+    - unit
+    - explicit_warning
+    - provenance
+
+capabilities:
+  - id: platform.canonical_schema
+    name_zh: Canonical Schema与类型生成
+    category: platform
+    phase: foundation
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-SCH-001
+    dependencies: []
+    algorithm_card: not_required
+    data_sources: []
+    inputs: [json_schema, openapi]
+    outputs: [typescript_types, python_types, api_contract]
+    validation_profile: platform_stable
+
+  - id: platform.time_spec
+    name_zh: TimeSpec与时间可信度
+    category: platform
+    phase: foundation
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-TIM-001
+    dependencies: [platform.canonical_schema]
+    algorithm_card: required
+    data_sources: [iana_tzdb]
+    inputs: [local_time, precision, timezone, calendar]
+    outputs: [utc_candidates, selected_utc, confidence, warnings]
+    validation_profile: platform_stable
+
+  - id: platform.location
+    name_zh: 地点、时区边界与地名检索
+    category: platform
+    phase: foundation
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-TIM-001
+    dependencies: [platform.canonical_schema]
+    algorithm_card: required
+    data_sources: [geonames, timezone_boundary_builder, natural_earth]
+    inputs: [place_query, latitude, longitude]
+    outputs: [location, timezone_candidates, provenance]
+    validation_profile: platform_stable
+
+  - id: platform.subject_versioning
+    name_zh: 对象与不可变版本
+    category: platform
+    phase: foundation
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-SUB-001
+    dependencies: [platform.canonical_schema, platform.time_spec, platform.location]
+    algorithm_card: not_required
+    data_sources: []
+    inputs: [subject, subject_version]
+    outputs: [immutable_subject_version]
+    validation_profile: platform_stable
+
+  - id: platform.calculation_snapshot
+    name_zh: 不可变计算快照与可复现元数据
+    category: platform
+    phase: foundation
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-ENG-001
+    dependencies: [platform.canonical_schema, platform.subject_versioning]
+    algorithm_card: not_required
+    data_sources: []
+    inputs: [normalized_chart_request]
+    outputs: [calculation_snapshot, input_fingerprint]
+    validation_profile: platform_stable
+
+  - id: platform.rest_api
+    name_zh: 版本化REST API
+    category: platform
+    phase: alpha
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-API-001
+    dependencies: [platform.calculation_snapshot]
+    algorithm_card: not_required
+    data_sources: []
+    inputs: [http_request]
+    outputs: [json_response, problem_json]
+    validation_profile: platform_stable
+
+  - id: platform.async_jobs
+    name_zh: 异步任务、SSE、取消与重试
+    category: platform
+    phase: alpha
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-JOB-001
+    dependencies: [platform.rest_api]
+    algorithm_card: not_required
+    data_sources: []
+    inputs: [long_running_request]
+    outputs: [job, progress_events, terminal_resource]
+    validation_profile: platform_stable
+
+  - id: platform.workspace_security
+    name_zh: Workspace、RLS、字段加密和分享
+    category: platform
+    phase: alpha
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-SEC-001
+    dependencies: [platform.subject_versioning]
+    algorithm_card: not_required
+    data_sources: []
+    inputs: [workspace_resource, authorization]
+    outputs: [authorized_resource, audit_event]
+    validation_profile: platform_stable
+
+  - id: platform.rule_pack_runtime
+    name_zh: 声明式Rule Pack运行时
+    category: platform
+    phase: beta
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-RULE-001
+    dependencies: [platform.canonical_schema, platform.calculation_snapshot]
+    algorithm_card: required
+    data_sources: []
+    inputs: [facts, rule_pack]
+    outputs: [evidence, rule_trace]
+    validation_profile: astrology_beta
+
+  - id: platform.project_archive
+    name_zh: 可重导入项目归档
+    category: platform
+    phase: beta
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-REL-003
+    dependencies: [platform.subject_versioning, platform.calculation_snapshot, platform.rule_pack_runtime]
+    algorithm_card: not_required
+    data_sources: []
+    inputs: [workspace_selection]
+    outputs: [versioned_zip_archive]
+    validation_profile: platform_stable
+
+  - id: astronomy.ephemeris_core
+    name_zh: 主要天体、月球、节点和速度
+    category: astronomy
+    phase: alpha
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-ENG-001
+    dependencies: [platform.time_spec, platform.location]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris, jpl_spice, iers]
+    inputs: [utc_instant, observer, coordinate_settings]
+    outputs: [celestial_positions, velocities, retrograde_state]
+    validation_profile: astronomy_stable
+
+  - id: astronomy.coordinate_systems
+    name_zh: 黄道、赤道、地平与观察中心坐标
+    category: astronomy
+    phase: beta
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-ENG-001
+    dependencies: [astronomy.ephemeris_core]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris, jpl_spice, iers]
+    inputs: [celestial_positions, coordinate_frame]
+    outputs: [ecliptic, equatorial, horizontal]
+    validation_profile: astronomy_stable
+
+  - id: astronomy.houses_angles
+    name_zh: 宫位制、四轴和敏感点
+    category: astronomy
+    phase: alpha
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-NAT-001
+    dependencies: [astronomy.ephemeris_core, platform.location]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris]
+    inputs: [sidereal_time, latitude, house_system]
+    outputs: [house_cusps, asc_mc, sensitive_points, polar_warnings]
+    validation_profile: astronomy_stable
+
+  - id: astronomy.aspects
+    name_zh: 黄经、赤纬和镜像相位
+    category: astronomy
+    phase: alpha
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-NAT-001
+    dependencies: [astronomy.ephemeris_core]
+    algorithm_card: required
+    data_sources: []
+    inputs: [points, aspect_set, orb_profile]
+    outputs: [aspects, applying_state, strength]
+    validation_profile: astrology_stable
+
+  - id: astronomy.fixed_stars
+    name_zh: 固定星位置、合相与Paran基础
+    category: astronomy
+    phase: beta
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-CLS-001
+    dependencies: [astronomy.coordinate_systems]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris, gaia_dr3]
+    inputs: [fixed_star_selection, epoch, observer]
+    outputs: [fixed_star_positions, conjunctions]
+    validation_profile: astronomy_stable
+
+  - id: astronomy.minor_bodies
+    name_zh: 常用与按需小行星
+    category: astronomy
+    phase: beta
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-CLS-001
+    dependencies: [astronomy.ephemeris_core]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris, minor_planet_center]
+    inputs: [minor_body_ids, utc_instant]
+    outputs: [minor_body_positions, orbit_provenance]
+    validation_profile: astrology_beta
+
+  - id: astronomy.eclipse_events
+    name_zh: 日月食计算与路径
+    category: astronomy
+    phase: v1
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-MUN-001
+    dependencies: [astronomy.ephemeris_core, platform.async_jobs]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris, jpl_spice, nasa_eclipse]
+    inputs: [time_range, location_optional]
+    outputs: [eclipse_events, visibility, path_geometry]
+    validation_profile: astronomy_stable
+
+  - id: natal.standard_chart
+    name_zh: 标准本命盘
+    category: natal
+    phase: alpha
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-NAT-001
+    dependencies: [astronomy.ephemeris_core, astronomy.houses_angles, astronomy.aspects]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris]
+    inputs: [subject_version, chart_settings]
+    outputs: [natal_chart, distributions]
+    validation_profile: astrology_stable
+
+  - id: natal.unknown_time_mode
+    name_zh: 无出生时间与时间区间模式
+    category: natal
+    phase: alpha
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-TIM-001
+    dependencies: [natal.standard_chart, platform.time_spec]
+    algorithm_card: required
+    data_sources: []
+    inputs: [date_or_time_interval]
+    outputs: [time_independent_results, uncertainty_ranges, disabled_features]
+    validation_profile: astrology_stable
+
+  - id: natal.patterns_distributions
+    name_zh: 元素、模式、半球、行星形态和几何格局
+    category: natal
+    phase: beta
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-CLS-001
+    dependencies: [natal.standard_chart]
+    algorithm_card: required
+    data_sources: []
+    inputs: [natal_chart, pattern_profile]
+    outputs: [distributions, chart_shapes, aspect_patterns]
+    validation_profile: astrology_beta
+
+  - id: natal.dignity_reception
+    name_zh: 本质/偶然尊贵、接纳与定位星链
+    category: classical
+    phase: beta
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-CLS-001
+    dependencies: [natal.standard_chart, platform.rule_pack_runtime]
+    algorithm_card: required
+    data_sources: []
+    inputs: [chart, dignity_table, sect_profile]
+    outputs: [dignities, receptions, dispositors]
+    validation_profile: astrology_beta
+
+  - id: natal.arabic_parts
+    name_zh: 阿拉伯点与自定义公式
+    category: classical
+    phase: beta
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-CLS-001
+    dependencies: [natal.standard_chart, natal.dignity_reception]
+    algorithm_card: required
+    data_sources: []
+    inputs: [chart, lot_formulas, sect]
+    outputs: [lots, rulers, aspects]
+    validation_profile: astrology_beta
+
+  - id: natal.midpoints
+    name_zh: 中点、模数与中点树
+    category: natal
+    phase: beta
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-MID-001
+    dependencies: [natal.standard_chart]
+    algorithm_card: required
+    data_sources: []
+    inputs: [points, modulus, orb]
+    outputs: [midpoints, midpoint_axes, midpoint_tree]
+    validation_profile: astrology_beta
+
+  - id: natal.harmonics
+    name_zh: 任意N次谐波盘
+    category: natal
+    phase: beta
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-MID-001
+    dependencies: [natal.standard_chart]
+    algorithm_card: required
+    data_sources: []
+    inputs: [chart, harmonic_number]
+    outputs: [harmonic_chart, harmonic_aspects]
+    validation_profile: astrology_beta
+
+  - id: forecast.transits
+    name_zh: 行运、宫位进入与多次触发
+    category: forecast
+    phase: alpha
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-TRN-001
+    dependencies: [natal.standard_chart, astronomy.aspects]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris]
+    inputs: [natal_chart, reference_time_or_range]
+    outputs: [transit_chart, transit_events, active_windows]
+    validation_profile: astrology_stable
+
+  - id: forecast.returns
+    name_zh: 太阳、月亮与行星返照
+    category: forecast
+    phase: alpha
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-TRN-001
+    dependencies: [natal.standard_chart, platform.async_jobs]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris]
+    inputs: [natal_point, return_body, search_range, location_policy]
+    outputs: [exact_return_times, return_charts]
+    validation_profile: astrology_stable
+
+  - id: forecast.secondary_progression
+    name_zh: 次限推运
+    category: forecast
+    phase: beta
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-PRG-001
+    dependencies: [natal.standard_chart]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris]
+    inputs: [natal_chart, target_time, progression_variant]
+    outputs: [progressed_chart, progressed_aspects]
+    validation_profile: astrology_beta
+
+  - id: forecast.tertiary_progression
+    name_zh: 三限及其他推运变体
+    category: forecast
+    phase: beta
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-PRG-001
+    dependencies: [forecast.secondary_progression]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris]
+    inputs: [natal_chart, target_time, variant]
+    outputs: [progressed_chart, progressed_aspects]
+    validation_profile: astrology_beta
+
+  - id: forecast.solar_arc
+    name_zh: 太阳弧与其他弧向
+    category: forecast
+    phase: beta
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-PRG-001
+    dependencies: [natal.standard_chart]
+    algorithm_card: required
+    data_sources: []
+    inputs: [natal_chart, target_time, arc_key]
+    outputs: [directed_points, directed_aspects]
+    validation_profile: astrology_beta
+
+  - id: forecast.primary_directions
+    name_zh: 主限与时间钥匙
+    category: forecast
+    phase: pro
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-DIR-001
+    dependencies: [astronomy.coordinate_systems, natal.dignity_reception]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris, iers]
+    inputs: [natal_chart, direction_system, time_key]
+    outputs: [directions, exact_times]
+    validation_profile: astrology_beta
+
+  - id: forecast.event_search
+    name_zh: 统一事件搜索器
+    category: forecast
+    phase: beta
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-EVT-001
+    dependencies: [forecast.transits, platform.async_jobs]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris]
+    inputs: [time_range, predicates, precision]
+    outputs: [event_hits, exact_times, active_windows]
+    validation_profile: astrology_stable
+
+  - id: timing.annual_profections
+    name_zh: 年度、月度和日度小限
+    category: timing
+    phase: pro
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-TML-001
+    dependencies: [natal.dignity_reception]
+    algorithm_card: required
+    data_sources: []
+    inputs: [natal_chart, target_time, profection_level]
+    outputs: [activated_house, time_lord, period]
+    validation_profile: astrology_beta
+
+  - id: timing.firdaria
+    name_zh: 法达周期
+    category: timing
+    phase: pro
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-TML-001
+    dependencies: [natal.dignity_reception]
+    algorithm_card: required
+    data_sources: []
+    inputs: [natal_chart, target_time, firdaria_variant]
+    outputs: [major_lord, minor_lord, period]
+    validation_profile: astrology_beta
+
+  - id: timing.zodiacal_releasing
+    name_zh: 黄道释放L1-L4
+    category: timing
+    phase: pro
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-TML-001
+    dependencies: [natal.arabic_parts]
+    algorithm_card: required
+    data_sources: []
+    inputs: [releasing_lot, target_range, variant]
+    outputs: [levels, peaks, loosing_of_bond, angular_periods]
+    validation_profile: astrology_beta
+
+  - id: relationship.synastry
+    name_zh: 比较盘与双向宫位覆盖
+    category: relationship
+    phase: alpha
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-REL-001
+    dependencies: [natal.standard_chart, astronomy.aspects]
+    algorithm_card: required
+    data_sources: []
+    inputs: [subject_a_chart, subject_b_chart]
+    outputs: [cross_aspects, house_overlays, directional_views]
+    validation_profile: astrology_stable
+
+  - id: relationship.composite
+    name_zh: 中点组合盘
+    category: relationship
+    phase: alpha
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-REL-001
+    dependencies: [relationship.synastry]
+    algorithm_card: required
+    data_sources: []
+    inputs: [subject_a_chart, subject_b_chart, midpoint_policy]
+    outputs: [composite_chart]
+    validation_profile: astrology_stable
+
+  - id: relationship.davison
+    name_zh: 戴维森与校正变体
+    category: relationship
+    phase: beta
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-REL-002
+    dependencies: [relationship.synastry, platform.location]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris]
+    inputs: [subject_a, subject_b, location_policy]
+    outputs: [davison_chart, midpoint_time_location]
+    validation_profile: astrology_beta
+
+  - id: relationship.dynamic_forecast
+    name_zh: 动态关系预测
+    category: relationship
+    phase: v1
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-REL-002
+    dependencies: [relationship.composite, relationship.davison, forecast.event_search]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris]
+    inputs: [relationship_charts, time_range, techniques]
+    outputs: [relationship_events, multi_chart_evidence]
+    validation_profile: astrology_beta
+
+  - id: special.horary
+    name_zh: 卜卦占星规则引擎
+    category: special
+    phase: pro
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-HOR-001
+    dependencies: [natal.dignity_reception, platform.rule_pack_runtime]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris]
+    inputs: [question_chart, topic_house_mapping, rule_profile]
+    outputs: [significators, perfection_evidence, timing_evidence, warnings]
+    validation_profile: astrology_beta
+
+  - id: special.electional
+    name_zh: 择时约束与候选排序
+    category: special
+    phase: pro
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-ELE-001
+    dependencies: [forecast.event_search, platform.rule_pack_runtime]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris]
+    inputs: [time_range, hard_constraints, scoring_rules]
+    outputs: [ranked_windows, rejected_windows, evidence]
+    validation_profile: astrology_beta
+
+  - id: geography.relocation
+    name_zh: 迁移盘与城市比较
+    category: geography
+    phase: pro
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-GEO-001
+    dependencies: [natal.standard_chart, platform.location]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris, geonames]
+    inputs: [natal_time, target_locations]
+    outputs: [relocated_charts, city_comparison]
+    validation_profile: astrology_beta
+
+  - id: geography.astrocartography
+    name_zh: Astrocartography角线
+    category: geography
+    phase: pro
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-GEO-001
+    dependencies: [astronomy.coordinate_systems, platform.location]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris, natural_earth]
+    inputs: [utc_instant, selected_points]
+    outputs: [asc_dsc_mc_ic_lines, intersections]
+    validation_profile: astrology_beta
+
+  - id: geography.local_space
+    name_zh: Local Space方位线
+    category: geography
+    phase: pro
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-GEO-001
+    dependencies: [astronomy.coordinate_systems, platform.location]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris, natural_earth]
+    inputs: [chart, origin_location]
+    outputs: [azimuth_lines]
+    validation_profile: astrology_beta
+
+  - id: geography.parans
+    name_zh: Paran事件与地图
+    category: geography
+    phase: pro
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-GEO-001
+    dependencies: [astronomy.fixed_stars, forecast.event_search]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris, gaia_dr3, natural_earth]
+    inputs: [chart, selected_bodies, selected_stars]
+    outputs: [paran_events, paran_lines]
+    validation_profile: astrology_beta
+
+  - id: mundane.organizations_projects
+    name_zh: 国家、公司、项目和世运盘
+    category: mundane
+    phase: v1
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-MUN-001
+    dependencies: [natal.standard_chart, forecast.event_search, geography.relocation]
+    algorithm_card: required
+    data_sources: [swiss_ephemeris, natural_earth]
+    inputs: [event_or_organization_subject, time_range]
+    outputs: [mundane_chart, cycles, geographic_overlays]
+    validation_profile: astrology_beta
+
+  - id: topic.structured_evidence
+    name_zh: 主题基线、激活、支持、压力与确定度
+    category: topic
+    phase: pro
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-TOP-001
+    dependencies: [platform.rule_pack_runtime, forecast.event_search, timing.annual_profections]
+    algorithm_card: required
+    data_sources: []
+    inputs: [calculation_facts, topic_rule_pack]
+    outputs: [activity, support, pressure, confidence, evidence, counter_evidence]
+    validation_profile: astrology_beta
+    forbidden_outputs: [objective_event_probability, guaranteed_outcome, opaque_luck_score]
+
+  - id: rendering.wheels
+    name_zh: 单轮、双轮、三轮和四轮
+    category: rendering
+    phase: alpha
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-RND-001
+    dependencies: [natal.standard_chart, relationship.synastry]
+    algorithm_card: required
+    data_sources: []
+    inputs: [calculation_snapshot, render_spec]
+    outputs: [svg, interactive_scene]
+    validation_profile: rendering_stable
+
+  - id: rendering.tables_grids
+    name_zh: 位置表、相位矩阵和专业数据表
+    category: rendering
+    phase: alpha
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-RND-001
+    dependencies: [platform.calculation_snapshot]
+    algorithm_card: not_required
+    data_sources: []
+    inputs: [calculation_snapshot, column_profile]
+    outputs: [accessible_table, csv]
+    validation_profile: rendering_stable
+
+  - id: rendering.timelines_ephemeris
+    name_zh: 时间线、甘特图与图形星历
+    category: rendering
+    phase: beta
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-RND-002
+    dependencies: [forecast.event_search, forecast.secondary_progression]
+    algorithm_card: required
+    data_sources: []
+    inputs: [periods, events, render_spec]
+    outputs: [canvas_or_svg_timeline, graphical_ephemeris]
+    validation_profile: rendering_stable
+
+  - id: rendering.maps
+    name_zh: 占星地理、Local Space、Paran和食相地图
+    category: rendering
+    phase: pro
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-RND-003
+    dependencies: [geography.astrocartography, geography.local_space, geography.parans, astronomy.eclipse_events]
+    algorithm_card: required
+    data_sources: [natural_earth, openstreetmap]
+    inputs: [geographic_geometry, map_render_spec]
+    outputs: [interactive_map, svg_or_png_map]
+    validation_profile: rendering_stable
+
+  - id: rendering.advanced_dials
+    name_zh: 中点指针、45度、90度、360度和谐波刻度盘
+    category: rendering
+    phase: v1
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-RND-003
+    dependencies: [natal.midpoints, natal.harmonics]
+    algorithm_card: required
+    data_sources: []
+    inputs: [midpoint_or_harmonic_data, dial_spec]
+    outputs: [svg_dial, interactive_dial]
+    validation_profile: rendering_stable
+
+  - id: rendering.exports
+    name_zh: SVG、PNG、PDF、JSON、CSV和ICS导出
+    category: rendering
+    phase: beta
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-RND-002
+    dependencies: [rendering.wheels, rendering.tables_grids, platform.async_jobs]
+    algorithm_card: not_required
+    data_sources: []
+    inputs: [calculation_snapshot, render_spec, export_format]
+    outputs: [svg, png, pdf, json, csv, ics]
+    validation_profile: rendering_stable
+
+  - id: ux.professional_workspace
+    name_zh: 三栏专业工作台与四分屏
+    category: ux
+    phase: alpha
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-UI-001
+    dependencies: [platform.rest_api, rendering.wheels, rendering.tables_grids]
+    algorithm_card: not_required
+    data_sources: []
+    inputs: [user_actions, presets, workspace_layout]
+    outputs: [calculation_requests, synchronized_views]
+    validation_profile: platform_stable
+
+  - id: ux.bilingual_accessible
+    name_zh: 中英文、键盘、打印和色盲支持
+    category: ux
+    phase: v1
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-LOC-001
+    dependencies: [ux.professional_workspace, rendering.exports]
+    algorithm_card: not_required
+    data_sources: []
+    inputs: [locale, accessibility_preferences]
+    outputs: [localized_accessible_ui_and_exports]
+    validation_profile: rendering_stable
+
+  - id: future.birth_time_rectification
+    name_zh: 出生时间校正
+    category: future
+    phase: post_v1
+    v1_required: false
+    target_maturity: experimental
+    work_package: null
+    dependencies: [platform.time_spec, forecast.event_search]
+    algorithm_card: required
+    data_sources: [authorized_birth_data]
+    inputs: [time_interval, life_events, rectification_profile]
+    outputs: [ranked_time_candidates, uncertainty, evidence]
+    validation_profile: research_experimental
+    blocker: No authoritative ground-truth dataset or universally accepted method.
+
+  - id: future.consumer_product
+    name_zh: 普通消费者产品
+    category: future
+    phase: post_v1
+    v1_required: false
+    target_maturity: experimental
+    work_package: null
+    dependencies: [topic.structured_evidence, ux.professional_workspace]
+    algorithm_card: not_required
+    data_sources: []
+    inputs: [simplified_user_input]
+    outputs: [consumer_experience, reports, journals]
+    validation_profile: research_experimental
+
+  - id: future.ai_interpretation
+    name_zh: AI证据链解释与自然语言控制
+    category: future
+    phase: post_v1
+    v1_required: false
+    target_maturity: experimental
+    work_package: null
+    dependencies: [topic.structured_evidence, platform.calculation_snapshot]
+    algorithm_card: required
+    data_sources: []
+    inputs: [structured_evidence, authorized_user_context]
+    outputs: [explanation, chart_commands]
+    validation_profile: research_experimental
+    constraint: AI must never calculate or overwrite astronomical facts.
+
+  - id: future.non_western_plugins
+    name_zh: 印度占星、八字、紫微和奇门插件
+    category: future
+    phase: post_v1
+    v1_required: false
+    target_maturity: experimental
+    work_package: null
+    dependencies: [platform.canonical_schema, platform.async_jobs, rendering.exports]
+    algorithm_card: required
+    data_sources: []
+    inputs: [plugin_specific_schema]
+    outputs: [platform_envelope, plugin_domain_result]
+    validation_profile: research_experimental
+    constraint: Each system owns a separate strongly typed domain schema.
+
+  - id: future.professional_commerce
+    name_zh: CRM、预约、支付、团队和商业API
+    category: future
+    phase: post_v1
+    v1_required: false
+    target_maturity: experimental
+    work_package: null
+    dependencies: [platform.workspace_security, platform.rest_api]
+    algorithm_card: not_required
+    data_sources: []
+    inputs: [clients, appointments, payments, teams]
+    outputs: [professional_service_workflows]
+    validation_profile: research_experimental
+
+  - id: future.enterprise_infrastructure
+    name_zh: 多区域、高可用和企业SLA
+    category: future
+    phase: post_v1
+    v1_required: false
+    target_maturity: experimental
+    work_package: null
+    dependencies: [platform.rest_api, platform.async_jobs, platform.workspace_security]
+    algorithm_card: not_required
+    data_sources: [commercial_map_service]
+    inputs: [enterprise_slo, capacity_plan]
+    outputs: [multi_region_service, sla, disaster_recovery]
+    validation_profile: research_experimental
