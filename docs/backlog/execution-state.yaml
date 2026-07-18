@@ -3,7 +3,7 @@ controller_ref: docs/backlog/execution-controller.yaml
 updated_at: '2026-07-18'
 goal_status: active
 active_stage: professional_alpha
-active_month: M3
+active_month: M4
 stage_status:
   foundation: completed
   professional_alpha: in_progress
@@ -13,31 +13,32 @@ stage_status:
   released: pending
 
 active_work_packages:
-  - id: M3-HOUSES
-    owner: delegated_m3_houses
+  - id: M4-REGISTRIES
+    owner: delegated_m4_registries
     status: in_progress
-    write_scope: [python/interstellar_core/astrology/houses, tests/astrology/houses]
-    acceptance: asc_mc_twelve_cusps_and_high_latitude_policy_are_canonical_and_tested
-  - id: M3-ASPECTS
-    owner: delegated_m3_aspects
+    write_scope: [python/interstellar_core/analysis/registries, tests/analysis/registries]
+    acceptance: all_12_base_models_24_topic_models_and_35_intents_load_and_cross_reference
+  - id: M4-RECIPE
+    owner: delegated_m4_recipe
     status: in_progress
-    write_scope: [python/interstellar_core/astrology/aspects, tests/astrology/aspects]
-    acceptance: major_aspects_orbs_applying_state_and_circular_properties_pass
-  - id: M3-DISTRIBUTIONS
-    owner: delegated_m3_distributions
+    write_scope: [python/interstellar_core/analysis/recipe, tests/analysis/recipe]
+    acceptance: six_entry_paths_resolve_to_deduplicated_blocking_and_budgeted_immutable_recipes
+  - id: M4-JOBS
+    owner: delegated_m4_jobs
     status: in_progress
-    write_scope: [python/interstellar_core/astrology/distributions, tests/astrology/distributions]
-    acceptance: raw_and_weighted_element_modality_polarity_results_are_reproducible
-  - id: M3-INTEGRATION
+    write_scope: [python/interstellar_core/jobs, tests/jobs]
+    acceptance: job_state_machine_sse_cancel_retry_lease_and_recovery_pass
+  - id: M4-INTEGRATION
     owner: interstellar_primary_agent
     status: in_progress
-    write_scope: [python/interstellar_core/application, apps/api/interstellar_api, tests/backend, exports, package_scripts, stage_gate]
-    acceptance: complete_natal_fact_snapshot_and_position_house_aspect_distribution_tables_export_json_csv
+    write_scope: [apps/api, apps/worker, openapi, packages/canonical-schema, packages/sdk, tests/backend, tests/contracts, scripts, stage_gate]
+    acceptance: core_api_and_generated_sdk_execute_registry_recipe_and_job_flows_end_to_end
 
 current_gate_evidence:
   - docs/backlog/evidence/M0.yaml
   - docs/backlog/evidence/M1.yaml
   - docs/backlog/evidence/M2.yaml
+  - docs/backlog/evidence/M3.yaml
 open_blockers:
   - astronomy.ephemeris_core_stable_requires_independent_jpl_positions_and_spice_kernels
-next_action: implement_and_validate_all_M3_parallel_work_packages
+next_action: implement_and_validate_all_M4_parallel_work_packages

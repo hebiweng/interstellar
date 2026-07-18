@@ -171,7 +171,7 @@ SubjectSubjectVersion: TypeAlias = JSONObject
 SubjectSubjectVersionInput: TypeAlias = JSONObject
 TimeSpecDocument: TypeAlias = JSONObject
 
-ApiOperationId: TypeAlias = Literal['cancelJob', 'confirmAnalysisRecipe', 'createAnalysisDraft', 'createCalculation', 'createRender', 'createReport', 'createRulePack', 'createRulePackVersion', 'createShare', 'createSubject', 'createSubjectVersion', 'deleteSubject', 'exportProjectArchive', 'getAnalysisDraft', 'getAnalysisIntentVersion', 'getAnalysisModel', 'getAnalysisModelVersion', 'getAnalysisRecipe', 'getArtifact', 'getCalculation', 'getDatasetVersion', 'getJob', 'getReport', 'getReportRulePackVersion', 'getRulePackVersion', 'getSubject', 'getTopicModelVersion', 'importProjectArchive', 'listAnalysisIntents', 'listAnalysisModels', 'listCalculations', 'listDatasetVersions', 'listDatasets', 'listEntryPoints', 'listReportArtifacts', 'listReportConclusions', 'listReportFindings', 'listReportProfiles', 'listSubjectVersions', 'listSubjects', 'listTechniques', 'listTopicModels', 'renderReport', 'resolveAnalysisRecipe', 'resolveShare', 'revokeShare', 'streamJobEvents', 'updateAnalysisDraft', 'validateCustomAnalysisModel', 'validateReportRulePack', 'validateRulePack']
+ApiOperationId: TypeAlias = Literal['cancelJob', 'confirmAnalysisRecipe', 'createAnalysisDraft', 'createCalculation', 'createRender', 'createReport', 'createRulePack', 'createRulePackVersion', 'createShare', 'createSubject', 'createSubjectVersion', 'deleteSubject', 'exportProjectArchive', 'getAnalysisDraft', 'getAnalysisIntentVersion', 'getAnalysisModel', 'getAnalysisModelVersion', 'getAnalysisRecipe', 'getArtifact', 'getCalculation', 'getCalculationTable', 'getDatasetVersion', 'getJob', 'getReport', 'getReportRulePackVersion', 'getRulePackVersion', 'getSubject', 'getTopicModelVersion', 'importProjectArchive', 'listAnalysisIntents', 'listAnalysisModels', 'listCalculations', 'listDatasetVersions', 'listDatasets', 'listEntryPoints', 'listReportArtifacts', 'listReportConclusions', 'listReportFindings', 'listReportProfiles', 'listSubjectVersions', 'listSubjects', 'listTechniques', 'listTopicModels', 'renderReport', 'resolveAnalysisRecipe', 'resolveShare', 'revokeShare', 'streamJobEvents', 'updateAnalysisDraft', 'validateCustomAnalysisModel', 'validateReportRulePack', 'validateRulePack']
 API_OPERATION_IDS: Final[tuple[ApiOperationId, ...]] = (
     'cancelJob',
     'confirmAnalysisRecipe',
@@ -193,6 +193,7 @@ API_OPERATION_IDS: Final[tuple[ApiOperationId, ...]] = (
     'getAnalysisRecipe',
     'getArtifact',
     'getCalculation',
+    'getCalculationTable',
     'getDatasetVersion',
     'getJob',
     'getReport',

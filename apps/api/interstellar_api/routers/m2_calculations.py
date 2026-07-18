@@ -6,10 +6,15 @@ from datetime import UTC, datetime
 from typing import Any, Literal
 from uuid import uuid4
 
-from fastapi import APIRouter, Request, status
+from fastapi import APIRouter, Query, Request, Response, status
 from interstellar_core.application.astronomical_snapshot import (
     AstronomicalSnapshotInputError,
     create_astronomical_snapshot,
+)
+from interstellar_core.application.snapshot_tables import (
+    SnapshotTableError,
+    build_snapshot_table,
+    table_json_bytes,
 )
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -141,3 +146,45 @@ async def create_calculation(payload: ChartRequestPayload, request: Request) -> 
         raise _unsupported({"subject.time_spec": str(exc)}) from exc
     request.app.state.workflow_store.put_snapshot(snapshot)
     return snapshot
+
+
+@router.get("/calculations/{snapshot_id}/tables/{table_id}")
+async def get_calculation_table(
+    snapshot_id: str,
+    table_id: str,
+    request: Request,
+    output_format: Literal["json", "csv"] = Query(default="json", alias="format"),
+) -> Response:
+    try:
+        snapshot = request.app.state.workflow_store.get_snapshot(snapshot_id)
+    except WorkflowRecordNotFound as exc:
+        raise ProblemException(
+            status=status.HTTP_404_NOT_FOUND,
+            code=ErrorCode.NOT_FOUND,
+            detail="Calculation snapshot was not found.",
+        ) from exc
+    try:
+        table = build_snapshot_table(snapshot, table_id)
+    except SnapshotTableError as exc:
+        raise ProblemException(
+            status=status.HTTP_409_CONFLICT,
+            code=ErrorCode.INVALID_REQUEST,
+            detail=str(exc),
+        ) from exc
+
+    headers = {
+        "Content-Disposition": f'attachment; filename="{snapshot_id}-{table_id}.{output_format}"',
+        "X-Interstellar-Snapshot-ID": snapshot_id,
+        "X-Interstellar-Input-Fingerprint": snapshot["input_fingerprint"],
+    }
+    if output_format == "csv":
+        return Response(
+            content=table.to_csv().encode("utf-8"),
+            media_type="text/csv; charset=utf-8",
+            headers=headers,
+        )
+    return Response(
+        content=table_json_bytes(table),
+        media_type="application/json",
+        headers=headers,
+    )

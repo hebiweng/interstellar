@@ -20,8 +20,8 @@ class ContractQualityTests(unittest.TestCase):
     def test_repository_contracts_are_valid(self) -> None:
         report = validate_openapi.validate_all()
         self.assertEqual(report.schema_files, 15)
-        self.assertEqual(report.openapi_paths, 45)
-        self.assertEqual(report.openapi_operations, 51)
+        self.assertEqual(report.openapi_paths, 46)
+        self.assertEqual(report.openapi_operations, 52)
         self.assertGreater(report.schema_refs, 0)
         self.assertGreater(report.openapi_refs, 0)
 
@@ -68,7 +68,7 @@ class ContractQualityTests(unittest.TestCase):
             )
         )
         self.assertEqual(len(manifest["schemas"]), 15)
-        self.assertEqual(len(manifest["operation_ids"]), 51)
+        self.assertEqual(len(manifest["operation_ids"]), 52)
         self.assertEqual(len(manifest["operation_ids"]), len(set(manifest["operation_ids"])))
         self.assertTrue(all(len(item["sha256"]) == 64 for item in manifest["schemas"]))
 

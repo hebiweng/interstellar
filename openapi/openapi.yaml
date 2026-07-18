@@ -313,6 +313,34 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/CalculationSnapshot'}
         default: {$ref: '#/components/responses/Problem'}
+  /calculations/{id}/tables/{table_id}:
+    get:
+      tags: [Calculations, Renders]
+      operationId: getCalculationTable
+      security: [{}, {bearerAuth: []}]
+      parameters:
+        - {$ref: '#/components/parameters/ResourceId'}
+        - name: table_id
+          in: path
+          required: true
+          schema: {type: string, minLength: 1, maxLength: 160}
+        - name: format
+          in: query
+          required: false
+          schema: {type: string, enum: [json, csv], default: json}
+        - {$ref: '#/components/parameters/AnonymousAccessToken'}
+      responses:
+        '200':
+          description: Deterministic table projection from the immutable snapshot
+          headers:
+            X-Interstellar-Snapshot-ID: {schema: {type: string}}
+            X-Interstellar-Input-Fingerprint: {schema: {type: string}}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SnapshotTable'}
+            text/csv:
+              schema: {type: string}
+        default: {$ref: '#/components/responses/Problem'}
 
   /renders:
     post:
@@ -689,6 +717,22 @@ components:
     OutputManifest: {$ref: '../packages/canonical-schema/output-manifest.schema.json'}
     Evidence: {$ref: '../packages/canonical-schema/evidence.schema.json'}
     CalculationSnapshot: {$ref: '../packages/canonical-schema/calculation-snapshot.schema.json'}
+    SnapshotTable:
+      type: object
+      additionalProperties: false
+      required: [table_id, metadata, columns, rows]
+      properties:
+        table_id: {type: string, minLength: 1, maxLength: 160}
+        metadata:
+          type: object
+          additionalProperties: false
+          required: [snapshot_id, input_fingerprint, engine_version]
+          properties:
+            snapshot_id: {type: string, minLength: 1}
+            input_fingerprint: {type: string, minLength: 1}
+            engine_version: {type: string, minLength: 1}
+        columns: {type: array, minItems: 1, uniqueItems: true, items: {type: string}}
+        rows: {type: array, items: {type: object, additionalProperties: true}}
     ReportDocument: {$ref: '../packages/canonical-schema/report-document.schema.json'}
     Finding: {$ref: '../packages/canonical-schema/report-document.schema.json#/$defs/Finding'}
     Conclusion: {$ref: '../packages/canonical-schema/report-document.schema.json#/$defs/Conclusion'}

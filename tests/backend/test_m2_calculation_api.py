@@ -12,7 +12,9 @@ def _client() -> TestClient:
     return TestClient(create_app(ApiSettings(environment="test")))
 
 
-def _birth_payload(*, precision: str = "minute", local_value: str = "2000-01-01T20:00") -> dict:
+def _birth_payload(
+    *, precision: str = "minute", local_value: str = "2000-01-01T20:00"
+) -> dict:
     return {
         "workspace_id": "workspace-m2",
         "version": {
@@ -65,7 +67,7 @@ def _calculation_payload(version_id: str) -> dict:
     }
 
 
-def test_selected_utc_to_reproducible_astronomical_snapshot() -> None:
+def test_selected_utc_to_reproducible_m3_natal_fact_snapshot() -> None:
     with _client() as client:
         saved = client.post("/api/v1/subjects", json=_birth_payload()).json()
         response = client.post(
@@ -75,7 +77,7 @@ def test_selected_utc_to_reproducible_astronomical_snapshot() -> None:
 
         assert response.status_code == 201, response.text
         snapshot = response.json()
-        assert snapshot["status"] == "partial"
+        assert snapshot["status"] == "succeeded"
         assert snapshot["maturity"] == "experimental"
         assert snapshot["engine"]["version"] == "0.1.0"
         assert snapshot["adapters"][0]["name"] == "pysweph"
@@ -95,7 +97,8 @@ def test_selected_utc_to_reproducible_astronomical_snapshot() -> None:
             "neptune",
             "pluto",
         ]
-        assert all(point["house"] is None for point in points)
+        assert all(1 <= point["house"] <= 12 for point in points)
+        assert all(point["distance_to_next_cusp_deg"] >= 0 for point in points)
         assert all(point["position"]["epoch"].startswith("JDUT:") for point in points)
         context = snapshot["result"]["astronomical_context"]
         assert context["julian_day_ut"] == 2451545.0
@@ -103,16 +106,82 @@ def test_selected_utc_to_reproducible_astronomical_snapshot() -> None:
         assert context["delta_t_seconds"] > 0
         assert 0 <= context["lunar_phase"]["illumination_fraction"] <= 1
 
-        manifests = {item["calculation_id"]: item for item in snapshot["result"]["output_manifest"]}
+        manifests = {
+            item["calculation_id"]: item
+            for item in snapshot["result"]["output_manifest"]
+        }
         assert manifests["astronomy.ephemeris_core"]["status"] == "generated"
-        assert manifests["natal.standard_chart"]["status"] == "blocked"
-        assert snapshot["result"]["houses"] == []
-        assert snapshot["result"]["aspects"] == []
-        assert snapshot["warnings"][0]["code"] == "M2_PARTIAL_CHART"
+        assert manifests["astronomy.houses_angles"]["status"] == "generated"
+        assert manifests["astronomy.aspects"]["status"] == "generated"
+        assert manifests["natal.patterns_distributions"]["status"] == "generated"
+        assert manifests["natal.standard_chart"]["status"] == "generated"
+        assert len(snapshot["result"]["houses"]) == 12
+        assert snapshot["result"]["aspects"]
+        assert len(snapshot["result"]["distributions"]) == 3
+        assert snapshot["warnings"]
+        assert {warning["code"] for warning in snapshot["warnings"]} <= {
+            "EPHEMERIS_FALLBACK_MOSHIER",
+            "SWISS_EPHEMERIS_MESSAGE",
+        }
+
+        chart = snapshot["result"]["charts"][0]
+        assert chart["house_set"]["system"] == "placidus"
+        assert set(chart["house_set"]["angles"]) == {"asc", "dsc", "mc", "ic"}
+        assigned_ids = {
+            point_id
+            for house in chart["house_set"]["houses"]
+            for point_id in house["point_ids"]
+        }
+        assert assigned_ids == {point["point_id"] for point in points}
+        assert all(
+            0 <= aspect["actual_angle_deg"] <= 180 for aspect in chart["aspects"]
+        )
+        assert all(0 <= aspect["strength"] <= 1 for aspect in chart["aspects"])
+        for distribution in chart["distributions"]:
+            assert distribution["availability"] == "available"
+            assert sum(
+                category["percentage"] for category in distribution["categories"]
+            ) == pytest.approx(100.0)
 
         fetched = client.get(f"/api/v1/calculations/{snapshot['id']}")
         assert fetched.status_code == 200
         assert fetched.json() == snapshot
+
+        table_json = client.get(
+            f"/api/v1/calculations/{snapshot['id']}/tables/table.planet_positions"
+        )
+        assert table_json.status_code == 200
+        assert len(table_json.json()["rows"]) == 10
+        assert table_json.json()["metadata"]["snapshot_id"] == snapshot["id"]
+        table_csv = client.get(
+            f"/api/v1/calculations/{snapshot['id']}/tables/table.planet_positions",
+            params={"format": "csv"},
+        )
+        assert table_csv.status_code == 200
+        assert table_csv.headers["content-type"].startswith("text/csv")
+        assert snapshot["id"] in table_csv.text.splitlines()[1]
+
+        expected_table_sizes = {
+            "table.planet_positions": 10,
+            "table.planet_speeds": 10,
+            "table.house_cusps": 12,
+            "table.natal_aspects": len(snapshot["result"]["aspects"]),
+            "table.elements": 4,
+            "table.modalities": 3,
+            "table.polarity": 2,
+        }
+        for table_id, expected_size in expected_table_sizes.items():
+            table_response = client.get(
+                f"/api/v1/calculations/{snapshot['id']}/tables/{table_id}"
+            )
+            assert table_response.status_code == 200, table_response.text
+            assert len(table_response.json()["rows"]) == expected_size
+            csv_response = client.get(
+                f"/api/v1/calculations/{snapshot['id']}/tables/{table_id}",
+                params={"format": "csv"},
+            )
+            assert csv_response.status_code == 200
+            assert csv_response.text.count("\n") >= expected_size
 
         repeated = client.post(
             "/api/v1/calculations",
@@ -120,8 +189,14 @@ def test_selected_utc_to_reproducible_astronomical_snapshot() -> None:
         ).json()
         assert repeated["input_fingerprint"] == snapshot["input_fingerprint"]
         assert repeated["result"]["points"] == snapshot["result"]["points"]
-        assert repeated["result"]["astronomical_context"]["julian_day_ut"] == (
-            snapshot["result"]["astronomical_context"]["julian_day_ut"]
+        assert (
+            repeated["result"]["astronomical_context"]["julian_day_ut"]
+            == (snapshot["result"]["astronomical_context"]["julian_day_ut"])
+        )
+        assert repeated["result"]["houses"] == snapshot["result"]["houses"]
+        assert repeated["result"]["aspects"] == snapshot["result"]["aspects"]
+        assert (
+            repeated["result"]["distributions"] == snapshot["result"]["distributions"]
         )
 
 
@@ -141,7 +216,9 @@ def test_unknown_birth_time_never_runs_as_midnight() -> None:
     assert "cannot be guessed" in response.json()["fields"]["subject.time_spec"]
 
 
-def test_m2_rejects_unimplemented_coordinate_mode_instead_of_degrading_silently() -> None:
+def test_m2_rejects_unimplemented_coordinate_mode_instead_of_degrading_silently() -> (
+    None
+):
     with _client() as client:
         saved = client.post("/api/v1/subjects", json=_birth_payload()).json()
         payload = _calculation_payload(saved["version"]["id"])
@@ -162,3 +239,93 @@ def test_process_adapter_rejects_snapshot_overwrite() -> None:
     assert store.get_snapshot("calculation-immutable")["value"] == 1
     with pytest.raises(WorkflowRecordConflict, match="already exists"):
         store.put_snapshot({"id": "calculation-immutable", "value": 3})
+
+
+def test_m3_point_projection_is_explicit_and_distribution_degrades() -> None:
+    with _client() as client:
+        saved = client.post("/api/v1/subjects", json=_birth_payload()).json()
+        payload = _calculation_payload(saved["version"]["id"])
+        payload["settings"]["included_points"] = ["sun", "moon", "saturn"]
+        response = client.post("/api/v1/calculations", json=payload)
+
+    assert response.status_code == 201, response.text
+    snapshot = response.json()
+    assert snapshot["status"] == "partial"
+    assert [point["point_id"] for point in snapshot["result"]["points"]] == [
+        "sun",
+        "moon",
+        "saturn",
+    ]
+    assert all(
+        distribution["availability"] == "unavailable"
+        for distribution in snapshot["result"]["distributions"]
+    )
+    assert "DISTRIBUTION_INPUT_INCOMPLETE" in {
+        warning["code"] for warning in snapshot["warnings"]
+    }
+
+
+def test_m3_rejects_unknown_house_or_rule_profile_instead_of_ignoring_it() -> None:
+    with _client() as client:
+        saved = client.post("/api/v1/subjects", json=_birth_payload()).json()
+        payload = _calculation_payload(saved["version"]["id"])
+        payload["settings"]["house_system"] = "invented_house_system"
+        house_response = client.post("/api/v1/calculations", json=payload)
+
+        payload = _calculation_payload(saved["version"]["id"])
+        payload["settings"]["orb_profile_id"] = "invented.orb.profile"
+        orb_response = client.post("/api/v1/calculations", json=payload)
+
+    assert house_response.status_code == 422
+    assert (
+        "unsupported house system"
+        in house_response.json()["fields"]["subject.time_spec"]
+    )
+    assert orb_response.status_code == 422
+    assert (
+        "official.orbs.standard.v1"
+        in orb_response.json()["fields"]["subject.time_spec"]
+    )
+
+
+def test_m3_high_latitude_fallback_is_never_silent() -> None:
+    birth = _birth_payload(local_value="2000-01-01T12:00")
+    birth["version"]["time_spec"]["timezone_id"] = "Europe/Oslo"
+    birth["version"]["location"].update(
+        {
+            "name": "Svalbard",
+            "latitude": 80.0,
+            "longitude": 18.9553,
+            "timezone_id": "Europe/Oslo",
+        }
+    )
+    with _client() as client:
+        saved = client.post("/api/v1/subjects", json=birth).json()
+        base = _calculation_payload(saved["version"]["id"])
+        unavailable = client.post("/api/v1/calculations", json=base)
+
+        fallback = _calculation_payload(saved["version"]["id"])
+        fallback["settings"]["custom_parameters"] = {
+            "allow_house_fallback_whole_sign": True
+        }
+        degraded = client.post("/api/v1/calculations", json=fallback)
+
+    assert unavailable.status_code == 201
+    assert unavailable.json()["status"] == "partial"
+    assert unavailable.json()["result"]["charts"][0]["house_set"] is None
+    assert "HOUSE_SYSTEM_UNAVAILABLE_AT_LATITUDE" in {
+        warning["code"] for warning in unavailable.json()["warnings"]
+    }
+
+    assert degraded.status_code == 201
+    degraded_snapshot = degraded.json()
+    assert degraded_snapshot["status"] == "partial"
+    assert degraded_snapshot["result"]["charts"][0]["house_set"]["system"] == (
+        "whole_sign"
+    )
+    house_manifest = next(
+        item
+        for item in degraded_snapshot["result"]["output_manifest"]
+        if item["calculation_id"] == "astronomy.houses_angles"
+    )
+    assert house_manifest["status"] == "degraded"

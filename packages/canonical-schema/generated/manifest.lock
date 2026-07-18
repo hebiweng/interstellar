@@ -22,6 +22,7 @@
     "getAnalysisRecipe",
     "getArtifact",
     "getCalculation",
+    "getCalculationTable",
     "getDatasetVersion",
     "getJob",
     "getReport",
@@ -215,7 +216,7 @@
   ],
   "source_of_truth": {
     "openapi": "openapi/openapi.yaml",
-    "openapi_sha256": "e8147cef342fe97df6972e422d691e19bff086190a54ef2fdc20cd3153943237",
+    "openapi_sha256": "0332ff2cdd74eb1121305bc3f09a3409af6f363af6bb75e601517cb886e5dedb",
     "schema_directory": "packages/canonical-schema"
   }
 }

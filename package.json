@@ -22,11 +22,14 @@
     "m1:domain:test": "PYTHONPATH=apps/api:apps/worker:python python3 -m pytest tests/time tests/data tests/integration",
     "m2:domain:test": "PYTHONPATH=apps/api:apps/worker:python python3 -m pytest tests/astronomy tests/differential/m2 tests/gold/m2 tests/backend/test_m2_calculation_api.py",
     "m2:lint": "python3 -m ruff check python/interstellar_core/astronomy python/interstellar_core/application/astronomical_snapshot.py apps/api/interstellar_api/routers/m2_calculations.py tests/astronomy tests/differential/m2 tests/gold/m2 tests/backend/test_m2_calculation_api.py",
+    "m3:domain:test": "PYTHONPATH=apps/api:apps/worker:python python3 -m pytest tests/astrology tests/backend/test_m2_calculation_api.py",
+    "m3:lint": "python3 -m ruff check python/interstellar_core/astrology python/interstellar_core/application/astronomical_snapshot.py python/interstellar_core/application/snapshot_tables.py apps/api/interstellar_api/routers/m2_calculations.py tests/astrology tests/backend/test_m2_calculation_api.py",
     "api:dev": "PYTHONPATH=apps/api:python python3 -m interstellar_api",
     "worker:once": "PYTHONPATH=apps/worker:python python3 -m interstellar_worker --once",
     "foundation:check": "node scripts/run-foundation-checks.mjs",
     "m1:check": "node scripts/run-m1-checks.mjs",
     "m2:check": "node scripts/run-m2-checks.mjs",
+    "m3:check": "node scripts/run-m3-checks.mjs",
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {

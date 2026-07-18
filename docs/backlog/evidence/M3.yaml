@@ -1,0 +1,86 @@
+schema_version: 1.0.0
+milestone: M3
+stage: professional_alpha
+status: passed
+verified_at: '2026-07-18'
+commit_parent: f3afa75
+
+deliverables:
+  - id: M3-001
+    status: passed_with_explicit_maturity_block
+    evidence:
+      - python/interstellar_core/astrology/houses
+      - tests/astrology/houses
+      - algorithm-cards/astronomy/astronomy.houses_angles.md
+    assertions:
+      - placidus_and_ten_additional_swiss_house_systems_are_versioned
+      - whole_sign_is_an_explicit_self_implemented_system
+      - asc_dsc_mc_ic_twelve_cusps_sensitive_points_and_speeds_are_returned
+      - point_placement_uses_circular_front_closed_back_open_intervals
+      - high_latitude_failure_never_silently_substitutes_another_system
+      - whole_sign_fallback_requires_an_explicit_request_parameter
+  - id: M3-002
+    status: passed_with_explicit_future_dynamic_scope
+    evidence:
+      - python/interstellar_core/astrology/aspects
+      - tests/astrology/aspects
+      - algorithm-cards/astronomy/astronomy.aspects.md
+    assertions:
+      - conjunction_sextile_square_trine_opposition_use_versioned_profiles
+      - minimum_circular_separation_and_orb_boundaries_are_property_tested
+      - applying_separating_exact_and_indeterminate_are_explicit
+      - point_order_swap_preserves_result_identity
+      - dynamic_enter_exact_leave_and_retrograde_multi_hit_are_deferred_to_M5
+  - id: M3-003
+    status: passed_with_explicit_pattern_scope
+    evidence:
+      - python/interstellar_core/astrology/distributions
+      - tests/astrology/distributions
+      - algorithm-cards/natal/natal.patterns_distributions.md
+    assertions:
+      - modern_ten_and_classical_seven_profiles_are_immutable_and_hashed
+      - elements_modalities_and_polarities_return_raw_and_weighted_values
+      - incomplete_participant_sets_do_not_re_normalize_remaining_points
+      - all_sign_boundaries_duplicate_unknown_and_zero_denominator_cases_are_tested
+      - hemisphere_jones_and_geometry_patterns_are_not_claimed_in_M3
+  - id: M3-004
+    status: passed
+    evidence:
+      - python/interstellar_core/application/astronomical_snapshot.py
+      - python/interstellar_core/application/snapshot_tables.py
+      - apps/api/interstellar_api/routers/m2_calculations.py
+      - tests/backend/test_m2_calculation_api.py
+      - openapi/openapi.yaml
+    assertions:
+      - one_immutable_snapshot_combines_points_houses_aspects_and_distributions
+      - each_sub_capability_has_its_own_output_manifest_and_provenance
+      - seven_professional_tables_are_projected_only_from_snapshot_data
+      - all_seven_tables_export_deterministic_json_and_csv
+      - unsupported_house_aspect_or_orb_profiles_are_rejected_not_ignored
+      - partial_point_projection_and_high_latitude_degradation_are_auditable
+
+gate_commands:
+  - command: INTERSTELLAR_TEST_DATABASE_URL=<isolated-local-postgres> npm run m3:check
+    result: passed
+    totals:
+      backend_api_worker: 28
+      time_location_dataset_postgres: 28
+      m2_astronomy_differential_and_api: 64
+      m3_houses_aspects_distributions_snapshot_tables: 71
+      contract_unittests: 6
+      rendered_html: 2
+
+closed_defects:
+  - natal_snapshot_no_longer_stops_at_unassigned_astronomical_points
+  - house_system_failure_can_no_longer_be_silently_replaced
+  - aspect_and_distribution_profiles_can_no_longer_be_ignored_by_the_api
+  - professional_tables_now_repeat_snapshot_reproducibility_metadata
+  - openapi_now_contracts_the_calculation_table_endpoint
+
+known_limits:
+  - Independent JPL position and independent house-engine fixtures remain absent, so astronomical and house results remain Experimental rather than Stable.
+  - Dynamic aspect entry, exact-hit and exit times are M5 scope.
+  - Minor, harmonic, declination, latitude and mirror aspects are later Beta/V1 scope.
+  - Hemisphere distributions, Jones shapes and geometric aspect patterns are later Beta scope.
+  - The local repository still uses an explicitly recorded Moshier fallback because licensed Swiss ephemeris files are not bundled.
+  - Inline anonymous ChartRequest subjects remain explicitly rejected until durable anonymous normalization is wired.

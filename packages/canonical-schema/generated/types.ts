@@ -203,6 +203,7 @@ export const API_OPERATION_IDS = [
   "getAnalysisRecipe",
   "getArtifact",
   "getCalculation",
+  "getCalculationTable",
   "getDatasetVersion",
   "getJob",
   "getReport",
