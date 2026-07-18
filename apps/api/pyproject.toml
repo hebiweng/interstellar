@@ -12,6 +12,7 @@ dependencies = [
   "fastapi==0.136.1",
   "pydantic==2.13.3",
   "psycopg[binary]==3.3.4",
+  "pysweph==2.10.3.6",
   "PyYAML==6.0.3",
   "sqlalchemy==2.0.51",
   "uvicorn==0.46.0",

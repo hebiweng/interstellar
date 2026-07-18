@@ -7,7 +7,9 @@ name = "interstellar-core"
 version = "0.1.0"
 description = "Framework-independent Interstellar domain and application boundaries"
 requires-python = ">=3.13,<3.14"
-dependencies = []
+dependencies = [
+  "pysweph==2.10.3.6",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["interstellar_core"]

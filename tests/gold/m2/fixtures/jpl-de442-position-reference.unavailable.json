@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "fixture_id": "GOLD-ASTRONOMY-002",
+  "fixture_kind": "positions",
+  "review_status": "draft",
+  "availability": "unavailable",
+  "source": {
+    "source_id": "jpl-naif-de442-required",
+    "title": "NASA/JPL NAIF DE442 independent position reference",
+    "organization": "NASA Jet Propulsion Laboratory Navigation and Ancillary Information Facility",
+    "source_uri": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/",
+    "source_version": "DE442 required; no position values captured in repository",
+    "license_identifier": "NASA_JPL_public_information_terms",
+    "implementation_family": "jpl_spice",
+    "independently_captured": false,
+    "stable_eligible": false
+  },
+  "epoch": {
+    "label": "J2000.0",
+    "julian_date": 2451545.0,
+    "time_scale": "TT"
+  },
+  "coordinates": {
+    "frame": "ICRF",
+    "center": "earth",
+    "axes": "equatorial",
+    "equinox": null
+  },
+  "units": {
+    "angle": "degree",
+    "distance": "astronomical_unit"
+  },
+  "tolerance": {
+    "longitude_arcsec": 1.0,
+    "latitude_arcsec": 1.0,
+    "distance_absolute": 1e-8,
+    "body_overrides": {
+      "moon": {
+        "longitude_arcsec": 3.0,
+        "latitude_arcsec": 3.0,
+        "distance_absolute": 1e-8
+      }
+    }
+  },
+  "constants": {},
+  "positions": [],
+  "required_kernels": ["de442.bsp", "naif0012.tls", "pck00011.tpc"],
+  "notes": [
+    "This file is an explicit acquisition placeholder, not a numerical reference.",
+    "Do not populate it from Swiss Ephemeris output.",
+    "Stable remains blocked until independently captured JPL values and exact kernel checksums are reviewed."
+  ]
+}

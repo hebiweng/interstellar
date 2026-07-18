@@ -3,7 +3,7 @@ controller_ref: docs/backlog/execution-controller.yaml
 updated_at: '2026-07-18'
 goal_status: active
 active_stage: professional_alpha
-active_month: M2
+active_month: M3
 stage_status:
   foundation: completed
   professional_alpha: in_progress
@@ -13,29 +13,31 @@ stage_status:
   released: pending
 
 active_work_packages:
-  - id: M2-EPHEMERIS
-    owner: delegated_m2_ephemeris
+  - id: M3-HOUSES
+    owner: delegated_m3_houses
     status: in_progress
-    write_scope: [python/interstellar_core/astronomy/adapters, tests/astronomy/adapters]
-    acceptance: swiss_ephemeris_adapter_returns_canonical_sun_moon_and_planets_with_versioned_provenance
-  - id: M2-ASTRONOMY-CORE
-    owner: delegated_m2_astronomy_core
+    write_scope: [python/interstellar_core/astrology/houses, tests/astrology/houses]
+    acceptance: asc_mc_twelve_cusps_and_high_latitude_policy_are_canonical_and_tested
+  - id: M3-ASPECTS
+    owner: delegated_m3_aspects
     status: in_progress
-    write_scope: [python/interstellar_core/astronomy/timebase, python/interstellar_core/astronomy/derived, tests/astronomy/core]
-    acceptance: utc_jd_delta_t_motion_state_and_lunar_phase_gold_tests_pass
-  - id: M2-DIFFERENTIAL
-    owner: delegated_m2_differential
+    write_scope: [python/interstellar_core/astrology/aspects, tests/astrology/aspects]
+    acceptance: major_aspects_orbs_applying_state_and_circular_properties_pass
+  - id: M3-DISTRIBUTIONS
+    owner: delegated_m3_distributions
     status: in_progress
-    write_scope: [python/interstellar_core/astronomy/validation, tests/differential/m2, tests/gold/m2]
-    acceptance: independent_reference_fixtures_and_tolerance_report_gate_maturity
-  - id: M2-PIPELINE
+    write_scope: [python/interstellar_core/astrology/distributions, tests/astrology/distributions]
+    acceptance: raw_and_weighted_element_modality_polarity_results_are_reproducible
+  - id: M3-INTEGRATION
     owner: interstellar_primary_agent
     status: in_progress
-    write_scope: [python/interstellar_core/application, apps/api/interstellar_api, tests/backend, package_scripts, stage_gate]
-    acceptance: normalized_subject_to_canonical_astronomical_snapshot_is_reproducible_and_immutable
+    write_scope: [python/interstellar_core/application, apps/api/interstellar_api, tests/backend, exports, package_scripts, stage_gate]
+    acceptance: complete_natal_fact_snapshot_and_position_house_aspect_distribution_tables_export_json_csv
 
 current_gate_evidence:
   - docs/backlog/evidence/M0.yaml
   - docs/backlog/evidence/M1.yaml
-open_blockers: []
-next_action: implement_and_validate_all_M2_parallel_work_packages
+  - docs/backlog/evidence/M2.yaml
+open_blockers:
+  - astronomy.ephemeris_core_stable_requires_independent_jpl_positions_and_spice_kernels
+next_action: implement_and_validate_all_M3_parallel_work_packages

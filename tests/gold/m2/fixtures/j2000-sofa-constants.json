@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "fixture_id": "GOLD-ASTRONOMY-001",
+  "fixture_kind": "constants",
+  "review_status": "independently_captured",
+  "availability": "available",
+  "source": {
+    "source_id": "iau-sofa-constants-2023-10-11",
+    "title": "IAU SOFA constants header (sofam.h)",
+    "organization": "International Astronomical Union Standards of Fundamental Astronomy",
+    "source_uri": "https://www.iausofa.org/2023_1011_C/sofa/sofam.h",
+    "source_version": "2023-10-11 C release",
+    "license_identifier": "IAU_SOFA_License",
+    "implementation_family": "iau_sofa_published_standard",
+    "independently_captured": true,
+    "stable_eligible": true
+  },
+  "epoch": {
+    "label": "J2000.0",
+    "julian_date": 2451545.0,
+    "time_scale": "TT"
+  },
+  "coordinates": {
+    "frame": "ICRS",
+    "center": "solar_system_barycenter",
+    "axes": "equatorial",
+    "equinox": null
+  },
+  "units": {
+    "angle": "degree",
+    "distance": "kilometer"
+  },
+  "tolerance": {
+    "longitude_arcsec": 0.0,
+    "latitude_arcsec": 0.0,
+    "distance_absolute": 0.0,
+    "body_overrides": {}
+  },
+  "constants": {
+    "DJ00": {
+      "value": 2451545.0,
+      "unit": "day",
+      "tolerance_absolute": 0.0,
+      "source_symbol": "DJ00"
+    },
+    "DJY": {
+      "value": 365.25,
+      "unit": "day",
+      "tolerance_absolute": 0.0,
+      "source_symbol": "DJY"
+    },
+    "DAU": {
+      "value": 149597870.7,
+      "unit": "kilometer",
+      "tolerance_absolute": 0.0,
+      "source_symbol": "DAU"
+    }
+  },
+  "positions": [],
+  "required_kernels": [],
+  "notes": [
+    "This fixture validates public constants and fixture parsing only.",
+    "It contains no body positions and therefore cannot satisfy the ephemeris Stable gate."
+  ]
+}

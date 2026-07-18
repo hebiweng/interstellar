@@ -16,6 +16,10 @@ class WorkflowRecordNotFound(KeyError):
     pass
 
 
+class WorkflowRecordConflict(ValueError):
+    pass
+
+
 @dataclass(slots=True)
 class WorkflowStore:
     subjects: dict[str, dict[str, Any]] = field(default_factory=dict)
@@ -61,7 +65,10 @@ class WorkflowStore:
             raise WorkflowRecordNotFound(recipe_id) from exc
 
     def put_snapshot(self, snapshot: dict[str, Any]) -> None:
-        self.snapshots[snapshot["id"]] = deepcopy(snapshot)
+        snapshot_id = snapshot["id"]
+        if snapshot_id in self.snapshots:
+            raise WorkflowRecordConflict(f"snapshot already exists: {snapshot_id}")
+        self.snapshots[snapshot_id] = deepcopy(snapshot)
 
     def get_snapshot(self, snapshot_id: str) -> dict[str, Any]:
         try:

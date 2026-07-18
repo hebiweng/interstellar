@@ -11,6 +11,7 @@ from interstellar_api.middleware import install_request_context
 from interstellar_api.readiness import ProbeResult, ReadinessRegistry
 from interstellar_api.routers.health import router as health_router
 from interstellar_api.routers.m1_workflow import router as m1_workflow_router
+from interstellar_api.routers.m2_calculations import router as m2_calculations_router
 from interstellar_api.workflow_store import WorkflowStore
 
 
@@ -41,6 +42,7 @@ def create_app(settings: ApiSettings | None = None) -> FastAPI:
     install_request_context(app, request_id_header=resolved.request_id_header)
     app.include_router(health_router)
     app.include_router(m1_workflow_router)
+    app.include_router(m2_calculations_router)
     return app
 
 

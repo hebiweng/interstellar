@@ -19,7 +19,7 @@ cards:
   - {card_id: ALG-PLATFORM-003, capability_id: platform.analysis_model_registry, path: algorithm-cards/platform/platform.analysis_model_registry.md, phase: foundation, status: review, implementation_status: not_started}
   - {card_id: ALG-PLATFORM-004, capability_id: platform.analysis_recipe_resolver, path: algorithm-cards/platform/platform.analysis_recipe_resolver.md, phase: foundation, status: review, implementation_status: not_started}
   - {card_id: ALG-PLATFORM-005, capability_id: platform.rule_pack_runtime, path: algorithm-cards/platform/platform.rule_pack_runtime.md, phase: beta, status: review, implementation_status: not_started}
-  - {card_id: ALG-ASTRONOMY-001, capability_id: astronomy.ephemeris_core, path: algorithm-cards/astronomy/astronomy.ephemeris_core.md, phase: alpha, status: review, implementation_status: not_started}
+  - {card_id: ALG-ASTRONOMY-001, capability_id: astronomy.ephemeris_core, path: algorithm-cards/astronomy/astronomy.ephemeris_core.md, phase: alpha, status: review, implementation_status: implemented}
   - {card_id: ALG-ASTRONOMY-002, capability_id: astronomy.coordinate_systems, path: algorithm-cards/astronomy/astronomy.coordinate_systems.md, phase: beta, status: review, implementation_status: not_started}
   - {card_id: ALG-ASTRONOMY-003, capability_id: astronomy.houses_angles, path: algorithm-cards/astronomy/astronomy.houses_angles.md, phase: alpha, status: review, implementation_status: not_started}
   - {card_id: ALG-ASTRONOMY-004, capability_id: astronomy.aspects, path: algorithm-cards/astronomy/astronomy.aspects.md, phase: alpha, status: review, implementation_status: not_started}

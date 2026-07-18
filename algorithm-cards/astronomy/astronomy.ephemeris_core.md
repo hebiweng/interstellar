@@ -20,3 +20,10 @@ result_contracts: [AstronomicalContext, CelestialPosition, LunarPhaseResult, Pla
 ## 验证
 
 主要行星对JPL SPICE按同一参考系差异验证；Alpha容差太阳/行星`1 arcsec`、月亮`3 arcsec`、速度`1e-5°/day`。超出只阻断Stable，不用舍入掩盖。
+
+## M2实现记录（2026-07-18）
+
+- `pysweph==2.10.3.6`适配器已实现太阳、月亮及八颗主要行星的黄道/赤道位置、距离、速度、运动状态、JD UT、JD TT和Delta-T；
+- 当前仓库未随附Swiss星历文件，真实烟测会显式回退Moshier并逐天体输出`EPHEMERIS_FALLBACK_MOSHIER`，不会静默声称使用Swiss文件；
+- IAU SOFA公开常量夹具和差异报告框架已通过；JPL DE442位置夹具与SPICE内核仍缺失，因此本卡保持`review/implemented`和`experimental`，不得升级Stable；
+- 宫位、轴点、相位、站点求根、特殊月相标签和行星时不属于M2已实现范围，分别由后续能力卡接续。

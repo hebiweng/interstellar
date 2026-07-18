@@ -1,0 +1,77 @@
+schema_version: 1.0.0
+milestone: M2
+stage: professional_alpha
+status: passed
+verified_at: '2026-07-18'
+commit_parent: 95f0d21
+
+deliverables:
+  - id: M2-001
+    status: passed_with_explicit_maturity_block
+    evidence:
+      - python/interstellar_core/astronomy/adapters/swiss_ephemeris.py
+      - tests/astronomy/adapters/test_swiss_ephemeris.py
+      - python/interstellar_core/astronomy/validation/compare.py
+    assertions:
+      - ten_core_bodies_return_canonical_point_records
+      - requested_and_returned_flags_are_recorded
+      - swiss_file_fallback_to_moshier_is_never_silent
+      - jpl_stable_gate_remains_blocked_without_independent_position_fixture
+  - id: M2-002
+    status: passed
+    evidence:
+      - python/interstellar_core/astronomy/timebase
+      - python/interstellar_core/astronomy/derived
+      - tests/astronomy/core
+    assertions:
+      - j2000_and_gregorian_julian_day_boundaries
+      - delta_t_source_quality_and_uncertainty_are_explicit
+      - direct_retrograde_stationary_threshold_boundaries
+      - elongation_lunar_age_illumination_and_eight_phase_boundaries
+  - id: M2-003
+    status: passed
+    evidence:
+      - python/interstellar_core/application/astronomical_snapshot.py
+      - apps/api/interstellar_api/routers/m2_calculations.py
+      - apps/api/interstellar_api/workflow_store.py
+      - tests/backend/test_m2_calculation_api.py
+    assertions:
+      - normalized_subject_to_canonical_astronomical_snapshot
+      - identical_normalized_input_has_identical_fingerprint_and_astronomical_facts
+      - snapshot_adapter_rejects_overwrite_and_returns_defensive_copies
+      - unknown_time_never_runs_as_midnight
+      - unsupported_coordinate_modes_are_rejected_not_silently_degraded
+  - id: M2-004
+    status: passed_with_explicit_maturity_block
+    evidence:
+      - tests/gold/m2/fixtures/j2000-sofa-constants.json
+      - tests/gold/m2/fixtures/jpl-de442-position-reference.unavailable.json
+      - tests/differential/m2/test_difference_reports.py
+      - tests/gold/m2/test_public_reference_fixtures.py
+    assertions:
+      - public_iau_sofa_constants_are_traceable
+      - same_implementation_family_cannot_claim_independent_validation
+      - metadata_mismatch_blocks_numeric_comparison
+      - missing_jpl_positions_and_kernels_block_stable_without_fabrication
+
+gate_commands:
+  - command: INTERSTELLAR_TEST_DATABASE_URL=<isolated-local-postgres> npm run m2:check
+    result: passed
+    totals:
+      backend_api_worker: 25
+      time_location_dataset_postgres: 28
+      m2_astronomy_differential_and_api: 61
+      contract_unittests: 6
+      rendered_html: 2
+
+closed_defects:
+  - pysweph_binding_version_was_resolved_from_distribution_metadata
+  - delta_t_is_calculated_inside_adapter_with_actual_ephemeris_mode
+  - duplicate_snapshot_ids_can_no_longer_overwrite_existing_records
+  - incomplete_m2_chart_is_partial_with_houses_and_aspects_explicitly_blocked
+
+known_limits:
+  - The repository does not yet contain licensed/versioned Swiss ephemeris files; local M2 smoke tests use the explicitly recorded Moshier fallback.
+  - JPL DE442 numerical reference positions and required SPICE kernels are not present, so astronomy.ephemeris_core remains experimental rather than Stable.
+  - Houses, angles, aspects and distributions are M3 work and are empty in M2 snapshots.
+  - Inline anonymous ChartRequest subjects are explicitly rejected until their durable normalization adapter is wired.
