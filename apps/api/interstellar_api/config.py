@@ -34,6 +34,7 @@ class ApiSettings(BaseModel):
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
     server_host: str = Field(default="127.0.0.1", min_length=1, max_length=255)
     server_port: int = Field(default=8018, ge=1, le=65535)
+    cors_allowed_origins: tuple[str, ...] = ()
 
     @field_validator("request_id_header")
     @classmethod
@@ -41,6 +42,14 @@ class ApiSettings(BaseModel):
         if any(char.isspace() for char in value):
             raise ValueError("request_id_header must not contain whitespace")
         return value
+
+    @field_validator("cors_allowed_origins")
+    @classmethod
+    def validate_cors_origins(cls, values: tuple[str, ...]) -> tuple[str, ...]:
+        for value in values:
+            if not value.startswith(("http://", "https://")) or "*" in value:
+                raise ValueError("CORS origins must be explicit http(s) origins")
+        return values
 
     @classmethod
     def from_env(cls, environ: Mapping[str, str] | None = None) -> ApiSettings:
@@ -64,4 +73,9 @@ class ApiSettings(BaseModel):
             log_level=read("LOG_LEVEL", "INFO").upper(),
             server_host=read("API_HOST", "127.0.0.1"),
             server_port=int(read("API_PORT", "8018")),
+            cors_allowed_origins=tuple(
+                origin.strip()
+                for origin in read("CORS_ALLOWED_ORIGINS", "").split(",")
+                if origin.strip()
+            ),
         )

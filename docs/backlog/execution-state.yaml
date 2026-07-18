@@ -3,7 +3,7 @@ controller_ref: docs/backlog/execution-controller.yaml
 updated_at: '2026-07-18'
 goal_status: active
 active_stage: professional_alpha
-active_month: M4
+active_month: M5
 stage_status:
   foundation: completed
   professional_alpha: in_progress
@@ -13,32 +13,33 @@ stage_status:
   released: pending
 
 active_work_packages:
-  - id: M4-REGISTRIES
-    owner: delegated_m4_registries
-    status: in_progress
-    write_scope: [python/interstellar_core/analysis/registries, tests/analysis/registries]
-    acceptance: all_12_base_models_24_topic_models_and_35_intents_load_and_cross_reference
-  - id: M4-RECIPE
-    owner: delegated_m4_recipe
-    status: in_progress
-    write_scope: [python/interstellar_core/analysis/recipe, tests/analysis/recipe]
-    acceptance: six_entry_paths_resolve_to_deduplicated_blocking_and_budgeted_immutable_recipes
-  - id: M4-JOBS
-    owner: delegated_m4_jobs
-    status: in_progress
-    write_scope: [python/interstellar_core/jobs, tests/jobs]
-    acceptance: job_state_machine_sse_cancel_retry_lease_and_recovery_pass
-  - id: M4-INTEGRATION
+  - id: M5-TRANSIT-EVENTS
     owner: interstellar_primary_agent
     status: in_progress
-    write_scope: [apps/api, apps/worker, openapi, packages/canonical-schema, packages/sdk, tests/backend, tests/contracts, scripts, stage_gate]
-    acceptance: core_api_and_generated_sdk_execute_registry_recipe_and_job_flows_end_to_end
+    write_scope: [python/interstellar_core/forecast/transits, tests/forecast/transits, algorithm-cards/forecast]
+    acceptance: ingress_station_aspect_window_exact_hit_and_retrograde_multi_hit_tolerances_pass
+  - id: M5-RETURNS
+    owner: interstellar_primary_agent
+    status: pending
+    write_scope: [python/interstellar_core/forecast/returns, tests/forecast/returns, algorithm-cards/forecast]
+    acceptance: solar_and_lunar_return_multi_solution_location_policy_and_independent_difference_tests_pass
+  - id: M5-RENDERING
+    owner: interstellar_primary_agent
+    status: pending
+    write_scope: [python/interstellar_core/rendering, app/components/rendering, tests/rendering]
+    acceptance: single_double_wheel_grid_and_basic_timeline_visual_and_accessibility_gates_pass
+  - id: M5-EXPORTS
+    owner: interstellar_primary_agent
+    status: pending
+    write_scope: [python/interstellar_core/rendering/exports, apps/api, tests/rendering/exports]
+    acceptance: RenderSpec_drives_screen_SVG_and_PNG_from_one_source_with_hash_reuse
 
 current_gate_evidence:
   - docs/backlog/evidence/M0.yaml
   - docs/backlog/evidence/M1.yaml
   - docs/backlog/evidence/M2.yaml
   - docs/backlog/evidence/M3.yaml
+  - docs/backlog/evidence/M4.yaml
 open_blockers:
   - astronomy.ephemeris_core_stable_requires_independent_jpl_positions_and_spice_kernels
-next_action: implement_and_validate_all_M4_parallel_work_packages
+next_action: implement_M5_transit_event_search_and_independent_difference_fixtures_before_returns_and_rendering_integration

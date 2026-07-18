@@ -1,0 +1,111 @@
+schema_version: 1.0.0
+milestone: M4
+stage: professional_alpha
+status: passed
+verified_at: '2026-07-18'
+commit_parent: f87899a
+
+deliverables:
+  - id: M4-001
+    status: passed_with_model_semantics_remaining_experimental
+    evidence:
+      - python/interstellar_core/analysis/registries
+      - tests/analysis/registries
+      - apps/api/interstellar_api/routers/m4_catalogs.py
+      - algorithm-cards/platform/platform.analysis_model_registry.md
+    assertions:
+      - exactly_12_base_models_24_topic_models_and_35_intents_load
+      - all_registry_references_and_stage_availability_are_validated
+      - api_catalog_counts_are_derived_from_the_runtime_registry
+      - future_models_remain_visible_but_are_never_claimed_executable
+  - id: M4-002
+    status: passed_with_M5_M6_input_and_override_scope_explicit
+    evidence:
+      - python/interstellar_core/analysis/recipe
+      - tests/analysis/recipe
+      - apps/api/interstellar_api/recipe_registry.py
+      - algorithm-cards/platform/platform.analysis_recipe_resolver.md
+    assertions:
+      - six_entry_points_preserve_distinct_context
+      - required_dependency_closure_is_deduplicated_and_topologically_ordered
+      - blocked_nodes_reuse_plan_outputs_warnings_and_resource_budget_are_explicit
+      - confirmed_recipes_are_immutable_and_expiring
+      - resolver_does_not_execute_astronomy
+  - id: M4-003
+    status: passed_with_in_memory_store_only
+    evidence:
+      - python/interstellar_core/jobs
+      - tests/jobs
+      - apps/api/interstellar_api/routers/m4_jobs.py
+      - apps/worker/interstellar_worker/job_runner.py
+    assertions:
+      - job_state_machine_rejects_illegal_transitions
+      - event_stream_cursor_cancel_retry_lease_and_recovery_are_tested
+      - worker_claim_heartbeat_complete_fail_and_cancel_paths_are_tested
+      - durable_queue_and_database_job_store_remain_M5_M6_work
+  - id: M4-004
+    status: passed
+    evidence:
+      - openapi/openapi.yaml
+      - packages/sdk/python/interstellar_sdk
+      - packages/sdk/typescript/src
+      - scripts/generate_sdk.py
+      - tests/contracts/test_sdk_generation.py
+    assertions:
+      - catalog_recipe_and_job_operations_are_contracted
+      - Python_and_TypeScript_operation_registries_are_generated_deterministically
+      - TypeScript_SDK_compiles_in_strict_mode
+      - SDK_generation_drift_gate_passes
+  - id: M4-005
+    status: passed_with_real_subject_input_deferred_to_M5_M6
+    evidence:
+      - app/page.tsx
+      - app/globals.css
+      - app/lib/interstellar-api.ts
+      - tests/rendered-html.test.mjs
+      - docs/v1-development-spec.md
+    assertions:
+      - six_entry_cards_keep_stable_entry_point_id_and_distinct_prefill_context
+      - real_recipe_preflight_and_job_confirmation_use_JSON_API_without_fake_timers
+      - eight_chart_families_show_distinct_registered_and_roadmap_items
+      - unavailable_actions_are_disabled_with_stage_or_reason
+      - chart_search_and_status_filter_change_the_visible_catalog
+      - desktop_workspace_mobile_document_flow_and_modal_scroll_reach_bottom
+      - comfortable_density_uses_12px_semantic_floor_and_14px_body_baseline
+
+gate_commands:
+  - command: INTERSTELLAR_TEST_DATABASE_URL=<isolated-local-postgres> npm run m4:check
+    result: passed
+    totals:
+      backend_api_worker: 49
+      time_location_dataset_postgres: 28
+      astronomy_differential_and_api: 64
+      houses_aspects_distributions_snapshot_tables: 71
+      registries_recipes_jobs_worker_and_api: 75
+      contract_and_sdk_unittests: 12
+      rendered_html_and_interaction_source: 6
+  - command: playwright_cli desktop_1440x900_and_mobile_800x667_manual_gate
+    result: passed
+    assertions:
+      - desktop_workspace_reached_bottom
+      - mobile_body_uses_document_scroll
+      - modal_body_reached_bottom
+      - relationship_and_basic_wheel_catalogs_are_distinct
+      - unavailable_chart_and_real_subject_actions_are_disabled
+      - browser_console_has_zero_errors
+
+closed_defects:
+  - six_entry_paths_no_longer_collapse_to_one_unidentified_static_modal
+  - prototype_no_longer_uses_timeout_or_HTML_fallback_as_fake_calculation
+  - chart_family_navigation_no_longer_repeats_the_same_eight_cards
+  - planned_features_no_longer_look_clickable_without_behavior
+  - desktop_and_mobile_content_no_longer_require_browser_zoom_to_reach_the_bottom
+  - default_professional_density_no_longer_uses_sub_12px_meaningful_text
+
+known_limits:
+  - M4 UI executes the virtual-sample vertical slice only; real subject forms, location resolution and SubjectVersion persistence enter M5-M6.
+  - User-editable calculation parameters and output selection are intentionally read-only until their server contracts are wired in M5.
+  - The JobStore is in memory; database persistence, real queue transport and multi-process recovery are not yet production-ready.
+  - Job completion currently produces an explicitly partial non-astronomical result; real M5 calculation workers will replace it.
+  - Only 35 view registrations are currently exposed while the 146-item roadmap remains contract-validated for M24 completion.
+  - Independent JPL position validation remains absent, so astronomical results stay Experimental.

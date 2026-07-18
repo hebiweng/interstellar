@@ -58,6 +58,7 @@ months:
       - {id: M4-002, lane: product, deliverable: AnalysisDraft与RecipeResolver, acceptance: 六入口等价_DAG去重_阻断_预算测试通过}
       - {id: M4-003, lane: platform, deliverable: Job_SSE_取消_重试_租约, acceptance: 状态机E2E与故障恢复通过}
       - {id: M4-004, lane: contract, deliverable: /api/v1核心接口与SDK生成, acceptance: OpenAPI契约测试通过}
+      - {id: M4-005, lane: product, deliverable: 工作台信息架构_六入口差异化_滚动与交互状态, acceptance: 每个入口保留entry_point_id和预填上下文_无假按钮_桌面移动端可完整滚动_舒适字号视觉与E2E通过}
   - month: M5
     objective: 完成Alpha预测与基础渲染
     tasks:

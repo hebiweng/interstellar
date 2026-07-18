@@ -63,5 +63,5 @@ jobs:
           INTERSTELLAR_MINIO_APP_SECRET_KEY: ci-minio-app-secret
         run: docker compose -f compose.yaml config --quiet
 
-      - name: Run M3 natal fact pipeline repository gate
-        run: npm run m3:check
+      - name: Run M4 registry, recipe, jobs, API and SDK repository gate
+        run: npm run m4:check

@@ -55,14 +55,64 @@ class WorkflowStore:
         except KeyError as exc:
             raise WorkflowRecordNotFound(draft_id) from exc
 
+    def update_draft(
+        self,
+        draft_id: str,
+        *,
+        expected_revision: int,
+        changes: dict[str, Any],
+        updated_at: str,
+    ) -> dict[str, Any]:
+        try:
+            current = self.drafts[draft_id]
+        except KeyError as exc:
+            raise WorkflowRecordNotFound(draft_id) from exc
+        if current["revision"] != expected_revision:
+            raise WorkflowRecordConflict(
+                f"draft revision mismatch: expected {expected_revision}, "
+                f"actual {current['revision']}"
+            )
+        updated = deepcopy(current)
+        updated.update(deepcopy(changes))
+        updated["revision"] = expected_revision + 1
+        updated["status"] = "editing"
+        updated["updated_at"] = updated_at
+        self.drafts[draft_id] = updated
+        return deepcopy(updated)
+
     def put_recipe(self, recipe: dict[str, Any]) -> None:
-        self.recipes[recipe["recipe_id"]] = deepcopy(recipe)
+        recipe_id = recipe["recipe_id"]
+        if recipe_id in self.recipes:
+            raise WorkflowRecordConflict(f"recipe already exists: {recipe_id}")
+        self.recipes[recipe_id] = deepcopy(recipe)
 
     def get_recipe(self, recipe_id: str) -> dict[str, Any]:
         try:
             return deepcopy(self.recipes[recipe_id])
         except KeyError as exc:
             raise WorkflowRecordNotFound(recipe_id) from exc
+
+    def confirm_recipe(
+        self,
+        recipe: dict[str, Any],
+        *,
+        expected_content_hash: str,
+    ) -> dict[str, Any]:
+        recipe_id = recipe["recipe_id"]
+        try:
+            current = self.recipes[recipe_id]
+        except KeyError as exc:
+            raise WorkflowRecordNotFound(recipe_id) from exc
+        if current["content_hash"] != expected_content_hash:
+            raise WorkflowRecordConflict("recipe content hash changed before confirmation")
+        if current["status"] == "confirmed":
+            return deepcopy(current)
+        if current["status"] != "resolved" or recipe.get("status") != "confirmed":
+            raise WorkflowRecordConflict("only a resolved recipe can be confirmed")
+        if recipe["content_hash"] != current["content_hash"]:
+            raise WorkflowRecordConflict("confirmed recipe cannot change semantic content")
+        self.recipes[recipe_id] = deepcopy(recipe)
+        return deepcopy(recipe)
 
     def put_snapshot(self, snapshot: dict[str, Any]) -> None:
         snapshot_id = snapshot["id"]

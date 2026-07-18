@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+.playwright-cli/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/

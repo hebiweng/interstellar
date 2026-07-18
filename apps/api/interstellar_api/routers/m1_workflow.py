@@ -6,12 +6,21 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 from uuid import uuid4
 
-from fastapi import APIRouter, Request, status
+from fastapi import APIRouter, Header, Request, status
+from fastapi.responses import JSONResponse
+from interstellar_core.analysis.recipe import (
+    AnalysisRecipeResolver,
+    RecipeDocument,
+    RecipeResolutionError,
+)
+from interstellar_core.analysis.recipe import (
+    confirm_recipe as confirm_recipe_document,
+)
 from interstellar_core.application.recipe_preflight import (
     canonical_hash,
     create_noncomputing_snapshot,
-    resolve_analysis_recipe,
 )
+from interstellar_core.jobs import JobKind
 from interstellar_core.time import (
     DatasetReference,
     SourceReference,
@@ -21,9 +30,13 @@ from interstellar_core.time import (
 )
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from interstellar_api.catalogs import AnalysisModelCatalog, CatalogError
 from interstellar_api.errors import ErrorCode, ProblemException
-from interstellar_api.workflow_store import WorkflowRecordNotFound, WorkflowStore
+from interstellar_api.recipe_registry import RepositoryRecipeRegistry
+from interstellar_api.workflow_store import (
+    WorkflowRecordConflict,
+    WorkflowRecordNotFound,
+    WorkflowStore,
+)
 
 router = APIRouter(prefix="/api/v1", tags=["M1 Workflow"])
 
@@ -137,6 +150,24 @@ class RecipeResolvePayload(StrictModel):
     draft_revision: int = Field(ge=1)
 
 
+class AnalysisDraftPatchPayload(StrictModel):
+    selection: dict[str, Any] | None = None
+    subject_roles: list[dict[str, Any]] | None = Field(default=None, min_length=1)
+    time_context: dict[str, Any] | None = None
+    locations: list[LocationPayload] | None = None
+    allowed_overrides: dict[str, Any] | None = None
+    optional_extensions: list[str] | None = None
+    requested_outputs: dict[str, Any] | None = None
+
+    @model_validator(mode="after")
+    def at_least_one_change(self) -> AnalysisDraftPatchPayload:
+        if not self.model_fields_set:
+            raise ValueError("at least one draft field must be supplied")
+        if self.selection is not None and len(self.selection) != 1:
+            raise ValueError("selection must contain exactly one entry")
+        return self
+
+
 class RecipeConfirmPayload(StrictModel):
     recipe_content_hash: str
     outputs: list[str] = Field(min_length=1)
@@ -167,8 +198,32 @@ def _store(request: Request) -> WorkflowStore:
     return request.app.state.workflow_store
 
 
-def _catalog(request: Request) -> AnalysisModelCatalog:
-    return request.app.state.analysis_model_catalog
+def _recipe_registry(request: Request) -> RepositoryRecipeRegistry:
+    return request.app.state.recipe_registry
+
+
+def _recipe_problem(exc: RecipeResolutionError) -> ProblemException:
+    conflict_codes = {
+        "RECIPE_CONFIRMATION_ERROR",
+        "RECIPE_EXPIRED",
+        "RESOURCE_BUDGET_EXCEEDED",
+    }
+    http_status = (
+        status.HTTP_409_CONFLICT
+        if exc.code in conflict_codes
+        else status.HTTP_422_UNPROCESSABLE_CONTENT
+    )
+    fields: dict[str, Any] = {"recipe_code": exc.code}
+    if exc.path:
+        fields["path"] = exc.path
+    if exc.details:
+        fields["details"] = exc.details
+    return ProblemException(
+        status=http_status,
+        code=ErrorCode.INVALID_REQUEST,
+        detail=str(exc),
+        fields=fields,
+    )
 
 
 def _normalize_time(payload: TimeSpecPayload | None) -> tuple[dict[str, Any] | None, str]:
@@ -258,6 +313,57 @@ async def create_analysis_draft(
     return draft
 
 
+@router.get("/analysis-drafts/{draft_id}")
+async def get_analysis_draft(draft_id: str, request: Request) -> dict[str, Any]:
+    try:
+        return _store(request).get_draft(draft_id)
+    except WorkflowRecordNotFound as exc:
+        raise _not_found("Analysis draft") from exc
+
+
+@router.patch("/analysis-drafts/{draft_id}")
+async def update_analysis_draft(
+    draft_id: str,
+    payload: AnalysisDraftPatchPayload,
+    request: Request,
+    if_match: str = Header(alias="If-Match"),
+) -> dict[str, Any]:
+    try:
+        expected_revision = int(if_match)
+    except ValueError as exc:
+        raise ProblemException(
+            status=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            code=ErrorCode.INVALID_REQUEST,
+            detail="If-Match must be the current positive integer draft revision.",
+        ) from exc
+    if expected_revision < 1:
+        raise ProblemException(
+            status=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            code=ErrorCode.INVALID_REQUEST,
+            detail="If-Match must be the current positive integer draft revision.",
+        )
+    changes = payload.model_dump(
+        mode="json",
+        exclude_unset=True,
+        exclude_none=False,
+    )
+    try:
+        return _store(request).update_draft(
+            draft_id,
+            expected_revision=expected_revision,
+            changes=changes,
+            updated_at=_iso(_now()),
+        )
+    except WorkflowRecordNotFound as exc:
+        raise _not_found("Analysis draft") from exc
+    except WorkflowRecordConflict as exc:
+        raise ProblemException(
+            status=status.HTTP_409_CONFLICT,
+            code=ErrorCode.INVALID_REQUEST,
+            detail=str(exc),
+        ) from exc
+
+
 @router.post("/analysis-recipes/resolve", status_code=status.HTTP_201_CREATED)
 async def resolve_recipe(payload: RecipeResolvePayload, request: Request) -> dict[str, Any]:
     try:
@@ -270,74 +376,84 @@ async def resolve_recipe(payload: RecipeResolvePayload, request: Request) -> dic
             code=ErrorCode.INVALID_REQUEST,
             detail="The requested draft revision is stale.",
         )
-    model_id = draft["selection"].get("analysis_model_id")
-    if not model_id:
-        raise ProblemException(
-            status=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            code=ErrorCode.INVALID_REQUEST,
-            detail="M1 preflight currently accepts analysis_model_id selection only.",
-        )
     try:
-        preset = _catalog(request).get(str(model_id))
-    except CatalogError as exc:
-        raise ProblemException(
-            status=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            code=ErrorCode.INVALID_REQUEST,
-            detail=str(exc),
-        ) from exc
-
-    primary_role = draft["subject_roles"][0]
-    version_id = primary_role.get("subject_version_id")
-    if not version_id:
-        raise ProblemException(
-            status=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            code=ErrorCode.INVALID_REQUEST,
-            detail="M1 preflight requires a saved subject_version_id.",
-        )
-    try:
-        version = _store(request).get_subject_version(version_id)
-    except WorkflowRecordNotFound as exc:
-        raise _not_found("Subject version") from exc
-    time_spec = version.get("time_spec") or {}
-    recipe = resolve_analysis_recipe(
-        recipe_id=_id("recipe"),
-        source_draft_id=draft["draft_id"],
-        source_draft_revision=draft["revision"],
-        entry_point_id=draft["entry_point_id"],
-        subject_roles=draft["subject_roles"],
-        model_preset=preset,
-        available_components=set(),
-        time_precision=str(time_spec.get("precision", "unknown")),
-        has_exact_location=version.get("location") is not None,
-        datasets=[],
-        requested_view_ids=draft["requested_outputs"].get("view_ids"),
-        requested_exports=draft["requested_outputs"].get("exports"),
-        now=_now(),
-        expires_at=_now() + timedelta(hours=1),
-    )
+        recipe = AnalysisRecipeResolver(_recipe_registry(request)).resolve(
+            draft,
+            recipe_id=_id("recipe"),
+            now=_now(),
+        ).to_dict()
+    except RecipeResolutionError as exc:
+        raise _recipe_problem(exc) from exc
     _store(request).put_recipe(recipe)
     return recipe
+
+
+@router.get("/analysis-recipes/{recipe_id}")
+async def get_analysis_recipe(recipe_id: str, request: Request) -> dict[str, Any]:
+    try:
+        return _store(request).get_recipe(recipe_id)
+    except WorkflowRecordNotFound as exc:
+        raise _not_found("Analysis recipe") from exc
 
 
 @router.post(
     "/analysis-recipes/{recipe_id}/confirm",
     status_code=status.HTTP_201_CREATED,
+    response_model=None,
 )
 async def confirm_recipe(
-    recipe_id: str, payload: RecipeConfirmPayload, request: Request
-) -> dict[str, Any]:
+    recipe_id: str,
+    payload: RecipeConfirmPayload,
+    request: Request,
+    prefer: str | None = Header(default=None, alias="Prefer"),
+) -> dict[str, Any] | JSONResponse:
     try:
         recipe = _store(request).get_recipe(recipe_id)
     except WorkflowRecordNotFound as exc:
         raise _not_found("Analysis recipe") from exc
-    if recipe["content_hash"] != payload.recipe_content_hash:
+    try:
+        confirmed = confirm_recipe_document(
+            RecipeDocument(recipe),
+            now=_now(),
+            expected_content_hash=payload.recipe_content_hash,
+        ).to_dict()
+        recipe = _store(request).confirm_recipe(
+            confirmed,
+            expected_content_hash=payload.recipe_content_hash,
+        )
+    except RecipeResolutionError as exc:
+        raise _recipe_problem(exc) from exc
+    except WorkflowRecordConflict as exc:
         raise ProblemException(
             status=status.HTTP_409_CONFLICT,
             code=ErrorCode.INVALID_REQUEST,
-            detail="recipe_content_hash does not match the immutable recipe.",
+            detail=str(exc),
+        ) from exc
+
+    prefer_async = bool(prefer and "respond-async" in prefer.casefold())
+    if prefer_async or recipe["resource_estimate"]["execution_mode"] != "sync":
+        job = request.app.state.job_store.create(
+            _id("job"),
+            JobKind.CALCULATION,
+            now=_now(),
+        )
+        canonical_job = job.to_canonical()
+        return JSONResponse(
+            status_code=status.HTTP_202_ACCEPTED,
+            content=canonical_job,
+            headers={
+                "Location": str(canonical_job["links"]["self"]),
+                "Retry-After": "1",
+            },
         )
     role = recipe["subject_roles"][0]
-    version = _store(request).get_subject_version(role["subject_version_id"])
+    if "subject_version_id" in role:
+        try:
+            version = _store(request).get_subject_version(role["subject_version_id"])
+        except WorkflowRecordNotFound as exc:
+            raise _not_found("Subject version") from exc
+    else:
+        version = role["inline_subject"]
     snapshot = create_noncomputing_snapshot(
         snapshot_id=_id("calculation"),
         recipe=recipe,

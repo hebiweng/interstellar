@@ -42,3 +42,21 @@ def test_readiness_reports_503_when_startup_gate_is_closed() -> None:
         "ready": False,
         "detail": "startup gate disabled",
     }
+
+
+def test_explicit_cors_origin_supports_browser_preflight() -> None:
+    app = create_app(
+        ApiSettings(environment="test", cors_allowed_origins=("http://localhost:3000",))
+    )
+    response = TestClient(app).options(
+        "/api/v1/analysis-drafts",
+        headers={
+            "Origin": "http://localhost:3000",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type,prefer",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:3000"
+    assert "POST" in response.headers["access-control-allow-methods"]
