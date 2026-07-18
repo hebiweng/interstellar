@@ -1,98 +1,69 @@
-# vinext-starter
+# Interstellar
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+Interstellar is a professional Western-astrology calculation, research, visualization, and evidence-reporting platform. V1 prioritizes deterministic calculation and professional workflows; it does not include AI interpretation or a consumer horoscope experience.
 
-## Prerequisites
+The current repository contains the product/development baseline and an interactive frontend prototype. The normative scope is:
 
-- Node.js `>=22.13.0`
+- 12 backend `AnalysisModel` definitions;
+- 24 user-facing `TopicModel` definitions;
+- 35 `AnalysisIntent` choices;
+- 99 registered deterministic calculations;
+- 146 registered render views, of which 1–128 are the professional V1 baseline;
+- six report profiles, three report densities, and six evidence/report layers.
 
-## Quick Start
+## Documentation map
+
+| Document | Authority |
+|---|---|
+| [`docs/v1-development-spec.md`](./docs/v1-development-spec.md) | Architecture, domain contracts, API, workflow, security, testing, and acceptance |
+| [`docs/project-plan.md`](./docs/project-plan.md) | 24-month scope, milestones, resources, risks, and post-V1 roadmap |
+| [`docs/analysis-catalog.yaml`](./docs/analysis-catalog.yaml) | Entry points, models, intents, recipes, output profiles, and reports |
+| [`docs/capabilities.yaml`](./docs/capabilities.yaml) | Capability ownership, phase, dependencies, data sources, and maturity |
+| [`docs/calculation-catalog.yaml`](./docs/calculation-catalog.yaml) | Stable calculation IDs, result contracts, release, and maturity targets |
+| [`docs/calculation-result-catalog.md`](./docs/calculation-result-catalog.md) | Raw and derived result fields, boundaries, units, and null semantics |
+| [`docs/render-catalog.yaml`](./docs/render-catalog.yaml) | All 146 view IDs, dependencies, renderer, and release scope |
+| [`docs/algorithm-card-template.md`](./docs/algorithm-card-template.md) | Required algorithm/model/report-rule decision record |
+
+When documents disagree, stable IDs and catalog-owned fields follow the relevant YAML catalog; behavioral and engineering constraints follow the development specification.
+
+## Validate the baseline
+
+Python 3 with PyYAML is required for catalog validation. Node.js `>=22.13.0` is required for the prototype.
 
 ```bash
 npm install
-npm run dev
+npm run docs:validate
 npm run build
+npm test
 ```
 
-This starter does not use `wrangler.jsonc`.
+`npm run docs:validate` checks catalog counts, unique IDs, calculation/capability ownership, model and intent references, output-view references, render dependencies, work-package references, and Markdown code fences.
 
-## Included Shape
+## Prototype
 
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
-
-## Workspace Auth Headers
-
-OpenAI workspace sites can read the current user's email from
-`oai-authenticated-user-email`.
-
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
+```bash
+npm run dev
 ```
 
-## Optional Dispatch-Owned ChatGPT Sign-In
+The frontend is a product-flow prototype, not a working astrology engine. Demo values must remain labeled as virtual/cached/prototype data. It demonstrates the unified analysis center, “add and analyze” flow, Recipe preflight, on-demand calculation planning, result workspace, chart catalog, evidence drill-down, and report profiles.
 
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
+## Product invariants
 
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
+- Never substitute `00:00` for an unknown birth time.
+- A page load never calculates every model or chart.
+- Every execution resolves to an immutable `AnalysisRecipe` and `CalculationSnapshot`.
+- Required dependencies are server-selected and locked; optional extensions are explicit.
+- AI never performs ephemeris, house, aspect, or exact timing calculation.
+- A formal report requires an approved `ReportRulePack`; otherwise results remain structured facts/evidence or a technical report.
+- Proprietary commercial astrology models, texts, and weights are not executable without written permission.
+- V1 uses a zero-crawler data strategy and official, versioned sources.
 
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
+## Current implementation shape
 
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
+- frontend: Next.js/React through vinext;
+- planned API: FastAPI/Python;
+- planned storage: PostgreSQL/PostGIS, Redis, and S3-compatible object storage;
+- planned local deployment: Docker Compose;
+- `.openai/hosting.json` describes the prototype hosting bindings.
 
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
-
-## Useful Commands
-
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+The current `db/` and `worker/` files are prototype scaffolding and do not replace the canonical backend plan in the development specification.

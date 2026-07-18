@@ -1,0 +1,184 @@
+schema_version: 1.0.0
+catalog_id: interstellar.render_catalog.v1
+title_zh: Interstellar 全量图形目录
+authoritative_for: [view_id, view_number, render_family, result_dependencies, release_scope]
+
+entry_contract:
+  required_fields: [number, view_id, name_zh, family, target_release, capability_id, result_dependencies, renderer]
+  acceptance:
+    - deterministic_from_snapshot_and_render_spec
+    - stable_semantic_ids
+    - keyboard_and_screen_reader_fallback
+    - color_blind_safe_palette
+    - visual_regression_fixture
+    - export_or_data_fallback
+  release_values: [alpha, beta, pro, v1, post_v1_consumer]
+  renderer_values: [svg, canvas, webgl, table, graph, timeline, calendar, map]
+
+release_policy:
+  professional_v1: "编号1—128属于专业平台V1基线；可按成熟度发布为Stable、Beta或Experimental。"
+  consumer_later: "编号129—146登记在总目录中，但因V1不含消费者模式，目标阶段为post_v1_consumer。"
+  no_silent_drop: "未完成条目必须在OutputManifest中标为blocked或degraded，不得从目录静默删除。"
+
+views:
+  # 第一类：基础轮盘图 1—17
+  - {number: 1, view_id: wheel.natal, name_zh: "本命盘轮盘", family: wheel, target_release: alpha, capability_id: rendering.wheels, result_dependencies: [natal.standard_chart], renderer: svg}
+  - {number: 2, view_id: wheel.unknown_time, name_zh: "无出生时间盘", family: wheel, target_release: alpha, capability_id: rendering.wheels, result_dependencies: [natal.unknown_time_mode], renderer: svg}
+  - {number: 3, view_id: wheel.current_sky, name_zh: "当前天空盘", family: wheel, target_release: alpha, capability_id: rendering.wheels, result_dependencies: [forecast.transits], renderer: svg}
+  - {number: 4, view_id: wheel.event, name_zh: "事件盘", family: wheel, target_release: alpha, capability_id: rendering.wheels, result_dependencies: [event.chart.v1], renderer: svg}
+  - {number: 5, view_id: wheel.project_start, name_zh: "项目启动盘", family: wheel, target_release: v1, capability_id: rendering.wheels, result_dependencies: [project.base_chart.v1], renderer: svg}
+  - {number: 6, view_id: wheel.organization, name_zh: "公司盘", family: wheel, target_release: v1, capability_id: rendering.wheels, result_dependencies: [mundane.subject_charts.v1], renderer: svg}
+  - {number: 7, view_id: wheel.country, name_zh: "国家盘", family: wheel, target_release: v1, capability_id: rendering.wheels, result_dependencies: [mundane.subject_charts.v1], renderer: svg}
+  - {number: 8, view_id: wheel.horary, name_zh: "问事盘", family: wheel, target_release: pro, capability_id: rendering.wheels, result_dependencies: [horary.judgement.v1], renderer: svg}
+  - {number: 9, view_id: wheel.electional, name_zh: "择时盘", family: wheel, target_release: pro, capability_id: rendering.wheels, result_dependencies: [electional.search.v1], renderer: svg}
+  - {number: 10, view_id: wheel.relocation, name_zh: "迁移盘", family: wheel, target_release: pro, capability_id: rendering.wheels, result_dependencies: [geography.relocation.v1], renderer: svg}
+  - {number: 11, view_id: wheel.draconic, name_zh: "龙首盘", family: wheel, target_release: beta, capability_id: rendering.wheels, result_dependencies: [chart.draconic.v1], renderer: svg}
+  - {number: 12, view_id: wheel.sidereal, name_zh: "恒星黄道盘", family: wheel, target_release: beta, capability_id: rendering.wheels, result_dependencies: [zodiac.sidereal.v1], renderer: svg}
+  - {number: 13, view_id: wheel.heliocentric, name_zh: "日心盘", family: wheel, target_release: beta, capability_id: rendering.wheels, result_dependencies: [coordinate.heliocentric.v1], renderer: svg}
+  - {number: 14, view_id: wheel.topocentric, name_zh: "拓扑中心盘", family: wheel, target_release: beta, capability_id: rendering.wheels, result_dependencies: [coordinate.topocentric.v1], renderer: svg}
+  - {number: 15, view_id: wheel.harmonic, name_zh: "谐波盘", family: wheel, target_release: beta, capability_id: rendering.advanced_dials, result_dependencies: [harmonic.chart.v1], renderer: svg}
+  - {number: 16, view_id: wheel.solar, name_zh: "太阳盘", family: wheel, target_release: beta, capability_id: rendering.wheels, result_dependencies: [chart.solar_lunar.v1], renderer: svg}
+  - {number: 17, view_id: wheel.lunar, name_zh: "月亮盘", family: wheel, target_release: beta, capability_id: rendering.wheels, result_dependencies: [chart.solar_lunar.v1], renderer: svg}
+
+  # 第二类：双轮、三轮和四轮 18—31
+  - {number: 18, view_id: wheel.bi_natal_transit, name_zh: "本命＋行运双轮", family: multi_wheel, target_release: alpha, capability_id: rendering.wheels, result_dependencies: [natal.standard_chart, forecast.transits], renderer: svg}
+  - {number: 19, view_id: wheel.bi_natal_secondary, name_zh: "本命＋次限双轮", family: multi_wheel, target_release: beta, capability_id: rendering.wheels, result_dependencies: [natal.standard_chart, forecast.secondary_progression], renderer: svg}
+  - {number: 20, view_id: wheel.bi_natal_solar_arc, name_zh: "本命＋太阳弧双轮", family: multi_wheel, target_release: beta, capability_id: rendering.wheels, result_dependencies: [natal.standard_chart, forecast.solar_arc], renderer: svg}
+  - {number: 21, view_id: wheel.bi_natal_solar_return, name_zh: "本命＋太阳返照双轮", family: multi_wheel, target_release: alpha, capability_id: rendering.wheels, result_dependencies: [natal.standard_chart, forecast.returns], renderer: svg}
+  - {number: 22, view_id: wheel.bi_natal_lunar_return, name_zh: "本命＋月亮返照双轮", family: multi_wheel, target_release: alpha, capability_id: rendering.wheels, result_dependencies: [natal.standard_chart, forecast.returns], renderer: svg}
+  - {number: 23, view_id: wheel.bi_synastry, name_zh: "A＋B比较盘", family: multi_wheel, target_release: alpha, capability_id: rendering.wheels, result_dependencies: [relationship.synastry], renderer: svg}
+  - {number: 24, view_id: wheel.bi_natal_relocation, name_zh: "本命＋迁移盘", family: multi_wheel, target_release: pro, capability_id: rendering.wheels, result_dependencies: [natal.standard_chart, geography.relocation], renderer: svg}
+  - {number: 25, view_id: wheel.bi_natal_event, name_zh: "本命＋事件盘", family: multi_wheel, target_release: beta, capability_id: rendering.wheels, result_dependencies: [natal.standard_chart, event.chart.v1], renderer: svg}
+  - {number: 26, view_id: wheel.bi_project_founder, name_zh: "项目盘＋创始人盘", family: multi_wheel, target_release: v1, capability_id: rendering.wheels, result_dependencies: [project.cross_subject.v1], renderer: svg}
+  - {number: 27, view_id: wheel.tri_natal_transit_progression, name_zh: "本命＋行运＋推运三轮", family: multi_wheel, target_release: beta, capability_id: rendering.wheels, result_dependencies: [natal.standard_chart, forecast.transits, forecast.secondary_progression], renderer: svg}
+  - {number: 28, view_id: wheel.tri_natal_transit_solar_arc, name_zh: "本命＋行运＋太阳弧三轮", family: multi_wheel, target_release: beta, capability_id: rendering.wheels, result_dependencies: [natal.standard_chart, forecast.transits, forecast.solar_arc], renderer: svg}
+  - {number: 29, view_id: wheel.tri_natal_return_transit, name_zh: "本命＋返照＋行运三轮", family: multi_wheel, target_release: beta, capability_id: rendering.wheels, result_dependencies: [natal.standard_chart, forecast.returns, forecast.transits], renderer: svg}
+  - {number: 30, view_id: wheel.quad_natal_progression_return_transit, name_zh: "本命＋推运＋返照＋行运四轮", family: multi_wheel, target_release: v1, capability_id: rendering.wheels, result_dependencies: [natal.standard_chart, forecast.secondary_progression, forecast.returns, forecast.transits], renderer: svg}
+  - {number: 31, view_id: wheel.multi_custom, name_zh: "任意自定义多轮盘", family: multi_wheel, target_release: v1, capability_id: rendering.wheels, result_dependencies: [platform.calculation_snapshot], renderer: svg}
+
+  # 第三类：关系图 32—45
+  - {number: 32, view_id: relationship.synastry_wheel, name_zh: "比较盘", family: relationship, target_release: alpha, capability_id: rendering.wheels, result_dependencies: [relationship.synastry], renderer: svg}
+  - {number: 33, view_id: relationship.bidirectional_house_overlay, name_zh: "双向宫位覆盖图", family: relationship, target_release: alpha, capability_id: rendering.tables_grids, result_dependencies: [relationship.synastry], renderer: graph}
+  - {number: 34, view_id: relationship.composite_wheel, name_zh: "组合盘", family: relationship, target_release: alpha, capability_id: rendering.wheels, result_dependencies: [relationship.composite], renderer: svg}
+  - {number: 35, view_id: relationship.davison_wheel, name_zh: "戴维森盘", family: relationship, target_release: beta, capability_id: rendering.wheels, result_dependencies: [relationship.davison], renderer: svg}
+  - {number: 36, view_id: relationship.corrected_davison, name_zh: "校正戴维森盘", family: relationship, target_release: beta, capability_id: rendering.wheels, result_dependencies: [relationship.davison], renderer: svg}
+  - {number: 37, view_id: relationship.reference_place_davison, name_zh: "参考地戴维森盘", family: relationship, target_release: beta, capability_id: rendering.wheels, result_dependencies: [relationship.davison], renderer: svg}
+  - {number: 38, view_id: relationship.progressed_synastry, name_zh: "推运合盘", family: relationship, target_release: v1, capability_id: rendering.wheels, result_dependencies: [relationship.dynamic_forecast], renderer: svg}
+  - {number: 39, view_id: relationship.transit_to_composite, name_zh: "行运对组合盘", family: relationship, target_release: v1, capability_id: rendering.wheels, result_dependencies: [relationship.dynamic_forecast], renderer: svg}
+  - {number: 40, view_id: relationship.transit_to_davison, name_zh: "行运对戴维森盘", family: relationship, target_release: v1, capability_id: rendering.wheels, result_dependencies: [relationship.dynamic_forecast], renderer: svg}
+  - {number: 41, view_id: relationship.dimension_radar, name_zh: "关系维度雷达图", family: relationship, target_release: v1, capability_id: rendering.tables_grids, result_dependencies: [topic.structured_evidence], renderer: graph}
+  - {number: 42, view_id: relationship.aspect_network, name_zh: "关系相位网络图", family: relationship, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [relationship.synastry], renderer: graph}
+  - {number: 43, view_id: relationship.family_network, name_zh: "家庭多人关系网络", family: relationship, target_release: v1, capability_id: rendering.tables_grids, result_dependencies: [relationship.synastry], renderer: graph}
+  - {number: 44, view_id: relationship.team_network, name_zh: "团队关系网络", family: relationship, target_release: v1, capability_id: rendering.tables_grids, result_dependencies: [relationship.synastry], renderer: graph}
+  - {number: 45, view_id: relationship.cycle_comparison, name_zh: "双方时间周期对照图", family: relationship, target_release: v1, capability_id: rendering.timelines_ephemeris, result_dependencies: [relationship.dynamic_forecast], renderer: timeline}
+
+  # 第四类：表格和网格 46—73
+  - {number: 46, view_id: table.planet_positions, name_zh: "行星位置表", family: table, target_release: alpha, capability_id: rendering.tables_grids, result_dependencies: [astronomy.ephemeris_core], renderer: table}
+  - {number: 47, view_id: table.house_cusps, name_zh: "宫头表", family: table, target_release: alpha, capability_id: rendering.tables_grids, result_dependencies: [astronomy.houses_angles], renderer: table}
+  - {number: 48, view_id: table.natal_aspects, name_zh: "本命相位表", family: table, target_release: alpha, capability_id: rendering.tables_grids, result_dependencies: [astronomy.aspects], renderer: table}
+  - {number: 49, view_id: grid.aspects, name_zh: "相位网格", family: grid, target_release: alpha, capability_id: rendering.tables_grids, result_dependencies: [astronomy.aspects], renderer: table}
+  - {number: 50, view_id: grid.cross_aspects, name_zh: "跨盘相位网格", family: grid, target_release: alpha, capability_id: rendering.tables_grids, result_dependencies: [relationship.synastry], renderer: table}
+  - {number: 51, view_id: table.house_overlays, name_zh: "宫位覆盖表", family: table, target_release: alpha, capability_id: rendering.tables_grids, result_dependencies: [relationship.synastry], renderer: table}
+  - {number: 52, view_id: table.elements, name_zh: "元素统计表", family: table, target_release: alpha, capability_id: rendering.tables_grids, result_dependencies: [natal.patterns_distributions], renderer: table}
+  - {number: 53, view_id: table.modalities, name_zh: "模式统计表", family: table, target_release: alpha, capability_id: rendering.tables_grids, result_dependencies: [natal.patterns_distributions], renderer: table}
+  - {number: 54, view_id: table.polarity, name_zh: "阴阳统计表", family: table, target_release: alpha, capability_id: rendering.tables_grids, result_dependencies: [natal.patterns_distributions], renderer: table}
+  - {number: 55, view_id: table.essential_dignities, name_zh: "尊贵表", family: table, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [natal.dignity_reception], renderer: table}
+  - {number: 56, view_id: table.accidental_dignities, name_zh: "偶然尊贵表", family: table, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [natal.dignity_reception], renderer: table}
+  - {number: 57, view_id: table.sect_condition, name_zh: "昼夜条件表", family: table, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [natal.dignity_reception], renderer: table}
+  - {number: 58, view_id: table.planet_speeds, name_zh: "行星速度表", family: table, target_release: alpha, capability_id: rendering.tables_grids, result_dependencies: [astronomy.ephemeris_core], renderer: table}
+  - {number: 59, view_id: table.retrograde_stations, name_zh: "逆行站点表", family: table, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [forecast.event_search], renderer: table}
+  - {number: 60, view_id: table.declinations, name_zh: "赤纬表", family: table, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [astronomy.coordinate_systems], renderer: table}
+  - {number: 61, view_id: table.declination_aspects, name_zh: "平行和反平行表", family: table, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [astronomy.aspects], renderer: table}
+  - {number: 62, view_id: table.fixed_stars, name_zh: "固定星表", family: table, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [astronomy.fixed_stars], renderer: table}
+  - {number: 63, view_id: table.arabic_parts, name_zh: "阿拉伯点表", family: table, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [natal.arabic_parts], renderer: table}
+  - {number: 64, view_id: table.midpoints, name_zh: "中点表", family: table, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [natal.midpoints], renderer: table}
+  - {number: 65, view_id: graph.midpoint_tree, name_zh: "中点树", family: graph, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [natal.midpoints], renderer: graph}
+  - {number: 66, view_id: table.house_rulers, name_zh: "宫主星表", family: table, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [natal.dignity_reception], renderer: table}
+  - {number: 67, view_id: graph.dispositor_chain, name_zh: "定位星链表", family: graph, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [natal.dignity_reception], renderer: graph}
+  - {number: 68, view_id: table.chart_patterns, name_zh: "格局表", family: table, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [natal.patterns_distributions], renderer: table}
+  - {number: 69, view_id: table.planet_power_ranking, name_zh: "行星力量排名", family: table, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [natal.dignity_reception], renderer: table}
+  - {number: 70, view_id: table.house_power_ranking, name_zh: "宫位力量排名", family: table, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [natal.dignity_reception], renderer: table}
+  - {number: 71, view_id: table.dominant_planets, name_zh: "主导星排名", family: table, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [natal.patterns_distributions, natal.dignity_reception], renderer: table}
+  - {number: 72, view_id: table.active_triggers, name_zh: "当前触发列表", family: table, target_release: alpha, capability_id: rendering.tables_grids, result_dependencies: [forecast.transits], renderer: table}
+  - {number: 73, view_id: table.future_events, name_zh: "未来事件列表", family: table, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [forecast.event_search], renderer: table}
+
+  # 第五类：预测时间图 74—97
+  - {number: 74, view_id: timeline.transit_gantt, name_zh: "行运甘特时间轴", family: timeline, target_release: beta, capability_id: rendering.timelines_ephemeris, result_dependencies: [forecast.transits], renderer: timeline}
+  - {number: 75, view_id: timeline.transit_intensity, name_zh: "行运强度曲线", family: timeline, target_release: beta, capability_id: rendering.timelines_ephemeris, result_dependencies: [forecast.transits], renderer: canvas}
+  - {number: 76, view_id: ephemeris.graphical, name_zh: "图形星历", family: ephemeris, target_release: beta, capability_id: rendering.timelines_ephemeris, result_dependencies: [forecast.event_search], renderer: canvas}
+  - {number: 77, view_id: ephemeris.longitude_tracks, name_zh: "行星黄经轨迹图", family: ephemeris, target_release: beta, capability_id: rendering.timelines_ephemeris, result_dependencies: [astronomy.ephemeris_core], renderer: canvas}
+  - {number: 78, view_id: ephemeris.declination_tracks, name_zh: "赤纬轨迹图", family: ephemeris, target_release: beta, capability_id: rendering.timelines_ephemeris, result_dependencies: [astronomy.coordinate_systems], renderer: canvas}
+  - {number: 79, view_id: ephemeris.latitude_tracks, name_zh: "黄纬轨迹图", family: ephemeris, target_release: beta, capability_id: rendering.timelines_ephemeris, result_dependencies: [astronomy.coordinate_systems], renderer: canvas}
+  - {number: 80, view_id: calendar.retrogrades, name_zh: "逆行日历", family: calendar, target_release: beta, capability_id: rendering.timelines_ephemeris, result_dependencies: [forecast.event_search], renderer: calendar}
+  - {number: 81, view_id: calendar.ingresses, name_zh: "行星进入日历", family: calendar, target_release: beta, capability_id: rendering.timelines_ephemeris, result_dependencies: [forecast.event_search], renderer: calendar}
+  - {number: 82, view_id: calendar.aspects, name_zh: "相位日历", family: calendar, target_release: alpha, capability_id: rendering.timelines_ephemeris, result_dependencies: [forecast.event_search], renderer: calendar}
+  - {number: 83, view_id: calendar.lunations, name_zh: "新月满月日历", family: calendar, target_release: beta, capability_id: rendering.timelines_ephemeris, result_dependencies: [moon.phase.v1], renderer: calendar}
+  - {number: 84, view_id: calendar.eclipses, name_zh: "日月食日历", family: calendar, target_release: v1, capability_id: rendering.timelines_ephemeris, result_dependencies: [astronomy.eclipse_events], renderer: calendar}
+  - {number: 85, view_id: calendar.returns, name_zh: "返照日历", family: calendar, target_release: beta, capability_id: rendering.timelines_ephemeris, result_dependencies: [forecast.returns], renderer: calendar}
+  - {number: 86, view_id: calendar.planetary_cycles, name_zh: "行星周期日历", family: calendar, target_release: v1, capability_id: rendering.timelines_ephemeris, result_dependencies: [forecast.event_search], renderer: calendar}
+  - {number: 87, view_id: timeline.solar_arc, name_zh: "太阳弧时间线", family: timeline, target_release: beta, capability_id: rendering.timelines_ephemeris, result_dependencies: [forecast.solar_arc], renderer: timeline}
+  - {number: 88, view_id: timeline.secondary_progression, name_zh: "次限时间线", family: timeline, target_release: beta, capability_id: rendering.timelines_ephemeris, result_dependencies: [forecast.secondary_progression], renderer: timeline}
+  - {number: 89, view_id: timeline.progressed_moon, name_zh: "推运月亮周期图", family: timeline, target_release: beta, capability_id: rendering.timelines_ephemeris, result_dependencies: [forecast.secondary_progression], renderer: timeline}
+  - {number: 90, view_id: timeline.progressed_lunation, name_zh: "推运月相图", family: timeline, target_release: beta, capability_id: rendering.timelines_ephemeris, result_dependencies: [forecast.secondary_progression], renderer: timeline}
+  - {number: 91, view_id: timeline.primary_directions, name_zh: "主限时间线", family: timeline, target_release: pro, capability_id: rendering.timelines_ephemeris, result_dependencies: [forecast.primary_directions], renderer: timeline}
+  - {number: 92, view_id: timeline.profections, name_zh: "年度小限时间线", family: timeline, target_release: pro, capability_id: rendering.timelines_ephemeris, result_dependencies: [timing.annual_profections], renderer: timeline}
+  - {number: 93, view_id: timeline.firdaria, name_zh: "法达时间线", family: timeline, target_release: pro, capability_id: rendering.timelines_ephemeris, result_dependencies: [timing.firdaria], renderer: timeline}
+  - {number: 94, view_id: timeline.zodiacal_releasing, name_zh: "黄道释放L1—L4时间线", family: timeline, target_release: pro, capability_id: rendering.timelines_ephemeris, result_dependencies: [timing.zodiacal_releasing], renderer: timeline}
+  - {number: 95, view_id: timeline.distributions_through_bounds, name_zh: "通过界的分配时间线", family: timeline, target_release: pro, capability_id: rendering.timelines_ephemeris, result_dependencies: [direction.bounds.v1], renderer: timeline}
+  - {number: 96, view_id: timeline.multi_technique, name_zh: "多方法联合时间线", family: timeline, target_release: v1, capability_id: rendering.timelines_ephemeris, result_dependencies: [topic.structured_evidence], renderer: timeline}
+  - {number: 97, view_id: timeline.historical_analogs, name_zh: "历史相似周期对照图", family: timeline, target_release: v1, capability_id: rendering.timelines_ephemeris, result_dependencies: [forecast.event_search], renderer: timeline}
+
+  # 第六类：地图 98—110
+  - {number: 98, view_id: map.astrocartography_global, name_zh: "全球占星地图", family: map, target_release: pro, capability_id: rendering.maps, result_dependencies: [geography.astrocartography], renderer: map}
+  - {number: 99, view_id: map.asc_lines, name_zh: "ASC线地图", family: map, target_release: pro, capability_id: rendering.maps, result_dependencies: [geography.astrocartography], renderer: map}
+  - {number: 100, view_id: map.dsc_lines, name_zh: "DSC线地图", family: map, target_release: pro, capability_id: rendering.maps, result_dependencies: [geography.astrocartography], renderer: map}
+  - {number: 101, view_id: map.mc_lines, name_zh: "MC线地图", family: map, target_release: pro, capability_id: rendering.maps, result_dependencies: [geography.astrocartography], renderer: map}
+  - {number: 102, view_id: map.ic_lines, name_zh: "IC线地图", family: map, target_release: pro, capability_id: rendering.maps, result_dependencies: [geography.astrocartography], renderer: map}
+  - {number: 103, view_id: map.parans, name_zh: "Paran地图", family: map, target_release: pro, capability_id: rendering.maps, result_dependencies: [geography.parans], renderer: map}
+  - {number: 104, view_id: map.local_space, name_zh: "Local Space地图", family: map, target_release: pro, capability_id: rendering.maps, result_dependencies: [geography.local_space], renderer: map}
+  - {number: 105, view_id: map.line_intersections, name_zh: "行星线交叉点地图", family: map, target_release: pro, capability_id: rendering.maps, result_dependencies: [geography.astrocartography], renderer: map}
+  - {number: 106, view_id: map.city_comparison, name_zh: "城市比较地图", family: map, target_release: pro, capability_id: rendering.maps, result_dependencies: [geography.relocation], renderer: map}
+  - {number: 107, view_id: map.relocation_scores, name_zh: "迁移评分地图", family: map, target_release: v1, capability_id: rendering.maps, result_dependencies: [topic.structured_evidence, geography.relocation], renderer: map}
+  - {number: 108, view_id: map.solar_eclipse_path, name_zh: "日食路径图", family: map, target_release: v1, capability_id: rendering.maps, result_dependencies: [astronomy.eclipse_events], renderer: map}
+  - {number: 109, view_id: map.lunar_eclipse_visibility, name_zh: "月食可见区域图", family: map, target_release: v1, capability_id: rendering.maps, result_dependencies: [astronomy.eclipse_events], renderer: map}
+  - {number: 110, view_id: map.geographic_hotspots, name_zh: "地理热点聚合图", family: map, target_release: v1, capability_id: rendering.maps, result_dependencies: [geography.astrocartography, topic.structured_evidence], renderer: map}
+
+  # 第七类：高级技术图 111—128
+  - {number: 111, view_id: dial.90_degree, name_zh: "90°刻度盘", family: advanced, target_release: v1, capability_id: rendering.advanced_dials, result_dependencies: [natal.midpoints], renderer: svg}
+  - {number: 112, view_id: dial.45_degree, name_zh: "45°刻度盘", family: advanced, target_release: v1, capability_id: rendering.advanced_dials, result_dependencies: [natal.midpoints], renderer: svg}
+  - {number: 113, view_id: dial.22_5_degree, name_zh: "22.5°刻度盘", family: advanced, target_release: v1, capability_id: rendering.advanced_dials, result_dependencies: [uranian.dials.v1], renderer: svg}
+  - {number: 114, view_id: dial.360_degree, name_zh: "360°刻度盘", family: advanced, target_release: v1, capability_id: rendering.advanced_dials, result_dependencies: [natal.midpoints], renderer: svg}
+  - {number: 115, view_id: wheel.harmonic_advanced, name_zh: "谐波轮盘", family: advanced, target_release: beta, capability_id: rendering.advanced_dials, result_dependencies: [natal.harmonics], renderer: svg}
+  - {number: 116, view_id: dial.midpoint_pointer, name_zh: "中点指针盘", family: advanced, target_release: v1, capability_id: rendering.advanced_dials, result_dependencies: [natal.midpoints], renderer: svg}
+  - {number: 117, view_id: graph.dispositor_relationship, name_zh: "定位星关系图", family: advanced, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [natal.dignity_reception], renderer: graph}
+  - {number: 118, view_id: graph.house_ruler_relationship, name_zh: "宫主星关系图", family: advanced, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [natal.dignity_reception], renderer: graph}
+  - {number: 119, view_id: graph.aspect_network, name_zh: "相位网络图", family: advanced, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [astronomy.aspects], renderer: graph}
+  - {number: 120, view_id: graph.pattern_geometry, name_zh: "星盘格局几何图", family: advanced, target_release: beta, capability_id: rendering.tables_grids, result_dependencies: [natal.patterns_distributions], renderer: graph}
+  - {number: 121, view_id: chart.declination_3d, name_zh: "3D赤纬星盘", family: advanced, target_release: v1, capability_id: rendering.advanced_dials, result_dependencies: [astronomy.coordinate_systems], renderer: webgl}
+  - {number: 122, view_id: chart.declination_strip, name_zh: "赤纬条带图", family: advanced, target_release: beta, capability_id: rendering.advanced_dials, result_dependencies: [astronomy.coordinate_systems], renderer: canvas}
+  - {number: 123, view_id: chart.latitude_strip, name_zh: "黄纬条带图", family: advanced, target_release: beta, capability_id: rendering.advanced_dials, result_dependencies: [astronomy.coordinate_systems], renderer: canvas}
+  - {number: 124, view_id: chart.lunar_phase, name_zh: "月相示意图", family: advanced, target_release: alpha, capability_id: rendering.advanced_dials, result_dependencies: [moon.phase.v1], renderer: svg}
+  - {number: 125, view_id: chart.rise_set, name_zh: "天体升落图", family: advanced, target_release: beta, capability_id: rendering.advanced_dials, result_dependencies: [astronomy.coordinate_systems], renderer: canvas}
+  - {number: 126, view_id: chart.horizon_meridian, name_zh: "地平线和子午线图", family: advanced, target_release: beta, capability_id: rendering.advanced_dials, result_dependencies: [astronomy.coordinate_systems], renderer: canvas}
+  - {number: 127, view_id: chart.planet_visibility, name_zh: "行星可见性图", family: advanced, target_release: v1, capability_id: rendering.advanced_dials, result_dependencies: [astronomy.ephemeris_core], renderer: canvas}
+  - {number: 128, view_id: chart.fixed_star_paran, name_zh: "恒星Paran图", family: advanced, target_release: pro, capability_id: rendering.advanced_dials, result_dependencies: [geography.parans, astronomy.fixed_stars], renderer: canvas}
+
+  # 第八类：普通消费者产品图 129—146（V1后）
+  - {number: 129, view_id: consumer.topic_today, name_zh: "今日主题活跃度", family: consumer, target_release: post_v1_consumer, capability_id: topic.structured_evidence, result_dependencies: [topic.structured_evidence], renderer: graph}
+  - {number: 130, view_id: consumer.weekly_curve, name_zh: "本周运势曲线", family: consumer, target_release: post_v1_consumer, capability_id: topic.structured_evidence, result_dependencies: [topic.structured_evidence], renderer: graph}
+  - {number: 131, view_id: consumer.monthly_heatmap, name_zh: "月度主题热力图", family: consumer, target_release: post_v1_consumer, capability_id: topic.structured_evidence, result_dependencies: [topic.structured_evidence], renderer: graph}
+  - {number: 132, view_id: consumer.annual_heatmap, name_zh: "年度主题热力图", family: consumer, target_release: post_v1_consumer, capability_id: topic.structured_evidence, result_dependencies: [topic.structured_evidence], renderer: graph}
+  - {number: 133, view_id: consumer.career_activity, name_zh: "事业活动曲线", family: consumer, target_release: post_v1_consumer, capability_id: topic.structured_evidence, result_dependencies: [topic.structured_evidence], renderer: graph}
+  - {number: 134, view_id: consumer.relationship_activity, name_zh: "感情活动曲线", family: consumer, target_release: post_v1_consumer, capability_id: topic.structured_evidence, result_dependencies: [topic.structured_evidence], renderer: graph}
+  - {number: 135, view_id: consumer.finance_activity, name_zh: "财务活动曲线", family: consumer, target_release: post_v1_consumer, capability_id: topic.structured_evidence, result_dependencies: [topic.structured_evidence], renderer: graph}
+  - {number: 136, view_id: consumer.family_activity, name_zh: "家庭活动曲线", family: consumer, target_release: post_v1_consumer, capability_id: topic.structured_evidence, result_dependencies: [topic.structured_evidence], renderer: graph}
+  - {number: 137, view_id: consumer.emotion_activity, name_zh: "情绪活动曲线", family: consumer, target_release: post_v1_consumer, capability_id: topic.structured_evidence, result_dependencies: [topic.structured_evidence], renderer: graph}
+  - {number: 138, view_id: consumer.relationship_stability, name_zh: "关系稳定性趋势", family: consumer, target_release: post_v1_consumer, capability_id: topic.structured_evidence, result_dependencies: [relationship.dynamic_forecast, topic.structured_evidence], renderer: graph}
+  - {number: 139, view_id: consumer.project_windows, name_zh: "项目推进窗口", family: consumer, target_release: post_v1_consumer, capability_id: topic.structured_evidence, result_dependencies: [project.forecast.v1], renderer: timeline}
+  - {number: 140, view_id: consumer.risk_windows, name_zh: "风险时间窗", family: consumer, target_release: post_v1_consumer, capability_id: topic.structured_evidence, result_dependencies: [topic.structured_evidence], renderer: timeline}
+  - {number: 141, view_id: consumer.communication_windows, name_zh: "适合沟通时间", family: consumer, target_release: post_v1_consumer, capability_id: topic.structured_evidence, result_dependencies: [topic.structured_evidence], renderer: timeline}
+  - {number: 142, view_id: consumer.contract_windows, name_zh: "适合签约时间", family: consumer, target_release: post_v1_consumer, capability_id: topic.structured_evidence, result_dependencies: [special.electional], renderer: timeline}
+  - {number: 143, view_id: consumer.events_transits, name_zh: "用户事件与行运对照图", family: consumer, target_release: post_v1_consumer, capability_id: topic.structured_evidence, result_dependencies: [forecast.transits, future.user_events], renderer: timeline}
+  - {number: 144, view_id: consumer.wellbeing_astrology, name_zh: "情绪、睡眠和星象对照图", family: consumer, target_release: post_v1_consumer, capability_id: topic.structured_evidence, result_dependencies: [future.user_tracking, forecast.transits], renderer: graph}
+  - {number: 145, view_id: consumer.forecast_feedback, name_zh: "历史预测反馈图", family: consumer, target_release: post_v1_consumer, capability_id: topic.structured_evidence, result_dependencies: [future.feedback_system], renderer: graph}
+  - {number: 146, view_id: consumer.sensitive_configurations, name_zh: "用户个人敏感配置排名", family: consumer, target_release: post_v1_consumer, capability_id: topic.structured_evidence, result_dependencies: [future.feedback_system], renderer: table}

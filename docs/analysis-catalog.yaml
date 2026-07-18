@@ -1,0 +1,394 @@
+schema_version: 1.0.0
+catalog_id: interstellar.analysis_catalog.v1
+title_zh: Interstellar 分析入口、专题模型、目的与报告目录
+authoritative_for:
+  - entry_point_id
+  - topic_model_id
+  - analysis_intent_id
+  - report_profile_id
+  - report_layer
+  - report_density
+
+product_rules:
+  canonical_router: unified_analysis_center
+  default_subject: clearly_labeled_virtual_sample
+  default_loaded_data: cached_modern_natal_summary_only
+  compute_everything_on_open: false
+  unknown_birth_time_default: never_assume_midnight
+  proprietary_commercial_models_executable_without_license: false
+  every_v1_capability_must_be_reachable: true
+  reachability_paths: [direct_entry, dependency, analysis_recipe]
+
+entry_points:
+  - id: entry.technique
+    name_zh: 按计算技法排盘
+    behavior: explicit_technique_selection
+    default_interpretation_model: none
+    resolver_adds: [required_dependencies, standard_calculation_bundle, standard_render_bundle]
+  - id: entry.topic_model
+    name_zh: 按专题模型分析
+    behavior: select_topic_model_card
+    model_policy: locked_core_limited_overrides_optional_extensions
+    core_change_behavior: clone_to_custom_model_spec
+  - id: entry.object_context
+    name_zh: 从对象或已有星盘进入
+    behavior: subject_roles_prefilled_then_show_object_action_matrix
+  - id: entry.personal_dashboard
+    name_zh: 从个人仪表盘进入
+    behavior: primary_person_and_current_time_prefilled
+    startup_compute: cached_natal_only
+  - id: entry.intent
+    name_zh: 按分析目的进入
+    behavior: select_analysis_intent_then_resolve_models_techniques_and_outputs
+  - id: entry.context_shortcut
+    name_zh: 从时间、关系、项目或地点快捷进入
+    behavior: context_and_subject_roles_prefilled
+
+unified_analysis_center:
+  tabs:
+    - recent
+    - techniques
+    - topic_models
+    - analysis_intents
+    - favorites_and_presets
+    - all_capabilities
+  search_targets: [techniques, topic_models, analysis_intents, subjects, render_views]
+  common_pipeline:
+    - create_analysis_draft
+    - resolve_subject_roles_and_required_inputs
+    - resolve_recipe
+    - apply_allowed_parameter_overrides
+    - select_optional_extensions
+    - show_preflight_plan
+    - run_selected_calculations
+    - create_immutable_calculation_snapshot
+    - open_result_workspace
+
+recipe_resolution_policy:
+  required_dependencies: backend_selected_and_locked
+  recommended_defaults: versioned_preset_selected_user_may_change
+  optional_extensions: user_selected
+  incompatible_or_unavailable: backend_blocks_with_reason
+  output_states: [already_computed, renderable_from_snapshot, additional_calculation_required, unavailable]
+  long_task_behavior: job_with_progress_cancel_timeout_and_retry
+  render_on_demand: true
+  preflight_required: true
+  preflight_fields:
+    - normalized_subject_roles
+    - techniques_and_base_models
+    - rule_pack_versions
+    - required_calculations
+    - optional_calculations
+    - render_outputs
+    - report_outputs
+    - maturity_and_warnings
+    - estimated_duration_and_resource_class
+
+object_action_matrix:
+  person:
+    - natal_analysis
+    - short_transit
+    - annual_cycle
+    - long_cycle
+    - topic_analysis
+    - relationship_analysis
+    - geography_analysis
+    - birth_time_rectification_future
+  relationship:
+    - synastry
+    - composite
+    - davison
+    - relationship_topic
+    - dynamic_relationship_forecast
+  project_or_event:
+    - base_chart
+    - current_transits
+    - development_cycle
+    - event_search
+    - electional
+    - compare_with_person_or_organization
+  question:
+    - horary_judgement
+    - derived_house_mapping
+    - rule_pack_selection
+  organization:
+    - organization_chart
+    - development_cycle
+    - related_projects
+    - related_people
+    - mundane_context
+  country_or_city:
+    - mundane_chart
+    - mundane_cycle
+    - ingress_chart
+    - eclipses_and_lunations
+    - outer_planet_cycles
+  location:
+    - relocation_chart
+    - astrocartography
+    - local_space
+    - paran
+    - city_comparison
+  existing_snapshot:
+    - switch_render_view
+    - inspect_raw_data
+    - add_forecast_layer
+    - add_topic_model
+    - compare_with_subject
+    - export
+
+personal_dashboard:
+  sections:
+    - active_person_and_time_quality
+    - cached_natal_summary
+    - current_triggers_on_demand
+    - range_shortcuts_7_30_90_days_1_3_years
+    - timing_models
+    - topic_model_shortcuts
+    - relationship_dynamics
+    - geography_shortcuts
+    - recent_activity_and_jobs
+    - data_and_maturity_warnings
+
+base_analysis_models:
+  source: docs/capabilities.yaml#analysis_models
+  ids:
+    - natal.modern.v1
+    - natal.classical.v1
+    - natal.hellenistic.v1
+    - natal.integrated.v1
+    - forecast.short_transit.v1
+    - forecast.annual_integrated.v1
+    - forecast.long_cycle.v1
+    - relationship.comparison.v1
+    - relationship.entity.v1
+    - special.project_event.v1
+    - special.question_action.v1
+    - geography.location.v1
+
+topic_model_policy:
+  core_recipe_immutable: true
+  allowed_overrides_declared_per_version: true
+  optional_extensions_compatibility_checked: true
+  editing_core_requires_custom_model_spec: true
+  formal_report_requires_report_rule_pack: true
+  maturity_cannot_exceed_required_dependencies: true
+
+topic_model_contract:
+  required_fields: [id, name_zh, group, phase, base_models, input_profile, output_profile, report_target]
+  default_allowed_overrides: [house_system, zodiac, orb_profile_id, visible_points, locale]
+  rule_pack_id_convention: "official.<topic_model_id>"
+  report_rule_pack_id_convention: "report.<topic_model_id>"
+  default_report_profile: report.topic_model.v1
+
+input_profiles:
+  person_natal: {roles: {primary: person}, minimum_time_precision: date, time_range: none}
+  person_exact_natal: {roles: {primary: person}, minimum_time_precision: minute, time_range: none}
+  person_short_timing: {roles: {primary: person}, minimum_time_precision: date, time_range: required_max_1_year}
+  person_annual_timing: {roles: {primary: person}, minimum_time_precision: minute, time_range: target_year}
+  person_long_timing: {roles: {primary: person}, minimum_time_precision: minute, time_range: required_max_10_years}
+  two_people: {roles: {primary: person, secondary: person}, minimum_time_precision: date, time_range: optional}
+  two_people_exact: {roles: {primary: person, secondary: person}, minimum_time_precision: minute, time_range: optional}
+  two_people_timed: {roles: {primary: person, secondary: person}, minimum_time_precision: minute, time_range: required_max_10_years}
+  parent_child: {roles: {parent: person, child: person}, minimum_time_precision: date, time_range: optional}
+  person_project_optional: {roles: {primary: person, project: optional, organization: optional}, minimum_time_precision: minute, time_range: optional}
+  project_or_event: {roles: {primary: [project, event], person: optional, organization: optional}, minimum_time_precision: minute, time_range: optional}
+  question_exact: {roles: {primary: question}, minimum_time_precision: minute, location: required, time_range: none}
+  electional_constraints: {roles: {primary: [person, event, project, question]}, minimum_time_precision: minute, location: required, time_range: required}
+  mundane_subject: {roles: {primary: [organization, country, event, project]}, minimum_time_precision: minute, time_range: optional}
+  person_locations: {roles: {primary: person, locations: location_list}, minimum_time_precision: minute, time_range: optional}
+
+output_profiles:
+  natal_standard: {primary_views: [wheel.natal, table.planet_positions, grid.aspects], secondary_views: [table.elements, table.modalities, table.chart_patterns]}
+  natal_classical: {primary_views: [wheel.natal, table.essential_dignities, table.house_rulers], secondary_views: [table.arabic_parts, graph.dispositor_chain, table.sect_condition]}
+  natal_integrated: {primary_views: [wheel.natal, table.dominant_planets, graph.aspect_network], secondary_views: [grid.aspects, graph.dispositor_chain, table.chart_patterns]}
+  topic_natal: {primary_views: [wheel.natal, graph.house_ruler_relationship, table.dominant_planets], secondary_views: [grid.aspects, table.active_triggers]}
+  short_timing: {primary_views: [wheel.bi_natal_transit, table.active_triggers, calendar.aspects], secondary_views: [timeline.transit_gantt, table.future_events]}
+  annual_timing: {primary_views: [wheel.tri_natal_return_transit, timeline.multi_technique, calendar.returns], secondary_views: [timeline.profections, table.future_events, calendar.eclipses]}
+  long_timing: {primary_views: [timeline.multi_technique, timeline.secondary_progression, timeline.solar_arc], secondary_views: [timeline.primary_directions, timeline.firdaria, timeline.zodiacal_releasing]}
+  relationship_compare: {primary_views: [relationship.synastry_wheel, grid.cross_aspects, relationship.bidirectional_house_overlay], secondary_views: [relationship.aspect_network, table.house_overlays]}
+  relationship_entity: {primary_views: [relationship.composite_wheel, relationship.davison_wheel], secondary_views: [relationship.cycle_comparison]}
+  relationship_dynamic: {primary_views: [relationship.cycle_comparison, relationship.transit_to_composite], secondary_views: [relationship.progressed_synastry, relationship.transit_to_davison]}
+  project_event: {primary_views: [wheel.project_start, wheel.bi_project_founder, timeline.multi_technique], secondary_views: [table.active_triggers, table.future_events]}
+  horary: {primary_views: [wheel.horary, table.essential_dignities, table.house_rulers], secondary_views: [grid.aspects, table.active_triggers]}
+  electional: {primary_views: [wheel.electional, table.future_events], secondary_views: [calendar.aspects, calendar.lunations]}
+  mundane: {primary_views: [wheel.organization, wheel.country, calendar.eclipses], secondary_views: [calendar.lunations, timeline.multi_technique]}
+  geography: {primary_views: [map.astrocartography_global, wheel.relocation, map.city_comparison], secondary_views: [map.local_space, map.parans, map.line_intersections]}
+
+topic_models:
+  - {id: personality.modern.v1, name_zh: 现代本命结构, group: personality, phase: alpha, base_models: [natal.modern.v1], input_profile: person_natal, output_profile: natal_standard, report_target: stable}
+  - {id: personality.psychodynamic.v1, name_zh: 心理动力与内在冲突, group: personality, phase: pro, base_models: [natal.integrated.v1], input_profile: person_exact_natal, output_profile: natal_integrated, report_target: beta}
+  - {id: personality.shadow_archetype.v1, name_zh: 阴影与原型倾向, group: personality, phase: v1, base_models: [natal.integrated.v1], input_profile: person_exact_natal, output_profile: natal_integrated, report_target: beta}
+  - {id: personality.dominant_signature.v1, name_zh: 主导行星与星盘签名, group: personality, phase: beta, base_models: [natal.modern.v1, natal.classical.v1], input_profile: person_exact_natal, output_profile: natal_integrated, report_target: beta}
+  - {id: personality.classical.v1, name_zh: 古典本命判断, group: personality, phase: beta, base_models: [natal.classical.v1], input_profile: person_exact_natal, output_profile: natal_classical, report_target: beta}
+  - {id: personality.hellenistic.v1, name_zh: 希腊化本命结构, group: personality, phase: pro, base_models: [natal.hellenistic.v1], input_profile: person_exact_natal, output_profile: natal_classical, report_target: beta}
+  - {id: personality.integrated.v1, name_zh: 多流派本命综合, group: personality, phase: pro, base_models: [natal.integrated.v1], input_profile: person_exact_natal, output_profile: natal_integrated, report_target: beta}
+  - {id: topic.career_vocation.v1, name_zh: 职业、天赋与使命, group: life_topic, phase: beta, base_models: [natal.integrated.v1], input_profile: person_exact_natal, output_profile: topic_natal, report_target: beta}
+  - {id: topic.money_resources.v1, name_zh: 财富、资源与成功, group: life_topic, phase: beta, base_models: [natal.integrated.v1], input_profile: person_exact_natal, output_profile: topic_natal, report_target: beta}
+  - {id: topic.fixed_star_story.v1, name_zh: 恒星与人生主题, group: life_topic, phase: v1, base_models: [natal.integrated.v1], input_profile: person_exact_natal, output_profile: natal_integrated, report_target: experimental}
+  - {id: topic.parent_child.v1, name_zh: 亲子互动与成长, group: life_topic, phase: pro, base_models: [natal.integrated.v1, relationship.comparison.v1], input_profile: parent_child, output_profile: relationship_compare, report_target: beta}
+  - {id: topic.life_stage_midlife.v1, name_zh: 人生阶段与中年周期, group: life_topic, phase: v1, base_models: [natal.integrated.v1, forecast.long_cycle.v1], input_profile: person_long_timing, output_profile: long_timing, report_target: beta}
+  - {id: timing.short_term.v1, name_zh: 短期行运周期, group: timing, phase: alpha, base_models: [forecast.short_transit.v1], input_profile: person_short_timing, output_profile: short_timing, report_target: stable}
+  - {id: timing.annual_integrated.v1, name_zh: 年度综合周期, group: timing, phase: pro, base_models: [forecast.annual_integrated.v1], input_profile: person_annual_timing, output_profile: annual_timing, report_target: beta}
+  - {id: timing.long_cycle.v1, name_zh: 长期人生周期, group: timing, phase: v1, base_models: [forecast.long_cycle.v1], input_profile: person_long_timing, output_profile: long_timing, report_target: beta}
+  - {id: timing.personal_eclipse.v1, name_zh: 个人食相周期, group: timing, phase: pro, base_models: [forecast.annual_integrated.v1, forecast.long_cycle.v1], input_profile: person_long_timing, output_profile: annual_timing, report_target: beta}
+  - {id: relationship.comparison.v1, name_zh: 关系比较与双向影响, group: relationship, phase: alpha, base_models: [relationship.comparison.v1], input_profile: two_people, output_profile: relationship_compare, report_target: stable}
+  - {id: relationship.entity.v1, name_zh: 关系实体与共同方向, group: relationship, phase: beta, base_models: [relationship.entity.v1], input_profile: two_people_exact, output_profile: relationship_entity, report_target: beta}
+  - {id: relationship.dynamic.v1, name_zh: 动态关系周期, group: relationship, phase: v1, base_models: [relationship.comparison.v1, relationship.entity.v1, forecast.long_cycle.v1], input_profile: two_people_exact, output_profile: relationship_dynamic, report_target: beta}
+  - {id: special.project_event.v1, name_zh: 项目与事件周期, group: event_decision, phase: v1, base_models: [special.project_event.v1], input_profile: project_or_event, output_profile: project_event, report_target: beta}
+  - {id: special.horary.v1, name_zh: 卜卦判定, group: event_decision, phase: pro, base_models: [special.question_action.v1], input_profile: question_exact, output_profile: horary, report_target: beta}
+  - {id: special.electional.v1, name_zh: 择时约束优化, group: event_decision, phase: pro, base_models: [special.question_action.v1], input_profile: electional_constraints, output_profile: electional, report_target: beta}
+  - {id: special.mundane.v1, name_zh: 世运与组织周期, group: event_decision, phase: v1, base_models: [special.project_event.v1], input_profile: mundane_subject, output_profile: mundane, report_target: experimental}
+  - {id: geography.location.v1, name_zh: 地理、迁移与地点比较, group: geography, phase: pro, base_models: [geography.location.v1], input_profile: person_locations, output_profile: geography, report_target: beta}
+
+analysis_intent_contract:
+  required_fields: [id, name_zh, topic_models, input_profile, report_profile]
+  resolver_mode: union_dependencies_deduplicate_then_validate
+  default_report_profile: report.intent_composite.v1
+  model_order_semantics: primary_then_supporting
+  custom_changes_behavior: save_as_analysis_preset_not_mutate_catalog
+
+analysis_intents:
+  self_and_life:
+    - {id: intent.natal_overview, name_zh: 本命全貌, topic_models: [personality.integrated.v1], input_profile: person_exact_natal, report_profile: report.intent_composite.v1}
+    - {id: intent.core_psychodynamics, name_zh: 核心人格动力, topic_models: [personality.psychodynamic.v1], input_profile: person_exact_natal, report_profile: report.intent_composite.v1}
+    - {id: intent.talents_signature, name_zh: 优势、天赋与主导特征, topic_models: [personality.dominant_signature.v1], input_profile: person_exact_natal, report_profile: report.intent_composite.v1}
+    - {id: intent.shadow_growth, name_zh: 内在矛盾、阴影与成长课题, topic_models: [personality.shadow_archetype.v1], input_profile: person_exact_natal, report_profile: report.intent_composite.v1}
+    - {id: intent.life_stage, name_zh: 人生阶段与中年周期, topic_models: [topic.life_stage_midlife.v1], input_profile: person_long_timing, report_profile: report.intent_composite.v1}
+  career_and_money:
+    - {id: intent.career_vocation, name_zh: 职业方向与使命, topic_models: [topic.career_vocation.v1], input_profile: person_exact_natal, report_profile: report.intent_composite.v1}
+    - {id: intent.work_style, name_zh: 工作方式与能力结构, topic_models: [topic.career_vocation.v1], input_profile: person_exact_natal, report_profile: report.intent_composite.v1}
+    - {id: intent.current_career_cycle, name_zh: 当前事业周期, topic_models: [topic.career_vocation.v1, timing.short_term.v1], input_profile: person_short_timing, report_profile: report.intent_composite.v1}
+    - {id: intent.career_transition, name_zh: 职位变化与职业转型窗口, topic_models: [topic.career_vocation.v1, timing.annual_integrated.v1], input_profile: person_annual_timing, report_profile: report.intent_composite.v1}
+    - {id: intent.money_resources, name_zh: 财富与资源模式, topic_models: [topic.money_resources.v1], input_profile: person_exact_natal, report_profile: report.intent_composite.v1}
+    - {id: intent.entrepreneurship_project_fit, name_zh: 创业倾向与项目适配, topic_models: [topic.career_vocation.v1, special.project_event.v1], input_profile: person_project_optional, report_profile: report.intent_composite.v1}
+  love_and_relationship:
+    - {id: intent.personal_relationship_pattern, name_zh: 个人关系模式, topic_models: [personality.psychodynamic.v1], input_profile: person_exact_natal, report_profile: report.intent_composite.v1}
+    - {id: intent.attraction_compatibility, name_zh: 两人吸引与兼容, topic_models: [relationship.comparison.v1], input_profile: two_people, report_profile: report.intent_composite.v1}
+    - {id: intent.relationship_entity, name_zh: 关系作为独立实体, topic_models: [relationship.entity.v1], input_profile: two_people_exact, report_profile: report.intent_composite.v1}
+    - {id: intent.relationship_timing, name_zh: 关系当前与未来周期, topic_models: [relationship.dynamic.v1], input_profile: two_people_timed, report_profile: report.intent_composite.v1}
+    - {id: intent.commitment_intimacy_conflict, name_zh: 承诺、亲密与冲突结构, topic_models: [relationship.comparison.v1, relationship.entity.v1], input_profile: two_people_exact, report_profile: report.intent_composite.v1}
+    - {id: intent.parent_child_family, name_zh: 亲子与家庭互动, topic_models: [topic.parent_child.v1], input_profile: parent_child, report_profile: report.intent_composite.v1}
+  timing_and_cycles:
+    - {id: intent.current_cycle, name_zh: 当前处于什么周期, topic_models: [timing.short_term.v1, timing.long_cycle.v1], input_profile: person_long_timing, report_profile: report.intent_composite.v1}
+    - {id: intent.next_7_30_90_days, name_zh: 未来7、30或90天, topic_models: [timing.short_term.v1], input_profile: person_short_timing, report_profile: report.intent_composite.v1}
+    - {id: intent.annual_cycle, name_zh: 年度综合周期, topic_models: [timing.annual_integrated.v1], input_profile: person_annual_timing, report_profile: report.intent_composite.v1}
+    - {id: intent.long_cycle_3_5_10_years, name_zh: 未来3、5或10年长期周期, topic_models: [timing.long_cycle.v1], input_profile: person_long_timing, report_profile: report.intent_composite.v1}
+    - {id: intent.eclipse_return_events, name_zh: 个人食相、返照与重要天象, topic_models: [timing.personal_eclipse.v1, timing.annual_integrated.v1], input_profile: person_long_timing, report_profile: report.intent_composite.v1}
+  project_and_decision:
+    - {id: intent.project_or_event_chart, name_zh: 项目或事件本身, topic_models: [special.project_event.v1], input_profile: project_or_event, report_profile: report.intent_composite.v1}
+    - {id: intent.project_cycle_risk, name_zh: 项目发展周期与风险窗口, topic_models: [special.project_event.v1, timing.annual_integrated.v1], input_profile: project_or_event, report_profile: report.intent_composite.v1}
+    - {id: intent.horary_question, name_zh: 具体问题的卜卦判断, topic_models: [special.horary.v1], input_profile: question_exact, report_profile: report.intent_composite.v1}
+    - {id: intent.electional_time, name_zh: 为行动选择时间, topic_models: [special.electional.v1], input_profile: electional_constraints, report_profile: report.intent_composite.v1}
+    - {id: intent.compare_candidate_dates, name_zh: 比较多个候选日期, topic_models: [special.electional.v1], input_profile: electional_constraints, report_profile: report.intent_composite.v1}
+  geography:
+    - {id: intent.relocation_effect, name_zh: 迁移到某地的影响, topic_models: [geography.location.v1], input_profile: person_locations, report_profile: report.intent_composite.v1}
+    - {id: intent.compare_cities, name_zh: 比较多个城市, topic_models: [geography.location.v1], input_profile: person_locations, report_profile: report.intent_composite.v1}
+    - {id: intent.astrocartography_lines, name_zh: 查看全球占星地理线, topic_models: [geography.location.v1], input_profile: person_locations, report_profile: report.intent_composite.v1}
+    - {id: intent.local_space_paran, name_zh: Local Space与Paran分析, topic_models: [geography.location.v1], input_profile: person_locations, report_profile: report.intent_composite.v1}
+  organization_and_mundane:
+    - {id: intent.organization_analysis, name_zh: 公司或组织分析, topic_models: [special.mundane.v1, special.project_event.v1], input_profile: mundane_subject, report_profile: report.intent_composite.v1}
+    - {id: intent.country_city_cycle, name_zh: 国家或城市周期, topic_models: [special.mundane.v1], input_profile: mundane_subject, report_profile: report.intent_composite.v1}
+    - {id: intent.ingress_lunation_eclipse, name_zh: 四季进入盘、朔望与食相, topic_models: [special.mundane.v1], input_profile: mundane_subject, report_profile: report.intent_composite.v1}
+    - {id: intent.outer_planet_mundane, name_zh: 重大行星周期与世运事件, topic_models: [special.mundane.v1], input_profile: mundane_subject, report_profile: report.intent_composite.v1}
+
+report_generation:
+  ai_required: false
+  source_of_truth: structured_report_document_json
+  pipeline:
+    - calculation_snapshot
+    - evidence_selector
+    - theme_mapper
+    - finding_rule
+    - aggregation_rule
+    - conflict_rule
+    - priority_rule
+    - conclusion_template
+    - section_builder
+    - render_html_pdf_json
+  rules:
+    finding_without_rule_pack_cannot_enter_interpretive_body: true
+    missing_localized_template_falls_back_to_structured_finding: true
+    calculations_without_interpretation_rules_remain_in_technical_appendix: true
+    formal_report_requires_professional_review: true
+    no_objective_event_probability: true
+
+report_layers:
+  - {level: L0, type: RawFact, purpose: 原始计算数据}
+  - {level: L1, type: Evidence, purpose: 原子证据}
+  - {level: L2, type: Finding, purpose: 最小结构化解释单位}
+  - {level: L3, type: Conclusion, purpose: 子主题结论}
+  - {level: L4, type: ReportSection, purpose: 报告章节}
+  - {level: L5, type: ReportDocument, purpose: 完整报告}
+
+report_profile_contract:
+  required_fields: [id, name_zh, source, interpretation, default_sections, default_density, missing_dependency_behavior]
+  allowed_densities: [summary, standard, full_technical]
+  missing_dependency_behavior: preflight_never_auto_compute
+  every_conclusion_must_link_to_evidence: true
+  every_evidence_must_link_to_snapshot_path: true
+
+report_profiles:
+  - id: report.calculation_record.v1
+    name_zh: 计算记录报告
+    source: calculation_snapshot
+    interpretation: none
+    default_sections: [subject_and_input, parameters, positions_and_derived_results, warnings, provenance, technical_appendix]
+    default_density: full_technical
+    missing_dependency_behavior: show_missing_section_and_recipe_extension
+  - id: report.technique_analysis.v1
+    name_zh: 技法分析报告
+    source: calculation_technique
+    interpretation: technique_rules
+    default_sections: [executive_summary, technique_scope, key_configurations, timing_windows, evidence, limits, technical_appendix]
+    default_density: standard
+    missing_dependency_behavior: show_missing_section_and_recipe_extension
+  - id: report.topic_model.v1
+    name_zh: 专题模型报告
+    source: topic_model
+    interpretation: report_rule_pack
+    default_sections: [executive_summary, baseline, strengths, pressures, contradictions, activations, evidence, limits, technical_appendix]
+    default_density: standard
+    missing_dependency_behavior: show_missing_section_and_recipe_extension
+  - id: report.intent_composite.v1
+    name_zh: 目的综合报告
+    source: analysis_intent
+    interpretation: multi_model_report_rules
+    default_sections: [question_scope, executive_summary, cross_model_findings, timing_windows, counter_evidence, confidence, limits, technical_appendix]
+    default_density: standard
+    missing_dependency_behavior: block_formal_report_allow_partial_preview
+  - id: report.subject_dossier.v1
+    name_zh: 对象档案报告
+    source: selected_subject_modules
+    interpretation: multiple_report_rule_packs
+    default_sections: [subject_profile, selected_natal_modules, selected_timing_modules, selected_relationship_or_project_modules, evidence_index, provenance]
+    default_density: standard
+    missing_dependency_behavior: keep_unselected_modules_explicitly_omitted
+  - id: report.research_comparison.v1
+    name_zh: 研究比较报告
+    source: multiple_snapshots
+    interpretation: comparison_rules
+    default_sections: [research_question, sample_definition, method_and_versions, commonalities, differences, descriptive_statistics, exceptions, reproducibility_appendix]
+    default_density: full_technical
+    missing_dependency_behavior: block_until_comparable_versions_and_fields_exist
+
+report_densities:
+  - id: summary
+    name_zh: 摘要视图
+    content_budget: 3_to_5_top_conclusions_3_to_8_dates_max_3_charts
+  - id: standard
+    name_zh: 标准报告
+    default: true
+    content_budget: all_sections_1_to_3_core_conclusions_per_subtopic_with_primary_evidence
+  - id: full_technical
+    name_zh: 完整技术版
+    content_budget: all_accepted_findings_evidence_parameters_algorithm_cards_raw_tables_and_warnings
+
+proprietary_models_not_executable_without_license:
+  - Liz_Greene_Seven_Deadly_Sins
+  - Liz_Greene_Psychological_Horoscope
+  - Liz_Greene_Career_and_Vocation
+  - Astro_Color_System
+  - Bernadette_Brady_Personal_Eclipse_exact_texts_and_rules
+  - AstroIntelligence
+  - Astro_com_commercial_relationship_children_and_yearly_report_texts

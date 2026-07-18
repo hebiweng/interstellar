@@ -21,11 +21,13 @@ test("server-renders the Interstellar professional workspace", async () => {
   const html = await response.text();
   assert.match(html, /<title>Interstellar · 专业占星研究工作台<\/title>/i);
   assert.match(html, /INTERSTELLAR/);
-  assert.match(html, /RESEARCH WORKSPACE/);
-  assert.match(html, /研究对象/);
-  assert.match(html, /本命盘轮盘/);
-  assert.match(html, /结构与证据/);
-  assert.match(html, /数据集已锁定/);
+  assert.match(html, /PROFESSIONAL ASTROLOGY/);
+  assert.match(html, /阿斯特拉/);
+  assert.match(html, /虚拟示例/);
+  assert.match(html, /开始新的分析/);
+  assert.match(html, /六种入口/);
+  assert.match(html, /图表中心 · 146/);
+  assert.match(html, /本页未启动任何新计算/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
 

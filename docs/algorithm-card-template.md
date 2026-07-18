@@ -1,6 +1,6 @@
 # Interstellar 算法卡模板
 
-算法卡是复杂计算能力进入开发的前置条件，也是`Stable`发布门禁的一部分。每项技法、流派变体、时间转换或关键渲染算法各自维护一张卡，存放于仓库`algorithm-cards/<category>/<capability-id>.md`。
+算法卡是复杂计算能力进入开发的前置条件，也是`Stable`发布门禁的一部分。每项技法、流派变体、时间转换、关键渲染算法或分析模型组合各自维护一张卡，存放于仓库`algorithm-cards/<category>/<capability-or-model-id>.md`。
 
 算法卡必须让另一名开发者在不自行选择流派、公式、默认参数和误差口径的情况下完成实现。未知内容不得留空或用“常见做法”代替，应标记为`BLOCKED`并停止进入正式开发。
 
@@ -10,9 +10,16 @@
 
 ```markdown
 ---
-schema_version: 1.0.0
+schema_version: 1.3.0
 card_id: ALG-<CATEGORY>-<NUMBER>
-capability_id: <capabilities.yaml中的ID>
+card_kind: technique # technique | analysis_model | topic_model | analysis_recipe | report_rule_pack | time_location | rendering
+capability_id: <capabilities.yaml中的能力ID；analysis_model时可为null>
+analysis_model_id: <capabilities.yaml中的analysis_models.id；非模型卡时为null>
+topic_model_id: <analysis-catalog.yaml中的topic_models.id；非专题模型卡时为null>
+report_profile_ids: [] # analysis-catalog.yaml中的报告类型
+calculation_ids: [] # calculation-catalog.yaml中的稳定ID
+result_contracts: [] # 例如ChartResult、AspectResult、ForecastResult
+view_ids: [] # render-catalog.yaml中直接消费本算法结果的视图
 title_zh: <中文名称>
 title_en: <English name>
 card_version: 0.1.0
@@ -133,6 +140,46 @@ function calculate(input, settings) -> Result:
 
 不同变体的结果必须并列存在或由参数选择，禁止静默混用。
 
+### 7.1 分析模型组合卡附加要求
+
+当`card_kind=analysis_model`时，本节必须额外填写：
+
+| 字段 | 要求 |
+|---|---|
+| 对象角色 | 每个角色允许的SubjectKind、数量和是否必需 |
+| 兼容主题 | AnalysisTopic白名单，不得用“全部”代替 |
+| 输入门槛 | 时间精度、时间范围、地点和第二对象要求 |
+| 组件DAG | 每个`capability_id`、执行顺序、依赖和必需/可选标记 |
+| 默认参数 | Rule Pack、宫位制、容许度、返照地点等全部默认值 |
+| 覆盖范围 | 用户允许覆盖的参数及覆盖后的兼容性影响 |
+| 降级计划 | 每个输入不足或可选组件失败场景的明确行为 |
+| 证据聚合 | 支持、压力、反证和确定度分别如何聚合；禁止不透明抵消 |
+| 输出Manifest | 主要视图、次要视图、表格、地图、时间线和导出格式 |
+| 版本策略 | 哪些变化属于Patch、Minor和Major |
+
+模型卡不得重新描述底层公式，而应引用各组件算法卡；模型卡的金标准至少验证一次完整展开、一次降级、一次阻断、一次模型版本升级后旧快照复现。模型卡未批准时，模型最多标记为`Experimental`。
+
+### 7.2 TopicModel与ReportRulePack附加要求
+
+当`card_kind=topic_model`或`report_rule_pack`时，必须额外填写：
+
+| 字段 | 要求 |
+|---|---|
+| 核心配方 | 引用的AnalysisModel、技法、顺序和锁定项 |
+| 允许覆盖 | 用户可修改的有限参数；核心修改必须另存CustomModelSpec |
+| EvidenceSelector | 从哪些Canonical结果路径选择原子证据 |
+| ThemeMapper | 证据到主题/子主题的显式映射 |
+| FindingRule | 形成Finding的充分条件、必要条件和排除条件 |
+| AggregationRule | 重复证据去重、多技法印证和时间窗合并 |
+| ConflictRule | 支持、压力、反证和矛盾如何保留 |
+| PriorityRule | 收录阈值、排序、并列和截断规则 |
+| SectionDefinition | 报告章节、适用对象、空章节和推荐图表 |
+| Templates | `statement_key`、中英文版本、变量、语气和来源许可 |
+| ReportProfile | 可生成的六类报告及不支持原因 |
+| 专业复核 | 规则、模板、样本和成熟度的签署状态 |
+
+报告规则卡至少包含：一个正常样本、一个反证样本、一个证据冲突样本、一个无模板回退样本、一个未知出生时间降级样本，以及摘要/标准/完整技术版共享同一Finding集合的测试。
+
 ## 8. 边界、异常和降级
 
 | 场景 | 预期行为 | 错误/警告代码 | 是否产生部分结果 |
@@ -202,6 +249,9 @@ function calculate(input, settings) -> Result:
 
 ## 13. API、Schema和存储影响
 
+- 对应`calculation_id`：
+- 实现的Canonical Result Contract：
+- 直接消费结果的`view_id`：
 - 新增或复用的Schema：
 - 新增枚举：
 - `/api/v1`影响：
@@ -267,7 +317,12 @@ function calculate(input, settings) -> Result:
 
 ## 20. 完成检查
 
-- [ ] 能力ID存在于`docs/capabilities.yaml`；
+- [ ] 能力卡的能力ID存在于`docs/capabilities.yaml`；
+- [ ] `calculation_ids`存在于`docs/calculation-catalog.yaml`，且`docs/calculation-result-catalog.md`已覆盖输入、单位和输出字段；
+- [ ] `view_ids`存在于`docs/render-catalog.yaml`且结果依赖与本卡输出一致；
+- [ ] 模型卡的AnalysisModel ID、版本、组件和输出Manifest存在于`docs/capabilities.yaml`；
+- [ ] TopicModel、AnalysisIntent和ReportProfile ID存在于`docs/analysis-catalog.yaml`；
+- [ ] 报告规则明确EvidenceSelector、Finding、冲突、优先级、章节和双语模板；
 - [ ] 公式、单位、坐标和时间尺度无歧义；
 - [ ] 流派变体和默认参数已锁定；
 - [ ] 输入、输出、错误和降级可直接编码；

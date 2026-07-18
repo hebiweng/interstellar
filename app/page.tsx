@@ -1,595 +1,374 @@
 "use client";
 
-import { useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 
-type InspectorTab = "input" | "params" | "result" | "evidence";
-type DataTab = "positions" | "houses" | "aspects" | "strength";
-type ChartMode = "natal" | "transit" | "synastry" | "return";
+type WorkspaceView = "dashboard" | "charts" | "reports" | "data";
+type CatalogTab = "techniques" | "topics" | "intents";
+type BuilderStep = 1 | 2 | 3 | 4 | 5;
 
-const subjects = [
-  {
-    id: "lin-che",
-    initials: "澈",
-    name: "林澈",
-    meta: "1992.03.28 · 21:16",
-    place: "杭州，中国",
-    tag: "AA",
-    kind: "人物",
-    color: "blue",
-  },
-  {
-    id: "yan",
-    initials: "晏",
-    name: "沈晏",
-    meta: "1990.11.06 · 06:42",
-    place: "成都，中国",
-    tag: "A",
-    kind: "人物",
-    color: "amber",
-  },
-  {
-    id: "orphic",
-    initials: "O",
-    name: "Orphic Studio",
-    meta: "2024.08.19 · 10:30",
-    place: "上海，中国",
-    tag: "项目",
-    kind: "项目",
-    color: "green",
-  },
-  {
-    id: "relationship",
-    initials: "双",
-    name: "林澈 × 沈晏",
-    meta: "关系档案 · v3",
-    place: "双向比较",
-    tag: "关系",
-    kind: "关系",
-    color: "violet",
-  },
-];
+const topicModels = [
+  ["personality.modern.v1", "现代本命结构", "人格与本命", "Alpha"],
+  ["personality.psychodynamic.v1", "心理动力与内在冲突", "人格与本命", "Pro"],
+  ["personality.shadow_archetype.v1", "阴影与原型倾向", "人格与本命", "V1"],
+  ["personality.dominant_signature.v1", "主导行星与星盘签名", "人格与本命", "Beta"],
+  ["personality.classical.v1", "古典本命判断", "人格与本命", "Beta"],
+  ["personality.hellenistic.v1", "希腊化本命结构", "人格与本命", "Pro"],
+  ["personality.integrated.v1", "多流派本命综合", "人格与本命", "Pro"],
+  ["topic.career_vocation.v1", "职业、天赋与使命", "人生主题", "Beta"],
+  ["topic.money_resources.v1", "财富、资源与成功", "人生主题", "Beta"],
+  ["topic.fixed_star_story.v1", "恒星与人生主题", "人生主题", "V1"],
+  ["topic.parent_child.v1", "亲子互动与成长", "人生主题", "Pro"],
+  ["topic.life_stage_midlife.v1", "人生阶段与中年周期", "人生主题", "V1"],
+  ["timing.short_term.v1", "短期行运周期", "时间与预测", "Alpha"],
+  ["timing.annual_integrated.v1", "年度综合周期", "时间与预测", "Pro"],
+  ["timing.long_cycle.v1", "长期人生周期", "时间与预测", "V1"],
+  ["timing.personal_eclipse.v1", "个人食相周期", "时间与预测", "Pro"],
+  ["relationship.comparison.v1", "关系比较与双向影响", "关系", "Alpha"],
+  ["relationship.entity.v1", "关系实体与共同方向", "关系", "Beta"],
+  ["relationship.dynamic.v1", "动态关系周期", "关系", "V1"],
+  ["special.project_event.v1", "项目与事件周期", "专项", "V1"],
+  ["special.horary.v1", "卜卦判定", "专项", "Pro"],
+  ["special.electional.v1", "择时约束优化", "专项", "Pro"],
+  ["special.mundane.v1", "世运与组织周期", "专项", "V1"],
+  ["geography.location.v1", "地理、迁移与地点比较", "地理", "Pro"],
+] as const;
+
+const intents = [
+  "本命全貌", "核心人格动力", "优势、天赋与主导特征", "内在矛盾、阴影与成长课题", "人生阶段与中年周期",
+  "职业方向与使命", "工作方式与能力结构", "当前事业周期", "职位变化与职业转型窗口", "财富与资源模式", "创业倾向与项目适配",
+  "个人关系模式", "两人吸引与兼容", "关系作为独立实体", "关系当前与未来周期", "承诺、亲密与冲突结构", "亲子与家庭互动",
+  "当前处于什么周期", "未来7、30或90天", "年度综合周期", "未来3、5或10年长期周期", "个人食相、返照与重要天象",
+  "项目或事件本身", "项目发展周期与风险窗口", "具体问题的卜卦判断", "为行动选择时间", "比较多个候选日期",
+  "迁移到某地的影响", "比较多个城市", "查看全球占星地理线", "Local Space与Paran分析",
+  "公司或组织分析", "国家或城市周期", "四季进入盘、朔望与食相", "重大行星周期与世运事件",
+] as const;
+
+const techniques = [
+  ["本命盘", "natal.standard", "单盘 · Alpha"],
+  ["当前行运", "forecast.transit", "双轮 · Alpha"],
+  ["太阳返照", "forecast.solar_return", "返照 · Alpha"],
+  ["月亮返照", "forecast.lunar_return", "返照 · Alpha"],
+  ["次限推运", "progression.secondary", "推运 · Beta"],
+  ["太阳弧", "direction.solar_arc", "弧向 · Beta"],
+  ["比较盘", "relationship.synastry", "关系 · Alpha"],
+  ["组合盘", "relationship.composite", "关系 · Alpha"],
+  ["戴维森盘", "relationship.davison", "关系 · Beta"],
+  ["年度小限", "timelord.profection", "古典 · Pro"],
+  ["黄道释放", "timelord.zodiacal_releasing", "古典 · Pro"],
+  ["主限法", "direction.primary", "古典 · Pro"],
+  ["卜卦占星", "horary.judgement", "专项 · Pro"],
+  ["择时搜索", "electional.search", "专项 · Pro"],
+  ["迁移盘", "geography.relocation", "地理 · Pro"],
+  ["占星地理线", "geography.astrocartography", "地理 · Pro"],
+] as const;
+
+const entryModes = [
+  ["技法排盘", "直接选择本命、行运、推运、返照等方法", "techniques", "◫"],
+  ["专题模型", "从24个已定义专题模型开始分析", "topics", "◇"],
+  ["分析目的", "从35个现实问题反推模型与计算", "intents", "◎"],
+  ["对象快捷", "人物、关系、项目、事件、组织或问题", "topics", "↗"],
+  ["时间与周期", "7/30/90天、年度或长期周期", "intents", "⌁"],
+  ["关系／项目／地点", "预填双人、项目或地点上下文", "intents", "⌖"],
+] as const;
+
+const baseModels = [
+  ["natal.modern.v1", "现代本命", "Stable"], ["natal.classical.v1", "古典本命", "Beta"],
+  ["natal.hellenistic.v1", "希腊化本命", "Beta"], ["natal.integrated.v1", "综合本命", "Beta"],
+  ["forecast.short_transit.v1", "短期行运", "Stable"], ["forecast.annual_integrated.v1", "年度综合", "Beta"],
+  ["forecast.long_cycle.v1", "长期周期", "Beta"], ["relationship.comparison.v1", "关系比较", "Stable"],
+  ["relationship.entity.v1", "关系实体", "Beta"], ["special.project_event.v1", "项目事件", "Beta"],
+  ["special.question_action.v1", "卜卦择时", "Beta"], ["geography.location.v1", "地理迁移", "Beta"],
+] as const;
+
+const chartFamilies = [
+  ["基础轮盘", 17, "本命、事件、项目、卜卦、迁移、谐波"],
+  ["多轮盘", 14, "双轮、三轮、四轮与自定义叠盘"],
+  ["关系图", 14, "比较、组合、戴维森与动态关系"],
+  ["表格与网格", 28, "位置、宫位、相位、尊贵、中点"],
+  ["预测时间图", 24, "行运甘特、图形星历与时间主星"],
+  ["地图", 13, "Astrocartography、Local Space、Paran"],
+  ["高级技术图", 18, "刻度盘、网络、赤纬与可见性"],
+  ["消费者扩展", 18, "V1后：主题曲线、热力图与反馈"],
+] as const;
+
+const reports = [
+  ["计算记录报告", "原始输入、参数、计算结果、版本和警告", "可用"],
+  ["技法分析报告", "单一技法的配置、时间窗口与技术解释", "Alpha"],
+  ["专题模型报告", "基线、优势、压力、矛盾、激活和证据", "Beta"],
+  ["目的综合报告", "跨模型发现、时间窗口、反证和确定度", "Pro"],
+  ["对象档案报告", "选择多个本命、预测、关系或项目模块", "Pro"],
+  ["研究比较报告", "样本、方法、共同点、差异与可复现附录", "Pro"],
+] as const;
 
 const planets = [
-  { symbol: "☉", name: "太阳", sign: "白羊", degree: "08° 14′", house: "5", angle: 8, tone: "warm" },
-  { symbol: "☽", name: "月亮", sign: "水瓶", degree: "21° 03′", house: "3", angle: 321, tone: "cool" },
-  { symbol: "☿", name: "水星", sign: "双鱼", degree: "27° 46′", house: "4", angle: 357, tone: "cool" },
-  { symbol: "♀", name: "金星", sign: "金牛", degree: "13° 22′", house: "6", angle: 43, tone: "green" },
-  { symbol: "♂", name: "火星", sign: "水瓶", degree: "05° 18′", house: "2", angle: 305, tone: "red" },
-  { symbol: "♃", name: "木星", sign: "处女", degree: "06° 41′ R", house: "10", angle: 156, tone: "warm" },
-  { symbol: "♄", name: "土星", sign: "水瓶", degree: "15° 32′", house: "3", angle: 315, tone: "cool" },
-  { symbol: "♅", name: "天王", sign: "摩羯", degree: "17° 44′", house: "2", angle: 287, tone: "cool" },
-  { symbol: "♆", name: "海王", sign: "摩羯", degree: "18° 21′", house: "2", angle: 288, tone: "violet" },
-  { symbol: "♇", name: "冥王", sign: "天蝎", degree: "22° 51′ R", house: "12", angle: 232, tone: "red" },
-];
+  ["☉", "太阳", "白羊 08°14′", "5宫"], ["☽", "月亮", "水瓶 21°03′", "3宫"],
+  ["☿", "水星", "双鱼 27°46′", "4宫"], ["♀", "金星", "金牛 13°22′", "6宫"],
+  ["♂", "火星", "水瓶 05°18′", "2宫"], ["♃", "木星", "处女 06°41′ R", "10宫"],
+] as const;
 
-const zodiac = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
-
-const aspectLines = [
-  { angle: 8, width: 117, type: "support" },
-  { angle: 37, width: 144, type: "pressure" },
-  { angle: 68, width: 132, type: "support" },
-  { angle: 104, width: 152, type: "pressure" },
-  { angle: 142, width: 122, type: "support" },
-  { angle: 178, width: 139, type: "support" },
-  { angle: 211, width: 151, type: "pressure" },
-  { angle: 254, width: 128, type: "support" },
-  { angle: 295, width: 148, type: "pressure" },
-  { angle: 329, width: 116, type: "support" },
-];
-
-const chartModeLabels: Record<ChartMode, string> = {
-  natal: "本命",
-  transit: "行运",
-  synastry: "比较",
-  return: "太阳返照",
-};
-
-function GlyphIcon({ children }: { children: ReactNode }) {
-  return <span className="glyph-icon" aria-hidden="true">{children}</span>;
+function IconButton({ children, label, onClick }: { children: ReactNode; label: string; onClick?: () => void }) {
+  return <button className="icon-button" aria-label={label} onClick={onClick}>{children}</button>;
 }
 
-function ChartWheel({ compact = false }: { compact?: boolean }) {
-  const sizeClass = compact ? "chart-wheel compact" : "chart-wheel";
+function AstrologyWheel() {
+  const zodiac = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
   return (
-    <div className={sizeClass} aria-label="林澈本命盘轮盘图">
-      <div className="zodiac-ring" />
-      <div className="house-ring" />
-      <div className="inner-ring" />
-      <div className="axis axis-horizontal" />
-      <div className="axis axis-vertical" />
+    <div className="astro-wheel" role="img" aria-label="虚拟示例人物的缓存本命盘">
+      <div className="wheel-ring wheel-ring-one" />
+      <div className="wheel-ring wheel-ring-two" />
+      <div className="wheel-cross wheel-cross-a" />
+      <div className="wheel-cross wheel-cross-b" />
+      <div className="aspect-web"><i /><i /><i /><i /><i /></div>
       {zodiac.map((symbol, index) => {
         const angle = index * 30 + 15;
-        return (
-          <span
-            className="zodiac-symbol"
-            key={symbol}
-            style={{ transform: `rotate(${angle}deg) translateY(${compact ? -116 : -167}px) rotate(${-angle}deg)` }}
-          >
-            {symbol}
-          </span>
-        );
+        return <span key={symbol} className="zodiac" style={{ transform: `rotate(${angle}deg) translateY(-138px) rotate(${-angle}deg)` }}>{symbol}</span>;
       })}
-      {Array.from({ length: 12 }).map((_, index) => {
-        const angle = index * 30 + 15;
-        return (
-          <span
-            className="house-number"
-            key={index}
-            style={{ transform: `rotate(${angle}deg) translateY(${compact ? -82 : -119}px) rotate(${-angle}deg)` }}
-          >
-            {index + 1}
-          </span>
-        );
+      {planets.map((planet, index) => {
+        const angle = [8, 321, 357, 43, 305, 156][index];
+        return <span key={planet[0]} className="planet" style={{ transform: `rotate(${angle}deg) translateY(-106px) rotate(${-angle}deg)` }}>{planet[0]}</span>;
       })}
-      <div className="aspect-field">
-        {aspectLines.map((line, index) => (
-          <span
-            className={`aspect-line ${line.type}`}
-            key={`${line.angle}-${index}`}
-            style={{
-              width: compact ? line.width * 0.68 : line.width,
-              transform: `rotate(${line.angle}deg)`,
-            }}
-          />
-        ))}
-      </div>
-      {planets.map((planet, index) => (
-        <button
-          className={`planet-marker ${planet.tone}`}
-          key={`${planet.symbol}-${index}`}
-          style={{ transform: `rotate(${planet.angle}deg) translateY(${compact ? -98 : -141}px) rotate(${-planet.angle}deg)` }}
-          title={`${planet.name} · ${planet.sign} ${planet.degree} · 第${planet.house}宫`}
-        >
-          {planet.symbol}
-        </button>
-      ))}
-      <div className="chart-core">
-        <span className="core-label">ASC</span>
-        <strong>19°07′</strong>
-        <small>天蝎座</small>
-      </div>
-      <span className="axis-label asc">ASC 19°</span>
-      <span className="axis-label mc">MC 24°</span>
+      <div className="wheel-center"><small>ASC</small><strong>19°07′</strong><span>天蝎</span></div>
+      <span className="axis-label axis-asc">ASC 19°</span>
+      <span className="axis-label axis-mc">MC 24°</span>
     </div>
   );
 }
 
-function LibraryItem({
-  subject,
-  active,
-  onClick,
-}: {
-  subject: (typeof subjects)[number];
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button className={`library-item ${active ? "active" : ""}`} onClick={onClick}>
-      <span className={`subject-avatar ${subject.color}`}>{subject.initials}</span>
-      <span className="library-copy">
-        <strong>{subject.name}</strong>
-        <small>{subject.meta}</small>
-      </span>
-      <span className="quality-tag">{subject.tag}</span>
-    </button>
-  );
+function StatusPill({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "green" | "amber" | "blue" | "violet" }) {
+  return <span className={`status-pill ${tone}`}>{children}</span>;
 }
 
 export default function Home() {
-  const [activeSubjectId, setActiveSubjectId] = useState(subjects[0].id);
-  const [inspectorTab, setInspectorTab] = useState<InspectorTab>("evidence");
-  const [dataTab, setDataTab] = useState<DataTab>("positions");
-  const [chartMode, setChartMode] = useState<ChartMode>("natal");
-  const [splitView, setSplitView] = useState(false);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [view, setView] = useState<WorkspaceView>("dashboard");
+  const [analysisOpen, setAnalysisOpen] = useState(false);
+  const [catalogTab, setCatalogTab] = useState<CatalogTab>("topics");
+  const [builderStep, setBuilderStep] = useState<BuilderStep>(1);
+  const [selectedItem, setSelectedItem] = useState("personality.modern.v1");
+  const [search, setSearch] = useState("");
+  const [subjectMode, setSubjectMode] = useState<"sample" | "new">("sample");
   const [running, setRunning] = useState(false);
-  const [exportOpen, setExportOpen] = useState(false);
-  const [toast, setToast] = useState("计算快照 #C-208 已加载");
-  const [leftOpen, setLeftOpen] = useState(false);
-  const [rightOpen, setRightOpen] = useState(false);
+  const [notice, setNotice] = useState("已加载 1 份虚拟示例缓存；本页未启动任何新计算");
+  const [chartFamily, setChartFamily] = useState("基础轮盘");
+  const [reportDensity, setReportDensity] = useState("标准");
 
-  const activeSubject = useMemo(
-    () => subjects.find((subject) => subject.id === activeSubjectId) ?? subjects[0],
-    [activeSubjectId],
-  );
+  const catalogItems = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    if (catalogTab === "topics") {
+      return topicModels.filter((item) => `${item[0]} ${item[1]} ${item[2]}`.toLowerCase().includes(needle));
+    }
+    if (catalogTab === "intents") {
+      return intents
+        .map((name, index) => [`intent.${index + 1}`, name, "分析目的", index < 12 ? "Beta" : "Pro"] as const)
+        .filter((item) => item[1].toLowerCase().includes(needle));
+    }
+    return techniques
+      .map((item) => [item[1], item[0], "计算技法", item[2]] as const)
+      .filter((item) => `${item[0]} ${item[1]}`.toLowerCase().includes(needle));
+  }, [catalogTab, search]);
 
-  const handleRun = () => {
-    if (running) return;
+  const openAnalysis = (tab: CatalogTab = "topics", item?: string) => {
+    setCatalogTab(tab);
+    setSelectedItem(item ?? (tab === "techniques" ? "natal.standard" : tab === "intents" ? "intent.1" : "personality.modern.v1"));
+    setSearch("");
+    setBuilderStep(1);
+    setAnalysisOpen(true);
+  };
+
+  const runPrototype = () => {
     setRunning(true);
-    setToast("正在标准化输入并计算…");
+    setNotice("正在执行已确认的 Recipe（原型演示）");
     window.setTimeout(() => {
       setRunning(false);
-      setToast("计算完成 · 184 ms · 新快照 #C-209");
-    }, 1250);
-  };
-
-  const handleSubject = (id: string) => {
-    setActiveSubjectId(id);
-    setToast("已切换对象版本，等待重新计算");
-    setLeftOpen(false);
-  };
-
-  const handleExport = (format: string) => {
-    setExportOpen(false);
-    setToast(`${format} 导出任务已创建`);
+      setAnalysisOpen(false);
+      setView("dashboard");
+      setNotice("原型演示完成：已创建 1 个模拟快照；未调用真实星历引擎");
+    }, 1100);
   };
 
   return (
-    <main className="app-shell" data-theme={theme}>
+    <main className="app-shell">
       <header className="topbar">
-        <div className="brand-block">
-          <div className="brand-mark" aria-hidden="true"><span>✦</span></div>
-          <div>
-            <strong>INTERSTELLAR</strong>
-            <span>RESEARCH WORKSPACE</span>
-          </div>
-        </div>
-
-        <div className="topbar-center">
-          <button className="top-action primary" onClick={() => { setInspectorTab("input"); setRightOpen(true); }}>
-            <GlyphIcon>＋</GlyphIcon>
-            新建计算
-          </button>
-          <span className="toolbar-divider" />
-          <button className="subject-crumb" onClick={() => setLeftOpen(true)}>
-            <span className="status-dot" />
-            {activeSubject.name}
-            <span className="crumb-version">v4</span>
-          </button>
-          <span className="crumb-separator">/</span>
-          <button className="mode-crumb">{chartModeLabels[chartMode]}</button>
-        </div>
-
-        <div className="topbar-actions">
-          <button className="icon-button mobile-only" onClick={() => setLeftOpen(true)} aria-label="打开对象库">☰</button>
-          <button className="icon-button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label="切换明暗主题">
-            {theme === "dark" ? "☼" : "◐"}
-          </button>
-          <button className={`icon-button ${splitView ? "active" : ""}`} onClick={() => setSplitView(!splitView)} aria-pressed={splitView} aria-label="切换分屏">
-            ◫
-          </button>
-          <div className="export-wrap">
-            <button className="top-action" onClick={() => setExportOpen(!exportOpen)} aria-expanded={exportOpen}>
-              导出 <span>⌄</span>
+        <button className="brand" onClick={() => setView("dashboard")} aria-label="返回工作台首页">
+          <span className="brand-orbit">✦</span>
+          <span><strong>INTERSTELLAR</strong><small>PROFESSIONAL ASTROLOGY</small></span>
+        </button>
+        <nav className="top-nav" aria-label="工作台主导航">
+          {(["dashboard", "charts", "reports", "data"] as const).map((item) => (
+            <button key={item} className={view === item ? "active" : ""} onClick={() => setView(item)}>
+              {item === "dashboard" ? "工作台" : item === "charts" ? "图表中心 · 146" : item === "reports" ? "报告" : "能力与数据"}
             </button>
-            {exportOpen && (
-              <div className="export-menu">
-                {["SVG 图表", "PNG 2×", "PDF 报告", "JSON 快照", "项目归档"].map((item) => (
-                  <button key={item} onClick={() => handleExport(item)}>{item}</button>
-                ))}
-              </div>
-            )}
-          </div>
-          <button className={`run-button ${running ? "running" : ""}`} onClick={handleRun}>
-            <span>{running ? "↻" : "▶"}</span>{running ? "计算中" : "运行"}
-          </button>
-          <button className="profile-button" aria-label="账户菜单">XG</button>
+          ))}
+        </nav>
+        <div className="top-actions">
+          <span className="dataset-lock"><i /> SE 2.10 · IANA 2026c</span>
+          <button className="primary-button compact" onClick={() => openAnalysis()}>＋ 新建分析</button>
+          <IconButton label="任务中心">⌁</IconButton>
+          <IconButton label="账户">XG</IconButton>
         </div>
       </header>
 
-      <aside className={`library-panel ${leftOpen ? "mobile-open" : ""}`}>
-        <div className="panel-heading">
-          <div>
-            <span className="eyebrow">WORKSPACE</span>
-            <h2>研究对象</h2>
-          </div>
-          <button className="icon-button small mobile-close" onClick={() => setLeftOpen(false)} aria-label="关闭对象库">×</button>
-        </div>
-        <label className="search-box">
-          <span>⌕</span>
-          <input aria-label="搜索对象" placeholder="搜索人物、关系、项目…" />
-          <kbd>⌘K</kbd>
-        </label>
-
-        <nav className="library-nav" aria-label="对象分类">
-          <button className="active"><span>◉</span> 全部对象 <b>17</b></button>
-          <button><span>♙</span> 人物 <b>5</b></button>
-          <button><span>⇄</span> 关系 <b>2</b></button>
-          <button><span>◇</span> 事件与项目 <b>9</b></button>
-          <button><span>?</span> 问事盘 <b>1</b></button>
-        </nav>
-
-        <div className="list-section-heading">
-          <span>最近使用</span>
-          <button>排序 ↕</button>
-        </div>
-        <div className="library-list">
-          {subjects.map((subject) => (
-            <LibraryItem
-              subject={subject}
-              active={subject.id === activeSubjectId}
-              onClick={() => handleSubject(subject.id)}
-              key={subject.id}
-            />
-          ))}
+      <aside className="sidebar">
+        <div className="side-section">
+          <div className="section-label"><span>对象库</span><button onClick={() => openAnalysis("topics")}>新增并分析</button></div>
+          <button className="subject-card active">
+            <span className="subject-avatar">A</span>
+            <span><strong>阿斯特拉</strong><small>1992.03.28 · 21:16</small></span>
+            <StatusPill tone="violet">虚拟</StatusPill>
+          </button>
+          <p className="side-hint">这里只预置一个明确标记的虚拟人物。真实用户对象会在新增并分析后出现。</p>
         </div>
 
-        <div className="saved-view-section">
-          <div className="list-section-heading">
-            <span>已存视图</span>
-            <button>＋</button>
-          </div>
-          <button className="saved-view active"><span className="view-grid">▦</span> 本命研究台 <kbd>1</kbd></button>
-          <button className="saved-view"><span className="view-grid">▥</span> 年度预测 <kbd>2</kbd></button>
-          <button className="saved-view"><span className="view-grid">▦</span> 关系双盘 <kbd>3</kbd></button>
+        <div className="side-section grow">
+          <div className="section-label"><span>从对象开始</span></div>
+          <button className="side-link active" onClick={() => setView("dashboard")}><span>◉</span>个人仪表盘<em>缓存</em></button>
+          <button className="side-link" onClick={() => openAnalysis("topics", "timing.short_term.v1")}><span>⌁</span>当前与短期周期<em>按需</em></button>
+          <button className="side-link" onClick={() => openAnalysis("topics", "timing.annual_integrated.v1")}><span>□</span>年度与长期周期<em>按需</em></button>
+          <button className="side-link" onClick={() => openAnalysis("topics", "relationship.comparison.v1")}><span>⇄</span>关系分析<em>需2人</em></button>
+          <button className="side-link" onClick={() => openAnalysis("topics", "geography.location.v1")}><span>⌖</span>地理与迁移<em>需地点</em></button>
+          <button className="side-link" onClick={() => setView("charts")}><span>▦</span>全部图表<em>146</em></button>
         </div>
 
-        <div className="dataset-card">
-          <div className="dataset-title"><span className="status-dot green" /> 数据集已锁定</div>
-          <strong>SE 2.10 · IANA 2026c</strong>
-          <small>规则包 official.modern.v1</small>
-          <button onClick={() => setToast("已打开可复现性信息")}>查看版本详情 →</button>
+        <div className="side-section registry-card">
+          <div className="registry-row"><span>计算</span><strong>99</strong></div>
+          <div className="registry-row"><span>基础模型</span><strong>12</strong></div>
+          <div className="registry-row"><span>专题 / 目的</span><strong>24 / 35</strong></div>
+          <div className="registry-row"><span>专业V1图</span><strong>128</strong></div>
+          <small>目录已校验 · 不会打开即全算</small>
         </div>
       </aside>
 
       <section className="workspace">
-        <div className="workspace-header">
-          <div className="subject-title-group">
-            <span className={`subject-avatar large ${activeSubject.color}`}>{activeSubject.initials}</span>
-            <div>
-              <div className="title-row">
-                <h1>{activeSubject.name}</h1>
-                <span className="version-pill">版本 4</span>
-                <span className="maturity-pill stable">STABLE</span>
-              </div>
-              <p>{activeSubject.meta} · {activeSubject.place} · <span>UTC+08:00</span></p>
-            </div>
-          </div>
-          <div className="snapshot-meta">
-            <span>快照</span>
-            <strong>#C-208</strong>
-            <small>14:32:08</small>
-          </div>
-        </div>
+        <div className="workspace-banner" role="status"><span>原型</span>{notice}</div>
 
-        <div className="technique-bar" role="tablist" aria-label="技法">
-          {(Object.keys(chartModeLabels) as ChartMode[]).map((mode) => (
-            <button
-              key={mode}
-              role="tab"
-              aria-selected={chartMode === mode}
-              className={chartMode === mode ? "active" : ""}
-              onClick={() => { setChartMode(mode); setToast(`已切换到${chartModeLabels[mode]}技法`); }}
-            >
-              {chartModeLabels[mode]}
-            </button>
-          ))}
-          <span className="technique-spacer" />
-          <button className="parameter-chip"><span>宫位</span> Placidus⌄</button>
-          <button className="parameter-chip"><span>黄道</span> Tropical⌄</button>
-          <button className="parameter-chip icon-chip">•••</button>
-        </div>
-
-        <div className={`canvas-area ${splitView ? "split" : ""}`}>
-          <article className="chart-card primary-chart">
-            <div className="chart-card-heading">
+        {view === "dashboard" && (
+          <>
+            <div className="subject-header">
               <div>
-                <span className="eyebrow">PRIMARY VIEW · {chartMode.toUpperCase()}</span>
-                <h2>{chartModeLabels[chartMode]}盘轮盘</h2>
+                <div className="subject-kicker"><StatusPill tone="violet">虚拟示例</StatusPill><StatusPill tone="green">时间质量 A</StatusPill><span>缓存快照 · CS-DEMO-001</span></div>
+                <h1>阿斯特拉的专业占星工作台</h1>
+                <p>杭州 · 1992年3月28日 21:16 · Asia/Shanghai · 现代本命预设</p>
               </div>
-              <div className="chart-tools">
-                <button title="居中">⌖</button>
-                <button title="缩放">⌕</button>
-                <button title="图层">▱</button>
+              <div className="subject-actions">
+                <button className="secondary-button" onClick={() => setView("charts")}>查看 146 项图表目录</button>
+                <button className="primary-button" onClick={() => openAnalysis()}>开始新的分析</button>
               </div>
             </div>
-            <div className="chart-stage">
-              <div className="chart-index left-index">
-                <span>ASC</span><strong>♏ 19°07′</strong>
-                <span>MC</span><strong>♌ 24°38′</strong>
-              </div>
-              <ChartWheel compact={splitView} />
-              <div className="chart-index right-index">
-                <span>日月相位</span><strong>六分 · 2°49′</strong>
-                <span>盘型</span><strong>束型</strong>
-              </div>
-              {running && (
-                <div className="calculating-overlay">
-                  <div className="orbital-loader"><span /></div>
-                  <strong>正在计算</strong>
-                  <small>规则命中与证据聚合</small>
+
+            <div className="dashboard-grid">
+              <article className="panel natal-panel">
+                <div className="panel-title">
+                  <div><span className="eyebrow">CACHED RESULT</span><h2>现代本命 · 基础视图</h2></div>
+                  <div className="segmented"><button className="active">轮盘</button><button onClick={() => setView("data")}>数据</button><button onClick={() => setView("reports")}>报告</button></div>
                 </div>
-              )}
+                <div className="natal-content">
+                  <AstrologyWheel />
+                  <div className="planet-list">
+                    <div className="list-head"><span>天体</span><span>位置</span><span>宫位</span></div>
+                    {planets.map((planet) => <div className="planet-row" key={planet[1]}><b>{planet[0]}</b><strong>{planet[1]}</strong><span>{planet[2]}</span><em>{planet[3]}</em></div>)}
+                    <button className="text-button" onClick={() => setView("data")}>打开完整位置、宫位、相位与证据 →</button>
+                  </div>
+                </div>
+                <div className="snapshot-foot"><span>引擎：演示缓存</span><span>规则：official.modern_natal.v1</span><span>本页新增计算：0</span></div>
+              </article>
+
+              <aside className="panel current-plan">
+                <div className="panel-title"><div><span className="eyebrow">CURRENT STATE</span><h2>当前没有分析任务</h2></div><StatusPill>空闲</StatusPill></div>
+                <div className="plan-empty"><span>＋</span><strong>选择要分析的内容</strong><p>可以直接选技法，也可以按专题或现实目的进入。系统会先给出计算计划，不会立刻执行。</p><button className="primary-button wide" onClick={() => openAnalysis()}>打开统一分析中心</button></div>
+                <div className="plan-rule"><b>运行前你会看到</b><span>必需且锁定</span><span>推荐默认</span><span>可选扩展</span><span>缺失与阻断</span><span>预计图表 / 报告 / 时间</span></div>
+              </aside>
             </div>
-            <footer className="chart-footer">
-              <span><i className="legend-line support" /> 支持相位 9</span>
-              <span><i className="legend-line pressure" /> 压力相位 6</span>
-              <span><i className="legend-dot" /> 容许度 ≤ 6°</span>
-              <button onClick={() => setInspectorTab("evidence")}>查看全部证据 →</button>
-            </footer>
-          </article>
 
-          {splitView && (
-            <article className="chart-card comparison-chart">
-              <div className="chart-card-heading">
-                <div>
-                  <span className="eyebrow">SECONDARY VIEW · TRANSIT</span>
-                  <h2>当前行运</h2>
+            <section className="start-section">
+              <div className="section-heading"><div><span className="eyebrow">SIX ENTRY PATHS</span><h2>你想从哪里开始？</h2><p>六种入口只负责预填上下文，最终都进入同一个 Recipe 预检和按需计算流程。</p></div><button className="text-button" onClick={() => openAnalysis("techniques")}>浏览全部能力 →</button></div>
+              <div className="entry-grid">
+                {entryModes.map((item) => <button key={item[0]} className="entry-card" onClick={() => openAnalysis(item[2] as CatalogTab)}><span className="entry-icon">{item[3]}</span><strong>{item[0]}</strong><p>{item[1]}</p><em>进入选择 →</em></button>)}
+              </div>
+            </section>
+
+            <section className="model-strip">
+              <div><span className="eyebrow">MODEL REGISTRY</span><h2>12 个后端分析模型</h2><p>它们是确定性能力编排，不是AI模型。专题和目的会引用这些模型。</p></div>
+              <div className="model-chips">{baseModels.slice(0, 6).map((model) => <button key={model[0]} onClick={() => openAnalysis("topics")}><span>{model[1]}</span><small>{model[2]}</small></button>)}</div>
+              <button className="secondary-button" onClick={() => setView("data")}>查看全部12个</button>
+            </section>
+          </>
+        )}
+
+        {view === "charts" && (
+          <section className="catalog-page">
+            <div className="page-heading"><div><span className="eyebrow">RENDER CATALOG</span><h1>146 项图表都在这里</h1><p>图表不是一次性全部生成；系统会根据当前快照判断可直接渲染、需要追加计算、不可用或未来能力。</p></div><button className="primary-button" onClick={() => openAnalysis("techniques")}>选择技法并生成图表</button></div>
+            <div className="status-legend"><StatusPill tone="green">已有快照</StatusPill><StatusPill tone="blue">可直接渲染</StatusPill><StatusPill tone="amber">需追加计算</StatusPill><StatusPill>不可用</StatusPill><StatusPill tone="violet">V1后</StatusPill></div>
+            <div className="chart-layout">
+              <nav className="family-nav">{chartFamilies.map((family) => <button key={family[0]} className={chartFamily === family[0] ? "active" : ""} onClick={() => setChartFamily(family[0])}><span>{family[0]}<small>{family[2]}</small></span><strong>{family[1]}</strong></button>)}</nav>
+              <div className="chart-results">
+                <div className="result-toolbar"><div><h2>{chartFamily}</h2><span>{chartFamilies.find((item) => item[0] === chartFamily)?.[1]} 项</span></div><label>⌕ <input placeholder="按名称或 view_id 搜索" /></label><select aria-label="筛选图表状态"><option>全部状态</option><option>可直接渲染</option><option>需追加计算</option></select></div>
+                <div className="chart-card-grid">
+                  {Array.from({ length: 8 }).map((_, index) => {
+                    const names = ["本命盘轮盘", "无出生时间盘", "当前天空盘", "事件盘", "项目启动盘", "公司盘", "国家盘", "问事盘"];
+                    const status = index === 0 ? ["已有快照", "green"] : index < 3 ? ["可直接渲染", "blue"] : index < 6 ? ["需追加计算", "amber"] : ["尚未可用", "neutral"];
+                    return <button key={index} className="chart-card" onClick={() => index === 0 ? setNotice("已打开缓存本命轮盘") : openAnalysis("techniques")}><div className="chart-thumb"><div className="mini-orbit" /><span>{index + 1}</span></div><strong>{names[index]}</strong><code>wheel.{["natal", "unknown_time", "current_sky", "event", "project_start", "organization", "country", "horary"][index]}</code><StatusPill tone={status[1] as "neutral" | "green" | "amber" | "blue"}>{status[0]}</StatusPill></button>;
+                  })}
                 </div>
-                <button className="close-split" onClick={() => setSplitView(false)}>×</button>
+                <div className="catalog-note"><strong>目录不是计算按钮集合</strong><p>点击“需追加计算”会带着目标 view_id 返回分析构建器，补齐依赖并重新预检；不会在后台静默计算。</p></div>
               </div>
-              <div className="chart-stage compact-stage">
-                <ChartWheel compact />
-              </div>
-              <footer className="chart-footer compact-footer">
-                <span><i className="legend-dot amber" /> 精确命中 3</span>
-                <span>2026.07.17 14:32</span>
-              </footer>
-            </article>
-          )}
-        </div>
+            </div>
+          </section>
+        )}
 
-        <section className="data-dock">
-          <div className="data-tabs" role="tablist" aria-label="结构化数据">
-            {([
-              ["positions", "行星位置", 14],
-              ["houses", "宫位", 12],
-              ["aspects", "相位", 18],
-              ["strength", "力量与尊贵", 8],
-            ] as [DataTab, string, number][]).map(([key, label, count]) => (
-              <button
-                key={key}
-                role="tab"
-                aria-selected={dataTab === key}
-                onClick={() => setDataTab(key)}
-                className={dataTab === key ? "active" : ""}
-              >
-                {label}<span>{count}</span>
-              </button>
-            ))}
-            <span className="data-spacer" />
-            <button className="dock-control">筛选⌄</button>
-            <button className="dock-control">↥</button>
-          </div>
-          <div className="table-wrap">
-            {dataTab === "positions" && (
-              <table>
-                <thead><tr><th>天体</th><th>黄经</th><th>星座位置</th><th>宫位</th><th>速度</th><th>状态</th></tr></thead>
-                <tbody>
-                  {planets.slice(0, 6).map((planet) => (
-                    <tr key={planet.name}>
-                      <td><span className={`table-symbol ${planet.tone}`}>{planet.symbol}</span><strong>{planet.name}</strong></td>
-                      <td>{planet.angle.toFixed(4)}°</td>
-                      <td>{planet.sign} <b>{planet.degree}</b></td>
-                      <td>第 {planet.house} 宫</td>
-                      <td className="mono">+0.{planet.angle.toString().padStart(4, "0")}°/d</td>
-                      <td><span className={`motion-state ${planet.degree.includes("R") ? "retro" : ""}`}>{planet.degree.includes("R") ? "逆行" : "顺行"}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-            {dataTab === "houses" && <DockMessage title="宫位与宫主星" copy="12个宫头、宫主星落座、落宫和定位星链已载入。" values={["ASC ♏ 19°07′", "MC ♌ 24°38′", "2宫 ♐ 18°12′"]} />}
-            {dataTab === "aspects" && <DockMessage title="18条本命相位" copy="按容许度排序；支持、压力和中性证据分别保留。" values={["☉ ✶ ☽ 2°49′", "♀ △ ♃ 6°41′", "♂ □ ♇ 2°27′"]} />}
-            {dataTab === "strength" && <DockMessage title="行星力量与尊贵" copy="当前使用 official.modern.v1；古典尊贵保持Beta标签。" values={["土星 82", "火星 74", "金星 68"]} />}
-          </div>
-        </section>
+        {view === "reports" && (
+          <section className="catalog-page">
+            <div className="page-heading"><div><span className="eyebrow">REPORT ENGINE</span><h1>报告从证据生成，不从AI生成</h1><p>同一份 ReportDocument 可以切换三种密度。正式解释必须有 ReportRulePack，缺失时只输出技术记录或结构化 Finding。</p></div><button className="primary-button" onClick={() => openAnalysis("topics")}>创建可报告的分析</button></div>
+            <div className="report-layout">
+              <div className="report-profile-list">{reports.map((report, index) => <button key={report[0]} className={index === 2 ? "active" : ""}><span className="report-number">0{index + 1}</span><span><strong>{report[0]}</strong><small>{report[1]}</small></span><StatusPill tone={index === 0 ? "green" : index < 3 ? "blue" : "amber"}>{report[2]}</StatusPill></button>)}</div>
+              <article className="report-preview">
+                <div className="report-toolbar"><div><StatusPill tone="violet">原型预览</StatusPill><h2>专题模型报告</h2></div><div className="density-switch">{["摘要", "标准", "完整技术版"].map((density) => <button className={reportDensity === density ? "active" : ""} onClick={() => setReportDensity(density)} key={density}>{density}</button>)}</div></div>
+                <div className="report-paper"><div className="paper-meta"><span>阿斯特拉 · 虚拟示例</span><span>{reportDensity}密度</span></div><h1>现代本命结构</h1><p className="lead">这份页面展示报告的结构与证据下钻方式，不代表真实占星结论。切换密度不会重新计算，也不会改变底层 Finding。</p><h3>01 · 基线结构</h3><div className="finding"><span className="finding-index">F-01</span><div><strong>结构化 Finding 最小解释单元</strong><p>每条结论分别保存支持、压力与反证，不合并成单一“好运分”。</p><button>查看 3 条证据 →</button></div><StatusPill tone="blue">Beta</StatusPill></div><h3>02 · 激活与时间</h3><div className="timeline-placeholder"><i /><i /><i /><span>开始</span><span>精确</span><span>结束</span></div><h3>03 · 限制与来源</h3><p>规则包、模板、算法卡、数据版本、时间可信度和缺失章节都随报告保存。</p></div>
+                <div className="evidence-chain"><span>RawFact</span><b>→</b><span>Evidence</span><b>→</b><span>Finding</span><b>→</b><span>Conclusion</span><b>→</b><span>Section</span><b>→</b><span>Document</span></div>
+              </article>
+            </div>
+          </section>
+        )}
+
+        {view === "data" && (
+          <section className="catalog-page">
+            <div className="page-heading"><div><span className="eyebrow">CAPABILITIES & DATA</span><h1>计算、模型和数据来源一目了然</h1><p>所有计算都返回引擎、数据、规则和模型版本。免费官方数据覆盖 V1 确定性计算，专业解释与规则仍需自建和评审。</p></div><button className="secondary-button">导出目录 JSON</button></div>
+            <div className="metric-grid"><div><strong>99</strong><span>登记计算</span><small>均有 calculation_id</small></div><div><strong>12</strong><span>基础分析模型</span><small>确定性编排</small></div><div><strong>24</strong><span>专题模型</span><small>可选产品卡</small></div><div><strong>35</strong><span>分析目的</span><small>映射到模型和Recipe</small></div><div><strong>146</strong><span>图形目录</span><small>专业V1为1—128</small></div></div>
+            <div className="data-grid">
+              <article className="panel model-registry"><div className="panel-title"><div><span className="eyebrow">ANALYSIS MODELS</span><h2>12 个基础模型</h2></div><StatusPill tone="green">目录有效</StatusPill></div>{baseModels.map((model, index) => <div className="registry-model" key={model[0]}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{model[1]}</strong><code>{model[0]}</code></div><StatusPill tone={model[2] === "Stable" ? "green" : "blue"}>{model[2]}</StatusPill></div>)}</article>
+              <article className="panel source-registry"><div className="panel-title"><div><span className="eyebrow">VERSIONED SOURCES</span><h2>数据来源与用途</h2></div></div>{[["Swiss Ephemeris", "主星历、宫位与天体位置", "AGPL 免费"], ["JPL DE/SPICE", "独立天文差异校验", "免费"], ["IANA tzdb", "历史时区与DST", "免费"], ["GeoNames", "地名、经纬度与时区ID", "CC BY"], ["Natural Earth", "全球底图与静态导出", "公有领域"], ["MPC / Gaia / IERS", "小行星、恒星与地球定向", "免费/署名"]].map((source) => <div className="source-row" key={source[0]}><span className="source-dot" /><div><strong>{source[0]}</strong><small>{source[1]}</small></div><em>{source[2]}</em></div>)}<div className="source-warning"><strong>明确缺口</strong><p>1970年前部分历史时区、精确公众人物出生时间、商业中文解释文本、行业统一主题权重和真实事件验证集不能由免费数据自动解决。</p></div></article>
+            </div>
+          </section>
+        )}
       </section>
 
-      <aside className={`inspector-panel ${rightOpen ? "mobile-open" : ""}`}>
-        <div className="inspector-tabs" role="tablist" aria-label="检查器">
-          {([
-            ["input", "输入"],
-            ["params", "参数"],
-            ["result", "结果"],
-            ["evidence", "证据"],
-          ] as [InspectorTab, string][]).map(([key, label]) => (
-            <button key={key} role="tab" aria-selected={inspectorTab === key} className={inspectorTab === key ? "active" : ""} onClick={() => setInspectorTab(key)}>{label}</button>
-          ))}
-          <button className="mobile-close inspector-close" onClick={() => setRightOpen(false)} aria-label="关闭检查器">×</button>
-        </div>
-        <div className="inspector-content">
-          {inspectorTab === "input" && <InputPanel subject={activeSubject} onRun={handleRun} />}
-          {inspectorTab === "params" && <ParameterPanel />}
-          {inspectorTab === "result" && <ResultPanel />}
-          {inspectorTab === "evidence" && <EvidencePanel />}
-        </div>
-        <footer className="inspector-footer">
-          <span className="status-dot green" />
-          <div><strong>结果可复现</strong><small>输入、引擎、数据和规则版本已锁定</small></div>
-          <button aria-label="查看可复现性信息">›</button>
-        </footer>
-      </aside>
+      {analysisOpen && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setAnalysisOpen(false); }}>
+          <section className="analysis-modal" role="dialog" aria-modal="true" aria-labelledby="analysis-title">
+            <header className="modal-header">
+              <div><span className="eyebrow">UNIFIED ANALYSIS CENTER</span><h1 id="analysis-title">新建分析</h1><p>选择内容 → 对象与上下文 → 模型与参数 → 输出 → 预检</p></div>
+              <button className="modal-close" onClick={() => setAnalysisOpen(false)} aria-label="关闭分析中心">×</button>
+            </header>
+            <div className="stepper">{["选择内容", "对象与输入", "模型与参数", "图表与报告", "预检并运行"].map((label, index) => <button key={label} className={builderStep === index + 1 ? "active" : builderStep > index + 1 ? "done" : ""} onClick={() => setBuilderStep((index + 1) as BuilderStep)}><span>{builderStep > index + 1 ? "✓" : index + 1}</span>{label}</button>)}</div>
 
-      <div className="mobile-bottom-bar">
-        <button onClick={() => setLeftOpen(true)}><span>☰</span>对象</button>
-        <button className="active"><span>◎</span>星盘</button>
-        <button onClick={handleRun}><span>▶</span>运行</button>
-        <button onClick={() => { setInspectorTab("evidence"); setRightOpen(true); }}><span>≡</span>证据</button>
-      </div>
+            <div className="modal-body">
+              {builderStep === 1 && <div className="catalog-selector">
+                <div className="catalog-tabs"><button className={catalogTab === "techniques" ? "active" : ""} onClick={() => setCatalogTab("techniques")}>计算技法 <b>99项底层</b></button><button className={catalogTab === "topics" ? "active" : ""} onClick={() => setCatalogTab("topics")}>专题模型 <b>24</b></button><button className={catalogTab === "intents" ? "active" : ""} onClick={() => setCatalogTab("intents")}>分析目的 <b>35</b></button></div>
+                <label className="catalog-search">⌕<input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="搜索名称、ID、领域或技法…" /></label>
+                <div className="catalog-list">{catalogItems.map((item) => <button key={item[0]} className={selectedItem === item[0] ? "selected" : ""} onClick={() => setSelectedItem(item[0])}><span className="catalog-item-icon">{catalogTab === "techniques" ? "◫" : catalogTab === "topics" ? "◇" : "◎"}</span><span><strong>{item[1]}</strong><code>{item[0]}</code></span><span className="catalog-meta">{item[2]}<small>{item[3]}</small></span><i>{selectedItem === item[0] ? "✓" : "→"}</i></button>)}</div>
+              </div>}
 
-      {(leftOpen || rightOpen) && <button className="mobile-scrim" aria-label="关闭面板" onClick={() => { setLeftOpen(false); setRightOpen(false); }} />}
-      <div className="status-toast" role="status"><span className={running ? "pulse-dot" : "status-dot green"} />{toast}</div>
+              {builderStep === 2 && <div className="builder-form"><div className="builder-copy"><span className="eyebrow">SUBJECT ROLES</span><h2>这次要分析谁或什么？</h2><p>你不是在单纯新增人物；对象资料会和本次分析内容一起进入Recipe。时间未知时保持未知。</p></div><div className="choice-row"><button className={subjectMode === "sample" ? "active" : ""} onClick={() => setSubjectMode("sample")}><span className="subject-avatar small">A</span><strong>使用虚拟示例</strong><small>已有缓存本命，可复用部分结果</small></button><button className={subjectMode === "new" ? "active" : ""} onClick={() => setSubjectMode("new")}><span className="subject-avatar small empty">＋</span><strong>新增真实对象</strong><small>人物、关系、项目、事件、组织或问题</small></button></div>{subjectMode === "new" && <div className="input-grid"><label>对象类型<select><option>人物</option><option>关系</option><option>事件</option><option>项目</option><option>组织</option><option>国家 / 城市</option><option>具体问题</option></select></label><label>显示名称<input placeholder="姓名或代号" /></label><label>出生 / 事件日期<input type="date" /></label><label>时间精度<select><option>精确到分钟</option><option>约一小时</option><option>上午 / 下午</option><option>只知道日期</option><option>未知</option></select></label><label>当地时间<input type="time" /></label><label>出生 / 事件地点<input placeholder="选择地点，不使用浏览器自动替代" /></label><label className="span-two">资料来源<select><option>出生证明 / 官方记录</option><option>本人或亲友提供</option><option>传记或公开来源</option><option>记忆 / 估计</option><option>未知</option></select></label></div>}</div>}
+
+              {builderStep === 3 && <div className="builder-form"><div className="builder-copy"><span className="eyebrow">RESOLVED MODEL</span><h2>确认模型、技法与允许参数</h2><p>当前选择会解析为确定性模型。模型的核心组件不可随意删改；需要修改核心时另存为自定义配方。</p></div><div className="resolved-model"><div className="resolved-head"><span className="model-mark">M</span><div><strong>现代本命分析</strong><code>natal.modern.v1 · 1.0.0</code></div><StatusPill tone="green">Stable</StatusPill></div><div className="component-flow"><span>时间与地点</span><b>→</b><span>Swiss星历</span><b>→</b><span>本命盘</span><b>→</b><span>相位与格局</span><b>→</b><span>快照</span></div></div><div className="parameter-grid"><label>官方预设<select><option>official.modern_natal.v1</option><option>official.classical_natal.v1</option><option>official.hellenistic_natal.v1</option></select></label><label>黄道<select><option>回归黄道 Tropical</option><option>恒星黄道 Sidereal</option></select></label><label>宫位制<select><option>Placidus</option><option>Whole Sign</option><option>Equal House</option><option>Koch</option></select></label><label>相位集<select><option>主要相位</option><option>主要 + 次要相位</option><option>自定义相位集</option></select></label></div><div className="locked-note"><span>锁</span><p><strong>核心组件由服务端锁定</strong>：天体位置、宫位、相位和结果Schema不能从浏览器删除。</p></div></div>}
+
+              {builderStep === 4 && <div className="builder-form"><div className="builder-copy"><span className="eyebrow">OUTPUT MANIFEST</span><h2>选择这次需要的输出</h2><p>图表只是结果的不同视图。已存在的事实直接渲染；需要新事实的输出会在预检中增加计算节点。</p></div><div className="output-columns"><div><h3>主输出 · 默认选中</h3>{["本命盘轮盘", "行星位置表", "相位网格", "计算记录报告"].map((item) => <label className="check-row" key={item}><input type="checkbox" defaultChecked /><span>{item}</span><StatusPill tone="green">直接</StatusPill></label>)}</div><div><h3>推荐输出 · 可取消</h3>{["元素与模式", "格局表", "主导行星", "SVG / PNG 导出"].map((item) => <label className="check-row" key={item}><input type="checkbox" defaultChecked /><span>{item}</span><StatusPill tone="blue">推荐</StatusPill></label>)}</div><div><h3>可选扩展 · 不默认计算</h3>{["古典尊贵", "固定星接触", "未来一年行运", "专题模型报告"].map((item) => <label className="check-row" key={item}><input type="checkbox" /><span>{item}</span><StatusPill tone="amber">追加</StatusPill></label>)}</div></div><div className="output-total"><span>当前计划</span><strong>4 个主输出 · 4 个推荐 · 0 个扩展</strong><em>不会生成其余138项图表</em></div></div>}
+
+              {builderStep === 5 && <div className="preflight"><div className="builder-copy"><span className="eyebrow">PREFLIGHT PLAN</span><h2>确认后才开始计算</h2><p>下面是服务端解析出的不可变执行计划。所有依赖、版本、复用与缺失项都在运行前可见。</p></div><div className="preflight-grid"><article><header><StatusPill tone="green">必需 · 4</StatusPill><span>锁定</span></header><ul><li><b>时间与地点规范化</b><small>TimeSpec + Location</small></li><li><b>天体位置</b><small>Swiss Ephemeris 2.10.x</small></li><li><b>宫位与四轴</b><small>Placidus · Tropical</small></li><li><b>主要相位</b><small>official.modern_major.v1</small></li></ul></article><article><header><StatusPill tone="blue">复用 · 3</StatusPill><span>无需重算</span></header><ul><li><b>对象版本</b><small>SV-DEMO-001</small></li><li><b>本命位置</b><small>CS-DEMO-001 / points</small></li><li><b>主要相位</b><small>CS-DEMO-001 / aspects</small></li></ul></article><article><header><StatusPill tone="amber">可选 · 4</StatusPill><span>未选择</span></header><ul><li><b>古典尊贵</b><small>+ 约 140 ms</small></li><li><b>固定星接触</b><small>+ Gaia 常用星表</small></li><li><b>未来一年行运</b><small>转为异步任务</small></li><li><b>专题报告</b><small>需要 ReportRulePack</small></li></ul></article><article><header><StatusPill>阻断 · 1</StatusPill><span>不影响本次</span></header><ul><li><b>关系比较盘</b><small>缺少第二人物；本次不执行</small></li></ul></article></div><div className="recipe-summary"><div><span>Recipe</span><code>AR-DEMO · sha256:91b7…e04c</code></div><div><span>资源等级</span><strong>轻量 · 预计 &lt; 300 ms</strong></div><div><span>将生成</span><strong>1 快照 · 8 视图状态 · 1 技术报告</strong></div><div><span>成熟度</span><strong>Stable · 时间质量 A</strong></div></div></div>}
+            </div>
+
+            <footer className="modal-footer"><button className="secondary-button" onClick={() => builderStep === 1 ? setAnalysisOpen(false) : setBuilderStep((builderStep - 1) as BuilderStep)}>{builderStep === 1 ? "取消" : "上一步"}</button><div><span>{builderStep} / 5</span>{builderStep < 5 ? <button className="primary-button" onClick={() => setBuilderStep((builderStep + 1) as BuilderStep)}>继续</button> : <button className={`primary-button ${running ? "loading" : ""}`} onClick={runPrototype} disabled={running}>{running ? "正在运行…" : "确认 Recipe 并运行"}</button>}</div></footer>
+          </section>
+        </div>
+      )}
     </main>
-  );
-}
-
-function DockMessage({ title, copy, values }: { title: string; copy: string; values: string[] }) {
-  return (
-    <div className="dock-message">
-      <div><span className="eyebrow">STRUCTURED DATA</span><h3>{title}</h3><p>{copy}</p></div>
-      <div className="dock-values">{values.map((value) => <span key={value}>{value}</span>)}</div>
-    </div>
-  );
-}
-
-function InputPanel({ subject, onRun }: { subject: (typeof subjects)[number]; onRun: () => void }) {
-  return (
-    <div className="panel-stack">
-      <div className="inspector-heading"><span className="eyebrow">SOURCE DATA</span><h2>输入资料</h2><p>修改后将创建新的对象版本，不会覆盖历史快照。</p></div>
-      <label className="field"><span>对象名称</span><input defaultValue={subject.name} /></label>
-      <div className="field-row">
-        <label className="field"><span>日期</span><input defaultValue="1992-03-28" /></label>
-        <label className="field"><span>当地时间</span><input defaultValue="21:16" /></label>
-      </div>
-      <label className="field"><span>时间精度</span><select defaultValue="minute"><option value="minute">精确到分钟</option><option value="hour">约一小时</option><option value="unknown">未知</option></select></label>
-      <label className="field"><span>出生地点</span><input defaultValue={subject.place} /><small>31.2304° N · 121.4737° E</small></label>
-      <div className="validation-card success"><span>✓</span><div><strong>时间转换无歧义</strong><small>1992-03-28 13:16:00 UTC · IANA 2026c</small></div></div>
-      <button className="panel-primary-button" onClick={onRun}>创建新版本并运行</button>
-    </div>
-  );
-}
-
-function ParameterPanel() {
-  return (
-    <div className="panel-stack">
-      <div className="inspector-heading"><span className="eyebrow">CALCULATION</span><h2>计算参数</h2><p>所有默认值都会写入请求指纹和计算快照。</p></div>
-      <label className="field"><span>宫位制</span><select defaultValue="placidus"><option value="placidus">Placidus</option><option value="whole">Whole Sign</option><option value="equal">Equal House</option></select></label>
-      <label className="field"><span>黄道体系</span><select defaultValue="tropical"><option value="tropical">Tropical</option><option value="sidereal">Sidereal</option></select></label>
-      <label className="field"><span>月交点</span><select defaultValue="true"><option value="true">True Node</option><option value="mean">Mean Node</option></select></label>
-      <fieldset className="toggle-group"><legend>显示图层</legend>{["主要相位", "次要相位", "小行星", "固定星"].map((item, index) => <label key={item}><input type="checkbox" defaultChecked={index < 2} /><span>{item}</span></label>)}</fieldset>
-      <div className="parameter-summary"><span>规则包</span><strong>official.modern.v1</strong><small>sha256 · b82f…98a1</small></div>
-    </div>
-  );
-}
-
-function ResultPanel() {
-  return (
-    <div className="panel-stack">
-      <div className="inspector-heading"><span className="eyebrow">RESULT SUMMARY</span><h2>结构化结果</h2><p>结果只描述盘面事实与主题活跃度，不输出确定性事件概率。</p></div>
-      <div className="metric-grid">
-        <Metric value="76" label="事业活跃" tone="blue" />
-        <Metric value="62" label="关系活跃" tone="amber" />
-        <Metric value="71" label="当前压力" tone="red" />
-        <Metric value="84" label="证据确定度" tone="green" />
-      </div>
-      <div className="result-block"><span className="block-kicker">核心结构</span><h3>固定能量集中，行动与控制议题明显</h3><p>土星、水瓶座与第三宫重复出现；火星—冥王星压力相位提高表达与执行的强度。</p></div>
-      <div className="result-block"><span className="block-kicker">当前周期</span><h3>职业可见度进入扩张窗口</h3><p>木星触发MC，同时太阳返照与年度小限指向第十宫主题。</p></div>
-    </div>
-  );
-}
-
-function Metric({ value, label, tone }: { value: string; label: string; tone: string }) {
-  return <div className={`metric-card ${tone}`}><strong>{value}</strong><span>{label}</span><i style={{ "--metric": `${value}%` } as CSSProperties} /></div>;
-}
-
-function EvidencePanel() {
-  return (
-    <div className="panel-stack evidence-stack">
-      <div className="inspector-heading"><span className="eyebrow">EVIDENCE CHAIN</span><h2>结构与证据</h2><p>每条结论均可回溯到配置、规则、时间窗口和算法来源。</p></div>
-      <div className="confidence-card">
-        <div className="confidence-ring"><strong>84</strong><small>/100</small></div>
-        <div><span>证据确定度</span><strong>多技法同向</strong><small>4条支持 · 2条压力 · 1条反证</small></div>
-      </div>
-      <div className="evidence-section">
-        <div className="section-label"><span>当前重点</span><small>按权重排序</small></div>
-        <EvidenceItem tone="support" icon="♃" title="事业可见度上升" meta="行运木星 合 MC · 0°18′" weight="0.92" tags={["行运", "第10宫"]} />
-        <EvidenceItem tone="support" icon="☉" title="年度主题聚焦事业" meta="太阳返照 · 木星落第10宫" weight="0.81" tags={["返照", "年度"]} />
-        <EvidenceItem tone="pressure" icon="♄" title="责任与延迟并存" meta="行运土星 刑 本命太阳 · 1°04′" weight="0.78" tags={["压力", "长期"]} />
-        <EvidenceItem tone="counter" icon="♀" title="合作条件提供缓冲" meta="金星 拱 木星 · 出相 2°12′" weight="0.54" tags={["反证", "关系"]} />
-      </div>
-      <button className="outline-button">展开全部 18 条证据</button>
-      <div className="provenance-block"><span>算法来源</span><strong>ALG-TRN-001 · v1.2.0</strong><small>Swiss Ephemeris 2.10 · 已通过金标准</small></div>
-    </div>
-  );
-}
-
-function EvidenceItem({ tone, icon, title, meta, weight, tags }: { tone: string; icon: string; title: string; meta: string; weight: string; tags: string[] }) {
-  return (
-    <article className={`evidence-item ${tone}`}>
-      <span className="evidence-icon">{icon}</span>
-      <div className="evidence-copy"><strong>{title}</strong><small>{meta}</small><div>{tags.map((tag) => <span key={tag}>{tag}</span>)}</div></div>
-      <span className="evidence-weight">{weight}</span>
-    </article>
   );
 }

@@ -1,0 +1,121 @@
+schema_version: 1.0.0
+catalog_id: interstellar.calculation_catalog.v1
+title_zh: Interstellar 全量计算ID目录
+detail_contract: docs/calculation-result-catalog.md
+authoritative_for: [calculation_id, capability_owner, target_release, target_maturity, result_contract]
+
+entry_contract:
+  required_fields: [calculation_id, capability_id, target_release, target_maturity, result_contract]
+  release_values: [foundation, alpha, beta, pro, v1, post_v1]
+  maturity_values: [stable, beta, experimental]
+  completion_requires: [schema, algorithm_card, unit_test, gold_test, differential_test, output_manifest, consumer_view_or_table]
+
+calculations:
+  # 时间、地点、坐标和天文事实
+  - {calculation_id: time.input.v1, capability_id: platform.time_spec, target_release: alpha, target_maturity: stable, result_contract: TimeSpec}
+  - {calculation_id: time.timezone.v1, capability_id: platform.time_spec, target_release: alpha, target_maturity: stable, result_contract: TimeNormalization}
+  - {calculation_id: time.scales.v1, capability_id: astronomy.ephemeris_core, target_release: beta, target_maturity: stable, result_contract: AstronomicalContext}
+  - {calculation_id: time.julian.v1, capability_id: astronomy.ephemeris_core, target_release: alpha, target_maturity: stable, result_contract: AstronomicalContext}
+  - {calculation_id: time.solar_sidereal.v1, capability_id: astronomy.coordinate_systems, target_release: beta, target_maturity: stable, result_contract: AstronomicalContext}
+  - {calculation_id: time.earth_orientation.v1, capability_id: astronomy.coordinate_systems, target_release: beta, target_maturity: stable, result_contract: AstronomicalContext}
+  - {calculation_id: location.normalized.v1, capability_id: platform.location, target_release: foundation, target_maturity: stable, result_contract: Location}
+  - {calculation_id: time.quality.v1, capability_id: natal.unknown_time_mode, target_release: alpha, target_maturity: stable, result_contract: TimeQualityResult}
+  - {calculation_id: astronomy.position.v1, capability_id: astronomy.ephemeris_core, target_release: alpha, target_maturity: stable, result_contract: CelestialPosition}
+  - {calculation_id: coordinate.ecliptic.v1, capability_id: astronomy.coordinate_systems, target_release: alpha, target_maturity: stable, result_contract: CelestialPosition}
+  - {calculation_id: coordinate.equatorial.v1, capability_id: astronomy.coordinate_systems, target_release: beta, target_maturity: stable, result_contract: CelestialPosition}
+  - {calculation_id: coordinate.horizontal.v1, capability_id: astronomy.coordinate_systems, target_release: beta, target_maturity: stable, result_contract: CelestialPosition}
+  - {calculation_id: coordinate.geocentric.v1, capability_id: astronomy.coordinate_systems, target_release: alpha, target_maturity: stable, result_contract: CelestialPosition}
+  - {calculation_id: coordinate.heliocentric.v1, capability_id: astronomy.coordinate_systems, target_release: beta, target_maturity: beta, result_contract: CelestialPosition}
+  - {calculation_id: coordinate.topocentric.v1, capability_id: astronomy.coordinate_systems, target_release: beta, target_maturity: stable, result_contract: CelestialPosition}
+  - {calculation_id: coordinate.local_space.v1, capability_id: astronomy.coordinate_systems, target_release: pro, target_maturity: beta, result_contract: CelestialPosition}
+  - {calculation_id: coordinate.latitude_declination.v1, capability_id: astronomy.coordinate_systems, target_release: beta, target_maturity: beta, result_contract: CelestialPosition}
+
+  # 黄道、盘面、宫位、相位和结构
+  - {calculation_id: zodiac.tropical.v1, capability_id: natal.standard_chart, target_release: alpha, target_maturity: stable, result_contract: ChartResult}
+  - {calculation_id: zodiac.sidereal.v1, capability_id: natal.standard_chart, target_release: beta, target_maturity: beta, result_contract: ChartResult}
+  - {calculation_id: chart.draconic.v1, capability_id: natal.standard_chart, target_release: beta, target_maturity: beta, result_contract: ChartResult}
+  - {calculation_id: chart.solar_lunar.v1, capability_id: natal.standard_chart, target_release: beta, target_maturity: beta, result_contract: ChartResult}
+  - {calculation_id: chart.zodiac_comparison.v1, capability_id: natal.standard_chart, target_release: v1, target_maturity: beta, result_contract: ChartComparisonResult}
+  - {calculation_id: angles.primary.v1, capability_id: astronomy.houses_angles, target_release: alpha, target_maturity: stable, result_contract: HouseSet}
+  - {calculation_id: angles.sensitive.v1, capability_id: astronomy.houses_angles, target_release: beta, target_maturity: beta, result_contract: HouseSet}
+  - {calculation_id: houses.systems.v1, capability_id: astronomy.houses_angles, target_release: alpha, target_maturity: stable, result_contract: HouseSet}
+  - {calculation_id: houses.results.v1, capability_id: astronomy.houses_angles, target_release: alpha, target_maturity: stable, result_contract: HouseSet}
+  - {calculation_id: houses.derived.v1, capability_id: astronomy.houses_angles, target_release: pro, target_maturity: beta, result_contract: DerivedHouseResult}
+  - {calculation_id: houses.polar.v1, capability_id: astronomy.houses_angles, target_release: alpha, target_maturity: stable, result_contract: HouseSet}
+  - {calculation_id: aspect.major.v1, capability_id: astronomy.aspects, target_release: alpha, target_maturity: stable, result_contract: AspectResult}
+  - {calculation_id: aspect.minor.v1, capability_id: astronomy.aspects, target_release: beta, target_maturity: beta, result_contract: AspectResult}
+  - {calculation_id: aspect.harmonic.v1, capability_id: astronomy.aspects, target_release: beta, target_maturity: beta, result_contract: AspectResult}
+  - {calculation_id: aspect.declination.v1, capability_id: astronomy.aspects, target_release: beta, target_maturity: beta, result_contract: AspectResult}
+  - {calculation_id: aspect.latitude.v1, capability_id: astronomy.aspects, target_release: v1, target_maturity: experimental, result_contract: AspectResult}
+  - {calculation_id: aspect.mirror.v1, capability_id: astronomy.aspects, target_release: beta, target_maturity: beta, result_contract: AspectResult}
+  - {calculation_id: distribution.elements.v1, capability_id: natal.patterns_distributions, target_release: alpha, target_maturity: stable, result_contract: DistributionResult}
+  - {calculation_id: distribution.modalities.v1, capability_id: natal.patterns_distributions, target_release: alpha, target_maturity: stable, result_contract: DistributionResult}
+  - {calculation_id: distribution.polarity.v1, capability_id: natal.patterns_distributions, target_release: alpha, target_maturity: stable, result_contract: DistributionResult}
+  - {calculation_id: distribution.hemisphere.v1, capability_id: natal.patterns_distributions, target_release: beta, target_maturity: beta, result_contract: DistributionResult}
+  - {calculation_id: pattern.jones.v1, capability_id: natal.patterns_distributions, target_release: beta, target_maturity: beta, result_contract: PatternResult}
+  - {calculation_id: pattern.geometry.v1, capability_id: natal.patterns_distributions, target_release: beta, target_maturity: beta, result_contract: PatternResult}
+
+  # 古典、Lots、中点、谐波和天文现象
+  - {calculation_id: natal.rulership_reception.v1, capability_id: natal.dignity_reception, target_release: beta, target_maturity: beta, result_contract: DignityResult}
+  - {calculation_id: classical.essential_dignity.v1, capability_id: natal.dignity_reception, target_release: beta, target_maturity: beta, result_contract: DignityResult}
+  - {calculation_id: classical.accidental_dignity.v1, capability_id: natal.dignity_reception, target_release: beta, target_maturity: beta, result_contract: DignityResult}
+  - {calculation_id: classical.condition.v1, capability_id: natal.dignity_reception, target_release: pro, target_maturity: beta, result_contract: DignityResult}
+  - {calculation_id: classical.life_points.v1, capability_id: natal.dignity_reception, target_release: v1, target_maturity: experimental, result_contract: LifePointResearchResult}
+  - {calculation_id: classical.lots.v1, capability_id: natal.arabic_parts, target_release: beta, target_maturity: beta, result_contract: LotResult}
+  - {calculation_id: midpoint.direct_indirect.v1, capability_id: natal.midpoints, target_release: beta, target_maturity: beta, result_contract: MidpointResult}
+  - {calculation_id: harmonic.chart.v1, capability_id: natal.harmonics, target_release: beta, target_maturity: beta, result_contract: ChartResult}
+  - {calculation_id: uranian.dials.v1, capability_id: natal.midpoints, target_release: v1, target_maturity: experimental, result_contract: MidpointResult}
+  - {calculation_id: uranian.tnp.v1, capability_id: natal.midpoints, target_release: v1, target_maturity: experimental, result_contract: ChartPoint}
+  - {calculation_id: fixed_star.position.v1, capability_id: astronomy.fixed_stars, target_release: beta, target_maturity: beta, result_contract: CelestialPosition}
+  - {calculation_id: fixed_star.contact.v1, capability_id: astronomy.fixed_stars, target_release: pro, target_maturity: beta, result_contract: FixedStarContactResult}
+  - {calculation_id: moon.phase.v1, capability_id: astronomy.ephemeris_core, target_release: alpha, target_maturity: stable, result_contract: LunarPhaseResult}
+  - {calculation_id: moon.special_labels.v1, capability_id: astronomy.ephemeris_core, target_release: beta, target_maturity: beta, result_contract: LunarPhaseResult}
+  - {calculation_id: astronomy.eclipse.v1, capability_id: astronomy.eclipse_events, target_release: v1, target_maturity: beta, result_contract: EclipseResult}
+  - {calculation_id: astronomy.phenomena.v1, capability_id: forecast.event_search, target_release: beta, target_maturity: stable, result_contract: ForecastResult}
+  - {calculation_id: moon.void_of_course.v1, capability_id: forecast.event_search, target_release: pro, target_maturity: beta, result_contract: ForecastResult}
+  - {calculation_id: planetary.hours.v1, capability_id: astronomy.ephemeris_core, target_release: pro, target_maturity: beta, result_contract: PlanetaryHourResult}
+
+  # 预测、弧向、返照、时间主星和搜索
+  - {calculation_id: forecast.transit.v1, capability_id: forecast.transits, target_release: alpha, target_maturity: stable, result_contract: ForecastResult}
+  - {calculation_id: progression.secondary.v1, capability_id: forecast.secondary_progression, target_release: beta, target_maturity: beta, result_contract: ForecastResult}
+  - {calculation_id: progression.tertiary.v1, capability_id: forecast.tertiary_progression, target_release: beta, target_maturity: beta, result_contract: ForecastResult}
+  - {calculation_id: progression.minor_quartary.v1, capability_id: forecast.tertiary_progression, target_release: v1, target_maturity: experimental, result_contract: ForecastResult}
+  - {calculation_id: progression.cross.v1, capability_id: forecast.secondary_progression, target_release: beta, target_maturity: beta, result_contract: ForecastResult}
+  - {calculation_id: direction.solar_arc.v1, capability_id: forecast.solar_arc, target_release: beta, target_maturity: beta, result_contract: ForecastResult}
+  - {calculation_id: direction.other_arcs.v1, capability_id: forecast.solar_arc, target_release: pro, target_maturity: beta, result_contract: ForecastResult}
+  - {calculation_id: direction.primary.v1, capability_id: forecast.primary_directions, target_release: pro, target_maturity: beta, result_contract: ForecastResult}
+  - {calculation_id: direction.time_keys.v1, capability_id: forecast.primary_directions, target_release: pro, target_maturity: beta, result_contract: ForecastResult}
+  - {calculation_id: direction.bounds.v1, capability_id: forecast.primary_directions, target_release: pro, target_maturity: experimental, result_contract: ForecastResult}
+  - {calculation_id: forecast.return.v1, capability_id: forecast.returns, target_release: alpha, target_maturity: stable, result_contract: ForecastResult}
+  - {calculation_id: timelord.profection.v1, capability_id: timing.annual_profections, target_release: pro, target_maturity: beta, result_contract: ForecastResult}
+  - {calculation_id: timelord.firdaria.v1, capability_id: timing.firdaria, target_release: pro, target_maturity: beta, result_contract: ForecastResult}
+  - {calculation_id: timelord.zodiacal_releasing.v1, capability_id: timing.zodiacal_releasing, target_release: pro, target_maturity: beta, result_contract: ForecastResult}
+  - {calculation_id: timelord.decennials.v1, capability_id: timing.annual_profections, target_release: v1, target_maturity: experimental, result_contract: ForecastResult}
+  - {calculation_id: timelord.planetary_periods.v1, capability_id: timing.annual_profections, target_release: v1, target_maturity: experimental, result_contract: ForecastResult}
+  - {calculation_id: timelord.return_lord.v1, capability_id: timing.annual_profections, target_release: pro, target_maturity: beta, result_contract: ForecastResult}
+  - {calculation_id: forecast.event_search.v1, capability_id: forecast.event_search, target_release: beta, target_maturity: stable, result_contract: ForecastResult}
+
+  # 关系、项目、择时、卜卦、地理与世运
+  - {calculation_id: relationship.synastry.v1, capability_id: relationship.synastry, target_release: alpha, target_maturity: stable, result_contract: RelationshipResult}
+  - {calculation_id: relationship.composite.v1, capability_id: relationship.composite, target_release: alpha, target_maturity: stable, result_contract: RelationshipResult}
+  - {calculation_id: relationship.davison.v1, capability_id: relationship.davison, target_release: beta, target_maturity: beta, result_contract: RelationshipResult}
+  - {calculation_id: relationship.dynamic.v1, capability_id: relationship.dynamic_forecast, target_release: v1, target_maturity: beta, result_contract: RelationshipResult}
+  - {calculation_id: relationship.event_charts.v1, capability_id: relationship.dynamic_forecast, target_release: v1, target_maturity: experimental, result_contract: RelationshipResult}
+  - {calculation_id: event.chart.v1, capability_id: natal.standard_chart, target_release: alpha, target_maturity: stable, result_contract: ChartResult}
+  - {calculation_id: project.base_chart.v1, capability_id: mundane.organizations_projects, target_release: v1, target_maturity: beta, result_contract: MundaneResult}
+  - {calculation_id: project.forecast.v1, capability_id: mundane.organizations_projects, target_release: v1, target_maturity: beta, result_contract: MundaneResult}
+  - {calculation_id: project.cross_subject.v1, capability_id: mundane.organizations_projects, target_release: v1, target_maturity: experimental, result_contract: RelationshipResult}
+  - {calculation_id: electional.search.v1, capability_id: special.electional, target_release: pro, target_maturity: beta, result_contract: ElectionalResult}
+  - {calculation_id: horary.judgement.v1, capability_id: special.horary, target_release: pro, target_maturity: beta, result_contract: HoraryResult}
+  - {calculation_id: geography.relocation.v1, capability_id: geography.relocation, target_release: pro, target_maturity: beta, result_contract: GeographyResult}
+  - {calculation_id: geography.astrocartography.v1, capability_id: geography.astrocartography, target_release: pro, target_maturity: beta, result_contract: GeographyResult}
+  - {calculation_id: geography.paran.v1, capability_id: geography.parans, target_release: pro, target_maturity: beta, result_contract: GeographyResult}
+  - {calculation_id: geography.local_space.v1, capability_id: geography.local_space, target_release: pro, target_maturity: beta, result_contract: GeographyResult}
+  - {calculation_id: geography.city_compare.v1, capability_id: geography.relocation, target_release: pro, target_maturity: beta, result_contract: GeographyResult}
+  - {calculation_id: geography.travel.v1, capability_id: geography.relocation, target_release: v1, target_maturity: experimental, result_contract: GeographyResult}
+  - {calculation_id: mundane.subject_charts.v1, capability_id: mundane.organizations_projects, target_release: v1, target_maturity: beta, result_contract: MundaneResult}
+  - {calculation_id: mundane.ingress.v1, capability_id: mundane.organizations_projects, target_release: v1, target_maturity: beta, result_contract: MundaneResult}
+  - {calculation_id: mundane.lunation_eclipse.v1, capability_id: mundane.organizations_projects, target_release: v1, target_maturity: beta, result_contract: MundaneResult}
+  - {calculation_id: mundane.outer_cycles.v1, capability_id: mundane.organizations_projects, target_release: v1, target_maturity: experimental, result_contract: MundaneResult}
+  - {calculation_id: mundane.sign_ingress.v1, capability_id: mundane.organizations_projects, target_release: v1, target_maturity: beta, result_contract: MundaneResult}
+  - {calculation_id: mundane.geo_projection.v1, capability_id: mundane.organizations_projects, target_release: v1, target_maturity: beta, result_contract: MundaneResult}

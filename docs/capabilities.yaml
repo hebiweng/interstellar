@@ -1,8 +1,38 @@
-schema_version: 1.0.0
-document_version: 1.0.0-draft.1
+schema_version: 1.3.0
+document_version: 1.3.0-draft.1
 product: interstellar
-baseline_date: 2026-07-17
+baseline_date: 2026-07-18
 license_strategy: agpl_open_source
+
+normative_catalogs:
+  analysis_registry:
+    path: docs/analysis-catalog.yaml
+    authority: entry_point_topic_model_analysis_intent_recipe_and_report_contract
+    base_analysis_models: 12
+    topic_models: 24
+    analysis_intents: 35
+    report_profiles: 6
+  calculation_registry:
+    path: docs/calculation-catalog.yaml
+    authority: calculation_id_capability_owner_release_and_result_contract
+    total_calculations: 99
+    professional_v1_releases: [alpha, beta, pro, v1]
+  calculation_results:
+    path: docs/calculation-result-catalog.md
+    authority: field_algorithm_boundary_and_null_semantics
+  render_views:
+    path: docs/render-catalog.yaml
+    authority: view_id_and_result_dependency
+    total_views: 146
+    professional_v1_range: [1, 128]
+    post_v1_consumer_range: [129, 146]
+
+catalog_coverage_policy:
+  calculation_completion_requires: [schema, algorithm_card, tests, maturity, output_manifest, render_or_table_consumer]
+  view_completion_requires: [result_dependency, renderer, visual_regression, accessibility_fallback, export_or_data_fallback]
+  missing_required_item: explicit_blocked_or_degraded
+  silent_catalog_omission: forbidden
+  build_checks: [unique_calculation_ids, unique_view_ids, contiguous_view_numbers, known_capability_owners, release_scope_consistency]
 
 policy:
   v1_duration_months: 24
@@ -197,6 +227,202 @@ validation_profiles:
     - explicit_warning
     - provenance
 
+analysis_model_policy:
+  registry_capability: platform.analysis_model_registry
+  builtin_versions_immutable: true
+  approved_model_card_required_for_stable: true
+  model_version_in_calculation_fingerprint: true
+  maturity_cannot_exceed_required_components: true
+  required_component_failure: block
+  optional_component_failure: explicit_degradation
+  unknown_birth_time_default: never_assume_midnight
+  custom_model_mode: validated_declarative_components_only
+  availability_states: [available, degraded, blocked]
+  forbidden_outputs: [objective_event_probability, guaranteed_outcome, opaque_luck_score]
+
+analysis_recipe_policy:
+  resolver_capability: platform.analysis_recipe_resolver
+  entry_points: 6
+  preflight_required: true
+  required_dependencies: backend_locked
+  recommended_defaults: user_changeable
+  optional_extensions: user_selected
+  blocked_items_remain_visible: true
+  compute_all_on_page_open: false
+  reachability_gate: [direct_entry, dependency, analysis_recipe]
+
+topic_and_report_policy:
+  topic_models: 24
+  analysis_intents: 35
+  topic_model_core_recipe_immutable: true
+  core_change_requires_custom_model_spec: true
+  formal_report_requires_report_rule_pack: true
+  report_profiles: 6
+  report_densities: [summary, standard, full_technical]
+  report_layers: [RawFact, Evidence, Finding, Conclusion, ReportSection, ReportDocument]
+  proprietary_models_executable_without_license: false
+
+analysis_models:
+  - id: natal.modern.v1
+    version: 1.0.0
+    name_zh: 现代本命分析
+    phase: alpha
+    work_package: V1-MDL-002
+    target_maturity: stable
+    compatible_topics: [general, personality, career, relationship, finance, family]
+    subject_roles: {primary: [person]}
+    minimum_time_precision: date
+    components: [natal.standard_chart, natal.patterns_distributions]
+    default_rule_pack: official.natal.modern.v1
+    primary_outputs: [wheel.natal, table.planet_positions, grid.aspects, table.elements]
+
+  - id: natal.classical.v1
+    version: 1.0.0
+    name_zh: 古典本命分析
+    phase: beta
+    work_package: V1-MDL-003
+    target_maturity: beta
+    compatible_topics: [general, career, relationship, finance, family]
+    subject_roles: {primary: [person]}
+    minimum_time_precision: minute
+    components: [natal.standard_chart, natal.dignity_reception, natal.arabic_parts]
+    default_rule_pack: official.natal.classical.v1
+    primary_outputs: [wheel.natal, table.essential_dignities, graph.dispositor_chain, table.arabic_parts]
+
+  - id: natal.hellenistic.v1
+    version: 1.0.0
+    name_zh: 希腊化本命分析
+    phase: pro
+    work_package: V1-MDL-003
+    target_maturity: beta
+    compatible_topics: [general, career, relationship, finance, family]
+    subject_roles: {primary: [person]}
+    minimum_time_precision: minute
+    components: [natal.standard_chart, natal.dignity_reception, natal.arabic_parts]
+    default_rule_pack: official.natal.hellenistic.v1
+    primary_outputs: [wheel.natal, timeline.profections, timeline.zodiacal_releasing, table.arabic_parts]
+
+  - id: natal.integrated.v1
+    version: 1.0.0
+    name_zh: 综合本命分析
+    phase: pro
+    work_package: V1-MDL-003
+    target_maturity: beta
+    compatible_topics: [general, personality, career, relationship, finance, family]
+    subject_roles: {primary: [person]}
+    minimum_time_precision: minute
+    components: [natal.standard_chart, natal.patterns_distributions, natal.dignity_reception, natal.arabic_parts, topic.structured_evidence]
+    default_rule_pack: official.natal.integrated.v1
+    primary_outputs: [wheel.natal, table.chart_patterns, table.essential_dignities, graph.aspect_network]
+
+  - id: forecast.short_transit.v1
+    version: 1.0.0
+    name_zh: 短期行运分析
+    phase: alpha
+    work_package: V1-MDL-002
+    target_maturity: stable
+    compatible_topics: [general, daily_forecast, monthly_forecast, career, relationship, finance]
+    subject_roles: {primary: [person]}
+    minimum_time_precision: date
+    components: [forecast.transits, forecast.event_search]
+    default_rule_pack: official.forecast.short_transit.v1
+    primary_outputs: [wheel.bi_natal_transit, timeline.transit_gantt, table.future_events, calendar.aspects]
+
+  - id: forecast.annual_integrated.v1
+    version: 1.0.0
+    name_zh: 年度综合分析
+    phase: pro
+    work_package: V1-MDL-003
+    target_maturity: beta
+    compatible_topics: [general, annual_forecast, career, relationship, finance, family]
+    subject_roles: {primary: [person]}
+    minimum_time_precision: minute
+    components: [forecast.transits, forecast.returns, forecast.secondary_progression, timing.annual_profections, topic.structured_evidence]
+    default_rule_pack: official.forecast.annual_integrated.v1
+    primary_outputs: [wheel.tri_natal_return_transit, timeline.multi_technique, calendar.returns, table.active_triggers]
+
+  - id: forecast.long_cycle.v1
+    version: 1.0.0
+    name_zh: 长期周期分析
+    phase: v1
+    work_package: V1-MDL-004
+    target_maturity: beta
+    compatible_topics: [general, long_term_forecast, career, relationship, finance]
+    subject_roles: {primary: [person]}
+    minimum_time_precision: minute
+    components: [forecast.secondary_progression, forecast.solar_arc, forecast.primary_directions, timing.firdaria, timing.zodiacal_releasing, forecast.event_search]
+    default_rule_pack: official.forecast.long_cycle.v1
+    primary_outputs: [timeline.multi_technique, timeline.zodiacal_releasing, timeline.primary_directions, timeline.historical_analogs]
+
+  - id: relationship.comparison.v1
+    version: 1.0.0
+    name_zh: 关系比较分析
+    phase: alpha
+    work_package: V1-MDL-002
+    target_maturity: stable
+    compatible_topics: [relationship]
+    subject_roles: {subject_a: [person], subject_b: [person]}
+    minimum_time_precision: date
+    components: [relationship.synastry]
+    default_rule_pack: official.relationship.comparison.v1
+    primary_outputs: [relationship.synastry_wheel, grid.cross_aspects, table.house_overlays, relationship.bidirectional_house_overlay]
+
+  - id: relationship.entity.v1
+    version: 1.0.0
+    name_zh: 关系实体分析
+    phase: beta
+    work_package: V1-MDL-003
+    target_maturity: beta
+    compatible_topics: [relationship]
+    subject_roles: {subject_a: [person], subject_b: [person]}
+    minimum_time_precision: minute
+    components: [relationship.composite, relationship.davison]
+    optional_components: [relationship.dynamic_forecast]
+    default_rule_pack: official.relationship.entity.v1
+    primary_outputs: [relationship.composite_wheel, relationship.davison_wheel, relationship.cycle_comparison, table.active_triggers]
+
+  - id: special.project_event.v1
+    version: 1.0.0
+    name_zh: 项目与事件分析
+    phase: v1
+    work_package: V1-MDL-004
+    target_maturity: beta
+    compatible_topics: [project, event, mundane]
+    subject_roles: {primary: [project, event, organization]}
+    optional_subject_roles: {related: [person, organization]}
+    minimum_time_precision: minute
+    components: [mundane.organizations_projects, forecast.transits, forecast.event_search, topic.structured_evidence]
+    default_rule_pack: official.special.project_event.v1
+    primary_outputs: [wheel.project_start, wheel.bi_project_founder, timeline.multi_technique, table.future_events]
+
+  - id: special.question_action.v1
+    version: 1.0.0
+    name_zh: 卜卦与择时分析
+    phase: pro
+    work_package: V1-MDL-003
+    target_maturity: beta
+    compatible_topics: [horary, electional]
+    subject_roles: {primary: [question, event]}
+    minimum_time_precision: minute
+    variants:
+      horary: [special.horary]
+      electional: [special.electional]
+    default_rule_pack: official.special.question_action.v1
+    primary_outputs: [wheel.horary, wheel.electional, table.future_events]
+
+  - id: geography.location.v1
+    version: 1.0.0
+    name_zh: 地理与迁移分析
+    phase: pro
+    work_package: V1-MDL-003
+    target_maturity: beta
+    compatible_topics: [relocation]
+    subject_roles: {primary: [person]}
+    minimum_time_precision: minute
+    components: [geography.relocation, geography.astrocartography, geography.local_space, geography.parans]
+    default_rule_pack: official.geography.location.v1
+    primary_outputs: [wheel.relocation, map.astrocartography_global, map.local_space, map.parans, map.city_comparison]
+
 capabilities:
   - id: platform.canonical_schema
     name_zh: Canonical Schema与类型生成
@@ -254,6 +480,48 @@ capabilities:
     outputs: [immutable_subject_version]
     validation_profile: platform_stable
 
+  - id: platform.analysis_model_registry
+    name_zh: 分析模型注册、版本与兼容性解析
+    category: platform
+    phase: foundation
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-MDL-001
+    dependencies: [platform.canonical_schema, platform.subject_versioning]
+    algorithm_card: required
+    data_sources: []
+    inputs: [analysis_topic, subject_roles, time_range, locations, model_version]
+    outputs: [model_catalog, availability, missing_inputs, degradation_plan, expanded_components, output_manifest]
+    validation_profile: platform_stable
+
+  - id: platform.analysis_recipe_resolver
+    name_zh: 六类入口、分析草稿、配方预检与按需计算解析
+    category: platform
+    phase: foundation
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-RCP-001
+    dependencies: [platform.canonical_schema, platform.subject_versioning, platform.analysis_model_registry]
+    algorithm_card: required
+    data_sources: []
+    inputs: [entry_point, analysis_draft, topic_model_or_intent, subject_roles, time_context, allowed_overrides, optional_extensions]
+    outputs: [analysis_recipe, required_nodes, recommended_nodes, optional_nodes, blocked_nodes, reuse_plan, output_plan, resource_estimate]
+    validation_profile: platform_stable
+
+  - id: platform.analysis_catalog
+    name_zh: 24个专题模型、35个分析目的与对象快捷目录
+    category: platform
+    phase: foundation
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-CAT-001
+    dependencies: [platform.analysis_recipe_resolver]
+    algorithm_card: not_required
+    data_sources: []
+    inputs: [analysis_catalog, filters, subject_context]
+    outputs: [topic_model_catalog, analysis_intent_catalog, entry_point_catalog, object_action_matrix]
+    validation_profile: platform_stable
+
   - id: platform.calculation_snapshot
     name_zh: 不可变计算快照与可复现元数据
     category: platform
@@ -261,7 +529,7 @@ capabilities:
     v1_required: true
     target_maturity: stable
     work_package: V1-ENG-001
-    dependencies: [platform.canonical_schema, platform.subject_versioning]
+    dependencies: [platform.canonical_schema, platform.subject_versioning, platform.analysis_recipe_resolver]
     algorithm_card: not_required
     data_sources: []
     inputs: [normalized_chart_request]
@@ -340,6 +608,7 @@ capabilities:
 
   - id: astronomy.ephemeris_core
     name_zh: 主要天体、月球、节点和速度
+    catalog_sections: ["2.1", "2.2", "2.3", "2.13"]
     category: astronomy
     phase: alpha
     v1_required: true
@@ -354,6 +623,7 @@ capabilities:
 
   - id: astronomy.coordinate_systems
     name_zh: 黄道、赤道、地平与观察中心坐标
+    catalog_sections: ["2.4", "2.5", "2.13"]
     category: astronomy
     phase: beta
     v1_required: true
@@ -368,6 +638,7 @@ capabilities:
 
   - id: astronomy.houses_angles
     name_zh: 宫位制、四轴和敏感点
+    catalog_sections: ["2.6"]
     category: astronomy
     phase: alpha
     v1_required: true
@@ -382,6 +653,7 @@ capabilities:
 
   - id: astronomy.aspects
     name_zh: 黄经、赤纬和镜像相位
+    catalog_sections: ["2.7"]
     category: astronomy
     phase: alpha
     v1_required: true
@@ -396,6 +668,7 @@ capabilities:
 
   - id: astronomy.fixed_stars
     name_zh: 固定星位置、合相与Paran基础
+    catalog_sections: ["2.13"]
     category: astronomy
     phase: beta
     v1_required: true
@@ -410,6 +683,7 @@ capabilities:
 
   - id: astronomy.minor_bodies
     name_zh: 常用与按需小行星
+    catalog_sections: ["2.2", "2.3"]
     category: astronomy
     phase: beta
     v1_required: true
@@ -424,6 +698,7 @@ capabilities:
 
   - id: astronomy.eclipse_events
     name_zh: 日月食计算与路径
+    catalog_sections: ["2.13", "7.2"]
     category: astronomy
     phase: v1
     v1_required: true
@@ -438,6 +713,7 @@ capabilities:
 
   - id: natal.standard_chart
     name_zh: 标准本命盘
+    catalog_sections: ["2.3", "2.5", "2.6", "8.5"]
     category: natal
     phase: alpha
     v1_required: true
@@ -466,6 +742,7 @@ capabilities:
 
   - id: natal.patterns_distributions
     name_zh: 元素、模式、半球、行星形态和几何格局
+    catalog_sections: ["2.8"]
     category: natal
     phase: beta
     v1_required: true
@@ -480,6 +757,7 @@ capabilities:
 
   - id: natal.dignity_reception
     name_zh: 本质/偶然尊贵、接纳与定位星链
+    catalog_sections: ["2.9", "2.10"]
     category: classical
     phase: beta
     v1_required: true
@@ -494,6 +772,7 @@ capabilities:
 
   - id: natal.arabic_parts
     name_zh: 阿拉伯点与自定义公式
+    catalog_sections: ["2.11"]
     category: classical
     phase: beta
     v1_required: true
@@ -508,6 +787,7 @@ capabilities:
 
   - id: natal.midpoints
     name_zh: 中点、模数与中点树
+    catalog_sections: ["2.12"]
     category: natal
     phase: beta
     v1_required: true
@@ -522,6 +802,7 @@ capabilities:
 
   - id: natal.harmonics
     name_zh: 任意N次谐波盘
+    catalog_sections: ["2.12"]
     category: natal
     phase: beta
     v1_required: true
@@ -536,6 +817,7 @@ capabilities:
 
   - id: forecast.transits
     name_zh: 行运、宫位进入与多次触发
+    catalog_sections: ["3.1"]
     category: forecast
     phase: alpha
     v1_required: true
@@ -550,6 +832,7 @@ capabilities:
 
   - id: forecast.returns
     name_zh: 太阳、月亮与行星返照
+    catalog_sections: ["3.4"]
     category: forecast
     phase: alpha
     v1_required: true
@@ -564,6 +847,7 @@ capabilities:
 
   - id: forecast.secondary_progression
     name_zh: 次限推运
+    catalog_sections: ["3.2"]
     category: forecast
     phase: beta
     v1_required: true
@@ -578,6 +862,7 @@ capabilities:
 
   - id: forecast.tertiary_progression
     name_zh: 三限及其他推运变体
+    catalog_sections: ["3.2"]
     category: forecast
     phase: beta
     v1_required: true
@@ -592,6 +877,7 @@ capabilities:
 
   - id: forecast.solar_arc
     name_zh: 太阳弧与其他弧向
+    catalog_sections: ["3.3"]
     category: forecast
     phase: beta
     v1_required: true
@@ -606,6 +892,7 @@ capabilities:
 
   - id: forecast.primary_directions
     name_zh: 主限与时间钥匙
+    catalog_sections: ["3.3"]
     category: forecast
     phase: pro
     v1_required: true
@@ -620,6 +907,7 @@ capabilities:
 
   - id: forecast.event_search
     name_zh: 统一事件搜索器
+    catalog_sections: ["3.6"]
     category: forecast
     phase: beta
     v1_required: true
@@ -634,6 +922,7 @@ capabilities:
 
   - id: timing.annual_profections
     name_zh: 年度、月度和日度小限
+    catalog_sections: ["3.5"]
     category: timing
     phase: pro
     v1_required: true
@@ -648,6 +937,7 @@ capabilities:
 
   - id: timing.firdaria
     name_zh: 法达周期
+    catalog_sections: ["3.5"]
     category: timing
     phase: pro
     v1_required: true
@@ -662,6 +952,7 @@ capabilities:
 
   - id: timing.zodiacal_releasing
     name_zh: 黄道释放L1-L4
+    catalog_sections: ["3.5"]
     category: timing
     phase: pro
     v1_required: true
@@ -676,6 +967,7 @@ capabilities:
 
   - id: relationship.synastry
     name_zh: 比较盘与双向宫位覆盖
+    catalog_sections: ["4"]
     category: relationship
     phase: alpha
     v1_required: true
@@ -690,6 +982,7 @@ capabilities:
 
   - id: relationship.composite
     name_zh: 中点组合盘
+    catalog_sections: ["4"]
     category: relationship
     phase: alpha
     v1_required: true
@@ -704,6 +997,7 @@ capabilities:
 
   - id: relationship.davison
     name_zh: 戴维森与校正变体
+    catalog_sections: ["4"]
     category: relationship
     phase: beta
     v1_required: true
@@ -718,6 +1012,7 @@ capabilities:
 
   - id: relationship.dynamic_forecast
     name_zh: 动态关系预测
+    catalog_sections: ["4"]
     category: relationship
     phase: v1
     v1_required: true
@@ -732,6 +1027,7 @@ capabilities:
 
   - id: special.horary
     name_zh: 卜卦占星规则引擎
+    catalog_sections: ["6"]
     category: special
     phase: pro
     v1_required: true
@@ -746,6 +1042,7 @@ capabilities:
 
   - id: special.electional
     name_zh: 择时约束与候选排序
+    catalog_sections: ["5.2"]
     category: special
     phase: pro
     v1_required: true
@@ -760,6 +1057,7 @@ capabilities:
 
   - id: geography.relocation
     name_zh: 迁移盘与城市比较
+    catalog_sections: ["7.1"]
     category: geography
     phase: pro
     v1_required: true
@@ -774,6 +1072,7 @@ capabilities:
 
   - id: geography.astrocartography
     name_zh: Astrocartography角线
+    catalog_sections: ["7.1"]
     category: geography
     phase: pro
     v1_required: true
@@ -788,6 +1087,7 @@ capabilities:
 
   - id: geography.local_space
     name_zh: Local Space方位线
+    catalog_sections: ["7.1"]
     category: geography
     phase: pro
     v1_required: true
@@ -802,6 +1102,7 @@ capabilities:
 
   - id: geography.parans
     name_zh: Paran事件与地图
+    catalog_sections: ["7.1"]
     category: geography
     phase: pro
     v1_required: true
@@ -816,6 +1117,7 @@ capabilities:
 
   - id: mundane.organizations_projects
     name_zh: 国家、公司、项目和世运盘
+    catalog_sections: ["5.1", "7.2"]
     category: mundane
     phase: v1
     v1_required: true
@@ -843,8 +1145,42 @@ capabilities:
     validation_profile: astrology_beta
     forbidden_outputs: [objective_event_probability, guaranteed_outcome, opaque_luck_score]
 
+  - id: reporting.structured_report_engine
+    name_zh: 非AI结构化报告、规则包与三种展示密度
+    category: reporting
+    phase: beta
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-RPT-001
+    dependencies: [platform.calculation_snapshot, platform.analysis_recipe_resolver, topic.structured_evidence, rendering.exports]
+    algorithm_card: required
+    data_sources: []
+    inputs: [calculation_snapshot, report_profile, report_rule_pack, interpretation_templates, locale]
+    outputs: [raw_facts, evidence, findings, conclusions, report_sections, report_document, summary_render, standard_render, full_technical_render]
+    validation_profile: astrology_beta
+    constraints:
+      - no_ai_generation
+      - no_interpretive_finding_without_rule
+      - same_report_document_for_all_densities
+      - missing_template_falls_back_to_structured_finding
+
+  - id: reporting.topic_report_packs
+    name_zh: 24个专题模型报告规则与双语模板
+    category: reporting
+    phase: pro
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-RPT-002
+    dependencies: [reporting.structured_report_engine, platform.analysis_catalog]
+    algorithm_card: required
+    data_sources: []
+    inputs: [topic_model_version, evidence_selectors, finding_rules, conflict_rules, priority_rules, section_definitions, templates]
+    outputs: [report_ready_status, report_rule_pack_versions, localized_templates, professional_review_status]
+    validation_profile: astrology_beta
+
   - id: rendering.wheels
     name_zh: 单轮、双轮、三轮和四轮
+    view_number_ranges: [[1, 40]]
     category: rendering
     phase: alpha
     v1_required: true
@@ -859,6 +1195,7 @@ capabilities:
 
   - id: rendering.tables_grids
     name_zh: 位置表、相位矩阵和专业数据表
+    view_number_ranges: [[33, 33], [41, 44], [46, 73], [117, 120]]
     category: rendering
     phase: alpha
     v1_required: true
@@ -873,6 +1210,7 @@ capabilities:
 
   - id: rendering.timelines_ephemeris
     name_zh: 时间线、甘特图与图形星历
+    view_number_ranges: [[45, 45], [74, 97]]
     category: rendering
     phase: beta
     v1_required: true
@@ -887,6 +1225,7 @@ capabilities:
 
   - id: rendering.maps
     name_zh: 占星地理、Local Space、Paran和食相地图
+    view_number_ranges: [[98, 110]]
     category: rendering
     phase: pro
     v1_required: true
@@ -900,7 +1239,8 @@ capabilities:
     validation_profile: rendering_stable
 
   - id: rendering.advanced_dials
-    name_zh: 中点指针、45度、90度、360度和谐波刻度盘
+    name_zh: 中点指针、22.5度、45度、90度、360度、谐波与高级坐标图
+    view_number_ranges: [[15, 15], [111, 128]]
     category: rendering
     phase: v1
     v1_required: true
@@ -927,6 +1267,20 @@ capabilities:
     outputs: [svg, png, pdf, json, csv, ics]
     validation_profile: rendering_stable
 
+  - id: ux.subject_analysis_workflow
+    name_zh: 示例人物、新增并分析、六类入口、预检和运行流程
+    category: ux
+    phase: alpha
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-UI-001
+    dependencies: [platform.subject_versioning, platform.analysis_catalog, platform.analysis_recipe_resolver, platform.rest_api]
+    algorithm_card: not_required
+    data_sources: []
+    inputs: [entry_point, active_subject, subject_form, technique_or_topic_model_or_intent, allowed_overrides, optional_extensions]
+    outputs: [subject_version, analysis_draft, analysis_recipe, preflight_plan, calculation_request, output_manifest]
+    validation_profile: platform_stable
+
   - id: ux.professional_workspace
     name_zh: 三栏专业工作台与四分屏
     category: ux
@@ -934,7 +1288,7 @@ capabilities:
     v1_required: true
     target_maturity: stable
     work_package: V1-UI-001
-    dependencies: [platform.rest_api, rendering.wheels, rendering.tables_grids]
+    dependencies: [ux.subject_analysis_workflow, rendering.wheels, rendering.tables_grids, reporting.structured_report_engine]
     algorithm_card: not_required
     data_sources: []
     inputs: [user_actions, presets, workspace_layout]
@@ -972,6 +1326,7 @@ capabilities:
 
   - id: future.consumer_product
     name_zh: 普通消费者产品
+    view_number_ranges: [[129, 146]]
     category: future
     phase: post_v1
     v1_required: false
