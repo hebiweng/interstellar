@@ -1,0 +1,6 @@
+1816670	Beijing	Beijing	Peking	39.9075	116.3972	P	PPLC	CN		22				21540000	43	43	Asia/Shanghai	2026-01-01
+4250542	Springfield	Springfield	Springfield Illinois	39.8017	-89.6437	P	PPLA	US		IL	167			114394	182	182	America/Chicago	2026-01-01
+4951788	Springfield	Springfield	Springfield Massachusetts	42.1015	-72.5898	P	PPLA	US		MA	013			155929	21	21	America/New_York	2026-01-01
+9000001	Boundaryville	Boundaryville	Boundary Town	0	0	P	PPL	ZZ		00				1000		0	Etc/UTC	2026-01-01
+9000002	Ocean Station	Ocean Station	Pelagic Station	0	-140	S	STNM	ZZ		00				0		0		2026-01-01
+9000003	Hint Only	Hint Only	Fallback Place	10	10	P	PPL	ZZ		00				500		0	Etc/UTC	2026-01-01

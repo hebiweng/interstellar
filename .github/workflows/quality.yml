@@ -16,6 +16,22 @@ jobs:
   contracts-and-application:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4-alpine
+        env:
+          POSTGRES_DB: interstellar
+          POSTGRES_USER: interstellar_owner
+          POSTGRES_PASSWORD: ci-postgres-secret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U interstellar_owner -d interstellar"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      INTERSTELLAR_TEST_DATABASE_URL: postgresql://interstellar_owner:ci-postgres-secret@127.0.0.1:5432/interstellar
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -47,5 +63,5 @@ jobs:
           INTERSTELLAR_MINIO_APP_SECRET_KEY: ci-minio-app-secret
         run: docker compose -f compose.yaml config --quiet
 
-      - name: Run Foundation repository gate
-        run: npm run foundation:check
+      - name: Run M1 Foundation repository gate
+        run: npm run m1:check

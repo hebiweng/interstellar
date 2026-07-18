@@ -56,13 +56,24 @@ async def service_status(request: Request) -> ServiceStatusResponse:
         environment=settings.environment,
         build_commit=settings.build_commit,
         capabilities={
+            "input_normalization": CapabilityStatus(
+                state="available",
+                detail="M1 local-time normalization and subject-version envelope are available.",
+            ),
+            "recipe_preflight": CapabilityStatus(
+                state="available",
+                detail=(
+                    "M1 can expose required, optional, blocked, and unavailable work "
+                    "without executing astrology."
+                ),
+            ),
             "astrology_calculation": CapabilityStatus(
                 state="not_implemented",
-                detail="Scheduled for later milestones; M0 provides service foundations only.",
+                detail="Scheduled for M2 and later; M1 snapshots contain no astrology facts.",
             ),
             "report_generation": CapabilityStatus(
                 state="not_implemented",
-                detail="Scheduled for later milestones; no report inference runs in M0.",
+                detail="Scheduled for later milestones; no report inference runs in M1.",
             ),
         },
     )

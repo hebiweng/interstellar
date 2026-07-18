@@ -1,0 +1,45 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {"tzid": "Asia/Shanghai"},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[115, 39], [117, 39], [117, 41], [115, 41], [115, 39]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"tzid": "America/Chicago"},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-90, 39], [-89, 39], [-89, 40], [-90, 40], [-90, 39]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"tzid": "America/New_York"},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-73, 42], [-72, 42], [-72, 43], [-73, 43], [-73, 42]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"tzid": "Etc/GMT+1"},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-1, -1], [0, -1], [0, 1], [-1, 1], [-1, -1]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"tzid": "Etc/GMT-1"},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[0, -1], [1, -1], [1, 1], [0, 1], [0, -1]]]
+      }
+    }
+  ]
+}

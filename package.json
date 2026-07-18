@@ -17,11 +17,13 @@
     "contracts:generate": "python3 scripts/generate_contract_types.py",
     "contracts:check": "python3 scripts/generate_contract_types.py --check",
     "contracts:test": "python3 -m unittest discover -s tests/contracts -p test_*.py",
-    "backend:lint": "python3 -m ruff check apps/api apps/worker python tests/backend",
+    "backend:lint": "python3 -m ruff check apps/api apps/worker python scripts/data tests/backend tests/time tests/data tests/integration",
     "backend:test": "python3 -m pytest tests/backend",
+    "m1:domain:test": "PYTHONPATH=apps/api:apps/worker:python python3 -m pytest tests/time tests/data tests/integration",
     "api:dev": "PYTHONPATH=apps/api:python python3 -m interstellar_api",
     "worker:once": "PYTHONPATH=apps/worker:python python3 -m interstellar_worker --once",
     "foundation:check": "node scripts/run-foundation-checks.mjs",
+    "m1:check": "node scripts/run-m1-checks.mjs",
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {

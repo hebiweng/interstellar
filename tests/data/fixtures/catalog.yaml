@@ -1,0 +1,44 @@
+schema_version: 1.0.0
+catalog_id: interstellar.test.catalog.v1
+policy:
+  crawler_usage: forbidden
+  online_runtime_dependency: forbidden_for_required_datasets
+datasets:
+  - id: geonames
+    name: GeoNames fixture
+    required_for_v1: true
+    role: place_search
+    source_url: https://download.geonames.org/export/dump/
+    acquisition:
+      method: official_dump
+      crawler: false
+      runtime_mode: local_fixture
+    version:
+      strategy: fixture_release
+      pinned: test-2026-01-01
+    integrity:
+      state: verified
+    license:
+      identifier: CC-BY-4.0
+    attribution:
+      required: true
+    failure_strategy: retain_last_verified_dump
+  - id: timezone_boundary_builder
+    name: Timezone Boundary Builder fixture
+    required_for_v1: true
+    role: timezone_spatial_lookup
+    source_url: https://github.com/evansiroky/timezone-boundary-builder/releases
+    acquisition:
+      method: official_release
+      crawler: false
+      runtime_mode: local_fixture
+    version:
+      strategy: fixture_release
+      pinned: test-2026a
+    integrity:
+      state: verified
+    license:
+      identifier: ODbL-1.0_output_AND_MIT_code
+    attribution:
+      required: true
+    failure_strategy: require_explicit_timezone

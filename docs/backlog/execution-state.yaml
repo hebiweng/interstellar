@@ -2,39 +2,40 @@ schema_version: 1.0.0
 controller_ref: docs/backlog/execution-controller.yaml
 updated_at: '2026-07-18'
 goal_status: active
-active_stage: foundation
-active_month: M1
+active_stage: professional_alpha
+active_month: M2
 stage_status:
-  foundation: in_progress
-  professional_alpha: pending
+  foundation: completed
+  professional_alpha: in_progress
   professional_beta: pending
   professional_pro: pending
   complete_v1: pending
   released: pending
 
 active_work_packages:
-  - id: M1-PERSISTENCE
-    owner: delegated_m1_persistence
+  - id: M2-EPHEMERIS
+    owner: delegated_m2_ephemeris
     status: in_progress
-    write_scope: [apps/api/migrations, python/interstellar_core/persistence, tests/integration]
-    acceptance: migrations_rls_and_immutable_version_tests_pass_against_postgres
-  - id: M1-TIME
-    owner: delegated_m1_time
+    write_scope: [python/interstellar_core/astronomy/adapters, tests/astronomy/adapters]
+    acceptance: swiss_ephemeris_adapter_returns_canonical_sun_moon_and_planets_with_versioned_provenance
+  - id: M2-ASTRONOMY-CORE
+    owner: delegated_m2_astronomy_core
     status: in_progress
-    write_scope: [python/interstellar_core/time, tests/time]
-    acceptance: normal_overlap_gap_date_only_and_unknown_time_gold_tests_pass
-  - id: M1-LOCATION-DATASETS
-    owner: delegated_m1_location_datasets
+    write_scope: [python/interstellar_core/astronomy/timebase, python/interstellar_core/astronomy/derived, tests/astronomy/core]
+    acceptance: utc_jd_delta_t_motion_state_and_lunar_phase_gold_tests_pass
+  - id: M2-DIFFERENTIAL
+    owner: delegated_m2_differential
     status: in_progress
-    write_scope: [python/interstellar_core/location, python/interstellar_core/datasets, scripts/data, tests/data]
-    acceptance: manifest_import_geonames_disambiguation_boundary_candidates_and_degradation_tests_pass
-  - id: M1-INTEGRATION
+    write_scope: [python/interstellar_core/astronomy/validation, tests/differential/m2, tests/gold/m2]
+    acceptance: independent_reference_fixtures_and_tolerance_report_gate_maturity
+  - id: M2-PIPELINE
     owner: interstellar_primary_agent
     status: in_progress
-    write_scope: [apps/api/interstellar_api, package_scripts, api_contract_integration, foundation_gate]
-    acceptance: birth_input_creates_versioned_subject_recipe_preflight_and_empty_snapshot
+    write_scope: [python/interstellar_core/application, apps/api/interstellar_api, tests/backend, package_scripts, stage_gate]
+    acceptance: normalized_subject_to_canonical_astronomical_snapshot_is_reproducible_and_immutable
 
 current_gate_evidence:
   - docs/backlog/evidence/M0.yaml
+  - docs/backlog/evidence/M1.yaml
 open_blockers: []
-next_action: implement_and_validate_all_M1_parallel_work_packages
+next_action: implement_and_validate_all_M2_parallel_work_packages

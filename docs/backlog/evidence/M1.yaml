@@ -1,0 +1,83 @@
+schema_version: 1.0.0
+milestone: M1
+stage: foundation
+status: passed
+verified_at: '2026-07-18'
+commit_parent: 88512e8
+
+deliverables:
+  - id: M1-001
+    status: passed
+    evidence:
+      - apps/api/migrations/versions/0001_persistence_baseline.py
+      - python/interstellar_core/persistence/schema.py
+      - tests/integration/test_postgres_persistence.py
+    assertions:
+      - clean_alembic_upgrade_and_downgrade
+      - postgres_rls_hides_and_rejects_cross_workspace_rows
+      - subject_versions_and_calculation_snapshots_reject_update_and_delete
+  - id: M1-002
+    status: passed
+    evidence:
+      - python/interstellar_core/time/normalize.py
+      - tests/time/test_normalize.py
+    assertions:
+      - normal_local_time_resolves_one_utc_candidate
+      - dst_overlap_returns_two_candidates_without_implicit_selection
+      - dst_gap_is_explicitly_nonexistent
+      - date_only_and_unknown_never_invent_midnight
+      - unsupported_calendars_are_explicit
+  - id: M1-003
+    status: passed
+    evidence:
+      - python/interstellar_core/location/importers.py
+      - python/interstellar_core/location/resolver.py
+      - tests/data/test_location_importers.py
+      - tests/data/test_location_resolver.py
+    assertions:
+      - geonames_offline_import_contract
+      - place_alias_and_admin_disambiguation
+      - timezone_boundary_overlap_returns_candidates
+      - geonames_hint_and_ocean_cases_degrade_without_guessing
+  - id: M1-004
+    status: passed
+    evidence:
+      - python/interstellar_core/datasets/registry.py
+      - scripts/data/verify_dataset_lock.py
+      - tests/data/test_dataset_registry.py
+    assertions:
+      - manifest_policy_forbids_crawlers_and_required_online_runtime_dependencies
+      - checksum_size_license_and_safe_path_verification
+      - failed_activation_preserves_last_verified_pin
+  - id: M1-INTEGRATION
+    status: passed
+    evidence:
+      - apps/api/interstellar_api/routers/m1_workflow.py
+      - python/interstellar_core/application/recipe_preflight.py
+      - tests/backend/test_m1_workflow_api.py
+    assertions:
+      - birth_input_to_immutable_subject_version
+      - model_preflight_exposes_blocked_unimplemented_components
+      - partial_snapshot_never_claims_astrology_results
+
+gate_commands:
+  - command: INTERSTELLAR_TEST_DATABASE_URL=<isolated-local-postgres> npm run m1:check
+    result: passed
+    totals:
+      backend_api_worker: 21
+      time_location_dataset: 22
+      postgres_contract_and_integration: 6
+      contract_unittests: 6
+      rendered_html: 2
+
+closed_defects:
+  - psycopg3_driver_scheme_was_not_explicit_for_sqlalchemy
+  - psycopg3_percent_placeholder_in_trigger_function
+  - historical_china_dst_expectation_corrected_in_vertical_slice
+  - persistence_sql_ruff_scope_and_migration_import_order
+
+known_limits:
+  - M1 workflow HTTP storage is process-local; PostgreSQL durable schema and RLS are validated separately and are wired in a later adapter task.
+  - No astrology facts are calculated in M1; snapshots are partial and manifest every component as blocked or not requested.
+  - Required external dataset artifacts remain unverified until exact release files and checksums are promoted.
+  - Gregorian normalization is implemented; other calendars remain explicitly unsupported.
