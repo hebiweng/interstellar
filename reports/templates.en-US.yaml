@@ -1,0 +1,94 @@
+schema_version: 1.0.0
+template_set_id: interstellar.report_templates.en-US.v1
+locale: en-US
+deterministic: true
+style: professional_evidence_first_non_fatalistic
+
+common:
+  confidence: {low: Low, medium: Medium, high: High}
+  polarity: {supportive: Supporting evidence, pressuring: Pressure evidence, amplifying: Salience evidence, mitigating: Mitigating evidence, neutral: Descriptive evidence}
+  missing_value: "This item cannot be generated: {{missing_reason}}."
+  unavailable_section: "This section requires {{dependency_name}}, which is not part of the current recipe; no calculation was added automatically."
+  warning: "Notice: {{warning_message}}"
+  evidence_line: "{{configuration_label}}; strength {{strength_label}}; source {{technique_label}}."
+  counter_evidence_line: "Countervailing or mitigating evidence: {{configuration_label}}."
+  conclusion: "{{dimension_label}}: {{summary_text}}"
+  timing_window: "{{start_local}} to {{end_local}}; exact contacts: {{peak_dates_local}}."
+  provenance: "Engine {{engine_version}}; datasets {{dataset_versions}}; rule packs {{rule_pack_versions}}; input fingerprint {{input_fingerprint}}."
+  limits: "This report presents structures and timing windows produced by declared astrological rules. It does not provide objective event probabilities, guaranteed outcomes, or medical, legal, or investment advice."
+  unknown_time: "The birth time is unknown or insufficiently precise; conclusions requiring houses, angles, or exact timing were omitted or degraded."
+
+profiles:
+  report.calculation_record.v1:
+    title: "{{subject_display_name}} | Calculation Record"
+    subtitle: "Calculated {{generated_at_local}} | Snapshot {{snapshot_id}}"
+    sections:
+      subject_and_input: {title: Subject and input, lead: "Subject type: {{subject_type}}; time quality: {{time_quality_label}}; location: {{location_label}}."}
+      parameters: {title: Parameters, lead: "Zodiac {{zodiac_label}}; house system {{house_system_label}}; aspect set {{aspect_profile_label}}; coordinate center {{coordinate_center_label}}."}
+      positions_and_derived_results: {title: Positions and derived results, lead: "The following values come directly from the immutable calculation snapshot and contain no interpretive judgement."}
+      warnings: {title: Warnings and degradations, lead: "The calculation recorded {{warning_count}} warning(s)."}
+      provenance: {title: Sources and versions, lead: "The result can be reproduced from the following version metadata."}
+      technical_appendix: {title: Technical appendix, lead: "Includes raw fields, units, JSON Pointers, and algorithm references."}
+
+  report.technique_analysis.v1:
+    title: "{{subject_display_name}} | {{technique_name}}"
+    subtitle: "Rule pack {{primary_rule_pack_id}} | Maturity {{maturity_label}}"
+    sections:
+      executive_summary: {title: Executive summary, lead: "This technique produced {{accepted_conclusion_count}} conclusion(s) that met the declared threshold."}
+      technique_scope: {title: Technique scope, lead: "This report interprets only {{technique_name}} and its declared dependencies; it does not represent other schools."}
+      key_configurations: {title: Key configurations, lead: "Configurations are ordered by priority, strength, and evidence independence."}
+      timing_windows: {title: Timing windows, lead: "Windows distinguish entry, exact contact, repeat passes, and exit."}
+      evidence: {title: Evidence chain, lead: "Every conclusion is traceable to calculation fields and rules."}
+      limits: {title: Boundaries and limitations, lead: "The following limitations affect the report's usable scope."}
+      technical_appendix: {title: Technical appendix, lead: "Includes parameters, algorithm cards, rule traces, and evidence below the reporting threshold."}
+
+  report.topic_model.v1:
+    title: "{{subject_display_name}} | {{topic_model_name}}"
+    subtitle: "Topic model {{topic_model_id}} | Report rules {{report_rule_pack_id}}"
+    sections:
+      executive_summary: {title: Topic summary, lead: "The summary keeps salience, support, pressure, and confidence separate rather than combining them into a luck score."}
+      baseline: {title: Natal baseline, lead: "These structures describe long-term tendencies in the topic and do not assert specific events."}
+      strengths: {title: Supporting structures, lead: "The following evidence indicates resources, facilitating conditions, or usable capacities."}
+      pressures: {title: Pressure structures, lead: "The following evidence indicates friction, responsibility, delay, or conflict."}
+      contradictions: {title: Contradictions and compensation, lead: "Countervailing evidence is preserved and is not cancelled through net scoring."}
+      activations: {title: Current and future activations, lead: "Only timing techniques already included in the current recipe are shown."}
+      evidence: {title: Evidence index, lead: "Evidence can be inspected by dimension, polarity, technique, and strength."}
+      limits: {title: Boundaries and limitations, lead: "Topic weights are versioned rules, not objective event probabilities."}
+      technical_appendix: {title: Technical appendix, lead: "Includes complete rules, thresholds, counter-evidence, and source versions."}
+
+  report.intent_composite.v1:
+    title: "{{analysis_intent_name}} | Composite Analysis"
+    subtitle: "Subject {{subject_display_name}} | {{topic_model_count}} topic model(s)"
+    sections:
+      question_scope: {title: Question and scope, lead: "This report addresses: {{question_scope_text}}"}
+      executive_summary: {title: Composite summary, lead: "Cross-model findings are combined only where semantics and sources are comparable."}
+      cross_model_findings: {title: Cross-model findings, lead: "Each finding identifies its primary model, supporting models, and unresolved differences."}
+      timing_windows: {title: Timing windows, lead: "Timing findings are graded by technique independence and exactness."}
+      counter_evidence: {title: Counter-evidence and disagreement, lead: "Opposing evidence and differences between schools remain visible."}
+      confidence: {title: Confidence, lead: "Confidence derives from input quality, dependency maturity, evidence strength, and the number of independent techniques."}
+      limits: {title: Boundaries and limitations, lead: "The composite report does not translate astrological signals into event-success probabilities."}
+      technical_appendix: {title: Technical appendix, lead: "Includes the recipe, snapshots, models, rule packs, and cross-model aggregation trace."}
+
+  report.subject_dossier.v1:
+    title: "{{subject_display_name}} | Subject Dossier"
+    subtitle: "Subject version {{subject_version_id}} | {{module_snapshot_count}} module snapshot(s)"
+    sections:
+      subject_profile: {title: Subject profile, lead: "The dossier is based on an immutable subject version."}
+      selected_natal_modules: {title: Selected natal modules, lead: "Only natal modules explicitly selected and already calculated are included."}
+      selected_timing_modules: {title: Selected timing modules, lead: "Each timing module retains its own technique and version."}
+      selected_relationship_or_project_modules: {title: Selected relationship, project, or specialist modules, lead: "Unselected modules are not calculated automatically."}
+      evidence_index: {title: Consolidated evidence index, lead: "Evidence is indexed by subject version, snapshot, model, and dimension."}
+      provenance: {title: Sources and reproducibility, lead: "Lists every subject, dataset, algorithm, rule, and rendering version."}
+
+  report.research_comparison.v1:
+    title: "{{research_title}} | Research Comparison"
+    subtitle: "Sample {{sample_count}} | {{comparable_field_count}} comparable field(s)"
+    sections:
+      research_question: {title: Research question, lead: "Research question: {{research_question_text}}"}
+      sample_definition: {title: Sample definition, lead: "{{included_count}} snapshot(s) included and {{excluded_count}} excluded; every exclusion has a recorded reason."}
+      method_and_versions: {title: Method and versions, lead: "Only data with comparable schemas, field semantics, and calculation settings enter the same statistic."}
+      commonalities: {title: Commonalities, lead: "Commonalities are descriptive patterns and do not establish causality."}
+      differences: {title: Differences, lead: "Differences are shown with effect size, distribution, and missingness."}
+      descriptive_statistics: {title: Descriptive statistics, lead: "Statistics and uncertainty describe only the sample and do not infer astrological causation."}
+      exceptions: {title: Exceptions and outliers, lead: "Outliers retain their provenance and are not removed for contradicting expectations."}
+      reproducibility_appendix: {title: Reproducibility appendix, lead: "Includes query, sample fingerprint, versions, field mappings, and export checksums."}

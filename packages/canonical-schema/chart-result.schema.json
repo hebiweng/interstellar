@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://interstellar.dev/schemas/v1/chart-result.schema.json",
+  "title": "ChartResult",
+  "$defs": {
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["engine", "datasets"],
+      "properties": {
+        "engine": {"$ref": "common.schema.json#/$defs/EngineReference"},
+        "adapter": {"oneOf": [{"$ref": "common.schema.json#/$defs/EngineReference"}, {"type": "null"}]},
+        "datasets": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/DatasetReference"}},
+        "algorithm_cards": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "rule_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+      }
+    },
+    "CelestialPosition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ecliptic", "equatorial", "distance_au", "velocity", "motion_state", "frame", "center", "epoch"],
+      "properties": {
+        "ecliptic": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["longitude_deg", "latitude_deg"],
+          "properties": {
+            "longitude_deg": {"type": "number", "minimum": 0, "exclusiveMaximum": 360},
+            "latitude_deg": {"type": "number", "minimum": -90, "maximum": 90}
+          }
+        },
+        "equatorial": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["right_ascension_deg", "declination_deg"],
+          "properties": {
+            "right_ascension_deg": {"type": "number", "minimum": 0, "exclusiveMaximum": 360},
+            "declination_deg": {"type": "number", "minimum": -90, "maximum": 90}
+          }
+        },
+        "horizontal": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["azimuth_deg", "altitude_deg"],
+          "properties": {
+            "azimuth_deg": {"type": "number", "minimum": 0, "exclusiveMaximum": 360},
+            "altitude_deg": {"type": "number", "minimum": -90, "maximum": 90}
+          }
+        },
+        "distance_au": {"type": "number", "minimum": 0},
+        "velocity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["longitude_deg_per_day", "latitude_deg_per_day", "distance_au_per_day"],
+          "properties": {
+            "longitude_deg_per_day": {"type": "number"},
+            "latitude_deg_per_day": {"type": "number"},
+            "right_ascension_deg_per_day": {"type": ["number", "null"]},
+            "declination_deg_per_day": {"type": ["number", "null"]},
+            "distance_au_per_day": {"type": "number"}
+          }
+        },
+        "motion_state": {"type": "string", "enum": ["direct", "retrograde", "stationary", "not_applicable"]},
+        "frame": {"type": "string", "enum": ["true_ecliptic_of_date", "mean_ecliptic_of_date", "icrs", "j2000", "custom"]},
+        "center": {"type": "string", "enum": ["geocentric", "heliocentric", "topocentric"]},
+        "epoch": {"type": "string", "minLength": 1},
+        "uncertainty_arcsec": {"type": ["number", "null"], "minimum": 0}
+      }
+    },
+    "Point": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["point_id", "kind", "position", "sign", "degree_in_sign", "retrograde", "status_refs"],
+      "properties": {
+        "point_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "kind": {"type": "string", "enum": ["luminary", "planet", "dwarf_planet", "asteroid", "centaur", "node", "lunar_point", "angle", "lot", "fixed_star", "hypothetical", "custom"]},
+        "position": {"$ref": "#/$defs/CelestialPosition"},
+        "sign": {"type": "string", "minLength": 1},
+        "degree_in_sign": {"type": "number", "minimum": 0, "exclusiveMaximum": 30},
+        "house": {"type": ["integer", "null"], "minimum": 1, "maximum": 12},
+        "distance_to_next_cusp_deg": {"type": ["number", "null"], "minimum": 0},
+        "retrograde": {"type": "boolean"},
+        "out_of_bounds": {"type": ["boolean", "null"]},
+        "solar_relation": {"type": ["string", "null"], "enum": ["cazimi", "combust", "under_beams", "free", "not_applicable", null]},
+        "status_refs": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true}
+      }
+    },
+    "House": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["number", "cusp_longitude_deg", "sign", "degree_in_sign", "ruler_ids", "point_ids"],
+      "properties": {
+        "number": {"type": "integer", "minimum": 1, "maximum": 12},
+        "cusp_longitude_deg": {"type": "number", "minimum": 0, "exclusiveMaximum": 360},
+        "sign": {"type": "string", "minLength": 1},
+        "degree_in_sign": {"type": "number", "minimum": 0, "exclusiveMaximum": 30},
+        "ruler_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "point_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "intercepted_signs": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    },
+    "HouseSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "houses", "angles", "polar_status", "warnings"],
+      "properties": {
+        "system": {"type": "string", "minLength": 1},
+        "houses": {"type": "array", "items": {"$ref": "#/$defs/House"}, "minItems": 12, "maxItems": 12},
+        "angles": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["asc", "dsc", "mc", "ic"],
+          "properties": {
+            "asc": {"type": "number", "minimum": 0, "exclusiveMaximum": 360},
+            "dsc": {"type": "number", "minimum": 0, "exclusiveMaximum": 360},
+            "mc": {"type": "number", "minimum": 0, "exclusiveMaximum": 360},
+            "ic": {"type": "number", "minimum": 0, "exclusiveMaximum": 360}
+          }
+        },
+        "sensitive_points": {"type": "object", "additionalProperties": {"type": "number", "minimum": 0, "exclusiveMaximum": 360}},
+        "polar_status": {"type": "string", "enum": ["normal", "distorted", "unsupported", "degraded"]},
+        "warnings": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Warning"}}
+      }
+    },
+    "Aspect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["aspect_id", "point_a", "point_b", "context", "type", "exact_angle_deg", "actual_angle_deg", "orb_deg", "orb_ratio", "applying_state", "direction", "strength", "exact_hits", "rule_refs"],
+      "properties": {
+        "aspect_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "point_a": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "point_b": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "context": {"type": "string", "enum": ["within_chart", "cross_chart", "transit", "progression", "direction", "declination", "latitude", "midpoint"]},
+        "type": {"type": "string", "minLength": 1},
+        "exact_angle_deg": {"type": "number", "minimum": 0, "maximum": 180},
+        "actual_angle_deg": {"type": "number", "minimum": 0, "maximum": 180},
+        "orb_deg": {"type": "number", "minimum": 0},
+        "orb_ratio": {"type": "number", "minimum": 0},
+        "applying_state": {"type": "string", "enum": ["applying", "separating", "exact", "indeterminate", "not_applicable"]},
+        "direction": {"type": "string", "enum": ["dexter", "sinister", "bidirectional", "not_applicable"]},
+        "strength": {"type": "number", "minimum": 0, "maximum": 1},
+        "entered_at": {"type": ["string", "null"], "format": "date-time"},
+        "exact_hits": {"type": "array", "items": {"type": "string", "format": "date-time"}, "uniqueItems": true},
+        "left_at": {"type": ["string", "null"], "format": "date-time"},
+        "rule_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+      }
+    },
+    "AstronomicalContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["utc", "julian_day_ut", "julian_day_tt", "delta_t_seconds", "observer", "coordinate_settings", "provenance"],
+      "properties": {
+        "utc": {"type": "string", "format": "date-time"},
+        "julian_day_ut": {"type": "number"},
+        "julian_day_tt": {"type": "number"},
+        "delta_t_seconds": {"type": "number"},
+        "greenwich_sidereal_time_deg": {"type": "number", "minimum": 0, "exclusiveMaximum": 360},
+        "local_sidereal_time_deg": {"type": "number", "minimum": 0, "exclusiveMaximum": 360},
+        "obliquity_deg": {"type": "number"},
+        "observer": {"$ref": "location.schema.json"},
+        "coordinate_settings": {"type": "object", "additionalProperties": true},
+        "provenance": {"$ref": "#/$defs/Provenance"},
+        "uncertainty": {"type": "object", "additionalProperties": true}
+      }
+    },
+    "Chart": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["chart_id", "family", "technique", "subject_version_refs", "time_spec", "location", "settings", "astronomical_context", "points", "aspects", "distributions", "patterns", "warnings", "provenance"],
+      "properties": {
+        "chart_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "family": {"$ref": "common.schema.json#/$defs/ChartFamily"},
+        "technique": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "subject_version_refs": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "minItems": 1},
+        "time_spec": {"$ref": "time-spec.schema.json"},
+        "location": {"$ref": "location.schema.json"},
+        "settings": {"$ref": "chart-request.schema.json#/$defs/ChartSettings"},
+        "astronomical_context": {"$ref": "#/$defs/AstronomicalContext"},
+        "points": {"type": "array", "items": {"$ref": "#/$defs/Point"}},
+        "house_set": {"oneOf": [{"$ref": "#/$defs/HouseSet"}, {"type": "null"}]},
+        "aspects": {"type": "array", "items": {"$ref": "#/$defs/Aspect"}},
+        "distributions": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "patterns": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "dignities": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "receptions": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "lots": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "midpoints": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "warnings": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Warning"}},
+        "provenance": {"$ref": "#/$defs/Provenance"}
+      }
+    }
+  },
+  "$ref": "#/$defs/Chart"
+}

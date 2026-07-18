@@ -1,0 +1,221 @@
+{
+  "format_version": 1,
+  "generator": "scripts/generate_contract_types.py",
+  "operation_ids": [
+    "cancelJob",
+    "confirmAnalysisRecipe",
+    "createAnalysisDraft",
+    "createCalculation",
+    "createRender",
+    "createReport",
+    "createRulePack",
+    "createRulePackVersion",
+    "createShare",
+    "createSubject",
+    "createSubjectVersion",
+    "deleteSubject",
+    "exportProjectArchive",
+    "getAnalysisDraft",
+    "getAnalysisIntentVersion",
+    "getAnalysisModel",
+    "getAnalysisModelVersion",
+    "getAnalysisRecipe",
+    "getArtifact",
+    "getCalculation",
+    "getDatasetVersion",
+    "getJob",
+    "getReport",
+    "getReportRulePackVersion",
+    "getRulePackVersion",
+    "getSubject",
+    "getTopicModelVersion",
+    "importProjectArchive",
+    "listAnalysisIntents",
+    "listAnalysisModels",
+    "listCalculations",
+    "listDatasetVersions",
+    "listDatasets",
+    "listEntryPoints",
+    "listReportArtifacts",
+    "listReportConclusions",
+    "listReportFindings",
+    "listReportProfiles",
+    "listSubjectVersions",
+    "listSubjects",
+    "listTechniques",
+    "listTopicModels",
+    "renderReport",
+    "resolveAnalysisRecipe",
+    "resolveShare",
+    "revokeShare",
+    "streamJobEvents",
+    "updateAnalysisDraft",
+    "validateCustomAnalysisModel",
+    "validateReportRulePack",
+    "validateRulePack"
+  ],
+  "schemas": [
+    {
+      "definitions": [],
+      "file": "analysis-draft.schema.json",
+      "schema_id": "https://interstellar.dev/schemas/v1/analysis-draft.schema.json",
+      "sha256": "baaf75d9f90502ba6e25b8d1512f9def1df690513a9d57a522067ac2876a9ac4",
+      "title": "AnalysisDraft"
+    },
+    {
+      "definitions": [
+        "RecipeNode",
+        "RecipeOutputs",
+        "ReusePlan"
+      ],
+      "file": "analysis-recipe.schema.json",
+      "schema_id": "https://interstellar.dev/schemas/v1/analysis-recipe.schema.json",
+      "sha256": "2e03b04ae20d2eb9883a7f1c4007c96a55cf1aefcf73ff79e5ea88629ec40174",
+      "title": "AnalysisRecipe"
+    },
+    {
+      "definitions": [
+        "AnalysisModelExecution",
+        "CalculationResult",
+        "RecipeExecutionRequest"
+      ],
+      "file": "calculation-snapshot.schema.json",
+      "schema_id": "https://interstellar.dev/schemas/v1/calculation-snapshot.schema.json",
+      "sha256": "047e99ca08a1f3aed361fe10e9a798b457523289aa042f1ae329d4c561179592",
+      "title": "CalculationSnapshot"
+    },
+    {
+      "definitions": [
+        "ChartDefinition",
+        "ChartSettings",
+        "SubjectInput"
+      ],
+      "file": "chart-request.schema.json",
+      "schema_id": "https://interstellar.dev/schemas/v1/chart-request.schema.json",
+      "sha256": "8c5f2713f7a8810f85943f83b7e91982f829324dc709cddbcd706a01289aa17f",
+      "title": "ChartRequest"
+    },
+    {
+      "definitions": [
+        "Aspect",
+        "AstronomicalContext",
+        "CelestialPosition",
+        "Chart",
+        "House",
+        "HouseSet",
+        "Point",
+        "Provenance"
+      ],
+      "file": "chart-result.schema.json",
+      "schema_id": "https://interstellar.dev/schemas/v1/chart-result.schema.json",
+      "sha256": "11433428240824149d1cf9547b637c2a233df362eeb99ce824f46a936d62cfbe",
+      "title": "ChartResult"
+    },
+    {
+      "definitions": [
+        "ChartFamily",
+        "ContentHash",
+        "DatasetReference",
+        "EngineReference",
+        "EvidencePolarity",
+        "Identifier",
+        "JobStatus",
+        "Maturity",
+        "PageInfo",
+        "ResourceStatus",
+        "ScoreSet",
+        "SemVer",
+        "SourceReference",
+        "SubjectKind",
+        "TimeWindow",
+        "VersionReference",
+        "Warning"
+      ],
+      "file": "common.schema.json",
+      "schema_id": "https://interstellar.dev/schemas/v1/common.schema.json",
+      "sha256": "298a7e4c563a68563ffb8fd8f655f78f45734809c825b3051369dd5580b29138",
+      "title": "Interstellar Common Types"
+    },
+    {
+      "definitions": [],
+      "file": "evidence.schema.json",
+      "schema_id": "https://interstellar.dev/schemas/v1/evidence.schema.json",
+      "sha256": "b15b785197c19993d8d0393921a99ad2380f4ad2868f129d79d9e705506a00c4",
+      "title": "Evidence"
+    },
+    {
+      "definitions": [],
+      "file": "job.schema.json",
+      "schema_id": "https://interstellar.dev/schemas/v1/job.schema.json",
+      "sha256": "c4c357a97487c89ee5c1cf409f0d858f19f20e2460bdc536b212d325f7dfa315",
+      "title": "Job"
+    },
+    {
+      "definitions": [],
+      "file": "location.schema.json",
+      "schema_id": "https://interstellar.dev/schemas/v1/location.schema.json",
+      "sha256": "9cf195b02fb7bb6c8498d77fafd0b00bf15b69c0193b0b3cc766d92d1366d42c",
+      "title": "Location"
+    },
+    {
+      "definitions": [],
+      "file": "output-manifest.schema.json",
+      "schema_id": "https://interstellar.dev/schemas/v1/output-manifest.schema.json",
+      "sha256": "5633482ba2e7e25dc2844b704af971cde356b9ba1cdf64aa596eb65df5a04d79",
+      "title": "OutputManifest"
+    },
+    {
+      "definitions": [],
+      "file": "problem-error.schema.json",
+      "schema_id": "https://interstellar.dev/schemas/v1/problem-error.schema.json",
+      "sha256": "23047cc1f852a70b46c71040799b9b3e4f56366303cecdc24237d7e357d03323",
+      "title": "ProblemError"
+    },
+    {
+      "definitions": [],
+      "file": "render-spec.schema.json",
+      "schema_id": "https://interstellar.dev/schemas/v1/render-spec.schema.json",
+      "sha256": "b9ace1e122966b53af806b57affcdd1ba11e6a7846bc71e16d627c9957e9e8c6",
+      "title": "RenderSpec"
+    },
+    {
+      "definitions": [
+        "Conclusion",
+        "DateOrDateTime",
+        "Finding",
+        "RawFactReference",
+        "ReportBlock",
+        "ReportSection",
+        "ReportTimeWindow",
+        "TechnicalAppendix"
+      ],
+      "file": "report-document.schema.json",
+      "schema_id": "https://interstellar.dev/schemas/v1/report-document.schema.json",
+      "sha256": "e866fa556406e3e3bfdeabeb9b770632575c56cae1d2084e6d50db50abab44c8",
+      "title": "ReportDocument"
+    },
+    {
+      "definitions": [
+        "Subject",
+        "SubjectVersion",
+        "SubjectVersionInput"
+      ],
+      "file": "subject.schema.json",
+      "schema_id": "https://interstellar.dev/schemas/v1/subject.schema.json",
+      "sha256": "971efb3d1e36f5bdde09f0b584294d14c4696684bade849464f3e1f2cf0ca3ef",
+      "title": "Subject Contracts"
+    },
+    {
+      "definitions": [],
+      "file": "time-spec.schema.json",
+      "schema_id": "https://interstellar.dev/schemas/v1/time-spec.schema.json",
+      "sha256": "ecdcfd94323608820c8c9e587ba8597e1377e1aaecde448fc767003d7c337cbb",
+      "title": "TimeSpec"
+    }
+  ],
+  "source_of_truth": {
+    "openapi": "openapi/openapi.yaml",
+    "openapi_sha256": "e8147cef342fe97df6972e422d691e19bff086190a54ef2fdc20cd3153943237",
+    "schema_directory": "packages/canonical-schema"
+  }
+}

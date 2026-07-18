@@ -1,0 +1,254 @@
+schema_version: 1.0.0
+catalog_id: interstellar.dataset_manifest_catalog.v1
+policy:
+  crawler_usage: forbidden
+  acquisition_sources: official_release_dump_api_or_archive_only
+  online_runtime_dependency: forbidden_for_required_datasets
+  checksum_algorithm: sha256
+  checksum_placeholder_rule:
+    value_before_download: null
+    state_before_download: unverified_until_download
+    release_gate: exact_version_and_sha256_required
+  provenance_required: true
+  license_review_required: true
+  failed_sync_behavior: retain_last_verified_version_and_emit_dataset_degraded_event
+  never_replace_verified_data_with_partial_download: true
+
+datasets:
+  - id: swiss_ephemeris
+    name: Swiss Ephemeris
+    required_for_v1: true
+    role: primary_astronomical_and_house_calculation
+    source_url: https://www.astro.com/ftp/swisseph/
+    acquisition:
+      method: official_release_package
+      transport: https_download
+      crawler: false
+      runtime_mode: local_read_only_versioned_files
+    version:
+      strategy: exact_upstream_release
+      pinned: null
+      placeholder_rule: set_release_number_and_file_inventory_before_promotion
+    integrity:
+      sha256: null
+      state: unverified_until_download
+      verify_each_file: true
+    license:
+      identifier: AGPL-3.0-or-later_OR_Swiss_Ephemeris_Professional_License
+      v1_choice: AGPL-3.0-or-later
+      commercial_closed_source_action: purchase_professional_license_before_operation
+    attribution:
+      required: true
+      text_zh: 天文计算使用 Swiss Ephemeris（Astrodienst AG）。
+      text_en: Astronomical calculations use Swiss Ephemeris by Astrodienst AG.
+    sync:
+      cadence: on_verified_upstream_release
+      automatic_promotion: false
+    failure_strategy: block_new_engine_release_keep_last_verified_runtime
+
+  - id: jpl_spice
+    name: NASA/JPL NAIF SPICE
+    required_for_v1: true
+    role: independent_astronomical_differential_validation
+    source_url: https://naif.jpl.nasa.gov/pub/naif/generic_kernels/
+    acquisition:
+      method: official_kernel_download
+      transport: https_download
+      crawler: false
+      runtime_mode: local_validation_only
+    version:
+      strategy: explicit_kernel_set
+      pinned_kernel_set: [de442.bsp, naif0012.tls, pck00011.tpc]
+      optional_extended_historical_kernel_set: [de441_part-1.bsp, de441_part-2.bsp]
+      source_verified_at: '2026-07-18'
+      placeholder_rule: record_exact_kernel_checksums_and_supported_date_ranges_before_release
+    integrity: {sha256: null, state: unverified_until_download, verify_each_kernel: true}
+    license:
+      identifier: NASA_JPL_public_information_terms
+      legal_review_note: preserve_notices_and_follow_each_kernel_readme
+    attribution:
+      required: true
+      text_zh: 独立校验使用 NASA/JPL NAIF SPICE 内核。
+      text_en: Independent validation uses NASA/JPL NAIF SPICE kernels.
+    sync: {cadence: quarterly_check_and_on_kernel_release, automatic_promotion: false}
+    failure_strategy: continue_primary_engine_mark_differential_validation_unavailable
+
+  - id: iana_tzdb
+    name: IANA Time Zone Database
+    required_for_v1: true
+    role: utc_offset_dst_and_historical_timezone_rules
+    source_url: https://data.iana.org/time-zones/releases/
+    acquisition: {method: official_release_archive, transport: https_download, crawler: false, runtime_mode: local_versioned_database}
+    version:
+      strategy: exact_tzdb_release
+      pinned: 2026c
+      source_verified_at: '2026-07-18'
+      placeholder_rule: update_only_after_dst_regression_suite_passes
+    integrity: {sha256: null, state: unverified_until_download, verify_archive: true}
+    license: {identifier: IANA_tz_database_public_domain_style_notice, preserve_notice: true}
+    attribution: {required: true, text_zh: 时区规则来自 IANA Time Zone Database。, text_en: Time-zone rules are sourced from the IANA Time Zone Database.}
+    sync: {cadence: on_each_upstream_release, automatic_promotion: false}
+    failure_strategy: retain_previous_tzdb_block_new_or_changed_zone_claims
+
+  - id: timezone_boundary_builder
+    name: Timezone Boundary Builder
+    required_for_v1: true
+    role: coordinate_to_iana_timezone_spatial_lookup
+    source_url: https://github.com/evansiroky/timezone-boundary-builder/releases
+    acquisition: {method: official_github_release, transport: https_download, crawler: false, runtime_mode: postgis_local}
+    version: {strategy: exact_release_tag, pinned: null, placeholder_rule: release_tag_geometry_variant_and_checksum_required}
+    integrity: {sha256: null, state: unverified_until_download, verify_archive: true}
+    license:
+      identifier: ODbL-1.0_output_AND_MIT_code
+      obligations: [database_attribution, odbl_notice, document_modified_derivative_database]
+    attribution: {required: true, text_zh: 时区边界来自 Timezone Boundary Builder 与 OpenStreetMap 贡献者。, text_en: Time-zone boundaries are from Timezone Boundary Builder and OpenStreetMap contributors.}
+    sync: {cadence: quarterly_check, automatic_promotion: false}
+    failure_strategy: accept_explicit_iana_zone_input_disable_coordinate_auto_resolution
+
+  - id: geonames
+    name: GeoNames
+    required_for_v1: true
+    role: global_place_search_aliases_coordinates_and_admin_hierarchy
+    source_url: https://download.geonames.org/export/dump/
+    acquisition:
+      method: official_dump
+      transport: https_download
+      crawler: false
+      runtime_mode: postgresql_local
+      files: [allCountries.zip, alternateNamesV2.zip, admin1CodesASCII.txt, admin2Codes.txt, countryInfo.txt, timeZones.txt]
+    version: {strategy: dump_date_plus_file_inventory, pinned: null, placeholder_rule: utc_download_date_and_each_file_checksum_required}
+    integrity: {sha256: null, state: unverified_until_download, verify_each_file: true}
+    license: {identifier: CC-BY-4.0, obligations: [credit_GeoNames, retain_source_date]}
+    attribution: {required: true, text_zh: 地名数据 © GeoNames，依据 CC BY 4.0 使用。, text_en: Place data © GeoNames, used under CC BY 4.0.}
+    sync: {cadence: monthly, automatic_promotion: false}
+    failure_strategy: retain_last_verified_dump_allow_manual_coordinates
+
+  - id: natural_earth
+    name: Natural Earth
+    required_for_v1: true
+    role: global_base_map_and_static_export_geometry
+    source_url: https://www.naturalearthdata.com/downloads/
+    acquisition: {method: official_data_package, transport: https_download, crawler: false, runtime_mode: local_map_assets}
+    version: {strategy: exact_natural_earth_version_and_scale, pinned: null, placeholder_rule: pin_10m_50m_110m_packages_separately}
+    integrity: {sha256: null, state: unverified_until_download, verify_each_package: true}
+    license: {identifier: public_domain, obligations: [preserve_source_provenance]}
+    attribution: {required: false, recommended_text_zh: "地图数据：Natural Earth。", recommended_text_en: "Map data: Natural Earth."}
+    sync: {cadence: annual_check, automatic_promotion: false}
+    failure_strategy: retain_bundled_verified_assets
+
+  - id: openstreetmap
+    name: OpenStreetMap
+    required_for_v1: false
+    role: optional_detailed_interactive_map
+    source_url: https://planet.openstreetmap.org/
+    acquisition:
+      method: official_planet_or_authorized_regional_extract
+      transport: https_download
+      crawler: false
+      runtime_mode: self_hosted_extract_or_replaceable_provider
+      public_nominatim_usage: forbidden_for_production_bulk_or_autocomplete
+    version: {strategy: extract_timestamp_and_provider, pinned: null, placeholder_rule: record_extract_boundary_timestamp_and_sha256}
+    integrity: {sha256: null, state: unverified_until_download, verify_extract: true}
+    license: {identifier: ODbL-1.0, obligations: [openstreetmap_attribution, derivative_database_review, provider_terms_if_any]}
+    attribution: {required: true, text_zh: © OpenStreetMap 贡献者。, text_en: © OpenStreetMap contributors.}
+    sync: {cadence: monthly_if_enabled, automatic_promotion: false}
+    failure_strategy: fall_back_to_natural_earth_disable_street_level_features
+
+  - id: iers
+    name: IERS Bulletins and Earth Orientation Parameters
+    required_for_v1: true
+    role: earth_orientation_delta_ut1_polar_motion_and_leap_second_validation
+    source_url: https://data.iers.org/bulletins.php
+    acquisition: {method: official_bulletin_download, transport: https_download, crawler: false, runtime_mode: local_versioned_data}
+    version: {strategy: bulletin_identifier_and_publication_date, pinned: null, placeholder_rule: record_Bulletin_A_B_C_D_ids_and_applicable_ranges}
+    integrity: {sha256: null, state: unverified_until_download, verify_each_bulletin: true}
+    license: {identifier: IERS_official_public_data_terms, preserve_notice: true}
+    attribution: {required: true, text_zh: 地球定向参数来自 IERS。, text_en: Earth-orientation parameters are sourced from IERS.}
+    sync: {cadence: weekly_for_A_monthly_for_B_on_release_for_C_D, automatic_promotion: false}
+    failure_strategy: use_last_final_values_and_model_estimate_emit_precision_warning
+
+  - id: minor_planet_center
+    name: Minor Planet Center orbital data
+    required_for_v1: false
+    role: optional_long_tail_asteroid_and_comet_orbits
+    source_url: https://www.minorplanetcenter.net/data
+    acquisition: {method: official_json_or_download, transport: https_or_documented_api, crawler: false, runtime_mode: common_local_long_tail_cache}
+    version: {strategy: retrieval_timestamp_plus_orbit_solution_epoch, pinned: null, placeholder_rule: record_object_id_epoch_source_revision_and_payload_sha256}
+    integrity: {sha256: null, state: unverified_until_download, verify_payload: true}
+    license: {identifier: MPC_data_terms_review_required, obligations: [preserve_source_and_orbit_epoch]}
+    attribution: {required: true, text_zh: 小天体轨道数据来自 Minor Planet Center。, text_en: Small-body orbital data are sourced from the Minor Planet Center.}
+    sync: {cadence: weekly_if_enabled_or_on_demand, automatic_promotion: false}
+    failure_strategy: use_bundled_common_objects_mark_requested_object_unavailable
+
+  - id: gaia_dr3
+    name: ESA Gaia DR3
+    required_for_v1: false
+    role: optional_fixed_star_astrometry_and_long_tail_star_catalog
+    source_url: https://gea.esac.esa.int/archive/
+    acquisition: {method: official_tap_or_archive_subset, transport: https_or_tap, crawler: false, runtime_mode: curated_local_subset_and_cache}
+    version: {strategy: data_release_plus_query_hash, pinned: Gaia_DR3, placeholder_rule: record_adql_query_result_timestamp_row_count_and_sha256}
+    integrity: {sha256: null, state: unverified_until_download, verify_result: true}
+    license: {identifier: ESA_Gaia_archive_terms, obligations: [ESA_Gaia_DPAC_acknowledgement, cite_release_documentation]}
+    attribution: {required: true, text_zh: 本工作使用 ESA Gaia 任务数据，由 DPAC 处理。, text_en: This work uses data from the ESA Gaia mission processed by the Gaia DPAC.}
+    sync: {cadence: on_data_release_or_curated_query_change, automatic_promotion: false}
+    failure_strategy: use_bundled_named_star_subset_disable_long_tail_search
+
+  - id: nasa_eclipse
+    name: NASA Eclipse Catalogs
+    required_for_v1: false
+    role: eclipse_algorithm_gold_and_differential_fixture
+    source_url: https://eclipse.gsfc.nasa.gov/eclipse.html
+    acquisition: {method: official_catalog_download, transport: https_download, crawler: false, runtime_mode: validation_fixture_only}
+    version: {strategy: catalog_title_revision_and_download_date, pinned: null, placeholder_rule: record_catalog_range_revision_and_sha256}
+    integrity: {sha256: null, state: unverified_until_download, verify_catalog: true}
+    license: {identifier: NASA_information_reuse_terms, obligations: [credit_catalog_authors_and_NASA, no_NASA_endorsement_claim]}
+    attribution: {required: true, text_zh: 食相校验数据来自 NASA/GSFC 食相目录。, text_en: Eclipse validation data are sourced from NASA/GSFC eclipse catalogs.}
+    sync: {cadence: annual_check, automatic_promotion: false}
+    failure_strategy: continue_internal_calculation_mark_external_fixture_unavailable
+
+  - id: wikidata
+    name: Wikidata
+    required_for_v1: false
+    role: optional_curated_public_subject_metadata_without_inferred_birth_time
+    source_url: https://dumps.wikimedia.org/wikidatawiki/entities/
+    acquisition: {method: official_dump_or_documented_sparql_api, transport: https, crawler: false, runtime_mode: curated_reference_cases}
+    version: {strategy: dump_date_or_query_hash, pinned: null, placeholder_rule: record_dump_date_query_source_references_and_sha256}
+    integrity: {sha256: null, state: unverified_until_download, verify_payload: true}
+    license: {identifier: CC0-1.0-structured-data, obligations: [retain_statement_references_and_precision, do_not_claim_birth_time_quality]}
+    attribution: {required: false, recommended_text_zh: 公共对象元数据来自 Wikidata。, recommended_text_en: Public-subject metadata is sourced from Wikidata.}
+    sync: {cadence: quarterly_if_enabled, automatic_promotion: false}
+    failure_strategy: retain_curated_verified_cases_disable_public_subject_import
+
+  - id: authorized_birth_data
+    name: Authorized exact birth-time dataset
+    required_for_v1: false
+    role: post_v1_rectification_research_ground_truth_if_legally_obtained
+    source_url: null
+    acquisition:
+      method: written_authorization_only
+      transport: contract_defined
+      crawler: false
+      runtime_mode: isolated_curated_reference_cases
+    version: {strategy: contract_dataset_release_and_record_provenance, pinned: null, placeholder_rule: no_dataset_may_be_loaded_before_written_authorization_and_privacy_review}
+    integrity: {sha256: null, state: unavailable, verify_each_record_provenance: true}
+    license: {identifier: to_be_negotiated, obligations: [written_authorization, purpose_limitation, deletion_and_retention_terms, privacy_review]}
+    attribution: {required: contract_defined}
+    sync: {cadence: none_until_authorized, automatic_promotion: false}
+    failure_strategy: keep_birth_time_rectification_post_v1_experimental_without_ground_truth_claim
+
+  - id: commercial_map_service
+    name: Commercial map and geocoding service
+    required_for_v1: false
+    role: optional_post_v1_hosted_map_provider
+    source_url: null
+    acquisition:
+      method: procurement_and_documented_api
+      transport: provider_sdk_or_https
+      crawler: false
+      runtime_mode: replaceable_map_adapter
+    version: {strategy: provider_contract_api_and_style_version, pinned: null, placeholder_rule: provider_terms_region_data_residency_and_cost_must_be_approved_before_enablement}
+    integrity: {sha256: null, state: unavailable, verify_provider_response_contract: true}
+    license: {identifier: commercial_contract, obligations: [provider_attribution, cache_and_export_limits, privacy_and_data_residency_review]}
+    attribution: {required: contract_defined}
+    sync: {cadence: provider_contract_defined, automatic_promotion: false}
+    failure_strategy: fall_back_to_natural_earth_and_self_hosted_open_data_adapters

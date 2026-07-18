@@ -1,0 +1,66 @@
+schema_version: 1.0.0
+catalog_id: interstellar.algorithm_cards.v1
+authority: capability_to_review_ready_implementation_specification
+owner: interstellar_primary_agent
+review_model:
+  single_accountable_owner: true
+  parallel_subagents_allowed: true
+  owner_must_recheck_before_merge: true
+  external_review_optional: true
+status_semantics:
+  review: specification_complete_and_ready_for_isolated_implementation
+  approved: implementation_and_independent_difference_review_complete
+  implementation_status: [not_started, in_progress, implemented, verified]
+  maturity_is_controlled_by: docs/capabilities.yaml
+
+cards:
+  - {card_id: ALG-PLATFORM-001, capability_id: platform.time_spec, path: algorithm-cards/platform/platform.time_spec.md, phase: foundation, status: review, implementation_status: not_started}
+  - {card_id: ALG-PLATFORM-002, capability_id: platform.location, path: algorithm-cards/platform/platform.location.md, phase: foundation, status: review, implementation_status: not_started}
+  - {card_id: ALG-PLATFORM-003, capability_id: platform.analysis_model_registry, path: algorithm-cards/platform/platform.analysis_model_registry.md, phase: foundation, status: review, implementation_status: not_started}
+  - {card_id: ALG-PLATFORM-004, capability_id: platform.analysis_recipe_resolver, path: algorithm-cards/platform/platform.analysis_recipe_resolver.md, phase: foundation, status: review, implementation_status: not_started}
+  - {card_id: ALG-PLATFORM-005, capability_id: platform.rule_pack_runtime, path: algorithm-cards/platform/platform.rule_pack_runtime.md, phase: beta, status: review, implementation_status: not_started}
+  - {card_id: ALG-ASTRONOMY-001, capability_id: astronomy.ephemeris_core, path: algorithm-cards/astronomy/astronomy.ephemeris_core.md, phase: alpha, status: review, implementation_status: not_started}
+  - {card_id: ALG-ASTRONOMY-002, capability_id: astronomy.coordinate_systems, path: algorithm-cards/astronomy/astronomy.coordinate_systems.md, phase: beta, status: review, implementation_status: not_started}
+  - {card_id: ALG-ASTRONOMY-003, capability_id: astronomy.houses_angles, path: algorithm-cards/astronomy/astronomy.houses_angles.md, phase: alpha, status: review, implementation_status: not_started}
+  - {card_id: ALG-ASTRONOMY-004, capability_id: astronomy.aspects, path: algorithm-cards/astronomy/astronomy.aspects.md, phase: alpha, status: review, implementation_status: not_started}
+  - {card_id: ALG-ASTRONOMY-005, capability_id: astronomy.fixed_stars, path: algorithm-cards/astronomy/astronomy.fixed_stars.md, phase: beta, status: review, implementation_status: not_started}
+  - {card_id: ALG-ASTRONOMY-006, capability_id: astronomy.minor_bodies, path: algorithm-cards/astronomy/astronomy.minor_bodies.md, phase: beta, status: review, implementation_status: not_started}
+  - {card_id: ALG-ASTRONOMY-007, capability_id: astronomy.eclipse_events, path: algorithm-cards/astronomy/astronomy.eclipse_events.md, phase: v1, status: review, implementation_status: not_started}
+  - {card_id: ALG-NATAL-001, capability_id: natal.standard_chart, path: algorithm-cards/natal/natal.standard_chart.md, phase: alpha, status: review, implementation_status: not_started}
+  - {card_id: ALG-NATAL-002, capability_id: natal.unknown_time_mode, path: algorithm-cards/natal/natal.unknown_time_mode.md, phase: alpha, status: review, implementation_status: not_started}
+  - {card_id: ALG-NATAL-003, capability_id: natal.patterns_distributions, path: algorithm-cards/natal/natal.patterns_distributions.md, phase: alpha, status: review, implementation_status: not_started}
+  - {card_id: ALG-NATAL-004, capability_id: natal.dignity_reception, path: algorithm-cards/natal/natal.dignity_reception.md, phase: beta, status: review, implementation_status: not_started}
+  - {card_id: ALG-NATAL-005, capability_id: natal.arabic_parts, path: algorithm-cards/natal/natal.arabic_parts.md, phase: beta, status: review, implementation_status: not_started}
+  - {card_id: ALG-NATAL-006, capability_id: natal.midpoints, path: algorithm-cards/natal/natal.midpoints.md, phase: beta, status: review, implementation_status: not_started}
+  - {card_id: ALG-NATAL-007, capability_id: natal.harmonics, path: algorithm-cards/natal/natal.harmonics.md, phase: beta, status: review, implementation_status: not_started}
+  - {card_id: ALG-FORECAST-001, capability_id: forecast.transits, path: algorithm-cards/forecast/forecast.transits.md, phase: alpha, status: review, implementation_status: not_started}
+  - {card_id: ALG-FORECAST-002, capability_id: forecast.returns, path: algorithm-cards/forecast/forecast.returns.md, phase: alpha, status: review, implementation_status: not_started}
+  - {card_id: ALG-FORECAST-003, capability_id: forecast.secondary_progression, path: algorithm-cards/forecast/forecast.secondary_progression.md, phase: beta, status: review, implementation_status: not_started}
+  - {card_id: ALG-FORECAST-004, capability_id: forecast.tertiary_progression, path: algorithm-cards/forecast/forecast.tertiary_progression.md, phase: beta, status: review, implementation_status: not_started}
+  - {card_id: ALG-FORECAST-005, capability_id: forecast.solar_arc, path: algorithm-cards/forecast/forecast.solar_arc.md, phase: beta, status: review, implementation_status: not_started}
+  - {card_id: ALG-FORECAST-006, capability_id: forecast.primary_directions, path: algorithm-cards/forecast/forecast.primary_directions.md, phase: pro, status: review, implementation_status: not_started}
+  - {card_id: ALG-FORECAST-007, capability_id: forecast.event_search, path: algorithm-cards/forecast/forecast.event_search.md, phase: beta, status: review, implementation_status: not_started}
+  - {card_id: ALG-TIMING-001, capability_id: timing.annual_profections, path: algorithm-cards/timing/timing.annual_profections.md, phase: pro, status: review, implementation_status: not_started}
+  - {card_id: ALG-TIMING-002, capability_id: timing.firdaria, path: algorithm-cards/timing/timing.firdaria.md, phase: pro, status: review, implementation_status: not_started}
+  - {card_id: ALG-TIMING-003, capability_id: timing.zodiacal_releasing, path: algorithm-cards/timing/timing.zodiacal_releasing.md, phase: pro, status: review, implementation_status: not_started}
+  - {card_id: ALG-RELATIONSHIP-001, capability_id: relationship.synastry, path: algorithm-cards/relationship/relationship.synastry.md, phase: alpha, status: review, implementation_status: not_started}
+  - {card_id: ALG-RELATIONSHIP-002, capability_id: relationship.composite, path: algorithm-cards/relationship/relationship.composite.md, phase: alpha, status: review, implementation_status: not_started}
+  - {card_id: ALG-RELATIONSHIP-003, capability_id: relationship.davison, path: algorithm-cards/relationship/relationship.davison.md, phase: beta, status: review, implementation_status: not_started}
+  - {card_id: ALG-RELATIONSHIP-004, capability_id: relationship.dynamic_forecast, path: algorithm-cards/relationship/relationship.dynamic_forecast.md, phase: v1, status: review, implementation_status: not_started}
+  - {card_id: ALG-SPECIAL-001, capability_id: special.horary, path: algorithm-cards/special/special.horary.md, phase: pro, status: review, implementation_status: not_started}
+  - {card_id: ALG-SPECIAL-002, capability_id: special.electional, path: algorithm-cards/special/special.electional.md, phase: pro, status: review, implementation_status: not_started}
+  - {card_id: ALG-GEOGRAPHY-001, capability_id: geography.relocation, path: algorithm-cards/geography/geography.relocation.md, phase: pro, status: review, implementation_status: not_started}
+  - {card_id: ALG-GEOGRAPHY-002, capability_id: geography.astrocartography, path: algorithm-cards/geography/geography.astrocartography.md, phase: pro, status: review, implementation_status: not_started}
+  - {card_id: ALG-GEOGRAPHY-003, capability_id: geography.local_space, path: algorithm-cards/geography/geography.local_space.md, phase: pro, status: review, implementation_status: not_started}
+  - {card_id: ALG-GEOGRAPHY-004, capability_id: geography.parans, path: algorithm-cards/geography/geography.parans.md, phase: pro, status: review, implementation_status: not_started}
+  - {card_id: ALG-MUNDANE-001, capability_id: mundane.organizations_projects, path: algorithm-cards/mundane/mundane.organizations_projects.md, phase: v1, status: review, implementation_status: not_started}
+  - {card_id: ALG-TOPIC-001, capability_id: topic.structured_evidence, path: algorithm-cards/topic/topic.structured_evidence.md, phase: pro, status: review, implementation_status: not_started}
+  - {card_id: ALG-REPORT-001, capability_id: reporting.structured_report_engine, path: algorithm-cards/reporting/reporting.structured_report_engine.md, phase: beta, status: review, implementation_status: not_started}
+  - {card_id: ALG-REPORT-002, capability_id: reporting.topic_report_packs, path: algorithm-cards/reporting/reporting.topic_report_packs.md, phase: pro, status: review, implementation_status: not_started}
+  - {card_id: ALG-RENDER-001, capability_id: rendering.wheels, path: algorithm-cards/rendering/rendering.wheels.md, phase: alpha, status: review, implementation_status: not_started}
+  - {card_id: ALG-RENDER-002, capability_id: rendering.timelines_ephemeris, path: algorithm-cards/rendering/rendering.timelines_ephemeris.md, phase: beta, status: review, implementation_status: not_started}
+  - {card_id: ALG-RENDER-003, capability_id: rendering.maps, path: algorithm-cards/rendering/rendering.maps.md, phase: pro, status: review, implementation_status: not_started}
+  - {card_id: ALG-RENDER-004, capability_id: rendering.advanced_dials, path: algorithm-cards/rendering/rendering.advanced_dials.md, phase: v1, status: review, implementation_status: not_started}
+  - {card_id: ALG-FUTURE-001, capability_id: future.birth_time_rectification, path: algorithm-cards/future/future.birth_time_rectification.md, phase: post_v1, status: review, implementation_status: not_started}
+  - {card_id: ALG-FUTURE-002, capability_id: future.ai_interpretation, path: algorithm-cards/future/future.ai_interpretation.md, phase: post_v1, status: review, implementation_status: not_started}
+  - {card_id: ALG-FUTURE-003, capability_id: future.non_western_plugins, path: algorithm-cards/future/future.non_western_plugins.md, phase: post_v1, status: review, implementation_status: not_started}

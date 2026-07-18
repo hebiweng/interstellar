@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://interstellar.dev/schemas/v1/report-document.schema.json",
+  "title": "ReportDocument",
+  "$defs": {
+    "DateOrDateTime": {"type": "string", "format": "date-time"},
+    "ReportTimeWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": {"$ref": "#/$defs/DateOrDateTime"},
+        "exact": {"type": "array", "items": {"$ref": "#/$defs/DateOrDateTime"}, "uniqueItems": true},
+        "end": {"$ref": "#/$defs/DateOrDateTime"}
+      }
+    },
+    "RawFactReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["snapshot_id", "json_pointer"],
+      "properties": {
+        "snapshot_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "json_pointer": {"type": "string", "pattern": "^/result/"},
+        "label_key": {"type": ["string", "null"]}
+      }
+    },
+    "Finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "topic", "subtopic", "finding_type", "statement_key", "support_evidence_ids", "pressure_evidence_ids", "counter_evidence_ids", "scores", "priority", "maturity", "rule_pack", "related_view_ids", "warnings"],
+      "properties": {
+        "id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "topic": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "subtopic": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "finding_type": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "statement_key": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "statement_args": {"type": "object", "additionalProperties": true},
+        "active_window": {"oneOf": [{"$ref": "#/$defs/ReportTimeWindow"}, {"type": "null"}]},
+        "support_evidence_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "pressure_evidence_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "counter_evidence_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "scores": {"$ref": "common.schema.json#/$defs/ScoreSet"},
+        "priority": {"type": "integer", "minimum": 0, "maximum": 100},
+        "maturity": {"$ref": "common.schema.json#/$defs/Maturity"},
+        "rule_pack": {"$ref": "common.schema.json#/$defs/VersionReference"},
+        "related_view_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "warnings": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Warning"}}
+      }
+    },
+    "Conclusion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "topic", "title_key", "body_key", "finding_ids", "priority", "maturity", "warnings"],
+      "properties": {
+        "id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "topic": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "title_key": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "body_key": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "template_args": {"type": "object", "additionalProperties": true},
+        "finding_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "minItems": 1, "uniqueItems": true},
+        "priority": {"type": "integer", "minimum": 0, "maximum": 100},
+        "maturity": {"$ref": "common.schema.json#/$defs/Maturity"},
+        "related_view_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "warnings": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Warning"}}
+      }
+    },
+    "ReportBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "density_visibility"],
+      "properties": {
+        "id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "type": {"type": "string", "enum": ["conclusion", "finding_list", "evidence_list", "chart", "table", "timeline", "callout", "technical_appendix"]},
+        "conclusion_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "finding_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "evidence_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "view_id": {"type": ["string", "null"]},
+        "title_key": {"type": ["string", "null"]},
+        "density_visibility": {"type": "array", "items": {"type": "string", "enum": ["summary", "standard", "full_technical"]}, "minItems": 1, "uniqueItems": true},
+        "options": {"type": "object", "additionalProperties": true}
+      }
+    },
+    "ReportSection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title_key", "order", "blocks", "status"],
+      "properties": {
+        "id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "title_key": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "order": {"type": "integer", "minimum": 0},
+        "blocks": {"type": "array", "items": {"$ref": "#/$defs/ReportBlock"}},
+        "status": {"type": "string", "enum": ["complete", "partial", "missing", "technical_only"]},
+        "warnings": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Warning"}}
+      }
+    },
+    "TechnicalAppendix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["raw_fact_refs", "evidence_refs", "algorithm_cards", "datasets"],
+      "properties": {
+        "raw_fact_refs": {"type": "array", "items": {"$ref": "#/$defs/RawFactReference"}},
+        "evidence_refs": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "algorithm_cards": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "datasets": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/DatasetReference"}}
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "version", "schema_version", "status", "profile", "recipe", "source_snapshot_ids", "locale", "title", "summary_conclusion_ids", "evidence", "findings", "conclusions", "sections", "technical_appendix", "coverage", "report_rule_packs", "template_versions", "maturity", "warnings", "created_at"],
+  "properties": {
+    "id": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "version": {"type": "integer", "minimum": 1},
+    "schema_version": {"$ref": "common.schema.json#/$defs/SemVer"},
+    "status": {"type": "string", "enum": ["draft", "resolving", "queued", "generating", "ready", "partial", "failed", "cancelled"]},
+    "profile": {"$ref": "common.schema.json#/$defs/VersionReference"},
+    "recipe": {"type": "object", "additionalProperties": false, "required": ["id", "content_hash"], "properties": {"id": {"$ref": "common.schema.json#/$defs/Identifier"}, "content_hash": {"$ref": "common.schema.json#/$defs/ContentHash"}}},
+    "source_snapshot_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "minItems": 1, "uniqueItems": true},
+    "locale": {"type": "string", "pattern": "^[a-z]{2,3}(?:-[A-Z]{2})?$"},
+    "title": {"type": "string", "minLength": 1},
+    "summary_conclusion_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+    "evidence": {"type": "array", "items": {"$ref": "evidence.schema.json"}},
+    "findings": {"type": "array", "items": {"$ref": "#/$defs/Finding"}},
+    "conclusions": {"type": "array", "items": {"$ref": "#/$defs/Conclusion"}},
+    "sections": {"type": "array", "items": {"$ref": "#/$defs/ReportSection"}},
+    "technical_appendix": {"$ref": "#/$defs/TechnicalAppendix"},
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_selected", "findings_accepted", "findings_excluded", "missing_sections"],
+      "properties": {
+        "evidence_selected": {"type": "integer", "minimum": 0},
+        "findings_accepted": {"type": "integer", "minimum": 0},
+        "findings_excluded": {"type": "integer", "minimum": 0},
+        "missing_sections": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "evidence_coverage_ratio": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "report_rule_packs": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/VersionReference"}},
+    "template_versions": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/VersionReference"}},
+    "maturity": {"$ref": "common.schema.json#/$defs/Maturity"},
+    "warnings": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Warning"}},
+    "created_at": {"type": "string", "format": "date-time"}
+  }
+}

@@ -1,0 +1,48 @@
+schema_version: 1.0.0
+matrix_id: interstellar.differential.v1
+rules:
+  same_time_scale_frame_center_epoch_flags_required: true
+  system_under_test_cannot_generate_reference: true
+  raw_and_normalized_differences_both_saved: true
+  mismatch_requires_classification: [implementation, parameter, data_version, reference_limit, historical_uncertainty]
+profiles:
+  ephemeris:
+    primary_reference: JPL_SPICE_DE440_or_locked_successor
+    secondary_reference: Swiss_Ephemeris_official_tools
+    tolerances: {sun_planets_arcsec: 1, moon_arcsec: 3, speed_degree_per_day: 1.0e-5}
+  time:
+    primary_reference: IANA_zic_or_Python_zoneinfo_with_bundled_same_tzdb
+    tolerances: {seconds: 0}
+  houses:
+    primary_reference: Swiss_Ephemeris_house_test_program
+    secondary_reference: independently_parameterized_open_implementation
+    tolerances: {angles_arcsec: 2, cusps_arcsec: 5}
+  aspects:
+    primary_reference: analytic_invariants_and_independent_pure_function
+    tolerances: {degree: 1.0e-9, dynamic_personal_seconds: 60, dynamic_slow_seconds: 300}
+  returns:
+    primary_reference: independent_root_solver_over_JPL_positions
+    tolerances: {seconds: 60}
+  progressions:
+    primary_reference: documented_formula_fixture_and_independent_implementation
+    tolerances: {position_arcsec: 2, event_seconds: 300}
+  primary_directions:
+    primary_reference: published_worked_examples_with_all_intermediate_values
+    tolerances: {arc_arcmin: 1, converted_date_days: 1}
+  fixed_stars:
+    primary_reference: Gaia_DR3_with_ERFA_proper_motion_and_precession
+    tolerances: {arcsec: 2}
+  eclipse:
+    primary_reference: NASA_Five_Millennium_catalog
+    tolerances: {maximum_seconds_modern: 60, path_km_modern: 10}
+  geography:
+    primary_reference: independent_spherical_astronomy_recalculation
+    secondary_reference: Swiss_rise_set_and_house_calls
+    tolerances: {line_degree_or_km: [0.25, 25], angle_event_seconds: 60}
+  rendering:
+    primary_reference: canonical_geometry_fixture
+    tolerances: {geometry_css_px: 1, image_changed_pixel_ratio: 0.001}
+coverage_gate:
+  stable: [primary_reference_pass, secondary_reference_or_analytic_invariants_pass, parameter_manifest_saved]
+  beta: [primary_reference_pass, known_limits_saved]
+  experimental: [unit_and_invariant_tests_pass, visible_warning]

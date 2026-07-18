@@ -1,0 +1,215 @@
+schema_version: 1.0.0
+backlog_id: interstellar.m24.single_owner.v1
+accountable_owner: interstellar_primary_agent
+execution_model:
+  human_or_agent_owners: 1
+  parallel_subagents: allowed
+  merge_authority: accountable_owner_only
+  source_of_truth:
+    calculations: docs/calculation-catalog.yaml
+    views: docs/render-catalog.yaml
+    capabilities: docs/capabilities.yaml
+    models_and_reports: docs/analysis-catalog.yaml
+    algorithms: algorithm-cards/catalog.yaml
+  monthly_rule: no_month_closes_with_failed_required_gate
+  maturity_rule: specification_approved_is_not_implementation_or_stable
+
+lanes:
+  - {id: contract, owns: [schema, openapi, types, migrations]}
+  - {id: computation, owns: [adapters, calculations, algorithms, differential_tests]}
+  - {id: product, owns: [workflow, recipe, reports, ui, renderers]}
+  - {id: platform, owns: [jobs, storage, security, datasets, operations]}
+  - {id: quality, owns: [gold, contracts, visual, performance, release_gates]}
+
+months:
+  - month: M0
+    objective: 把原型仓库变为可持续开发的规范化Monorepo
+    tasks:
+      - {id: M0-001, lane: contract, deliverable: 根Sites_Web包_apps/api_apps/worker_packages目录与锁文件, acceptance: web_api_worker均可独立启动}
+      - {id: M0-002, lane: platform, deliverable: Compose启动PostgreSQL_PostGIS_Redis_MinIO_Mailpit, acceptance: 健康检查全部通过}
+      - {id: M0-003, lane: quality, deliverable: CI执行catalog_schema_openapi_lint_unit_build, acceptance: 任一契约漂移阻断合并}
+      - {id: M0-004, lane: contract, deliverable: CanonicalSchema与OpenAPI基线, acceptance: JSON_YAML引用可解析}
+  - month: M1
+    objective: 完成对象、时间、地点、数据版本和持久化基础
+    tasks:
+      - {id: M1-001, lane: contract, deliverable: Alembic核心表_RLS_不可变触发器, acceptance: 跨workspace访问被拒绝且版本不可更新}
+      - {id: M1-002, lane: computation, deliverable: TimeSpec与DST候选, acceptance: 正常_重叠_空洞_未知时间金标准通过}
+      - {id: M1-003, lane: computation, deliverable: GeoNames与时区边界导入, acceptance: 地名消歧_边界候选_海域降级通过}
+      - {id: M1-004, lane: platform, deliverable: DatasetVersion_Manifest_许可证台账, acceptance: 每次计算能固定活动数据版本}
+  - month: M2
+    objective: 建立星历适配器和Canonical计算流水线
+    catalog_scope: calculation.target_release in [foundation, alpha]
+    tasks:
+      - {id: M2-001, lane: computation, deliverable: SwissEphemerisAdapter与JPL差异框架, acceptance: Sun_Moon_主要行星位置进入Canonical结果}
+      - {id: M2-002, lane: computation, deliverable: UTC_JD_DeltaT_运动状态_月相, acceptance: 数值_单位_标志_数据版本完整}
+      - {id: M2-003, lane: contract, deliverable: CalculationSnapshot不可变存储, acceptance: 相同指纹可复现且旧快照不覆盖}
+      - {id: M2-004, lane: quality, deliverable: 首批天文金标准与差异报告, acceptance: 达到算法卡容差或显式阻断Stable}
+  - month: M3
+    objective: 完成本命基础事实
+    tasks:
+      - {id: M3-001, lane: computation, deliverable: ASC_MC_12宫与高纬策略, acceptance: 宫头与独立实现差异通过}
+      - {id: M3-002, lane: computation, deliverable: 主要相位_入出相_容许度, acceptance: 圆周与交换属性测试通过}
+      - {id: M3-003, lane: computation, deliverable: 元素_模式_阴阳统计, acceptance: 权重Preset与原始计数同时返回}
+      - {id: M3-004, lane: product, deliverable: 位置_宫位_相位_统计数据表, acceptance: 只消费Snapshot且可CSV_JSON导出}
+  - month: M4
+    objective: 打通六类入口到不可变Recipe
+    tasks:
+      - {id: M4-001, lane: product, deliverable: AnalysisModel_TopicModel_Intent注册表, acceptance: 12_24_35数量和引用一致}
+      - {id: M4-002, lane: product, deliverable: AnalysisDraft与RecipeResolver, acceptance: 六入口等价_DAG去重_阻断_预算测试通过}
+      - {id: M4-003, lane: platform, deliverable: Job_SSE_取消_重试_租约, acceptance: 状态机E2E与故障恢复通过}
+      - {id: M4-004, lane: contract, deliverable: /api/v1核心接口与SDK生成, acceptance: OpenAPI契约测试通过}
+  - month: M5
+    objective: 完成Alpha预测与基础渲染
+    tasks:
+      - {id: M5-001, lane: computation, deliverable: 行运_事件窗口_站点, acceptance: 逆行多击与精确时刻容差通过}
+      - {id: M5-002, lane: computation, deliverable: 太阳返照_月亮返照, acceptance: 多解_地点策略_独立实现通过}
+      - {id: M5-003, lane: product, deliverable: 单轮_双轮_网格_基础时间线, acceptance: SVG视觉回归和无障碍表格通过}
+      - {id: M5-004, lane: product, deliverable: RenderSpec与SVG_PNG导出, acceptance: 屏幕导出同源且哈希复用}
+  - month: M6
+    objective: 交付Professional Alpha
+    tasks:
+      - {id: M6-001, lane: computation, deliverable: 比较盘_宫位覆盖_组合盘, acceptance: A_B交换和方向性测试通过}
+      - {id: M6-002, lane: product, deliverable: 现代本命_短期行运_关系比较三个模型, acceptance: Recipe_结果_图表_报告闭环}
+      - {id: M6-003, lane: product, deliverable: 计算记录与基础技法ReportDocument, acceptance: JSON_HTML_PDF来自同一报告对象}
+      - {id: M6-004, lane: quality, deliverable: Alpha恢复_性能_安全_许可门禁, acceptance: 全新Compose部署并完成恢复演练}
+  - month: M7
+    objective: 扩展坐标、相位和盘型
+    tasks:
+      - {id: M7-001, lane: computation, deliverable: 赤道_地平_日心_拓扑坐标, acceptance: 坐标往返和差异测试通过}
+      - {id: M7-002, lane: computation, deliverable: 次要_谐波_赤纬_镜像相位, acceptance: 每类边界夹具通过}
+      - {id: M7-003, lane: computation, deliverable: 恒星黄道_龙首_太阳_月亮盘, acceptance: Ayanamsa与变体哈希可复现}
+      - {id: M7-004, lane: product, deliverable: 未知时间候选与降级UI, acceptance: 不生成午夜伪盘}
+  - month: M8
+    objective: 完成推运和弧向Beta
+    tasks:
+      - {id: M8-001, lane: computation, deliverable: 次限_推运月亮_推运月相, acceptance: 年龄0恒等与案例差异通过}
+      - {id: M8-002, lane: computation, deliverable: 三限_小限_四限变体, acceptance: 时间钥匙在结果可见}
+      - {id: M8-003, lane: computation, deliverable: 真太阳弧_Naibod_其他弧, acceptance: 跨0度和全点同弧属性通过}
+      - {id: M8-004, lane: product, deliverable: 推运_太阳弧双轮与时间线, acceptance: OutputManifest覆盖全部结果路径}
+  - month: M9
+    objective: 完成古典本命派生层
+    tasks:
+      - {id: M9-001, lane: computation, deliverable: 守护_定位星_接纳, acceptance: 表版本和双向规则可追溯}
+      - {id: M9-002, lane: computation, deliverable: 本质_偶然尊贵和昼夜条件, acceptance: EgyptianTerms_DorotheanTriplicity边界通过}
+      - {id: M9-003, lane: computation, deliverable: Lots公式与自定义三点, acceptance: 昼夜反转_循环_缺失点测试通过}
+      - {id: M9-004, lane: product, deliverable: 古典表格_定位链_技术报告, acceptance: 不输出寿命断言}
+  - month: M10
+    objective: 完成中点、谐波、固定星与常用小天体
+    tasks:
+      - {id: M10-001, lane: computation, deliverable: 中点_中点树_模数盘, acceptance: 对冲歧义和模数测试通过}
+      - {id: M10-002, lane: computation, deliverable: N次谐波与叠盘, acceptance: N1恒等和旋转属性通过}
+      - {id: M10-003, lane: computation, deliverable: 固定星位置_合相与常用小天体, acceptance: 来源_历元_误差完整}
+      - {id: M10-004, lane: product, deliverable: 中点_谐波_固定星视图, acceptance: 专业表格和SVG可导出}
+  - month: M11
+    objective: 完成统一事件搜索与专业时间图
+    tasks:
+      - {id: M11-001, lane: computation, deliverable: 事件搜索DSL与插件, acceptance: 进入_相位_站点_返照_月相_条件交集通过}
+      - {id: M11-002, lane: computation, deliverable: 月亮空亡两种Preset, acceptance: 定义和结果不混用}
+      - {id: M11-003, lane: product, deliverable: 图形星历_甘特_日历_轨迹, acceptance: 高密度与表格降级通过}
+      - {id: M11-004, lane: platform, deliverable: 大区间任务分块_续跑_取消, acceptance: 取消点和部分结果状态正确}
+  - month: M12
+    objective: 交付Professional Beta
+    tasks:
+      - {id: M12-001, lane: product, deliverable: 三轮_四轮_PDF_ICS_项目归档, acceptance: 归档导入后快照哈希一致}
+      - {id: M12-002, lane: product, deliverable: 关系Davison与首批动态关系, acceptance: 时间地点中点和反足点测试通过}
+      - {id: M12-003, lane: quality, deliverable: Alpha_Beta目录覆盖报告, acceptance: 对应计算和视图无静默缺失}
+      - {id: M12-004, lane: quality, deliverable: Beta安全_性能_恢复门禁, acceptance: 已知限制与成熟度真实}
+  - month: M13
+    objective: 建立确定性规则和证据运行时
+    tasks:
+      - {id: M13-001, lane: product, deliverable: RulePack解析_校验_执行_沙箱, acceptance: 注入_循环_预算_确定性测试通过}
+      - {id: M13-002, lane: product, deliverable: Evidence_ThemeMapper_Finding流水线, acceptance: 每条结论可回链Snapshot}
+      - {id: M13-003, lane: contract, deliverable: 官方Preset_RulePack版本API, acceptance: 发布后版本不可变}
+      - {id: M13-004, lane: quality, deliverable: 24专题包回归框架, acceptance: 每包有完整_降级_反证_空结果样本}
+  - month: M14
+    objective: 完成古典时间主星
+    tasks:
+      - {id: M14-001, lane: computation, deliverable: 年月日小限与年主星, acceptance: 周期边界无空洞重叠}
+      - {id: M14-002, lane: computation, deliverable: 昼夜法达, acceptance: 75年主次周期覆盖正确}
+      - {id: M14-003, lane: computation, deliverable: 黄道释放L1_L4, acceptance: Lot_360日年_峰值_断链测试通过}
+      - {id: M14-004, lane: product, deliverable: 三类时间主星时间线, acceptance: 规则变体清晰可见}
+  - month: M15
+    objective: 完成主限和高级方向法
+    tasks:
+      - {id: M15-001, lane: computation, deliverable: Ptolemaic与Placidus主限中间量, acceptance: RA_OA_AD_pole_arc夹具通过}
+      - {id: M15-002, lane: computation, deliverable: Ptolemy_Naibod时间钥匙与through_bounds, acceptance: 弧和日期容差通过}
+      - {id: M15-003, lane: product, deliverable: 主限查询_表格_时间线, acceptance: 顺逆和变体不合并}
+      - {id: M15-004, lane: quality, deliverable: 高纬_拱极_无解边界集, acceptance: 不产生NaN或伪结果}
+  - month: M16
+    objective: 完成卜卦规则引擎
+    tasks:
+      - {id: M16-001, lane: computation, deliverable: 象征星_转宫_接纳_入相, acceptance: 用户事项宫和修正可审计}
+      - {id: M16-002, lane: computation, deliverable: 完成_禁止_挫败_返回_光线传递收集, acceptance: 有序规则案例通过}
+      - {id: M16-003, lane: product, deliverable: 卜卦输入_盘_判定_证据报告, acceptance: considerations不自动判无效}
+      - {id: M16-004, lane: quality, deliverable: 公共领域Lilly案例回归, acceptance: 每项差异有规则说明}
+  - month: M17
+    objective: 完成择时约束优化
+    tasks:
+      - {id: M17-001, lane: computation, deliverable: 硬约束_软条件_场景Preset, acceptance: 每个拒绝候选有证据}
+      - {id: M17-002, lane: computation, deliverable: 状态区间分割与候选精化, acceptance: 不以固定采样冒充最优时刻}
+      - {id: M17-003, lane: product, deliverable: 条件编辑器_候选比较_导出ICS, acceptance: 排序稳定且无成功概率}
+      - {id: M17-004, lane: platform, deliverable: 搜索预算_取消_并发限制, acceptance: 超预算给缩小范围建议}
+  - month: M18
+    objective: 交付Professional Pro地理能力
+    tasks:
+      - {id: M18-001, lane: computation, deliverable: 迁移盘与城市比较, acceptance: 保持UTC并只重算地点相关量}
+      - {id: M18-002, lane: computation, deliverable: Astrocartography四角线与交点, acceptance: 路径容差和日期线分段通过}
+      - {id: M18-003, lane: computation, deliverable: LocalSpace_Paran, acceptance: 地平_大圆_角事件差异通过}
+      - {id: M18-004, lane: product, deliverable: 五类地图和可替换底图, acceptance: 无底图仍可导出计算线与表格}
+  - month: M19
+    objective: 完成项目、组织和世运基础
+    tasks:
+      - {id: M19-001, lane: computation, deliverable: 项目_组织_国家多锚点盘, acceptance: 锚点不静默替换}
+      - {id: M19-002, lane: computation, deliverable: 四季进入_朔望食相_外行星周期, acceptance: 精确时刻和地点策略可复现}
+      - {id: M19-003, lane: product, deliverable: 项目与负责人_组织跨主体分析, acceptance: 复用关系组件且保留角色}
+      - {id: M19-004, lane: product, deliverable: 世运时间线_地图_技术报告, acceptance: 不映射客观事件概率}
+  - month: M20
+    objective: 完成动态关系与长期联合时间线
+    tasks:
+      - {id: M20-001, lane: computation, deliverable: 行运对组合_Davison_双方推运, acceptance: 每条命中保存source_target}
+      - {id: M20-002, lane: product, deliverable: 多技法联合时间线_历史相似周期, acceptance: 相似仅比较配置不暗示事件重复}
+      - {id: M20-003, lane: product, deliverable: 家庭_团队关系网络, acceptance: 多人规模预算和方向性正确}
+      - {id: M20-004, lane: quality, deliverable: 关系动态回归集, acceptance: 组件独立运行与组合运行结果一致}
+  - month: M21
+    objective: 完成24个专题与六类正式报告
+    tasks:
+      - {id: M21-001, lane: product, deliverable: 24个TopicReportRulePack, acceptance: 每包规则_章节_阈值_反证齐全}
+      - {id: M21-002, lane: product, deliverable: 中英文确定性模板, acceptance: 缺模板降级结构化Finding}
+      - {id: M21-003, lane: product, deliverable: 六种ReportProfile三密度, acceptance: 同一ReportDocument子集关系通过}
+      - {id: M21-004, lane: quality, deliverable: 报告覆盖_引用_风险语言审计, acceptance: 无断链结论和禁用概率}
+  - month: M22
+    objective: 完成128项专业图形目录
+    catalog_scope: render.view_number 1..128
+    tasks:
+      - {id: M22-001, lane: product, deliverable: 所有轮盘_关系_表格_时间图, acceptance: 每个view_id有renderer或批准降级}
+      - {id: M22-002, lane: product, deliverable: 地图_刻度盘_网络_高级技术图, acceptance: 数据表替代和无障碍通过}
+      - {id: M22-003, lane: quality, deliverable: 128视图视觉回归, acceptance: 固定数据_视口_主题_字体均可复现}
+      - {id: M22-004, lane: product, deliverable: 视图中心_搜索_按需计算状态, acceptance: 不在打开时全算}
+  - month: M23
+    objective: 稳定API、双语、自托管和安全性能
+    tasks:
+      - {id: M23-001, lane: contract, deliverable: /api/v1冻结_TS_PythonSDK_迁移指南, acceptance: 契约兼容和示例通过}
+      - {id: M23-002, lane: product, deliverable: 中英文_键盘_色盲_打印, acceptance: WCAG关键路径和导出检查通过}
+      - {id: M23-003, lane: platform, deliverable: 备份_恢复_升级_回滚_Runbook, acceptance: 全新机器和灾难恢复演练通过}
+      - {id: M23-004, lane: quality, deliverable: 安全_许可_性能_隐私审计, acceptance: 无P0_P1且许可证署名完整}
+  - month: M24
+    objective: 发布完整西方占星专业平台V1
+    catalog_scope: all_v1_required_capabilities_99_calculations_128_professional_views_12_models_24_topics_35_intents_6_reports
+    tasks:
+      - {id: M24-001, lane: quality, deliverable: 全目录可达性与OutputManifest报告, acceptance: 无静默遗漏}
+      - {id: M24-002, lane: quality, deliverable: 全量金标准_差异_契约_视觉_性能回归, acceptance: 所有目标成熟度真实或显式降级}
+      - {id: M24-003, lane: platform, deliverable: AGPL源码_镜像_Compose_文档_数据获取器, acceptance: 干净环境可复现}
+      - {id: M24-004, lane: product, deliverable: V1已知限制_版本迁移_后续插件路线, acceptance: 不承诺行业不存在的确定答案}
+
+global_exit_gate:
+  required:
+    - all_required_catalog_ids_reachable
+    - schemas_and_openapi_parse
+    - generated_types_match
+    - algorithm_cards_covered
+    - dataset_licenses_and_attribution_complete
+    - gold_and_differential_tests_pass_or_maturity_degraded
+    - visual_catalog_1_128_implemented_or_explicitly_degraded
+    - no_unlinked_report_conclusion
+    - backup_restore_rehearsed
+    - known_limits_published

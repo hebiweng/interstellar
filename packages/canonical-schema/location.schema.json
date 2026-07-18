@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://interstellar.dev/schemas/v1/location.schema.json",
+  "title": "Location",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "latitude", "longitude", "source"],
+  "properties": {
+    "id": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 240},
+    "country_code": {"type": ["string", "null"], "pattern": "^[A-Z]{2}$"},
+    "admin_path": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+    "longitude": {"type": "number", "minimum": -180, "exclusiveMaximum": 180},
+    "elevation_m": {"type": ["number", "null"], "minimum": -500, "maximum": 10000},
+    "timezone_id": {"type": ["string", "null"], "minLength": 1},
+    "geonames_id": {"type": ["integer", "null"], "minimum": 1},
+    "source": {"oneOf": [{"type": "string", "minLength": 1}, {"$ref": "common.schema.json#/$defs/SourceReference"}]},
+    "source_version": {"type": ["string", "null"]},
+    "accuracy_m": {"type": ["number", "null"], "minimum": 0},
+    "warnings": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Warning"}}
+  }
+}

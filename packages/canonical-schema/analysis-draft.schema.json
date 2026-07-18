@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://interstellar.dev/schemas/v1/analysis-draft.schema.json",
+  "title": "AnalysisDraft",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["draft_id", "entry_point_id", "selection", "subject_roles", "allowed_overrides", "optional_extensions", "revision", "status"],
+  "properties": {
+    "draft_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "workspace_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "entry_point_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "analysis_intent_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "topic_model_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "analysis_model_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "technique_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "custom_model_spec": {"type": "object", "additionalProperties": true}
+      },
+      "minProperties": 1,
+      "maxProperties": 1
+    },
+    "subject_roles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role"],
+        "properties": {
+          "role": {"$ref": "common.schema.json#/$defs/Identifier"},
+          "subject_version_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+          "inline_subject": {"$ref": "subject.schema.json#/$defs/SubjectVersionInput"}
+        },
+        "oneOf": [
+          {"required": ["subject_version_id"]},
+          {"required": ["inline_subject"]}
+        ]
+      },
+      "minItems": 1
+    },
+    "time_context": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "start": {"type": "string", "format": "date-time"},
+        "end": {"type": "string", "format": "date-time"},
+        "reference_time": {"$ref": "time-spec.schema.json"}
+      },
+      "anyOf": [{"required": ["start", "end"]}, {"required": ["reference_time"]}]
+    },
+    "locations": {"type": "array", "items": {"$ref": "location.schema.json"}, "uniqueItems": true},
+    "allowed_overrides": {"type": "object", "additionalProperties": true},
+    "optional_extensions": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+    "requested_outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "view_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "report_profile_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "exports": {"type": "array", "items": {"type": "string", "enum": ["svg", "png", "pdf", "json", "csv", "ics", "project_archive"]}, "uniqueItems": true}
+      }
+    },
+    "revision": {"type": "integer", "minimum": 1},
+    "status": {"type": "string", "enum": ["editing", "resolving", "ready", "invalid", "expired"]},
+    "expires_at": {"type": ["string", "null"], "format": "date-time"},
+    "created_at": {"type": ["string", "null"], "format": "date-time"},
+    "updated_at": {"type": ["string", "null"], "format": "date-time"}
+  }
+}

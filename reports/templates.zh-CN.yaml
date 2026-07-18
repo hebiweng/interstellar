@@ -1,0 +1,100 @@
+schema_version: 1.0.0
+template_set_id: interstellar.report_templates.zh-CN.v1
+locale: zh-CN
+deterministic: true
+style: professional_evidence_first_non_fatalistic
+
+common:
+  confidence: {low: 低, medium: 中, high: 高}
+  polarity: {supportive: 支持证据, pressuring: 压力证据, amplifying: 强调证据, mitigating: 缓和证据, neutral: 描述证据}
+  missing_value: "此项无法生成：{{missing_reason}}。"
+  unavailable_section: "本章节所需的 {{dependency_name}} 未包含在当前计算配方中；系统没有自动补算。"
+  warning: "注意：{{warning_message}}"
+  evidence_line: "{{configuration_label}}；强度 {{strength_label}}；来源 {{technique_label}}。"
+  counter_evidence_line: "反向或缓和证据：{{configuration_label}}。"
+  conclusion: "{{dimension_label}}：{{summary_text}}"
+  timing_window: "{{start_local}} 至 {{end_local}}；精确触发：{{peak_dates_local}}。"
+  provenance: "引擎 {{engine_version}}；数据集 {{dataset_versions}}；规则包 {{rule_pack_versions}}；输入指纹 {{input_fingerprint}}。"
+  limits: "本报告呈现按已声明占星规则得到的结构与时间窗口，不构成现实事件概率、保证性结果、医疗、法律或投资建议。"
+  unknown_time: "出生时间未知或精度不足；依赖宫位、四轴及精确时间的结论已省略或降级。"
+
+profiles:
+  report.calculation_record.v1:
+    title: "{{subject_display_name}}｜计算记录"
+    subtitle: "计算时间 {{generated_at_local}}｜快照 {{snapshot_id}}"
+    sections:
+      subject_and_input:
+        title: 对象与输入
+        lead: "对象类型：{{subject_type}}；时间可信度：{{time_quality_label}}；地点：{{location_label}}。"
+      parameters:
+        title: 计算参数
+        lead: "黄道 {{zodiac_label}}；宫位制 {{house_system_label}}；相位集 {{aspect_profile_label}}；坐标中心 {{coordinate_center_label}}。"
+      positions_and_derived_results:
+        title: 位置与派生结果
+        lead: "下列结果直接来自不可变计算快照，不包含解释性判断。"
+      warnings: {title: 警告与降级, lead: "共记录 {{warning_count}} 条警告。"}
+      provenance: {title: 来源与版本, lead: "本次结果可通过下列版本元数据复现。"}
+      technical_appendix: {title: 技术附录, lead: "包含原始字段、单位、JSON Pointer 和算法引用。"}
+
+  report.technique_analysis.v1:
+    title: "{{subject_display_name}}｜{{technique_name}}"
+    subtitle: "规则包 {{primary_rule_pack_id}}｜成熟度 {{maturity_label}}"
+    sections:
+      executive_summary: {title: 结论摘要, lead: "当前技法形成 {{accepted_conclusion_count}} 条达到阈值的结论。"}
+      technique_scope: {title: 技法范围, lead: "本报告只解释 {{technique_name}} 及其已声明依赖，不代表其他流派。"}
+      key_configurations: {title: 关键配置, lead: "配置按优先级、强度与证据独立性排序。"}
+      timing_windows: {title: 时间窗口, lead: "时间窗口区分进入、精确、回访和离开阶段。"}
+      evidence: {title: 证据链, lead: "每条结论均可追溯到计算快照字段与规则。"}
+      limits: {title: 边界与限制, lead: "以下限制影响本报告的可用范围。"}
+      technical_appendix: {title: 技术附录, lead: "包含参数、算法卡、规则轨迹及未入选证据。"}
+
+  report.topic_model.v1:
+    title: "{{subject_display_name}}｜{{topic_model_name}}"
+    subtitle: "专题模型 {{topic_model_id}}｜报告规则 {{report_rule_pack_id}}"
+    sections:
+      executive_summary: {title: 专题摘要, lead: "摘要分别呈现主题活跃度、支持、压力与确定度，不合并为单一好运分。"}
+      baseline: {title: 本命基线, lead: "这些结构描述该主题的长期倾向，不代表具体事件。"}
+      strengths: {title: 支持结构, lead: "以下证据显示资源、顺畅条件或可用能力。"}
+      pressures: {title: 压力结构, lead: "以下证据显示摩擦、责任、延迟或冲突。"}
+      contradictions: {title: 矛盾与补偿, lead: "相反证据被并列保留，不以正负抵消。"}
+      activations: {title: 当前与未来激活, lead: "仅显示当前配方已计算的时间技法。"}
+      evidence: {title: 证据索引, lead: "可按维度、极性、技法和强度查看证据。"}
+      limits: {title: 边界与限制, lead: "专题权重属于版本化规则，不是客观事件概率。"}
+      technical_appendix: {title: 技术附录, lead: "包含完整规则、阈值、反证与来源版本。"}
+
+  report.intent_composite.v1:
+    title: "{{analysis_intent_name}}｜综合分析"
+    subtitle: "对象 {{subject_display_name}}｜包含 {{topic_model_count}} 个专题模型"
+    sections:
+      question_scope: {title: 问题与范围, lead: "本报告回答：{{question_scope_text}}"}
+      executive_summary: {title: 综合摘要, lead: "跨模型结论仅在语义相同且来源可比较时聚合。"}
+      cross_model_findings: {title: 跨模型发现, lead: "以下结论标明主模型、支持模型与未解决差异。"}
+      timing_windows: {title: 时间窗口, lead: "时间结论按技法独立性与精确度分级。"}
+      counter_evidence: {title: 反证与不同意见, lead: "相反证据和流派差异不会被隐藏。"}
+      confidence: {title: 确定度, lead: "确定度来自输入质量、依赖成熟度、证据强度与独立技法数量。"}
+      limits: {title: 边界与限制, lead: "综合报告不把占星信号转换为事件成功概率。"}
+      technical_appendix: {title: 技术附录, lead: "包含配方、快照、模型、规则包及跨模型聚合轨迹。"}
+
+  report.subject_dossier.v1:
+    title: "{{subject_display_name}}｜对象档案"
+    subtitle: "对象版本 {{subject_version_id}}｜模块快照 {{module_snapshot_count}} 个"
+    sections:
+      subject_profile: {title: 对象资料, lead: "档案以不可变对象版本为基础。"}
+      selected_natal_modules: {title: 已选本命模块, lead: "仅包含用户明确选择并已经计算的本命模块。"}
+      selected_timing_modules: {title: 已选时间模块, lead: "各时间模块保留独立技法与版本。"}
+      selected_relationship_or_project_modules: {title: 已选关系、项目或专项模块, lead: "未选择的模块不会自动计算。"}
+      evidence_index: {title: 证据总索引, lead: "证据按对象版本、快照、模型和维度索引。"}
+      provenance: {title: 来源与复现信息, lead: "列出全部对象、数据、算法、规则和渲染版本。"}
+
+  report.research_comparison.v1:
+    title: "{{research_title}}｜研究比较"
+    subtitle: "样本 {{sample_count}}｜比较字段 {{comparable_field_count}}"
+    sections:
+      research_question: {title: 研究问题, lead: "研究问题：{{research_question_text}}"}
+      sample_definition: {title: 样本定义, lead: "纳入 {{included_count}} 个快照，排除 {{excluded_count}} 个；排除理由均已记录。"}
+      method_and_versions: {title: 方法与版本, lead: "只有 Schema、字段语义和计算配置可比较的数据进入同一统计。"}
+      commonalities: {title: 共同点, lead: "共同点是描述性模式，不构成因果关系。"}
+      differences: {title: 差异, lead: "差异按效应量、分布和缺失率展示。"}
+      descriptive_statistics: {title: 描述性统计, lead: "仅报告样本内统计及不确定性，不推断占星因果。"}
+      exceptions: {title: 例外与异常值, lead: "异常值保留来源，不因不符合预期而删除。"}
+      reproducibility_appendix: {title: 可复现附录, lead: "包含查询、样本指纹、版本、字段映射和导出校验和。"}

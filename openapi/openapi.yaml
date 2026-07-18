@@ -1,0 +1,996 @@
+openapi: 3.1.0
+info:
+  title: Interstellar Professional Astrology API
+  version: 1.0.0-alpha.1
+  description: >-
+    Versioned deterministic western astrology API. All calculations resolve through an
+    AnalysisRecipe, preserve dataset/rule provenance, and expose application/problem+json errors.
+servers:
+  - url: /api/v1
+    description: Same-origin V1 API
+security:
+  - bearerAuth: []
+tags:
+  - {name: Catalog}
+  - {name: Subjects}
+  - {name: Analysis}
+  - {name: Calculations}
+  - {name: Reports}
+  - {name: Renders}
+  - {name: Jobs}
+  - {name: Rules}
+  - {name: Datasets}
+  - {name: Archives}
+
+paths:
+  /entry-points:
+    get:
+      tags: [Catalog]
+      operationId: listEntryPoints
+      parameters: [{$ref: '#/components/parameters/PageCursor'}, {$ref: '#/components/parameters/PageLimit'}]
+      responses:
+        '200': {$ref: '#/components/responses/CatalogPage'}
+        default: {$ref: '#/components/responses/Problem'}
+  /techniques:
+    get:
+      tags: [Catalog]
+      operationId: listTechniques
+      parameters: [{$ref: '#/components/parameters/PageCursor'}, {$ref: '#/components/parameters/PageLimit'}, {$ref: '#/components/parameters/Maturity'}]
+      responses:
+        '200': {$ref: '#/components/responses/CatalogPage'}
+        default: {$ref: '#/components/responses/Problem'}
+  /analysis-models:
+    get:
+      tags: [Catalog]
+      operationId: listAnalysisModels
+      parameters: [{$ref: '#/components/parameters/PageCursor'}, {$ref: '#/components/parameters/PageLimit'}, {$ref: '#/components/parameters/Maturity'}, {$ref: '#/components/parameters/Search'}]
+      responses:
+        '200': {$ref: '#/components/responses/CatalogPage'}
+        default: {$ref: '#/components/responses/Problem'}
+  /analysis-models/{id}:
+    get:
+      tags: [Catalog]
+      operationId: getAnalysisModel
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      responses:
+        '200': {$ref: '#/components/responses/CatalogItem'}
+        default: {$ref: '#/components/responses/Problem'}
+  /analysis-models/{id}/versions/{version}:
+    get:
+      tags: [Catalog]
+      operationId: getAnalysisModelVersion
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {$ref: '#/components/parameters/Version'}]
+      responses:
+        '200': {$ref: '#/components/responses/CatalogItem'}
+        default: {$ref: '#/components/responses/Problem'}
+  /analysis-models/validate-custom:
+    post:
+      tags: [Catalog]
+      operationId: validateCustomAnalysisModel
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CustomModelSpec'}
+      responses:
+        '200': {$ref: '#/components/responses/ValidationResult'}
+        default: {$ref: '#/components/responses/Problem'}
+  /topic-models:
+    get:
+      tags: [Catalog]
+      operationId: listTopicModels
+      parameters: [{$ref: '#/components/parameters/PageCursor'}, {$ref: '#/components/parameters/PageLimit'}, {$ref: '#/components/parameters/Maturity'}, {$ref: '#/components/parameters/Search'}]
+      responses:
+        '200': {$ref: '#/components/responses/CatalogPage'}
+        default: {$ref: '#/components/responses/Problem'}
+  /topic-models/{id}/versions/{version}:
+    get:
+      tags: [Catalog]
+      operationId: getTopicModelVersion
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {$ref: '#/components/parameters/Version'}]
+      responses:
+        '200': {$ref: '#/components/responses/CatalogItem'}
+        default: {$ref: '#/components/responses/Problem'}
+  /analysis-intents:
+    get:
+      tags: [Catalog]
+      operationId: listAnalysisIntents
+      parameters: [{$ref: '#/components/parameters/PageCursor'}, {$ref: '#/components/parameters/PageLimit'}, {$ref: '#/components/parameters/Search'}]
+      responses:
+        '200': {$ref: '#/components/responses/CatalogPage'}
+        default: {$ref: '#/components/responses/Problem'}
+  /analysis-intents/{id}/versions/{version}:
+    get:
+      tags: [Catalog]
+      operationId: getAnalysisIntentVersion
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {$ref: '#/components/parameters/Version'}]
+      responses:
+        '200': {$ref: '#/components/responses/CatalogItem'}
+        default: {$ref: '#/components/responses/Problem'}
+
+  /subjects:
+    get:
+      tags: [Subjects]
+      operationId: listSubjects
+      parameters: [{$ref: '#/components/parameters/PageCursor'}, {$ref: '#/components/parameters/PageLimit'}, {$ref: '#/components/parameters/SubjectKind'}, {$ref: '#/components/parameters/Search'}]
+      responses:
+        '200':
+          description: Subject page
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SubjectPage'}
+        default: {$ref: '#/components/responses/Problem'}
+    post:
+      tags: [Subjects]
+      operationId: createSubject
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubjectCreate'}
+      responses:
+        '201':
+          description: Subject and immutable first version
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SubjectWithVersion'}
+        default: {$ref: '#/components/responses/Problem'}
+  /subjects/{id}:
+    get:
+      tags: [Subjects]
+      operationId: getSubject
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      responses:
+        '200':
+          description: Subject
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Subject'}
+        default: {$ref: '#/components/responses/Problem'}
+    delete:
+      tags: [Subjects]
+      operationId: deleteSubject
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      responses:
+        '204': {description: Soft-deleted}
+        default: {$ref: '#/components/responses/Problem'}
+  /subjects/{id}/versions:
+    get:
+      tags: [Subjects]
+      operationId: listSubjectVersions
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {$ref: '#/components/parameters/PageCursor'}, {$ref: '#/components/parameters/PageLimit'}]
+      responses:
+        '200':
+          description: Immutable version page
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SubjectVersionPage'}
+        default: {$ref: '#/components/responses/Problem'}
+    post:
+      tags: [Subjects]
+      operationId: createSubjectVersion
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubjectVersionInput'}
+      responses:
+        '201':
+          description: Immutable subject version
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SubjectVersion'}
+        default: {$ref: '#/components/responses/Problem'}
+
+  /analysis-drafts:
+    post:
+      tags: [Analysis]
+      operationId: createAnalysisDraft
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/AnalysisDraftCreate'}
+      responses:
+        '201':
+          description: Mutable analysis draft
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AnalysisDraft'}
+        default: {$ref: '#/components/responses/Problem'}
+  /analysis-drafts/{id}:
+    get:
+      tags: [Analysis]
+      operationId: getAnalysisDraft
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      responses:
+        '200':
+          description: Analysis draft
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AnalysisDraft'}
+        default: {$ref: '#/components/responses/Problem'}
+    patch:
+      tags: [Analysis]
+      operationId: updateAnalysisDraft
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {$ref: '#/components/parameters/IfMatchRevision'}]
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema: {$ref: '#/components/schemas/AnalysisDraftPatch'}
+      responses:
+        '200':
+          description: Updated draft with incremented revision
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AnalysisDraft'}
+        default: {$ref: '#/components/responses/Problem'}
+  /analysis-recipes/resolve:
+    post:
+      tags: [Analysis]
+      operationId: resolveAnalysisRecipe
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RecipeResolveRequest'}
+      responses:
+        '201':
+          description: Immutable preflight recipe; no calculation has started
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AnalysisRecipe'}
+        default: {$ref: '#/components/responses/Problem'}
+  /analysis-recipes/{id}:
+    get:
+      tags: [Analysis]
+      operationId: getAnalysisRecipe
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      responses:
+        '200':
+          description: Analysis recipe
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AnalysisRecipe'}
+        default: {$ref: '#/components/responses/Problem'}
+  /analysis-recipes/{id}/confirm:
+    post:
+      tags: [Analysis, Calculations]
+      operationId: confirmAnalysisRecipe
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {$ref: '#/components/parameters/IdempotencyKey'}, {$ref: '#/components/parameters/PreferAsync'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RecipeConfirmRequest'}
+      responses:
+        '201': {$ref: '#/components/responses/CalculationCreated'}
+        '202': {$ref: '#/components/responses/JobAccepted'}
+        default: {$ref: '#/components/responses/Problem'}
+
+  /calculations:
+    get:
+      tags: [Calculations]
+      operationId: listCalculations
+      parameters: [{$ref: '#/components/parameters/PageCursor'}, {$ref: '#/components/parameters/PageLimit'}]
+      responses:
+        '200':
+          description: Calculation snapshot page
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/CalculationPage'}
+        default: {$ref: '#/components/responses/Problem'}
+    post:
+      tags: [Calculations]
+      operationId: createCalculation
+      security: [{}, {bearerAuth: []}]
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}, {$ref: '#/components/parameters/PreferAsync'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ChartRequest'}
+      responses:
+        '201': {$ref: '#/components/responses/CalculationCreated'}
+        '202': {$ref: '#/components/responses/JobAccepted'}
+        default: {$ref: '#/components/responses/Problem'}
+  /calculations/{id}:
+    get:
+      tags: [Calculations]
+      operationId: getCalculation
+      security: [{}, {bearerAuth: []}]
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {$ref: '#/components/parameters/AnonymousAccessToken'}]
+      responses:
+        '200':
+          description: Immutable calculation snapshot
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/CalculationSnapshot'}
+        default: {$ref: '#/components/responses/Problem'}
+
+  /renders:
+    post:
+      tags: [Renders]
+      operationId: createRender
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}, {$ref: '#/components/parameters/PreferAsync'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RenderRequest'}
+      responses:
+        '201':
+          description: Synchronous SVG artifact
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Artifact'}
+        '202': {$ref: '#/components/responses/JobAccepted'}
+        default: {$ref: '#/components/responses/Problem'}
+
+  /report-profiles:
+    get:
+      tags: [Reports, Catalog]
+      operationId: listReportProfiles
+      parameters: [{$ref: '#/components/parameters/PageCursor'}, {$ref: '#/components/parameters/PageLimit'}]
+      responses:
+        '200': {$ref: '#/components/responses/CatalogPage'}
+        default: {$ref: '#/components/responses/Problem'}
+  /reports:
+    post:
+      tags: [Reports]
+      operationId: createReport
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}, {$ref: '#/components/parameters/PreferAsync'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ReportCreateRequest'}
+      responses:
+        '201':
+          description: Report document created synchronously
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ReportDocument'}
+        '202': {$ref: '#/components/responses/JobAccepted'}
+        '422':
+          description: Report dependency preflight failed
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/ProblemError'}
+        default: {$ref: '#/components/responses/Problem'}
+  /reports/{id}:
+    get:
+      tags: [Reports]
+      operationId: getReport
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      responses:
+        '200':
+          description: Structured report document
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ReportDocument'}
+        default: {$ref: '#/components/responses/Problem'}
+  /reports/{id}/findings:
+    get:
+      tags: [Reports]
+      operationId: listReportFindings
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {$ref: '#/components/parameters/PageCursor'}, {$ref: '#/components/parameters/PageLimit'}, {name: topic, in: query, schema: {type: string}}, {name: min_priority, in: query, schema: {type: integer, minimum: 0, maximum: 100}}]
+      responses:
+        '200':
+          description: Finding page
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/FindingPage'}
+        default: {$ref: '#/components/responses/Problem'}
+  /reports/{id}/conclusions:
+    get:
+      tags: [Reports]
+      operationId: listReportConclusions
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {$ref: '#/components/parameters/PageCursor'}, {$ref: '#/components/parameters/PageLimit'}]
+      responses:
+        '200':
+          description: Conclusion page
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ConclusionPage'}
+        default: {$ref: '#/components/responses/Problem'}
+  /reports/{id}/renders:
+    post:
+      tags: [Reports, Renders]
+      operationId: renderReport
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {$ref: '#/components/parameters/IdempotencyKey'}, {$ref: '#/components/parameters/PreferAsync'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ReportRenderRequest'}
+      responses:
+        '201':
+          description: Rendered artifact
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Artifact'}
+        '202': {$ref: '#/components/responses/JobAccepted'}
+        default: {$ref: '#/components/responses/Problem'}
+  /reports/{id}/artifacts:
+    get:
+      tags: [Reports]
+      operationId: listReportArtifacts
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {$ref: '#/components/parameters/PageCursor'}, {$ref: '#/components/parameters/PageLimit'}]
+      responses:
+        '200':
+          description: Artifact page
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ArtifactPage'}
+        default: {$ref: '#/components/responses/Problem'}
+
+  /jobs/{id}:
+    get:
+      tags: [Jobs]
+      operationId: getJob
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Job'}
+        default: {$ref: '#/components/responses/Problem'}
+  /jobs/{id}/events:
+    get:
+      tags: [Jobs]
+      operationId: streamJobEvents
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {name: Last-Event-ID, in: header, required: false, schema: {type: string}}]
+      responses:
+        '200':
+          description: SSE stream; progress, warning, completed and failed event names are stable
+          headers:
+            Cache-Control: {schema: {type: string}, description: Always no-cache}
+          content:
+            text/event-stream:
+              schema: {type: string}
+        default: {$ref: '#/components/responses/Problem'}
+  /jobs/{id}/cancel:
+    post:
+      tags: [Jobs]
+      operationId: cancelJob
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
+      responses:
+        '202':
+          description: Cancellation requested or job already terminal
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Job'}
+        default: {$ref: '#/components/responses/Problem'}
+
+  /rule-packs:
+    post:
+      tags: [Rules]
+      operationId: createRulePack
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody: {$ref: '#/components/requestBodies/RulePack'}
+      responses:
+        '201': {$ref: '#/components/responses/RulePack'}
+        default: {$ref: '#/components/responses/Problem'}
+  /rule-packs/{id}/versions:
+    post:
+      tags: [Rules]
+      operationId: createRulePackVersion
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody: {$ref: '#/components/requestBodies/RulePack'}
+      responses:
+        '201': {$ref: '#/components/responses/RulePack'}
+        default: {$ref: '#/components/responses/Problem'}
+  /rule-packs/{id}/versions/{version}:
+    get:
+      tags: [Rules]
+      operationId: getRulePackVersion
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {$ref: '#/components/parameters/Version'}]
+      responses:
+        '200': {$ref: '#/components/responses/RulePack'}
+        default: {$ref: '#/components/responses/Problem'}
+  /rule-packs/validate:
+    post:
+      tags: [Rules]
+      operationId: validateRulePack
+      requestBody: {$ref: '#/components/requestBodies/RulePack'}
+      responses:
+        '200': {$ref: '#/components/responses/ValidationResult'}
+        default: {$ref: '#/components/responses/Problem'}
+  /report-rule-packs/validate:
+    post:
+      tags: [Rules, Reports]
+      operationId: validateReportRulePack
+      requestBody: {$ref: '#/components/requestBodies/RulePack'}
+      responses:
+        '200': {$ref: '#/components/responses/ValidationResult'}
+        default: {$ref: '#/components/responses/Problem'}
+  /report-rule-packs/{id}/versions/{version}:
+    get:
+      tags: [Rules, Reports]
+      operationId: getReportRulePackVersion
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {$ref: '#/components/parameters/Version'}]
+      responses:
+        '200': {$ref: '#/components/responses/RulePack'}
+        default: {$ref: '#/components/responses/Problem'}
+
+  /datasets:
+    get:
+      tags: [Datasets]
+      operationId: listDatasets
+      parameters: [{$ref: '#/components/parameters/PageCursor'}, {$ref: '#/components/parameters/PageLimit'}]
+      responses:
+        '200':
+          description: Dataset page
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DatasetPage'}
+        default: {$ref: '#/components/responses/Problem'}
+  /datasets/{id}/versions:
+    get:
+      tags: [Datasets]
+      operationId: listDatasetVersions
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {$ref: '#/components/parameters/PageCursor'}, {$ref: '#/components/parameters/PageLimit'}]
+      responses:
+        '200':
+          description: Dataset version page
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DatasetPage'}
+        default: {$ref: '#/components/responses/Problem'}
+  /datasets/{id}/versions/{version}:
+    get:
+      tags: [Datasets]
+      operationId: getDatasetVersion
+      parameters: [{$ref: '#/components/parameters/ResourceId'}, {$ref: '#/components/parameters/Version'}]
+      responses:
+        '200':
+          description: Dataset version
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Dataset'}
+        default: {$ref: '#/components/responses/Problem'}
+
+  /imports/project-archives:
+    post:
+      tags: [Archives]
+      operationId: importProjectArchive
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/zip:
+            schema: {type: string, format: binary}
+      responses:
+        '202': {$ref: '#/components/responses/JobAccepted'}
+        default: {$ref: '#/components/responses/Problem'}
+  /exports/project-archives:
+    post:
+      tags: [Archives]
+      operationId: exportProjectArchive
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [workspace_id, resource_ids, include_artifacts]
+              properties:
+                workspace_id: {type: string}
+                resource_ids: {type: array, items: {type: string}, minItems: 1, uniqueItems: true}
+                include_artifacts: {type: boolean}
+      responses:
+        '202': {$ref: '#/components/responses/JobAccepted'}
+        default: {$ref: '#/components/responses/Problem'}
+  /artifacts/{id}:
+    get:
+      tags: [Archives, Renders]
+      operationId: getArtifact
+      parameters: [{$ref: '#/components/parameters/ResourceId'}]
+      responses:
+        '200':
+          description: Artifact metadata and time-limited download URI
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Artifact'}
+        default: {$ref: '#/components/responses/Problem'}
+  /shares:
+    post:
+      tags: [Archives]
+      operationId: createShare
+      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ShareCreateRequest'}
+      responses:
+        '201':
+          description: Revocable share; token is returned only at creation
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Share'}
+        default: {$ref: '#/components/responses/Problem'}
+  /shares/{share_ref}:
+    get:
+      tags: [Archives]
+      operationId: resolveShare
+      security: []
+      parameters:
+        - name: share_ref
+          in: path
+          required: true
+          description: Opaque public share token for GET
+          schema: {type: string, minLength: 32}
+      responses:
+        '200':
+          description: Shared resource descriptor; private source fields are excluded
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ShareResolution'}
+        default: {$ref: '#/components/responses/Problem'}
+    delete:
+      tags: [Archives]
+      operationId: revokeShare
+      parameters:
+        - name: share_ref
+          in: path
+          required: true
+          description: Authenticated share resource ID for DELETE
+          schema: {type: string, minLength: 1}
+      responses:
+        '204': {description: Share revoked}
+        default: {$ref: '#/components/responses/Problem'}
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    ResourceId: {name: id, in: path, required: true, schema: {type: string, minLength: 1}}
+    Version: {name: version, in: path, required: true, schema: {type: string, minLength: 1}}
+    PageCursor: {name: 'page[cursor]', in: query, required: false, schema: {type: string}}
+    PageLimit: {name: 'page[limit]', in: query, required: false, schema: {type: integer, minimum: 1, maximum: 100, default: 20}}
+    Search: {name: q, in: query, required: false, schema: {type: string, maxLength: 200}}
+    Maturity: {name: maturity, in: query, required: false, schema: {$ref: '#/components/schemas/Maturity'}}
+    SubjectKind: {name: kind, in: query, required: false, schema: {$ref: '#/components/schemas/SubjectKind'}}
+    IdempotencyKey: {name: Idempotency-Key, in: header, required: false, schema: {type: string, minLength: 16, maxLength: 200}}
+    IfMatchRevision: {name: If-Match, in: header, required: true, description: Current integer draft revision, schema: {type: string, pattern: '^[1-9][0-9]*$'}}
+    PreferAsync: {name: Prefer, in: header, required: false, schema: {type: string, enum: [respond-async]}}
+    AnonymousAccessToken: {name: access_token, in: query, required: false, description: Short-lived signed token for an anonymous calculation, schema: {type: string}}
+  schemas:
+    Maturity: {$ref: '../packages/canonical-schema/common.schema.json#/$defs/Maturity'}
+    SubjectKind: {$ref: '../packages/canonical-schema/common.schema.json#/$defs/SubjectKind'}
+    PageInfo: {$ref: '../packages/canonical-schema/common.schema.json#/$defs/PageInfo'}
+    TimeSpec: {$ref: '../packages/canonical-schema/time-spec.schema.json'}
+    Location: {$ref: '../packages/canonical-schema/location.schema.json'}
+    Subject: {$ref: '../packages/canonical-schema/subject.schema.json#/$defs/Subject'}
+    SubjectVersion: {$ref: '../packages/canonical-schema/subject.schema.json#/$defs/SubjectVersion'}
+    SubjectVersionInput: {$ref: '../packages/canonical-schema/subject.schema.json#/$defs/SubjectVersionInput'}
+    AnalysisDraft: {$ref: '../packages/canonical-schema/analysis-draft.schema.json'}
+    AnalysisRecipe: {$ref: '../packages/canonical-schema/analysis-recipe.schema.json'}
+    AnalysisRecipeNode: {$ref: '../packages/canonical-schema/analysis-recipe.schema.json#/$defs/RecipeNode'}
+    ChartRequest: {$ref: '../packages/canonical-schema/chart-request.schema.json'}
+    Chart: {$ref: '../packages/canonical-schema/chart-result.schema.json#/$defs/Chart'}
+    Point: {$ref: '../packages/canonical-schema/chart-result.schema.json#/$defs/Point'}
+    House: {$ref: '../packages/canonical-schema/chart-result.schema.json#/$defs/House'}
+    Aspect: {$ref: '../packages/canonical-schema/chart-result.schema.json#/$defs/Aspect'}
+    OutputManifest: {$ref: '../packages/canonical-schema/output-manifest.schema.json'}
+    Evidence: {$ref: '../packages/canonical-schema/evidence.schema.json'}
+    CalculationSnapshot: {$ref: '../packages/canonical-schema/calculation-snapshot.schema.json'}
+    ReportDocument: {$ref: '../packages/canonical-schema/report-document.schema.json'}
+    Finding: {$ref: '../packages/canonical-schema/report-document.schema.json#/$defs/Finding'}
+    Conclusion: {$ref: '../packages/canonical-schema/report-document.schema.json#/$defs/Conclusion'}
+    ReportBlock: {$ref: '../packages/canonical-schema/report-document.schema.json#/$defs/ReportBlock'}
+    ReportSection: {$ref: '../packages/canonical-schema/report-document.schema.json#/$defs/ReportSection'}
+    RenderSpec: {$ref: '../packages/canonical-schema/render-spec.schema.json'}
+    Job: {$ref: '../packages/canonical-schema/job.schema.json'}
+    ProblemError: {$ref: '../packages/canonical-schema/problem-error.schema.json'}
+    CatalogItem:
+      type: object
+      additionalProperties: false
+      required: [id, version, name, maturity, content_hash, payload]
+      properties:
+        id: {type: string}
+        version: {type: string}
+        name: {type: string}
+        maturity: {$ref: '#/components/schemas/Maturity'}
+        content_hash: {type: string}
+        payload: {type: object, additionalProperties: true}
+    CatalogPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/CatalogItem'}}
+        page: {$ref: '#/components/schemas/PageInfo'}
+    SubjectCreate:
+      type: object
+      additionalProperties: false
+      required: [workspace_id, version]
+      properties:
+        workspace_id: {type: string}
+        version: {$ref: '#/components/schemas/SubjectVersionInput'}
+    SubjectWithVersion:
+      type: object
+      additionalProperties: false
+      required: [subject, version]
+      properties:
+        subject: {$ref: '#/components/schemas/Subject'}
+        version: {$ref: '#/components/schemas/SubjectVersion'}
+    SubjectPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Subject'}}
+        page: {$ref: '#/components/schemas/PageInfo'}
+    SubjectVersionPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/SubjectVersion'}}
+        page: {$ref: '#/components/schemas/PageInfo'}
+    AnalysisDraftCreate:
+      type: object
+      additionalProperties: false
+      required: [entry_point_id, selection, subject_roles]
+      properties:
+        workspace_id: {type: string}
+        entry_point_id: {type: string}
+        selection: {type: object, minProperties: 1, maxProperties: 1, additionalProperties: true}
+        subject_roles: {type: array, minItems: 1, items: {type: object, additionalProperties: true}}
+        time_context: {type: [object, 'null'], additionalProperties: true}
+        locations: {type: array, items: {$ref: '#/components/schemas/Location'}}
+        allowed_overrides: {type: object, additionalProperties: true}
+        optional_extensions: {type: array, items: {type: string}, uniqueItems: true}
+        requested_outputs: {type: object, additionalProperties: true}
+    AnalysisDraftPatch:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        selection: {type: object, minProperties: 1, maxProperties: 1, additionalProperties: true}
+        subject_roles: {type: array, minItems: 1, items: {type: object, additionalProperties: true}}
+        time_context: {type: [object, 'null'], additionalProperties: true}
+        locations: {type: array, items: {$ref: '#/components/schemas/Location'}}
+        allowed_overrides: {type: object, additionalProperties: true}
+        optional_extensions: {type: array, items: {type: string}, uniqueItems: true}
+        requested_outputs: {type: object, additionalProperties: true}
+    RecipeResolveRequest:
+      type: object
+      additionalProperties: false
+      required: [draft_id, draft_revision]
+      properties:
+        draft_id: {type: string}
+        draft_revision: {type: integer, minimum: 1}
+    RecipeConfirmRequest:
+      type: object
+      additionalProperties: false
+      required: [recipe_content_hash, outputs, report_requests]
+      properties:
+        recipe_content_hash: {type: string}
+        outputs: {type: array, items: {type: string}, minItems: 1, uniqueItems: true}
+        report_requests:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [profile_id, density]
+            properties:
+              profile_id: {type: string}
+              density: {type: string, enum: [summary, standard, full_technical]}
+              locale: {type: string}
+    CustomModelSpec:
+      type: object
+      additionalProperties: false
+      required: [name, component_ids, parameters, output_ids]
+      properties:
+        name: {type: string, minLength: 1}
+        component_ids: {type: array, items: {type: string}, minItems: 1, uniqueItems: true}
+        parameters: {type: object, additionalProperties: true}
+        output_ids: {type: array, items: {type: string}, minItems: 1, uniqueItems: true}
+    CalculationPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/CalculationSnapshot'}}
+        page: {$ref: '#/components/schemas/PageInfo'}
+    RenderRequest:
+      type: object
+      additionalProperties: false
+      required: [calculation_id, render_spec, format]
+      properties:
+        calculation_id: {type: string}
+        render_spec: {$ref: '#/components/schemas/RenderSpec'}
+        format: {type: string, enum: [svg, png, pdf]}
+    ReportCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [report_profile_id, locale, density]
+      properties:
+        snapshot_ids: {type: array, items: {type: string}, minItems: 1, uniqueItems: true}
+        recipe_id: {type: string}
+        report_profile_id: {type: string}
+        locale: {type: string}
+        density: {type: string, enum: [summary, standard, full_technical]}
+      oneOf:
+        - required: [snapshot_ids]
+        - required: [recipe_id]
+    ReportRenderRequest:
+      type: object
+      additionalProperties: false
+      required: [density, locale, format, theme]
+      properties:
+        density: {type: string, enum: [summary, standard, full_technical]}
+        locale: {type: string}
+        format: {type: string, enum: [html, pdf, json]}
+        theme: {type: string}
+    FindingPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items: {type: array, items: {$ref: '../packages/canonical-schema/report-document.schema.json#/$defs/Finding'}}
+        page: {$ref: '#/components/schemas/PageInfo'}
+    ConclusionPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items: {type: array, items: {$ref: '../packages/canonical-schema/report-document.schema.json#/$defs/Conclusion'}}
+        page: {$ref: '#/components/schemas/PageInfo'}
+    Artifact:
+      type: object
+      additionalProperties: false
+      required: [id, kind, format, status, content_hash, media_type, size_bytes, created_at, expires_at]
+      properties:
+        id: {type: string}
+        kind: {type: string, enum: [chart, report, table, archive]}
+        format: {type: string, enum: [svg, png, pdf, html, json, csv, ics, project_archive]}
+        status: {type: string, enum: [requested, rendering, ready, failed, expired]}
+        content_hash: {type: string}
+        media_type: {type: string}
+        size_bytes: {type: integer, minimum: 0}
+        download_uri: {type: [string, 'null'], format: uri-reference}
+        created_at: {type: string, format: date-time}
+        expires_at: {type: [string, 'null'], format: date-time}
+    ArtifactPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Artifact'}}
+        page: {$ref: '#/components/schemas/PageInfo'}
+    RulePack:
+      type: object
+      additionalProperties: false
+      required: [id, version, kind, content_hash, maturity, rules, source_refs]
+      properties:
+        id: {type: string}
+        version: {type: string}
+        kind: {type: string, enum: [calculation, topic, report, electional, horary]}
+        content_hash: {type: string}
+        maturity: {$ref: '#/components/schemas/Maturity'}
+        rules: {type: array, items: {type: object, additionalProperties: true}}
+        source_refs: {type: array, items: {type: string}, minItems: 1, uniqueItems: true}
+    ValidationResult:
+      type: object
+      additionalProperties: false
+      required: [valid, errors, warnings]
+      properties:
+        valid: {type: boolean}
+        errors: {type: array, items: {$ref: '#/components/schemas/ProblemError'}}
+        warnings: {type: array, items: {type: object, additionalProperties: true}}
+    Dataset:
+      type: object
+      additionalProperties: false
+      required: [id, version, status, checksum, source_uri, license, activated_at]
+      properties:
+        id: {type: string}
+        version: {type: string}
+        status: {type: string, enum: [discovered, downloading, validating, staged, active, rejected, rolled_back]}
+        checksum: {type: string}
+        source_uri: {type: string, format: uri-reference}
+        license: {type: string}
+        activated_at: {type: [string, 'null'], format: date-time}
+        metadata: {type: object, additionalProperties: true}
+    DatasetPage:
+      type: object
+      additionalProperties: false
+      required: [items, page]
+      properties:
+        items: {type: array, items: {$ref: '#/components/schemas/Dataset'}}
+        page: {$ref: '#/components/schemas/PageInfo'}
+    ShareCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [resource_type, resource_id, permissions, expires_at]
+      properties:
+        resource_type: {type: string, enum: [calculation, report, artifact, project_archive]}
+        resource_id: {type: string}
+        permissions: {type: array, items: {type: string, enum: [view, download]}, minItems: 1, uniqueItems: true}
+        expires_at: {type: string, format: date-time}
+    Share:
+      type: object
+      additionalProperties: false
+      required: [id, token, resource_type, resource_id, permissions, created_at, expires_at, revoked_at]
+      properties:
+        id: {type: string}
+        token: {type: string, minLength: 32, writeOnly: true}
+        resource_type: {type: string, enum: [calculation, report, artifact, project_archive]}
+        resource_id: {type: string}
+        permissions: {type: array, items: {type: string, enum: [view, download]}, minItems: 1, uniqueItems: true}
+        created_at: {type: string, format: date-time}
+        expires_at: {type: string, format: date-time}
+        revoked_at: {type: [string, 'null'], format: date-time}
+    ShareResolution:
+      type: object
+      additionalProperties: false
+      required: [resource_type, resource_uri, permissions, expires_at]
+      properties:
+        resource_type: {type: string, enum: [calculation, report, artifact, project_archive]}
+        resource_uri: {type: string, format: uri-reference}
+        permissions: {type: array, items: {type: string, enum: [view, download]}, minItems: 1, uniqueItems: true}
+        expires_at: {type: string, format: date-time}
+  requestBodies:
+    RulePack:
+      required: true
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/RulePack'}
+  responses:
+    Problem:
+      description: RFC 9457-style problem response
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/ProblemError'}
+    CatalogPage:
+      description: Versioned catalog page
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/CatalogPage'}
+    CatalogItem:
+      description: Versioned catalog item
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/CatalogItem'}
+    CalculationCreated:
+      description: Calculation completed within synchronous budget
+      headers:
+        X-RateLimit-Limit: {schema: {type: integer}}
+        X-RateLimit-Remaining: {schema: {type: integer}}
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/CalculationSnapshot'}
+    JobAccepted:
+      description: Long-running operation accepted
+      headers:
+        Location: {schema: {type: string, format: uri-reference}}
+        Retry-After: {schema: {type: integer, minimum: 1}}
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Job'}
+    ValidationResult:
+      description: Deterministic validation result
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ValidationResult'}
+    RulePack:
+      description: Versioned rule pack
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/RulePack'}

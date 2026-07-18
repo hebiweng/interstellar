@@ -1,0 +1,254 @@
+schema_version: 1.0.0
+catalog_id: interstellar.official_topic_model_rule_bindings.v1
+deterministic: true
+binding_policy:
+  expected_topic_models: 24
+  rule_pack_id_convention: official.<topic_model_id>
+  report_rule_pack_id_convention: report.<topic_model_id>
+  shared_base_topic_ids: [relationship.comparison.v1, relationship.entity.v1, special.project_event.v1, geography.location.v1]
+  shared_id_behavior: reuse_base_model_pack_and_apply_topic_binding_no_duplicate_registry_entry
+  evidence_polarity_profile: five_state_supportive_pressuring_amplifying_mitigating_neutral
+  aggregation_profile: preserve_support_pressure_and_counter_evidence
+  thresholds_profile: evidence_0_35_finding_1_conclusion_2
+  forbidden_outputs: [objective_event_probability, guaranteed_outcome, opaque_luck_score]
+
+topic_rule_bindings:
+  - topic_model_id: personality.modern.v1
+    rule_pack_id: official.personality.modern.v1
+    report_rule_pack_id: report.personality.modern.v1
+    base_rule_packs: [official.natal.modern.v1]
+    selectors: [luminary_core, ascendant_ruler, angular_planets, tight_major_aspects, distribution_patterns]
+    dimensions: [identity, emotional_needs, cognition, relating, agency, recurring_patterns]
+    aggregation: repeated_theme_then_counter_evidence
+    conflict: express_both_poles_and_context
+    thresholds: {conclusion_min_evidence: 2, top_conclusions: 8}
+
+  - topic_model_id: personality.psychodynamic.v1
+    rule_pack_id: official.personality.psychodynamic.v1
+    report_rule_pack_id: report.personality.psychodynamic.v1
+    base_rule_packs: [official.natal.integrated.v1]
+    selectors: [luminary_core, tight_major_aspects, angular_planets, repeated_theme, counter_evidence]
+    dimensions: [core_needs, internal_conflict, defense_and_compensation, projection, autonomy_and_attachment, growth_direction]
+    aggregation: cluster_repeated_psychological_tensions
+    conflict: no_clinical_diagnosis_hold_ambivalence
+    thresholds: {conclusion_min_evidence: 3, repeated_theme_min_selectors: 2}
+
+  - topic_model_id: personality.shadow_archetype.v1
+    rule_pack_id: official.personality.shadow_archetype.v1
+    report_rule_pack_id: report.personality.shadow_archetype.v1
+    base_rule_packs: [official.natal.integrated.v1]
+    selectors: [saturn_contacts, outer_planet_contacts, twelfth_house_emphasis, eighth_house_emphasis, counter_evidence]
+    dimensions: [disowned_traits, fear_and_control, taboo_and_transformation, idealization, integration_resources]
+    aggregation: archetype_label_requires_multiple_independent_configurations
+    conflict: non_pathologizing_language_and_explicit_counter_evidence
+    thresholds: {conclusion_min_evidence: 3, archetype_min_independent_selectors: 2}
+
+  - topic_model_id: personality.dominant_signature.v1
+    rule_pack_id: official.personality.dominant_signature.v1
+    report_rule_pack_id: report.personality.dominant_signature.v1
+    base_rule_packs: [official.natal.modern.v1, official.natal.classical.v1]
+    selectors: [angular_planets, chart_ruler, dispositors, essential_dignity, aspect_centrality, distribution_patterns]
+    dimensions: [dominant_planets, dominant_elements, dominant_modalities, chart_ruler_chain, signature_candidates]
+    aggregation: output_ranked_contributors_not_single_absolute_signature
+    conflict: modern_and_classical_rankings_remain_labeled
+    thresholds: {rank_display_min_contribution: 0.1, tie_delta_max: 0.05}
+
+  - topic_model_id: personality.classical.v1
+    rule_pack_id: official.personality.classical.v1
+    report_rule_pack_id: report.personality.classical.v1
+    base_rule_packs: [official.natal.classical.v1]
+    selectors: [sect_condition, essential_dignity, accidental_dignity, house_lords, reception, lots]
+    dimensions: [temperament, planetary_capacity, house_topic_delivery, resources, relationships, vocation]
+    aggregation: traditional_planet_and_house_topic_synthesis
+    conflict: essential_and_accidental_conditions_explained_separately
+    thresholds: {conclusion_min_evidence: 2, high_confidence_min_testimonies: 3}
+
+  - topic_model_id: personality.hellenistic.v1
+    rule_pack_id: official.personality.hellenistic.v1
+    report_rule_pack_id: report.personality.hellenistic.v1
+    base_rule_packs: [official.natal.hellenistic.v1]
+    selectors: [sect_and_sect_light, whole_sign_topics, angularity_to_angles_and_lots, benefic_malefic_condition, time_lord_context]
+    dimensions: [sect, character_and_action, fortune_and_spirit, major_house_topics, benefic_malefic_testimony, time_lords]
+    aggregation: hellenistic_source_variant_preserved
+    conflict: no_modern_psychology_inserted_into_core
+    thresholds: {conclusion_min_evidence: 2, timed_claim_min_techniques: 2}
+
+  - topic_model_id: personality.integrated.v1
+    rule_pack_id: official.personality.integrated.v1
+    report_rule_pack_id: report.personality.integrated.v1
+    base_rule_packs: [official.natal.integrated.v1]
+    selectors: [modern_core, classical_condition, repeated_theme, counter_evidence]
+    dimensions: [identity, needs, agency, relationships, vocation, resources, tensions, integration]
+    aggregation: semantic_equivalence_only_cross_school_synthesis
+    conflict: preserve_school_source_and_unresolved_disagreement
+    thresholds: {conclusion_min_evidence: 3, cross_school_claim_min_sources: 2}
+
+  - topic_model_id: topic.career_vocation.v1
+    rule_pack_id: official.topic.career_vocation.v1
+    report_rule_pack_id: report.topic.career_vocation.v1
+    base_rule_packs: [official.natal.integrated.v1]
+    selectors: [mc_and_tenth, tenth_ruler, sixth_house, second_house, sun_saturn_jupiter, mercury_mars, fortune_and_spirit]
+    dimensions: [vocation, talents, work_style, authority, collaboration, income_pattern, entrepreneurship, constraints]
+    aggregation: house_ruler_natural_significator_repeated_theme
+    conflict: vocation_not_job_title_and_strength_not_guaranteed_success
+    thresholds: {conclusion_min_evidence: 3, career_archetype_min_dimensions: 2}
+
+  - topic_model_id: topic.money_resources.v1
+    rule_pack_id: official.topic.money_resources.v1
+    report_rule_pack_id: report.topic.money_resources.v1
+    base_rule_packs: [official.natal.integrated.v1]
+    selectors: [second_house_and_ruler, eighth_house_and_ruler, eleventh_house, venus_jupiter_saturn, fortune_and_wealth_lots]
+    dimensions: [money_values, earning_style, preservation, shared_resources, leverage_and_risk, networks, loss_patterns, success_definition]
+    aggregation: separate_personal_shared_and_network_resources
+    conflict: opportunity_and_risk_never_net_to_investment_signal
+    thresholds: {conclusion_min_evidence: 3, financial_claim_requires_house_and_significator: true}
+
+  - topic_model_id: topic.fixed_star_story.v1
+    rule_pack_id: official.topic.fixed_star_story.v1
+    report_rule_pack_id: report.topic.fixed_star_story.v1
+    base_rule_packs: [official.natal.integrated.v1]
+    selectors: [fixed_star_conjunctions_to_luminaries_angles, fixed_star_parans, star_magnitude, orb_and_epoch_provenance]
+    dimensions: [visibility, vocation, relational_story, challenge, cultural_tradition, uncertainty]
+    aggregation: named_star_claim_requires_catalog_epoch_and_orb
+    conflict: traditions_remain_attributed_no_universal_meaning
+    thresholds: {conjunction_orb_degrees_max: 1.0, paran_time_tolerance_minutes_max: 4}
+
+  - topic_model_id: topic.parent_child.v1
+    rule_pack_id: official.topic.parent_child.v1
+    report_rule_pack_id: report.topic.parent_child.v1
+    base_rule_packs: [official.natal.integrated.v1, official.relationship.comparison.v1]
+    selectors: [each_natal_needs, moon_saturn_contacts, mercury_contacts, bidirectional_house_overlays, support_and_pressure]
+    dimensions: [emotional_safety, communication, autonomy, boundaries, learning, conflict_repair, caregiver_child_perspectives]
+    aggregation: preserve_parent_and_child_directionality
+    conflict: never_label_child_or_parent_as_problem
+    thresholds: {conclusion_min_evidence: 3, relational_claim_requires_cross_chart_evidence: true}
+
+  - topic_model_id: topic.life_stage_midlife.v1
+    rule_pack_id: official.topic.life_stage_midlife.v1
+    report_rule_pack_id: report.topic.life_stage_midlife.v1
+    base_rule_packs: [official.natal.integrated.v1, official.forecast.long_cycle.v1]
+    selectors: [saturn_cycles, uranus_opposition, neptune_square, pluto_cycles, progressed_lunation, solar_arc_angles]
+    dimensions: [consolidation, liberation, meaning, transformation, identity_revision, relationship_revision, vocation_revision]
+    aggregation: age_cycle_and_personal_exact_hits_separated_then_synthesized
+    conflict: generational_cycle_not_individual_event_prediction
+    thresholds: {timed_conclusion_min_techniques: 2, wide_generational_contact_requires_personal_trigger: true}
+
+  - topic_model_id: timing.short_term.v1
+    rule_pack_id: official.timing.short_term.v1
+    report_rule_pack_id: report.timing.short_term.v1
+    base_rule_packs: [official.forecast.short_transit.v1]
+    selectors: [exact_transit_hits, ingress_and_station, fast_triggers, slow_background]
+    dimensions: [current_theme, near_term_peaks, support, pressure, repeated_passes, duration]
+    aggregation: cycle_series_with_exact_passes
+    conflict: fast_trigger_contextualizes_not_replaces_background
+    thresholds: {top_events: 12, conclusion_min_evidence: 2}
+
+  - topic_model_id: timing.annual_integrated.v1
+    rule_pack_id: official.timing.annual_integrated.v1
+    report_rule_pack_id: report.timing.annual_integrated.v1
+    base_rule_packs: [official.forecast.annual_integrated.v1]
+    selectors: [annual_transits, solar_return, secondary_progression, annual_profection, eclipse_contacts]
+    dimensions: [year_theme, quarterly_phases, vocation, relationships, resources, home, development, confidence]
+    aggregation: month_quarter_and_independent_technique_convergence
+    conflict: support_pressure_and_method_disagreement_visible
+    thresholds: {formal_conclusion_min_techniques: 2, high_confidence_min_techniques: 3}
+
+  - topic_model_id: timing.long_cycle.v1
+    rule_pack_id: official.timing.long_cycle.v1
+    report_rule_pack_id: report.timing.long_cycle.v1
+    base_rule_packs: [official.forecast.long_cycle.v1]
+    selectors: [secondary_progressions, solar_arcs, primary_directions, firdaria, zodiacal_releasing, historical_analogs]
+    dimensions: [life_phase, structural_change, inner_development, peak_periods, reorientation, confidence]
+    aggregation: yearly_windows_and_multi_technique_convergence
+    conflict: timing_key_variants_and_school_variants_separate
+    thresholds: {formal_conclusion_min_techniques: 2, high_confidence_min_techniques: 3}
+
+  - topic_model_id: timing.personal_eclipse.v1
+    rule_pack_id: official.timing.personal_eclipse.v1
+    report_rule_pack_id: report.timing.personal_eclipse.v1
+    base_rule_packs: [official.forecast.annual_integrated.v1, official.forecast.long_cycle.v1]
+    selectors: [eclipse_to_natal_points, eclipse_house_axis, eclipse_ruler_condition, pre_post_trigger_transits, saros_context]
+    dimensions: [activated_axis, visibility, endings_and_beginnings, relationship_to_natal_pattern, trigger_windows, uncertainty]
+    aggregation: eclipse_family_context_plus_personal_contact
+    conflict: eclipse_contact_is_salience_not_event_guarantee
+    thresholds: {luminary_angle_orb_degrees_max: 3.0, other_point_orb_degrees_max: 1.0}
+
+  - topic_model_id: relationship.comparison.v1
+    rule_pack_id: official.relationship.comparison.v1
+    report_rule_pack_id: report.relationship.comparison.v1
+    reuse_existing_base_pack: true
+    selectors: [cross_aspects, a_into_b_houses, b_into_a_houses, angle_node_vertex_contacts]
+    dimensions: [attraction, emotional_safety, communication, intimacy, stability, autonomy, conflict, growth]
+    aggregation: bidirectional_dimension_synthesis
+    conflict: support_and_pressure_never_cancel
+    thresholds: {conclusion_min_evidence: 2, total_score: forbidden}
+
+  - topic_model_id: relationship.entity.v1
+    rule_pack_id: official.relationship.entity.v1
+    report_rule_pack_id: report.relationship.entity.v1
+    reuse_existing_base_pack: true
+    selectors: [composite_core, davison_core, entity_to_individual, dynamic_activation]
+    dimensions: [shared_identity, emotional_climate, communication_field, commitment, purpose, conflict, current_cycle]
+    aggregation: chart_method_labeled_synthesis
+    conflict: composite_and_davison_never_average
+    thresholds: {conclusion_min_evidence: 2, duration_probability: forbidden}
+
+  - topic_model_id: relationship.dynamic.v1
+    rule_pack_id: official.relationship.dynamic.v1
+    report_rule_pack_id: report.relationship.dynamic.v1
+    base_rule_packs: [official.relationship.comparison.v1, official.relationship.entity.v1, official.forecast.long_cycle.v1]
+    selectors: [a_transits_to_b, b_transits_to_a, transits_to_composite, transits_to_davison, progressed_synastry]
+    dimensions: [individual_activation, shared_activation, support_windows, pressure_windows, commitment, change, repair]
+    aggregation: preserve_direction_chart_method_and_timing_technique
+    conflict: one_partner_activation_not_assigned_to_other
+    thresholds: {formal_window_min_independent_techniques: 2, breakup_probability: forbidden}
+
+  - topic_model_id: special.project_event.v1
+    rule_pack_id: official.special.project_event.v1
+    report_rule_pack_id: report.special.project_event.v1
+    reuse_existing_base_pack: true
+    selectors: [event_chart_core, project_house_topics, project_transits, related_subject_contacts]
+    dimensions: [purpose, resources, execution, communication, partners, public_outcome, risk_windows, timing]
+    aggregation: project_phase_dimension_synthesis
+    conflict: multiple_anchor_events_separate
+    thresholds: {conclusion_min_evidence: 2, success_probability: forbidden}
+
+  - topic_model_id: special.horary.v1
+    rule_pack_id: official.special.horary.v1
+    report_rule_pack_id: report.special.horary.v1
+    base_rule_packs: [official.special.question_action.v1]
+    selectors: [horary_radicality, horary_significators, perfection_and_prohibition, reception, moon_next_aspects]
+    dimensions: [radicality, querent_condition, quesited_condition, perfection, obstruction, timing, counter_testimony]
+    aggregation: ordered_testimony_with_rule_trace
+    conflict: variant_rules_require_separate_pack_version
+    thresholds: {judgement_requires_valid_significators: true, guaranteed_outcome: forbidden}
+
+  - topic_model_id: special.electional.v1
+    rule_pack_id: official.special.electional.v1
+    report_rule_pack_id: report.special.electional.v1
+    base_rule_packs: [official.special.question_action.v1]
+    selectors: [electional_hard_constraints, electional_soft_conditions, moon_condition, ascendant_ruler, target_house_ruler]
+    dimensions: [eligibility, objective_fit, lunar_flow, ruler_condition, support, pressure, relative_preference]
+    aggregation: hard_filter_then_dimension_rank
+    conflict: failed_hard_constraint_cannot_be_offset
+    thresholds: {all_hard_constraints_required: true, guaranteed_outcome: forbidden}
+
+  - topic_model_id: special.mundane.v1
+    rule_pack_id: official.special.mundane.v1
+    report_rule_pack_id: report.special.mundane.v1
+    base_rule_packs: [official.special.project_event.v1]
+    selectors: [country_organization_chart, ingress_chart, lunation_eclipse, outer_planet_cycle, geographic_projection]
+    dimensions: [leadership, population, economy, institutions, foreign_relations, public_mood, crisis_pressure, long_cycle]
+    aggregation: chart_type_jurisdiction_and_time_scale_preserved
+    conflict: disputed_foundation_charts_remain_variants
+    thresholds: {conclusion_min_evidence: 3, societal_event_probability: forbidden}
+
+  - topic_model_id: geography.location.v1
+    rule_pack_id: official.geography.location.v1
+    report_rule_pack_id: report.geography.location.v1
+    reuse_existing_base_pack: true
+    selectors: [relocation_angles_houses, astrocartography_lines, line_crossings, local_space_azimuths, paran_events]
+    dimensions: [identity_expression, vocation_visibility, relationships, home_belonging, opportunity, pressure, local_directionality]
+    aggregation: location_method_dimension_matrix
+    conflict: methods_never_collapsed_into_universal_city_score
+    thresholds: {exact_time_for_angular_claims: true, best_city_claim: forbidden}

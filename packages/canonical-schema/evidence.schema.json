@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://interstellar.dev/schemas/v1/evidence.schema.json",
+  "title": "Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "snapshot_id", "raw_fact_pointer", "topic", "polarity", "technique", "configuration", "rule_id", "weight", "maturity", "sources"],
+  "properties": {
+    "id": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "snapshot_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "raw_fact_pointer": {"type": "string", "pattern": "^/result/"},
+    "topic": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "polarity": {"$ref": "common.schema.json#/$defs/EvidencePolarity"},
+    "technique": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "configuration": {"type": "object", "additionalProperties": true, "minProperties": 1},
+    "active_window": {"oneOf": [{"$ref": "common.schema.json#/$defs/TimeWindow"}, {"type": "null"}]},
+    "rule_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "weight": {"type": "number", "minimum": 0, "maximum": 1},
+    "maturity": {"$ref": "common.schema.json#/$defs/Maturity"},
+    "sources": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1, "uniqueItems": true},
+    "warnings": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Warning"}}
+  }
+}

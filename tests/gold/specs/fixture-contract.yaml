@@ -1,0 +1,20 @@
+schema_version: 1.0.0
+fixture_id_pattern: '^GOLD-[A-Z]+-[0-9]{3}$'
+required_fields:
+  - fixture_id
+  - capability_ids
+  - calculation_ids
+  - input
+  - expected
+  - tolerance
+  - provenance
+  - license
+  - review_status
+null_semantics: [unknown, not_applicable, not_computable, not_requested]
+review_status: [draft, independently_captured, approved, superseded]
+rules:
+  no_commercial_report_text: true
+  expected_values_must_not_be_generated_by_system_under_test: true
+  parameters_must_match_reference: true
+  fixture_update_requires_reason_and_version_bump: true
+  failed_fixture_cannot_be_rebaselined_without_independent_check: true

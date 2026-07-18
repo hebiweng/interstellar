@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://interstellar.dev/schemas/v1/render-spec.schema.json",
+  "title": "RenderSpec",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["view_id", "locale", "theme", "width", "height", "layers", "accessibility"],
+  "properties": {
+    "view_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "locale": {"type": "string", "pattern": "^[a-z]{2,3}(?:-[A-Z]{2})?$"},
+    "theme": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "width": {"type": "integer", "minimum": 240, "maximum": 16384},
+    "height": {"type": "integer", "minimum": 240, "maximum": 16384},
+    "pixel_ratio": {"type": "number", "enum": [1, 2, 4]},
+    "layers": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+    "labels": {"type": "object", "additionalProperties": {"type": "boolean"}},
+    "interaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "zoom": {"type": "boolean"},
+        "pan": {"type": "boolean"},
+        "tooltips": {"type": "boolean"},
+        "selectable": {"type": "boolean"}
+      }
+    },
+    "accessibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["color_blind_safe", "include_data_alternative"],
+      "properties": {
+        "color_blind_safe": {"type": "boolean"},
+        "include_data_alternative": {"type": "boolean"},
+        "title": {"type": ["string", "null"]},
+        "description": {"type": ["string", "null"]}
+      }
+    },
+    "options": {"type": "object", "additionalProperties": true}
+  }
+}

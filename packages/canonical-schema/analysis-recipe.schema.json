@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://interstellar.dev/schemas/v1/analysis-recipe.schema.json",
+  "title": "AnalysisRecipe",
+  "$defs": {
+    "RecipeNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["calculation_id", "tier", "selected", "locked", "availability"],
+      "properties": {
+        "node_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "calculation_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "tier": {"type": "string", "enum": ["required", "recommended", "optional", "blocked"]},
+        "selected": {"type": "boolean"},
+        "locked": {"type": "boolean"},
+        "availability": {"type": "string", "enum": ["available", "degraded", "blocked"]},
+        "depends_on": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "parameters": {"type": "object", "additionalProperties": true},
+        "blocking_reasons": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Warning"}},
+        "degradation": {"type": ["object", "null"], "additionalProperties": true},
+        "output_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true}
+      }
+    },
+    "ReusePlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["snapshot_id", "result_paths"],
+      "properties": {
+        "snapshot_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "result_paths": {"type": "array", "items": {"type": "string", "pattern": "^/"}, "minItems": 1, "uniqueItems": true}
+      }
+    },
+    "RecipeOutputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["view_ids", "report_profile_ids", "exports"],
+      "properties": {
+        "view_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "report_profile_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "exports": {"type": "array", "items": {"type": "string", "enum": ["svg", "png", "pdf", "json", "csv", "ics", "project_archive"]}, "uniqueItems": true}
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["recipe_id", "recipe_version", "source_draft_revision", "content_hash", "entry_point_id", "resolved_topic_models", "resolved_base_models", "nodes", "reuse", "outputs", "warnings", "resource_estimate", "status", "created_at", "expires_at"],
+  "properties": {
+    "recipe_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "recipe_version": {"type": "integer", "minimum": 1},
+    "source_draft_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "source_draft_revision": {"type": "integer", "minimum": 1},
+    "content_hash": {"$ref": "common.schema.json#/$defs/ContentHash"},
+    "entry_point_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "subject_roles": {"type": "array", "items": {"type": "object", "additionalProperties": true}, "minItems": 1},
+    "resolved_topic_models": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+    "resolved_base_models": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+    "rule_packs": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/VersionReference"}, "uniqueItems": true},
+    "dataset_requirements": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/DatasetReference"}, "uniqueItems": true},
+    "nodes": {"type": "array", "items": {"$ref": "#/$defs/RecipeNode"}, "minItems": 1},
+    "reuse": {"type": "array", "items": {"$ref": "#/$defs/ReusePlan"}},
+    "outputs": {"$ref": "#/$defs/RecipeOutputs"},
+    "warnings": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Warning"}},
+    "resource_estimate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["class", "duration_ms_p50", "execution_mode"],
+      "properties": {
+        "class": {"type": "string", "enum": ["small", "medium", "large", "batch"]},
+        "duration_ms_p50": {"type": "integer", "minimum": 0},
+        "search_points": {"type": ["integer", "null"], "minimum": 0},
+        "execution_mode": {"type": "string", "enum": ["sync", "async"]}
+      }
+    },
+    "status": {"type": "string", "enum": ["resolved", "confirmed", "superseded", "expired"]},
+    "created_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "confirmed_at": {"type": ["string", "null"], "format": "date-time"}
+  }
+}

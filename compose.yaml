@@ -1,0 +1,175 @@
+name: interstellar
+
+x-service-defaults: &service-defaults
+  restart: unless-stopped
+  security_opt:
+    - no-new-privileges:true
+  networks:
+    - backend
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  postgres:
+    <<: *service-defaults
+    image: ${INTERSTELLAR_POSTGIS_IMAGE:-postgis/postgis:16-3.4-alpine}
+    environment:
+      POSTGRES_DB: ${INTERSTELLAR_POSTGRES_DB:-interstellar}
+      POSTGRES_USER: ${INTERSTELLAR_POSTGRES_USER:-interstellar_owner}
+      POSTGRES_PASSWORD: ${INTERSTELLAR_POSTGRES_PASSWORD:?Set INTERSTELLAR_POSTGRES_PASSWORD in .env}
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256 --encoding=UTF8"
+      TZ: UTC
+      PGTZ: UTC
+    command:
+      - postgres
+      - -c
+      - password_encryption=scram-sha-256
+      - -c
+      - timezone=UTC
+    ports:
+      - "127.0.0.1:${INTERSTELLAR_POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\" -h 127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+    stop_grace_period: 30s
+    shm_size: 256mb
+
+  redis:
+    <<: *service-defaults
+    image: ${INTERSTELLAR_REDIS_IMAGE:-redis:7.4-alpine}
+    user: redis
+    environment:
+      REDIS_USERNAME: ${INTERSTELLAR_REDIS_USERNAME:-interstellar_app}
+      REDIS_PASSWORD: ${INTERSTELLAR_REDIS_PASSWORD:?Set INTERSTELLAR_REDIS_PASSWORD in .env}
+    command: ["/opt/interstellar/start-redis.sh"]
+    ports:
+      - "127.0.0.1:${INTERSTELLAR_REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+      - ./infra/redis/start-redis.sh:/opt/interstellar/start-redis.sh:ro
+    read_only: true
+    tmpfs:
+      - /run:size=1m,mode=1777
+      - /tmp:size=4m,mode=1777
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli --user \"$$REDIS_USERNAME\" --no-auth-warning ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    stop_grace_period: 20s
+
+  minio:
+    <<: *service-defaults
+    image: ${INTERSTELLAR_MINIO_IMAGE:-quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z}
+    environment:
+      MINIO_ROOT_USER: ${INTERSTELLAR_MINIO_ROOT_USER:?Set INTERSTELLAR_MINIO_ROOT_USER in .env}
+      MINIO_ROOT_PASSWORD: ${INTERSTELLAR_MINIO_ROOT_PASSWORD:?Set INTERSTELLAR_MINIO_ROOT_PASSWORD in .env}
+      MINIO_BROWSER_REDIRECT_URL: http://127.0.0.1:${INTERSTELLAR_MINIO_CONSOLE_PORT:-9001}
+    command: ["server", "/data", "--console-address", ":9001"]
+    ports:
+      - "127.0.0.1:${INTERSTELLAR_MINIO_API_PORT:-9000}:9000"
+      - "127.0.0.1:${INTERSTELLAR_MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+    stop_grace_period: 30s
+
+  minio-init:
+    image: ${INTERSTELLAR_MINIO_MC_IMAGE:-quay.io/minio/mc:RELEASE.2025-04-16T18-13-26Z}
+    restart: "no"
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MC_CONFIG_DIR: /tmp/.mc
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ROOT_USER: ${INTERSTELLAR_MINIO_ROOT_USER:?Set INTERSTELLAR_MINIO_ROOT_USER in .env}
+      MINIO_ROOT_PASSWORD: ${INTERSTELLAR_MINIO_ROOT_PASSWORD:?Set INTERSTELLAR_MINIO_ROOT_PASSWORD in .env}
+      MINIO_APP_ACCESS_KEY: ${INTERSTELLAR_MINIO_APP_ACCESS_KEY:?Set INTERSTELLAR_MINIO_APP_ACCESS_KEY in .env}
+      MINIO_APP_SECRET_KEY: ${INTERSTELLAR_MINIO_APP_SECRET_KEY:?Set INTERSTELLAR_MINIO_APP_SECRET_KEY in .env}
+      MINIO_ARTIFACTS_BUCKET: ${INTERSTELLAR_MINIO_ARTIFACTS_BUCKET:-interstellar-artifacts}
+      MINIO_IMPORTS_BUCKET: ${INTERSTELLAR_MINIO_IMPORTS_BUCKET:-interstellar-imports}
+      MINIO_EXPORTS_BUCKET: ${INTERSTELLAR_MINIO_EXPORTS_BUCKET:-interstellar-exports}
+    entrypoint: ["/bin/sh", "/opt/interstellar/init-buckets.sh"]
+    volumes:
+      - ./infra/minio/init-buckets.sh:/opt/interstellar/init-buckets.sh:ro
+    read_only: true
+    tmpfs:
+      - /tmp:size=4m,mode=1777
+    networks:
+      - backend
+    logging:
+      driver: json-file
+      options:
+        max-size: "1m"
+        max-file: "1"
+
+  mailpit:
+    <<: *service-defaults
+    image: ${INTERSTELLAR_MAILPIT_IMAGE:-axllent/mailpit:v1.20.4}
+    environment:
+      MP_DATABASE: /data/mailpit.db
+      MP_MAX_MESSAGES: ${INTERSTELLAR_MAILPIT_MAX_MESSAGES:-5000}
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+    ports:
+      - "127.0.0.1:${INTERSTELLAR_MAILPIT_SMTP_PORT:-1025}:1025"
+      - "127.0.0.1:${INTERSTELLAR_MAILPIT_UI_PORT:-8025}:8025"
+    volumes:
+      - mailpit-data:/data
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+networks:
+  backend:
+    driver: bridge
+    attachable: true
+    labels:
+      dev.interstellar.purpose: local-backend
+
+volumes:
+  postgres-data:
+    labels:
+      dev.interstellar.data: postgres
+  redis-data:
+    labels:
+      dev.interstellar.data: redis
+  minio-data:
+    labels:
+      dev.interstellar.data: minio
+  mailpit-data:
+    labels:
+      dev.interstellar.data: mailpit

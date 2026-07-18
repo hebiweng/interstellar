@@ -1,0 +1,112 @@
+schema_version: 1.0.0
+controller_id: interstellar.v1.phase_controller
+objective: 从Foundation连续开发到完整V1并在每个阶段通过真实门禁后自动推进
+accountable_owner: interstellar_primary_agent
+auto_advance:
+  enabled: true
+  trigger: all_required_exit_gate_assertions_pass
+  on_pass:
+    - write_stage_evidence_manifest
+    - update_capability_and_algorithm_implementation_status
+    - run_full_regression
+    - create_stage_checkpoint_commit
+    - activate_next_stage
+  on_failure:
+    - remain_in_current_stage
+    - classify_failure
+    - create_or_update_corrective_task
+    - rerun_failed_gate_and_impacted_regression
+  forbidden:
+    - advance_by_calendar_only
+    - mark_unimplemented_catalog_item_complete
+    - bypass_failed_license_security_or_reproducibility_gate
+
+concurrency:
+  maximum_active_agents: 4
+  primary_integration_lanes: 1
+  parallel_work_packages: 3
+  requirements:
+    - file_write_boundaries_do_not_overlap
+    - public_contract_changes_owned_by_primary_agent
+    - production_and_reference_implementations_do_not_share_domain_logic
+    - primary_agent_reviews_and_reruns_all_merge_gates
+
+stages:
+  - id: foundation
+    months: [M0, M1]
+    status: in_progress
+    entry_gate: approved_development_baseline_and_clean_catalog_validation
+    parallel_lanes: [web_workspace, backend_worker, local_infrastructure, contracts_ci]
+    exit_gate:
+      - web_api_worker_start_independently
+      - compose_services_healthy
+      - canonical_types_generate_deterministically
+      - ci_runs_catalog_contract_lint_test_build
+      - subject_version_and_snapshot_persistence_migrations_apply
+      - workspace_rls_and_immutable_version_tests_pass
+      - timespec_dst_overlap_gap_unknown_tests_pass
+      - location_and_dataset_manifest_import_contracts_pass
+    next_stage: professional_alpha
+
+  - id: professional_alpha
+    months: [M2, M3, M4, M5, M6]
+    status: pending
+    entry_gate: foundation.exit_gate
+    parallel_lanes: [production_calculation, independent_reference, product_recipe, rendering_quality]
+    exit_gate:
+      - core_ephemeris_houses_aspects_gold_and_difference_tests_pass
+      - natal_transit_return_synastry_composite_recipe_paths_complete
+      - single_double_wheel_aspect_grid_tables_and_basic_timeline_complete
+      - anonymous_and_persisted_subject_workflows_complete
+      - calculation_and_technique_reports_export_json_html_pdf
+      - professional_alpha_performance_security_license_and_recovery_gate_pass
+    next_stage: professional_beta
+
+  - id: professional_beta
+    months: [M7, M8, M9, M10, M11, M12]
+    status: pending
+    entry_gate: professional_alpha.exit_gate
+    parallel_lanes: [advanced_calculation, independent_reference, professional_views, archive_quality]
+    exit_gate:
+      - advanced_coordinates_minor_aspects_and_chart_variants_complete
+      - progressions_solar_arc_classical_derivations_midpoints_harmonics_complete
+      - fixed_stars_common_minor_bodies_and_event_search_complete
+      - graphical_ephemeris_gantt_calendars_three_four_wheels_complete
+      - pdf_ics_project_archive_round_trip_pass
+      - professional_beta_performance_security_and_recovery_gate_pass
+    next_stage: professional_pro
+
+  - id: professional_pro
+    months: [M13, M14, M15, M16, M17, M18]
+    status: pending
+    entry_gate: professional_beta.exit_gate
+    parallel_lanes: [rules_reports, time_lords_directions, horary_electional, geography_quality]
+    exit_gate:
+      - deterministic_rule_evidence_finding_pipeline_complete
+      - profections_firdaria_zodiacal_releasing_and_primary_directions_complete
+      - horary_and_electional_rule_traces_complete
+      - relocation_astrocartography_local_space_and_parans_complete
+      - twenty_four_topic_recipes_resolve_with_explicit_degradation
+      - professional_pro_difference_performance_security_and_license_gate_pass
+    next_stage: complete_v1
+
+  - id: complete_v1
+    months: [M19, M20, M21, M22, M23, M24]
+    status: pending
+    entry_gate: professional_pro.exit_gate
+    parallel_lanes: [mundane_relationship, topic_reports, render_catalog, api_release_quality]
+    exit_gate:
+      - ninety_nine_calculation_output_manifests_accounted_for
+      - one_hundred_twenty_eight_professional_views_implemented_or_approved_degraded
+      - twelve_models_twenty_four_topics_thirty_five_intents_and_six_reports_reachable
+      - full_gold_difference_contract_visual_performance_and_recovery_regression_pass
+      - bilingual_api_sdk_self_hosting_upgrade_and_rollback_docs_complete
+      - security_privacy_data_and_license_audits_have_no_open_release_blocker
+      - known_limits_and_actual_maturity_published
+    next_stage: released
+
+release_state:
+  id: released
+  status: pending
+  required_from: complete_v1.exit_gate
+  completion_action: mark_goal_complete_only_after_all_required_work_is_finished

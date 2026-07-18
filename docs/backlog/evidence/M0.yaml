@@ -1,0 +1,63 @@
+schema_version: 1.0.0
+checkpoint: M0
+stage: foundation
+verified_at: '2026-07-18'
+verifier: interstellar_primary_agent
+result: passed
+
+work_items:
+  M0-001:
+    result: passed
+    evidence:
+      - command: npm run test:web
+        outcome: web_build_and_two_rendered_html_tests_passed
+      - command: npm run api:dev
+        outcome: api_listened_on_127_0_0_1_8018_and_status_returned_foundation
+      - command: npm run worker:once
+        outcome: worker_wrote_sequence_1_idle_heartbeat
+  M0-002:
+    result: passed
+    evidence:
+      - command: docker-compose_config_quiet_with_explicit_test_environment
+        outcome: compose_configuration_resolved
+      - command: docker-compose_up_detached_wait_from_empty_named_volumes
+        outcome: postgres_redis_minio_mailpit_and_minio_init_healthy
+      - command: postgres_select_postgis_version
+        outcome: 3.4_USE_GEOS_USE_PROJ_USE_STATS
+      - command: redis_acl_ping
+        outcome: PONG
+      - command: minio_init_logs
+        outcome: three_private_buckets_restricted_user_and_policy_created
+      - command: loopback_http_health
+        outcome: minio_and_mailpit_health_endpoints_reachable
+  M0-003:
+    result: passed
+    evidence:
+      - command: npm run foundation:check
+        outcome: catalog_contract_generated_drift_python_lint_backend_tests_web_lint_build_and_web_tests_passed
+      - command: github_quality_workflow_review
+        outcome: python_3_13_pinned_dependencies_compose_config_and_foundation_gate_defined
+  M0-004:
+    result: passed
+    evidence:
+      - command: python3_scripts_validate_openapi_py
+        outcome: 15_schemas_220_schema_refs_45_paths_51_operations_275_openapi_refs_passed
+      - command: python3_scripts_generate_contract_types_py_check
+        outcome: three_generated_contract_files_deterministic
+      - command: python3_unittest_contracts
+        outcome: six_contract_tests_passed
+
+defects_found_and_closed:
+  - minio_fixed_uid_could_not_write_fresh_named_volume
+  - minio_client_config_was_on_read_only_root_filesystem
+  - internal_network_prevented_promised_loopback_access_in_colima
+  - api_bind_address_and_port_were_not_configurable
+  - generated_types_violated_root_eslint
+  - ci_python_version_did_not_match_backend_requirement
+
+known_non_blocking_notes:
+  - local_arm64_runtime_emulates_the_pinned_amd64_postgis_image
+  - actual_github_hosted_workflow_execution_requires_a_push_or_pull_request
+  - current_web_content_and_astrology_values_remain_explicitly_non_production_demo_data
+
+next_checkpoint: M1

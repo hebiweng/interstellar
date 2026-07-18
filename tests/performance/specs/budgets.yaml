@@ -1,0 +1,58 @@
+schema_version: 1.0.0
+suite_id: interstellar.performance_budgets.v1
+environment:
+  reference_profile: 4_vcpu_8_gib_single_region_docker_compose
+  warmup_requests: 100
+  measured_requests: 1000
+  concurrency_levels: [1, 10, 25]
+  report_percentiles: [50, 95, 99]
+
+budgets:
+  - id: PERF-SYNC-SINGLE-CHART
+    workload: one_person_one_standard_natal_chart_uncached
+    p95_ms: 2000
+    hard_timeout_ms: 5000
+    max_response_mib: 5
+  - id: PERF-CACHE-HIT
+    workload: existing_calculation_snapshot_read
+    p95_ms: 300
+    hard_timeout_ms: 1000
+    max_response_mib: 5
+  - id: PERF-RECIPE-PREFLIGHT
+    workload: resolve_analysis_recipe_without_calculation
+    p95_ms: 500
+    hard_timeout_ms: 1500
+    max_response_mib: 2
+  - id: PERF-SVG-WHEEL
+    workload: render_standard_single_wheel_from_snapshot
+    p95_ms: 800
+    hard_timeout_ms: 3000
+    max_artifact_mib: 5
+  - id: PERF-RELATIONSHIP
+    workload: synastry_plus_composite_without_report_uncached
+    p95_ms: 3000
+    hard_timeout_ms: 8000
+    max_response_mib: 12
+  - id: PERF-EVENT-SEARCH
+    workload: one_year_major_transit_event_search
+    mode: asynchronous
+    first_progress_event_p95_ms: 1000
+    hard_timeout_seconds: 60
+    cancellation_ack_p95_ms: 1000
+  - id: PERF-REPORT-PDF
+    workload: full_technical_report_with_20_views
+    mode: asynchronous
+    hard_timeout_seconds: 120
+    max_artifact_mib: 50
+  - id: PERF-MAP
+    workload: astrocartography_major_bodies_global_lines
+    mode: asynchronous
+    hard_timeout_seconds: 60
+    max_feature_count: 5000
+
+failure_policy:
+  synchronous_over_budget: convert_to_202_job_when_contract_allows_else_return_CALCULATION_BUDGET_EXCEEDED
+  asynchronous_over_budget: checkpoint_cancel_or_return_partial_manifest_with_warning
+  memory_pressure: reject_new_heavy_jobs_before_process_oom
+  release_regression_threshold_percent: 15
+  stable_release_requires_three_consecutive_passing_runs: true

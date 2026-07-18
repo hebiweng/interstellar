@@ -1,0 +1,136 @@
+schema_version: 1.0.0
+catalog_id: interstellar.official_analysis_model_presets.v1
+immutable: true
+id_semantics: each_preset_id_equals_docs_capabilities_analysis_model_id
+runtime_policy:
+  required_components_locked: true
+  optional_components_user_selectable: true
+  user_change_creates_analysis_recipe_override: true
+  core_change_creates_custom_model_spec: true
+  unknown_birth_time: never_assume_midnight
+  unavailable_required_component: block_with_reason
+  unavailable_optional_component: explicit_degradation
+
+shared_defaults:
+  zodiac: tropical
+  house_system: placidus
+  high_latitude_fallback: whole_sign_with_warning
+  coordinate_center: geocentric
+  apparent_positions: true
+  node_mode: true_node
+  orb_profile_id: official.orbs.standard.v1
+  locale: zh-CN
+  maturity_visibility: always
+  provenance_visibility: always
+
+presets:
+  - id: natal.modern.v1
+    rule_pack_id: official.natal.modern.v1
+    required_components: [natal.standard_chart, natal.patterns_distributions]
+    optional_components: []
+    primary_outputs: [wheel.natal, table.planet_positions, grid.aspects, table.elements]
+    secondary_outputs: [table.modalities, table.chart_patterns]
+    report_profile_id: report.technique_analysis.v1
+    defaults: {minimum_time_precision: date, unknown_time_mode: no_houses_no_angles}
+
+  - id: natal.classical.v1
+    rule_pack_id: official.natal.classical.v1
+    required_components: [natal.standard_chart, natal.dignity_reception, natal.arabic_parts]
+    optional_components: [natal.midpoints]
+    primary_outputs: [wheel.natal, table.essential_dignities, graph.dispositor_chain, table.arabic_parts]
+    secondary_outputs: [table.house_rulers, table.sect_condition]
+    report_profile_id: report.technique_analysis.v1
+    defaults: {minimum_time_precision: minute, rulership_system: traditional, sect_required: true}
+
+  - id: natal.hellenistic.v1
+    rule_pack_id: official.natal.hellenistic.v1
+    required_components: [natal.standard_chart, natal.dignity_reception, natal.arabic_parts]
+    optional_components: [timing.annual_profections, timing.zodiacal_releasing]
+    primary_outputs: [wheel.natal, timeline.profections, timeline.zodiacal_releasing, table.arabic_parts]
+    secondary_outputs: [table.essential_dignities, table.sect_condition]
+    report_profile_id: report.technique_analysis.v1
+    defaults: {minimum_time_precision: minute, house_system: whole_sign, rulership_system: traditional, sect_required: true}
+
+  - id: natal.integrated.v1
+    rule_pack_id: official.natal.integrated.v1
+    required_components: [natal.standard_chart, natal.patterns_distributions, natal.dignity_reception, natal.arabic_parts, topic.structured_evidence]
+    optional_components: [natal.midpoints, natal.harmonics]
+    primary_outputs: [wheel.natal, table.chart_patterns, table.essential_dignities, graph.aspect_network]
+    secondary_outputs: [graph.dispositor_chain, table.dominant_planets, table.arabic_parts]
+    report_profile_id: report.technique_analysis.v1
+    defaults: {minimum_time_precision: minute, synthesis_policy: preserve_school_specific_evidence}
+
+  - id: forecast.short_transit.v1
+    rule_pack_id: official.forecast.short_transit.v1
+    required_components: [forecast.transits, forecast.event_search]
+    optional_components: [forecast.returns]
+    primary_outputs: [wheel.bi_natal_transit, timeline.transit_gantt, table.future_events, calendar.aspects]
+    secondary_outputs: [table.active_triggers, calendar.lunations]
+    report_profile_id: report.technique_analysis.v1
+    defaults: {minimum_time_precision: date, default_range_days: 90, exact_passes_required: true}
+
+  - id: forecast.annual_integrated.v1
+    rule_pack_id: official.forecast.annual_integrated.v1
+    required_components: [forecast.transits, forecast.returns, forecast.secondary_progression, timing.annual_profections, topic.structured_evidence]
+    optional_components: [forecast.solar_arc, timing.firdaria]
+    primary_outputs: [wheel.tri_natal_return_transit, timeline.multi_technique, calendar.returns, table.active_triggers]
+    secondary_outputs: [timeline.profections, calendar.eclipses, table.future_events]
+    report_profile_id: report.technique_analysis.v1
+    defaults: {minimum_time_precision: minute, default_range_years: 1, return_location_policy: user_selected}
+
+  - id: forecast.long_cycle.v1
+    rule_pack_id: official.forecast.long_cycle.v1
+    required_components: [forecast.secondary_progression, forecast.solar_arc, forecast.primary_directions, timing.firdaria, timing.zodiacal_releasing, forecast.event_search]
+    optional_components: [forecast.transits, forecast.returns]
+    primary_outputs: [timeline.multi_technique, timeline.zodiacal_releasing, timeline.primary_directions, timeline.historical_analogs]
+    secondary_outputs: [timeline.secondary_progression, timeline.solar_arc, timeline.firdaria]
+    report_profile_id: report.technique_analysis.v1
+    defaults: {minimum_time_precision: minute, default_range_years: 10, convergence_required_for_priority: true}
+
+  - id: relationship.comparison.v1
+    rule_pack_id: official.relationship.comparison.v1
+    required_components: [relationship.synastry]
+    optional_components: [relationship.composite]
+    primary_outputs: [relationship.synastry_wheel, grid.cross_aspects, table.house_overlays, relationship.bidirectional_house_overlay]
+    secondary_outputs: [relationship.aspect_network]
+    report_profile_id: report.technique_analysis.v1
+    defaults: {minimum_time_precision: date, preserve_directionality: true, single_total_score: forbidden}
+
+  - id: relationship.entity.v1
+    rule_pack_id: official.relationship.entity.v1
+    required_components: [relationship.composite, relationship.davison]
+    optional_components: [relationship.dynamic_forecast]
+    primary_outputs: [relationship.composite_wheel, relationship.davison_wheel, relationship.cycle_comparison, table.active_triggers]
+    secondary_outputs: [relationship.transit_to_composite, relationship.transit_to_davison]
+    report_profile_id: report.technique_analysis.v1
+    defaults: {minimum_time_precision: minute, composite_midpoint_policy: shortest_arc, davison_midpoint_policy: spherical_location}
+
+  - id: special.project_event.v1
+    rule_pack_id: official.special.project_event.v1
+    required_components: [mundane.organizations_projects, forecast.transits, forecast.event_search, topic.structured_evidence]
+    optional_components: [forecast.returns, forecast.secondary_progression]
+    primary_outputs: [wheel.project_start, wheel.bi_project_founder, timeline.multi_technique, table.future_events]
+    secondary_outputs: [table.active_triggers, calendar.aspects]
+    report_profile_id: report.technique_analysis.v1
+    defaults: {minimum_time_precision: minute, event_anchor_must_be_explicit: true, success_probability: forbidden}
+
+  - id: special.question_action.v1
+    rule_pack_id: official.special.question_action.v1
+    required_components: []
+    variants:
+      horary: {required_components: [special.horary], primary_outputs: [wheel.horary, table.essential_dignities, table.house_rulers]}
+      electional: {required_components: [special.electional], primary_outputs: [wheel.electional, table.future_events, calendar.aspects]}
+    optional_components: []
+    primary_outputs: [wheel.horary, wheel.electional, table.future_events]
+    secondary_outputs: [grid.aspects, calendar.lunations]
+    report_profile_id: report.technique_analysis.v1
+    defaults: {minimum_time_precision: minute, exact_location_required: true, variant_required: true, guaranteed_outcome: forbidden}
+
+  - id: geography.location.v1
+    rule_pack_id: official.geography.location.v1
+    required_components: [geography.relocation, geography.astrocartography, geography.local_space, geography.parans]
+    optional_components: []
+    primary_outputs: [wheel.relocation, map.astrocartography_global, map.local_space, map.parans, map.city_comparison]
+    secondary_outputs: [map.line_intersections]
+    report_profile_id: report.technique_analysis.v1
+    defaults: {minimum_time_precision: minute, exact_location_required: true, city_score: forbidden_without_declared_rule}

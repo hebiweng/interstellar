@@ -1,0 +1,211 @@
+schema_version: 1.0.0
+catalog_id: interstellar.official_base_model_rule_packs.v1
+runtime: platform.rule_pack_runtime
+deterministic: true
+rule_language:
+  selector_result: [matched_fact_paths, normalized_strength, provenance]
+  evidence_polarities:
+    supportive: configuration supports or facilitates the named dimension
+    pressuring: configuration adds friction demand delay or conflict
+    amplifying: configuration increases salience without asserting benefit or harm
+    mitigating: configuration moderates another evidence item
+    neutral: descriptive evidence without directional judgement
+  aggregation:
+    deduplicate_by: [semantic_signature, source_snapshot_path, technique]
+    correlated_evidence_discount: 0.65
+    independent_technique_bonus_cap: 0.25
+    max_normalized_score: 1.0
+  conflict_resolution:
+    never_cancel_opposite_polarities: true
+    preserve_support_and_pressure_separately: true
+    contradiction_requires_shared_dimension: true
+    school_conflict: preserve_school_labels_no_forced_merge
+  thresholds:
+    evidence_min_strength: 0.35
+    finding_min_independent_evidence: 1
+    conclusion_min_independent_evidence: 2
+    high_confidence_min_independent_techniques: 3
+  forbidden_outputs:
+    - objective_event_probability
+    - guaranteed_outcome
+    - deterministic_life_event
+    - opaque_luck_score
+    - medical_legal_or_financial_instruction
+
+rule_packs:
+  - id: official.natal.modern.v1
+    owners: {base_models: [natal.modern.v1], topic_models: []}
+    maturity: stable
+    selectors:
+      - {id: luminary_core, paths: [/charts/primary/points/sun, /charts/primary/points/moon], polarity: amplifying}
+      - {id: ascendant_ruler, paths: [/charts/primary/angles/asc, /derived/rulers/asc], polarity: neutral, requires_time: true}
+      - {id: angular_planets, paths: [/derived/angularity/*], polarity: amplifying, requires_time: true}
+      - {id: tight_major_aspects, paths: [/charts/primary/aspects/*], predicate: major_and_orb_ratio_gte_0_65, polarity: dynamic_by_aspect}
+      - {id: distribution_patterns, paths: [/derived/distributions, /derived/patterns], polarity: neutral}
+    dimensions: [identity_and_direction, emotional_regulation, cognition_and_communication, relating_and_values, agency_and_drive, recurring_patterns]
+    aggregation: {group_by: dimension, priority: [luminary_core, ascendant_ruler, angular_planets, tight_major_aspects, distribution_patterns]}
+    conflict: {pairs: [security_vs_autonomy, stability_vs_change, expression_vs_inhibition], output: both_poles_and_synthesis}
+    thresholds: {top_findings_per_dimension: 3, conclusion_min_independent_evidence: 2}
+    forbidden_outputs: [personality_diagnosis, objective_event_probability]
+
+  - id: official.natal.classical.v1
+    owners: {base_models: [natal.classical.v1], topic_models: []}
+    maturity: beta
+    selectors:
+      - {id: sect_condition, paths: [/derived/sect], polarity: neutral, requires_time: true}
+      - {id: essential_dignity, paths: [/derived/dignities/essential/*], polarity: dynamic_by_condition}
+      - {id: accidental_dignity, paths: [/derived/dignities/accidental/*], polarity: dynamic_by_condition, requires_time: true}
+      - {id: house_lords, paths: [/derived/rulers/houses/*], polarity: neutral, requires_time: true}
+      - {id: reception, paths: [/derived/receptions/*], polarity: dynamic_by_reception}
+      - {id: lots, paths: [/derived/lots/*], polarity: neutral, requires_time: true}
+    dimensions: [planetary_capacity, planetary_condition, house_topic_delivery, support_and_impairment, sect_alignment, lot_testimony]
+    aggregation: {group_by: [planet, house_topic], scoring_profile: traditional_weighted_no_cross_school_mix}
+    conflict: {essential_vs_accidental: preserve_both_explain_capacity_vs_circumstance, reception_mitigates_not_erases: true}
+    thresholds: {finding_min_independent_evidence: 1, conclusion_min_independent_evidence: 2}
+    forbidden_outputs: [lifespan_prediction, death_prediction, objective_event_probability]
+
+  - id: official.natal.hellenistic.v1
+    owners: {base_models: [natal.hellenistic.v1], topic_models: []}
+    maturity: beta
+    selectors:
+      - {id: sect_and_sect_light, paths: [/derived/sect, /charts/primary/points/sun, /charts/primary/points/moon], polarity: neutral}
+      - {id: whole_sign_topics, paths: [/charts/primary/houses/*, /derived/rulers/houses/*], polarity: neutral, requires_time: true}
+      - {id: angularity_to_angles_and_lots, paths: [/derived/angularity/*, /derived/lots/*], polarity: amplifying, requires_time: true}
+      - {id: benefic_malefic_condition, paths: [/derived/dignities/*, /derived/sect], polarity: dynamic_by_sect_and_condition}
+      - {id: time_lord_context, paths: [/timing/profections, /timing/zodiacal_releasing], polarity: amplifying, optional: true}
+    dimensions: [sect_structure, house_topics, fortune_and_spirit, benefic_malefic_condition, angularity, time_lord_context]
+    aggregation: {group_by: [house_topic, time_lord], scoring_profile: hellenistic_school_specific}
+    conflict: {modern_outer_planet_claims: exclude_from_core, variant_sources: preserve_source_variant}
+    thresholds: {conclusion_min_independent_evidence: 2, high_confidence_min_independent_techniques: 3}
+    forbidden_outputs: [lifespan_prediction, fatalistic_certainty, objective_event_probability]
+
+  - id: official.natal.integrated.v1
+    owners: {base_models: [natal.integrated.v1], topic_models: []}
+    maturity: beta
+    selectors:
+      - {id: modern_core, include_rule_pack: official.natal.modern.v1, polarity: inherit}
+      - {id: classical_condition, include_rule_pack: official.natal.classical.v1, polarity: inherit}
+      - {id: repeated_theme, paths: [/evidence/*], predicate: same_dimension_across_independent_selectors, polarity: amplifying}
+      - {id: counter_evidence, paths: [/evidence/*], predicate: opposite_polarity_same_dimension, polarity: mitigating}
+    dimensions: [identity, needs, agency, relationships, vocation, resources, tensions, compensations]
+    aggregation: {group_by: dimension, require_school_provenance: true, cross_school_bonus_only_when_semantically_equivalent: true}
+    conflict: {psychological_vs_event_claim: keep_separate, school_conflict: no_majority_vote}
+    thresholds: {conclusion_min_independent_evidence: 2, top_findings_per_dimension: 4}
+    forbidden_outputs: [clinical_diagnosis, objective_event_probability, guaranteed_outcome]
+
+  - id: official.forecast.short_transit.v1
+    owners: {base_models: [forecast.short_transit.v1], topic_models: []}
+    maturity: stable
+    selectors:
+      - {id: exact_transit_hits, paths: [/timing/transits/events/*], predicate: aspect_orb_phase_present, polarity: dynamic_by_target_and_aspect}
+      - {id: ingress_and_station, paths: [/timing/transits/ingresses/*, /timing/transits/stations/*], polarity: amplifying}
+      - {id: fast_triggers, paths: [/timing/transits/events/*], predicate: moving_body_in_sun_to_mars, polarity: amplifying}
+      - {id: slow_background, paths: [/timing/transits/events/*], predicate: moving_body_jupiter_or_slower, polarity: dynamic_by_target_and_aspect}
+    dimensions: [active_theme, support, pressure, peak_dates, duration, repeated_passes]
+    aggregation: {group_by: [target_point, semantic_theme, pass_series], exact_passes_merge_into_cycle: true}
+    conflict: {support_pressure: report_both, fast_trigger_does_not_override_slow_background: true}
+    thresholds: {active_orb_ratio_min: 0.35, top_events_default: 12}
+    forbidden_outputs: [daily_luck_score, event_guarantee, objective_event_probability]
+
+  - id: official.forecast.annual_integrated.v1
+    owners: {base_models: [forecast.annual_integrated.v1], topic_models: []}
+    maturity: beta
+    selectors:
+      - {id: annual_transits, include_rule_pack: official.forecast.short_transit.v1, polarity: inherit}
+      - {id: solar_return, paths: [/charts/returns/solar, /evidence/solar_return/*], polarity: neutral}
+      - {id: secondary_progression, paths: [/timing/secondary_progressions/*], polarity: dynamic_by_target_and_aspect}
+      - {id: annual_profection, paths: [/timing/profections/annual], polarity: amplifying}
+      - {id: eclipse_contacts, paths: [/timing/eclipses/*], polarity: amplifying}
+    dimensions: [annual_emphasis, activated_houses, major_cycles, support_windows, pressure_windows, confidence]
+    aggregation: {group_by: [dimension, month], independent_technique_convergence_bonus: true, no_single_score: true}
+    conflict: {technique_disagreement: preserve_with_confidence_reduction, return_location_variants: never_merge}
+    thresholds: {formal_annual_conclusion_min_techniques: 2, high_confidence_min_independent_techniques: 3}
+    forbidden_outputs: [guaranteed_yearly_event, objective_event_probability, opaque_annual_score]
+
+  - id: official.forecast.long_cycle.v1
+    owners: {base_models: [forecast.long_cycle.v1], topic_models: []}
+    maturity: beta
+    selectors:
+      - {id: secondary_progressions, paths: [/timing/secondary_progressions/*], polarity: dynamic_by_target_and_aspect}
+      - {id: solar_arcs, paths: [/timing/solar_arcs/*], polarity: dynamic_by_target_and_aspect}
+      - {id: primary_directions, paths: [/timing/primary_directions/*], polarity: dynamic_by_promissor_significator}
+      - {id: firdaria, paths: [/timing/firdaria/*], polarity: amplifying}
+      - {id: zodiacal_releasing, paths: [/timing/zodiacal_releasing/*], polarity: amplifying}
+      - {id: historical_analogs, paths: [/timing/historical_analogs/*], polarity: neutral}
+    dimensions: [life_phase, structural_change, inner_development, peak_periods, release_or_reorientation, convergence]
+    aggregation: {group_by: [dimension, quarter_or_year], independent_technique_convergence_bonus: true}
+    conflict: {timing_key_variants: separate_series, historical_analog_is_context_not_prediction: true}
+    thresholds: {formal_conclusion_min_techniques: 2, high_confidence_min_independent_techniques: 3}
+    forbidden_outputs: [lifespan_prediction, unavoidable_event, objective_event_probability]
+
+  - id: official.relationship.comparison.v1
+    owners: {base_models: [relationship.comparison.v1], topic_models: [relationship.comparison.v1]}
+    maturity: stable
+    selectors:
+      - {id: cross_aspects, paths: [/relationships/synastry/aspects/*], polarity: dynamic_by_pair_and_aspect}
+      - {id: a_into_b_houses, paths: [/relationships/synastry/overlays/a_into_b/*], polarity: amplifying, requires_time: true}
+      - {id: b_into_a_houses, paths: [/relationships/synastry/overlays/b_into_a/*], polarity: amplifying, requires_time: true}
+      - {id: angle_node_vertex_contacts, paths: [/relationships/synastry/aspects/*], predicate: involves_angle_node_or_vertex, polarity: amplifying, requires_time: conditional}
+    dimensions: [attraction, emotional_safety, communication, intimacy, stability, autonomy, conflict, mutual_growth]
+    aggregation: {group_by: [dimension, direction], preserve_a_and_b_perspectives: true}
+    conflict: {support_pressure: report_both, chemistry_not_equal_stability: true, asymmetry_must_remain_visible: true}
+    thresholds: {tight_cross_aspect_orb_ratio_min: 0.45, conclusion_min_independent_evidence: 2}
+    forbidden_outputs: [single_compatibility_score, breakup_probability, marriage_guarantee]
+
+  - id: official.relationship.entity.v1
+    owners: {base_models: [relationship.entity.v1], topic_models: [relationship.entity.v1]}
+    maturity: beta
+    selectors:
+      - {id: composite_core, paths: [/relationships/composite/*], polarity: dynamic_by_configuration}
+      - {id: davison_core, paths: [/relationships/davison/*], polarity: dynamic_by_configuration}
+      - {id: entity_to_individual, paths: [/relationships/entity_to_subject/*], polarity: amplifying}
+      - {id: dynamic_activation, paths: [/relationships/dynamic/*], polarity: dynamic_by_target_and_aspect, optional: true}
+    dimensions: [shared_identity, emotional_climate, communication_field, commitment_structure, purpose, conflict_field, current_cycle]
+    aggregation: {group_by: [dimension, chart_method], composite_and_davison_never_average: true}
+    conflict: {method_disagreement: preserve_as_distinct_lenses, personal_vs_entity_claim: keep_separate}
+    thresholds: {conclusion_min_independent_evidence: 2, dynamic_claim_requires_timing_data: true}
+    forbidden_outputs: [relationship_success_probability, guaranteed_duration, single_compatibility_score]
+
+  - id: official.special.project_event.v1
+    owners: {base_models: [special.project_event.v1], topic_models: [special.project_event.v1]}
+    maturity: beta
+    selectors:
+      - {id: event_chart_core, paths: [/charts/primary/*], polarity: dynamic_by_configuration}
+      - {id: project_house_topics, paths: [/derived/rulers/houses/*, /charts/primary/houses/*], polarity: neutral}
+      - {id: project_transits, paths: [/timing/transits/*], polarity: dynamic_by_target_and_aspect}
+      - {id: related_subject_contacts, paths: [/relationships/synastry/*], polarity: dynamic_by_pair_and_aspect, optional: true}
+    dimensions: [purpose, resources, execution, communication, partners, public_outcome, risk_windows, timing]
+    aggregation: {group_by: [dimension, phase], anchor_event_provenance_required: true}
+    conflict: {multiple_anchor_events: separate_snapshots, opportunity_and_risk: report_both}
+    thresholds: {conclusion_min_independent_evidence: 2, timing_window_requires_exact_event_time: true}
+    forbidden_outputs: [project_success_probability, investment_instruction, guaranteed_outcome]
+
+  - id: official.special.question_action.v1
+    owners: {base_models: [special.question_action.v1], topic_models: []}
+    maturity: beta
+    selectors:
+      - {id: horary_radicality, paths: [/special/horary/radicality/*], polarity: neutral, variant: horary}
+      - {id: horary_significators, paths: [/special/horary/significators/*], polarity: dynamic_by_condition, variant: horary}
+      - {id: perfection_and_prohibition, paths: [/special/horary/perfection/*], polarity: dynamic_by_rule, variant: horary}
+      - {id: electional_hard_constraints, paths: [/special/electional/candidates/*/constraints/hard], polarity: dynamic_by_pass_fail, variant: electional}
+      - {id: electional_soft_conditions, paths: [/special/electional/candidates/*/constraints/soft], polarity: dynamic_by_rule, variant: electional}
+    dimensions: [question_validity, significator_condition, connection_or_perfection, prohibition_or_delay, candidate_eligibility, relative_preference]
+    aggregation: {group_by: [variant, question_or_candidate], horary_and_electional_never_merge: true}
+    conflict: {traditional_rule_variants: preserve_rule_pack_variant, soft_score_cannot_override_failed_hard_constraint: true}
+    thresholds: {horary_judgement_requires_significators: true, electional_candidate_requires_all_hard_constraints: true}
+    forbidden_outputs: [guaranteed_outcome, objective_event_probability, medical_surgery_clearance, legal_or_financial_instruction]
+
+  - id: official.geography.location.v1
+    owners: {base_models: [geography.location.v1], topic_models: [geography.location.v1]}
+    maturity: beta
+    selectors:
+      - {id: relocation_angles_houses, paths: [/geography/relocation/*], polarity: dynamic_by_configuration}
+      - {id: astrocartography_lines, paths: [/geography/astrocartography/lines/*], polarity: amplifying}
+      - {id: line_crossings, paths: [/geography/astrocartography/intersections/*], polarity: amplifying}
+      - {id: local_space_azimuths, paths: [/geography/local_space/*], polarity: neutral}
+      - {id: paran_events, paths: [/geography/parans/*], polarity: dynamic_by_bodies}
+    dimensions: [identity_expression, vocation_visibility, relationships, home_belonging, opportunity, pressure, local_directionality]
+    aggregation: {group_by: [location, dimension, method], methods_never_collapsed_into_single_city_score: true}
+    conflict: {support_pressure: report_both, distance_decay_profile_must_be_versioned: true}
+    thresholds: {exact_birth_time_required_for_angular_claims: true, displayed_distance_km_requires_rule_version: true}
+    forbidden_outputs: [best_city_objective_claim, relocation_success_probability, guaranteed_outcome]

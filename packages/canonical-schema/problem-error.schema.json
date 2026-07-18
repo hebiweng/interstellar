@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://interstellar.dev/schemas/v1/problem-error.schema.json",
+  "title": "ProblemError",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "title", "status", "code", "detail", "instance", "request_id", "retryable"],
+  "properties": {
+    "type": {"type": "string", "format": "uri"},
+    "title": {"type": "string", "minLength": 1},
+    "status": {"type": "integer", "minimum": 400, "maximum": 599},
+    "code": {
+      "type": "string",
+      "enum": [
+        "INVALID_REQUEST", "UNAUTHENTICATED", "FORBIDDEN", "NOT_FOUND", "IDEMPOTENCY_CONFLICT",
+        "TIME_AMBIGUOUS_LOCAL", "TIME_NONEXISTENT_LOCAL", "TIME_PRECISION_INSUFFICIENT",
+        "SUBJECT_ROLE_MISSING", "DRAFT_REVISION_CONFLICT", "MODEL_NOT_AVAILABLE",
+        "REQUIRED_DEPENDENCY_BLOCKED", "OPTIONAL_EXTENSION_INCOMPATIBLE", "RECIPE_EXPIRED",
+        "RECIPE_HASH_MISMATCH", "DATASET_VERSION_UNAVAILABLE", "JOB_CONCURRENCY_LIMIT",
+        "CALCULATION_TIMEOUT", "REPORT_RULES_MISSING", "REPORT_TEMPLATE_MISSING",
+        "RENDER_DEPENDENCY_MISSING", "LICENSE_RESTRICTED", "INTERNAL_ERROR"
+      ]
+    },
+    "detail": {"type": "string", "minLength": 1},
+    "instance": {"type": "string", "format": "uri-reference"},
+    "fields": {"type": "object", "additionalProperties": true},
+    "request_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "retryable": {"type": "boolean"}
+  }
+}

@@ -1,0 +1,49 @@
+schema_version: 1.0.0
+suite_id: interstellar.contract_test_matrix.v1
+purpose: 公共REST_SSE_归档与CanonicalSchema的兼容性门禁
+source_of_truth:
+  openapi: openapi/openapi.yaml
+  schemas: packages/canonical-schema
+  errors: docs/v1-development-spec.md
+
+global_assertions:
+  - every_operation_has_unique_operation_id
+  - every_request_and_response_ref_resolves
+  - success_payload_matches_json_schema_2020_12
+  - errors_use_application_problem_json_and_stable_domain_code
+  - mutating_commands_accept_idempotency_key
+  - mutable_drafts_require_revision_precondition
+  - immutable_resources_expose_no_update_operation
+  - unknown_enum_values_do_not_crash_generated_clients
+  - sensitive_birth_data_and_tokens_never_appear_in_urls
+
+suites:
+  - id: CONTRACT-CATALOG
+    paths: [/entry-points, /techniques, /analysis-models, /topic-models, /analysis-intents]
+    assertions: [cursor_pagination_stable, filters_are_deterministic, catalog_version_returned]
+  - id: CONTRACT-SUBJECT
+    paths: [/subjects, "/subjects/{id}", "/subjects/{id}/versions"]
+    assertions: [first_version_created_atomically, subject_version_immutable, workspace_scope_enforced]
+  - id: CONTRACT-RECIPE
+    paths: [/analysis-drafts, "/analysis-drafts/{id}", "/analysis-drafts/{id}/resolve", "/analysis-recipes/{id}", "/analysis-recipes/{id}/confirm"]
+    assertions: [resolve_has_no_calculation_side_effect, recipe_immutable, stale_revision_is_409]
+  - id: CONTRACT-CALCULATION
+    paths: [/calculations, "/calculations/{id}"]
+    assertions: [sync_returns_201_snapshot, async_returns_202_job, calculation_fingerprint_reproducible]
+  - id: CONTRACT-JOB-SSE
+    paths: ["/jobs/{id}", "/jobs/{id}/events", "/jobs/{id}/cancel"]
+    assertions: [state_transitions_valid, last_event_id_resumes, cancel_idempotent, terminal_job_not_restarted]
+  - id: CONTRACT-REPORT-RENDER
+    paths: [/reports, "/reports/{id}", /renders]
+    assertions: [report_references_snapshot_findings, render_uses_render_spec_only, long_render_returns_job]
+  - id: CONTRACT-RULE-DATASET
+    paths: [/rule-packs, /datasets]
+    assertions: [released_version_immutable, content_hash_present, license_and_dataset_status_visible]
+  - id: CONTRACT-ARCHIVE
+    paths: [/archives, "/archives/{id}"]
+    assertions: [export_manifest_signed, import_validates_schema, round_trip_preserves_snapshot_hash]
+
+release_gate:
+  alpha: [CONTRACT-CATALOG, CONTRACT-SUBJECT, CONTRACT-RECIPE, CONTRACT-CALCULATION, CONTRACT-JOB-SSE]
+  beta: [CONTRACT-REPORT-RENDER, CONTRACT-ARCHIVE]
+  v1: [all_suites, generated_types_have_zero_diff]

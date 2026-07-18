@@ -2,7 +2,7 @@
 
 算法卡是复杂计算能力进入开发的前置条件，也是`Stable`发布门禁的一部分。每项技法、流派变体、时间转换、关键渲染算法或分析模型组合各自维护一张卡，存放于仓库`algorithm-cards/<category>/<capability-or-model-id>.md`。
 
-算法卡必须让另一名开发者在不自行选择流派、公式、默认参数和误差口径的情况下完成实现。未知内容不得留空或用“常见做法”代替，应标记为`BLOCKED`并停止进入正式开发。
+算法卡必须让主代理或受托子代理在不自行选择流派、公式、默认参数和误差口径的情况下完成实现。项目唯一责任主体是主代理；子代理可起草卡片、生产实现、独立参考实现或测试，但不得批准自己的产出。未知内容不得留空或用“常见做法”代替，应标记为`BLOCKED`并停止进入正式开发。
 
 ---
 
@@ -27,8 +27,10 @@ status: draft # draft | review | approved | superseded
 maturity_target: beta # stable | beta | experimental
 work_package: V1-XXX-001
 owners:
-  engineering: <name-or-tbd>
-  astrology_review: <name-or-tbd>
+  accountable_main_agent: codex
+  implementation_agent: <agent-id-or-main>
+  independent_reference_agent: <different-agent-id-or-main-isolated-pass>
+optional_external_reviewers: []
 created_at: YYYY-MM-DD
 updated_at: YYYY-MM-DD
 supersedes: null
@@ -157,7 +159,7 @@ function calculate(input, settings) -> Result:
 | 输出Manifest | 主要视图、次要视图、表格、地图、时间线和导出格式 |
 | 版本策略 | 哪些变化属于Patch、Minor和Major |
 
-模型卡不得重新描述底层公式，而应引用各组件算法卡；模型卡的金标准至少验证一次完整展开、一次降级、一次阻断、一次模型版本升级后旧快照复现。模型卡未批准时，模型最多标记为`Experimental`。
+模型卡不得重新描述底层公式，而应引用各组件算法卡；模型卡的金标准至少验证一次完整展开、一次降级、一次阻断、一次模型版本升级后旧快照复现。模型卡未经主代理完成自审和双实现差异验证时，模型最多标记为`Experimental`。
 
 ### 7.2 TopicModel与ReportRulePack附加要求
 
@@ -176,7 +178,7 @@ function calculate(input, settings) -> Result:
 | SectionDefinition | 报告章节、适用对象、空章节和推荐图表 |
 | Templates | `statement_key`、中英文版本、变量、语气和来源许可 |
 | ReportProfile | 可生成的六类报告及不支持原因 |
-| 专业复核 | 规则、模板、样本和成熟度的签署状态 |
+| 自审与可选外审 | 主代理对规则、模板、样本和成熟度的自审证据；外部专家评议如有则附加，但不是开发阻断条件 |
 
 报告规则卡至少包含：一个正常样本、一个反证样本、一个证据冲突样本、一个无模板回退样本、一个未知出生时间降级样本，以及摘要/标准/完整技术版共享同一Finding集合的测试。
 
@@ -224,13 +226,15 @@ function calculate(input, settings) -> Result:
 - 一个时间或地点不确定样本；
 - 一个该技法特有的失败样本。
 
-## 11. 差异测试
+## 11. 双实现差异测试
 
 | Reference ID | 独立实现 | 版本 | 参数对齐 | 比较字段 | 允许误差 | 不一致处理 |
 |---|---|---|---|---|---:|---|
 | DIFF-001 | | | | | | |
 
-差异测试必须记录参考实现的黄道、宫位制、岁差、章动、Delta T、观察中心、节点类型、容许度和舍入；参数未对齐时不得判断实现错误。
+差异测试必须至少包含两个独立实现路径：生产实现与独立参考实现，或生产实现与允许自动比对的第三方参考引擎。两路径不得共享同一段领域决策代码、同一个未校验转换器或同一份测试期望值生成逻辑。负责生产实现的子代理不得同时负责参考实现。
+
+差异测试必须记录参考实现的黄道、宫位制、岁差、章动、Delta T、观察中心、节点类型、容许度和舍入；参数未对齐时不得判断实现错误。如某项高阶技法没有可合法自动化的第三方实现，必须在隔离上下文中按原始来源编写最小参考实现，并以属性、金标准和手工推导样本交叉约束它。
 
 ## 12. 属性与不变量
 
@@ -307,13 +311,31 @@ function calculate(input, settings) -> Result:
 |---|---|---|---|---|---|
 | Q-01 | | | | | open |
 
-## 19. 审批
+## 19. 主代理自审与可选外部评议
 
-| 角色 | 姓名 | 结论 | 日期 | 备注 |
+### 19.1 强制自审清单
+
+| 审查项 | 证据路径/命令 | 结论 | 主代理签署 | 日期 |
 |---|---|---|---|---|
-| 工程负责人 | | approve/reject | | |
-| 占星专业评审 | | approve/reject | | |
-| 数据/许可评审 | | approve/reject/not-needed | | |
+| 原始/官方来源与当前公式逐项对照 | | pass/reject | | |
+| 所有默认值、单位、坐标系和流派已锁定 | | pass/reject | | |
+| 生产实现与独立参考实现无共享领域逻辑 | | pass/reject | | |
+| 差异报告在允许容差内，超差均有归因 | | pass/reject | | |
+| 金标准、属性、边界和降级测试通过 | | pass/reject | | |
+| Schema、API、快照、目录和OutputManifest一致 | | pass/reject | | |
+| 数据来源、许可、隐私和安全边界通过 | | pass/reject | | |
+| 性能预算、回滚和旧快照复现通过 | | pass/reject | | |
+
+任一强制项为`reject`时不得将卡片设为`approved`或将能力提升为`Stable`。
+
+### 19.2 记录与外部评议
+
+| 角色 | 标识 | 结论 | 日期 | 备注 |
+|---|---|---|---|---|
+| 主代理（唯一批准责任主体） | codex | approve/reject | | |
+| 独立参考实现验证 | | pass/reject | | |
+| 外部占星专家（可选） | | endorse/comment/reject | | 评议不替代强制自审 |
+| 外部数据/许可专家（可选） | | endorse/comment/reject/not-needed | | 无外评不阻断已通过强制门禁的开发 |
 
 ## 20. 完成检查
 
@@ -327,14 +349,15 @@ function calculate(input, settings) -> Result:
 - [ ] 流派变体和默认参数已锁定；
 - [ ] 输入、输出、错误和降级可直接编码；
 - [ ] 金标准样本合法可复用；
-- [ ] 差异测试至少包含一个独立实现；
+- [ ] 差异测试包含生产实现与一个不共享领域逻辑的独立参考实现；
 - [ ] 容差有依据且未为通过测试任意放宽；
 - [ ] 性能预算和异步边界明确；
 - [ ] UI、API、导出和存储影响明确；
 - [ ] 数据来源、版本、许可和署名明确；
 - [ ] 安全、隐私和日志边界明确；
-- [ ] 工程和专业评审已签署；
-- [ ] `status: approved`后才进入正式开发。
+- [ ] 第19.1节主代理强制自审已全部通过并签署；
+- [ ] 外部专家评议状态已记录为`not-requested`、`pending`或具体结论，且不被误用为强制阻断条件；
+- [ ] `status: review`后才可进入隔离实现与测试夹具开发；`status: approved`后才可进入正式发布门禁。
 ```
 
 ## 算法卡状态规则
@@ -342,8 +365,8 @@ function calculate(input, settings) -> Result:
 | 状态 | 含义 | 允许动作 |
 |---|---|---|
 | `draft` | 公式或决策正在整理 | 调研、原型；不得合并正式实现 |
-| `review` | 内容完整，等待审核 | 可实现隔离分支和测试夹具 |
-| `approved` | 工程与专业评审通过 | 可进入正式开发和发布门禁 |
+| `review` | 内容完整，等待双实现验证和主代理自审 | 可实现隔离工作包和测试夹具 |
+| `approved` | 双实现差异验证与主代理强制自审通过 | 可进入正式发布门禁；外部评议可后续附加 |
 | `superseded` | 已被新版本替代 | 只用于复现旧快照 |
 
 算法卡升级采用语义版本：

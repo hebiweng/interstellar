@@ -1,0 +1,100 @@
+schema_version: 1.0.0
+suite_id: interstellar.gold.seed.v1
+cases:
+  - fixture_id: GOLD-TIME-001
+    capability_ids: [platform.time_spec]
+    calculation_ids: [time.timezone.v1]
+    input: {calendar: gregorian, local_value: '2024-11-03T01:30:00', timezone_id: America/New_York, precision: minute}
+    expected: {utc_candidates: ['2024-11-03T05:30:00Z', '2024-11-03T06:30:00Z'], error: null}
+    tolerance: {seconds: 0}
+    provenance: IANA_tzdb_locked_release
+    license: public_tzdb_distribution
+    review_status: approved
+  - fixture_id: GOLD-TIME-002
+    capability_ids: [platform.time_spec]
+    calculation_ids: [time.timezone.v1]
+    input: {calendar: gregorian, local_value: '2024-03-10T02:30:00', timezone_id: America/New_York, precision: minute}
+    expected: {utc_candidates: [], error: TIME_NONEXISTENT_LOCAL}
+    tolerance: {seconds: 0}
+    provenance: IANA_tzdb_locked_release
+    license: public_tzdb_distribution
+    review_status: approved
+  - fixture_id: GOLD-TIME-003
+    capability_ids: [platform.time_spec, natal.unknown_time_mode]
+    calculation_ids: [time.input.v1, time.quality.v1]
+    input: {calendar: gregorian, local_value: '1990-01-01', timezone_id: Asia/Shanghai, precision: date}
+    expected: {selected_utc: null, quality: D, forbidden_outputs: [houses, angles, vertex, exact_house_placements]}
+    tolerance: {}
+    provenance: interstellar_algorithm_card_ALG_NATAL_002
+    license: CC0-1.0
+    review_status: approved
+  - fixture_id: GOLD-LOCATION-001
+    capability_ids: [platform.location]
+    calculation_ids: [location.normalized.v1]
+    input: {name: Shanghai, latitude: 31.2304, longitude: 121.4737}
+    expected: {country_code: CN, timezone_id: Asia/Shanghai, coordinate_system: WGS84}
+    tolerance: {coordinate_degree: 0}
+    provenance: GeoNames_and_Timezone_Boundary_Builder_locked_release
+    license: CC-BY-4.0_AND_ODbL-1.0
+    review_status: approved
+  - fixture_id: GOLD-ASPECT-001
+    capability_ids: [astronomy.aspects]
+    calculation_ids: [aspect.major.v1]
+    input: {point_a_longitude_deg: 359.0, point_b_longitude_deg: 1.0, target_angle_deg: 0, effective_orb_deg: 3.0}
+    expected: {matched: true, actual_angle_deg: 2.0, orb_deg: 2.0}
+    tolerance: {degree: 1.0e-12}
+    provenance: analytic_geometry
+    license: CC0-1.0
+    review_status: approved
+  - fixture_id: GOLD-ASPECT-002
+    capability_ids: [astronomy.aspects]
+    calculation_ids: [aspect.major.v1]
+    input: {point_a_longitude_deg: 10.0, point_b_longitude_deg: 190.0, target_angle_deg: 180, effective_orb_deg: 0.0}
+    expected: {matched: true, actual_angle_deg: 180.0, orb_deg: 0.0}
+    tolerance: {degree: 1.0e-12}
+    provenance: analytic_geometry
+    license: CC0-1.0
+    review_status: approved
+  - fixture_id: GOLD-MIDPOINT-001
+    capability_ids: [natal.midpoints]
+    calculation_ids: [midpoint.direct_indirect.v1]
+    input: {point_a_longitude_deg: 350.0, point_b_longitude_deg: 10.0, strategy: shortest_arc}
+    expected: {direct_midpoint_deg: 0.0, indirect_midpoint_deg: 180.0, ambiguous: false}
+    tolerance: {degree: 1.0e-12}
+    provenance: analytic_geometry
+    license: CC0-1.0
+    review_status: approved
+  - fixture_id: GOLD-HARMONIC-001
+    capability_ids: [natal.harmonics]
+    calculation_ids: [harmonic.chart.v1]
+    input: {longitude_deg: 123.456, harmonic: 1}
+    expected: {harmonic_longitude_deg: 123.456}
+    tolerance: {degree: 1.0e-12}
+    provenance: analytic_formula
+    license: CC0-1.0
+    review_status: approved
+  - fixture_id: GOLD-PROFECTION-001
+    capability_ids: [timing.annual_profections]
+    calculation_ids: [timelord.profection.v1]
+    input: {age_years: 12, starting_house: 1}
+    expected: {activated_house: 1}
+    tolerance: {}
+    provenance: traditional_formula
+    license: CC0-1.0
+    review_status: approved
+  - fixture_id: GOLD-RECIPE-001
+    capability_ids: [platform.analysis_recipe_resolver]
+    calculation_ids: []
+    input: {entry_point: entry.technique, selection: natal.standard_chart, subject_time_precision: date}
+    expected: {preflight_only: true, starts_calculation: false, deterministic: true}
+    tolerance: {}
+    provenance: interstellar_product_contract
+    license: CC0-1.0
+    review_status: approved
+
+required_future_numeric_families:
+  alpha: [ephemeris_positions, angles_and_houses, returns, transits, synastry, composite]
+  beta: [secondary_progression, solar_arc, fixed_stars, event_search]
+  pro: [primary_directions, timelords, horary, electional, geography]
+  v1: [eclipses, mundane, dynamic_relationship]
+capture_rule: numeric_expected_values_are_added_before_the_corresponding_implementation_merges_and_must_come_from_the_named_independent_reference

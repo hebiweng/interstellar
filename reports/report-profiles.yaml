@@ -1,0 +1,150 @@
+schema_version: 1.0.0
+catalog_id: interstellar.report_profiles.v1
+authoritative_source: docs/analysis-catalog.yaml#report_profiles
+deterministic: true
+ai_required: false
+
+report_document_contract:
+  id: ReportDocument.v1
+  required:
+    - report_id
+    - profile_id
+    - locale
+    - density
+    - generated_at
+    - subject_refs
+    - snapshot_refs
+    - rule_pack_refs
+    - sections
+    - evidence_index
+    - warnings
+    - provenance
+  invariants:
+    every_conclusion_links_to_evidence: true
+    every_evidence_links_to_snapshot_json_pointer: true
+    no_fact_without_snapshot_or_dataset_provenance: true
+    missing_dependencies_are_never_auto_computed: true
+    same_inputs_versions_locale_density_produce_same_semantic_document: true
+  layers:
+    L0_RawFact: {required: [json_pointer, value, unit, provenance_ref]}
+    L1_Evidence: {required: [evidence_id, rule_id, polarity, strength, fact_refs, provenance]}
+    L2_Finding: {required: [finding_id, dimension, claim_key, evidence_refs, counter_evidence_refs, confidence]}
+    L3_Conclusion: {required: [conclusion_id, dimension, summary_key, finding_refs, support, pressure, confidence]}
+    L4_ReportSection: {required: [section_id, title_key, blocks, evidence_refs]}
+    L5_ReportDocument: {required: [profile_id, sections, evidence_index, warnings, provenance]}
+  ordering:
+    sections: profile_declared_order
+    conclusions: [priority_desc, confidence_desc, conclusion_id_asc]
+    evidence: [dimension_asc, strength_desc, evidence_id_asc]
+    dates: utc_ascending
+  confidence:
+    inputs: [time_quality, required_dependency_maturity, independent_technique_count, selector_strength, counter_evidence]
+    labels: {low: [0.0, 0.49], medium: [0.5, 0.74], high: [0.75, 1.0]}
+    never_render_as_probability: true
+  safety:
+    forbidden_claims: [objective_event_probability, guaranteed_outcome, medical_diagnosis, legal_instruction, financial_instruction, lifespan_or_death_prediction]
+    required_limit_note_for_interpretive_profiles: true
+  render_targets: [json, html, pdf]
+
+template_contract:
+  token_syntax: "{{token_name}}"
+  missing_token_behavior: emit_structured_placeholder_and_warning
+  html_escape_all_user_fields: true
+  localized_template_fallback: structured_finding_table
+  supported_locales: [zh-CN, en-US]
+  template_sets:
+    zh-CN: reports/templates.zh-CN.yaml
+    en-US: reports/templates.en-US.yaml
+
+profiles:
+  - id: report.calculation_record.v1
+    name_zh: 计算记录报告
+    name_en: Calculation Record
+    source: calculation_snapshot
+    interpretation: none
+    default_sections: [subject_and_input, parameters, positions_and_derived_results, warnings, provenance, technical_appendix]
+    default_density: full_technical
+    allowed_densities: [summary, standard, full_technical]
+    required_dependencies: [calculation_snapshot]
+    missing_dependency_behavior: show_missing_section_and_recipe_extension
+    rule_pack_resolution: none
+
+  - id: report.technique_analysis.v1
+    name_zh: 技法分析报告
+    name_en: Technique Analysis
+    source: calculation_technique
+    interpretation: technique_rules
+    default_sections: [executive_summary, technique_scope, key_configurations, timing_windows, evidence, limits, technical_appendix]
+    default_density: standard
+    allowed_densities: [summary, standard, full_technical]
+    required_dependencies: [calculation_snapshot, base_model_rule_pack]
+    missing_dependency_behavior: show_missing_section_and_recipe_extension
+    rule_pack_resolution: analysis_recipe.base_model_rule_pack_refs
+
+  - id: report.topic_model.v1
+    name_zh: 专题模型报告
+    name_en: Topic Model Report
+    source: topic_model
+    interpretation: report_rule_pack
+    default_sections: [executive_summary, baseline, strengths, pressures, contradictions, activations, evidence, limits, technical_appendix]
+    default_density: standard
+    allowed_densities: [summary, standard, full_technical]
+    required_dependencies: [calculation_snapshot, topic_rule_binding, report_rule_pack]
+    missing_dependency_behavior: show_missing_section_and_recipe_extension
+    rule_pack_resolution: topic_binding.report_rule_pack_id
+
+  - id: report.intent_composite.v1
+    name_zh: 目的综合报告
+    name_en: Intent Composite Report
+    source: analysis_intent
+    interpretation: multi_model_report_rules
+    default_sections: [question_scope, executive_summary, cross_model_findings, timing_windows, counter_evidence, confidence, limits, technical_appendix]
+    default_density: standard
+    allowed_densities: [summary, standard, full_technical]
+    required_dependencies: [calculation_snapshots, resolved_topic_models, compatible_report_rule_packs]
+    missing_dependency_behavior: block_formal_report_allow_partial_preview
+    rule_pack_resolution: analysis_recipe.topic_report_rule_pack_refs
+
+  - id: report.subject_dossier.v1
+    name_zh: 对象档案报告
+    name_en: Subject Dossier
+    source: selected_subject_modules
+    interpretation: multiple_report_rule_packs
+    default_sections: [subject_profile, selected_natal_modules, selected_timing_modules, selected_relationship_or_project_modules, evidence_index, provenance]
+    default_density: standard
+    allowed_densities: [summary, standard, full_technical]
+    required_dependencies: [subject_version, explicitly_selected_module_snapshots]
+    missing_dependency_behavior: keep_unselected_modules_explicitly_omitted
+    rule_pack_resolution: per_selected_module
+
+  - id: report.research_comparison.v1
+    name_zh: 研究比较报告
+    name_en: Research Comparison
+    source: multiple_snapshots
+    interpretation: comparison_rules
+    default_sections: [research_question, sample_definition, method_and_versions, commonalities, differences, descriptive_statistics, exceptions, reproducibility_appendix]
+    default_density: full_technical
+    allowed_densities: [standard, full_technical]
+    required_dependencies: [two_or_more_snapshots, comparable_schema_versions, comparable_fields]
+    missing_dependency_behavior: block_until_comparable_versions_and_fields_exist
+    rule_pack_resolution: official.report.research_comparison.v1
+
+density_contracts:
+  summary:
+    conclusion_limit: 5
+    date_limit: 8
+    chart_limit: 3
+    evidence_detail: primary_refs_only
+    technical_appendix: omitted_with_export_link
+  standard:
+    conclusion_limit_per_dimension: 3
+    date_limit: 24
+    chart_limit: 12
+    evidence_detail: primary_and_counter_refs
+    technical_appendix: provenance_and_parameters
+  full_technical:
+    conclusion_limit_per_dimension: null
+    date_limit: null
+    chart_limit: null
+    evidence_detail: all_accepted_and_rejected_with_rule_trace
+    technical_appendix: raw_tables_algorithms_versions_warnings

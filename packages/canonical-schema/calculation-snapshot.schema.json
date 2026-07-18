@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://interstellar.dev/schemas/v1/calculation-snapshot.schema.json",
+  "title": "CalculationSnapshot",
+  "$defs": {
+    "RecipeExecutionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recipe_id", "recipe_content_hash", "outputs", "report_requests"],
+      "properties": {
+        "recipe_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "recipe_content_hash": {"$ref": "common.schema.json#/$defs/ContentHash"},
+        "outputs": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true},
+        "report_requests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["profile_id", "density"],
+            "properties": {
+              "profile_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+              "density": {"type": "string", "enum": ["summary", "standard", "full_technical"]},
+              "locale": {"type": "string", "minLength": 2}
+            }
+          }
+        }
+      }
+    },
+    "AnalysisModelExecution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "content_hash", "expanded_components", "overrides", "degradations"],
+      "properties": {
+        "id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "version": {"type": "string", "minLength": 1},
+        "content_hash": {"$ref": "common.schema.json#/$defs/ContentHash"},
+        "expanded_components": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "overrides": {"type": "object", "additionalProperties": true},
+        "degradations": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Warning"}}
+      }
+    },
+    "CalculationResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["charts", "points", "houses", "aspects", "evidence", "output_manifest"],
+      "properties": {
+        "astronomical_context": {"type": "object", "additionalProperties": true},
+        "charts": {"type": "array", "items": {"$ref": "chart-result.schema.json"}},
+        "points": {"type": "array", "items": {"$ref": "chart-result.schema.json#/$defs/Point"}},
+        "houses": {"type": "array", "items": {"$ref": "chart-result.schema.json#/$defs/House"}},
+        "aspects": {"type": "array", "items": {"$ref": "chart-result.schema.json#/$defs/Aspect"}},
+        "distributions": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "patterns": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "dignities": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "receptions": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "lots": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "midpoints": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "directions": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "returns": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "periods": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "events": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "relationships": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "geography": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "mundane": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "topic_results": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "evidence": {"type": "array", "items": {"$ref": "evidence.schema.json"}},
+        "output_manifest": {"type": "array", "items": {"$ref": "output-manifest.schema.json"}, "minItems": 1}
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "schema_version", "status", "request", "normalized_input", "input_fingerprint", "engine", "adapters", "datasets", "rule_pack_hash", "maturity", "result", "warnings", "created_at"],
+  "properties": {
+    "id": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "schema_version": {"$ref": "common.schema.json#/$defs/SemVer"},
+    "status": {"type": "string", "enum": ["succeeded", "partial", "failed", "cancelled", "timed_out"]},
+    "request": {"oneOf": [{"$ref": "chart-request.schema.json"}, {"$ref": "#/$defs/RecipeExecutionRequest"}]},
+    "normalized_input": {"type": "object", "additionalProperties": true},
+    "input_fingerprint": {"$ref": "common.schema.json#/$defs/ContentHash"},
+    "engine": {"$ref": "common.schema.json#/$defs/EngineReference"},
+    "adapters": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/EngineReference"}},
+    "datasets": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/DatasetReference"}},
+    "analysis_model": {"oneOf": [{"$ref": "#/$defs/AnalysisModelExecution"}, {"type": "null"}]},
+    "recipe": {"oneOf": [{"$ref": "analysis-recipe.schema.json"}, {"type": "null"}]},
+    "rule_pack_hash": {"$ref": "common.schema.json#/$defs/ContentHash"},
+    "maturity": {"$ref": "common.schema.json#/$defs/Maturity"},
+    "result": {"$ref": "#/$defs/CalculationResult"},
+    "warnings": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Warning"}},
+    "supersedes_id": {"type": ["string", "null"]},
+    "created_at": {"type": "string", "format": "date-time"}
+  }
+}

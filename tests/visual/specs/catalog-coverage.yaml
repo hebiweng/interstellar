@@ -1,0 +1,32 @@
+schema_version: 1.0.0
+suite_id: interstellar.visual.catalog.v1
+source_catalog: docs/render-catalog.yaml
+professional_view_range: [1, 128]
+consumer_post_v1_range: [129, 146]
+required_variants_per_view:
+  - desktop_light
+  - desktop_dark
+  - print_light_when_exportable
+  - empty_or_missing_dependency
+  - degraded_or_warning_when_supported
+global_fixtures:
+  - exact_time_single_person
+  - unknown_time_single_person
+  - two_people
+  - project_and_founder
+  - long_timeline
+  - high_latitude
+  - date_line_map
+  - dense_minor_points
+assertions:
+  - deterministic_font_and_locale
+  - no_label_overlap_above_declared_threshold
+  - no_nan_in_svg_or_canvas_layout
+  - table_or_text_accessibility_fallback
+  - attribution_visible_for_external_map_or_star_data
+  - screen_and_export_use_same_render_spec
+thresholds:
+  changed_pixel_ratio: 0.001
+  geometry_css_px: 1
+  minimum_text_contrast: WCAG_AA
+  max_unresolved_label_overlaps: 0

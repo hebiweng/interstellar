@@ -1,5 +1,5 @@
 {
-  "name": "interstellar-workspace-prototype",
+  "name": "interstellar-professional-platform",
   "version": "0.1.0",
   "private": true,
   "engines": {
@@ -9,9 +9,19 @@
     "dev": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext dev",
     "build": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext build",
     "start": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
-    "test": "npm run build && node --test tests/rendered-html.test.mjs",
+    "test": "node scripts/run-foundation-checks.mjs",
+    "test:web": "npm run build && node --test tests/rendered-html.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "docs:validate": "python3 scripts/validate_catalogs.py",
+    "contracts:validate": "python3 scripts/validate_openapi.py",
+    "contracts:generate": "python3 scripts/generate_contract_types.py",
+    "contracts:check": "python3 scripts/generate_contract_types.py --check",
+    "contracts:test": "python3 -m unittest discover -s tests/contracts -p test_*.py",
+    "backend:lint": "python3 -m ruff check apps/api apps/worker python tests/backend",
+    "backend:test": "python3 -m pytest tests/backend",
+    "api:dev": "PYTHONPATH=apps/api:python python3 -m interstellar_api",
+    "worker:once": "PYTHONPATH=apps/worker:python python3 -m interstellar_worker --once",
+    "foundation:check": "node scripts/run-foundation-checks.mjs",
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {

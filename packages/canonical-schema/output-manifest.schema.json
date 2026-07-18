@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://interstellar.dev/schemas/v1/output-manifest.schema.json",
+  "title": "OutputManifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["output_id", "status", "calculation_id", "maturity", "view_ids", "export_formats", "missing_inputs", "warnings", "algorithm_cards", "reproducibility"],
+  "properties": {
+    "output_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "status": {"$ref": "common.schema.json#/$defs/ResourceStatus"},
+    "calculation_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "result_pointer": {"type": ["string", "null"], "pattern": "^/"},
+    "maturity": {"$ref": "common.schema.json#/$defs/Maturity"},
+    "view_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+    "table_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+    "export_formats": {"type": "array", "items": {"type": "string", "enum": ["svg", "png", "pdf", "json", "csv", "ics", "project_archive"]}, "uniqueItems": true},
+    "recommended_primary_view_id": {"type": ["string", "null"]},
+    "missing_inputs": {"type": "array", "items": {"type": "string"}},
+    "warnings": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Warning"}},
+    "algorithm_cards": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "reproducibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["engine", "datasets", "rule_pack_hash"],
+      "properties": {
+        "engine": {"$ref": "common.schema.json#/$defs/EngineReference"},
+        "datasets": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/DatasetReference"}},
+        "rule_pack_hash": {"$ref": "common.schema.json#/$defs/ContentHash"},
+        "input_fingerprint": {"$ref": "common.schema.json#/$defs/ContentHash"}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "generated"}}, "required": ["status"]},
+      "then": {"required": ["result_pointer"]}
+    }
+  ]
+}

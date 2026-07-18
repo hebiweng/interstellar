@@ -6,13 +6,13 @@
 | 基线日期 | 2026-07-18 |
 | 产品版本 | Interstellar V1 |
 | 研发周期 | 24 个月；第 6 个月交付 Professional Alpha |
-| 目标读者 | 产品负责人、开发者、测试人员、占星算法审核者、运维人员 |
+| 目标读者 | 主代理（唯一责任主体）、受托子代理、可选外部评议者与未来维护者 |
 | 技术栈 | Next.js + TypeScript；FastAPI + Python；PostgreSQL/PostGIS；Redis；S3/MinIO |
 | 发布方式 | AGPL 开源；公共限流服务；Docker Compose 自托管 |
 
-本说明书是 V1 的研发基线。开发任务、接口、数据模型、测试和发布验收共同以本文、[分析入口、模型、目的与报告目录](./analysis-catalog.yaml)、[机器可读计算目录](./calculation-catalog.yaml)、[全量计算与结果说明](./calculation-result-catalog.md)、[146项图形目录](./render-catalog.yaml)及[能力矩阵](./capabilities.yaml)为准。涉及占星流派差异或复杂公式的工作项，必须先根据[算法卡模板](./algorithm-card-template.md)完成算法卡；没有算法卡的能力不得标记为 `Stable`。
+本说明书是 V1 的研发基线。开发任务、接口、数据模型、测试和发布验收共同以本文、[分析入口、模型、目的与报告目录](./analysis-catalog.yaml)、[机器可读计算目录](./calculation-catalog.yaml)、[全量计算与结果说明](./calculation-result-catalog.md)、[146项图形目录](./render-catalog.yaml)及[能力矩阵](./capabilities.yaml)为准。实际编码还必须遵守[Canonical JSON Schema](../packages/canonical-schema/README.md)、[OpenAPI 3.1](../openapi/openapi.yaml)、[算法卡目录](../algorithm-cards/catalog.yaml)、[官方 Preset](../presets/official/analysis-model-presets.yaml)、[官方规则包](../rules/official/)、[报告契约与双语模板](../reports/)、[数据 Manifest](../data-manifests/catalog.yaml)、[测试规范](../tests/)和[M0—M24 单一主责 Backlog](./backlog/m24-single-owner.yaml)。涉及占星流派差异或复杂公式的工作项，必须先根据[算法卡模板](./algorithm-card-template.md)完成算法卡；没有算法卡的能力不得标记为 `Stable`。
 
-五份规范的职责不可互相替代：本文定义架构和开发方式；分析目录定义“用户如何进入、模型如何组合、报告如何形成”；计算目录定义“算什么、返回什么”；图形目录定义“画什么、消费哪些结果”；能力矩阵定义阶段、依赖、成熟度和测试状态。任何实现只有同时完成五方追踪才算进入范围。
+各类规范职责不可互相替代：本文定义架构和开发方式；分析目录定义“用户如何进入、模型如何组合、报告如何形成”；计算目录定义“算什么、返回什么”；图形目录定义“画什么、消费哪些结果”；能力矩阵定义阶段、依赖、成熟度和测试状态；Schema/OpenAPI 定义机器契约；算法卡定义公式与变体；Preset/Rule Pack/Report Template 定义确定性编排与表达；数据 Manifest 定义来源和许可；Backlog 与测试规范定义实施顺序和完成证据。任何实现只有同时完成这些追踪才算进入范围。
 
 ## 1. 目标、范围与约束
 
@@ -57,6 +57,8 @@
 8. **同源渲染**：屏幕和导出共享 `RenderSpec`，避免前后端各自解释计算结果。
 9. **目录即范围**：禁止以“已支持轮盘/预测/关系”等家族声明代替逐项实现；计算以 `calculation_id`、图形以 `view_id` 验收。
 10. **可追踪覆盖**：每个公开结果必须回溯到计算条目、能力、算法卡和数据版本；每个图必须只消费 Canonical Result，不得在渲染层补算占星事实。
+11. **单一责任主体**：主代理对范围、领域决策、集成、验证、成熟度和发布负唯一责任；子代理不具有独立变更公共契约或签署Stable的权限。
+12. **独立双实现**：领域算法必须有生产实现和不共享关键逻辑的参考实现/参考引擎；主代理以差异报告、金标准和属性测试统一验收。
 
 ## 2. 总体架构
 
@@ -99,10 +101,11 @@ flowchart LR
 ### 2.2 建议仓库结构
 
 ```text
+app/                      Sites托管的Next.js工作台（仓库根Web包）
+worker/                   Sites托管的边缘入口
 apps/
-  web/                    Next.js 工作台
   api/                    FastAPI 应用与模块
-  worker/                 异步任务 Worker
+  worker/                 Python异步任务 Worker
 packages/
   canonical-schema/       OpenAPI/JSON Schema/生成类型
   render-spec/            渲染协议和前端组件
@@ -112,7 +115,7 @@ python/
   interstellar_rules/     Rule Pack 编译和运行时
   interstellar_render/    服务端渲染
 data-manifests/           官方数据版本与许可证清单
-algorithm-cards/          已批准算法卡
+algorithm-cards/          算法卡、评审状态与实现状态
 tests/
   gold/                   金标准样本
   differential/           独立实现差异测试
@@ -120,9 +123,17 @@ tests/
 docs/                     研发与项目文档
 ```
 
-`packages/canonical-schema` 是跨语言契约的唯一来源。Python 和 TypeScript 类型由 Schema 生成，不允许维护两套手写、可能漂移的公共类型。
+仓库根保留Web包是为了兼容现有Sites构建和`.openai/hosting.json`，不把工作中的前端强行搬迁到破坏托管契约的子目录；根`package.json`同时承担统一开发命令。`packages/canonical-schema`是跨语言契约的唯一来源。Python和TypeScript类型由Schema生成，不允许维护两套手写、可能漂移的公共类型。
 
-### 2.3 固定实现选型
+### 2.3 主代理/子代理执行模型
+
+- 主代理持续维护一条集成主线，决定公共ID、Schema、流派、默认参数、容差、成熟度和发布状态；
+- 子代理仅处理边界清晰且可独立应用的工作包，任务必须明示可写文件、输入契约、输出契约、验证命令和禁止决策项；
+- 生产实现和独立参考实现优先分派给不同子代理；无第三方参考引擎时，参考实现必须在隔离上下文中依原始来源重新实现；
+- 主代理不直接信任子代理的“完成”声明；必须重读差异、检查契约和目录可达性、重跑定向测试及全量门禁后才能集成；
+- 外部占星师、安全或许可专家只提供可选增强证据；未获得外部评议不阻断已通过强制自审、双实现差异验证、许可、安全和可复现性门禁的开发或发布。
+
+### 2.4 固定实现选型
 
 | 层 | 选型 | 约束 |
 |---|---|---|
@@ -179,11 +190,11 @@ docs/                     研发与项目文档
 | V1-TOP-001 | M13-M18 | P1 | 结构化主题模型 | V1-RULE-001,V1-TML-001 | 基线、激活、支持、压力、确定度 |
 | V1-MUN-001 | M19-M22 | P2 | 世运、国家、公司、项目 | V1-EVT-001,V1-GEO-001 | 组织与事件周期 |
 | V1-MDL-004 | M19-M24 | P1 | V1分析模型目录稳定化 | V1-MDL-003,V1-MUN-001,V1-TOP-001 | 12个内置模型、兼容性矩阵、模型卡、迁移和SDK |
-| V1-RPT-002 | M13-M24 | P1 | 正式报告规则与专业复核 | V1-RPT-001,V1-TOP-001,V1-MDL-004 | 六类报告、24个TopicModel报告状态、规则包、双语模板、样本和复核记录 |
+| V1-RPT-002 | M13-M24 | P1 | 正式报告规则与验证 | V1-RPT-001,V1-TOP-001,V1-MDL-004 | 六类报告、24个TopicModel报告状态、规则包、双语模板、样本、自审和双实现验证记录 |
 | V1-RND-003 | M19-M23 | P1 | 专业V1全图形目录 | 全部计算能力 | `render-catalog.yaml`编号1—128逐项实现与视觉回归 |
 | V1-LOC-001 | M19-M23 | P1 | 中英文和无障碍 | V1-UI-001,V1-RND-003 | 双语、打印、键盘、色盲支持 |
 | V1-REL-003 | M19-M23 | P1 | SDK、归档与兼容性 | V1-API-001 | TS/Python SDK、可重导入归档 |
-| V1-GATE-001 | M23-M24 | P0 | V1 稳定化与审计 | 全部 | 专业评审、许可、安全、性能、发布 |
+| V1-GATE-001 | M23-M24 | P0 | V1 稳定化与审计 | 全部 | 主代理总审、双实现差异验证、许可、安全、性能、发布 |
 
 ### 3.1 工作包完成定义
 
@@ -197,7 +208,7 @@ docs/                     研发与项目文档
 - 日志不包含明文敏感出生资料；
 - 文档、示例、变更记录和能力矩阵状态同步；
 - 性能预算没有回退，或已记录并批准例外；
-- `Stable` 能力完成专业复核。
+- `Stable` 能力完成算法卡强制自审、独立双实现差异验证和主代理签署；外部专业评议可选附加。
 - 工作包声明的全部 `calculation_id` 和 `view_id` 已在 `OutputManifest`、契约测试和目录覆盖报告中闭环。
 
 ## 4. Canonical Domain Schema
@@ -455,7 +466,7 @@ V1主题输出只提供 `activity`、`support`、`pressure`、`confidence`和证
     {"capability_id": "timing.annual_profections", "required": true},
     {"capability_id": "topic.structured_evidence", "required": true}
   ],
-  "default_rule_pack": "official.annual_integrated.v1",
+  "default_rule_pack": "official.forecast.annual_integrated.v1",
   "allowed_overrides": ["house_system", "orb_profile_id", "return_location_policy"],
   "output_manifest": {
     "primary_views": ["wheel.tri_natal_return_transit", "timeline.multi_technique", "table.active_triggers"],
@@ -659,7 +670,7 @@ ConflictRule → PriorityRule → ConclusionTemplate → SectionDefinition
 - 支持、压力和反证分别保存，不能相互抵消为单一“好运分”；
 - 同一证据可以服务多个Finding，但每个引用必须说明作用和权重；
 - 每个Conclusion必须至少引用一个Finding；每个正文段落必须可下钻到Conclusion和Evidence；
-- TopicModel完成计算并不代表可生成正式报告；正式报告还需报告规则、双语模板、样本、视觉回归和专业复核；
+- TopicModel完成计算并不代表可生成正式报告；正式报告还需报告规则、双语模板、样本、视觉回归、主代理自审和双实现差异验证；外部评议可选；
 - 报告不得输出升职、复合、婚姻或项目成功的客观概率和保证性结论。
 
 六类`ReportProfile`和三种展示密度以`analysis-catalog.yaml`为准。摘要、标准和完整技术版必须来自同一个`ReportDocument`，不能重新计算或重新解释。切换密度不增加计算；新增技法属于Recipe扩展，必须重新预检。
@@ -914,7 +925,7 @@ Recipe确认请求示例：
 {
   "calculation_id": "calc_01...",
   "render_spec": {
-    "view": "wheel.bi_wheel",
+    "view": "wheel.bi_natal_transit",
     "locale": "zh-CN",
     "theme": "print_light",
     "width": 1600,
@@ -1556,8 +1567,8 @@ V1必须随代码交付以下Runbook：API 5xx、队列积压、Worker失联、�
 | 级别 | 条件 |
 |---|---|
 | Experimental | 有算法卡草案、单元测试和显著警告；API可能变更 |
-| Beta | 算法卡批准、金标准和差异测试通过；边界或专业复核未完成 |
-| Stable | Beta条件 + 专业复核 + 兼容性承诺 + 完整文档 + 性能预算通过 |
+| Beta | 算法卡进入`review`、金标准和初步双实现差异测试通过；部分边界或主代理完整自审尚未完成 |
+| Stable | Beta条件 + 独立双实现全量差异验证 + 主代理算法卡自审签署 + 兼容性承诺 + 完整文档 + 性能预算通过 |
 
 任何未满足 Stable 条件的功能即使已经上线，也必须保留 Beta/Experimental 标签。
 
@@ -1586,13 +1597,13 @@ V1必须随代码交付以下Runbook：API 5xx、队列积压、Worker失联、�
 - [`render-catalog.yaml`](./render-catalog.yaml)编号1—128全部有实现或经批准的显式降级记录；目录覆盖校验、视觉回归和数据替代通过；
 - 12个内置AnalysisModel均有不可变版本、模型卡、兼容性测试、输出Manifest和SDK类型；
 - 24个TopicModel和35个AnalysisIntent均有不可变版本、输入契约、Recipe测试、输出预览和能力可达路径；
-- 六类ReportProfile、三种密度和六层报告对象均已实现；正式专题报告具备ReportRulePack、双语模板、样本与专业复核状态；
+- 六类ReportProfile、三种密度和六层报告对象均已实现；正式专题报告具备ReportRulePack、双语模板、样本、主代理自审与双实现差异验证状态，可选记录外部评议；
 - 条目至少达到其 `target_maturity`，未达标条目不得伪装完成；
 - 全部公开接口有契约测试、中英文文档和示例；
 - 全部计算结果可由版本元数据复现；
 - 完成数据和开源许可证审计；
 - 完成隐私、安全、性能和备份恢复演练；
-- 完成至少一轮职业占星师专业评审；
+- 完成主代理最终算法卡总审和全量双实现差异报告；如已进行外部占星师评议，一并发布其范围、结论和未采纳项；
 - 发布已知限制清单和V1后路线。
 
 ## 15. 首个八周开发顺序
@@ -1608,7 +1619,7 @@ V1必须随代码交付以下Runbook：API 5xx、队列积压、Worker失联、�
 | 7 | Jobs、Redis队列、SSE、取消和技术报告Schema | 长任务状态机E2E通过；快照可生成计算记录报告 |
 | 8 | 统一分析中心第一个纵向切片 | 示例人物→新增并分析→选择现代本命→预检→运行→位置表与证据 |
 
-第一个纵向切片不等待完整星盘图，先验证入口—对象—时间—模型/目的—Recipe—预检—计算—快照—读取—呈现的全链路；第9周开始并行扩展本命计算、SVG轮盘和报告渲染。
+第一个纵向切片不等待完整星盘图，先验证入口—对象—时间—模型/目的—Recipe—预检—计算—快照—读取—呈现的全链路；第9周起由主代理保持一条集成主线，并将本命计算、独立参考实现、SVG轮盘和报告渲染分配为互不覆盖的子代理工作包；主代理逐批集成和验收。
 
 ## 16. 已知限制
 
@@ -1619,7 +1630,7 @@ V1必须随代码交付以下Runbook：API 5xx、队列积压、Worker失联、�
 - 精确公众人物出生时间缺少统一合法开放数据库；
 - 主题权重和现实事件概率没有行业公认标准；
 - Gaia、OSM和全部小行星全量镜像不适合单机低成本V1；
-- 免费开放数据覆盖确定性计算，但不附带专业解释文本、专业评审和生产托管SLA；
+- 免费开放数据覆盖确定性计算，但不附带专业解释文本、第三方专业背书和生产托管SLA；
 - 闭源商业部署前必须重新评估Swiss Ephemeris专业许可。
 - “所有计算”是本版本目录定义的封闭基线，不代表世界上未来新增的小行星、阿拉伯点、流派和公式自动进入V1；新增项通过新ID和版本纳入。
 
@@ -1653,7 +1664,7 @@ Definition of Done
 
 - 已分配稳定ID并登记到对应机器目录；
 - 输入、输出、错误码和成熟度明确；
-- 依赖不存在循环，且每个依赖已有负责人和阶段；
+- 依赖不存在循环，且每个依赖已纳入主代理调度图并标明阶段；
 - 复杂技法已有算法卡草案、参考来源和测试样本；
 - 数据来源、许可和署名已确定；
 - UI有入口、空态、加载、阻断、错误和完成态；
@@ -1669,7 +1680,7 @@ Definition of Done
 - 算法卡、数据版本、许可、变更记录和用户文档同步；
 - 性能预算通过，缓存失效和版本升级路径已测试；
 - 能力矩阵状态只提升到实际达到的成熟度；
-- 代码审查和适用的专业占星复核完成。
+- 主代理完成代码/文档差异审查、算法卡强制自审和适用的独立双实现差异验证；外部占星评议可选附加。
 
 ### 17.3 目录一致性构建检查
 
@@ -1679,9 +1690,15 @@ CI必须阻断以下情况：
 - 任一V1计算、模型或图表没有入口、依赖或Recipe引用；
 - Recipe引用未知`calculation_id`、`view_id`、Rule Pack或ReportProfile；
 - 图表依赖结果路径不存在于Canonical Schema；
-- 正式报告模型缺少ReportRulePack、模板语言清单或专业复核状态；
+- 正式报告模型缺少ReportRulePack、模板语言清单、主代理自审或双实现验证状态；
 - 商业专有模型在许可登记为空时被标记可执行；
 - 目录版本发生语义变化但未提升版本或未生成迁移说明；
 - 文档宣称Stable而能力矩阵或算法卡仍为Beta/Experimental。
 
 仓库提供`npm run docs:validate`（调用`scripts/validate_catalogs.py`）作为最低目录检查。CI先运行该命令，再运行Schema生成、OpenAPI差异、契约、单元、构建和E2E；本地未通过目录校验的变更不得进入实现评审。
+
+## 18. M0—M24 开发资产状态
+
+当前可直接用于拆分、编码和验收的资产索引见[M0—M24 开发资产与开工说明](./m24-development-assets.md)。该文件记录当前真实状态：12个模型、24个专题、35个目的、99项计算和146项视图已形成稳定目录；50张算法卡为`review/not_started`；15个Canonical Schema、45条API路径/51个操作、14个数据Manifest和M0—M24共100个任务已落盘。
+
+这里的“可直接开发”只表示输入契约、公式选择、依赖、输出、降级和验收不再依赖聊天上下文，不表示业务代码已经完成。算法卡只有在生产实现、独立参考实现差异验证和主代理复核完成后才能从`review`升级为`approved`；能力只有满足本说明书成熟度门禁后才能升级为`Stable`。

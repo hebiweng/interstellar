@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://interstellar.dev/schemas/v1/subject.schema.json",
+  "title": "Subject Contracts",
+  "$defs": {
+    "Subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "workspace_id", "kind", "display_name", "current_version_id", "created_at"],
+      "properties": {
+        "id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "workspace_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "kind": {"$ref": "common.schema.json#/$defs/SubjectKind"},
+        "display_name": {"type": "string", "minLength": 1, "maxLength": 240},
+        "current_version_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "deleted_at": {"type": ["string", "null"], "format": "date-time"}
+      }
+    },
+    "SubjectVersion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "subject_id", "kind", "display_name", "version", "attributes", "source", "content_hash", "created_at"],
+      "properties": {
+        "id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "subject_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "kind": {"$ref": "common.schema.json#/$defs/SubjectKind"},
+        "display_name": {"type": "string", "minLength": 1, "maxLength": 240},
+        "version": {"type": "integer", "minimum": 1},
+        "time_spec": {"oneOf": [{"$ref": "time-spec.schema.json"}, {"type": "null"}]},
+        "location": {"oneOf": [{"$ref": "location.schema.json"}, {"type": "null"}]},
+        "attributes": {"type": "object", "additionalProperties": true},
+        "participant_version_ids": {
+          "type": "array",
+          "items": {"$ref": "common.schema.json#/$defs/Identifier"},
+          "minItems": 2,
+          "uniqueItems": true
+        },
+        "anchor_version_ids": {
+          "type": "array",
+          "items": {"$ref": "common.schema.json#/$defs/Identifier"},
+          "uniqueItems": true
+        },
+        "source": {"$ref": "common.schema.json#/$defs/SourceReference"},
+        "content_hash": {"$ref": "common.schema.json#/$defs/ContentHash"},
+        "created_at": {"type": "string", "format": "date-time"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "relationship"}}, "required": ["kind"]},
+          "then": {"required": ["participant_version_ids"]}
+        }
+      ]
+    },
+    "SubjectVersionInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "display_name", "attributes", "source"],
+      "properties": {
+        "kind": {"$ref": "common.schema.json#/$defs/SubjectKind"},
+        "display_name": {"type": "string", "minLength": 1, "maxLength": 240},
+        "time_spec": {"oneOf": [{"$ref": "time-spec.schema.json"}, {"type": "null"}]},
+        "location": {"oneOf": [{"$ref": "location.schema.json"}, {"type": "null"}]},
+        "attributes": {"type": "object", "additionalProperties": true},
+        "participant_version_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "minItems": 2, "uniqueItems": true},
+        "anchor_version_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "source": {"$ref": "common.schema.json#/$defs/SourceReference"}
+      }
+    }
+  }
+}

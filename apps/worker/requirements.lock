@@ -1,0 +1,2 @@
+# M0 worker runtime is Python-standard-library only.
+# Regenerate the dev environment after changing pyproject.toml.

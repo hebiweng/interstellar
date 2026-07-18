@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://interstellar.dev/schemas/v1/job.schema.json",
+  "title": "Job",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "kind", "status", "progress", "stage", "attempt", "links", "created_at", "updated_at"],
+  "properties": {
+    "id": {"$ref": "common.schema.json#/$defs/Identifier"},
+    "kind": {"type": "string", "enum": ["calculation", "render", "report", "import", "export", "dataset_sync", "batch"]},
+    "status": {"$ref": "common.schema.json#/$defs/JobStatus"},
+    "progress": {"type": "number", "minimum": 0, "maximum": 100},
+    "stage": {"type": "string", "minLength": 1},
+    "attempt": {"type": "integer", "minimum": 1},
+    "max_attempts": {"type": "integer", "minimum": 1},
+    "cancellable": {"type": "boolean"},
+    "resource_uri": {"type": ["string", "null"], "format": "uri-reference"},
+    "error": {"oneOf": [{"$ref": "problem-error.schema.json"}, {"type": "null"}]},
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["self", "events", "cancel"],
+      "properties": {
+        "self": {"type": "string", "format": "uri-reference"},
+        "events": {"type": "string", "format": "uri-reference"},
+        "cancel": {"type": "string", "format": "uri-reference"}
+      }
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "started_at": {"type": ["string", "null"], "format": "date-time"},
+    "finished_at": {"type": ["string", "null"], "format": "date-time"},
+    "expires_at": {"type": ["string", "null"], "format": "date-time"}
+  }
+}

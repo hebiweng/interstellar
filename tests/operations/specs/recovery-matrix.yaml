@@ -1,0 +1,46 @@
+schema_version: 1.0.0
+suite_id: interstellar.operations_recovery_matrix.v1
+deployment_target: docker_compose_single_region_no_sla
+
+objectives:
+  postgres_rpo_minutes: 24_hours_until_M12_then_15_minutes_at_M24
+  postgres_rto_minutes: 240_until_M12_then_60_at_M24
+  object_storage_rpo_minutes: 24_hours
+  object_storage_rto_minutes: 240
+  redis: reconstructible_no_source_of_truth
+
+scenarios:
+  - id: OPS-DB-RESTORE
+    inject: loss_of_primary_postgresql_volume
+    restore_from: latest_full_backup_plus_wal_when_enabled
+    assertions: [schema_version_valid, rls_enabled, subject_versions_immutable, snapshots_readable]
+  - id: OPS-OBJECT-RESTORE
+    inject: loss_of_render_and_archive_bucket
+    restore_from: versioned_object_backup
+    assertions: [artifact_hashes_match, expired_share_links_remain_expired]
+  - id: OPS-REDIS-LOSS
+    inject: redis_flush_or_restart
+    restore_from: no_backup
+    assertions: [queued_jobs_reconciled_from_postgres, no_completed_snapshot_lost, duplicate_delivery_idempotent]
+  - id: OPS-WORKER-CRASH
+    inject: terminate_worker_mid_calculation
+    assertions: [lease_expires, safe_retry_or_terminal_failure, no_duplicate_snapshot, progress_sequence_monotonic]
+  - id: OPS-SSE-DISCONNECT
+    inject: disconnect_and_resume_with_last_event_id
+    assertions: [no_missing_terminal_event, repeated_events_deduplicable]
+  - id: OPS-DATASET-ROLLBACK
+    inject: corrupt_or_regressing_dataset_release
+    assertions: [promotion_blocked, previous_verified_version_active, affected_jobs_warned]
+  - id: OPS-APP-ROLLBACK
+    inject: failed_schema_or_application_upgrade
+    assertions: [backward_compatible_read_path, migration_precheck_blocks_irreversible_step, documented_restore_point]
+  - id: OPS-KEY-ROTATION
+    inject: rotate_application_field_encryption_key
+    assertions: [old_records_readable_during_rotation, new_writes_use_new_key, audit_log_has_no_plaintext]
+
+cadence:
+  smoke: every_release
+  full_restore: monthly_from_M12
+  pre_v1: two_successful_full_drills_on_fresh_machine
+
+evidence_required: [start_end_time, operator_or_agent, backup_ids, versions, hashes, failures, corrective_actions]

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://interstellar.dev/schemas/v1/chart-request.schema.json",
+  "title": "ChartRequest",
+  "$defs": {
+    "SubjectInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subject_version_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "inline_subject": {"$ref": "subject.schema.json#/$defs/SubjectVersionInput"}
+      },
+      "oneOf": [{"required": ["subject_version_id"]}, {"required": ["inline_subject"]}]
+    },
+    "ChartDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["family", "technique"],
+      "properties": {
+        "family": {"$ref": "common.schema.json#/$defs/ChartFamily"},
+        "technique": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "reference_time": {"oneOf": [{"$ref": "time-spec.schema.json"}, {"type": "null"}]},
+        "reference_location": {"oneOf": [{"$ref": "location.schema.json"}, {"type": "null"}]},
+        "comparison_subjects": {"type": "array", "items": {"$ref": "#/$defs/SubjectInput"}, "uniqueItems": true}
+      }
+    },
+    "ChartSettings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["zodiac", "house_system", "center", "node_type", "aspect_set_id", "orb_profile_id"],
+      "properties": {
+        "zodiac": {"type": "string", "enum": ["tropical", "sidereal", "draconic"]},
+        "ayanamsa": {"type": ["string", "null"]},
+        "house_system": {"type": "string", "minLength": 1, "maxLength": 40},
+        "center": {"type": "string", "enum": ["geocentric", "heliocentric", "topocentric"]},
+        "coordinate_frame": {"type": "string", "enum": ["ecliptic", "equatorial", "horizontal"]},
+        "node_type": {"type": "string", "enum": ["true", "mean", "both"]},
+        "aspect_set_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "orb_profile_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "included_points": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "custom_parameters": {"type": "object", "additionalProperties": true}
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["subject", "chart", "settings", "rule_pack_hash", "dataset_versions", "outputs"],
+  "properties": {
+    "subject": {"$ref": "#/$defs/SubjectInput"},
+    "chart": {"$ref": "#/$defs/ChartDefinition"},
+    "settings": {"$ref": "#/$defs/ChartSettings"},
+    "analysis_model": {"oneOf": [{"$ref": "common.schema.json#/$defs/VersionReference"}, {"type": "null"}]},
+    "rule_pack_hash": {"$ref": "common.schema.json#/$defs/ContentHash"},
+    "dataset_versions": {
+      "type": "object",
+      "additionalProperties": {"type": "string", "minLength": 1}
+    },
+    "outputs": {
+      "type": "array",
+      "items": {"type": "string", "enum": ["snapshot", "default_render_manifest", "svg", "png", "pdf", "json", "csv", "ics"]},
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "input_fingerprint": {"$ref": "common.schema.json#/$defs/ContentHash"}
+  }
+}

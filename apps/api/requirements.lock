@@ -1,0 +1,14 @@
+# Regenerate after changing pyproject.toml in a clean Python 3.13 environment.
+# This file intentionally locks the complete M0 runtime dependency graph.
+annotated-types==0.7.0
+anyio==4.13.0
+click==8.3.3
+fastapi==0.136.1
+h11==0.16.0
+idna==3.13
+pydantic==2.13.3
+pydantic-core==2.46.3
+starlette==1.0.0
+typing-extensions==4.15.0
+typing-inspection==0.4.2
+uvicorn==0.46.0
