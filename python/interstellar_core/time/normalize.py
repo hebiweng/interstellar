@@ -17,6 +17,7 @@ from .models import (
     TimeWarning,
     WarningSeverity,
 )
+from .tzdb import TZDB_DATASET_REFERENCE
 
 _INSTANT_PRECISIONS = frozenset(
     {
@@ -113,7 +114,7 @@ def _base_spec(
         selected_utc=selected_utc,
         confidence=confidence,
         source=spec.source,
-        timezone_dataset=spec.timezone_dataset,
+        timezone_dataset=spec.timezone_dataset or TZDB_DATASET_REFERENCE,
         historical_confidence=historical_confidence,
         uncertainty_seconds=spec.uncertainty_seconds,
         warnings=warnings,

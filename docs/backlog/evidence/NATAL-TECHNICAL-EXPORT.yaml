@@ -1,0 +1,52 @@
+schema_version: 1.0.0
+gate_id: NATAL-TECHNICAL-EXPORT
+status: completed
+completed_at: '2026-07-19'
+objective: one_deterministic_user_facing_natal_analysis_document_is_reused_by_copy_markdown_plaintext_and_optional_AI_preview_without_recalculation_while_full_JSON_remains_separate
+contract:
+  schema: interstellar.natal.analysis-document.v2
+  hash_algorithm: sha256
+  user_projection:
+    - subject_time_and_location
+    - applied_calculation_settings
+    - astronomical_context
+    - points_houses_and_aspects
+    - distributions_patterns_and_classical_status
+    - input_quality_warnings
+  excluded_from_user_projection:
+    - output_manifest
+    - JSON_pointer_result_paths
+    - input_fingerprint
+    - rule_pack_hash
+    - internal_structured_evidence
+    - dispositors
+    - raw_advanced_objects
+  excluded_from_content_hash:
+    - snapshot_identifier
+    - creation_and_update_timestamps
+  formats: [markdown, plaintext]
+  invariant: both_formats_and_AI_preview_publish_the_same_user_document_content_hash_and_full_snapshot_JSON_requires_a_separate_explicit_export
+evidence:
+  - path: python/interstellar_core/application/natal_technical_export.py
+    proves: canonical_document_hash_and_full_snapshot_serializer_are_deterministic_and_format_independent
+  - path: apps/api/interstellar_api/routers/m2_calculations.py
+    proves: export_responses_publish_document_hash_ETag_snapshot_and_input_fingerprint_headers
+  - path: app/lib/interstellar-api.ts
+    proves: browser_requires_and_preserves_the_server_document_hash_for_each_artifact
+  - path: app/page.tsx
+    proves: read_only_user_analysis_document_copy_download_and_AI_preview_share_one_artifact_while_developer_audit_sections_are_not_rendered_in_the_product
+  - path: tests/backend/test_m2_calculation_api.py
+    proves: markdown_plaintext_headers_body_and_AI_preview_hash_contracts_are_regression_tested
+verification:
+  commands:
+    - PYTHONPATH=apps/api:apps/worker:python python3 -m pytest -q tests/backend/test_m2_calculation_api.py
+    - npm run build
+    - node --test tests/rendered-html.test.mjs
+    - playwright_cli real_natal_technical_document_visual_QA
+  result: passed
+  browser_checks:
+    - user_document_contains_no_dispositor_chain_structured_evidence_output_manifest_result_path_or_input_fingerprint
+    - user_document_contains_portable_points_houses_aspects_distributions_patterns_classical_status_and_input_warnings
+    - full_snapshot_JSON_is_available_only_through_the_separate_professional_JSON_action
+  visual_artifact: output/playwright/natal-analysis-document.png
+boundary: user_projection_serializes_only_portable_materialized_astrology_facts_and_never_silently_adds_points_aspects_techniques_or_internal_developer_objects

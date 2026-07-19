@@ -178,13 +178,29 @@ def test_real_natal_snapshot_supports_all_eight_contextual_item_kinds() -> None:
                         "item_kind": "classical_condition",
                         "result_path": "/result/dignities/0",
                     },
+                    {
+                        "item_kind": "structure_indicator",
+                        "result_path": "/result/structure/hemispheres",
+                    },
+                    {
+                        "item_kind": "classical_condition",
+                        "result_path": "/result/classical/sect",
+                    },
+                    {
+                        "item_kind": "classical_condition",
+                        "result_path": "/result/classical/dispositors",
+                    },
+                    {
+                        "item_kind": "classical_condition",
+                        "result_path": "/result/classical/receptions",
+                    },
                 ]
             },
         )
 
     assert response.status_code == 200, response.text
     interpretations = response.json()["interpretations"]
-    assert len(interpretations) == 8
+    assert len(interpretations) == 12
     assert {item["item_kind"] for item in interpretations} == {
         "point_intrinsic",
         "point_in_sign",

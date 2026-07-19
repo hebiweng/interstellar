@@ -1,6 +1,7 @@
 """Astronomy engine adapters."""
 
 from interstellar_core.astronomy.adapters.swiss_ephemeris import (
+    AYANAMSA_MODES,
     CORE_POINT_IDS,
     DIRECT_POINT_REGISTRY,
     HAMBURG_TNP_POINT_IDS,
@@ -14,6 +15,7 @@ from interstellar_core.astronomy.adapters.swiss_ephemeris import (
 )
 
 __all__ = [
+    "AYANAMSA_MODES",
     "CORE_POINT_IDS",
     "DIRECT_POINT_REGISTRY",
     "HAMBURG_TNP_POINT_IDS",

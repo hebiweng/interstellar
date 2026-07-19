@@ -83,7 +83,7 @@ data_sources:
     v1_choice: AGPL-3.0-or-later
     cost_v1: free
     required_for_v1: true
-    notes: Closed-source or AGPL-incompatible operation requires the professional license.
+    notes: Closed-source or AGPL-incompatible operation requires the professional license. The natal subset also bundles the official sefstars.txt fixed-star catalogue and seorbel.txt hypothetical-body definitions.
   jpl_spice:
     name: NASA/JPL NAIF SPICE
     url: https://naif.jpl.nasa.gov/naif/public.html
@@ -92,7 +92,12 @@ data_sources:
     license: publicly_available_with_credit_requirements
     cost_v1: free
     required_for_v1: true
-    notes: Independent astronomical validation; not the astrology semantic engine.
+    bundled_version: de442-validation-kernel-set-2025-02-06
+    bundled_paths:
+      planetary_spk: vendor/jpl-naif/kernels/spk/de442.bsp
+      leap_seconds: vendor/jpl-naif/kernels/lsk/naif0012.tls
+      planetary_constants: vendor/jpl-naif/kernels/pck/pck00011.tpc
+    notes: Independent astronomical validation source is now local and checksum-locked; the SPICE differential adapter and comparison suite remain a separate implementation gate and this source is not the astrology semantic engine.
   iana_tzdb:
     name: IANA Time Zone Database
     url: https://www.iana.org/time-zones
@@ -110,6 +115,10 @@ data_sources:
     license: ODbL-1.0-output_AND_MIT-code
     cost_v1: free
     required_for_v1: true
+    bundled_version: 2026b-full
+    bundled_path: vendor/timezone-boundary-builder/timezones-2026b.geojson.zip
+    sha256: f892b57ce8c7d9633a03ce9e6775d54544c05d9b8d62029bc6543091cac213c4
+    notes: Full individual IANA-zone boundaries; ocean and unmatched points require explicit IANA timezone confirmation. The merged now artifact is prohibited for birth-time conversion.
   geonames:
     name: GeoNames
     url: https://download.geonames.org/export/dump/
@@ -118,6 +127,16 @@ data_sources:
     license: CC-BY-4.0
     cost_v1: free
     required_for_v1: true
+    bundled_version: cities500-2026-07-19
+    bundled_paths:
+      places: vendor/geonames/cities500-2026-07-19.zip
+      admin1: vendor/geonames/admin1CodesASCII-2026-07-19.txt
+      admin2: vendor/geonames/admin2Codes-2026-07-19.txt
+    sha256:
+      places: 6cc1dd51bfdd407d626a3d3bc02226c36e44281fceecdc03019cf755c65d664a
+      admin1: 34784457b76b988a669dff7c3e4b104e4902c0875643cff019281ac79dfa2992
+      admin2: 314a76e0b02610c653947acbf4e9dceab6b20eb39a0e793e09fea55d3d1a96be
+    notes: Offline populated-place search with readable admin1/admin2 hierarchy; exact addresses and complete historical place names are outside this snapshot.
   natural_earth:
     name: Natural Earth
     url: https://www.naturalearthdata.com/about/terms-of-use/
@@ -143,6 +162,10 @@ data_sources:
     license: official_public_data
     cost_v1: free
     required_for_v1: true
+    bundled_version: finals2000A-2026-07-19
+    bundled_path: vendor/iers/finals2000A-2026-07-19.all
+    sha256: d4bb5af084caf3e82621bc75aad902dc7ad9e38e785a97d3fcac0a23d89644fb
+    notes: Local Earth-orientation snapshot for advanced coordinate and validation work; current ordinary natal longitudes and houses continue to use the explicitly versioned Swiss Ephemeris models until the IERS adapter gate is implemented.
   minor_planet_center:
     name: Minor Planet Center mpc_orb
     url: https://docs.minorplanetcenter.net/software/
@@ -649,6 +672,7 @@ capabilities:
     data_sources: [swiss_ephemeris]
     inputs: [sidereal_time, latitude, house_system]
     outputs: [house_cusps, asc_mc, sensitive_points, polar_warnings]
+    implemented_house_systems: [placidus, whole_sign, koch, porphyry, regiomontanus, campanus, equal, alcabitius, topocentric, morinus, krusinski, vehlow, equal_mc, equal_aries, meridian, horizontal, carter_poli_equatorial, apc, pullen_sd, pullen_sr, sunshine_treindl, sripati]
     validation_profile: astronomy_stable
 
   - id: astronomy.aspects
@@ -664,6 +688,12 @@ capabilities:
     data_sources: []
     inputs: [points, aspect_set, orb_profile]
     outputs: [aspects, applying_state, strength]
+    product_projection:
+      full_result: table_and_analysis_export
+      wheel_default: major_aspects_strongest_top_15_percent
+      wheel_alternatives: [strongest_top_percent, minimum_strength_threshold]
+      recalculation_required_for: [aspect_set, orb_profile, per_aspect_orb]
+      render_only: [visible_point_groups, major_only, strength_filter, aspect_lines_layer]
     validation_profile: astrology_stable
 
   - id: astronomy.fixed_stars
@@ -676,7 +706,8 @@ capabilities:
     work_package: V1-CLS-001
     dependencies: [astronomy.coordinate_systems]
     algorithm_card: required
-    data_sources: [swiss_ephemeris, gaia_dr3]
+    data_sources: [swiss_ephemeris]
+    optional_data_sources: [gaia_dr3]
     inputs: [fixed_star_selection, epoch, observer]
     outputs: [fixed_star_positions, conjunctions]
     validation_profile: astronomy_stable
@@ -691,7 +722,8 @@ capabilities:
     work_package: V1-CLS-001
     dependencies: [astronomy.ephemeris_core]
     algorithm_card: required
-    data_sources: [swiss_ephemeris, minor_planet_center]
+    data_sources: [swiss_ephemeris]
+    optional_data_sources: [minor_planet_center]
     inputs: [minor_body_ids, utc_instant]
     outputs: [minor_body_positions, orbit_provenance]
     validation_profile: astrology_beta
@@ -706,7 +738,8 @@ capabilities:
     work_package: V1-MUN-001
     dependencies: [astronomy.ephemeris_core, platform.async_jobs]
     algorithm_card: required
-    data_sources: [swiss_ephemeris, jpl_spice, nasa_eclipse]
+    data_sources: [swiss_ephemeris, jpl_spice]
+    optional_data_sources: [nasa_eclipse]
     inputs: [time_range, location_optional]
     outputs: [eclipse_events, visibility, path_geometry]
     validation_profile: astronomy_stable
@@ -724,6 +757,10 @@ capabilities:
     data_sources: [swiss_ephemeris]
     inputs: [subject_version, chart_settings]
     outputs: [natal_chart, distributions]
+    user_analysis_document:
+      schema: interstellar.natal.analysis-document.v2
+      excludes: [output_manifest, result_paths, input_fingerprint, rule_pack_hash, internal_evidence_objects, dispositors, raw_advanced_objects]
+      full_snapshot_json_is_separate: true
     validation_profile: astrology_stable
 
   - id: natal.unknown_time_mode
@@ -1115,7 +1152,8 @@ capabilities:
     work_package: V1-GEO-001
     dependencies: [astronomy.fixed_stars, forecast.event_search]
     algorithm_card: required
-    data_sources: [swiss_ephemeris, gaia_dr3, natural_earth]
+    data_sources: [swiss_ephemeris, natural_earth]
+    optional_data_sources: [gaia_dr3]
     inputs: [chart, selected_bodies, selected_stars]
     outputs: [paran_events, paran_lines]
     validation_profile: astrology_beta
@@ -1236,6 +1274,12 @@ capabilities:
     data_sources: []
     inputs: [calculation_snapshot, render_spec]
     outputs: [svg, interactive_scene]
+    current_natal_views: [professional_single_wheel, compact_single_wheel, aspect_matrix]
+    professional_natal_layers: [degree_ticks, zodiac_glyphs_and_names, point_labels_and_exact_degrees, houses, asc_dsc_mc_ic, inner_aspect_stage, aspect_legend]
+    constraints:
+      - switching_professional_compact_or_aspect_matrix_never_recalculates_the_snapshot
+      - compact_view_may_reduce_visual_density_but_never_result_or_export_coverage
+      - unknown_birth_time_removes_houses_axes_and_aspects_and_displays_date_range_uncertainty
     validation_profile: rendering_stable
 
   - id: rendering.tables_grids
@@ -1278,7 +1322,8 @@ capabilities:
     work_package: V1-RND-003
     dependencies: [geography.astrocartography, geography.local_space, geography.parans, astronomy.eclipse_events]
     algorithm_card: required
-    data_sources: [natural_earth, openstreetmap]
+    data_sources: [natural_earth]
+    optional_data_sources: [openstreetmap]
     inputs: [geographic_geometry, map_render_spec]
     outputs: [interactive_map, svg_or_png_map]
     validation_profile: rendering_stable

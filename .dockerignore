@@ -1,0 +1,24 @@
+.git
+.github
+.playwright-cli
+.pytest_cache
+.ruff_cache
+.venv
+.vinext
+.wrangler
+node_modules
+output
+outputs
+var
+work
+**/__pycache__
+*.pyc
+*.pyo
+*.log
+.env
+.env.*
+!.env.example
+
+# The JPL DE442 kernel is a validation asset, not a production runtime input.
+vendor/jpl-naif/kernels/spk/*.bsp
+

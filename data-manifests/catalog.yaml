@@ -27,11 +27,17 @@ datasets:
       runtime_mode: local_read_only_versioned_files
     version:
       strategy: exact_upstream_release
-      pinned: null
+      pinned: 2.10.3-DE441-natal-subset-2026-04-14
+      source_verified_at: '2026-07-19'
       placeholder_rule: set_release_number_and_file_inventory_before_promotion
     integrity:
-      sha256: null
-      state: unverified_until_download
+      state: verified
+      artifacts:
+        - {path: vendor/swisseph/ephe/sepl_18.se1, sha256: ca1393ceab3a44fbc895887cf789c68819ae6a1cbc9b22225872dbe4ccd99a66}
+        - {path: vendor/swisseph/ephe/semo_18.se1, sha256: 1ca07bd67c24374d77226180c20a4f9996cba013697894810518e7eb582ca4f7}
+        - {path: vendor/swisseph/ephe/seas_18.se1, sha256: a2cd8fc33807c78ca9a700c91c2e042258b12fc4796519e00781440b5ad8b2e2}
+        - {path: vendor/swisseph/ephe/seorbel.txt, sha256: 97b454ff78f4f4716b5cc987a93ca8f33e44ef4b524a165a155a8a4885fd2e18}
+        - {path: vendor/swisseph/ephe/sefstars.txt, sha256: 18b0dcafbe5b7240773daba2c038a325f5b3fc4163f61e0a7f4e92abd4f517c6}
       verify_each_file: true
     license:
       identifier: AGPL-3.0-or-later_OR_Swiss_Ephemeris_Professional_License
@@ -58,11 +64,18 @@ datasets:
       runtime_mode: local_validation_only
     version:
       strategy: explicit_kernel_set
+      pinned: de442-validation-kernel-set-2025-02-06
       pinned_kernel_set: [de442.bsp, naif0012.tls, pck00011.tpc]
       optional_extended_historical_kernel_set: [de441_part-1.bsp, de441_part-2.bsp]
-      source_verified_at: '2026-07-18'
+      source_verified_at: '2026-07-19'
       placeholder_rule: record_exact_kernel_checksums_and_supported_date_ranges_before_release
-    integrity: {sha256: null, state: unverified_until_download, verify_each_kernel: true}
+    integrity:
+      state: verified
+      verify_each_kernel: true
+      artifacts:
+        - {path: vendor/jpl-naif/kernels/spk/de442.bsp, sha256: 8d5001fab315eeff222cc51f7cf7ffcdb43fb38fb9ac73ff09e09a5b361fd388, upstream_md5: 446656322267e7b819a26cb08a0d8718}
+        - {path: vendor/jpl-naif/kernels/lsk/naif0012.tls, sha256: 678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b}
+        - {path: vendor/jpl-naif/kernels/pck/pck00011.tpc, sha256: 3dff7b1dbeceaa01f25467767d3fa25816051c85d162d1edf04acb310ee28bb1}
     license:
       identifier: NASA_JPL_public_information_terms
       legal_review_note: preserve_notices_and_follow_each_kernel_readme
@@ -82,9 +95,14 @@ datasets:
     version:
       strategy: exact_tzdb_release
       pinned: 2026c
-      source_verified_at: '2026-07-18'
+      runtime_package: tzdata==2026.3
+      source_verified_at: '2026-07-19'
       placeholder_rule: update_only_after_dst_regression_suite_passes
-    integrity: {sha256: null, state: unverified_until_download, verify_archive: true}
+    integrity:
+      sha256: dc096730c87af6cab1b171c9d532be840741ff5d459015e7f6947bd7d7e54931
+      artifact: tzdata-2026.3-py2.py3-none-any.whl
+      state: verified
+      verify_archive: true
     license: {identifier: IANA_tz_database_public_domain_style_notice, preserve_notice: true}
     attribution: {required: true, text_zh: 时区规则来自 IANA Time Zone Database。, text_en: Time-zone rules are sourced from the IANA Time Zone Database.}
     sync: {cadence: on_each_upstream_release, automatic_promotion: false}
@@ -96,8 +114,17 @@ datasets:
     role: coordinate_to_iana_timezone_spatial_lookup
     source_url: https://github.com/evansiroky/timezone-boundary-builder/releases
     acquisition: {method: official_github_release, transport: https_download, crawler: false, runtime_mode: postgis_local}
-    version: {strategy: exact_release_tag, pinned: null, placeholder_rule: release_tag_geometry_variant_and_checksum_required}
-    integrity: {sha256: null, state: unverified_until_download, verify_archive: true}
+    version:
+      strategy: exact_release_tag
+      pinned: 2026b
+      geometry_variant: full_individual_iana_zones
+      source_verified_at: '2026-07-19'
+      placeholder_rule: release_tag_geometry_variant_and_checksum_required
+    integrity:
+      sha256: f892b57ce8c7d9633a03ce9e6775d54544c05d9b8d62029bc6543091cac213c4
+      artifact: vendor/timezone-boundary-builder/timezones-2026b.geojson.zip
+      state: verified
+      verify_archive: true
     license:
       identifier: ODbL-1.0_output_AND_MIT_code
       obligations: [database_attribution, odbl_notice, document_modified_derivative_database]
@@ -115,9 +142,19 @@ datasets:
       transport: https_download
       crawler: false
       runtime_mode: postgresql_local
-      files: [allCountries.zip, alternateNamesV2.zip, admin1CodesASCII.txt, admin2Codes.txt, countryInfo.txt, timeZones.txt]
-    version: {strategy: dump_date_plus_file_inventory, pinned: null, placeholder_rule: utc_download_date_and_each_file_checksum_required}
-    integrity: {sha256: null, state: unverified_until_download, verify_each_file: true}
+      files: [cities500.zip, admin1CodesASCII.txt, admin2Codes.txt]
+    version:
+      strategy: dump_date_plus_file_inventory
+      pinned: cities500-2026-07-19
+      source_verified_at: '2026-07-19'
+      placeholder_rule: utc_download_date_and_each_file_checksum_required
+    integrity:
+      artifacts:
+        - {path: vendor/geonames/cities500-2026-07-19.zip, sha256: 6cc1dd51bfdd407d626a3d3bc02226c36e44281fceecdc03019cf755c65d664a}
+        - {path: vendor/geonames/admin1CodesASCII-2026-07-19.txt, sha256: 34784457b76b988a669dff7c3e4b104e4902c0875643cff019281ac79dfa2992}
+        - {path: vendor/geonames/admin2Codes-2026-07-19.txt, sha256: 314a76e0b02610c653947acbf4e9dceab6b20eb39a0e793e09fea55d3d1a96be}
+      state: verified
+      verify_each_file: true
     license: {identifier: CC-BY-4.0, obligations: [credit_GeoNames, retain_source_date]}
     attribution: {required: true, text_zh: 地名数据 © GeoNames，依据 CC BY 4.0 使用。, text_en: Place data © GeoNames, used under CC BY 4.0.}
     sync: {cadence: monthly, automatic_promotion: false}
@@ -129,8 +166,20 @@ datasets:
     role: global_base_map_and_static_export_geometry
     source_url: https://www.naturalearthdata.com/downloads/
     acquisition: {method: official_data_package, transport: https_download, crawler: false, runtime_mode: local_map_assets}
-    version: {strategy: exact_natural_earth_version_and_scale, pinned: null, placeholder_rule: pin_10m_50m_110m_packages_separately}
-    integrity: {sha256: null, state: unverified_until_download, verify_each_package: true}
+    version:
+      strategy: exact_natural_earth_version_and_scale
+      pinned: 5.1.2-110m-minimal-geojson
+      source_verified_at: '2026-07-19'
+      scale: 110m
+      layers: [admin_0_countries, land, coastline]
+      placeholder_rule: pin_additional_10m_50m_packages_separately_when_needed
+    integrity:
+      state: verified
+      artifacts:
+        - {path: vendor/natural-earth/ne_110m_admin_0_countries-v5.1.2.geojson, sha256: 6866c877d39cba9c357620878839b336d569f8c662d3cfab4cb1dbe2d39c977f}
+        - {path: vendor/natural-earth/ne_110m_land-v5.1.2.geojson, sha256: 9e0729ee253ca7d7a5c4ae9395fb1902264c5377c52e224d13dd85010e2835d9}
+        - {path: vendor/natural-earth/ne_110m_coastline-v5.1.2.geojson, sha256: 851f581ff5ffb844deed8ae1a9ce22e3c4bb3d74fa342cadb5d8e39b41ae7c3c}
+      verify_each_package: true
     license: {identifier: public_domain, obligations: [preserve_source_provenance]}
     attribution: {required: false, recommended_text_zh: "地图数据：Natural Earth。", recommended_text_en: "Map data: Natural Earth."}
     sync: {cadence: annual_check, automatic_promotion: false}
@@ -160,8 +209,16 @@ datasets:
     role: earth_orientation_delta_ut1_polar_motion_and_leap_second_validation
     source_url: https://data.iers.org/bulletins.php
     acquisition: {method: official_bulletin_download, transport: https_download, crawler: false, runtime_mode: local_versioned_data}
-    version: {strategy: bulletin_identifier_and_publication_date, pinned: null, placeholder_rule: record_Bulletin_A_B_C_D_ids_and_applicable_ranges}
-    integrity: {sha256: null, state: unverified_until_download, verify_each_bulletin: true}
+    version:
+      strategy: bulletin_identifier_and_publication_date
+      pinned: finals2000A-2026-07-19
+      source_verified_at: '2026-07-19'
+      placeholder_rule: record_Bulletin_A_B_C_D_ids_and_applicable_ranges
+    integrity:
+      sha256: d4bb5af084caf3e82621bc75aad902dc7ad9e38e785a97d3fcac0a23d89644fb
+      artifact: vendor/iers/finals2000A-2026-07-19.all
+      state: verified
+      verify_each_bulletin: true
     license: {identifier: IERS_official_public_data_terms, preserve_notice: true}
     attribution: {required: true, text_zh: 地球定向参数来自 IERS。, text_en: Earth-orientation parameters are sourced from IERS.}
     sync: {cadence: weekly_for_A_monthly_for_B_on_release_for_C_D, automatic_promotion: false}

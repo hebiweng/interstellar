@@ -36,6 +36,22 @@ SIGN_IDS: tuple[str, ...] = (
     "pisces",
 )
 
+# Stable public identifiers for the sidereal modes we expose in V1 natal
+# settings.  The numeric values are Swiss Ephemeris constants, but callers
+# never persist those implementation-specific integers.
+AYANAMSA_MODES: dict[str, int] = {
+    "fagan_bradley": swe.SIDM_FAGAN_BRADLEY,
+    "lahiri": swe.SIDM_LAHIRI,
+    "deluce": swe.SIDM_DELUCE,
+    "raman": swe.SIDM_RAMAN,
+    "krishnamurti": swe.SIDM_KRISHNAMURTI,
+    "yukteshwar": swe.SIDM_YUKTESHWAR,
+    "hipparchos": swe.SIDM_HIPPARCHOS,
+    "true_revati": swe.SIDM_TRUE_REVATI,
+    "true_citra": swe.SIDM_TRUE_CITRA,
+    "galactic_center_0_sagittarius": swe.SIDM_GALCENT_0SAG,
+}
+
 
 @dataclass(frozen=True, slots=True)
 class BodyDefinition:
@@ -218,7 +234,9 @@ class AdapterProvenance:
     actual_modes: tuple[str, ...]
     apparent: bool
     center: Literal["geocentric"]
-    zodiac: Literal["tropical"]
+    zodiac: Literal["tropical", "sidereal"]
+    ayanamsa: str | None
+    ayanamsa_value_deg: float | None
     frame: Literal["true_ecliptic_of_date"]
     speed_requested: bool
     delta_t_function: Literal["swe_deltat_ex"]
@@ -307,14 +325,21 @@ class SwissEphemerisAdapter:
         utc_instant: datetime | None = None,
         julian_day_ut: float | None = None,
         point_ids: Iterable[str] | None = None,
+        zodiac: Literal["tropical", "sidereal"] = "tropical",
+        ayanamsa: str | None = None,
     ) -> EphemerisResult:
         jd_ut, normalized_utc = self._normalize_time(
             utc_instant=utc_instant,
             julian_day_ut=julian_day_ut,
         )
+        ayanamsa_mode = self._validate_zodiac(zodiac=zodiac, ayanamsa=ayanamsa)
         requested_mode_flag = self._requested_mode_flag()
         ecliptic_flags = requested_mode_flag | swe.FLG_SPEED
-        equatorial_flags = ecliptic_flags | swe.FLG_EQUATORIAL
+        if zodiac == "sidereal":
+            ecliptic_flags |= swe.FLG_SIDEREAL
+        # Right ascension and declination remain physical equatorial
+        # coordinates.  Ayanamsa only changes the zodiacal longitude.
+        equatorial_flags = requested_mode_flag | swe.FLG_SPEED | swe.FLG_EQUATORIAL
         points: list[dict[str, Any]] = []
         warnings: list[AdapterWarning] = []
         flag_records: list[PointFlagRecord] = []
@@ -323,6 +348,8 @@ class SwissEphemerisAdapter:
         with self._backend_lock:
             if self.ephemeris_path is not None:
                 self._backend.set_ephe_path(self.ephemeris_path)
+            if ayanamsa_mode is not None:
+                self._backend.set_sid_mode(ayanamsa_mode)
             for body in definitions:
                 ecliptic = self._calculate_raw(jd_ut, body, ecliptic_flags)
                 equatorial = self._calculate_raw(jd_ut, body, equatorial_flags)
@@ -367,6 +394,11 @@ class SwissEphemerisAdapter:
             actual_modes = tuple(dict.fromkeys(record.actual_mode for record in flag_records))
             delta_t_days, delta_t_message = self._delta_t(jd_ut, actual_modes[0])
             earth_orientation = self._earth_orientation(jd_ut, requested_mode_flag)
+            ayanamsa_value = (
+                self._ayanamsa_value(jd_ut, requested_mode_flag)
+                if ayanamsa_mode is not None
+                else None
+            )
 
         if delta_t_message:
             warnings.append(
@@ -387,7 +419,9 @@ class SwissEphemerisAdapter:
             actual_modes=actual_modes,
             apparent=True,
             center="geocentric",
-            zodiac="tropical",
+            zodiac=zodiac,
+            ayanamsa=ayanamsa,
+            ayanamsa_value_deg=ayanamsa_value,
             frame="true_ecliptic_of_date",
             speed_requested=True,
             delta_t_function="swe_deltat_ex",
@@ -410,6 +444,40 @@ class SwissEphemerisAdapter:
             provenance=provenance,
             warnings=tuple(warnings),
         )
+
+    def _validate_zodiac(
+        self,
+        *,
+        zodiac: str,
+        ayanamsa: str | None,
+    ) -> int | None:
+        if zodiac == "tropical":
+            if ayanamsa is not None:
+                raise EphemerisInputError("tropical zodiac must not declare an ayanamsa")
+            return None
+        if zodiac != "sidereal":
+            raise EphemerisInputError(f"unsupported zodiac: {zodiac}")
+        if ayanamsa not in AYANAMSA_MODES:
+            supported = ", ".join(sorted(AYANAMSA_MODES))
+            raise EphemerisInputError(
+                f"sidereal zodiac requires a supported ayanamsa: {supported}"
+            )
+        return AYANAMSA_MODES[ayanamsa]
+
+    def _ayanamsa_value(self, julian_day_ut: float, mode_flag: int) -> float:
+        try:
+            _returned_flags, value = self._backend.get_ayanamsa_ex_ut(
+                julian_day_ut,
+                mode_flag,
+            )
+            value = float(value)
+        except Exception as exc:
+            raise EphemerisCalculationError(
+                f"Swiss Ephemeris failed to return ayanamsa: {type(exc).__name__}: {exc}"
+            ) from exc
+        if not math.isfinite(value):
+            raise EphemerisCalculationError("Swiss Ephemeris returned non-finite ayanamsa")
+        return value % 360
 
     def _earth_orientation(
         self,

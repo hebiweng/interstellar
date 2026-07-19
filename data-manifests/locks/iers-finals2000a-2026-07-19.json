@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "active": {
+    "iers": {
+      "dataset_id": "iers",
+      "version": "finals2000A-2026-07-19",
+      "license_identifier": "IERS_official_public_data_terms",
+      "license_accepted": true,
+      "artifacts": [
+        {
+          "path": "vendor/iers/finals2000A-2026-07-19.all",
+          "sha256": "d4bb5af084caf3e82621bc75aad902dc7ad9e38e785a97d3fcac0a23d89644fb",
+          "size_bytes": 3755676
+        }
+      ],
+      "verified_at": "2026-07-19T08:30:00Z"
+    }
+  }
+}

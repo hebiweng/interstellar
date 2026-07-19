@@ -12,10 +12,13 @@ import math
 from collections.abc import Mapping, Sequence
 from copy import deepcopy
 from dataclasses import asdict
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, time, timedelta
 from importlib.metadata import PackageNotFoundError, version
 from itertools import combinations
 from typing import Any
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
+import swisseph as swe
 
 from interstellar_core.application.recipe_preflight import canonical_hash
 from interstellar_core.astrology.aspects import (
@@ -62,6 +65,7 @@ from interstellar_core.astrology.natal import (
     lot_point_from_fact,
 )
 from interstellar_core.astronomy.adapters import (
+    AYANAMSA_MODES,
     CORE_POINT_IDS,
     DIRECT_POINT_REGISTRY,
     SwissEphemerisAdapter,
@@ -221,6 +225,26 @@ def _house_calculation(
             f"unsupported house system: {settings.get('house_system')}"
         ) from exc
     try:
+        zodiac = str(settings.get("zodiac", "tropical"))
+        ayanamsa = settings.get("ayanamsa")
+        if zodiac == "tropical":
+            house_flags = 0
+            sidereal_mode = None
+            if ayanamsa is not None:
+                raise AstronomicalSnapshotInputError(
+                    "tropical zodiac must not declare an ayanamsa"
+                )
+        elif zodiac == "sidereal":
+            if ayanamsa not in AYANAMSA_MODES:
+                raise AstronomicalSnapshotInputError(
+                    "sidereal zodiac requires a supported ayanamsa"
+                )
+            house_flags = swe.FLG_SIDEREAL
+            sidereal_mode = AYANAMSA_MODES[str(ayanamsa)]
+        else:
+            raise AstronomicalSnapshotInputError(
+                f"unsupported natal zodiac: {zodiac}"
+            )
         latitude = float(location["latitude"])
         longitude = float(location["longitude"])
         return HouseCalculator().calculate(
@@ -228,6 +252,8 @@ def _house_calculation(
             latitude_deg=latitude,
             longitude_deg=longitude,
             system=system,
+            flags=house_flags,
+            sidereal_mode=sidereal_mode,
             allow_fallback_whole_sign=bool(
                 custom_parameters.get("allow_house_fallback_whole_sign", False)
             ),
@@ -588,6 +614,430 @@ def _classical_documents(
     return classical_document, dignity_documents, [reception_document]
 
 
+def _date_level_instants(
+    time_spec: Mapping[str, Any],
+    location: Mapping[str, Any],
+) -> tuple[datetime, datetime, datetime, tuple[datetime, ...]]:
+    """Return the civil-day interval and deterministic probe instants.
+
+    The midpoint is a reference position for display, never a fabricated birth
+    time.  The probes span the complete local civil day, including DST days that
+    are not exactly 24 hours long.
+    """
+
+    local_value = time_spec.get("local_value")
+    if not isinstance(local_value, str):
+        raise AstronomicalSnapshotInputError(
+            "date-level TimeSpec requires a local calendar date"
+        )
+    try:
+        local_date = date.fromisoformat(local_value)
+    except ValueError as exc:
+        raise AstronomicalSnapshotInputError(
+            "date-level TimeSpec.local_value must be YYYY-MM-DD"
+        ) from exc
+    timezone_id = time_spec.get("timezone_id") or location.get("timezone_id")
+    if not isinstance(timezone_id, str) or not timezone_id:
+        raise AstronomicalSnapshotInputError(
+            "date-level calculation requires an explicitly selected IANA timezone"
+        )
+    try:
+        zone = ZoneInfo(timezone_id)
+    except ZoneInfoNotFoundError as exc:
+        raise AstronomicalSnapshotInputError(
+            f"IANA timezone {timezone_id!r} is unavailable"
+        ) from exc
+
+    start_local = datetime.combine(local_date, time.min, tzinfo=zone)
+    end_local = datetime.combine(local_date + timedelta(days=1), time.min, tzinfo=zone)
+    start_utc = start_local.astimezone(UTC)
+    end_utc = end_local.astimezone(UTC)
+    duration = end_utc - start_utc
+    reference_utc = start_utc + duration / 2
+    final_probe = end_utc - timedelta(microseconds=1)
+    probes = (
+        start_utc,
+        start_utc + duration / 4,
+        reference_utc,
+        start_utc + duration * 3 / 4,
+        final_probe,
+    )
+    return start_utc, end_utc, reference_utc, probes
+
+
+def _circular_delta(value: float, reference: float) -> float:
+    return (value - reference + 180.0) % 360.0 - 180.0
+
+
+def create_date_level_astronomical_snapshot(
+    *,
+    snapshot_id: str,
+    request_payload: Mapping[str, Any],
+    subject_version: Mapping[str, Any],
+    now: datetime,
+    engine_version: str,
+    adapter: SwissEphemerisAdapter | None = None,
+) -> dict[str, Any]:
+    """Create a transparent date-range natal snapshot for unknown birth time.
+
+    It exposes reference positions plus full-day uncertainty envelopes.  Houses,
+    angles, Lots, within-chart aspects, structural and classical results are
+    blocked because those would require inventing a time inside the day.
+    """
+
+    time_spec = subject_version.get("time_spec")
+    location = subject_version.get("location")
+    if not isinstance(time_spec, Mapping) or not isinstance(location, Mapping):
+        raise AstronomicalSnapshotInputError(
+            "The subject version requires both TimeSpec and Location."
+        )
+    if time_spec.get("precision") not in {"date", "unknown"}:
+        raise AstronomicalSnapshotInputError(
+            "date-level snapshot requires TimeSpec precision date or unknown"
+        )
+    start_utc, end_utc, reference_utc, probes = _date_level_instants(time_spec, location)
+    settings = request_payload["settings"]
+    requested_point_ids = _requested_final_point_ids(settings)
+    supported_point_ids = tuple(
+        point_id
+        for point_id in requested_point_ids
+        if point_id in DIRECT_POINT_REGISTRY
+        or point_id in {"true_south_node", "mean_south_node"}
+    )
+    excluded_point_ids = tuple(
+        point_id for point_id in requested_point_ids if point_id not in supported_point_ids
+    )
+    direct_point_ids = _direct_point_dependencies(supported_point_ids)
+    calculator = adapter or SwissEphemerisAdapter(moshier_fallback="record")
+    ephemerides = tuple(
+        calculator.calculate(
+            utc_instant=instant,
+            point_ids=direct_point_ids,
+            zodiac=str(settings.get("zodiac", "tropical")),
+            ayanamsa=settings.get("ayanamsa"),
+        )
+        for instant in probes
+    )
+    reference_ephemeris = ephemerides[2]
+    if reference_ephemeris.true_obliquity_deg is None:
+        raise AstronomicalSnapshotInputError(
+            "Swiss Ephemeris did not return true obliquity for the date-level reference"
+        )
+    obliquity_deg = float(reference_ephemeris.true_obliquity_deg)
+
+    sampled_points: list[dict[str, dict[str, Any]]] = []
+    for ephemeris in ephemerides:
+        available = add_opposite_nodes(
+            ephemeris.points,
+            obliquity_deg=float(ephemeris.true_obliquity_deg or obliquity_deg),
+            julian_day_ut=ephemeris.julian_day_ut,
+        )
+        sampled_points.append({str(point["point_id"]): point for point in available})
+
+    reference_points = _selected_points(
+        list(sampled_points[2].values()),
+        supported_point_ids,
+    )
+    ranges: dict[str, dict[str, Any]] = {}
+    for point in reference_points:
+        point_id = str(point["point_id"])
+        reference_longitude = float(point["position"]["ecliptic"]["longitude_deg"])
+        longitudes = [
+            float(sample[point_id]["position"]["ecliptic"]["longitude_deg"])
+            for sample in sampled_points
+        ]
+        signs = [str(sample[point_id]["sign"]) for sample in sampled_points]
+        motion_states = [
+            str(sample[point_id]["position"].get("motion_state") or "unknown")
+            for sample in sampled_points
+        ]
+        deviations = [_circular_delta(value, reference_longitude) for value in longitudes]
+        max_deviation = max(abs(value) for value in deviations)
+        sign_stable = len(set(signs)) == 1
+        motion_stable = len(set(motion_states)) == 1
+        point["house"] = None
+        point["distance_from_previous_cusp_deg"] = None
+        point["distance_to_next_cusp_deg"] = None
+        point["house_position_fraction"] = None
+        point["position"]["uncertainty_arcsec"] = round(max_deviation * 3600, 6)
+        point["status_refs"] = [
+            *point.get("status_refs", []),
+            "date_range.reference_position_not_birth_time",
+            *( [] if sign_stable else ["date_range.sign_ambiguous"] ),
+            *( [] if motion_stable else ["date_range.motion_state_changes"] ),
+        ]
+        ranges[point_id] = {
+            "reference_longitude_deg": reference_longitude,
+            "sample_longitudes_deg": longitudes,
+            "signed_deviation_from_reference_deg": deviations,
+            "maximum_uncertainty_deg": max_deviation,
+            "signs_observed": list(dict.fromkeys(signs)),
+            "sign_stable": sign_stable,
+            "motion_states_observed": list(dict.fromkeys(motion_states)),
+            "motion_state_stable": motion_stable,
+        }
+
+    reference_by_id = {str(point["point_id"]): point for point in reference_points}
+    lunar = derive_lunar_phase(
+        reference_by_id["sun"]["position"]["ecliptic"]["longitude_deg"],
+        reference_by_id["moon"]["position"]["ecliptic"]["longitude_deg"],
+    )
+    normalized_input = {
+        "subject_version": deepcopy(dict(subject_version)),
+        "chart": deepcopy(dict(request_payload["chart"])),
+        "settings": deepcopy(dict(settings)),
+    }
+    input_fingerprint = canonical_hash(normalized_input)
+    engine = {"name": "interstellar-core", "version": engine_version, "content_hash": None}
+    adapter_ref = {
+        "name": "pysweph",
+        "version": _package_version(
+            "pysweph", reference_ephemeris.provenance.binding_version
+        ),
+        "content_hash": None,
+    }
+    dataset = {
+        "id": "swiss_ephemeris_core",
+        "version": reference_ephemeris.provenance.swiss_c_library_version,
+        "checksum": None,
+        "license": "AGPL-3.0-or-commercial",
+        "source_uri": "https://www.astro.com/swisseph/",
+    }
+    datasets = [dataset]
+    provenance = {
+        "engine": engine,
+        "adapter": adapter_ref,
+        "datasets": datasets,
+        "algorithm_cards": ["ALG-ASTRONOMY-001", "ALG-NATAL-UNKNOWN-TIME-001"],
+        "rule_refs": ["astronomy.ephemeris_core", "natal.unknown_time_date_range"],
+    }
+    adapter_warning_groups: dict[tuple[str, str], set[str]] = {}
+    for ephemeris in ephemerides:
+        for item in ephemeris.warnings:
+            key = (str(item.code), str(item.message))
+            point_id = getattr(item, "point_id", None)
+            if point_id:
+                adapter_warning_groups.setdefault(key, set()).add(str(point_id))
+            else:
+                adapter_warning_groups.setdefault(key, set())
+    date_level_adapter_warnings = [
+        _warning(code, message, details={"point_ids": sorted(point_ids)})
+        for (code, message), point_ids in sorted(adapter_warning_groups.items())
+    ]
+    warnings = [
+        *date_level_adapter_warnings,
+        _warning(
+            "BIRTH_TIME_UNKNOWN_DATE_RANGE",
+            "No birth time was invented. Point positions use the civil-day midpoint only as "
+            "a labeled reference and include a full-day uncertainty envelope.",
+            details={
+                "interval_start_utc": _timestamp(start_utc),
+                "interval_end_utc": _timestamp(end_utc),
+                "reference_utc": _timestamp(reference_utc),
+            },
+        ),
+        _warning(
+            "TIME_DEPENDENT_NATAL_OUTPUTS_BLOCKED",
+            "Houses, angles, Lots, aspects, structural and classical results are unavailable "
+            "until a birth time or bounded time interval is provided.",
+            details={"excluded_point_ids": list(excluded_point_ids)},
+        ),
+    ]
+    uncertainty = {
+        "mode": "civil_day_range",
+        "reference_position_is_birth_time": False,
+        "interval_start_utc": _timestamp(start_utc),
+        "interval_end_utc": _timestamp(end_utc),
+        "reference_utc": _timestamp(reference_utc),
+        "probe_instants_utc": [_timestamp(item) for item in probes],
+        "point_ranges": ranges,
+        "time_confidence": time_spec.get("confidence"),
+        "historical_confidence": time_spec.get("historical_confidence"),
+    }
+    astronomical_context = {
+        "utc": _timestamp(reference_utc),
+        "julian_day_ut": reference_ephemeris.julian_day_ut,
+        "julian_day_tt": reference_ephemeris.julian_day_tt,
+        "delta_t_seconds": reference_ephemeris.delta_t_seconds,
+        "greenwich_sidereal_time_deg": reference_ephemeris.greenwich_sidereal_time_deg,
+        "local_sidereal_time_deg": None,
+        "obliquity_deg": obliquity_deg,
+        "mean_obliquity_deg": reference_ephemeris.mean_obliquity_deg,
+        "nutation_longitude_deg": reference_ephemeris.nutation_longitude_deg,
+        "nutation_obliquity_deg": reference_ephemeris.nutation_obliquity_deg,
+        "sunrise_utc": None,
+        "sunset_utc": None,
+        "day_night_status": "indeterminate",
+        "sun_altitude_deg": None,
+        "precession_model": "swiss_ephemeris_apparent_of_date",
+        "nutation_model": "swiss_ephemeris_ecl_nut",
+        "observer": deepcopy(dict(location)),
+        "coordinate_settings": {
+            "apparent": reference_ephemeris.provenance.apparent,
+            "center": reference_ephemeris.provenance.center,
+            "frame": reference_ephemeris.provenance.frame,
+            "requested_ephemeris_mode": reference_ephemeris.provenance.requested_mode,
+            "actual_ephemeris_modes": list(reference_ephemeris.provenance.actual_modes),
+            "delta_t_function": reference_ephemeris.provenance.delta_t_function,
+        },
+        "uncertainty": uncertainty,
+        "provenance": provenance,
+    }
+    blocked_reasons = ["EXACT_BIRTH_TIME_REQUIRED"]
+    structure_document = {
+        "availability": "unavailable",
+        "unavailable_reasons": blocked_reasons,
+        "date_level_point_ranges": ranges,
+        "stelliums": {"availability": "unavailable", "facts": []},
+        "geometric_patterns": {"availability": "unavailable", "facts": []},
+        "jones_shape": {"availability": "unavailable", "reason": "EXACT_BIRTH_TIME_REQUIRED"},
+    }
+    classical_document = {
+        "availability": "unavailable",
+        "unavailable_reasons": blocked_reasons,
+        "day_night_status": "indeterminate",
+        "sun_altitude_deg": None,
+        "missing_traditional_planet_ids": [],
+        "sect": None,
+        "solar_conditions": [],
+        "dispositors": None,
+        "receptions": None,
+        "interpretation_boundary": "Exact birth time required for released classical natal facts",
+    }
+    chart_id = f"chart-{snapshot_id}"
+    chart = {
+        "chart_id": chart_id,
+        "family": str(request_payload["chart"]["family"]),
+        "technique": str(request_payload["chart"]["technique"]),
+        "subject_version_refs": [str(subject_version["id"])],
+        "time_spec": deepcopy(dict(time_spec)),
+        "location": deepcopy(dict(location)),
+        "settings": deepcopy(dict(settings)),
+        "astronomical_context": astronomical_context,
+        "points": deepcopy(reference_points),
+        "house_set": None,
+        "aspects": [],
+        "aspect_evaluation": {
+            "selected_point_count": len(reference_points),
+            "evaluated_pair_count": 0,
+            "matched_aspect_count": 0,
+            "excluded_pairs": [{"reason": "EXACT_BIRTH_TIME_REQUIRED"}],
+        },
+        "distributions": [],
+        "structure": deepcopy(structure_document),
+        "patterns": [],
+        "classical": deepcopy(classical_document),
+        "dignities": [],
+        "receptions": [],
+        "lots": [],
+        "midpoints": [],
+        "warnings": deepcopy(warnings),
+        "provenance": provenance,
+    }
+    reproducibility = {
+        "engine": engine,
+        "datasets": datasets,
+        "rule_pack_hash": str(request_payload["rule_pack_hash"]),
+        "input_fingerprint": input_fingerprint,
+    }
+    blocked_manifest_specs = (
+        ("astronomy.houses_angles", "ALG-ASTRONOMY-003"),
+        ("astronomy.aspects", "ALG-ASTRONOMY-004"),
+        ("natal.patterns_distributions", "ALG-NATAL-003"),
+        ("natal.dignity_reception", "ALG-NATAL-004"),
+        ("natal.arabic_parts", "ALG-NATAL-005"),
+        ("natal.standard_chart", "ALG-NATAL-001"),
+    )
+    manifests = [
+        {
+            "output_id": "manifest.astronomy.ephemeris_core",
+            "status": "degraded",
+            "calculation_id": "astronomy.ephemeris_core",
+            "result_pointer": "/result/points",
+            "maturity": "experimental",
+            "view_ids": ["view.natal.date_level_points"],
+            "table_ids": ["table.planet_positions", "table.planet_speeds"],
+            "export_formats": ["json", "csv", "markdown_technical", "plaintext_technical"],
+            "recommended_primary_view_id": "view.natal.date_level_points",
+            "missing_inputs": ["exact_birth_time"],
+            "warnings": deepcopy(warnings),
+            "algorithm_cards": ["ALG-ASTRONOMY-001", "ALG-NATAL-UNKNOWN-TIME-001"],
+            "reproducibility": reproducibility,
+        },
+        *[
+            {
+                "output_id": f"manifest.{calculation_id}",
+                "status": "blocked",
+                "calculation_id": calculation_id,
+                "result_pointer": None,
+                "maturity": "experimental",
+                "view_ids": [],
+                "table_ids": [],
+                "export_formats": [],
+                "recommended_primary_view_id": None,
+                "missing_inputs": ["exact_birth_time"],
+                "warnings": deepcopy(warnings[-1:]),
+                "algorithm_cards": [algorithm_card],
+                "reproducibility": reproducibility,
+            }
+            for calculation_id, algorithm_card in blocked_manifest_specs
+        ],
+    ]
+    lunar_result = {
+        **asdict(lunar),
+        "phase": lunar.phase.value,
+        "month_model": asdict(lunar.month_model),
+        "reference_position_not_birth_time": True,
+    }
+    return {
+        "id": snapshot_id,
+        "schema_version": "1.0.0",
+        "status": "partial",
+        "request": deepcopy(dict(request_payload)),
+        "normalized_input": normalized_input,
+        "input_fingerprint": input_fingerprint,
+        "engine": engine,
+        "adapters": [adapter_ref],
+        "datasets": datasets,
+        "analysis_model": None,
+        "recipe": None,
+        "rule_pack_hash": str(request_payload["rule_pack_hash"]),
+        "maturity": "experimental",
+        "result": {
+            "astronomical_context": {
+                **astronomical_context,
+                "lunar_phase": lunar_result,
+                "adapter_provenance": asdict(reference_ephemeris.provenance),
+            },
+            "charts": [chart],
+            "points": deepcopy(reference_points),
+            "houses": [],
+            "aspects": [],
+            "distributions": [],
+            "structure": deepcopy(structure_document),
+            "patterns": [],
+            "classical": deepcopy(classical_document),
+            "dignities": [],
+            "receptions": [],
+            "lots": [],
+            "midpoints": [],
+            "directions": [],
+            "returns": [],
+            "periods": [],
+            "events": [],
+            "relationships": [],
+            "geography": [],
+            "mundane": [],
+            "topic_results": [],
+            "evidence": [],
+            "output_manifest": manifests,
+        },
+        "warnings": deepcopy(warnings),
+        "supersedes_id": None,
+        "created_at": _timestamp(now),
+    }
+
+
 def create_astronomical_snapshot(
     *,
     snapshot_id: str,
@@ -614,6 +1064,8 @@ def create_astronomical_snapshot(
     ephemeris = calculator.calculate(
         utc_instant=utc_instant,
         point_ids=direct_point_ids,
+        zodiac=str(settings.get("zodiac", "tropical")),
+        ayanamsa=settings.get("ayanamsa"),
     )
     point_by_id = {str(point["point_id"]): point for point in ephemeris.points}
     lunar = derive_lunar_phase(

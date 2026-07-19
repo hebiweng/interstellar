@@ -39,6 +39,21 @@ class PlaceIndex:
 
     def __init__(self, places: Iterable[PlaceRecord], *, dataset_version: str) -> None:
         self._places = tuple(places)
+        self._search_records = tuple(
+            (
+                place,
+                (
+                    ("primary", _normalize(place.name)),
+                    ("ascii", _normalize(place.ascii_name)),
+                    *tuple(
+                        (f"alternate:{index}", _normalize(name))
+                        for index, name in enumerate(place.alternate_names)
+                    ),
+                ),
+                tuple(_normalize(value) for value in place.admin_path),
+            )
+            for place in self._places
+        )
         self.dataset_version = dataset_version
 
     def search(
@@ -60,20 +75,12 @@ class PlaceIndex:
         country = country_code.upper() if country_code else None
 
         matches: list[tuple[PlaceRecord, float, tuple[str, ...]]] = []
-        for place in self._places:
+        for place, names, normalized_admin in self._search_records:
             if country and place.country_code != country:
                 continue
-            names = {
-                "primary": _normalize(place.name),
-                "ascii": _normalize(place.ascii_name),
-                **{
-                    f"alternate:{index}": _normalize(name)
-                    for index, name in enumerate(place.alternate_names)
-                },
-            }
             score = 0.0
             reasons: list[str] = []
-            for kind, name in names.items():
+            for kind, name in names:
                 if name == normalized_query:
                     candidate_score = 100.0 if kind == "primary" else 96.0
                     if candidate_score > score:
@@ -87,7 +94,6 @@ class PlaceIndex:
                     reasons = ["name_contains"]
             if score == 0:
                 continue
-            normalized_admin = tuple(_normalize(value) for value in place.admin_path)
             matched_hints = sum(hint in normalized_admin for hint in normalized_hints)
             if normalized_hints:
                 if matched_hints == len(normalized_hints):
@@ -104,20 +110,14 @@ class PlaceIndex:
 
 
 class GeoJsonTimezoneIndex:
-    """Exact polygon lookup reference implementation for verified local GeoJSON.
-
-    Dateline-spanning polygons are rejected instead of normalized heuristically;
-    the production PostGIS adapter owns that specialized geometry handling.
-    """
+    """Exact polygon lookup reference implementation for verified local GeoJSON."""
 
     def __init__(self, features: Iterable[Mapping[str, Any]], *, dataset_version: str) -> None:
         collection = {"type": "FeatureCollection", "features": list(features)}
         self._features = validate_timezone_feature_collection(collection)
-        self.dataset_version = dataset_version
-
-    def lookup(self, latitude: float, longitude: float) -> tuple[str, ...]:
-        validate_coordinates(latitude, longitude)
-        matches: list[str] = []
+        compiled: list[
+            tuple[str, list[Any], float, float, float, float, bool]
+        ] = []
         for feature in self._features:
             geometry = feature["geometry"]
             polygons = (
@@ -125,18 +125,69 @@ class GeoJsonTimezoneIndex:
                 if geometry["type"] == "MultiPolygon"
                 else [geometry["coordinates"]]
             )
-            if any(_point_in_polygon(longitude, latitude, polygon) for polygon in polygons):
-                matches.append(feature["properties"]["tzid"])
+            for polygon in polygons:
+                prepared, dateline = _prepare_polygon(polygon)
+                outer = prepared[0]
+                longitudes = [float(point[0]) for point in outer]
+                latitudes = [float(point[1]) for point in outer]
+                compiled.append(
+                    (
+                        feature["properties"]["tzid"],
+                        prepared,
+                        min(longitudes),
+                        max(longitudes),
+                        min(latitudes),
+                        max(latitudes),
+                        dateline,
+                    )
+                )
+        self._polygons = tuple(compiled)
+        self.dataset_version = dataset_version
+
+    def lookup(self, latitude: float, longitude: float) -> tuple[str, ...]:
+        validate_coordinates(latitude, longitude)
+        matches: list[str] = []
+        for timezone_id, polygon, west, east, south, north, dateline in self._polygons:
+            candidate_longitude = longitude if not dateline or longitude >= 0 else longitude + 360
+            if not (west <= candidate_longitude <= east and south <= latitude <= north):
+                continue
+            if _point_in_polygon(candidate_longitude, latitude, polygon):
+                matches.append(timezone_id)
         return tuple(sorted(dict.fromkeys(matches)))
+
+
+def _prepare_polygon(rings: list[Any]) -> tuple[list[Any], bool]:
+    if not rings or not _ring_spans_dateline(rings[0]):
+        return rings, False
+    return (
+        [
+            [
+                [float(point[0]) if float(point[0]) >= 0 else float(point[0]) + 360, point[1]]
+                for point in ring
+            ]
+            for ring in rings
+        ],
+        True,
+    )
 
 
 def _point_in_polygon(longitude: float, latitude: float, rings: list[Any]) -> bool:
     if not rings:
         return False
     if _ring_spans_dateline(rings[0]):
-        raise DomainError(
-            "TIMEZONE_GEOMETRY_DATELINE_UNSUPPORTED",
-            "reference resolver cannot safely normalize a dateline-spanning polygon",
+        normalized_x = longitude if longitude >= 0 else longitude + 360
+        normalized_rings = [
+            [
+                [float(point[0]) if float(point[0]) >= 0 else float(point[0]) + 360, point[1]]
+                for point in ring
+            ]
+            for ring in rings
+        ]
+        if not _point_in_ring_or_boundary(normalized_x, latitude, normalized_rings[0]):
+            return False
+        return not any(
+            _point_in_ring_strict(normalized_x, latitude, ring)
+            for ring in normalized_rings[1:]
         )
     if not _point_in_ring_or_boundary(longitude, latitude, rings[0]):
         return False

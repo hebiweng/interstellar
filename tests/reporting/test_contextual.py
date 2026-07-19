@@ -87,6 +87,24 @@ def snapshot_fixture() -> dict:
                 }
             ],
             "structure": {
+                "hemispheres": {
+                    "dimension": "hemispheres",
+                    "availability": "available",
+                    "categories": [
+                        {"category_id": "east", "point_ids": ["sun", "mercury"], "count": 2},
+                        {"category_id": "west", "point_ids": ["moon"], "count": 1},
+                        {"category_id": "above", "point_ids": ["sun"], "count": 1},
+                        {"category_id": "below", "point_ids": ["moon", "mercury"], "count": 2},
+                    ],
+                    "evaluated_point_count": 3,
+                    "missing_house_point_ids": [],
+                    "rule_ref": "ALG-NATAL-003:structure.hemispheres.v1",
+                },
+                "jones_shape": {
+                    "status": "indeterminate",
+                    "shape_id": None,
+                    "maturity": "experimental",
+                },
                 "geometric_patterns": {
                     "facts": [
                         {
@@ -132,6 +150,71 @@ def snapshot_fixture() -> dict:
                     "rule_ids": ["classical.exaltation.v1"],
                     "source_ids": ["SRC-CLASSICAL-PTOLEMY-001"],
                     "excluded_capabilities": [],
+                }
+            ],
+            "classical": {
+                "sect": {
+                    "sect": "day",
+                    "sect_light_id": "sun",
+                    "diurnal_planet_ids": ["sun", "jupiter", "saturn"],
+                    "nocturnal_planet_ids": ["moon", "venus", "mars"],
+                    "conditional_planet_ids": ["mercury"],
+                    "algorithm_card_id": "ALG-NATAL-004",
+                    "rule_ids": ["classical.sect.v1"],
+                    "source_ids": ["SRC-CLASSICAL-SECT-001"],
+                    "excluded_capabilities": [],
+                },
+                "solar_conditions": [
+                    {
+                        "point_id": "mercury",
+                        "relation": "under_beams",
+                        "separation_deg": 9.0,
+                        "source_ids": ["SRC-CLASSICAL-SOLAR-001"],
+                    }
+                ],
+                "dispositors": {
+                    "edges": [
+                        {
+                            "subject_point_id": "sun",
+                            "subject_sign_id": "pisces",
+                            "ruler_point_id": "jupiter",
+                        },
+                        {
+                            "subject_point_id": "jupiter",
+                            "subject_sign_id": "cancer",
+                            "ruler_point_id": "moon",
+                        },
+                    ],
+                    "cycles": [["moon"]],
+                    "final_dispositor_ids": ["moon"],
+                    "unresolved_ruler_ids": [],
+                    "source_ids": ["SRC-CLASSICAL-LILLY-001"],
+                },
+                "receptions": {
+                    "receptions": [
+                        {
+                            "host_point_id": "jupiter",
+                            "guest_point_id": "sun",
+                            "dignity_kind": "domicile",
+                        }
+                    ],
+                    "mutual_receptions": [],
+                    "aspect_required": False,
+                    "source_ids": ["SRC-CLASSICAL-LILLY-001"],
+                },
+            },
+            "lots": [
+                {
+                    "lot_id": "fortune",
+                    "longitude_deg": 267.5,
+                    "sign_id": "sagittarius",
+                    "degree_in_sign": 27.5,
+                    "sect": "day",
+                    "formula_id": "hellenistic.lot.fortune.day.v1",
+                    "formula_version": "1.0.0",
+                    "formula_expression": "ASC + Moon - Sun",
+                    "operands": [],
+                    "source_ids": ["SRC-CLASSICAL-LOTS-001"],
                 }
             ],
         },
@@ -218,6 +301,92 @@ def test_classical_condition_preserves_snapshot_declared_sources() -> None:
 
     source_ids = {source["source_id"] for source in result["provenance"]["sources"]}
     assert "SRC-CLASSICAL-PTOLEMY-001" in source_ids
+
+
+@pytest.mark.parametrize(
+    ("kind", "path", "expected_key"),
+    [
+        (
+            ContextualItemKind.STRUCTURE_INDICATOR,
+            "/result/structure/hemispheres",
+            "structure.categorical.hemispheres",
+        ),
+        (
+            ContextualItemKind.CLASSICAL_CONDITION,
+            "/result/classical/sect",
+            "classical.sect.day",
+        ),
+        (
+            ContextualItemKind.CLASSICAL_CONDITION,
+            "/result/classical/solar_conditions/0",
+            "classical.solar.under_beams",
+        ),
+        (
+            ContextualItemKind.CLASSICAL_CONDITION,
+            "/result/classical/dispositors",
+            "classical.dispositor_graph",
+        ),
+        (
+            ContextualItemKind.CLASSICAL_CONDITION,
+            "/result/classical/receptions",
+            "classical.reception_document",
+        ),
+        (
+            ContextualItemKind.CLASSICAL_CONDITION,
+            "/result/lots/0",
+            "classical.lot.fortune",
+        ),
+    ],
+)
+def test_structure_and_classical_documents_publish_specific_semantics(
+    kind: ContextualItemKind,
+    path: str,
+    expected_key: str,
+) -> None:
+    result = _interpret(kind, path).to_dict()
+
+    assert result["status"] == "published"
+    assert result["meaning"]["statement_key"] == expected_key
+    assert result["provenance"]["sources"]
+    assert result["content_hash"].startswith("sha256:")
+
+
+def test_jones_shape_stays_explicitly_unavailable_without_classification_rule() -> None:
+    result = _interpret(
+        ContextualItemKind.STRUCTURE_INDICATOR,
+        "/result/structure/jones_shape",
+    ).to_dict()
+
+    assert result["status"] == "unavailable"
+    assert result["meaning"] is None
+    assert result["unavailable_reason"] == "STRUCTURE_INDICATOR_RULE_UNAVAILABLE"
+
+
+def test_published_structure_and_classical_copy_has_no_fatalistic_claims() -> None:
+    paths = [
+        (ContextualItemKind.STRUCTURE_INDICATOR, "/result/structure/hemispheres"),
+        (ContextualItemKind.STRUCTURE_INDICATOR, "/result/structure/geometric_patterns/facts/0"),
+        (ContextualItemKind.CLASSICAL_CONDITION, "/result/dignities/0"),
+        (ContextualItemKind.CLASSICAL_CONDITION, "/result/classical/dispositors"),
+        (ContextualItemKind.CLASSICAL_CONDITION, "/result/classical/receptions"),
+        (ContextualItemKind.CLASSICAL_CONDITION, "/result/lots/0"),
+    ]
+    prohibited = {
+        "一定发生",
+        "必然死亡",
+        "注定死亡",
+        "寿命长度",
+        "保证成功",
+        "保证复合",
+        "必然离婚",
+        "必然发财",
+        "项目一定成功",
+    }
+
+    for kind, path in paths:
+        result = _interpret(kind, path).to_dict()
+        text = result["meaning"]["text"]
+        assert not any(phrase in text for phrase in prohibited)
 
 
 def test_missing_house_blocks_only_house_layer_and_preserves_fact() -> None:

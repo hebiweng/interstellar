@@ -130,7 +130,7 @@ birth_place_and_timezone_input:
 
 settings_panel:
   quick_calculation: [astrology_rule_preset, zodiac, house_system, point_profile, aspect_profile, orb_profile]
-  quick_render: [result_view_wheel_or_aspect_grid, visible_point_layers, visible_aspect_lines, labels_and_degrees, color_theme]
+  quick_render: [professional_wheel_compact_wheel_or_aspect_matrix, visible_point_layers, visible_aspect_lines, labels_and_degrees, color_theme]
   advanced_groups:
     - normalized_time_place_timezone_and_confidence
     - zodiac_and_ayanamsa
@@ -149,16 +149,17 @@ settings_panel:
     unsupported_option: visible_disabled_with_reason
     technique_specific_options: shown_only_inside_the_relevant_technique_and_never_dumped_into_natal_settings
   rule_presets:
-    modern: modern_planets_rulers_aspects_and_interpretation_layer
-    classical: traditional_seven_planets_sect_dignities_receptions_lots_and_classical_interpretation_layer
-    integrated: modern_and_classical_facts_kept_separate_in_one_snapshot
+    modern: request_and_default_reading_layer_wired_to_natal.modern.v1
+    classical: request_and_default_reading_layer_wired_to_natal.classical.v1
+    integrated: request_wired_to_natal.integrated.v1_with_modern_and_classical_facts_kept_separate
     custom: user_selected_points_aspects_orbs_rules_and_render_options
   zodiac_scope:
-    current_stable: [tropical]
-    required_natal_extension: [sidereal_with_explicit_ayanamsa]
+    current_stable: [tropical, sidereal_with_10_explicit_ayanamsa_modes]
+    implemented_ayanamsa: [fagan_bradley, lahiri, deluce, raman, krishnamurti, yukteshwar, hipparchos, true_revati, true_citra, galactic_center_0_sagittarius]
+    recalculation_rule: zodiac_and_ayanamsa_are_passed_to_the_ephemeris_and_house_engine_and_recorded_in_provenance
     separate_chart_transform_not_zodiac_toggle: [draconic]
   house_system_scope:
-    currently_implemented_backend: [placidus, whole_sign, koch, porphyry, regiomontanus, campanus, equal, alcabitius, topocentric, morinus, krusinski, vehlow]
+    currently_implemented_backend: [placidus, whole_sign, koch, porphyry, regiomontanus, campanus, equal, alcabitius, topocentric, morinus, krusinski, vehlow, equal_mc, equal_aries, meridian, horizontal, carter_poli_equatorial, apc, pullen_sd, pullen_sr, sunshine_treindl, sripati]
     immediate_ui_rule: expose_every_backend_supported_system_with_source_and_maturity
     extension_rule: additional_Swiss_systems_require_enum_schema_algorithm_card_gold_and_high_latitude_tests_before_UI_enablement
   point_and_aspect_controls:
@@ -174,12 +175,13 @@ settings_panel:
 
 natal_chart_and_render_semantics:
   calculation_subject_roles: one_primary_subject
-  default_render: single_wheel
+  default_render: professional_single_wheel
   multi_wheel_rule: a_double_or_triple_wheel_is_an_overlay_render_for_an_added_chart_layer_not_a_second_natal_method
   future_overlay_examples: [natal_plus_transit, natal_plus_progression, natal_plus_return, person_A_plus_person_B]
   result_view_switcher:
-    - natal_wheel
-    - aspect_grid
+    - professional_natal_wheel
+    - compact_natal_wheel
+    - aspect_matrix
     - point_positions
     - houses_and_rulers
     - aspect_list
@@ -187,8 +189,37 @@ natal_chart_and_render_semantics:
     - basic_interpretation
     - classical_interpretation
     - technical_data_and_export
-  no_recalculation_views: [natal_wheel, aspect_grid, point_positions, houses_and_rulers, aspect_list, technical_data_and_export]
+  no_recalculation_views: [professional_natal_wheel, compact_natal_wheel, aspect_matrix, point_positions, houses_and_rulers, aspect_list, technical_data_and_export]
+  view_switch_rule: professional_compact_and_aspect_matrix_are_projections_of_the_same_immutable_snapshot_and_must_never_trigger_astrology_recalculation
+  compact_rule: compact_wheel_reduces_visual_density_only_and_never_removes_materialized_facts_from_results_or_exports
+  default_aspect_line_projection:
+    eligible_aspects: major_longitude_aspects_between_visible_points
+    ranking: strength_descending_then_orb_ascending
+    default_filter: strongest_top_15_percent
+    alternate_filter: minimum_strength_threshold
+    user_controls: [major_only, top_percent, minimum_strength, visible_point_groups, aspect_lines_layer]
+    invariant: filtering_changes_RenderSpec_immediately_and_never_deletes_aspects_from_the_snapshot_table_or_export
+  fixture_rule: opening_virtual_fixture_derives_its_complete_major_aspect_set_from_displayed_longitudes_and_must_not_fake_applying_or_separating_state
+  professional_wheel_layers:
+    - 360_degree_ticks_with_1_5_and_10_degree_hierarchy
+    - outer_zodiac_ring_with_12_boundaries_glyphs_chinese_names_and_0_10_20_degree_labels
+    - point_position_band_with_selected_planets_angles_nodes_minor_bodies_lots_and_hypothetical_points
+    - readable_point_abbreviation_exact_sign_degree_retrograde_marker_and_collision_lane
+    - 12_house_cusps_spans_numbers_and_asc_dsc_mc_ic_axes
+    - inner_aspect_stage_ring_with_visible_planet_anchors_and_major_and_minor_aspect_chords
+    - aspect_chord_strength_hierarchy_using_line_weight_and_opacity
+    - center_reference_ring_and_aspect_class_legend
+    - svg_title_description_semantic_labels_and_dark_light_contrast
+  unknown_time_render_rule: show_only_date_range_zodiac_positions_and_uncertainty_and_remove_axes_houses_aspects_and_time_dependent_labels
   interpretation_rule: basic_and_classical_are_versioned_layers_on_the_same_calculated_facts_and_each_eligible_item_has_a_local_interpret_action
+
+analysis_document:
+  schema: interstellar.natal.analysis-document.v2
+  purpose: portable_user_facts_for_astrologer_or_external_model
+  included: [subject_time_location, applied_settings, astronomical_context, points, houses, aspects, distributions, patterns, classical_status, input_warnings]
+  excluded: [output_manifest, result_paths, input_fingerprint, rule_pack_hash, internal_evidence_objects, dispositors, raw_advanced_objects]
+  full_snapshot_json: separate_explicit_professional_export
+  ai_default_payload: analysis_document_only
 
 calculation_scope:
   inputs_and_time:
@@ -286,15 +317,15 @@ detail_analysis:
     - {id: structure, label_zh: 结构, groups: [elements_modes_polarity, hemispheres_quadrants, angularity, chart_shapes_patterns, dispositor_chains]}
     - {id: aspects, label_zh: 相位, groups: [aspect_table, aspect_grid, aspect_filters, selected_aspect_detail]}
     - {id: classical, label_zh: 古典, groups: [sect, essential_dignity, accidental_dignity, solar_condition, rulership_dispositors, reception, lots_and_hellenistic_subsection]}
-    - {id: technical, label_zh: 技术数据, groups: [normalized_input, complete_positions, houses, complete_aspects, parameters, provenance, warnings, output_manifest]}
+    - {id: analysis_export, label_zh: 分析数据与导出, groups: [subject_time_location, applied_settings, astronomical_context, complete_positions, houses, complete_aspects, distributions, patterns, classical_status, input_warnings]}
   density_rule: sections_may_be_collapsed_filtered_paginated_or_virtualized_but_no_calculated_item_is_omitted
 
-technical_result_document:
+analysis_result_document:
   purpose:
     - professional_review_and_archive
     - copy_to_external_ai_manually
     - immutable_input_for_optional_built_in_ai_connector
-  formats: [markdown_technical, plaintext_technical, json, csv_tables]
+  formats: [markdown_analysis, plaintext_analysis, json_snapshot, csv_tables]
   required_sections:
     - subject_original_and_normalized_time_location
     - all_effective_natal_settings
@@ -303,15 +334,38 @@ technical_result_document:
     - all_12_houses_and_rulers
     - all_selected_aspects_with_geometry_orb_and_applying_state
     - distributions_structure_and_patterns
-    - sect_dignities_solar_conditions_dispositors_receptions_and_lots
-    - warnings_provenance_versions_and_reproducibility
+    - sect_dignities_solar_conditions_receptions_and_lots
+    - input_quality_and_analysis_warnings
   completeness_rule: serialize_every_materialized_fact_without_silently_calculating_unselected_points
   primary_actions:
-    - {id: natal.technical.copy, label_zh: 复制全部技术推演}
-    - {id: natal.technical.export_markdown, label_zh: 导出 Markdown}
-    - {id: natal.technical.export_plaintext, label_zh: 导出纯文本}
-    - {id: natal.technical.export_json, label_zh: 导出完整 JSON}
+    - {id: natal.analysis.copy, label_zh: 复制全部分析数据}
+    - {id: natal.analysis.export_markdown, label_zh: 导出 Markdown}
+    - {id: natal.analysis.export_plaintext, label_zh: 导出纯文本}
+    - {id: natal.snapshot.export_json, label_zh: 导出完整 JSON}
     - {id: natal.ai.submit, label_zh: 提交至 AI 分析}
+
+natal_graphic_export:
+  source_contract: one_RenderSpec_drives_the_visible_svg_and_all_download_artifacts
+  render_spec_schema: packages/canonical-schema/render-spec.schema.json
+  current_view_id: wheel.natal
+  current_variants: [professional, compact]
+  formats:
+    svg:
+      production: cloned_visible_svg_with_computed_styles_and_embedded_RenderSpec_metadata
+      vector: true
+    png:
+      production: same_serialized_svg_rasterized_at_1280_by_1280
+      alpha_or_background: theme_controlled_background
+    pdf:
+      production: same_rasterized_svg_embedded_as_one_page_DCTDecode_image
+      page_size_pt: [720, 720]
+  required_layers: [degree_ticks, zodiac, point_band, points, houses, axes, aspect_stage, aspect_lines, legend, provenance_metadata]
+  date_level_degradation: houses_axes_aspect_stage_and_aspect_lines_are_removed_by_RenderSpec_and_not_only_visually_hidden
+  current_boundary: aspect_matrix_has_a_separate_future_RenderSpec_and_its_graphic_export_button_is_disabled_until_implemented
+  verification:
+    - exported_svg_contains_view_snapshot_and_layer_metadata
+    - exported_png_is_1280_by_1280_and_visually_matches_the_visible_wheel
+    - exported_pdf_is_valid_single_page_PDF_1_4_and_visually_matches_the_png
 
 optional_ai_analysis_connector:
   calculation_boundary: AI_only_consumes_immutable_snapshot_or_technical_document_and_never_calculates_ephemeris_signs_houses_or_aspects
@@ -376,10 +430,11 @@ implementation_gates:
   - {id: NATAL-0, deliverable: contract_schema_parity_fixture_and_gold_subjects, exit: fields_settings_views_and_null_semantics_are_machine_testable}
   - {id: NATAL-1, deliverable: professional_natal_calculation_snapshot, exit: default_professional_points_houses_aspects_structure_and_provenance_pass_gold_and_difference_tests}
   - {id: NATAL-IA, deliverable: restored_global_shell_visible_future_techniques_and_split_subject_vs_calculation_flows, exit: six_entries_and_future_technique_shortcuts_are_reachable_without_fake_results_and_add_person_never_implicitly_calculates}
-  - {id: NATAL-2, deliverable: natal_workspace_location_flow_and_layered_settings, exit: select_or_inline_create_person_confirm_place_timezone_calculate_and_show_wheel_or_aspect_grid_with_recompute_boundaries}
+  - {id: NATAL-2, deliverable: natal_workspace_location_flow_layered_settings_and_professional_render_views, exit: select_or_inline_create_person_confirm_place_timezone_calculate_and_switch_professional_wheel_compact_wheel_or_aspect_matrix_without_recalculation_with_all_professional_wheel_layers_and_unknown_time_degradation_visible}
   - {id: NATAL-3, deliverable: complete_detail_views_and_exports, exit: every_materialized_result_is_reachable_and_technical_export_meets_information_dimension_parity}
   - {id: NATAL-4, deliverable: basic_contextual_interpretation, exit: eligible_basic_items_have_versioned_rules_templates_sources_and_click_through}
   - {id: NATAL-5, deliverable: classical_and_structure_interpretation, exit: classical_layers_are_separate_reproducible_and_do_not_emit_prohibited_fatalistic_claims}
+  - {id: NATAL-TECHNICAL-EXPORT, deliverable: deterministic_markdown_and_plaintext_full_selected_technical_document, exit: copy_download_and_AI_preview_share_one_semantic_content_hash_and_never_silently_compute_more}
   - {id: NATAL-AI, deliverable: optional_model_catalog_submission_contract_and_manual_export_fallback, exit: configured_models_are_selectable_unconfigured_models_are_disabled_consent_and_payload_preview_are_enforced_and_AI_never_calculates_chart_facts}
   - {id: NATAL-RELEASE, deliverable: professional_shell_with_complete_natal_alpha, exit: end_to_end_visual_accessibility_performance_privacy_and_restore_gates_pass}
 

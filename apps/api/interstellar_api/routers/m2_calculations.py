@@ -10,9 +10,11 @@ from fastapi import APIRouter, Query, Request, Response, status
 from interstellar_core.application.astronomical_snapshot import (
     AstronomicalSnapshotInputError,
     create_astronomical_snapshot,
+    create_date_level_astronomical_snapshot,
 )
 from interstellar_core.application.natal_technical_export import (
     NatalTechnicalExportError,
+    natal_technical_document_content_hash,
     render_natal_technical_document,
 )
 from interstellar_core.application.snapshot_tables import (
@@ -20,7 +22,7 @@ from interstellar_core.application.snapshot_tables import (
     build_snapshot_table,
     table_json_bytes,
 )
-from interstellar_core.astronomy.adapters import SwissEphemerisAdapter
+from interstellar_core.astronomy.adapters import AYANAMSA_MODES, SwissEphemerisAdapter
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from interstellar_api.errors import ErrorCode, ProblemException
@@ -94,9 +96,9 @@ class ChartSettingsPayload(StrictModel):
     center: Literal["geocentric", "heliocentric", "topocentric"]
     coordinate_frame: Literal["ecliptic", "equatorial", "horizontal"] | None = None
     node_type: Literal["true", "mean", "both"]
-    high_latitude_policy: Literal[
-        "block", "allow_distorted", "fallback_whole_sign", "fallback_equal"
-    ] | None = None
+    high_latitude_policy: (
+        Literal["block", "allow_distorted", "fallback_whole_sign", "fallback_equal"] | None
+    ) = None
     aspect_set_id: str = Field(min_length=1, max_length=160)
     orb_profile_id: str = Field(min_length=1, max_length=160)
     point_set_ids: list[str] = Field(default_factory=list)
@@ -159,8 +161,16 @@ async def create_calculation(payload: ChartRequestPayload, request: Request) -> 
     if payload.chart.family != "natal":
         raise _unsupported({"chart.family": "M2 supports natal astronomical snapshots only"})
     incompatible: dict[str, str] = {}
-    if payload.settings.zodiac != "tropical":
-        incompatible["settings.zodiac"] = "M2 supports tropical positions only"
+    if payload.settings.zodiac == "draconic":
+        incompatible["settings.zodiac"] = (
+            "draconic is a separate chart transform and is not a natal zodiac toggle"
+        )
+    elif payload.settings.zodiac == "tropical" and payload.settings.ayanamsa is not None:
+        incompatible["settings.ayanamsa"] = "tropical zodiac must not declare an ayanamsa"
+    elif payload.settings.zodiac == "sidereal" and payload.settings.ayanamsa not in AYANAMSA_MODES:
+        incompatible["settings.ayanamsa"] = "sidereal zodiac requires one of: " + ", ".join(
+            sorted(AYANAMSA_MODES)
+        )
     if payload.settings.center != "geocentric":
         incompatible["settings.center"] = "M2 supports geocentric positions only"
     if payload.settings.coordinate_frame == "horizontal":
@@ -184,7 +194,12 @@ async def create_calculation(payload: ChartRequestPayload, request: Request) -> 
 
     request_document = payload.model_dump(mode="json", exclude_none=True)
     try:
-        snapshot = create_astronomical_snapshot(
+        calculation_function = (
+            create_date_level_astronomical_snapshot
+            if subject_version.get("time_spec", {}).get("precision") in {"date", "unknown"}
+            else create_astronomical_snapshot
+        )
+        snapshot = calculation_function(
             snapshot_id=f"calculation-{uuid4()}",
             request_payload=request_document,
             subject_version=subject_version,
@@ -261,6 +276,7 @@ async def get_natal_technical_export(
             detail="Calculation snapshot was not found.",
         ) from exc
     try:
+        document_hash = natal_technical_document_content_hash(snapshot)
         document = render_natal_technical_document(
             snapshot,
             output_format=output_format,
@@ -285,5 +301,8 @@ async def get_natal_technical_export(
             ),
             "X-Interstellar-Snapshot-ID": snapshot_id,
             "X-Interstellar-Input-Fingerprint": snapshot["input_fingerprint"],
+            "X-Interstellar-Document-Hash": document_hash,
+            "ETag": f'"{document_hash}"',
+            "Cache-Control": "private, no-transform",
         },
     )

@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import os
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
 
 
 def _parse_bool(value: str, *, name: str) -> bool:
@@ -16,6 +17,30 @@ def _parse_bool(value: str, *, name: str) -> bool:
     if normalized in {"0", "false", "no", "off"}:
         return False
     raise ValueError(f"{name} must be a boolean value")
+
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
+DEFAULT_SWISS_EPHEMERIS_PATH = REPOSITORY_ROOT / "vendor" / "swisseph" / "ephe"
+DEFAULT_GEONAMES_PATH = (
+    REPOSITORY_ROOT / "vendor" / "geonames" / "cities500-2026-07-19.zip"
+)
+DEFAULT_GEONAMES_ADMIN1_PATH = (
+    REPOSITORY_ROOT / "vendor" / "geonames" / "admin1CodesASCII-2026-07-19.txt"
+)
+DEFAULT_GEONAMES_ADMIN2_PATH = (
+    REPOSITORY_ROOT / "vendor" / "geonames" / "admin2Codes-2026-07-19.txt"
+)
+DEFAULT_TIMEZONE_BOUNDARIES_PATH = (
+    REPOSITORY_ROOT
+    / "vendor"
+    / "timezone-boundary-builder"
+    / "timezones-2026b.geojson.zip"
+)
+DEFAULT_ACCOUNT_DATABASE_PATH = REPOSITORY_ROOT / "var" / "interstellar-accounts.sqlite3"
+
+
+def _bundled_path(path: Path) -> str | None:
+    return str(path) if path.exists() else None
 
 
 class ApiSettings(BaseModel):
@@ -36,6 +61,19 @@ class ApiSettings(BaseModel):
     server_port: int = Field(default=8018, ge=1, le=65535)
     cors_allowed_origins: tuple[str, ...] = ()
     swiss_ephemeris_path: str | None = None
+    geonames_path: str | None = None
+    geonames_admin1_path: str | None = None
+    geonames_admin2_path: str | None = None
+    geonames_dataset_version: str = "unconfigured"
+    timezone_boundaries_path: str | None = None
+    timezone_boundaries_dataset_version: str = "unconfigured"
+    deepseek_api_key: SecretStr | None = Field(default=None, exclude=True, repr=False)
+    deepseek_base_url: str = Field(default="https://api.deepseek.com", min_length=1)
+    deepseek_model: Literal["deepseek-v4-flash", "deepseek-v4-pro"] = "deepseek-v4-pro"
+    account_database_path: str = str(DEFAULT_ACCOUNT_DATABASE_PATH)
+    auth_cookie_name: str = Field(default="interstellar_session", min_length=1, max_length=80)
+    auth_session_days: int = Field(default=30, ge=1, le=365)
+    auth_cookie_secure: bool = False
 
     @field_validator("request_id_header")
     @classmethod
@@ -60,6 +98,34 @@ class ApiSettings(BaseModel):
         def read(name: str, default: str) -> str:
             return source.get(f"{prefix}{name}", default)
 
+        configured_swiss = read("SWISS_EPHEMERIS_PATH", "").strip()
+        configured_geonames = read("GEONAMES_PATH", "").strip()
+        configured_geonames_admin1 = read("GEONAMES_ADMIN1_PATH", "").strip()
+        configured_geonames_admin2 = read("GEONAMES_ADMIN2_PATH", "").strip()
+        configured_boundaries = read("TIMEZONE_BOUNDARIES_PATH", "").strip()
+        configured_geonames_version = read("GEONAMES_DATASET_VERSION", "").strip()
+        configured_boundaries_version = read(
+            "TIMEZONE_BOUNDARIES_DATASET_VERSION", ""
+        ).strip()
+        if configured_geonames and not configured_geonames_version:
+            raise ValueError(
+                f"{prefix}GEONAMES_DATASET_VERSION is required with a custom GeoNames path"
+            )
+        if bool(configured_geonames_admin1) != bool(configured_geonames_admin2):
+            raise ValueError(
+                f"{prefix}GEONAMES_ADMIN1_PATH and {prefix}GEONAMES_ADMIN2_PATH "
+                "must be configured together"
+            )
+        if configured_boundaries and not configured_boundaries_version:
+            raise ValueError(
+                f"{prefix}TIMEZONE_BOUNDARIES_DATASET_VERSION is required with a custom "
+                "timezone boundary path"
+            )
+        geonames_path = configured_geonames or _bundled_path(DEFAULT_GEONAMES_PATH)
+        boundaries_path = configured_boundaries or _bundled_path(
+            DEFAULT_TIMEZONE_BOUNDARIES_PATH
+        )
+
         return cls(
             service_name=read("SERVICE_NAME", "interstellar-api"),
             service_version=read("SERVICE_VERSION", "0.1.0"),
@@ -80,6 +146,53 @@ class ApiSettings(BaseModel):
                 if origin.strip()
             ),
             swiss_ephemeris_path=(
-                read("SWISS_EPHEMERIS_PATH", "").strip() or None
+                configured_swiss or _bundled_path(DEFAULT_SWISS_EPHEMERIS_PATH)
+            ),
+            geonames_path=geonames_path,
+            geonames_admin1_path=(
+                configured_geonames_admin1
+                or (
+                    _bundled_path(DEFAULT_GEONAMES_ADMIN1_PATH)
+                    if not configured_geonames
+                    else None
+                )
+            ),
+            geonames_admin2_path=(
+                configured_geonames_admin2
+                or (
+                    _bundled_path(DEFAULT_GEONAMES_ADMIN2_PATH)
+                    if not configured_geonames
+                    else None
+                )
+            ),
+            geonames_dataset_version=read(
+                "GEONAMES_DATASET_VERSION",
+                configured_geonames_version
+                or ("cities500-2026-07-19" if geonames_path else "unconfigured"),
+            ),
+            timezone_boundaries_path=boundaries_path,
+            timezone_boundaries_dataset_version=read(
+                "TIMEZONE_BOUNDARIES_DATASET_VERSION",
+                configured_boundaries_version
+                or ("2026b-full" if boundaries_path else "unconfigured"),
+            ),
+            deepseek_api_key=(
+                SecretStr(read("DEEPSEEK_API_KEY", "").strip())
+                if read("DEEPSEEK_API_KEY", "").strip()
+                else None
+            ),
+            deepseek_base_url=read("DEEPSEEK_BASE_URL", "https://api.deepseek.com").rstrip("/"),
+            deepseek_model=read("DEEPSEEK_MODEL", "deepseek-v4-pro"),
+            account_database_path=read(
+                "ACCOUNT_DATABASE_PATH", str(DEFAULT_ACCOUNT_DATABASE_PATH)
+            ),
+            auth_cookie_name=read("AUTH_COOKIE_NAME", "interstellar_session"),
+            auth_session_days=int(read("AUTH_SESSION_DAYS", "30")),
+            auth_cookie_secure=_parse_bool(
+                read(
+                    "AUTH_COOKIE_SECURE",
+                    "true" if read("ENVIRONMENT", "development") == "production" else "false",
+                ),
+                name=f"{prefix}AUTH_COOKIE_SECURE",
             ),
         )

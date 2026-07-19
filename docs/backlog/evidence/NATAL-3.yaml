@@ -1,0 +1,41 @@
+schema_version: 1.0.0
+gate_id: NATAL-3
+status: completed_at_beta_maturity
+completed_at: '2026-07-19'
+evidence:
+  - path: app/page.tsx
+    proves: every_materialized_result_key_is_dynamically_audited_mapped_to_a_detail_view_table_or_export_and_unknown_keys_block_release
+  - path: app/lib/render-export.ts
+    proves: one_RenderSpec_drives_visible_natal_svg_and_svg_png_pdf_exports_with_embedded_snapshot_and_layer_metadata
+  - path: python/interstellar_core/application/natal_technical_export.py
+    proves: user_analysis_document_projects_portable_astrology_facts_without_manifests_result_paths_or_internal_advanced_objects_and_without_new_calculation
+  - path: app/lib/interstellar-api.ts
+    proves: frontend_snapshot_contract_includes_charts_patterns_evidence_manifest_adapters_normalized_input_and_rule_pack_hash
+  - path: docs/natal-first-slice.yaml
+    proves: information_parity_result_disclosure_and_same_source_graphic_export_contracts_are_versioned
+verification:
+  commands:
+    - npm run test:web
+    - PYTHONPATH=apps/api:apps/worker:python python3 -m pytest -q tests/backend/test_m2_calculation_api.py tests/backend/test_location_api.py tests/data/test_location_resolver.py
+    - file output/playwright/natal-wheel-render-spec.svg output/playwright/natal-wheel-render-spec.png output/playwright/natal-wheel-render-spec.pdf
+    - pdfinfo output/playwright/natal-wheel-render-spec.pdf
+  result: passed
+  tests_passed: 27
+  artifact_checks:
+    - svg_is_valid_and_contains_wheel_natal_snapshot_id_houses_and_aspect_lines_RenderSpec_metadata
+    - png_is_valid_1280_by_1280_RGBA
+    - pdf_is_valid_PDF_1_4_one_page_720_by_720_points
+    - png_and_pdf_visual_previews_match_the_current_professional_screen_wheel
+  visual_artifacts:
+    - output/playwright/natal-wheel-render-spec.svg
+    - output/playwright/natal-wheel-render-spec.png
+    - output/playwright/natal-wheel-render-spec.pdf
+    - output/playwright/natal-wheel-render-spec-pdf-preview.png
+maturity_decision:
+  released_maturity: beta
+  reason: internal_materialized_result_coverage_and_natal_wheel_exports_pass_but_server_side_hash_reuse_multi_page_vector_PDF_and_aspect_matrix_export_remain_later_shared_rendering_work
+known_limits:
+  - The current PDF is a high_resolution_single_page_raster_artifact_from_the_same_SVG_not_a_vector_text_PDF.
+  - Aspect matrix graphic export is disabled until its independent RenderSpec is implemented.
+  - Server side artifact caching and content hash reuse remain in the shared rendering work package.
+  - AnalysisDocument content_hash parity across copy_markdown_and_plaintext remains in NATAL_TECHNICAL_EXPORT.

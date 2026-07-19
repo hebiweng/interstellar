@@ -20,6 +20,16 @@ class HouseSystem(StrEnum):
     MORINUS = "morinus"
     KRUSINSKI = "krusinski"
     VEHLOW = "vehlow"
+    EQUAL_MC = "equal_mc"
+    EQUAL_ARIES = "equal_aries"
+    MERIDIAN = "meridian"
+    HORIZONTAL = "horizontal"
+    CARTER_POLI_EQUATORIAL = "carter_poli_equatorial"
+    APC = "apc"
+    PULLEN_SD = "pullen_sd"
+    PULLEN_SR = "pullen_sr"
+    SUNSHINE_TREINDL = "sunshine_treindl"
+    SRIPATI = "sripati"
 
 
 @dataclass(frozen=True, slots=True)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -236,6 +237,19 @@ def test_professional_natal_profile_materializes_signs_points_structure_and_clas
             params={"format": "plaintext"},
         )
         ai_catalog = client.get("/api/v1/ai/providers")
+        ai_preview = client.post(
+            "/api/v1/ai/analyses/preview",
+            json={
+                "snapshot_id": snapshot_id,
+                "provider_id": "moonshot",
+                "model_id": "kimi",
+                "document_format": "markdown",
+                "analysis_focus": "Review the materialized natal facts only.",
+                "store_response": True,
+            },
+        )
+        assert ai_preview.status_code == 200, ai_preview.text
+        ai_preview_body = ai_preview.json()
         ai_without_consent = client.post(
             "/api/v1/ai/analyses",
             json={
@@ -243,7 +257,10 @@ def test_professional_natal_profile_materializes_signs_points_structure_and_clas
                 "provider_id": "openai",
                 "model_id": "gpt",
                 "document_format": "markdown",
+                "payload_hash": ai_preview_body["payload_hash"],
                 "consent_to_send_snapshot": False,
+                "authority_for_subject_data": True,
+                "consent_policy_version": "2026-07-19",
             },
         )
         ai_unconfigured = client.post(
@@ -253,9 +270,38 @@ def test_professional_natal_profile_materializes_signs_points_structure_and_clas
                 "provider_id": "moonshot",
                 "model_id": "kimi",
                 "document_format": "markdown",
+                "analysis_focus": "Review the materialized natal facts only.",
+                "payload_hash": ai_preview_body["payload_hash"],
                 "consent_to_send_snapshot": True,
+                "authority_for_subject_data": True,
+                "consent_policy_version": "2026-07-19",
             },
         )
+        professional_table_ids = [
+            "table.planet_positions",
+            "table.planet_speeds",
+            "table.house_cusps",
+            "table.natal_aspects",
+            "table.elements",
+            "table.modalities",
+            "table.polarity",
+            "table.chart_patterns",
+            "table.essential_dignities",
+            "table.receptions",
+            "graph.dispositor_chain",
+            "table.sect_condition",
+            "table.arabic_parts",
+        ]
+        professional_tables = {
+            table_id: (
+                client.get(f"/api/v1/calculations/{snapshot_id}/tables/{table_id}"),
+                client.get(
+                    f"/api/v1/calculations/{snapshot_id}/tables/{table_id}",
+                    params={"format": "csv"},
+                ),
+            )
+            for table_id in professional_table_ids
+        }
 
     snapshot = response.json()
     point_ids = [point["point_id"] for point in snapshot["result"]["points"]]
@@ -332,19 +378,198 @@ def test_professional_natal_profile_materializes_signs_points_structure_and_clas
     assert markdown_export.headers["content-type"].startswith("text/markdown")
     assert "## 完整点位" in markdown_export.text
     assert "## 完整相位" in markdown_export.text
-    assert "福点 (fortune)" in markdown_export.text
-    assert snapshot["input_fingerprint"] in markdown_export.text
+    assert "## 输入质量与分析提醒" in markdown_export.text
+    assert "结构化证据与原始高级结果" not in markdown_export.text
+    assert "结果覆盖与输出清单" not in markdown_export.text
+    assert "定位星链" not in markdown_export.text
+    assert "output_manifest" not in markdown_export.text
+    assert "input_fingerprint" not in markdown_export.text
+    assert "algorithm_card_id" not in markdown_export.text
+    assert "rule_ids" not in markdown_export.text
+    assert "not_calculated_in_virtual_fixture" not in markdown_export.text
+    assert "/result/structure" not in markdown_export.text
+    assert "manifest.natal.standard_chart" not in markdown_export.text
+    assert "福点：" in markdown_export.text
+    assert markdown_export.headers["x-interstellar-document-hash"].startswith("sha256:")
+    assert (
+        markdown_export.headers["x-interstellar-document-hash"]
+        == plaintext_export.headers["x-interstellar-document-hash"]
+        == ai_preview_body["document_content_hash"]
+    )
+    assert markdown_export.headers["etag"] == (
+        f'"{markdown_export.headers["x-interstellar-document-hash"]}"'
+    )
     assert plaintext_export.status_code == 200
     assert plaintext_export.headers["content-type"].startswith("text/plain")
     assert "=== 古典与希腊化事实 ===" in plaintext_export.text
+    assert "=== 输入质量与分析提醒 ===" in plaintext_export.text
+    assert "=== 结果覆盖与输出清单 ===" not in plaintext_export.text
+    for table_id, (json_response, csv_response) in professional_tables.items():
+        assert json_response.status_code == 200, (table_id, json_response.text)
+        assert "rows" in json_response.json()
+        assert csv_response.status_code == 200, (table_id, csv_response.text)
+        assert csv_response.headers["content-type"].startswith("text/csv")
     assert ai_catalog.status_code == 200
     assert [item["provider_id"] for item in ai_catalog.json()["providers"]] == [
+        "deepseek",
         "openai",
         "moonshot",
     ]
+    assert ai_preview_body["provider_configured"] is False
+    assert ai_preview_body["availability"] == "not_configured"
+    assert ai_preview_body["payload_hash"].startswith("sha256:")
+    assert ai_preview_body["character_count"] > 1_000
+    assert ai_preview_body["preview_excerpt"]
     assert ai_without_consent.status_code == 422
     assert ai_unconfigured.status_code == 409
-    assert ai_unconfigured.json()["fields"]["availability"] == "blocked"
+    assert ai_unconfigured.json()["code"] == "AI_PROVIDER_NOT_CONFIGURED"
+    assert ai_unconfigured.json()["fields"]["availability"] == "not_configured"
+
+
+def test_natal_ai_test_adapter_requires_unchanged_preview_and_keeps_snapshot_immutable() -> (
+    None
+):
+    ephemeris_path = (
+        Path(__file__).resolve().parents[2] / "vendor" / "swisseph" / "ephe"
+    )
+    app = create_app(
+        ApiSettings(
+            environment="test",
+            swiss_ephemeris_path=str(ephemeris_path),
+        )
+    )
+    captured: list[dict] = []
+
+    def executor(payload: dict) -> dict:
+        captured.append(payload)
+        return {"text": "isolated test response", "finish_reason": "stop"}
+
+    app.state.natal_ai_provider_overrides = {
+        "openai": {
+            "configured": True,
+            "availability": "configured",
+            "blocking_reason": None,
+            "data_destination": "test-adapter://isolated",
+            "retention_policy": "test only; no third-party transfer",
+            "models": [
+                {
+                    "model_id": "gpt",
+                    "label": "GPT isolated test adapter",
+                    "configured": True,
+                    "context_limit": 100_000,
+                }
+            ],
+        }
+    }
+    app.state.natal_ai_executor = executor
+
+    with TestClient(app) as client:
+        saved = client.post("/api/v1/subjects", json=_birth_payload()).json()
+        payload = _calculation_payload(saved["version"]["id"])
+        payload["settings"]["calculation_profile_id"] = "professional.natal.v1"
+        response = client.post("/api/v1/calculations", json=payload)
+        assert response.status_code == 201, response.text
+        snapshot = response.json()
+        snapshot_before = json.dumps(snapshot, ensure_ascii=False, sort_keys=True)
+        preview_request = {
+            "snapshot_id": snapshot["id"],
+            "provider_id": "openai",
+            "model_id": "gpt",
+            "document_format": "markdown",
+            "analysis_focus": "relationship between structure and dignities",
+            "store_response": True,
+        }
+        preview = client.post("/api/v1/ai/analyses/preview", json=preview_request)
+        assert preview.status_code == 200, preview.text
+        preview_body = preview.json()
+        changed = client.post(
+            "/api/v1/ai/analyses",
+            json={
+                **preview_request,
+                "analysis_focus": "changed after consent",
+                "payload_hash": preview_body["payload_hash"],
+                "consent_to_send_snapshot": True,
+                "authority_for_subject_data": True,
+                "consent_policy_version": "2026-07-19",
+            },
+        )
+        submitted = client.post(
+            "/api/v1/ai/analyses",
+            json={
+                **preview_request,
+                "payload_hash": preview_body["payload_hash"],
+                "consent_to_send_snapshot": True,
+                "authority_for_subject_data": True,
+                "consent_policy_version": "2026-07-19",
+            },
+        )
+        snapshot_after = client.app.state.workflow_store.get_snapshot(snapshot["id"])
+
+    assert preview_body["provider_configured"] is True
+    assert changed.status_code == 409
+    assert changed.json()["code"] == "AI_PAYLOAD_CHANGED_AFTER_CONSENT"
+    assert submitted.status_code == 202, submitted.text
+    artifact = submitted.json()
+    assert artifact["ai_generated"] is True
+    assert artifact["calculation_writeback"] is False
+    assert artifact["document_content_hash"] == preview_body["document_content_hash"]
+    assert artifact["response"]["text"] == "isolated test response"
+    assert len(captured) == 1
+    assert "technical_document" in captured[0]
+    assert "snapshot" not in captured[0]
+    assert (
+        json.dumps(snapshot_after, ensure_ascii=False, sort_keys=True)
+        == snapshot_before
+    )
+
+
+def test_sidereal_natal_api_requires_and_preserves_explicit_ayanamsa() -> None:
+    with _client() as client:
+        saved = client.post("/api/v1/subjects", json=_birth_payload()).json()
+        tropical_payload = _calculation_payload(saved["version"]["id"])
+        tropical = client.post("/api/v1/calculations", json=tropical_payload)
+        sidereal_payload = _calculation_payload(saved["version"]["id"])
+        sidereal_payload["settings"]["zodiac"] = "sidereal"
+        sidereal_payload["settings"]["ayanamsa"] = "lahiri"
+        sidereal = client.post("/api/v1/calculations", json=sidereal_payload)
+
+    assert tropical.status_code == 201, tropical.text
+    assert sidereal.status_code == 201, sidereal.text
+    tropical_snapshot = tropical.json()
+    sidereal_snapshot = sidereal.json()
+    provenance = sidereal_snapshot["result"]["astronomical_context"][
+        "adapter_provenance"
+    ]
+    assert sidereal_snapshot["request"]["settings"]["zodiac"] == "sidereal"
+    assert sidereal_snapshot["request"]["settings"]["ayanamsa"] == "lahiri"
+    assert provenance["zodiac"] == "sidereal"
+    assert provenance["ayanamsa"] == "lahiri"
+    assert 20 < provenance["ayanamsa_value_deg"] < 30
+    assert (
+        sidereal_snapshot["result"]["points"][0]["sign"]
+        != tropical_snapshot["result"]["points"][0]["sign"]
+    )
+    assert sidereal_snapshot["result"]["houses"][0][
+        "cusp_longitude_deg"
+    ] != pytest.approx(
+        tropical_snapshot["result"]["houses"][0]["cusp_longitude_deg"],
+        abs=1e-3,
+    )
+
+
+def test_sidereal_natal_api_rejects_missing_or_unknown_ayanamsa() -> None:
+    with _client() as client:
+        saved = client.post("/api/v1/subjects", json=_birth_payload()).json()
+        payload = _calculation_payload(saved["version"]["id"])
+        payload["settings"]["zodiac"] = "sidereal"
+        missing = client.post("/api/v1/calculations", json=payload)
+        payload["settings"]["ayanamsa"] = "invented"
+        unknown = client.post("/api/v1/calculations", json=payload)
+
+    assert missing.status_code == 422
+    assert unknown.status_code == 422
+    assert "settings.ayanamsa" in missing.json()["fields"]
+    assert "settings.ayanamsa" in unknown.json()["fields"]
 
 
 def test_unknown_birth_time_never_runs_as_midnight() -> None:
@@ -358,9 +583,36 @@ def test_unknown_birth_time_never_runs_as_midnight() -> None:
             json=_calculation_payload(saved["version"]["id"]),
         )
 
-    assert response.status_code == 422
-    assert response.headers["content-type"].startswith("application/problem+json")
-    assert "cannot be guessed" in response.json()["fields"]["subject.time_spec"]
+    assert response.status_code == 201
+    snapshot = response.json()
+    assert snapshot["status"] == "partial"
+    assert snapshot["result"]["houses"] == []
+    assert snapshot["result"]["aspects"] == []
+    assert snapshot["result"]["lots"] == []
+    assert snapshot["result"]["dignities"] == []
+    assert all(point["house"] is None for point in snapshot["result"]["points"])
+    assert all(
+        "date_range.reference_position_not_birth_time" in point["status_refs"]
+        for point in snapshot["result"]["points"]
+    )
+    uncertainty = snapshot["result"]["astronomical_context"]["uncertainty"]
+    assert uncertainty["reference_position_is_birth_time"] is False
+    assert uncertainty["interval_start_utc"] == "1999-12-31T16:00:00Z"
+    assert uncertainty["interval_end_utc"] == "2000-01-01T16:00:00Z"
+    assert uncertainty["reference_utc"] == "2000-01-01T04:00:00Z"
+    assert (
+        snapshot["normalized_input"]["subject_version"]["time_spec"]["selected_utc"]
+        is None
+    )
+    warning_codes = {warning["code"] for warning in snapshot["warnings"]}
+    assert "BIRTH_TIME_UNKNOWN_DATE_RANGE" in warning_codes
+    assert "TIME_DEPENDENT_NATAL_OUTPUTS_BLOCKED" in warning_codes
+    manifests = {
+        item["calculation_id"]: item for item in snapshot["result"]["output_manifest"]
+    }
+    assert manifests["astronomy.ephemeris_core"]["status"] == "degraded"
+    assert manifests["astronomy.houses_angles"]["status"] == "blocked"
+    assert manifests["natal.standard_chart"]["status"] == "blocked"
 
 
 def test_m2_rejects_unimplemented_coordinate_mode_instead_of_degrading_silently() -> (

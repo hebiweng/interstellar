@@ -1,0 +1,50 @@
+schema_version: 1.0.0
+gate_id: NATAL-AI
+status: completed_contract_and_test_adapter
+completed_at: '2026-07-19'
+objective: optional_AI_analysis_is_an_explicitly_consented_isolated_consumer_of_the_immutable_technical_document_and_never_an_astrology_calculator
+default_runtime_state:
+  providers_configured: 0
+  submission_enabled: false
+  manual_copy_and_download_available: true
+provider_families:
+  - {id: openai, display_name: GPT / OpenAI, default_status: not_configured}
+  - {id: moonshot, display_name: Kimi / Moonshot, default_status: not_configured}
+preview_contract:
+  discloses:
+    - provider_and_exact_model
+    - document_format_character_and_token_estimate
+    - document_and_payload_hashes
+    - included_sections_and_excerpt
+    - destination_privacy_and_retention
+    - independent_response_storage_boundary
+  network_effect: no_provider_request
+submission_contract:
+  required_confirmations:
+    - authority_for_subject_data
+    - consent_to_exact_payload_hash
+  changed_payload_after_consent: rejected
+  unconfigured_provider: rejected
+  response_storage: independent_optional_AI_artifact
+  calculation_writeback: forbidden
+evidence:
+  - path: apps/api/interstellar_api/routers/natal_ai.py
+    proves: provider_catalog_preview_hash_consent_authority_secret_isolation_test_executor_and_independent_artifact_contract
+  - path: apps/api/interstellar_api/errors.py
+    proves: stable_AI_payload_changed_provider_not_configured_and_consent_error_codes
+  - path: app/page.tsx
+    proves: provider_changes_invalidate_consent_preview_is_required_and_manual_fallback_remains_available
+  - path: tests/backend/test_m2_calculation_api.py
+    proves: unconfigured_runtime_and_configured_fake_executor_paths_are_tested_without_real_third_party_calls
+  - path: tests/rendered-html.test.mjs
+    proves: visible_preview_authority_consent_integrity_and_disabled_state_contract
+verification:
+  result: passed
+  browser_checks:
+    - preview_generated_without_sending_any_data
+    - destination_says_unconfigured_and_no_data_will_be_sent
+    - document_hash_matches_the_technical_export
+    - consent_checkboxes_unlock_only_after_preview
+    - submit_remains_disabled_for_unconfigured_provider
+  visual_artifact: output/playwright/natal-technical-ai-preview.png
+release_note: this_gate_does_not_claim_that_OpenAI_Moonshot_or_any_other_real_provider_is_connected

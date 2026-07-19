@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "active": {
+    "geonames": {
+      "dataset_id": "geonames",
+      "version": "cities500-2026-07-19",
+      "license_identifier": "CC-BY-4.0",
+      "license_accepted": true,
+      "artifacts": [
+        {
+          "path": "vendor/geonames/cities500-2026-07-19.zip",
+          "sha256": "6cc1dd51bfdd407d626a3d3bc02226c36e44281fceecdc03019cf755c65d664a",
+          "size_bytes": 13500206
+        },
+        {
+          "path": "vendor/geonames/admin1CodesASCII-2026-07-19.txt",
+          "sha256": "34784457b76b988a669dff7c3e4b104e4902c0875643cff019281ac79dfa2992",
+          "size_bytes": 151572
+        },
+        {
+          "path": "vendor/geonames/admin2Codes-2026-07-19.txt",
+          "sha256": "314a76e0b02610c653947acbf4e9dceab6b20eb39a0e793e09fea55d3d1a96be",
+          "size_bytes": 2370419
+        }
+      ],
+      "verified_at": "2026-07-19T07:07:12Z"
+    },
+    "iana_tzdb": {
+      "dataset_id": "iana_tzdb",
+      "version": "2026c",
+      "license_identifier": "IANA_tz_database_public_domain_style_notice",
+      "license_accepted": true,
+      "artifacts": [
+        {
+          "path": "vendor/iana-tzdb/tzdata-2026.3-py2.py3-none-any.whl",
+          "sha256": "dc096730c87af6cab1b171c9d532be840741ff5d459015e7f6947bd7d7e54931",
+          "size_bytes": 348168
+        }
+      ],
+      "verified_at": "2026-07-19T07:24:00Z"
+    },
+    "timezone_boundary_builder": {
+      "dataset_id": "timezone_boundary_builder",
+      "version": "2026b-full",
+      "license_identifier": "ODbL-1.0_output_AND_MIT_code",
+      "license_accepted": true,
+      "artifacts": [
+        {
+          "path": "vendor/timezone-boundary-builder/timezones-2026b.geojson.zip",
+          "sha256": "f892b57ce8c7d9633a03ce9e6775d54544c05d9b8d62029bc6543091cac213c4",
+          "size_bytes": 50522701
+        }
+      ],
+      "verified_at": "2026-07-19T07:17:00Z"
+    }
+  }
+}

@@ -46,6 +46,9 @@ def test_asia_shanghai_normal_time_has_one_selected_utc_candidate() -> None:
     assert result.time_spec.precision is TimePrecision.MINUTE
     assert result.time_spec.confidence is TimeConfidence.HIGH
     assert result.time_spec.source is SOURCE
+    assert result.time_spec.timezone_dataset is not None
+    assert result.time_spec.timezone_dataset.id == "iana_tzdb"
+    assert result.time_spec.timezone_dataset.version == "2026c"
     assert result.time_spec.warnings == ()
 
 
@@ -130,4 +133,10 @@ def test_contract_serialization_contains_required_fields_and_no_wrapper_status()
     assert payload["source"] == {
         "kind": "user_entered",
         "description": "Gold test fixture",
+    }
+    assert payload["timezone_dataset"] == {
+        "id": "iana_tzdb",
+        "version": "2026c",
+        "license": "IANA-TZDB",
+        "source_uri": "https://data.iana.org/time-zones/releases/",
     }

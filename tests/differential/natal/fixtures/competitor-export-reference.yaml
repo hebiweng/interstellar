@@ -1,0 +1,70 @@
+schema_version: 1.0.0
+fixture_id: DIFF-NATAL-COMPETITOR-001
+title: User-supplied Beijing natal export numeric comparison
+purpose: product_parity_regression_not_algorithm_authority
+source:
+  kind: user_supplied_competitor_export
+  captured_at: '2026-07-18'
+  redistribution: numeric_facts_only
+  engine_identity: undisclosed
+  rule_version: undisclosed
+  authoritative: false
+  stable_eligible: false
+notes:
+  - The source rounds displayed longitudes to arc minutes.
+  - It is used only to detect product-facing regressions and parameter mismatches.
+  - Swiss Ephemeris, analytic fixtures, and a future locked JPL kernel remain the astronomy references.
+input:
+  local_value: '2000-03-01T16:30:00'
+  timezone_id: Asia/Shanghai
+  latitude_deg: 39.93
+  longitude_deg: 116.41
+  zodiac: tropical
+  house_system: placidus
+tolerance:
+  displayed_longitude_deg: 0.02
+  displayed_cusp_deg: 0.02
+expected:
+  points:
+    - {point_id: sun, sign: pisces, longitude_deg: 341.0666666667, house: 7}
+    - {point_id: moon, sign: capricorn, longitude_deg: 285.6666666667, house: 5}
+    - {point_id: mercury, sign: pisces, longitude_deg: 341.6333333333, house: 7, motion_state: retrograde}
+    - {point_id: venus, sign: aquarius, longitude_deg: 315.0166666667, house: 6}
+    - {point_id: mars, sign: aries, longitude_deg: 13.8666666667, house: 9}
+    - {point_id: jupiter, sign: taurus, longitude_deg: 32.7333333333, house: 9}
+    - {point_id: saturn, sign: taurus, longitude_deg: 42.4333333333, house: 9}
+    - {point_id: uranus, sign: aquarius, longitude_deg: 318.1666666667, house: 6}
+    - {point_id: neptune, sign: aquarius, longitude_deg: 305.3833333333, house: 6}
+    - {point_id: pluto, sign: sagittarius, longitude_deg: 252.85, house: 4}
+    - {point_id: mean_north_node, sign: leo, longitude_deg: 121.8666666667, house: 12}
+    - {point_id: mean_lilith, sign: capricorn, longitude_deg: 270.1166666667, house: 5}
+    - {point_id: chiron, sign: sagittarius, longitude_deg: 256.65, house: 4}
+    - {point_id: ceres, sign: libra, longitude_deg: 186.4333333333, house: 2, motion_state: retrograde}
+    - {point_id: pallas, sign: cancer, longitude_deg: 118.7166666667, house: 12, motion_state: retrograde}
+    - {point_id: juno, sign: aquarius, longitude_deg: 300.1, house: 6}
+    - {point_id: vesta, sign: capricorn, longitude_deg: 275.3666666667, house: 5}
+    - {point_id: cupido, sign: sagittarius, longitude_deg: 244.6833333333, house: 4}
+    - {point_id: hades, sign: gemini, longitude_deg: 77.65, house: 10}
+    - {point_id: zeus, sign: libra, longitude_deg: 184.9666666667, house: 2, motion_state: retrograde}
+    - {point_id: kronos, sign: gemini, longitude_deg: 87.2666666667, house: 11, motion_state: retrograde}
+    - {point_id: apollon, sign: libra, longitude_deg: 201.15, house: 3, motion_state: retrograde}
+    - {point_id: admetos, sign: taurus, longitude_deg: 49.0833333333, house: 10}
+    - {point_id: vulkanus, sign: cancer, longitude_deg: 109.8333333333, house: 11, motion_state: retrograde}
+    - {point_id: poseidon, sign: scorpio, longitude_deg: 214.5666666667, house: 3, motion_state: retrograde}
+    - {point_id: asc, sign: leo, longitude_deg: 142.95, house: 1}
+    - {point_id: dsc, sign: aquarius, longitude_deg: 322.95, house: 7}
+    - {point_id: mc, sign: taurus, longitude_deg: 45.8333333333, house: 10}
+    - {point_id: ic, sign: scorpio, longitude_deg: 225.8333333333, house: 4}
+  houses:
+    - {number: 1, sign: leo, cusp_longitude_deg: 142.95}
+    - {number: 2, sign: virgo, cusp_longitude_deg: 165.4333333333}
+    - {number: 3, sign: libra, cusp_longitude_deg: 192.9666666667}
+    - {number: 4, sign: scorpio, cusp_longitude_deg: 225.8333333333}
+    - {number: 5, sign: sagittarius, cusp_longitude_deg: 261.1333333333}
+    - {number: 6, sign: capricorn, cusp_longitude_deg: 294.15}
+    - {number: 7, sign: aquarius, cusp_longitude_deg: 322.95}
+    - {number: 8, sign: pisces, cusp_longitude_deg: 345.4333333333}
+    - {number: 9, sign: aries, cusp_longitude_deg: 12.9666666667}
+    - {number: 10, sign: taurus, cusp_longitude_deg: 45.8333333333}
+    - {number: 11, sign: gemini, cusp_longitude_deg: 81.1333333333}
+    - {number: 12, sign: cancer, cusp_longitude_deg: 114.15}

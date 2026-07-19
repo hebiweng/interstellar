@@ -65,6 +65,16 @@ SWISS_HOUSE_CODES: dict[HouseSystem, bytes] = {
     HouseSystem.MORINUS: b"M",
     HouseSystem.KRUSINSKI: b"U",
     HouseSystem.VEHLOW: b"V",
+    HouseSystem.EQUAL_MC: b"D",
+    HouseSystem.EQUAL_ARIES: b"N",
+    HouseSystem.MERIDIAN: b"X",
+    HouseSystem.HORIZONTAL: b"H",
+    HouseSystem.CARTER_POLI_EQUATORIAL: b"F",
+    HouseSystem.APC: b"Y",
+    HouseSystem.PULLEN_SD: b"L",
+    HouseSystem.PULLEN_SR: b"Q",
+    HouseSystem.SUNSHINE_TREINDL: b"I",
+    HouseSystem.SRIPATI: b"S",
 }
 
 SENSITIVE_POINT_IDS: tuple[str, ...] = (
@@ -103,6 +113,7 @@ class HouseCalculator:
         longitude_deg: float,
         system: HouseSystem | str = HouseSystem.PLACIDUS,
         flags: int = 0,
+        sidereal_mode: int | None = None,
         allow_fallback_whole_sign: bool = False,
     ) -> HouseCalculationResult:
         jd, latitude, longitude, requested = self._validate_inputs(
@@ -112,6 +123,10 @@ class HouseCalculator:
             system,
             flags,
         )
+        if bool(flags & swe.FLG_SIDEREAL) != (sidereal_mode is not None):
+            raise HouseInputError(
+                "sidereal house flags and sidereal_mode must be supplied together"
+            )
         if requested is HouseSystem.WHOLE_SIGN:
             return self._calculate_whole_sign(
                 jd,
@@ -122,11 +137,19 @@ class HouseCalculator:
                 status="available",
                 polar_status="normal",
                 warnings=(),
+                sidereal_mode=sidereal_mode,
             )
 
         house_code = SWISS_HOUSE_CODES[requested]
         try:
-            raw = self._houses_ex2(jd, latitude, longitude, house_code, flags)
+            raw = self._houses_ex2(
+                jd,
+                latitude,
+                longitude,
+                house_code,
+                flags,
+                sidereal_mode=sidereal_mode,
+            )
         except Exception as exc:
             if not self._is_polar_failure(exc):
                 raise HouseCalculationError(
@@ -151,6 +174,7 @@ class HouseCalculator:
                     status="degraded",
                     polar_status="degraded",
                     warnings=(warning,),
+                    sidereal_mode=sidereal_mode,
                 )
             return self._unavailable(
                 requested=requested,
@@ -198,6 +222,7 @@ class HouseCalculator:
         status: str,
         polar_status: str,
         warnings: tuple[HouseWarning, ...],
+        sidereal_mode: int | None,
     ) -> HouseCalculationResult:
         # Swiss supplies only the astronomical axes; Interstellar derives all 12 cusps.
         _, ascmc_raw, _, ascmc_speeds_raw = self._houses_ex2(
@@ -206,6 +231,7 @@ class HouseCalculator:
             longitude,
             b"W",
             flags,
+            sidereal_mode=sidereal_mode,
         )
         ascmc = self._normalize_ascmc(ascmc_raw)
         cusps = whole_sign_cusps(ascmc[0])
@@ -271,8 +297,12 @@ class HouseCalculator:
         longitude: float,
         code: bytes,
         flags: int,
+        *,
+        sidereal_mode: int | None,
     ) -> tuple[Any, Any, Any, Any]:
         with self._backend_lock:
+            if sidereal_mode is not None:
+                self._backend.set_sid_mode(sidereal_mode)
             result = self._backend.houses_ex2(jd, latitude, longitude, code, flags)
         if not isinstance(result, tuple) or len(result) != 4:
             raise HouseCalculationError("Swiss houses_ex2 returned an unsupported payload")

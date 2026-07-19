@@ -1,0 +1,33 @@
+schema_version: 1.0.0
+gate_id: NATAL-1
+status: completed_at_experimental_maturity
+completed_at: '2026-07-19'
+evidence:
+  - path: python/interstellar_core/application/astronomical_snapshot.py
+    proves: professional_points_houses_aspects_structure_classical_facts_output_manifest_and_provenance_share_one_immutable_snapshot
+  - path: tests/gold/natal/fixtures/analytic-natal-gold.yaml
+    proves: independent_analytic_sign_motion_house_aspect_distribution_and_pattern_boundaries
+  - path: tests/gold/natal/test_analytic_gold.py
+    proves: every_natal_gold_fixture_is_contract_checked_and_executed
+  - path: tests/differential/natal/fixtures/competitor-export-reference.yaml
+    proves: user_supplied_beijing_product_reference_is_parameterized_and_explicitly_non_authoritative
+  - path: tests/differential/natal/test_competitor_export_reference.py
+    proves: 29_product_facing_points_and_all_12_placidus_cusps_match_the_supplied_arcminute_display_reference
+  - path: tests/backend/test_m2_calculation_api.py
+    proves: professional_snapshot_reproducibility_tables_exports_classical_and_structure_contracts
+verification:
+  commands:
+    - PYTHONPATH=apps/api:apps/worker:python python3 -m pytest tests/gold/natal/test_analytic_gold.py tests/differential/natal/test_competitor_export_reference.py tests/backend/test_m2_calculation_api.py -q
+  result: passed
+  tests_passed: 29
+maturity_decision:
+  released_maturity: experimental
+  reason: locked_JPL_SPICE_kernels_are_present_but_the_independent_adapter_differential_suite_and_professional_review_are_not_complete
+  consequences:
+    - calculations_are_available_with_visible_dataset_and_adapter_provenance
+    - no_capability_is_falsely_labeled_stable
+    - competitor_comparison_is_product_parity_evidence_not_algorithm_authority
+known_limits:
+  - The bundled Swiss ephemeris subset covers the natal slice from 1800 through 2399; outside it, Moshier fallback remains explicitly recorded where used.
+  - Hamburg TNP calculations use the bundled official seorbel.txt and retain hypothetical-body maturity labels.
+  - The official Swiss fixed-star catalogue is bundled and locked, but fixed-star materialization, arbitrary MPC objects, declination aspects, mirror aspects, and research-blocked competitor points are not part of this gate.

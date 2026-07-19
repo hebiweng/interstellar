@@ -1,0 +1,37 @@
+schema_version: 1.0.0
+gate_id: NATAL-5
+status: completed_at_beta_maturity
+completed_at: '2026-07-19'
+evidence:
+  - path: python/interstellar_core/reporting/contextual.py
+    proves: versioned_structure_sect_dignity_solar_condition_dispositor_reception_and_Hermetic_Lot_semantics_are_generated_from_exact_snapshot_paths_with_explicit_non_probability_boundaries_and_fatalistic_phrase_guards
+  - path: apps/api/interstellar_api/routers/natal_interpretations.py
+    proves: immutable_snapshot_interpretation_endpoint_preserves_fact_pointer_rule_source_maturity_and_content_hash_for_structure_and_classical_results
+  - path: app/page.tsx
+    proves: every_released_structure_and_classical_card_or_row_opens_contextual_interpretation_against_its_exact_result_JSON_pointer
+  - path: tests/reporting/test_contextual.py
+    proves: categorical_structure_Jones_unavailable_classical_condition_and_prohibited_fatalistic_copy_contracts_are_regression_tested
+  - path: tests/backend/test_natal_interpretation_api.py
+    proves: real_snapshot_API_publishes_reproducible_structure_sect_dispositor_reception_and_Lot_interpretations
+verification:
+  commands:
+    - npm run test:web
+    - PYTHONPATH=apps/api:apps/worker:python python3 -m pytest -q tests/reporting/test_contextual.py tests/backend/test_natal_interpretation_api.py
+    - playwright_cli real_calculation_structure_and_classical_interpretation_visual_QA
+  result: passed
+  tests_passed: 40
+  visual_artifacts:
+    - output/playwright/natal-structure-versioned-interpretation.png
+    - output/playwright/natal-classical-versioned-interpretation.png
+  browser_checks:
+    - real_professional_natal_snapshot_completed_with_repository_Swiss_ephemeris_files
+    - hemisphere_interpretation_publishes_counts_and_non_scoring_boundary
+    - Hermetic_Lot_interpretation_publishes_formula_position_symbolic_scope_and_non_deterministic_boundary
+    - rule_template_source_maturity_and_content_hash_are_visible
+maturity_decision:
+  released_maturity: beta
+  reason: deterministic_structure_and_classical_semantics_are_reproducible_and_guarded_but_still_require_professional_editorial_review_before_stable_maturity
+known_limits:
+  - Jones_shape_remains_explicitly_unavailable_until_a_versioned_classification_rule_and_gold_samples_exist.
+  - Interpretations_are_atomic_and_contextual; they_do_not_claim_to_be_a_complete_whole_chart_synthesis.
+  - No_item_interpretation_claims_event_probability_fate_lifespan_or_guaranteed_outcomes.

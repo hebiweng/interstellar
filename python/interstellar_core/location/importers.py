@@ -4,8 +4,12 @@ from __future__ import annotations
 
 import json
 from collections.abc import Iterable, Iterator, Mapping
+from contextlib import contextmanager
+from dataclasses import replace
+from io import TextIOWrapper
 from pathlib import Path
 from typing import Any, TextIO
+from zipfile import BadZipFile, ZipFile
 
 from interstellar_core.domain.errors import DomainError
 
@@ -68,6 +72,80 @@ def iter_geonames(handle: TextIO) -> Iterator[PlaceRecord]:
         if not line.strip() or line.startswith("#"):
             continue
         yield parse_geonames_line(line, line_number=line_number)
+
+
+@contextmanager
+def open_geonames_text(path: str | Path) -> Iterator[TextIO]:
+    """Open a plain GeoNames dump or its official single-file ZIP archive.
+
+    Keeping the official archive compressed avoids checking a roughly 40 MB
+    generated text file into the repository while preserving a byte-for-byte
+    upstream artifact and checksum.
+    """
+
+    resolved = Path(path)
+    if resolved.suffix.lower() != ".zip":
+        with resolved.open(encoding="utf-8") as handle:
+            yield handle
+        return
+
+    try:
+        with ZipFile(resolved) as archive:
+            members = sorted(
+                item
+                for item in archive.namelist()
+                if not item.endswith("/") and item.lower().endswith(".txt")
+            )
+            if len(members) != 1:
+                raise DomainError(
+                    "GEONAMES_ARCHIVE_INVALID",
+                    "GeoNames archive must contain exactly one text dump",
+                )
+            with (
+                archive.open(members[0]) as raw,
+                TextIOWrapper(raw, encoding="utf-8") as handle,
+            ):
+                yield handle
+    except BadZipFile as exc:
+        raise DomainError(
+            "GEONAMES_ARCHIVE_INVALID", "GeoNames archive is not a valid ZIP file"
+        ) from exc
+
+
+def load_geonames(path: str | Path) -> tuple[PlaceRecord, ...]:
+    with open_geonames_text(path) as handle:
+        return tuple(iter_geonames(handle))
+
+
+def load_geonames_admin_names(handle: TextIO) -> dict[str, str]:
+    """Load GeoNames admin1/admin2 code files into one display-name map."""
+
+    result: dict[str, str] = {}
+    for line_number, line in enumerate(handle, start=1):
+        if not line.strip() or line.startswith("#"):
+            continue
+        columns = line.rstrip("\n").split("\t")
+        if len(columns) < 2 or not columns[0].strip() or not columns[1].strip():
+            raise DomainError(
+                "GEONAMES_ADMIN_ROW_INVALID",
+                f"line {line_number} lacks an admin code or display name",
+            )
+        result[columns[0].strip()] = columns[1].strip()
+    return result
+
+
+def enrich_admin_names(
+    places: Iterable[PlaceRecord], admin_names: Mapping[str, str]
+) -> Iterator[PlaceRecord]:
+    """Replace opaque GeoNames admin codes with official hierarchy labels."""
+
+    for place in places:
+        resolved: list[str] = []
+        code_path: list[str] = [place.country_code]
+        for code in place.admin_path:
+            code_path.append(code)
+            resolved.append(admin_names.get(".".join(code_path), code))
+        yield replace(place, admin_path=tuple(resolved))
 
 
 def load_alternate_names(handle: TextIO) -> dict[int, tuple[str, ...]]:
@@ -160,11 +238,45 @@ def _validate_coordinate_tree(value: object, path: str) -> None:
     if not isinstance(value, list) or not value:
         raise DomainError("TIMEZONE_BOUNDARY_INVALID", f"{path} must be a non-empty array")
     if len(value) >= 2 and all(isinstance(item, int | float) for item in value[:2]):
-        validate_coordinates(float(value[1]), float(value[0]))
+        latitude = float(value[1])
+        longitude = float(value[0])
+        # GeoJSON polygon rings may legally close on +180°. Canonical user
+        # point coordinates remain half-open [-180, 180), but rejecting the
+        # antimeridian in an official boundary dataset would make the archive
+        # impossible to load.
+        if not -90 <= latitude <= 90 or not -180 <= longitude <= 180:
+            raise DomainError(
+                "TIMEZONE_BOUNDARY_INVALID",
+                f"{path} contains an out-of-range coordinate",
+            )
         return
     for index, child in enumerate(value):
         _validate_coordinate_tree(child, f"{path}[{index}]")
 
 
 def load_timezone_geojson(path: str | Path) -> tuple[dict[str, Any], ...]:
-    return validate_timezone_feature_collection(json.loads(Path(path).read_text(encoding="utf-8")))
+    resolved = Path(path)
+    if resolved.suffix.lower() != ".zip":
+        document = json.loads(resolved.read_text(encoding="utf-8"))
+        return validate_timezone_feature_collection(document)
+
+    try:
+        with ZipFile(resolved) as archive:
+            members = sorted(
+                item
+                for item in archive.namelist()
+                if not item.endswith("/")
+                and item.lower().endswith((".json", ".geojson"))
+            )
+            if len(members) != 1:
+                raise DomainError(
+                    "TIMEZONE_BOUNDARY_ARCHIVE_INVALID",
+                    "timezone boundary archive must contain exactly one GeoJSON document",
+                )
+            document = json.loads(archive.read(members[0]).decode("utf-8"))
+    except BadZipFile as exc:
+        raise DomainError(
+            "TIMEZONE_BOUNDARY_ARCHIVE_INVALID",
+            "timezone boundary archive is not a valid ZIP file",
+        ) from exc
+    return validate_timezone_feature_collection(document)

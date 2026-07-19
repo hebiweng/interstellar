@@ -1,15 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   createPersonAndNatalCalculation,
   getAiProviders,
   getNatalItemInterpretation,
+  getNatalTableExport,
   getNatalTechnicalDocument,
   InterstellarApiError,
+  previewNatalAiPayload,
+  searchLocations,
   submitNatalToAi,
   type AiProvider,
+  type AiModelId,
+  type AiProviderId,
   type ItemInterpretation,
   type NatalAspect,
   type NatalCalculationSettings,
@@ -17,10 +22,33 @@ import {
   type NatalPersonInput,
   type NatalPoint,
   type NatalSnapshot,
+  type LocationSearchItem,
+  type NatalAiPayloadPreview,
 } from "./lib/interstellar-api";
+import {
+  getAccountWorkspace,
+  loginAccount,
+  logoutAccount,
+  registerAccount,
+  saveAccountPerson,
+  saveLatestAiAnalysis,
+  saveLatestNatal,
+  type AccountWorkspace,
+  type WorkspacePerson,
+} from "./lib/account-workspace";
+import {
+  buildNatalRenderSpec,
+  buildSingleImagePdf,
+  downloadBlob,
+  rasterizeSerializedSvg,
+  selectVisibleNatalAspects,
+  serializeSvgWithComputedStyles,
+  type NatalRenderControls,
+  type RenderSpec,
+} from "./lib/render-export";
 
 type ResultTab = "basic" | "signs" | "houses" | "aspects" | "structure" | "classical" | "technical";
-type ChartView = "wheel" | "aspect_grid";
+type ChartView = "professional" | "compact" | "aspect_grid";
 type ThemeMode = "dark" | "light";
 type EntryPointId = "technique" | "topic" | "intent" | "object" | "personal" | "context";
 type TechniqueId = "synastry" | "natal" | "transits" | "current_sky" | "secondary_progressions" | "tertiary_progressions" | "solar_arc" | "returns" | "question" | "geography";
@@ -33,7 +61,7 @@ type InterpretationTarget = {
   resultPath?: string;
 };
 
-const globalNavigation = ["工作台", "分析中心", "对象库", "图表中心", "报告"] as const;
+const globalNavigation = ["工作台", "分析中心", "对象库", "计算方法", "报告"] as const;
 
 const entryModes: Array<{ id: EntryPointId; title: string; description: string; context: string }> = [
   { id: "technique", title: "技法排盘", description: "直接选择本命、行运、推运、返照等计算方法", context: "只加入所选技法的必需依赖，默认不添加专题解释。" },
@@ -57,12 +85,12 @@ const chartTechniques: Array<{ id: TechniqueId; label: string; status: "active" 
   { id: "geography", label: "地理占星", status: "planned", stage: "M18", inputs: "人物＋一个或多个地点", outputs: "迁移盘、地理线、Local Space" },
 ];
 
-const timezoneOptions = [
+const fallbackTimezoneOptions = [
   "Asia/Shanghai", "Asia/Hong_Kong", "Asia/Taipei", "Asia/Tokyo", "Asia/Singapore",
   "Europe/London", "Europe/Paris", "America/New_York", "America/Chicago", "America/Los_Angeles", "Australia/Sydney",
 ];
 
-const placeOptions = [
+const fallbackPlaceOptions = [
   { name: "北京", countryCode: "CN", latitude: 39.9042, longitude: 116.4074, timezoneId: "Asia/Shanghai" },
   { name: "上海", countryCode: "CN", latitude: 31.2304, longitude: 121.4737, timezoneId: "Asia/Shanghai" },
   { name: "广州", countryCode: "CN", latitude: 23.1291, longitude: 113.2644, timezoneId: "Asia/Shanghai" },
@@ -89,6 +117,35 @@ const houseSystemOptions: Array<{ id: NatalCalculationSettings["houseSystem"]; l
   { id: "morinus", label: "Morinus 莫里努斯" },
   { id: "krusinski", label: "Krusinski 克鲁辛斯基" },
   { id: "vehlow", label: "Vehlow 维洛" },
+  { id: "equal_mc", label: "Equal MC · 第十宫宫头固定 MC" },
+  { id: "equal_aries", label: "Equal Aries · 白羊 0° 起宫" },
+  { id: "meridian", label: "Meridian / Axial Rotation 子午线制" },
+  { id: "horizontal", label: "Horizontal / Azimuthal 地平制" },
+  { id: "carter_poli_equatorial", label: "Carter Poli-Equatorial 卡特制" },
+  { id: "apc", label: "APC 宫位制" },
+  { id: "pullen_sd", label: "Pullen SD 正弦差制" },
+  { id: "pullen_sr", label: "Pullen SR 正弦比制" },
+  { id: "sunshine_treindl", label: "Sunshine / Treindl 阳光宫位制" },
+  { id: "sripati", label: "Sripati 宫位制" },
+];
+
+const analysisSystemOptions: Array<{ id: NatalCalculationSettings["analysisSystem"]; label: string; description: string }> = [
+  { id: "integrated", label: "专业综合本命 v1", description: "计算完整现代、结构与古典事实，并分层展示。" },
+  { id: "modern", label: "现代本命 v1", description: "默认阅读现代点位、宫位、相位与盘面结构。" },
+  { id: "classical", label: "古典本命 v1", description: "默认阅读七曜、昼夜、尊贵、太阳条件、接纳与阿拉伯点。" },
+];
+
+const ayanamsaOptions: Array<{ id: NatalCalculationSettings["ayanamsa"]; label: string }> = [
+  { id: "fagan_bradley", label: "Fagan–Bradley" },
+  { id: "lahiri", label: "Lahiri" },
+  { id: "deluce", label: "De Luce" },
+  { id: "raman", label: "Raman" },
+  { id: "krishnamurti", label: "Krishnamurti" },
+  { id: "yukteshwar", label: "Yukteshwar" },
+  { id: "hipparchos", label: "Hipparchos" },
+  { id: "true_revati", label: "True Revati" },
+  { id: "true_citra", label: "True Citra" },
+  { id: "galactic_center_0_sagittarius", label: "Galactic Center 0° Sagittarius" },
 ];
 
 const pointNames: Record<string, string> = {
@@ -113,11 +170,22 @@ const pointGlyphs: Record<string, string> = {
   lot_eros: "E", lot_necessity: "N", lot_courage: "C", lot_victory: "V", lot_nemesis: "N", lot_exaltation: "X",
 };
 
+const wheelPointLabels: Record<string, string> = {
+  sun: "日", moon: "月", mercury: "水", venus: "金", mars: "火", jupiter: "木", saturn: "土",
+  uranus: "天", neptune: "海", pluto: "冥", asc: "升", dsc: "降", mc: "顶", ic: "底",
+  vertex: "宿", anti_vertex: "反", east_point: "东", west_point: "西", true_north_node: "北",
+  true_south_node: "南", mean_north_node: "平北", mean_south_node: "平南", mean_lilith: "莉",
+  true_lilith: "真莉", lunar_perigee: "近", chiron: "凯", ceres: "谷", pallas: "智", juno: "婚",
+  vesta: "灶", fortune: "福", spirit: "灵", lot_eros: "爱", lot_necessity: "必", lot_courage: "勇",
+  lot_victory: "胜", lot_nemesis: "报", lot_exaltation: "擢", cupido: "丘", hades: "哈", zeus: "宙",
+  kronos: "克", apollon: "阿", admetos: "得", vulkanus: "弗", poseidon: "波",
+};
+
 const signNames: Record<string, string> = {
   aries: "白羊", taurus: "金牛", gemini: "双子", cancer: "巨蟹", leo: "狮子", virgo: "处女",
   libra: "天秤", scorpio: "天蝎", sagittarius: "射手", capricorn: "摩羯", aquarius: "水瓶", pisces: "双鱼",
 };
-const signGlyphs = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
+const signGlyphs = ["♈︎", "♉︎", "♊︎", "♋︎", "♌︎", "♍︎", "♎︎", "♏︎", "♐︎", "♑︎", "♒︎", "♓︎"];
 const signIds = Object.keys(signNames);
 
 const aspectNames: Record<string, string> = {
@@ -126,6 +194,18 @@ const aspectNames: Record<string, string> = {
   quintile: "五分", biquintile: "双五分", novile: "九分", septile: "七分", biseptile: "双七分",
   triseptile: "三七分", undecile: "十一分", decile: "十分",
 };
+
+const aspectPhaseNames: Record<string, string> = {
+  applying: "入相",
+  exact: "精确",
+  separating: "出相",
+  stationary: "停滞",
+  unknown: "阶段未判定",
+};
+
+function aspectPhaseLabel(value: string) {
+  return aspectPhaseNames[value];
+}
 
 const aspectMarks: Record<string, string> = {
   conjunction: "☌", opposition: "☍", trine: "△", square: "□", sextile: "✶", quincunx: "⚻",
@@ -142,10 +222,89 @@ const pointGroups = {
   hamburg: ["cupido", "hades", "zeus", "kronos", "apollon", "admetos", "vulkanus", "poseidon"],
 } as const;
 
+const pointGroupLabels: Record<keyof typeof pointGroups, string> = {
+  core: "十大行星",
+  angles: "四轴与敏感点",
+  lunar: "交点与月球点",
+  asteroids: "常用小行星",
+  lots: "阿拉伯点",
+  hamburg: "汉堡虚星",
+};
+
+const pointKindNames: Record<string, string> = {
+  planet: "行星",
+  angle: "轴点",
+  node: "月交点",
+  lunar_point: "月球点",
+  asteroid: "小行星",
+  lot: "阿拉伯点",
+  hamburg: "汉堡虚星",
+  sensitive_point: "敏感点",
+};
+
+const availabilityNames: Record<string, string> = {
+  published: "已计算",
+  available: "已计算",
+  reference_fixture: "演示数据",
+  experimental: "试验性结果",
+  beta: "测试中",
+  unavailable: "尚不可用",
+  not_calculated: "尚未计算",
+  blocked_by_input_quality: "输入条件不足",
+};
+
+const statusNames: Record<string, string> = {
+  published: "已识别",
+  available: "已识别",
+  reference_fixture: "演示数据",
+  uncertain: "不确定",
+  unavailable: "尚不可用",
+  not_calculated: "尚未计算",
+  not_published: "规则尚未发布",
+};
+
+function availabilityLabel(value: unknown) {
+  const key = String(value ?? "");
+  return availabilityNames[key] ?? statusNames[key] ?? "计算结果";
+}
+
+const allPointGroupsEnabled: Record<keyof typeof pointGroups, boolean> = {
+  core: true, angles: true, lunar: true, asteroids: true, lots: true, hamburg: true,
+};
+
+const defaultWheelGroups: Record<keyof typeof pointGroups, boolean> = {
+  core: true, angles: true, lunar: true, asteroids: false, lots: false, hamburg: false,
+};
+
+const defaultWheelControls: Omit<NatalRenderControls, "visiblePointIds"> = {
+  showDegreeTicks: true,
+  showZodiacNames: true,
+  showZodiacDegrees: true,
+  showHouseLines: true,
+  showHouseNumbers: true,
+  showAxes: true,
+  showPointLeaders: true,
+  showPointDegrees: true,
+  showAspectLines: true,
+  showLegend: true,
+  majorAspectsOnly: true,
+  aspectFilterMode: "top_percent",
+  aspectTopPercent: 15,
+  aspectMinimumStrength: 0.7,
+};
+
 const allAspectIds = [
   "conjunction", "semiduodecile", "semioctile", "semisextile", "undecile", "decile", "novile", "semisquare", "septile",
   "sextile", "quintile", "square", "biseptile", "trine", "sesquisquare", "biquintile", "quincunx", "triseptile", "opposition",
 ];
+
+const natalTableExports = [
+  ["table.planet_positions", "完整点位"], ["table.planet_speeds", "点位速度"], ["table.house_cusps", "十二宫"],
+  ["table.natal_aspects", "完整相位"], ["table.elements", "四元素"], ["table.modalities", "三模式"],
+  ["table.polarity", "阴阳属性"], ["table.chart_patterns", "盘面格局"], ["table.essential_dignities", "先天尊贵"],
+  ["table.receptions", "接纳互容"], ["table.sect_condition", "昼夜 Sect"],
+  ["table.arabic_parts", "阿拉伯点"],
+] as const;
 
 const houseDomains = [
   "自我、身体与呈现", "金钱、资源与价值", "学习、表达与近距离环境", "家庭、根基与私人生活",
@@ -205,20 +364,44 @@ const sampleHouses: NatalHouse[] = Array.from({ length: 12 }, (_, index) => {
   };
 });
 
-const sampleAspects: NatalAspect[] = [
-  ["sun", "mercury", "conjunction", 0.57, "applying"], ["sun", "moon", "sextile", 4.6, "separating"],
-  ["venus", "uranus", "conjunction", 3.16, "applying"], ["mars", "jupiter", "conjunction", 1.13, "separating"],
-  ["saturn", "neptune", "square", 7.06, "applying"], ["moon", "pluto", "semisextile", 2.81, "separating"],
-].map(([a, b, type, orb, state], index) => ({
-  aspect_id: `sample:${index}`, point_a: String(a), point_b: String(b), type: String(type),
-  exact_angle_deg: type === "conjunction" ? 0 : type === "sextile" ? 60 : type === "square" ? 90 : 30,
-  actual_angle_deg: 0, orb_deg: Number(orb), applying_state: String(state), strength: Math.max(0, 1 - Number(orb) / 8),
-}));
+const sampleAspectDefinitions = [
+  { type: "conjunction", angle: 0, orb: 8 },
+  { type: "opposition", angle: 180, orb: 8 },
+  { type: "trine", angle: 120, orb: 7 },
+  { type: "square", angle: 90, orb: 7 },
+  { type: "sextile", angle: 60, orb: 5 },
+] as const;
+
+// The opening workspace is a deterministic virtual fixture. Derive its complete
+// major-aspect set from the displayed longitudes so the wheel, matrix and table
+// always describe the same facts. Applying/separating is deliberately not faked:
+// the real calculation service supplies that state from actual velocities.
+const sampleAspects: NatalAspect[] = samplePoints.flatMap((left, leftIndex) =>
+  samplePoints.slice(leftIndex + 1).flatMap((right) => {
+    const rawDistance = Math.abs(left.position.ecliptic.longitude_deg - right.position.ecliptic.longitude_deg);
+    const actualAngle = Math.min(rawDistance, 360 - rawDistance);
+    const definition = sampleAspectDefinitions.find((candidate) => Math.abs(actualAngle - candidate.angle) <= candidate.orb);
+    if (!definition) return [];
+    const orb = Math.abs(actualAngle - definition.angle);
+    return [{
+      aspect_id: `sample:${left.point_id}:${right.point_id}:${definition.type}`,
+      point_a: left.point_id,
+      point_b: right.point_id,
+      type: definition.type,
+      exact_angle_deg: definition.angle,
+      actual_angle_deg: Number(actualAngle.toFixed(6)),
+      orb_deg: Number(orb.toFixed(6)),
+      applying_state: "not_calculated_in_virtual_fixture",
+      strength: Math.max(0, 1 - orb / definition.orb),
+    }];
+  }),
+);
 
 const sampleSnapshot: NatalSnapshot = {
   id: "sample-natal-20000301-beijing", status: "succeeded", maturity: "reference_fixture",
   input_fingerprint: "sha256:virtual-reference-fixture", engine: { name: "interstellar-core", version: "0.1.0-reference" }, warnings: [],
   result: {
+    charts: [{ family: "natal", technique: "natal.standard_chart", status: "reference_fixture" }],
     points: samplePoints, houses: sampleHouses, aspects: sampleAspects,
     distributions: [
       { dimension: "elements", categories: [{ category_id: "fire", count: 2 }, { category_id: "earth", count: 3 }, { category_id: "air", count: 3 }, { category_id: "water", count: 2 }] },
@@ -226,16 +409,27 @@ const sampleSnapshot: NatalSnapshot = {
     ],
     structure: { availability: "reference_fixture", note: "真实计算后显示半球、象限、角续果宫、群星与几何格局。" },
     classical: { availability: "reference_fixture", day_night_status: "day", note: "真实计算后显示昼夜盘、尊贵、太阳条件、接纳与定位星。" },
-    dignities: [], lots: [], receptions: [],
+    dignities: [], lots: [], receptions: [], dispositors: {}, evidence: [],
+    astronomical_context: { source: "virtual_reference_fixture", uncertainty: { mode: "exact_reference_fixture" }, day_night_status: "day" },
+    output_manifest: [
+      { output_id: "manifest.astronomy.ephemeris_core", status: "reference_fixture", result_pointer: "/result/points", view_ids: ["view.natal.basic"], table_ids: ["table.planet_positions", "table.planet_speeds"], export_formats: ["json"], algorithm_cards: ["ALG-ASTRONOMY-001"] },
+      { output_id: "manifest.astronomy.houses_angles", status: "reference_fixture", result_pointer: "/result/houses", view_ids: ["wheel.natal", "view.natal.houses"], table_ids: ["table.house_cusps"], export_formats: ["json"], algorithm_cards: ["ALG-ASTRONOMY-003"] },
+      { output_id: "manifest.astronomy.aspects", status: "reference_fixture", result_pointer: "/result/aspects", view_ids: ["wheel.natal", "view.natal.aspects"], table_ids: ["table.natal_aspects"], export_formats: ["json"], algorithm_cards: ["ALG-ASTRONOMY-004"] },
+      { output_id: "manifest.natal.patterns_distributions", status: "reference_fixture", result_pointer: "/result/structure", view_ids: ["view.natal.structure"], table_ids: ["table.elements", "table.modalities", "table.polarity", "table.chart_patterns"], export_formats: ["json"], algorithm_cards: ["ALG-NATAL-003"] },
+      { output_id: "manifest.natal.dignity_reception", status: "reference_fixture", result_pointer: "/result/classical", view_ids: ["view.natal.classical"], table_ids: ["table.essential_dignities", "table.receptions", "graph.dispositor_chain", "table.sect_condition"], export_formats: ["json"], algorithm_cards: ["ALG-NATAL-004"] },
+      { output_id: "manifest.natal.standard_chart", status: "reference_fixture", result_pointer: "/result/charts/0", view_ids: ["wheel.natal", "view.natal.technical_document"], table_ids: [], export_formats: ["json"], algorithm_cards: ["ALG-NATAL-001"] },
+    ],
   },
 };
 
 const defaultPerson: NatalPersonInput = {
   displayName: "", relation: "self", localDate: "2000-03-01", localTime: "16:30", timezoneId: "Asia/Shanghai",
-  placeName: "北京", countryCode: "CN", latitude: 39.93, longitude: 116.41, timeConfidence: "high",
+  timePrecision: "minute", placeName: "北京", countryCode: "CN", latitude: 39.93, longitude: 116.41,
+  timeConfidence: "high", timezoneStatus: "resolved",
 };
 
 const defaultSettings: NatalCalculationSettings = {
+  analysisSystem: "integrated", zodiac: "tropical", ayanamsa: "lahiri",
   houseSystem: "placidus", nodeType: "both", pointIds: [], aspectIds: [], orbOverrides: {},
 };
 
@@ -248,36 +442,188 @@ function formatDegree(value: number) {
   return `${degree}°${String(minute).padStart(2, "0")}′${String(second).padStart(2, "0")}″`;
 }
 
+function pointPlacementLabel(point: NatalPoint, dateLevel: boolean) {
+  return `${dateLevel ? "≈ " : ""}${signNames[point.sign] ?? point.sign} ${formatDegree(point.degree_in_sign)}`;
+}
+
+function pointHouseLabel(point: NatalPoint) {
+  return point.house == null ? "未计算（时刻未知）" : `第${point.house}宫`;
+}
+
+function pointMotionLabel(point: NatalPoint, dateLevel: boolean) {
+  if (dateLevel && point.status_refs?.some((item) => item.includes("motion_state_changes"))) return "日期内可能变化";
+  if (point.motion_interpretation === "not_applicable") return "不适用";
+  return point.retrograde ? "逆行" : "顺行";
+}
+
+function pointUncertaintyLabel(point: NatalPoint) {
+  if (point.position.uncertainty_arcsec == null) return "";
+  return `日期范围 ±${(point.position.uncertainty_arcsec / 3600).toFixed(4)}°`;
+}
+
 function toPlain(value: unknown): string {
   if (value === null || value === undefined) return "—";
   if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return String(value);
   return JSON.stringify(value, null, 2);
 }
 
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
+}
+
+function asRecords(value: unknown): Array<Record<string, unknown>> {
+  return Array.isArray(value) ? value.map(asRecord) : [];
+}
+
+function asStrings(value: unknown): string[] {
+  return Array.isArray(value) ? value.map(String) : [];
+}
+
+function isDateLevelSnapshot(snapshot: NatalSnapshot): boolean {
+  return asRecord(asRecord(snapshot.result.astronomical_context).uncertainty).mode === "civil_day_range";
+}
+
+function dateLevelPointRange(snapshot: NatalSnapshot, pointId: string): Record<string, unknown> {
+  const ranges = asRecord(asRecord(snapshot.result.structure).date_level_point_ranges);
+  return asRecord(ranges[pointId]);
+}
+
+function pointList(value: unknown): string {
+  return asStrings(value).map((id) => pointNames[id] ?? id).join("、") || "—";
+}
+
+const dignityNames: Record<string, string> = {
+  domicile: "入庙", exaltation: "擢升", triplicity: "三分性", term: "界", face: "十度区间／面",
+  detriment: "失势", fall: "落陷", peregrine: "游走",
+};
+
+const solarRelationNames: Record<string, string> = {
+  cazimi: "日核", combust: "燃烧", under_beams: "光束下", free_of_beams: "脱离光束", self: "太阳本身", not_applicable: "不适用",
+};
+
+const structureCategoryNames: Record<string, string> = {
+  fire: "火", earth: "土", air: "风", water: "水",
+  cardinal: "基本", fixed: "固定", mutable: "变动", positive: "阳性", negative: "阴性",
+  east: "东方半球", west: "西方半球", above: "上半球", below: "下半球",
+  quadrant_1: "第一象限", quadrant_2: "第二象限", quadrant_3: "第三象限", quadrant_4: "第四象限",
+  angular: "角宫", succedent: "续宫", cadent: "果宫",
+};
+
+const distributionNames: Record<string, string> = {
+  elements: "四元素", modalities: "三模式", polarities: "阴阳属性",
+};
+
+const patternNames: Record<string, string> = {
+  grand_trine: "大三角", t_square: "T 三角", grand_cross: "大十字", yod: "Yod",
+  kite: "风筝", mystic_rectangle: "神秘矩形", sign: "同星座群星", house: "同宫群星", longitude: "经度群星",
+};
+
 function buildLocalInterpretation(target: InterpretationTarget, snapshot: NatalSnapshot): ItemInterpretation {
+  const fixtureLayer = (
+    itemKind: string,
+    label: string,
+    status: "published" | "unavailable" | "not_applicable" | "blocked_by_input_quality",
+    fact: Record<string, unknown>,
+    meaning?: string,
+    unavailableReason?: string,
+  ): NonNullable<ItemInterpretation["layers"]>[number] => ({
+    item_kind: itemKind,
+    label,
+    status,
+    fact,
+    meaning,
+    unavailable_reason: unavailableReason,
+    warnings: [],
+    content_hash: `reference-fixture:${snapshot.input_fingerprint}:${target.id}:${itemKind}`,
+    rule_ref: `reference_fixture.${itemKind}.v1`,
+    template_version: "1.0.0",
+    maturity: "Reference fixture",
+    source_refs: ["internal.authored.natal-reference-fixture.v1"],
+  });
   if (target.type === "point") {
     const point = snapshot.result.points.find((item) => item.point_id === target.id);
     if (!point) return { status: "unavailable", unavailable_reason: "未找到对应点位事实。" };
     const fn = pointFunctions[point.point_id] ?? "此点位的专门解释模板尚未发布";
     const style = signStyles[point.sign] ?? "该星座的表达方式";
-    const domain = point.house ? houseDomains[point.house - 1] : "宫位依赖准确出生时间";
+    const dateLevel = isDateLevelSnapshot(snapshot);
+    const domain = point.house ? houseDomains[point.house - 1] : "宫位未计算（需要可靠出生时刻）";
+    const pointLabel = pointNames[point.point_id] ?? point.point_id;
+    const signLabel = signNames[point.sign] ?? point.sign;
+    const pointFact = {
+      point_id: point.point_id,
+      sign_id: point.sign,
+      degree_in_sign: point.degree_in_sign,
+      house: point.house,
+      motion_state: point.position.motion_state,
+      retrograde: point.retrograde,
+    };
+    const intrinsicPublished = Boolean(pointFunctions[point.point_id]);
+    const signPublished = Boolean(signStyles[point.sign]) && intrinsicPublished;
+    const layers: NonNullable<ItemInterpretation["layers"]> = [
+      fixtureLayer(
+        "point_intrinsic",
+        "星体自身功能",
+        intrinsicPublished ? "published" : "unavailable",
+        pointFact,
+        intrinsicPublished ? `${pointLabel}：${fn}。` : undefined,
+        intrinsicPublished ? undefined : "POINT_INTRINSIC_RULE_UNAVAILABLE",
+      ),
+      fixtureLayer(
+        "point_in_sign",
+        "星座表达方式",
+        signPublished ? "published" : "unavailable",
+        pointFact,
+        signPublished ? `${pointLabel}落在${signLabel}：这项功能倾向${style}。` : undefined,
+        signPublished ? undefined : "POINT_OR_SIGN_RULE_UNAVAILABLE",
+      ),
+      fixtureLayer(
+        "point_in_house",
+        "所在宫位领域",
+        dateLevel || point.house == null ? "blocked_by_input_quality" : intrinsicPublished ? "published" : "unavailable",
+        pointFact,
+        !dateLevel && point.house != null && intrinsicPublished
+          ? `${pointLabel}落在第${point.house}宫：这项功能主要通过${domain}被体验和表达。`
+          : undefined,
+        dateLevel || point.house == null ? "MISSING_HOUSE_ASSIGNMENT" : intrinsicPublished ? undefined : "POINT_INTRINSIC_RULE_UNAVAILABLE",
+      ),
+      fixtureLayer(
+        "motion",
+        "运动状态",
+        point.motion_interpretation === "not_applicable" ? "not_applicable" : "published",
+        pointFact,
+        point.motion_interpretation === "not_applicable"
+          ? undefined
+          : `${pointLabel}${point.retrograde ? "逆行" : "顺行"}；这是运动状态，不单独表示吉凶。`,
+        point.motion_interpretation === "not_applicable" ? "MOTION_INTERPRETATION_NOT_APPLICABLE" : undefined,
+      ),
+    ];
     return {
-      status: "available", title: `${pointNames[point.point_id] ?? point.point_id} · ${signNames[point.sign] ?? point.sign} · 第${point.house ?? "—"}宫`,
+      status: "available", title: `${pointNames[point.point_id] ?? point.point_id} · ${signNames[point.sign] ?? point.sign}${point.house ? ` · 第${point.house}宫` : ""}`,
       facts: target.facts ?? [target.fact, `运动状态：${point.retrograde === true ? "逆行" : point.motion_interpretation === "not_applicable" ? "不适用" : "顺行"}`],
-      meaning: `${fn}，通过“${style}”的方式表达，主要落在“${domain}”这一生活领域。`,
-      synthesis: "这是结构化单项解释，不替代整盘综合；相位、宫主星、尊贵与重复主题可能强化、修正或抵消这条倾向。",
+      meaning: dateLevel
+        ? `${fn}。日期范围内的参考位置落在${signNames[point.sign] ?? point.sign}，可用“${style}”作为星座层阅读；这不是伪造的出生时刻。`
+        : `${fn}，通过“${style}”的方式表达，主要落在“${domain}”这一生活领域。`,
+      synthesis: dateLevel
+        ? "出生时刻未知，因此不合成上升、宫位、相位、Lots、昼夜 Sect 或其他时刻依赖结论；若该点在日期内跨星座或改变运动状态，必须同时阅读不确定范围。"
+        : "这是结构化单项解释，不替代整盘综合；相位、宫主星、尊贵与重复主题可能强化、修正或抵消这条倾向。",
       rule_refs: ["reporting.contextual_item_interpretation.v1", "natal.point_sign_house.composition.v1"],
       source_refs: ["internal.authored.natal-basic-template.v1"], template_version: "1.0.0", maturity: "Beta",
+      content_hash: layers.map((layer) => layer.content_hash).join(" · "),
+      layers,
     };
   }
   if (target.type === "house") {
     const house = snapshot.result.houses.find((item) => String(item.number) === target.id);
+    const houseMeaning = house
+      ? `第${house.number}宫对应“${houseDomains[house.number - 1]}”。宫头落在${signNames[house.sign] ?? house.sign}，表示这个领域倾向以“${signStyles[house.sign] ?? "对应星座"}”的方式启动。`
+      : undefined;
     return house ? {
       status: "available", title: `第${house.number}宫 · ${signNames[house.sign] ?? house.sign}`,
       facts: [target.fact, `宫内点位：${house.point_ids.map((id) => pointNames[id] ?? id).join("、") || "无"}`],
-      meaning: `第${house.number}宫对应“${houseDomains[house.number - 1]}”。宫头落在${signNames[house.sign] ?? house.sign}，表示这个领域倾向以“${signStyles[house.sign] ?? "对应星座"}”的方式启动。`,
+      meaning: houseMeaning,
       synthesis: "完整判断还需要宫主星落座、落宫、相位、宫内天体和宫位制共同参与。",
       rule_refs: ["natal.house.cusp_ruler.v1"], source_refs: ["internal.authored.house-domain.v1"], template_version: "1.0.0", maturity: "Beta",
+      layers: [fixtureLayer("house_cusp_ruler", "宫头与宫主链", "published", house as unknown as Record<string, unknown>, houseMeaning)],
     } : { status: "unavailable", unavailable_reason: "未找到宫位事实。" };
   }
   if (target.type === "aspect") {
@@ -287,39 +633,70 @@ function buildLocalInterpretation(target: InterpretationTarget, snapshot: NatalS
       conjunction: "两种功能紧密融合并彼此放大", opposition: "两端形成拉扯，需要在关系或情境中寻找平衡", square: "两种功能形成摩擦并推动行动",
       trine: "两种功能较自然地互相支持", sextile: "两种功能存在可被主动使用的协作机会", quincunx: "两种功能需要持续调整",
     };
+    const aspectMeaning = `${pointNames[aspect.point_a] ?? aspect.point_a}与${pointNames[aspect.point_b] ?? aspect.point_b}${interaction[aspect.type] ?? "形成一种需要结合具体定义阅读的关系"}。`;
+    const phase = aspectPhaseLabel(aspect.applying_state);
     return {
-      status: "available", title: target.title, facts: [target.fact, `入出相：${aspect.applying_state}`, `强度：${Math.round(aspect.strength * 100)}%`],
-      meaning: `${pointNames[aspect.point_a] ?? aspect.point_a}与${pointNames[aspect.point_b] ?? aspect.point_b}${interaction[aspect.type] ?? "形成一种需要结合具体定义阅读的关系"}。`,
+      status: "available", title: target.title, facts: [target.fact, ...(phase ? [`阶段：${phase}`] : []), `强度：${Math.round(aspect.strength * 100)}%`],
+      meaning: aspectMeaning,
       synthesis: "容许度越小通常越接近精确；入相/出相只在两点运动语义都明确时判断。次要相位不应压过太阳、月亮、四轴和紧密主要相位。",
       rule_refs: aspect.rule_refs ?? ["official.aspects.professional_natal.v1"], source_refs: ["internal.authored.aspect-template.v1"], template_version: "1.0.0", maturity: "Beta",
+      layers: [fixtureLayer("natal_aspect", "相位互动", "published", aspect as unknown as Record<string, unknown>, aspectMeaning)],
     };
   }
   return {
-    status: "available", title: target.title, facts: [target.fact],
-    meaning: "该条目是由确定性规则引擎生成的结构或古典事实。当前先展示事实与计算依据；未发布的综合判断不会用通用文案补齐。",
+    status: "unavailable", title: target.title, facts: [target.fact],
+    unavailable_reason: "REFERENCE_FIXTURE_SEMANTIC_RULE_UNAVAILABLE",
     synthesis: "请与点位、宫位、相位以及其他同向或反向证据一起阅读。",
     rule_refs: [target.type === "classical" ? "ALG-NATAL-004" : "ALG-NATAL-003"],
     source_refs: ["interstellar.versioned-rule-pack"], template_version: "1.0.0", maturity: "Experimental",
+    layers: [fixtureLayer(
+      target.type === "classical" ? "classical_condition" : "structure_indicator",
+      target.type === "classical" ? "古典条件" : "盘面结构",
+      "unavailable",
+      { reference_fact: target.fact },
+      undefined,
+      "REFERENCE_FIXTURE_SEMANTIC_RULE_UNAVAILABLE",
+    )],
   };
 }
 
 function buildLocalTechnicalDocument(snapshot: NatalSnapshot, subjectName: string) {
+  const distributions = snapshot.result.distributions ?? [];
+  const dignities = snapshot.result.dignities ?? [];
+  const lots = snapshot.result.lots ?? [];
   const lines = [
-    `# ${subjectName} · 本命盘专业技术推演`, "", "> 由确定性计算结果生成；AI 不参与星历、星座、宫位或相位计算。", "",
+    `# ${subjectName} · 本命盘分析数据`, "", "> 可复制给占星师或外部模型继续分析；完整 JSON 可另行导出。", "",
     "## 完整点位", "", "| 点位 | 星座度数 | 宫位 | 运动 | 黄经 |", "|---|---:|---:|---|---:|",
     ...snapshot.result.points.map((point) => `| ${pointNames[point.point_id] ?? point.point_id} | ${signNames[point.sign] ?? point.sign} ${formatDegree(point.degree_in_sign)} | ${point.house ?? "—"} | ${point.retrograde ? "逆行" : point.motion_interpretation === "not_applicable" ? "不适用" : "顺行"} | ${point.position.ecliptic.longitude_deg.toFixed(6)}° |`),
     "", "## 十二宫", "", ...snapshot.result.houses.map((house) => `- 第${house.number}宫：${signNames[house.sign] ?? house.sign} ${formatDegree(house.degree_in_sign)}；点位 ${house.point_ids.map((id) => pointNames[id] ?? id).join("、") || "无"}`),
-    "", "## 完整相位", "", ...snapshot.result.aspects.map((aspect) => `- ${pointNames[aspect.point_a] ?? aspect.point_a} ${aspectNames[aspect.type] ?? aspect.type} ${pointNames[aspect.point_b] ?? aspect.point_b}；容许度 ${aspect.orb_deg.toFixed(3)}°；${aspect.applying_state}`),
-    "", "## 结构与古典事实", "", "```json", JSON.stringify({ structure: snapshot.result.structure, classical: snapshot.result.classical, dignities: snapshot.result.dignities, lots: snapshot.result.lots }, null, 2), "```",
-    "", "## 可复现性", "", `- Snapshot: ${snapshot.id}`, `- Engine: ${snapshot.engine.name}@${snapshot.engine.version}`, `- Input fingerprint: ${snapshot.input_fingerprint}`, `- Maturity: ${snapshot.maturity}`,
+    "", "## 完整相位", "", ...snapshot.result.aspects.map((aspect) => {
+      const phase = aspectPhaseLabel(aspect.applying_state);
+      return `- ${pointNames[aspect.point_a] ?? aspect.point_a} ${aspectNames[aspect.type] ?? aspect.type} ${pointNames[aspect.point_b] ?? aspect.point_b}；容许度 ${aspect.orb_deg.toFixed(3)}°${phase ? `；${phase}` : ""}；强度 ${Math.round(aspect.strength * 100)}%`;
+    }),
+    "", "## 分布与盘面结构", "",
+    ...distributions.flatMap((distribution) => [
+      `- ${distributionNames[distribution.dimension] ?? distribution.dimension}：${distribution.categories.map((category) => `${structureCategoryNames[category.category_id] ?? category.category_id} ${category.percentage?.toFixed(2) ?? "—"}%`).join("；")}`,
+    ]),
+    ...((snapshot.result.patterns ?? []).map((pattern) => { const row = asRecord(pattern); return `- 格局：${patternNames[String(row.pattern_type ?? row.kind)] ?? String(row.pattern_type ?? row.kind ?? "未命名格局")}；参与点位 ${pointList(row.participant_ids)}`; })),
+    "", "## 古典与希腊化事实", "",
+    ...dignities.map((raw) => { const row = asRecord(raw); return `- ${pointNames[String(row.point_id)] ?? String(row.point_id)}：尊贵 ${asRecords(row.dignities).map((item) => dignityNames[String(item.kind)] ?? String(item.kind)).join("、") || "无"}；失势/落陷 ${asRecords(row.debilities).map((item) => dignityNames[String(item.kind)] ?? String(item.kind)).join("、") || "无"}；游走 ${row.peregrine === true ? "是" : row.peregrine === false ? "否" : "不适用"}`; }),
+    ...lots.map((raw) => { const lot = asRecord(raw); return `- ${pointNames[String(lot.lot_id)] ?? String(lot.lot_id)}：${signNames[String(lot.sign_id)] ?? String(lot.sign_id)} ${formatDegree(Number(lot.degree_in_sign ?? 0))}；公式 ${String(lot.formula_expression ?? "—")}`; }),
+    "", "## 输入质量与分析提醒", "", ...(snapshot.warnings.length ? snapshot.warnings.map((warning) => `- ${warning.message}`) : ["- 没有影响本次分析范围的计算警告。"]),
   ];
   return lines.join("\n");
 }
 
-function NatalWheel({ snapshot }: { snapshot: NatalSnapshot }) {
-  const points = snapshot.result.points.filter((point) => [
-    ...pointGroups.core, "asc", "mc", "true_north_node", "chiron", "fortune", "spirit",
-  ].includes(point.point_id));
+function NatalWheel({ snapshot, renderSpec, controls }: { snapshot: NatalSnapshot; renderSpec: RenderSpec; controls: NatalRenderControls }) {
+  const dateLevel = isDateLevelSnapshot(snapshot);
+  const variant = renderSpec.options.variant;
+  const professional = variant === "professional";
+  const hasLayer = (layer: string) => renderSpec.layers.includes(layer);
+  const compactPointIds = [...pointGroups.core, "asc", "dsc", "mc", "ic", "true_north_node", "chiron", "fortune", "spirit"];
+  const visiblePointIds = new Set(controls.visiblePointIds);
+  const points = snapshot.result.points
+    .filter((point) => visiblePointIds.has(point.point_id))
+    .filter((point) => professional || compactPointIds.includes(point.point_id))
+    .sort((a, b) => a.position.ecliptic.longitude_deg - b.position.ecliptic.longitude_deg);
   const asc = snapshot.result.points.find((point) => point.point_id === "asc")?.position.ecliptic.longitude_deg
     ?? snapshot.result.houses[0]?.cusp_longitude_deg ?? 0;
   const angleFor = (longitude: number) => (180 - (longitude - asc)) * Math.PI / 180;
@@ -328,36 +705,92 @@ function NatalWheel({ snapshot }: { snapshot: NatalSnapshot }) {
     y: Number((320 - Math.sin(angleFor(longitude)) * radius).toFixed(6)),
   });
   const pointById = new Map(snapshot.result.points.map((point) => [point.point_id, point]));
+  const angularDistance = (left: number, right: number) => Math.abs(((left - right + 540) % 360) - 180);
+  const placed: Array<{ longitude: number; lane: number }> = [];
+  const pointLayouts = points.map((point) => {
+    const longitude = point.position.ecliptic.longitude_deg;
+    const laneCount = professional ? 5 : 3;
+    const lane = Array.from({ length: laneCount }, (_, index) => index).find((candidate) =>
+      !placed.some((item) => item.lane === candidate && angularDistance(item.longitude, longitude) < (professional ? 6.5 : 10)),
+    ) ?? placed.length % laneCount;
+    placed.push({ longitude, lane });
+    return {
+      point,
+      anchor: xy(longitude, professional ? 253 : 232),
+      label: xy(longitude, professional ? 239 - lane * 11.5 : 207 - lane * 19),
+      lane,
+    };
+  });
+  const axes = [["asc", "ASC"], ["dsc", "DSC"], ["mc", "MC"], ["ic", "IC"]] as const;
+  const majorAspectTypes = new Set(["conjunction", "opposition", "trine", "square", "sextile"]);
+  const visibleAspects = selectVisibleNatalAspects(snapshot, controls);
+  const aspectPointIds = new Set(visibleAspects.flatMap((aspect) => [aspect.point_a, aspect.point_b]));
+  const aspectRadius = professional ? 143 : 156;
   return (
-    <svg className="natal-wheel" viewBox="0 0 640 640" role="img" aria-label="本命盘轮盘">
-      <circle cx="320" cy="320" r="294" className="wheel-outer" />
-      <circle cx="320" cy="320" r="246" className="wheel-ring" />
-      <circle cx="320" cy="320" r="184" className="wheel-ring wheel-inner" />
-      {Array.from({ length: 12 }, (_, index) => {
-        const boundary = xy(index * 30, 294);
-        const inner = xy(index * 30, 246);
-        const label = xy(index * 30 + 15, 270);
-        return <g key={`sign-${index}`}><line x1={inner.x} y1={inner.y} x2={boundary.x} y2={boundary.y} className="sign-line" /><text x={label.x} y={label.y} className="sign-glyph">{signGlyphs[index]}</text></g>;
+    <svg className={`natal-wheel ${professional ? "professional-wheel" : "compact-wheel"}`} viewBox="0 0 640 640" role="img" aria-label={renderSpec.accessibility.title} data-render-view={renderSpec.view_id} data-snapshot-id={snapshot.id}>
+      <metadata>{JSON.stringify(renderSpec)}</metadata>
+      <title>{renderSpec.accessibility.title}</title>
+      <desc>{renderSpec.accessibility.description}</desc>
+      <circle cx="320" cy="320" r="306" className="wheel-outer" />
+      <circle cx="320" cy="320" r="292" className="wheel-ring degree-ring" />
+      <circle cx="320" cy="320" r="257" className="wheel-ring zodiac-ring" />
+      <circle cx="320" cy="320" r={professional ? "190" : "176"} className="wheel-ring point-band-ring" />
+      <circle cx="320" cy="320" r={professional ? "154" : "166"} className="wheel-ring house-number-ring" />
+      <circle cx="320" cy="320" r={aspectRadius} className="wheel-ring aspect-stage-ring" />
+      {hasLayer("degree_ticks") && Array.from({ length: 360 }, (_, degree) => {
+        if (!professional && degree % 5 !== 0) return null;
+        const outer = xy(degree, 304);
+        const tickLength = degree % 10 === 0 ? 11 : degree % 5 === 0 ? 7 : 3.5;
+        const inner = xy(degree, 304 - tickLength);
+        return <line key={`degree-tick-${degree}`} x1={inner.x} y1={inner.y} x2={outer.x} y2={outer.y} className={`degree-tick ${degree % 10 === 0 ? "major" : degree % 5 === 0 ? "medium" : "minor"}`} />;
       })}
-      {snapshot.result.houses.map((house) => {
-        const end = xy(house.cusp_longitude_deg, 246);
-        const number = xy(house.cusp_longitude_deg + house.span_deg / 2, 218);
-        return <g key={`house-${house.number}`}><line x1="320" y1="320" x2={end.x} y2={end.y} className={house.number === 1 || house.number === 10 ? "house-line axis" : "house-line"} /><text x={number.x} y={number.y} className="house-number">{house.number}</text></g>;
+      {hasLayer("zodiac") && Array.from({ length: 12 }, (_, index) => {
+        const boundary = xy(index * 30, 304);
+        const inner = xy(index * 30, 257);
+        const label = xy(index * 30 + 15, professional ? 279 : 275);
+        const name = xy(index * 30 + 15, 264);
+        return <g key={`sign-${index}`}><line x1={inner.x} y1={inner.y} x2={boundary.x} y2={boundary.y} className="sign-line" /><text x={label.x} y={label.y} className="sign-glyph">{signGlyphs[index]}</text>{renderSpec.labels.zodiac_names && <text x={name.x} y={name.y} className="sign-name-label">{signNames[signIds[index]]}</text>}{renderSpec.labels.zodiac_degrees && [0, 10, 20].map((degree) => { const tickLabel = xy(index * 30 + degree + 1.3, 297); return <text key={degree} x={tickLabel.x} y={tickLabel.y} className="sign-degree-label">{degree}°</text>; })}</g>;
       })}
-      {snapshot.result.aspects.slice(0, 80).map((aspect) => {
+      {hasLayer("houses") && snapshot.result.houses.map((house) => {
+        const end = xy(house.cusp_longitude_deg, 257);
+        const start = xy(house.cusp_longitude_deg, professional ? 154 : 0);
+        const number = xy(house.cusp_longitude_deg + house.span_deg / 2, professional ? 171 : 184);
+        const isAxis = [1, 4, 7, 10].includes(house.number);
+        return <g key={`house-${house.number}`}>{controls.showHouseLines && <line x1={professional ? start.x : 320} y1={professional ? start.y : 320} x2={end.x} y2={end.y} className={isAxis ? "house-line axis" : "house-line"} />}{renderSpec.labels.house_numbers && <text x={number.x} y={number.y} className="house-number">{house.number}</text>}</g>;
+      })}
+      {hasLayer("aspect_stage") && [...aspectPointIds].map((pointId) => {
+        const point = pointById.get(pointId);
+        if (!point) return null;
+        const longitude = point.position.ecliptic.longitude_deg;
+        const outer = xy(longitude, professional ? 154 : 166);
+        const anchor = xy(longitude, aspectRadius);
+        return <g key={`aspect-anchor-${pointId}`} className="aspect-anchor-group"><line x1={outer.x} y1={outer.y} x2={anchor.x} y2={anchor.y} className="aspect-anchor-spoke" /><circle cx={anchor.x} cy={anchor.y} r={professional ? "2.8" : "2.2"} className="aspect-anchor-dot" /></g>;
+      })}
+      {hasLayer("aspect_lines") && visibleAspects.map((aspect) => {
         const a = pointById.get(aspect.point_a); const b = pointById.get(aspect.point_b);
         if (!a || !b) return null;
-        const start = xy(a.position.ecliptic.longitude_deg, 176); const end = xy(b.position.ecliptic.longitude_deg, 176);
+        const start = xy(a.position.ecliptic.longitude_deg, aspectRadius); const end = xy(b.position.ecliptic.longitude_deg, aspectRadius);
         const hard = ["square", "opposition", "semisquare", "sesquisquare"].includes(aspect.type);
-        return <line key={aspect.aspect_id} x1={start.x} y1={start.y} x2={end.x} y2={end.y} className={hard ? "aspect-line hard" : "aspect-line"} />;
+        const soft = ["trine", "sextile", "quintile", "biquintile"].includes(aspect.type);
+        const className = `aspect-line ${hard ? "hard" : soft ? "soft" : "neutral"} ${majorAspectTypes.has(aspect.type) ? "major" : "minor"}`;
+        return <line key={aspect.aspect_id} x1={start.x} y1={start.y} x2={end.x} y2={end.y} className={className} data-aspect={aspect.type} style={{ strokeWidth: majorAspectTypes.has(aspect.type) ? 1.05 + aspect.strength * 1.25 : .55 + aspect.strength * .55, opacity: majorAspectTypes.has(aspect.type) ? .5 + aspect.strength * .38 : .16 + aspect.strength * .2 }} />;
       })}
-      {points.map((point, index) => {
-        const location = xy(point.position.ecliptic.longitude_deg, 196 - (index % 3) * 13);
-        return <g key={point.point_id} transform={`translate(${location.x} ${location.y})`}><circle r="13" className="planet-dot" /><text className="planet-glyph" y="1">{pointGlyphs[point.point_id] ?? "•"}</text></g>;
+      {hasLayer("axes") && axes.map(([pointId, label]) => {
+        const point = pointById.get(pointId);
+        if (!point) return null;
+        const end = xy(point.position.ecliptic.longitude_deg, 304);
+        const tag = xy(point.position.ecliptic.longitude_deg, 316);
+        return <g key={`axis-${pointId}`}><line x1="320" y1="320" x2={end.x} y2={end.y} className={`wheel-axis wheel-axis-${pointId}`} /><text x={tag.x} y={tag.y} className="wheel-axis-label">{label}</text></g>;
       })}
-      <circle cx="320" cy="320" r="54" className="wheel-core" />
-      <text x="320" y="310" className="wheel-core-title">NATAL</text>
-      <text x="320" y="333" className="wheel-core-sub">{snapshot.result.points.length} 点 · {snapshot.result.aspects.length} 相位</text>
+      {hasLayer("points") && pointLayouts.map(({ point, anchor, label, lane }) => {
+        const glyph = pointGlyphs[point.point_id] ?? pointNames[point.point_id]?.slice(0, 1) ?? "•";
+        const shortLabel = wheelPointLabels[point.point_id] ?? pointNames[point.point_id]?.slice(0, 1) ?? glyph;
+        return <g key={point.point_id} className={`wheel-point wheel-point-${point.kind ?? "other"} wheel-point-id-${point.point_id}`} data-lane={lane}>{renderSpec.labels.point_leaders && <line x1={anchor.x} y1={anchor.y} x2={label.x} y2={label.y} className="point-leader" />}<circle cx={anchor.x} cy={anchor.y} r="2.5" className="point-anchor" />{professional ? <g transform={`translate(${label.x} ${label.y})`}><text className="professional-point-label" y="0">{shortLabel}</text>{point.retrograde && <text x="9" y="-8" className="point-retrograde">R</text>}{renderSpec.labels.point_degrees && <text x="0" y="10" className="point-degree-label">{Math.floor(point.degree_in_sign)}°{Math.round((point.degree_in_sign % 1) * 60).toString().padStart(2, "0")}′</text>}</g> : <g transform={`translate(${label.x} ${label.y})`}><circle r="13" className="planet-dot" /><text className="planet-glyph" y="1">{glyph}</text>{point.retrograde && <text x="13" y="-12" className="point-retrograde">R</text>}</g>}</g>;
+      })}
+      <circle cx="320" cy="320" r={professional ? "43" : "54"} className="wheel-core" />
+      <text x="320" y={professional ? "316" : "306"} className="wheel-core-title">{dateLevel ? "DATE RANGE" : professional ? "本命" : "NATAL"}</text>
+      <text x="320" y={professional ? "330" : "329"} className="wheel-core-sub">{dateLevel ? `${points.length} 点 · 时刻未知` : `${points.length} 点 · ${visibleAspects.length}/${snapshot.result.aspects.length} 相位线`}</text>
+      {hasLayer("legend") && !dateLevel && professional && <g className="wheel-legend"><line x1="266" y1="371" x2="284" y2="371" className="aspect-line hard major" /><text x="288" y="374">张力</text><line x1="322" y1="371" x2="340" y2="371" className="aspect-line soft major" /><text x="344" y="374">支持</text></g>}
     </svg>
   );
 }
@@ -389,15 +822,80 @@ function AspectGrid({ snapshot, onOpen }: { snapshot: NatalSnapshot; onOpen: (as
   );
 }
 
+function TimeDependentUnavailable({ title, detail }: { title: string; detail: string }) {
+  return <section className="time-dependent-unavailable"><span>TIME DEPENDENT · BLOCKED</span><h3>{title}</h3><p>{detail}</p><ul><li>系统没有把 00:00 或日期中点当作出生时刻。</li><li>补充可靠当地出生时间后，重新计算会生成新的不可变快照。</li><li>当前仍可查看日期级天体位置、不确定范围及可能的跨星座／运动状态变化。</li></ul></section>;
+}
+
+function StructureResults({ snapshot, onOpen }: { snapshot: NatalSnapshot; onOpen: (target: InterpretationTarget) => void }) {
+  const structure = asRecord(snapshot.result.structure);
+  const categorical = [
+    ["hemispheres", "半球分布"], ["quadrants", "象限分布"], ["house_modes", "角续果分布"],
+  ] as const;
+  const angularity = asRecord(structure.angularity);
+  const angularFacts = asRecords(angularity.facts);
+  const stelliums = asRecords(asRecord(structure.stelliums).facts);
+  const patterns = asRecords(asRecord(structure.geometric_patterns).facts);
+  const jones = asRecord(structure.jones_shape);
+  return <>
+    <div className="professional-grid">
+      {categorical.map(([key, label]) => {
+        const section = asRecord(structure[key]);
+        const categories = asRecords(section.categories);
+        return <article className="professional-card" key={key}><header><div><small>{availabilityLabel(section.availability)}</small><h3>{label}</h3></div><button onClick={() => onOpen({ type: "structure", id: key, title: label, fact: toPlain(section), resultPath: `/result/structure/${key}` })}>解读</button></header>{categories.length ? <ul className="fact-list">{categories.map((category) => <li key={String(category.category_id)}><span>{structureCategoryNames[String(category.category_id)] ?? String(category.category_id)}</span><b>{Number(category.count ?? 0)}</b><small>{pointList(category.point_ids)}</small></li>)}</ul> : <p className="empty-fact">没有可用分类事实。</p>}</article>;
+      })}
+    </div>
+
+    <h3 className="table-group-title">角度性与宫位强度位置</h3>
+    <div className="professional-table-wrap"><table className="professional-table"><thead><tr><th>点位</th><th>宫位</th><th>宫位类型</th><th>最近轴点</th><th>距离</th><th>带宽</th><th>操作</th></tr></thead><tbody>{angularFacts.map((fact, index) => <tr key={String(fact.point_id)}><td>{pointNames[String(fact.point_id)] ?? String(fact.point_id)}</td><td>{fact.house == null ? "—" : `第${String(fact.house)}宫`}</td><td>{structureCategoryNames[String(fact.house_mode)] ?? String(fact.house_mode ?? "—")}</td><td>{pointNames[String(fact.nearest_angle_id)] ?? String(fact.nearest_angle_id ?? "—")}</td><td>{fact.distance_to_angle_deg == null ? "—" : `${Number(fact.distance_to_angle_deg).toFixed(3)}°`}</td><td>{String(fact.band ?? "—")}</td><td><button onClick={() => onOpen({ type: "structure", id: `angularity.${String(fact.point_id)}`, title: `${pointNames[String(fact.point_id)] ?? String(fact.point_id)}的角度性`, fact: toPlain(fact), resultPath: `/result/structure/angularity/facts/${index}` })}>解读</button></td></tr>)}</tbody></table></div>
+
+    <div className="professional-grid structure-patterns">
+      <article className="professional-card"><header><div><small>STELLIUMS</small><h3>群星结构</h3></div><span>{stelliums.length}</span></header>{stelliums.length ? <ul className="fact-list">{stelliums.map((fact, index) => <li key={String(fact.stellium_id ?? index)}><span>{patternNames[String(fact.kind)] ?? String(fact.kind)}</span><b>{asStrings(fact.participant_ids).length} 点</b><small>{pointList(fact.participant_ids)}{fact.longitude_span_deg == null ? "" : ` · 跨度 ${Number(fact.longitude_span_deg).toFixed(3)}°`}</small><button onClick={() => onOpen({ type: "structure", id: String(fact.stellium_id ?? index), title: patternNames[String(fact.kind)] ?? "群星结构", fact: toPlain(fact), resultPath: `/result/structure/stelliums/facts/${index}` })}>解读</button></li>)}</ul> : <p className="empty-fact">当前规则方案未命中群星结构。</p>}</article>
+      <article className="professional-card"><header><div><small>GEOMETRIC PATTERNS</small><h3>几何格局</h3></div><span>{patterns.length}</span></header>{patterns.length ? <ul className="fact-list">{patterns.map((fact, index) => <li key={String(fact.pattern_id ?? index)}><span>{patternNames[String(fact.pattern_type)] ?? String(fact.pattern_type)}</span><b>{asStrings(fact.participant_ids).length} 点</b><small>{pointList(fact.participant_ids)}</small><button onClick={() => onOpen({ type: "structure", id: String(fact.pattern_id ?? index), title: patternNames[String(fact.pattern_type)] ?? "几何格局", fact: toPlain(fact), resultPath: `/result/structure/geometric_patterns/facts/${index}` })}>解读</button></li>)}</ul> : <p className="empty-fact">当前规则方案未命中已发布几何格局。</p>}</article>
+      <article className="professional-card"><header><div><small>盘型分类</small><h3>Jones 盘型</h3></div><span>{statusNames[String(jones.status ?? "")] ?? (jones.shape_id ? "已识别" : "不确定")}</span></header><p className="boundary-copy">{jones.shape_id ? String(jones.shape_id) : "当前没有通过验证的分类规则，因此保留为不确定，不用视觉猜测生成盘型。"}</p><button onClick={() => onOpen({ type: "structure", id: "jones_shape", title: "Jones 盘型边界", fact: toPlain(jones), resultPath: "/result/structure/jones_shape" })}>查看依据</button></article>
+    </div>
+  </>;
+}
+
+function ClassicalResults({ snapshot, onOpen }: { snapshot: NatalSnapshot; onOpen: (target: InterpretationTarget) => void }) {
+  const classical = asRecord(snapshot.result.classical);
+  const sect = asRecord(classical.sect);
+  const dignities = snapshot.result.dignities ?? [];
+  const solarConditions = asRecords(classical.solar_conditions);
+  const receptionDocument = asRecord(classical.receptions);
+  const receptions = asRecords(receptionDocument.receptions);
+  const mutualReceptions = asRecords(receptionDocument.mutual_receptions);
+  const lots = snapshot.result.lots ?? [];
+  return <>
+    <div className="classical-summary"><div><small>昼夜盘</small><b>{classical.day_night_status === "day" ? "昼盘" : classical.day_night_status === "night" ? "夜盘" : "不确定"}</b><span>太阳高度 {classical.sun_altitude_deg == null ? "—" : `${Number(classical.sun_altitude_deg).toFixed(3)}°`}</span></div><div><small>本质尊贵</small><b>{dignities.length}</b><span>传统七曜逐星计算</span></div><div><small>接纳 / 互容</small><b>{receptions.length} / {mutualReceptions.length}</b><span>不要求相位的接纳事实</span></div><div><small>阿拉伯点</small><b>{lots.length}</b><span>昼夜公式写入快照</span></div></div>
+
+    <div className="professional-card sect-card"><header><div><small>{availabilityLabel(classical.availability)}</small><h3>Sect 昼夜体系</h3></div><button onClick={() => onOpen({ type: "classical", id: "sect", title: "Sect 昼夜体系", fact: toPlain(sect), resultPath: "/result/classical/sect" })}>解读</button></header><dl className="fact-definition"><div><dt>当权光体</dt><dd>{pointNames[String(sect.sect_light_id)] ?? String(sect.sect_light_id ?? "—")}</dd></div><div><dt>昼星</dt><dd>{pointList(sect.diurnal_planet_ids)}</dd></div><div><dt>夜星</dt><dd>{pointList(sect.nocturnal_planet_ids)}</dd></div><div><dt>条件星</dt><dd>{pointList(sect.conditional_planet_ids)}</dd></div></dl></div>
+
+    <h3 className="table-group-title">先天尊贵与失势落陷</h3>
+    <div className="professional-table-wrap"><table className="professional-table dignity-table"><thead><tr><th>星体</th><th>位置</th><th>尊贵</th><th>失势／落陷</th><th>游走</th><th>Sect</th><th>操作</th></tr></thead><tbody>{dignities.map((raw, index) => { const row = asRecord(raw); const active = asRecords(row.dignities).map((item) => dignityNames[String(item.kind)] ?? String(item.kind)); const debilities = asRecords(row.debilities).map((item) => dignityNames[String(item.kind)] ?? String(item.kind)); return <tr key={String(row.point_id ?? index)}><td>{pointNames[String(row.point_id)] ?? String(row.point_id)}</td><td>{signNames[String(row.sign_id)] ?? String(row.sign_id)} {formatDegree(Number(row.degree_in_sign ?? 0))}</td><td>{active.join("、") || "无"}</td><td>{debilities.join("、") || "无"}</td><td>{row.peregrine === true ? "是" : row.peregrine === false ? "否" : "不适用"}</td><td>{String(row.sect ?? "—")}</td><td><button onClick={() => onOpen({ type: "classical", id: `dignity.${String(row.point_id)}`, title: `${pointNames[String(row.point_id)] ?? String(row.point_id)}的本质尊贵`, fact: toPlain(row), resultPath: `/result/dignities/${index}` })}>解读</button></td></tr>; })}</tbody></table></div>
+
+    <h3 className="table-group-title">太阳条件与方向状态</h3>
+    <div className="professional-table-wrap"><table className="professional-table"><thead><tr><th>星体</th><th>太阳条件</th><th>日距</th><th>东方／西方</th><th>越界</th><th>物理可见性</th><th>操作</th></tr></thead><tbody>{solarConditions.map((condition, index) => { const point = snapshot.result.points.find((item) => item.point_id === String(condition.point_id)); return <tr key={String(condition.point_id ?? index)}><td>{pointNames[String(condition.point_id)] ?? String(condition.point_id)}</td><td>{solarRelationNames[String(condition.relation)] ?? String(condition.relation)}</td><td>{condition.separation_deg == null ? "—" : `${Number(condition.separation_deg).toFixed(3)}°`}</td><td>{point?.oriental_occidental === "oriental" ? "东方" : point?.oriental_occidental === "occidental" ? "西方" : "不适用"}</td><td>{point?.out_of_bounds === true ? "是" : point?.out_of_bounds === false ? "否" : "不适用"}</td><td>{point?.visibility_state === "uncertain" ? "未计算（需晨昏模型）" : point?.visibility_state ?? "—"}</td><td><button onClick={() => onOpen({ type: "classical", id: `solar.${String(condition.point_id)}`, title: `${pointNames[String(condition.point_id)] ?? String(condition.point_id)}的太阳条件`, fact: toPlain(condition), resultPath: `/result/classical/solar_conditions/${index}` })}>解读</button></td></tr>; })}</tbody></table></div>
+
+    <div className="professional-grid classical-relations">
+      <article className="professional-card"><header><div><small>RECEPTIONS</small><h3>接纳与互容</h3></div><span>{receptions.length + mutualReceptions.length}</span></header><ul className="fact-list">{receptions.map((row, index) => <li key={`direct-${index}`}><span>{pointNames[String(row.host_point_id)] ?? String(row.host_point_id)} 接纳 {pointNames[String(row.guest_point_id)] ?? String(row.guest_point_id)}</span><b>{dignityNames[String(row.dignity_kind)] ?? String(row.dignity_kind)}</b><small>{row.active_for_sect == null ? "无昼夜过滤" : row.active_for_sect ? "当前 Sect 生效" : "当前 Sect 不生效"}</small></li>)}{mutualReceptions.map((row, index) => <li key={`mutual-${index}`}><span>{pointNames[String(row.point_a)] ?? String(row.point_a)} ↔ {pointNames[String(row.point_b)] ?? String(row.point_b)}</span><b>互容</b><small>{asStrings(row.a_receives_b_by).map((id) => dignityNames[id] ?? id).join("、")} / {asStrings(row.b_receives_a_by).map((id) => dignityNames[id] ?? id).join("、")}</small></li>)}</ul>{!receptions.length && !mutualReceptions.length && <p className="empty-fact">当前规则方案没有命中接纳或互容。</p>}<button onClick={() => onOpen({ type: "classical", id: "receptions", title: "接纳与互容", fact: toPlain(receptionDocument), resultPath: "/result/classical/receptions" })}>解读</button></article>
+    </div>
+
+    <h3 className="table-group-title">阿拉伯点／赫尔墨斯 Lots</h3>
+    <div className="professional-table-wrap"><table className="professional-table"><thead><tr><th>点位</th><th>位置</th><th>宫位</th><th>昼夜</th><th>公式</th><th>版本</th><th>操作</th></tr></thead><tbody>{lots.map((raw, index) => { const lot = asRecord(raw); const point = snapshot.result.points.find((item) => item.point_id === String(lot.lot_id)); return <tr key={String(lot.lot_id ?? index)}><td>{pointNames[String(lot.lot_id)] ?? String(lot.lot_id)}</td><td>{signNames[String(lot.sign_id)] ?? String(lot.sign_id)} {formatDegree(Number(lot.degree_in_sign ?? 0))}</td><td>{point?.house == null ? "—" : `第${point.house}宫`}</td><td>{String(lot.sect ?? "—")}</td><td><code>{String(lot.formula_expression ?? "—")}</code></td><td>{String(lot.formula_version ?? "—")}</td><td><button onClick={() => onOpen({ type: "classical", id: `lot.${String(lot.lot_id)}`, title: `${pointNames[String(lot.lot_id)] ?? String(lot.lot_id)}的计算与含义`, fact: toPlain(lot), resultPath: `/result/lots/${index}` })}>解读</button></td></tr>; })}</tbody></table></div>
+
+    <p className="professional-boundary">当前已可靠实现 9 个昼夜感知 Lots。Hayz、Almuten、综合尊贵分、完整偶然尊贵与物理可见性仍明确标记为待验证，不以空白分数或通用文案伪装。</p>
+  </>;
+}
+
 function InterpretationDrawer({ target, snapshot, onClose }: { target: InterpretationTarget; snapshot: NatalSnapshot; onClose: () => void }) {
   const [result, setResult] = useState<ItemInterpretation>(() => buildLocalInterpretation(target, snapshot));
   const [loading, setLoading] = useState(snapshot.id.startsWith("calculation-") && Boolean(target.resultPath));
   useEffect(() => {
     let active = true;
     if (!snapshot.id.startsWith("calculation-") || !target.resultPath) return () => { active = false; };
-    getNatalItemInterpretation(snapshot.id, target.type, target.resultPath)
+    getNatalItemInterpretation(snapshot.id, target.type, target.resultPath, { includeTimeDependent: !isDateLevelSnapshot(snapshot) })
       .then((value) => {
-        if (active && value.status === "available") {
+        if (active) {
           setResult({
             ...value,
             title: value.title ?? target.title,
@@ -408,86 +906,179 @@ function InterpretationDrawer({ target, snapshot, onClose }: { target: Interpret
       .catch(() => undefined)
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [snapshot.id, target.fact, target.facts, target.id, target.resultPath, target.title, target.type]);
+  }, [snapshot, target.fact, target.facts, target.id, target.resultPath, target.title, target.type]);
   return (
     <div className="drawer-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
       <aside className="interpretation-drawer" role="dialog" aria-modal="true" aria-label="逐项解读">
         <header><div><span>CONTEXTUAL INTERPRETATION</span><h2>{result.title ?? target.title}</h2></div><button onClick={onClose} aria-label="关闭">×</button></header>
-        {loading && <div className="drawer-loading">正在读取版本化解读规则…</div>}
-        {result.status === "unavailable" ? <section><h3>尚无已发布规则</h3><p>{result.unavailable_reason}</p></section> : <>
-          <section><h3>计算事实</h3>{[...new Set(result.facts ?? [])].map((fact, index) => <p className="fact-line" key={`${index}:${fact}`}>{fact}</p>)}</section>
-          <section><h3>单项含义</h3><p>{result.meaning}</p></section>
-          <section><h3>组合阅读边界</h3><p>{result.synthesis}</p></section>
-          <section className="provenance-box"><h3>规则与来源</h3><dl><div><dt>成熟度</dt><dd>{result.maturity}</dd></div><div><dt>模板</dt><dd>{result.template_version}</dd></div><div><dt>规则</dt><dd>{[...new Set(result.rule_refs ?? [])].join(" · ")}</dd></div><div><dt>来源</dt><dd>{[...new Set(result.source_refs ?? [])].join(" · ")}</dd></div></dl></section>
-        </>}
+        {loading && <div className="drawer-loading">正在读取这项结果的解读…</div>}
+        <section><h3>计算事实</h3>{[...new Set(result.facts ?? [target.fact])].map((fact, index) => <p className="fact-line" key={`${index}:${fact}`}>{fact}</p>)}</section>
+        {result.layers?.length ? <section><h3>分层解读</h3><p className="interpretation-boundary">只展示当前已发布且适用于这份出生资料的解释；条件不足的部分会明确说明。</p><div className="interpretation-layers">{result.layers.map((layer) => <article key={`${layer.item_kind}:${layer.content_hash}`} className={`interpretation-layer status-${layer.status}`}><header><h4>{layer.label}</h4><span>{({ published: "可阅读", unavailable: "尚无解读", not_applicable: "不适用", blocked_by_input_quality: "输入受限" })[layer.status]}</span></header>{layer.meaning ? <p>{layer.meaning}</p> : <p className="layer-unavailable">{layer.unavailable_reason ?? "当前条件下没有可用解释。"}</p>}</article>)}</div></section> : result.status === "available" ? <section><h3>单项含义</h3><p>{result.meaning}</p></section> : <section><h3>{result.status === "blocked_by_input_quality" ? "输入质量不足" : result.status === "not_applicable" ? "当前不适用" : "尚无已发布解读"}</h3><p>{result.unavailable_reason}</p></section>}
+        {result.status === "available" && <section><h3>组合阅读边界</h3><p>{result.synthesis}</p></section>}
       </aside>
     </div>
   );
 }
 
 function PersonFields({ person, onChange }: { person: NatalPersonInput; onChange: (person: NatalPersonInput) => void }) {
-  const applyPlace = (name: string) => {
-    const match = placeOptions.find((place) => place.name === name);
-    onChange(match ? { ...person, placeName: match.name, countryCode: match.countryCode, latitude: match.latitude, longitude: match.longitude, timezoneId: match.timezoneId } : { ...person, placeName: name });
+  const [locationCandidates, setLocationCandidates] = useState<LocationSearchItem[]>([]);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationMessage, setLocationMessage] = useState("");
+  const timezoneOptions = useMemo(() => {
+    const supportedValuesOf = (Intl as unknown as { supportedValuesOf?: (key: string) => string[] }).supportedValuesOf;
+    const supported = supportedValuesOf ? supportedValuesOf("timeZone") : fallbackTimezoneOptions;
+    return [...new Set([person.timezoneId, ...supported, ...fallbackTimezoneOptions].filter(Boolean))].sort();
+  }, [person.timezoneId]);
+
+  useEffect(() => {
+    const query = person.placeName.trim();
+    if (query.length < 2 || person.locationSourceId) return;
+    let active = true;
+    const timer = window.setTimeout(() => {
+      setLocationLoading(true);
+      searchLocations(query)
+        .then((items) => {
+          if (!active) return;
+          setLocationCandidates(items);
+          setLocationMessage(items.length ? "请选择与出生地相符的正式地点候选。" : "官方地点索引中没有匹配项，可继续细化地名或手动覆盖坐标。 ");
+        })
+        .catch((error) => {
+          if (!active) return;
+          const fallback = fallbackPlaceOptions
+            .filter((place) => place.name.includes(query) || query.includes(place.name))
+            .map<LocationSearchItem>((place, index) => ({
+              id: `demo-fallback:${index}`,
+              label: `${place.name} · ${place.countryCode} · 演示后备`,
+              match_score: 0,
+              match_reasons: ["demo_fallback"],
+              location: { name: place.name, country_code: place.countryCode, admin_path: [], latitude: place.latitude, longitude: place.longitude, elevation_m: null, timezone_id: place.timezoneId, warnings: [] },
+              timezone_status: "resolved",
+              timezone_candidates: [{ timezone_id: place.timezoneId, confidence: "demo_fallback", boundary_match: false }],
+            }));
+          setLocationCandidates(fallback);
+          setLocationMessage(error instanceof InterstellarApiError && error.code === "API_NOT_CONFIGURED"
+            ? "当前未连接地点服务，仅显示明确标注的演示后备候选；正式计算应使用官方 GeoNames 数据集。"
+            : "地点服务暂不可用。你仍可手动输入地点、时区和经纬度。 ");
+        })
+        .finally(() => { if (active) setLocationLoading(false); });
+    }, 320);
+    return () => { active = false; window.clearTimeout(timer); };
+  }, [person.locationSourceId, person.placeName]);
+
+  const selectLocation = (candidate: LocationSearchItem) => {
+    const timezone = candidate.location.timezone_id ?? candidate.timezone_candidates[0]?.timezone_id ?? person.timezoneId;
+    onChange({
+      ...person,
+      placeName: candidate.location.name,
+      countryCode: candidate.location.country_code,
+      latitude: candidate.location.latitude,
+      longitude: candidate.location.longitude,
+      timezoneId: timezone,
+      locationSourceId: candidate.id,
+      timezoneStatus: candidate.timezone_status,
+    });
+    setLocationCandidates([]);
+    setLocationMessage(candidate.timezone_status === "resolved"
+      ? `已使用 ${candidate.label}，IANA 时区由边界数据自动确认。`
+      : "地点已选择，但时区处于边界歧义或弱提示状态，请在下方人工确认 IANA 时区。 ");
+  };
+
+  const updatePlaceQuery = (value: string) => {
+    setLocationCandidates([]);
+    onChange({ ...person, placeName: value, locationSourceId: undefined, timezoneStatus: "unresolved" });
   };
   return <div className="form-grid">
     <label>名称<input value={person.displayName} onChange={(event) => onChange({ ...person, displayName: event.target.value })} placeholder="本人或关系人物名称" /></label>
     <label>与我的关系<select value={person.relation} onChange={(event) => onChange({ ...person, relation: event.target.value as NatalPersonInput["relation"] })}><option value="self">本人</option><option value="family">亲人</option><option value="partner">伴侣</option><option value="friend">朋友</option><option value="client">客户</option><option value="other">其他</option></select></label>
+    <label>时间精度<select value={person.timePrecision} onChange={(event) => { const precision = event.target.value as NatalPersonInput["timePrecision"]; onChange({ ...person, timePrecision: precision, timeConfidence: precision === "date" || precision === "unknown" ? "unknown" : person.timeConfidence === "unknown" ? "low" : person.timeConfidence }); }}><option value="minute">精确到分钟</option><option value="hour">精确到小时</option><option value="date">只有日期</option><option value="unknown">出生时刻未知</option></select><small>“只有日期／时刻未知”按完整当地民用日计算范围，绝不默认 00:00。</small></label>
     <label>出生日期<input type="date" value={person.localDate} onChange={(event) => onChange({ ...person, localDate: event.target.value })} /></label>
-    <label>出生时间<input type="time" value={person.localTime} onChange={(event) => onChange({ ...person, localTime: event.target.value })} /><small>当前精确时间模式；完全未知时间模式将在计算契约接入后开放，绝不默认 00:00。</small></label>
-    <label>出生城市／地区<input list="interstellar-place-options" value={person.placeName} onChange={(event) => applyPlace(event.target.value)} placeholder="输入城市并从候选中选择" /><datalist id="interstellar-place-options">{placeOptions.map((place) => <option key={place.name} value={place.name}>{place.countryCode}</option>)}</datalist><small>选择候选会自动填写经纬度、国家和时区。</small></label>
-    <label>IANA 时区<select value={person.timezoneId} onChange={(event) => onChange({ ...person, timezoneId: event.target.value })}>{timezoneOptions.map((timezone) => <option key={timezone} value={timezone}>{timezone}</option>)}</select><small>时区必须从候选选择，不接受自由文本。</small></label>
-    <label>时间可信度<select value={person.timeConfidence} onChange={(event) => onChange({ ...person, timeConfidence: event.target.value as NatalPersonInput["timeConfidence"] })}><option value="high">高：出生证明或正式记录</option><option value="medium">中：本人或亲友记忆</option><option value="low">低：大致时间</option></select></label>
+    <label>出生时间<input type="time" value={person.localTime} disabled={person.timePrecision === "date" || person.timePrecision === "unknown"} step={person.timePrecision === "hour" ? 3600 : 60} onChange={(event) => onChange({ ...person, localTime: event.target.value })} /><small>{person.timePrecision === "date" || person.timePrecision === "unknown" ? "将只返回日期级天体位置及不确定范围；上升、宫位、相位、Lots、昼夜 Sect 与古典时刻判断会明确阻断。" : "输入的是出生地当地钟表时间；系统会使用历史 IANA 时区规则换算 UTC。"}</small></label>
+    <label className="location-search-field">出生城市／地区<input value={person.placeName} onChange={(event) => updatePlaceQuery(event.target.value)} placeholder="输入城市、区县或多语言地名" autoComplete="off" />{locationLoading && <small>正在搜索本地版本化地点索引…</small>}{locationCandidates.length > 0 && <span className="location-candidates" role="listbox">{locationCandidates.map((candidate) => <button type="button" role="option" aria-selected="false" key={candidate.id} onClick={() => selectLocation(candidate)}><b>{candidate.label}</b><small>{candidate.location.latitude.toFixed(4)}, {candidate.location.longitude.toFixed(4)} · {candidate.timezone_status === "resolved" ? candidate.location.timezone_id : `时区需确认（${candidate.timezone_candidates.map((item) => item.timezone_id).join(" / ") || "无候选"}）`}</small></button>)}</span>}<small>{locationMessage || "从官方地点候选选择后，系统自动填写经纬度、国家和 IANA 时区。地点应精确到能可靠确定时区和坐标的城市或区县；无需填写街道或医院。"}</small></label>
+    <label>IANA 时区<select value={person.timezoneId} onChange={(event) => onChange({ ...person, timezoneId: event.target.value, timezoneStatus: "manual" })}>{timezoneOptions.map((timezone) => <option key={timezone} value={timezone}>{timezone}</option>)}</select><small>{person.timezoneStatus === "ambiguous" || person.timezoneStatus === "degraded" ? "地点数据未能唯一确认时区，必须人工确认。" : "时区使用 IANA 标识；历史夏令时由规则库计算，不让用户填写 UTC 偏移。"}</small></label>
+    <label>时间可信度<select value={person.timeConfidence} disabled={person.timePrecision === "date" || person.timePrecision === "unknown"} onChange={(event) => onChange({ ...person, timeConfidence: event.target.value as NatalPersonInput["timeConfidence"] })}><option value="high">高：出生证明或正式记录</option><option value="medium">中：本人或亲友记忆</option><option value="low">低：大致时间</option><option value="unknown">未知：没有出生时刻</option></select></label>
+    {(person.timePrecision === "date" || person.timePrecision === "unknown") && <p className="time-precision-warning"><b>日期级模式</b><span>可以计算天体在该日期内的星座位置范围、运动方向范围与跨界风险；不能生成完整本命盘。补充可靠出生时刻后才会开放四轴、十二宫、相位和古典结果。</span></p>}
     <details className="advanced-location"><summary>高级位置覆盖</summary><div><label>纬度<input type="number" step="0.0001" value={person.latitude} onChange={(event) => onChange({ ...person, latitude: Number(event.target.value) })} /></label><label>经度<input type="number" step="0.0001" value={person.longitude} onChange={(event) => onChange({ ...person, longitude: Number(event.target.value) })} /></label></div><p>一般无需修改。国家代码由地点候选派生，仅用于消歧，不参与占星判断。</p></details>
   </div>;
 }
 
 export default function Home() {
   const [snapshot, setSnapshot] = useState<NatalSnapshot>(sampleSnapshot);
-  const [subjectName, setSubjectName] = useState("阿斯特拉（虚拟验收样例）");
+  const [subjectName, setSubjectName] = useState("阿斯特拉");
   const [tab, setTab] = useState<ResultTab>("basic");
-  const [chartView, setChartView] = useState<ChartView>("wheel");
+  const [chartView, setChartView] = useState<ChartView>("professional");
   const [personModal, setPersonModal] = useState(false);
   const [calculationModal, setCalculationModal] = useState(false);
   const [analysisCenterOpen, setAnalysisCenterOpen] = useState(false);
+  const [methodMenuOpen, setMethodMenuOpen] = useState(false);
   const [capabilityTarget, setCapabilityTarget] = useState<(typeof chartTechniques)[number] | null>(null);
   const [entryPoint, setEntryPoint] = useState<EntryPointId>("technique");
-  const [theme, setTheme] = useState<ThemeMode>("dark");
-  const [settingsOpen, setSettingsOpen] = useState(true);
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    if (typeof window === "undefined") return "dark";
+    const stored = window.localStorage.getItem("interstellar.theme");
+    return stored === "light" || stored === "dark" ? stored : "dark";
+  });
+  const [settingsOpen, setSettingsOpen] = useState(() => typeof window === "undefined" || !window.matchMedia("(max-width: 900px)").matches);
   const [person, setPerson] = useState<NatalPersonInput>(defaultPerson);
   const [settings, setSettings] = useState<NatalCalculationSettings>(defaultSettings);
-  const [groups, setGroups] = useState<Record<keyof typeof pointGroups, boolean>>({ core: true, angles: true, lunar: true, asteroids: true, lots: true, hamburg: true });
+  const [appliedSettings, setAppliedSettings] = useState<NatalCalculationSettings>(defaultSettings);
+  const [groups, setGroups] = useState<Record<keyof typeof pointGroups, boolean>>({ ...allPointGroupsEnabled });
+  const [appliedGroups, setAppliedGroups] = useState<Record<keyof typeof pointGroups, boolean>>({ ...allPointGroupsEnabled });
+  const [wheelGroups, setWheelGroups] = useState<Record<keyof typeof pointGroups, boolean>>({ ...defaultWheelGroups });
+  const [wheelControls, setWheelControls] = useState<Omit<NatalRenderControls, "visiblePointIds">>({ ...defaultWheelControls });
   const [saveProfile, setSaveProfile] = useState(false);
-  const [savedPeople, setSavedPeople] = useState<NatalPersonInput[]>([]);
+  const [accountWorkspace, setAccountWorkspace] = useState<AccountWorkspace>({ authenticated: false, user: null, people: [] });
+  const [authModal, setAuthModal] = useState<"login" | "register" | null>(null);
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authDisplayName, setAuthDisplayName] = useState("");
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authError, setAuthError] = useState("");
+  const [savedPeople, setSavedPeople] = useState<WorkspacePerson[]>([]);
+  const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState("当前展示静态虚拟验收样例；连接计算服务后可新增人物并生成真实快照。");
+  const [notice, setNotice] = useState("");
   const [target, setTarget] = useState<InterpretationTarget | null>(null);
-  const [technicalDocument, setTechnicalDocument] = useState(() => buildLocalTechnicalDocument(sampleSnapshot, "阿斯特拉（虚拟验收样例）"));
+  const [technicalDocument, setTechnicalDocument] = useState(() => buildLocalTechnicalDocument(sampleSnapshot, "阿斯特拉"));
+  const [technicalDocumentHash, setTechnicalDocumentHash] = useState("虚拟样例 · 未生成服务端内容哈希");
   const [providers, setProviders] = useState<AiProvider[]>([
+    { provider_id: "deepseek", label: "DeepSeek", configured: false, availability: "blocked", blocking_reason: "等待服务端配置 DeepSeek API 密钥", models: [{ model_id: "deepseek-v4-pro", label: "DeepSeek V4 Pro", configured: false }] },
     { provider_id: "openai", label: "GPT / OpenAI", configured: false, availability: "blocked", blocking_reason: "等待后台配置 API 与允许模型", models: [{ model_id: "gpt", label: "GPT（后台指定版本）", configured: false }] },
     { provider_id: "moonshot", label: "Kimi / Moonshot", configured: false, availability: "blocked", blocking_reason: "等待后台配置 API 与允许模型", models: [{ model_id: "kimi", label: "Kimi（后台指定版本）", configured: false }] },
   ]);
-  const [providerId, setProviderId] = useState<"openai" | "moonshot">("openai");
+  const [providerId, setProviderId] = useState<AiProviderId>("deepseek");
+  const [modelId, setModelId] = useState<AiModelId>("deepseek-v4-pro");
+  const [exportTableId, setExportTableId] = useState<(typeof natalTableExports)[number][0]>("table.planet_positions");
+  const [graphicExportBusy, setGraphicExportBusy] = useState<"svg" | "png" | "pdf" | null>(null);
   const [consent, setConsent] = useState(false);
+  const [subjectDataAuthority, setSubjectDataAuthority] = useState(false);
   const [aiFocus, setAiFocus] = useState("");
+  const [aiPreview, setAiPreview] = useState<NatalAiPayloadPreview | null>(null);
+  const [aiPreviewBusy, setAiPreviewBusy] = useState(false);
+  const [aiSubmitBusy, setAiSubmitBusy] = useState(false);
+  const [aiAnalysisText, setAiAnalysisText] = useState("");
+  const resultsRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      const stored = window.localStorage.getItem("interstellar.natal.people.v1");
-      if (stored) {
-        try { setSavedPeople(JSON.parse(stored)); } catch { /* ignore invalid local cache */ }
+    getAccountWorkspace().then((workspace) => {
+      setAccountWorkspace(workspace);
+      setSavedPeople(workspace.people);
+    }).catch(() => {
+      setAccountWorkspace({ authenticated: false, user: null, people: [] });
+      setSavedPeople([]);
+    });
+    getAiProviders().then((items) => {
+      setProviders(items);
+      const configured = items.find((item) => item.provider_id === "deepseek" && item.configured);
+      if (configured) {
+        setProviderId("deepseek");
+        setModelId(configured.models.find((model) => model.configured)?.model_id ?? "deepseek-v4-pro");
       }
-    }, 0);
-    getAiProviders().then(setProviders).catch(() => undefined);
-    return () => window.clearTimeout(timer);
+    }).catch(() => undefined);
   }, []);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("interstellar.theme") as ThemeMode | null;
-    const next: ThemeMode = stored === "light" || stored === "dark" ? stored : "dark";
-    setTheme(next);
-    document.documentElement.dataset.theme = next;
-  }, []);
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   function toggleTheme() {
     const next: ThemeMode = theme === "dark" ? "light" : "dark";
@@ -500,16 +1091,117 @@ export default function Home() {
   const corePoints = snapshot.result.points.filter((point) => pointGroups.core.includes(point.point_id as never));
   const extendedPoints = snapshot.result.points.filter((point) => !pointGroups.core.includes(point.point_id as never));
   const signGroups = useMemo(() => signIds.map((sign) => ({ sign, points: snapshot.result.points.filter((point) => point.sign === sign) })).filter((group) => group.points.length), [snapshot]);
-  const structureEntries = useMemo(() => Object.entries(snapshot.result.structure ?? {}), [snapshot]);
-  const classicalEntries = useMemo(() => Object.entries(snapshot.result.classical ?? {}), [snapshot]);
+  const settingsDirty = JSON.stringify(settings) !== JSON.stringify(appliedSettings) || JSON.stringify(groups) !== JSON.stringify(appliedGroups);
+  const dateLevelMode = isDateLevelSnapshot(snapshot);
+  const visibleWheelPointIds = useMemo(() => (Object.entries(wheelGroups) as Array<[keyof typeof pointGroups, boolean]>)
+    .filter(([, enabled]) => enabled)
+    .flatMap(([group]) => [...pointGroups[group]]), [wheelGroups]);
+  const effectiveWheelControls = useMemo<NatalRenderControls>(() => ({
+    ...wheelControls,
+    visiblePointIds: visibleWheelPointIds,
+  }), [wheelControls, visibleWheelPointIds]);
+  const natalRenderSpec = useMemo(() => buildNatalRenderSpec(
+    snapshot,
+    chartView === "compact" ? "compact" : "professional",
+    theme,
+    effectiveWheelControls,
+  ), [snapshot, chartView, theme, effectiveWheelControls]);
 
-  function savePersonOnly() {
+  async function refreshWorkspace() {
+    const workspace = await getAccountWorkspace();
+    setAccountWorkspace(workspace);
+    setSavedPeople(workspace.people);
+    return workspace;
+  }
+
+  async function submitAccount() {
+    if (!authModal) return;
+    setAuthBusy(true);
+    setAuthError("");
+    try {
+      if (authModal === "register") {
+        await registerAccount({
+          email: authEmail,
+          password: authPassword,
+          displayName: authDisplayName,
+        });
+      } else {
+        await loginAccount({ email: authEmail, password: authPassword });
+      }
+      await refreshWorkspace();
+      setAuthModal(null);
+      setAuthPassword("");
+      setNotice(authModal === "register" ? "注册成功，人物与最新本命盘将保存到你的账户。" : "登录成功，已载入你的保存人物。 ");
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : "账户操作失败，请稍后再试。 ");
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+
+  async function signOut() {
+    try {
+      await logoutAccount();
+    } finally {
+      setAccountWorkspace({ authenticated: false, user: null, people: [] });
+      setSavedPeople([]);
+      setSelectedPersonId(null);
+      setNotice("已退出登录。当前页面结果仍可查看，但不会继续保存。 ");
+    }
+  }
+
+  async function savePersonOnly() {
     if (!person.displayName.trim()) { setNotice("请先填写人物名称。 "); return; }
-    const next = [...savedPeople.filter((item) => !(item.displayName === person.displayName && item.localDate === person.localDate)), person];
-    setSavedPeople(next);
-    window.localStorage.setItem("interstellar.natal.people.v1", JSON.stringify(next));
+    if (!accountWorkspace.authenticated) {
+      setSubjectName(person.displayName);
+      setSelectedPersonId(null);
+      setPersonModal(false);
+      setNotice(`游客人物“${person.displayName}”已用于当前会话，但不会保存。登录／注册后可永久保存。`);
+      return;
+    }
+    try {
+      const saved = await saveAccountPerson(person, selectedPersonId ?? undefined);
+      setSelectedPersonId(saved.id);
+      await refreshWorkspace();
+      setNotice(`已保存人物“${person.displayName}”。该资料只对当前登录账户可见。`);
+    } catch (error) {
+      setNotice(`人物保存失败：${error instanceof Error ? error.message : "未知错误"}`);
+      return;
+    }
     setPersonModal(false);
-    setNotice(`已保存人物“${person.displayName}”，未启动任何计算。可从“新建计算”选择这个人物。`);
+  }
+
+  function selectWorkspacePerson(saved: WorkspacePerson) {
+    setPerson({ ...defaultPerson, ...saved.person });
+    setSelectedPersonId(saved.id);
+    setSubjectName(saved.person.displayName);
+    if (!saved.latestNatal) {
+      setNotice(`“${saved.person.displayName}”尚无本命盘历史；已填入新建计算。`);
+      openNewCalculation("technique", saved.person);
+      return;
+    }
+    const latest = saved.latestNatal;
+    setSnapshot(latest.snapshot);
+    setSettings(latest.settings);
+    setAppliedSettings(latest.settings);
+    const savedGroups = { ...allPointGroupsEnabled, ...latest.groups } as Record<keyof typeof pointGroups, boolean>;
+    setGroups(savedGroups);
+    setAppliedGroups(savedGroups);
+    setTechnicalDocument(latest.analysisDocument);
+    setTechnicalDocumentHash(latest.analysisDocumentHash);
+    setAiAnalysisText(latest.aiAnalysisText ?? "");
+    if (latest.aiModelId) setModelId(latest.aiModelId as AiModelId);
+    setAiPreview(null);
+    setConsent(false);
+    setSubjectDataAuthority(false);
+    setTab("basic");
+    setChartView("professional");
+    setNotice(`已载入“${saved.person.displayName}”最后一次本命盘（${new Date(latest.calculatedAt).toLocaleString("zh-CN")}）。`);
+  }
+
+  function openTechnicalResults() {
+    setTab("technical");
+    window.requestAnimationFrame(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
   }
 
   function openNewCalculation(selectedEntry: EntryPointId = "technique", selectedPerson?: NatalPersonInput) {
@@ -520,20 +1212,46 @@ export default function Home() {
 
   async function calculateNatal() {
     if (!person.displayName.trim()) { setNotice("请先填写人物名称。 "); return; }
-    setBusy(true); setNotice("正在标准化时间、计算星历、宫位、相位、结构与古典事实…");
+    const dateLevelRequested = person.timePrecision === "date" || person.timePrecision === "unknown";
+    setBusy(true); setNotice(dateLevelRequested
+      ? "正在计算完整当地日期范围、天体位置区间与跨星座风险；不会伪造出生时刻…"
+      : "正在标准化时间、计算星历、宫位、相位、结构与古典事实…");
     const pointIds = (Object.entries(groups) as Array<[keyof typeof pointGroups, boolean]>)
       .filter(([, enabled]) => enabled).flatMap(([group]) => [...pointGroups[group]]);
     const allGroupsEnabled = Object.values(groups).every(Boolean);
     try {
       const result = await createPersonAndNatalCalculation(person, { ...settings, pointIds: allGroupsEnabled ? [] : pointIds });
-      setSnapshot(result.snapshot); setSubjectName(person.displayName); setCalculationModal(false); setTab("basic"); setChartView("wheel");
+      setSnapshot(result.snapshot); setSubjectName(person.displayName); setAppliedSettings({ ...settings }); setAppliedGroups({ ...groups }); setCalculationModal(false); setTab(settings.analysisSystem === "classical" ? "classical" : "basic"); setChartView("professional");
       const document = await getNatalTechnicalDocument(result.snapshot.id, "markdown");
-      setTechnicalDocument(document);
-      if (saveProfile) {
-        const next = [...savedPeople.filter((item) => item.displayName !== person.displayName), person];
-        setSavedPeople(next); window.localStorage.setItem("interstellar.natal.people.v1", JSON.stringify(next));
+      setTechnicalDocument(document.content);
+      setTechnicalDocumentHash(document.contentHash);
+      setAiAnalysisText("");
+      setAiPreview(null);
+      setConsent(false);
+      setSubjectDataAuthority(false);
+      if (accountWorkspace.authenticated && (selectedPersonId || saveProfile)) {
+        const saved = await saveAccountPerson(person, selectedPersonId ?? undefined);
+        setSelectedPersonId(saved.id);
+        await saveLatestNatal({
+          personId: saved.id,
+          snapshot: result.snapshot,
+          settings: { ...settings },
+          groups: { ...groups },
+          analysisDocument: document.content,
+          analysisDocumentHash: document.contentHash,
+          aiAnalysisText: null,
+          aiModelId: null,
+        });
+        await refreshWorkspace();
       }
-      setNotice(`已生成真实本命快照：${result.snapshot.result.points.length} 个点位、${result.snapshot.result.aspects.length} 条相位。`);
+      const persistenceNote = accountWorkspace.authenticated && (selectedPersonId || saveProfile)
+        ? "；已覆盖保存为该人物最新一次结果"
+        : accountWorkspace.authenticated
+          ? "；本次临时结果未保存"
+          : "；游客结果不会保存";
+      setNotice((isDateLevelSnapshot(result.snapshot)
+        ? `已生成日期级部分快照：${result.snapshot.result.points.length} 个天体位置范围；时刻依赖能力已阻断。`
+        : `已生成真实本命快照：${result.snapshot.result.points.length} 个点位、${result.snapshot.result.aspects.length} 条相位。`) + persistenceNote);
     } catch (error) {
       const message = error instanceof InterstellarApiError ? `${error.code}：${error.message}` : "本命盘计算失败。";
       setNotice(message);
@@ -541,34 +1259,145 @@ export default function Home() {
   }
 
   async function copyTechnical() {
-    try { await navigator.clipboard.writeText(technicalDocument); setNotice("已复制完整 Markdown 技术推演，可直接粘贴给外部模型。 "); }
-    catch { setNotice("浏览器未允许剪贴板访问，请在技术推演中手动全选复制。 "); }
+    try {
+      await navigator.clipboard.writeText(technicalDocument);
+      setNotice(`已复制本命盘分析数据（${new Blob([technicalDocument]).size} 字节）。`);
+    } catch {
+      setNotice("浏览器未允许剪贴板访问；文档仍保留在页面中，可手动全选或使用下载按钮。");
+    }
   }
 
-  function downloadTechnical(format: "markdown" | "plaintext") {
-    const content = format === "markdown" ? technicalDocument : technicalDocument.replace(/^#+\s*/gm, "").replace(/\|/g, " ");
-    const blob = new Blob([content], { type: format === "markdown" ? "text/markdown;charset=utf-8" : "text/plain;charset=utf-8" });
+  async function downloadTechnical(format: "markdown" | "plaintext") {
+    try {
+      const artifact = snapshot.id.startsWith("calculation-")
+        ? await getNatalTechnicalDocument(snapshot.id, format)
+        : {
+          content: format === "markdown" ? technicalDocument : technicalDocument.replace(/^#+\s*/gm, ""),
+          contentHash: technicalDocumentHash,
+        };
+      if (snapshot.id.startsWith("calculation-") && artifact.contentHash !== technicalDocumentHash) {
+        throw new Error("下载内容与当前页面的分析数据校验值不一致");
+      }
+      downloadBlob(
+        new Blob([artifact.content], { type: format === "markdown" ? "text/markdown;charset=utf-8" : "text/plain;charset=utf-8" }),
+        `${subjectName}-本命盘分析数据.${format === "markdown" ? "md" : "txt"}`,
+      );
+      setNotice(`已导出本命盘分析${format === "markdown" ? " Markdown" : "纯文本"}文档（${new Blob([artifact.content]).size} 字节）。`);
+    } catch (error) {
+      setNotice(`分析数据导出失败：${error instanceof Error ? error.message : "未知错误"}`);
+    }
+  }
+
+  function downloadSnapshotJson() {
+    const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: "application/json;charset=utf-8" });
     const url = URL.createObjectURL(blob); const link = document.createElement("a");
-    link.href = url; link.download = `${subjectName}-本命盘专业技术推演.${format === "markdown" ? "md" : "txt"}`; link.click(); URL.revokeObjectURL(url);
-    setNotice(`已导出${format === "markdown" ? " Markdown" : "纯文本"}文档。`);
+    link.href = url; link.download = `${subjectName}-本命盘完整快照.json`; link.click(); URL.revokeObjectURL(url);
+    setNotice("已导出完整 JSON 快照，包含计算事实、警告、版本与复现信息。");
+  }
+
+  async function downloadSelectedTable() {
+    if (!snapshot.id.startsWith("calculation-")) { setNotice("虚拟样例没有服务端 CSV；请先生成真实本命快照。"); return; }
+    try {
+      const blob = await getNatalTableExport(snapshot.id, exportTableId, "csv");
+      const url = URL.createObjectURL(blob); const link = document.createElement("a");
+      const label = natalTableExports.find(([id]) => id === exportTableId)?.[1] ?? exportTableId;
+      link.href = url; link.download = `${subjectName}-本命盘-${label}.csv`; link.click(); URL.revokeObjectURL(url);
+      setNotice(`已导出“${label}”CSV 表。`);
+    } catch (error) {
+      setNotice(error instanceof InterstellarApiError ? `${error.code}：${error.message}` : "CSV 导出失败。");
+    }
+  }
+
+  async function downloadNatalGraphic(format: "svg" | "png" | "pdf") {
+    if (chartView === "aspect_grid") {
+      setNotice("相位矩阵有独立导出规格；当前图形导出仅适用于专业／简洁本命轮盘。");
+      return;
+    }
+    const svg = document.querySelector<SVGSVGElement>(".natal-wheel");
+    if (!svg) { setNotice("未找到当前轮盘，无法导出。"); return; }
+    setGraphicExportBusy(format);
+    try {
+      const serialized = serializeSvgWithComputedStyles(svg, natalRenderSpec);
+      const filename = `${subjectName}-${chartView === "compact" ? "简洁" : "专业"}本命轮盘`;
+      if (format === "svg") {
+        downloadBlob(new Blob([serialized], { type: "image/svg+xml;charset=utf-8" }), `${filename}.svg`);
+      } else if (format === "png") {
+        const png = await rasterizeSerializedSvg(serialized, natalRenderSpec, "image/png");
+        downloadBlob(png, `${filename}.png`);
+      } else {
+        const jpeg = await rasterizeSerializedSvg(serialized, natalRenderSpec, "image/jpeg");
+        const pdf = buildSingleImagePdf(new Uint8Array(await jpeg.arrayBuffer()), natalRenderSpec.width, natalRenderSpec.height);
+        downloadBlob(new Blob([pdf], { type: "application/pdf" }), `${filename}.pdf`);
+      }
+      setNotice(`已按当前图形显示设置导出 ${format.toUpperCase()}；屏幕和文件使用同一黄道、宫位、点位与相位图层。`);
+    } catch (error) {
+      setNotice(`图形导出失败：${error instanceof Error ? error.message : "未知错误"}`);
+    } finally {
+      setGraphicExportBusy(null);
+    }
+  }
+
+  async function previewAi() {
+    if (!snapshot.id.startsWith("calculation-")) { setNotice("虚拟样例不能创建第三方载荷预览；请先生成真实计算快照。"); return; }
+    setAiPreviewBusy(true);
+    try {
+      const preview = await previewNatalAiPayload({
+        snapshotId: snapshot.id,
+        providerId,
+        modelId,
+        focus: aiFocus,
+        storeResponse: accountWorkspace.authenticated && Boolean(selectedPersonId),
+      });
+      setAiPreview(preview);
+      setConsent(false);
+      setSubjectDataAuthority(false);
+      setNotice(`载荷预览已生成：约 ${preview.estimated_tokens} tokens；当前不会发送数据。`);
+    } catch (error) {
+      setNotice(error instanceof InterstellarApiError ? `${error.code}：${error.message}` : "AI 载荷预览失败。");
+    } finally {
+      setAiPreviewBusy(false);
+    }
   }
 
   async function submitAi() {
     if (!snapshot.id.startsWith("calculation-")) { setNotice("虚拟样例不能提交；请先生成真实计算快照。 "); return; }
+    if (!aiPreview) { setNotice("请先预览本次将发送的具体载荷。"); return; }
+    setAiSubmitBusy(true);
     try {
-      await submitNatalToAi({ snapshotId: snapshot.id, providerId, modelId: providerId === "openai" ? "gpt" : "kimi", focus: aiFocus, consent });
-      setNotice("AI 分析任务已提交。 ");
+      const artifact = await submitNatalToAi({
+        snapshotId: snapshot.id,
+        providerId,
+        modelId,
+        focus: aiFocus,
+        consent,
+        payloadHash: aiPreview.payload_hash,
+        authorityForSubjectData: subjectDataAuthority,
+        storeResponse: accountWorkspace.authenticated && Boolean(selectedPersonId),
+      });
+      const text = artifact.response?.text?.trim();
+      if (!text) throw new Error("DeepSeek 未返回分析文本");
+      setAiAnalysisText(text);
+      if (accountWorkspace.authenticated && selectedPersonId) {
+        await saveLatestAiAnalysis(selectedPersonId, text, artifact.response.model ?? modelId);
+        await refreshWorkspace();
+      }
+      setNotice(accountWorkspace.authenticated && selectedPersonId
+        ? "DeepSeek 分析已完成，并附加到该人物的最新本命结果。"
+        : "DeepSeek 分析已完成；游客结果仅在当前页面显示，不会保存。 ");
     } catch (error) {
-      setNotice(error instanceof InterstellarApiError ? `${error.code}：${error.message}` : "AI 分析提交失败。 ");
+      setNotice(error instanceof InterstellarApiError ? `${error.code}：${error.message}` : `AI 分析失败：${error instanceof Error ? error.message : "未知错误"}`);
+    } finally {
+      setAiSubmitBusy(false);
     }
   }
 
   const openPoint = (point: NatalPoint) => setTarget({
     type: "point", id: point.point_id, title: pointNames[point.point_id] ?? point.point_id,
-    fact: `${pointNames[point.point_id] ?? point.point_id}位于${signNames[point.sign] ?? point.sign}${formatDegree(point.degree_in_sign)}，第${point.house ?? "—"}宫${point.retrograde ? "，逆行" : ""}`,
+    fact: `${pointNames[point.point_id] ?? point.point_id}位于${signNames[point.sign] ?? point.sign}${formatDegree(point.degree_in_sign)}${point.house ? `，第${point.house}宫` : "（日期中点参考位置，不是出生时刻）"}${point.retrograde ? "，逆行" : ""}`,
     facts: [
-      `${pointNames[point.point_id] ?? point.point_id}位于${signNames[point.sign] ?? point.sign}${formatDegree(point.degree_in_sign)}，第${point.house ?? "—"}宫${point.retrograde ? "，逆行" : ""}`,
+      `${pointNames[point.point_id] ?? point.point_id}位于${signNames[point.sign] ?? point.sign}${formatDegree(point.degree_in_sign)}${point.house ? `，第${point.house}宫` : "（日期中点参考位置，不是出生时刻）"}${point.retrograde ? "，逆行" : ""}`,
       `黄经 ${point.position.ecliptic.longitude_deg.toFixed(6)}° · 黄纬 ${point.position.ecliptic.latitude_deg?.toFixed(6) ?? "—"}°`,
+      ...(dateLevelMode ? [`完整日期最大位置不确定度 ±${(Number(point.position.uncertainty_arcsec ?? 0) / 3600).toFixed(6)}°`, `日期范围事实 ${toPlain(dateLevelPointRange(snapshot, point.point_id))}`] : []),
       `赤经 ${point.position.equatorial?.right_ascension_deg?.toFixed(6) ?? "—"}° · 赤纬 ${point.position.equatorial?.declination_deg?.toFixed(6) ?? "—"}° · 越界 ${point.out_of_bounds == null ? "—" : point.out_of_bounds ? "是" : "否"}`,
       `黄经速度 ${point.position.velocity?.longitude_deg_per_day?.toFixed(9) ?? "—"}°/日 · 运动状态 ${point.position.motion_state ?? (point.retrograde ? "retrograde" : "direct")}`,
       `距上一宫头 ${point.distance_from_previous_cusp_deg?.toFixed(6) ?? "—"}° · 距下一宫头 ${point.distance_to_next_cusp_deg?.toFixed(6) ?? "—"}° · 宫内比例 ${point.house_position_fraction?.toFixed(6) ?? "—"}`,
@@ -582,7 +1411,7 @@ export default function Home() {
     type: "aspect", id: aspect.aspect_id,
     title: `${pointNames[aspect.point_a] ?? aspect.point_a}${aspectNames[aspect.type] ?? aspect.type}${pointNames[aspect.point_b] ?? aspect.point_b}`,
     fact: `实际角距 ${aspect.actual_angle_deg.toFixed(3)}°，容许度 ${aspect.orb_deg.toFixed(3)}°`,
-    facts: [`理论角度 ${aspect.exact_angle_deg.toFixed(3)}°`, `入出相 ${aspect.applying_state}`, `强度 ${Math.round(aspect.strength * 100)}%`],
+    facts: [`理论角度 ${aspect.exact_angle_deg.toFixed(3)}°`, ...(aspectPhaseLabel(aspect.applying_state) ? [`阶段 ${aspectPhaseLabel(aspect.applying_state)}`] : []), `强度 ${Math.round(aspect.strength * 100)}%`],
     resultPath: `/result/aspects/${snapshot.result.aspects.findIndex((item) => item.aspect_id === aspect.aspect_id)}`,
   });
 
@@ -590,100 +1419,117 @@ export default function Home() {
     <main className="natal-app">
       <header className="site-header">
         <button className="brand-button" onClick={() => { setTab("basic"); window.scrollTo({ top: 0, behavior: "smooth" }); }}><span className="brand-mark">✦</span><span><b>INTERSTELLAR</b><small>PROFESSIONAL ASTROLOGY</small></span></button>
-        <nav>{globalNavigation.map((item) => <button key={item} className={item === "工作台" ? "active" : ""} onClick={() => {
+        <nav>{globalNavigation.map((item) => <button key={item} className={item === "工作台" || (item === "计算方法" && methodMenuOpen) ? "active" : ""} onClick={() => {
           if (item === "工作台") window.scrollTo({ top: 0, behavior: "smooth" });
           if (item === "分析中心") setAnalysisCenterOpen(true);
           if (item === "对象库") document.getElementById("subject-library")?.scrollIntoView({ behavior: "smooth" });
-          if (item === "图表中心") document.getElementById("technique-strip")?.scrollIntoView({ behavior: "smooth" });
-          if (item === "报告") { setTab("technical"); document.getElementById("natal-results")?.scrollIntoView({ behavior: "smooth" }); }
+          if (item === "计算方法") setMethodMenuOpen((value) => !value);
+          if (item === "报告") openTechnicalResults();
         }}>{item}</button>)}</nav>
-        <div className="site-actions"><button className="theme-toggle" onClick={toggleTheme} aria-label={`切换到${theme === "dark" ? "浅色" : "深色"}主题`} title={`当前${theme === "dark" ? "深色" : "浅色"}主题`}><span>{theme === "dark" ? "☀" : "☾"}</span><small>{theme === "dark" ? "Light" : "Dark"}</small></button><button className="primary-action" onClick={() => openNewCalculation()}>＋ 新建计算</button></div>
+        <div className="site-actions"><button className="theme-toggle" onClick={toggleTheme} aria-label={`切换到${theme === "dark" ? "浅色" : "深色"}主题`} title={`当前${theme === "dark" ? "深色" : "浅色"}主题`}><span>{theme === "dark" ? "☀" : "☾"}</span><small>{theme === "dark" ? "Light" : "Dark"}</small></button>{accountWorkspace.authenticated ? <div className="account-menu"><span>{accountWorkspace.user?.displayName}</span><button onClick={signOut}>退出</button></div> : <button className="account-action" onClick={() => { setAuthError(""); setAuthModal("login"); }}>登录／注册</button>}<button className="primary-action" onClick={() => openNewCalculation()}>＋ 新建计算</button></div>
       </header>
 
-      <div className="notice-bar" role="status"><span>{snapshot.id.startsWith("calculation-") ? "REAL SNAPSHOT" : "VIRTUAL FIXTURE"}</span><p>{notice}</p></div>
-
-      <section className="technique-strip" id="technique-strip" aria-label="占星计算方法">
-        <div><small>CHART METHODS</small><b>计算方法</b></div>
-        <nav>{chartTechniques.map((technique) => <button key={technique.id} className={technique.status === "active" ? "active" : "planned"} onClick={() => {
-          if (technique.status === "active") { setChartView("wheel"); window.scrollTo({ top: 0, behavior: "smooth" }); }
-          else setCapabilityTarget(technique);
-        }}><span>{technique.label}</span><small>{technique.status === "active" ? "已开放" : "规划中"}</small></button>)}</nav>
-      </section>
+      {methodMenuOpen && <section className="method-menu" aria-label="计算方法菜单"><header><div><small>CHART METHODS</small><b>选择计算方法</b></div><button onClick={() => setMethodMenuOpen(false)} aria-label="关闭计算方法菜单">×</button></header><div>{chartTechniques.map((technique) => <button key={technique.id} className={technique.status === "active" ? "active" : "planned"} onClick={() => {
+        setMethodMenuOpen(false);
+        if (technique.status === "active") openNewCalculation("technique");
+        else setCapabilityTarget(technique);
+      }}><span>{technique.label}</span><small>{technique.outputs}</small><i>{technique.status === "active" ? "已开放" : "规划中"}</i></button>)}</div></section>}
 
       <div className="natal-layout">
         <aside className="person-sidebar" id="subject-library">
-          <div className="side-heading"><span>当前人物</span><button onClick={() => setPersonModal(true)}>新增</button></div>
-          <button className="current-person"><span className="person-avatar">{subjectName.slice(0, 1)}</span><span><b>{subjectName}</b><small>{snapshot.id.startsWith("calculation-") ? "真实计算快照" : "虚拟示例 · 非真实人物"}</small></span><i>✓</i></button>
-          <div className="side-heading"><span>本机人物库</span><small>{savedPeople.length}</small></div>
+          <div className="side-heading"><span>当前人物</span><button onClick={() => { setSelectedPersonId(null); setPerson({ ...defaultPerson, displayName: "" }); setPersonModal(true); }}>新增</button></div>
+          <button className="current-person"><span className="person-avatar">{subjectName.slice(0, 1)}</span><span><b>{subjectName}</b><small>{snapshot.id.startsWith("calculation-") ? "真实计算快照" : "演示人物 · 非真实资料"}</small></span><i>✓</i></button>
+          <div className="side-heading"><span>{accountWorkspace.authenticated ? "我的人物" : "游客人物"}</span><small>{savedPeople.length}</small></div>
           <div className="saved-people">
-            {savedPeople.map((saved) => <button key={`${saved.displayName}-${saved.localDate}`} onClick={() => { setPerson(saved); setNotice(`已选择人物“${saved.displayName}”。点击右上角“新建计算”选择计算方法。`); }}><span>{saved.displayName.slice(0, 1)}</span><div><b>{saved.displayName}</b><small>{saved.relation} · {saved.localDate}</small></div><i>选择</i></button>)}
-            {!savedPeople.length && <p>尚无保存人物。“新增”只建档，不会自动计算；计算请使用右上角“新建计算”。</p>}
+            {savedPeople.map((saved) => <button key={saved.id} className={selectedPersonId === saved.id ? "active" : ""} onClick={() => selectWorkspacePerson(saved)}><span>{saved.person.displayName.slice(0, 1)}</span><div><b>{saved.person.displayName}</b><small>{saved.latestNatal ? `最新计算 ${new Date(saved.latestNatal.calculatedAt).toLocaleDateString("zh-CN")}` : `${saved.person.relation} · 尚未计算`}</small></div><i>{saved.latestNatal ? "载入" : "计算"}</i></button>)}
+            {!savedPeople.length && <p>{accountWorkspace.authenticated ? "尚无保存人物。新增人物后可保存，每个人物只保留最后一次本命盘。" : "游客可在“新建计算”中临时添加人物；关闭页面后不会保存。"}</p>}
           </div>
-          <section className="privacy-note"><b>当前保存边界</b><p>人物快捷资料仅保存在本机浏览器。登录、云端隔离和长期快照库尚未接入，绝不会显示成“全网共享”。</p></section>
+          <section className="privacy-note"><b>{accountWorkspace.authenticated ? "账户隔离" : "游客模式"}</b><p>{accountWorkspace.authenticated ? "只加载当前登录账户的人物。每个人物重算时覆盖旧结果，只保留最新本命盘。" : "可临时建档、计算和分析，但人物、计算与 AI 文本均不保存。"}</p>{!accountWorkspace.authenticated && <button onClick={() => { setAuthError(""); setAuthModal("register"); }}>注册后保存</button>}</section>
         </aside>
 
         <section className="main-workspace">
           <header className="subject-title">
-            <div><span>PROFESSIONAL NATAL · INTEGRATED FACTS</span><h1>{subjectName}的本命盘</h1><p>现代基础、盘面结构、完整相位与古典核心事实使用同一份不可变计算快照。</p></div>
-            <div className="header-actions"><button onClick={() => setSettingsOpen((value) => !value)}>⚙ 参数</button><button onClick={() => setTab("technical")}>查看完整推演</button></div>
+            <div><span>{dateLevelMode ? "DATE-LEVEL EPHEMERIS · PARTIAL SNAPSHOT" : "PROFESSIONAL NATAL · INTEGRATED FACTS"}</span><h1>{subjectName}的{dateLevelMode ? "日期级星座位置" : "本命盘"}</h1><p>{dateLevelMode ? "出生时刻未知：展示完整当地日期内的天体范围，不生成伪造的上升、宫位、相位或古典结论。" : "现代基础、盘面结构、完整相位与古典核心事实使用同一份不可变计算快照。"}</p></div>
+            <div className="header-actions"><button onClick={() => openNewCalculation("technique", person)}>↻ 重新分析</button><button onClick={() => setSettingsOpen((value) => !value)}>⚙ 参数</button><button onClick={openTechnicalResults}>分析数据与导出</button></div>
           </header>
+          {notice && <div className="workspace-status" role="status"><p>{notice}</p><button onClick={() => setNotice("")} aria-label="关闭提示">×</button></div>}
 
           <div className={`hero-grid ${settingsOpen ? "with-settings" : ""}`}>
             <article className="wheel-panel">
-              <div className="panel-heading"><div><small>NATAL CHART VIEWS</small><h2>{chartView === "wheel" ? "本命轮盘" : "主要相位图"}</h2></div><div className="view-switcher"><button className={chartView === "wheel" ? "active" : ""} onClick={() => setChartView("wheel")}>星盘</button><button className={chartView === "aspect_grid" ? "active" : ""} onClick={() => setChartView("aspect_grid")}>相位图</button><span>回归黄道</span><span>{settings.houseSystem}</span><span>{snapshot.result.points.length} 点</span></div></div>
-              {chartView === "wheel" ? <NatalWheel snapshot={snapshot} /> : <AspectGrid snapshot={snapshot} onOpen={openAspect} />}
-              <footer><span>Engine {snapshot.engine.version}</span><span>{snapshot.maturity}</span><span>{snapshot.input_fingerprint.slice(0, 22)}…</span></footer>
+              <div className="panel-heading"><div><small>{dateLevelMode ? "DATE-LEVEL POSITION VIEW" : "NATAL CHART VIEWS"}</small><h2>{dateLevelMode ? "日期级星座位置图（非本命轮盘）" : chartView === "professional" ? "专业本命轮盘" : chartView === "compact" ? "简洁本命轮盘" : "相位矩阵"}</h2></div><div className="panel-tools"><div className="view-switcher"><button className={chartView === "professional" ? "active" : ""} onClick={() => setChartView("professional")}>{dateLevelMode ? "专业位置图" : "专业轮盘"}</button><button className={chartView === "compact" ? "active" : ""} onClick={() => setChartView("compact")}>{dateLevelMode ? "简洁位置图" : "简洁轮盘"}</button><button disabled={dateLevelMode} className={chartView === "aspect_grid" ? "active" : ""} onClick={() => setChartView("aspect_grid")}>相位矩阵</button><span>{appliedSettings.zodiac === "tropical" ? "回归黄道" : `恒星黄道 · ${ayanamsaOptions.find((item) => item.id === appliedSettings.ayanamsa)?.label}`}</span>{!dateLevelMode && <span>{houseSystemOptions.find((item) => item.id === appliedSettings.houseSystem)?.label}</span>}<span>{natalRenderSpec.options.visible_point_ids.length}/{snapshot.result.points.length} 点</span><span>{natalRenderSpec.options.visible_aspect_count}/{snapshot.result.aspects.length} 相位线</span></div><div className="graphic-export-actions" aria-label="本命轮盘图形导出"><small>同源导出</small>{(["svg", "png", "pdf"] as const).map((format) => <button key={format} disabled={chartView === "aspect_grid" || graphicExportBusy !== null} onClick={() => downloadNatalGraphic(format)}>{graphicExportBusy === format ? "生成中…" : format.toUpperCase()}</button>)}</div></div></div>
+              {chartView === "aspect_grid" && !dateLevelMode ? <AspectGrid snapshot={snapshot} onOpen={openAspect} /> : <NatalWheel snapshot={snapshot} renderSpec={natalRenderSpec} controls={effectiveWheelControls} />}
+              <footer><span>计算相位 {snapshot.result.aspects.length} 条</span><span>轮盘绘制 {natalRenderSpec.options.visible_aspect_count} 条</span><span>完整结果见“相位”页</span><span>图形导出沿用当前显示设置</span></footer>
             </article>
 
             {settingsOpen && <aside className="settings-panel">
               <div className="settings-title"><div><small>CALCULATION SETTINGS</small><h2>本命盘参数</h2></div><button onClick={() => setSettingsOpen(false)}>×</button></div>
-              <label>黄道制<select disabled><option>回归黄道 Tropical（当前可用）</option><option>恒星黄道（待实现）</option></select><small>当前服务只支持 Tropical，不会静默替换。</small></label>
-              <label>规则方案<select defaultValue="integrated"><option value="integrated">专业综合本命 v1</option><option value="modern">现代本命 v1</option><option value="classical">古典本命 v1</option><option value="custom" disabled>自定义方案（规划中）</option></select><small>现代与古典事实分层展示，不合成不透明总分。</small></label>
+              <label>黄道制<select value={settings.zodiac} onChange={(event) => setSettings({ ...settings, zodiac: event.target.value as NatalCalculationSettings["zodiac"] })}><option value="tropical">Tropical 回归黄道</option><option value="sidereal">Sidereal 恒星黄道</option></select><small>切换黄道会生成新的计算快照，不会只移动图形标签。</small></label>
+              {settings.zodiac === "sidereal" && <label>岁差体系 Ayanamsa<select value={settings.ayanamsa} onChange={(event) => setSettings({ ...settings, ayanamsa: event.target.value as NatalCalculationSettings["ayanamsa"] })}>{ayanamsaOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select><small>岁差体系会写入本次计算结果与导出的分析数据。</small></label>}
+              <label>规则方案<select value={settings.analysisSystem} onChange={(event) => setSettings({ ...settings, analysisSystem: event.target.value as NatalCalculationSettings["analysisSystem"] })}>{analysisSystemOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select><small>{analysisSystemOptions.find((option) => option.id === settings.analysisSystem)?.description}</small></label>
               <label>宫位制<select value={settings.houseSystem} onChange={(event) => setSettings({ ...settings, houseSystem: event.target.value as NatalCalculationSettings["houseSystem"] })}>{houseSystemOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
               <label>交点类型<select value={settings.nodeType} onChange={(event) => setSettings({ ...settings, nodeType: event.target.value as NatalCalculationSettings["nodeType"] })}><option value="both">真交点＋平均交点</option><option value="true">真交点</option><option value="mean">平均交点</option></select></label>
-              <fieldset><legend>点位组</legend>{(Object.keys(pointGroups) as Array<keyof typeof pointGroups>).map((group) => <label className="check-option" key={group}><input type="checkbox" checked={groups[group]} onChange={(event) => setGroups({ ...groups, [group]: event.target.checked })} /><span>{({ core: "十大行星", angles: "四轴与敏感点", lunar: "交点与月球点", asteroids: "常用小行星", lots: "阿拉伯点", hamburg: "汉堡虚星" })[group]}</span><small>{pointGroups[group].length}</small></label>)}</fieldset>
-              <fieldset><legend>相位展示与计算</legend><label className="check-option"><input type="checkbox" checked={!settings.aspectIds.length} onChange={(event) => setSettings({ ...settings, aspectIds: event.target.checked ? [] : ["conjunction", "opposition", "trine", "square", "sextile"] })} /><span>完整专业相位集</span><small>{allAspectIds.length}</small></label><div className="aspect-toggle-grid">{allAspectIds.map((aspect) => <button key={aspect} className={!settings.aspectIds.length || settings.aspectIds.includes(aspect) ? "on" : ""} onClick={() => { const base = settings.aspectIds.length ? settings.aspectIds : [...allAspectIds]; setSettings({ ...settings, aspectIds: base.includes(aspect) ? base.filter((id) => id !== aspect) : [...base, aspect] }); }}>{aspectNames[aspect] ?? aspect}</button>)}</div></fieldset>
-              <button className="settings-calculate" onClick={() => openNewCalculation()}>用这些参数新建计算</button>
-              <p className="settings-boundary">当前已支持专业点位组、汉堡虚星与扩展 Lots。固定星、任意小行星、平行/反平行与镜像相位在数据或算法卡不足时明确禁用，不会伪造为已计算。</p>
+              <fieldset><legend>计算点位（需重新计算）</legend>{(Object.keys(pointGroups) as Array<keyof typeof pointGroups>).map((group) => <label className="check-option" key={group}><input type="checkbox" checked={groups[group]} onChange={(event) => setGroups({ ...groups, [group]: event.target.checked })} /><span>{pointGroupLabels[group]}</span><small>{pointGroups[group].length}</small></label>)}</fieldset>
+              <fieldset><legend>相位计算（需重新计算）</legend><label className="check-option"><input type="checkbox" checked={!settings.aspectIds.length} onChange={(event) => setSettings({ ...settings, aspectIds: event.target.checked ? [] : ["conjunction", "opposition", "trine", "square", "sextile"] })} /><span>完整专业相位集</span><small>{allAspectIds.length}</small></label><div className="aspect-toggle-grid">{allAspectIds.map((aspect) => <button key={aspect} className={!settings.aspectIds.length || settings.aspectIds.includes(aspect) ? "on" : ""} onClick={() => { const base = settings.aspectIds.length ? settings.aspectIds : [...allAspectIds]; setSettings({ ...settings, aspectIds: base.includes(aspect) ? base.filter((id) => id !== aspect) : [...base, aspect] }); }}>{aspectNames[aspect] ?? aspect}</button>)}</div><details className="orb-overrides"><summary>逐相位容许度覆盖（{allAspectIds.length} 项）</summary><div>{allAspectIds.map((aspect) => <label key={`orb-${aspect}`}><span>{aspectNames[aspect] ?? aspect}</span><input type="number" min="0" max="15" step="0.1" placeholder="规则默认" value={settings.orbOverrides[aspect] ?? ""} onChange={(event) => { const next = { ...settings.orbOverrides }; if (event.target.value === "") delete next[aspect]; else next[aspect] = Number(event.target.value); setSettings({ ...settings, orbOverrides: next }); }} /></label>)}</div></details></fieldset>
+              <fieldset className="wheel-display-settings"><legend>轮盘显示（即时生效）</legend><p className="settings-help">这些选项只改变当前轮盘与图形导出，不会修改计算快照。</p><h3>显示点位</h3>{(Object.keys(pointGroups) as Array<keyof typeof pointGroups>).map((group) => <label className="check-option" key={`wheel-${group}`}><input type="checkbox" checked={wheelGroups[group]} onChange={(event) => setWheelGroups({ ...wheelGroups, [group]: event.target.checked })} /><span>{pointGroupLabels[group]}</span><small>{pointGroups[group].length}</small></label>)}<h3>图层</h3><div className="display-toggle-grid">{([
+                ["showDegreeTicks", "360°刻度"], ["showZodiacNames", "星座名称"], ["showZodiacDegrees", "星座度数"], ["showHouseLines", "宫位分割线"], ["showHouseNumbers", "宫位数字"], ["showAxes", "四轴"], ["showPointLeaders", "点位引线"], ["showPointDegrees", "点位度数"], ["showAspectLines", "中心相位线"], ["showLegend", "相位图例"],
+              ] as Array<[keyof Omit<NatalRenderControls, "visiblePointIds" | "aspectFilterMode" | "aspectTopPercent" | "aspectMinimumStrength">, string]>).map(([key, label]) => <label className="check-option" key={key}><input type="checkbox" checked={Boolean(wheelControls[key])} onChange={(event) => setWheelControls({ ...wheelControls, [key]: event.target.checked })} /><span>{label}</span></label>)}</div><label className="check-option"><input type="checkbox" checked={wheelControls.majorAspectsOnly} onChange={(event) => setWheelControls({ ...wheelControls, majorAspectsOnly: event.target.checked })} /><span>仅主要相位</span><small>0° / 60° / 90° / 120° / 180°</small></label><label>相位线筛选<select value={wheelControls.aspectFilterMode} onChange={(event) => setWheelControls({ ...wheelControls, aspectFilterMode: event.target.value as NatalRenderControls["aspectFilterMode"] })}><option value="top_percent">按强度保留前百分比</option><option value="minimum_strength">按最低强度阈值</option></select></label>{wheelControls.aspectFilterMode === "top_percent" ? <label>保留强度最高的 {wheelControls.aspectTopPercent}%<input type="range" min="1" max="100" step="1" value={wheelControls.aspectTopPercent} onChange={(event) => setWheelControls({ ...wheelControls, aspectTopPercent: Number(event.target.value) })} /><small>当前显示 {natalRenderSpec.options.visible_aspect_count} / {snapshot.result.aspects.length} 条计算相位。</small></label> : <label>最低强度 {Math.round(wheelControls.aspectMinimumStrength * 100)}%<input type="range" min="0" max="100" step="1" value={Math.round(wheelControls.aspectMinimumStrength * 100)} onChange={(event) => setWheelControls({ ...wheelControls, aspectMinimumStrength: Number(event.target.value) / 100 })} /><small>当前显示 {natalRenderSpec.options.visible_aspect_count} / {snapshot.result.aspects.length} 条计算相位。</small></label>}</fieldset>
+              <button className="settings-calculate" disabled={busy} onClick={calculateNatal}>{busy ? "正在重新计算…" : settingsDirty ? "重新计算并应用参数" : "按当前参数重新计算"}</button>
+              {settingsDirty && <p className="settings-boundary"><b>存在尚未应用的参数改动。</b> 当前轮盘和结果仍属于上一份不可变快照，重新计算后才会切换。</p>}
+              <p className="settings-boundary">当前已支持专业点位组、汉堡虚星与扩展 Lots。固定星与任意小行星等扩展能力会在计算规则完成验证后开放；未开放的选项不会伪装为已计算。</p>
             </aside>}
           </div>
 
-          <section className="result-section" id="natal-results">
+          <section className="result-section" id="natal-results" ref={resultsRef}>
             <div className="result-tabs">
-              {(["basic", "signs", "houses", "aspects", "structure", "classical", "technical"] as ResultTab[]).map((item) => <button key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>{({ basic: "基本", signs: "星座", houses: "宫位", aspects: "相位", structure: "结构", classical: "古典", technical: "完整技术推演" })[item]}<small>{item === "basic" ? snapshot.result.points.length : item === "signs" ? signGroups.length : item === "houses" ? 12 : item === "aspects" ? snapshot.result.aspects.length : ""}</small></button>)}
+              {(["basic", "signs", "houses", "aspects", "structure", "classical", "technical"] as ResultTab[]).map((item) => <button key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>{({ basic: "基本", signs: "星座", houses: "宫位", aspects: "相位", structure: "结构", classical: "古典", technical: "分析数据与导出" })[item]}<small>{item === "basic" ? snapshot.result.points.length : item === "signs" ? signGroups.length : item === "houses" ? snapshot.result.houses.length : item === "aspects" ? snapshot.result.aspects.length : ""}</small></button>)}
             </div>
 
             {tab === "basic" && <div className="result-content">
-              <div className="section-copy"><div><small>DIRECT CALCULATION</small><h2>星座、度数、宫位与运动状态</h2><p>这些结果由天文与占星规则直接计算。点击“解读”读取该点位的自身功能、星座表达、宫位领域与运动状态。</p></div><button onClick={() => setTab("technical")}>查看全部字段</button></div>
-              <h3 className="table-group-title">十大行星</h3><div className="data-table"><div className="table-head"><span>星体</span><span>星座度数</span><span>宫位</span><span>运动</span><span>经纬度</span><span>操作</span></div>{corePoints.map((point) => <div className="table-row" key={point.point_id}><span className="point-name"><b>{pointGlyphs[point.point_id]}</b>{pointNames[point.point_id]}</span><span>{signNames[point.sign]} {formatDegree(point.degree_in_sign)}</span><span>第{point.house ?? "—"}宫</span><span className={point.retrograde ? "retrograde" : ""}>{point.retrograde ? "逆行" : point.motion_interpretation === "not_applicable" ? "不适用" : "顺行"}</span><span>{point.position.ecliptic.longitude_deg.toFixed(4)}°<small>纬 {point.position.ecliptic.latitude_deg?.toFixed(3) ?? "—"}°</small></span><button onClick={() => openPoint(point)}>解读</button></div>)}</div>
-              <h3 className="table-group-title">轴点、交点、小行星与阿拉伯点</h3><div className="data-table"><div className="table-head"><span>点位</span><span>星座度数</span><span>宫位</span><span>运动</span><span>类型</span><span>操作</span></div>{extendedPoints.map((point) => <div className="table-row" key={point.point_id}><span className="point-name"><b>{pointGlyphs[point.point_id] ?? "•"}</b>{pointNames[point.point_id] ?? point.point_id}</span><span>{signNames[point.sign]} {formatDegree(point.degree_in_sign)}</span><span>第{point.house ?? "—"}宫</span><span className={point.retrograde ? "retrograde" : ""}>{point.motion_interpretation === "not_applicable" ? "不适用" : point.retrograde ? "逆行" : "顺行"}</span><span>{point.kind}</span><button onClick={() => openPoint(point)}>解读</button></div>)}</div>
+              <div className="section-copy"><div><small>{dateLevelMode ? "DATE-RANGE EPHEMERIS" : "DIRECT CALCULATION"}</small><h2>{dateLevelMode ? "日期级星座位置与不确定范围" : "星座、度数、宫位与运动状态"}</h2><p>{dateLevelMode ? "≈ 表示当地日期中点的参考位置，不是出生时刻。每颗天体同时保留完整日期内的最大不确定度、跨星座和运动状态风险。" : "这些结果由天文与占星规则直接计算。点击“解读”读取该点位的自身功能、星座表达、宫位领域与运动状态。"}</p></div><button onClick={() => setTab("technical")}>查看全部字段</button></div>
+              <h3 className="table-group-title">十大行星</h3><div className="data-table"><div className="table-head"><span>星体</span><span>星座度数</span><span>宫位</span><span>运动</span><span>经纬度／范围</span><span>操作</span></div>{corePoints.map((point) => <div className="table-row" key={point.point_id}><span className="point-name"><b>{pointGlyphs[point.point_id]}</b>{pointNames[point.point_id]}</span><span>{pointPlacementLabel(point, dateLevelMode)}{dateLevelMode && <small>日期中点参考</small>}</span><span>{pointHouseLabel(point)}</span><span className={point.retrograde ? "retrograde" : ""}>{pointMotionLabel(point, dateLevelMode)}</span><span>{point.position.ecliptic.longitude_deg.toFixed(4)}°<small>{dateLevelMode ? pointUncertaintyLabel(point) : `纬 ${point.position.ecliptic.latitude_deg?.toFixed(3) ?? "—"}°`}</small></span><button onClick={() => openPoint(point)}>解读</button></div>)}</div>
+              <h3 className="table-group-title">轴点、交点、小行星与阿拉伯点</h3>{extendedPoints.length ? <div className="data-table"><div className="table-head"><span>点位</span><span>星座度数</span><span>宫位</span><span>运动</span><span>类型</span><span>操作</span></div>{extendedPoints.map((point) => <div className="table-row" key={point.point_id}><span className="point-name"><b>{pointGlyphs[point.point_id] ?? "•"}</b>{pointNames[point.point_id] ?? point.point_id}</span><span>{pointPlacementLabel(point, dateLevelMode)}</span><span>{pointHouseLabel(point)}</span><span className={point.retrograde ? "retrograde" : ""}>{pointMotionLabel(point, dateLevelMode)}</span><span>{pointKindNames[String(point.kind)] ?? "扩展点位"}</span><button onClick={() => openPoint(point)}>解读</button></div>)}</div> : <TimeDependentUnavailable title="时刻依赖点位未生成" detail="四轴、Vertex、依赖 ASC 的 Lots 与其他时刻敏感点不会在出生时刻未知时进入结果。" />}
             </div>}
 
-            {tab === "signs" && <div className="result-content"><div className="section-copy"><div><small>SIGN PLACEMENTS</small><h2>星座落点与表达方式</h2><p>星座由黄经直接换算。这里按星座聚合所有已选择点位，并保留每个点位的精确度数、宫位、运动状态和独立解读入口。</p></div></div><div className="sign-result-grid">{signGroups.map((group) => <article key={group.sign}><header><span>{signGlyphs[signIds.indexOf(group.sign)]}</span><div><b>{signNames[group.sign]}</b><small>{signStyles[group.sign]}</small></div><i>{group.points.length} 点</i></header><div>{group.points.map((point) => <button key={point.point_id} onClick={() => openPoint(point)}><span>{pointGlyphs[point.point_id] ?? "•"}</span><b>{pointNames[point.point_id] ?? point.point_id}</b><small>{formatDegree(point.degree_in_sign)} · 第{point.house ?? "—"}宫{point.retrograde ? " · 逆行" : ""}</small><i>解读</i></button>)}</div></article>)}</div></div>}
+            {tab === "signs" && <div className="result-content"><div className="section-copy"><div><small>SIGN PLACEMENTS</small><h2>星座落点与表达方式</h2><p>{dateLevelMode ? "按日期中点参考星座聚合，并保留完整日期的不确定范围。跨星座风险会进入点位事实，不把中点位置包装成精确本命落点。" : "星座由黄经直接换算。这里按星座聚合所有已选择点位，并保留每个点位的精确度数、宫位、运动状态和独立解读入口。"}</p></div></div><div className="sign-result-grid">{signGroups.map((group) => <article key={group.sign}><header><span>{signGlyphs[signIds.indexOf(group.sign)]}</span><div><b>{signNames[group.sign]}</b><small>{signStyles[group.sign]}</small></div><i>{group.points.length} 点</i></header><div>{group.points.map((point) => <button key={point.point_id} onClick={() => openPoint(point)}><span>{pointGlyphs[point.point_id] ?? "•"}</span><b>{pointNames[point.point_id] ?? point.point_id}</b><small>{dateLevelMode ? "≈ " : ""}{formatDegree(point.degree_in_sign)} · {point.house ? `第${point.house}宫` : pointUncertaintyLabel(point)}{point.retrograde ? " · 逆行" : ""}</small><i>解读</i></button>)}</div></article>)}</div></div>}
 
-            {tab === "houses" && <div className="result-content"><div className="section-copy"><div><small>HOUSE CUSPS & RULERS</small><h2>十二宫宫头、宫主与宫内点位</h2><p>宫位依赖出生时间和地点；高纬度或时间不确定会返回警告，而不是默认 00:00。</p></div></div><div className="house-grid">{snapshot.result.houses.map((house, index) => <article key={house.number}><header><span>{house.number}</span><div><b>第{house.number}宫</b><small>{houseDomains[house.number - 1]}</small></div></header><dl><div><dt>宫头</dt><dd>{signNames[house.sign]} {formatDegree(house.degree_in_sign)}</dd></div><div><dt>跨度</dt><dd>{house.span_deg.toFixed(3)}°</dd></div><div><dt>传统宫主</dt><dd>{house.traditional_ruler_ids.map((id) => pointNames[id] ?? id).join("、") || "—"}</dd></div><div><dt>现代宫主</dt><dd>{house.modern_ruler_ids.map((id) => pointNames[id] ?? id).join("、") || "—"}</dd></div><div><dt>宫内点位</dt><dd>{house.point_ids.map((id) => pointNames[id] ?? id).join("、") || "无"}</dd></div></dl><button onClick={() => setTarget({ type: "house", id: String(house.number), title: `第${house.number}宫`, fact: `宫头 ${signNames[house.sign]} ${formatDegree(house.degree_in_sign)}，跨度 ${house.span_deg.toFixed(3)}°`, resultPath: `/result/houses/${index}` })}>解读宫位</button></article>)}</div></div>}
+            {tab === "houses" && <div className="result-content"><div className="section-copy"><div><small>HOUSE CUSPS & RULERS</small><h2>十二宫宫头、宫主与宫内点位</h2><p>宫位依赖出生时间和地点；高纬度或时间不确定会返回警告，而不是默认 00:00。</p></div></div>{snapshot.result.houses.length ? <div className="house-grid">{snapshot.result.houses.map((house, index) => <article key={house.number}><header><span>{house.number}</span><div><b>第{house.number}宫</b><small>{houseDomains[house.number - 1]}</small></div></header><dl><div><dt>宫头</dt><dd>{signNames[house.sign]} {formatDegree(house.degree_in_sign)}</dd></div><div><dt>跨度</dt><dd>{house.span_deg.toFixed(3)}°</dd></div><div><dt>传统宫主</dt><dd>{house.traditional_ruler_ids.map((id) => pointNames[id] ?? id).join("、") || "—"}</dd></div><div><dt>现代宫主</dt><dd>{house.modern_ruler_ids.map((id) => pointNames[id] ?? id).join("、") || "—"}</dd></div><div><dt>宫内点位</dt><dd>{house.point_ids.map((id) => pointNames[id] ?? id).join("、") || "无"}</dd></div></dl><button onClick={() => setTarget({ type: "house", id: String(house.number), title: `第${house.number}宫`, fact: `宫头 ${signNames[house.sign]} ${formatDegree(house.degree_in_sign)}，跨度 ${house.span_deg.toFixed(3)}°`, resultPath: `/result/houses/${index}` })}>解读宫位</button></article>)}</div> : <TimeDependentUnavailable title="十二宫未计算" detail="ASC、MC 和十二宫宫头会在一天内显著移动；没有出生时刻就不存在唯一、可复现的宫位结果。" />}</div>}
 
-            {tab === "aspects" && <div className="result-content"><div className="section-copy"><div><small>PROFESSIONAL ASPECT SET</small><h2>完整本命相位表</h2><p>展示理论角度、实际角距、容许度、入出相和强度。平行/反平行与镜像相位在算法卡通过后以独立分组出现，不会混入黄经相位。</p></div><span className="count-chip">{snapshot.result.aspects.length} 条</span></div><div className="aspect-table"><div className="aspect-head"><span>点位 A</span><span>相位</span><span>点位 B</span><span>实际角距</span><span>容许度</span><span>阶段</span><span>强度</span><span>操作</span></div>{snapshot.result.aspects.map((aspect) => <div className="aspect-row" key={aspect.aspect_id}><span>{pointNames[aspect.point_a] ?? aspect.point_a}</span><b>{aspectNames[aspect.type] ?? aspect.type}<small>{aspect.exact_angle_deg.toFixed(3)}°</small></b><span>{pointNames[aspect.point_b] ?? aspect.point_b}</span><span>{aspect.actual_angle_deg.toFixed(3)}°</span><span>{aspect.orb_deg.toFixed(3)}°</span><span>{aspect.applying_state}</span><span><i style={{ width: `${Math.round(aspect.strength * 100)}%` }} />{Math.round(aspect.strength * 100)}%</span><button onClick={() => openAspect(aspect)}>解读</button></div>)}</div></div>}
+            {tab === "aspects" && <div className="result-content"><div className="section-copy"><div><small>PROFESSIONAL ASPECT SET</small><h2>完整本命相位表</h2><p>展示理论角度、实际角距、容许度、入出相和强度。平行/反平行与镜像相位在算法卡通过后以独立分组出现，不会混入黄经相位。</p></div><span className="count-chip">{snapshot.result.aspects.length} 条</span></div>{snapshot.result.aspects.length ? <div className="aspect-table"><div className="aspect-head"><span>点位 A</span><span>相位</span><span>点位 B</span><span>实际角距</span><span>容许度</span><span>阶段</span><span>强度</span><span>操作</span></div>{snapshot.result.aspects.map((aspect) => <div className="aspect-row" key={aspect.aspect_id}><span>{pointNames[aspect.point_a] ?? aspect.point_a}</span><b>{aspectNames[aspect.type] ?? aspect.type}<small>{aspect.exact_angle_deg.toFixed(3)}°</small></b><span>{pointNames[aspect.point_b] ?? aspect.point_b}</span><span>{aspect.actual_angle_deg.toFixed(3)}°</span><span>{aspect.orb_deg.toFixed(3)}°</span><span>{aspectPhaseLabel(aspect.applying_state) ?? "—"}</span><span><i style={{ width: `${Math.round(aspect.strength * 100)}%` }} />{Math.round(aspect.strength * 100)}%</span><button onClick={() => openAspect(aspect)}>解读</button></div>)}</div> : <TimeDependentUnavailable title="本命相位未计算" detail="日期内月亮及快速点位会移动，单取中点会制造并不存在于出生时刻的相位；日期级模式只报告点位范围。" />}</div>}
 
-            {tab === "structure" && <div className="result-content"><div className="section-copy"><div><small>NATAL STRUCTURE</small><h2>元素、模式、半球、象限与几何格局</h2><p>描述性结构不等于人格分数；Jones 盘型等证据不足的能力会明确标记不可用或 Experimental。</p></div></div><div className="distribution-grid">{snapshot.result.distributions?.map((distribution) => <article key={distribution.dimension}><h3>{distribution.dimension}</h3>{distribution.categories.map((category) => { const max = Math.max(...distribution.categories.map((item) => item.count), 1); return <div key={category.category_id}><span>{category.category_id}</span><i><b style={{ width: `${category.count / max * 100}%` }} /></i><strong>{category.count}</strong></div>; })}</article>)}</div><div className="fact-card-grid">{structureEntries.map(([key, value]) => <article key={key}><header><b>{key}</b><button onClick={() => setTarget({ type: "structure", id: key, title: key, fact: toPlain(value) })}>解读</button></header><pre>{toPlain(value)}</pre></article>)}</div></div>}
+            {tab === "structure" && <div className="result-content"><div className="section-copy"><div><small>NATAL STRUCTURE</small><h2>元素、模式、半球、象限与几何格局</h2><p>每项都显示参与点位、数量与规则边界。描述性结构不是人格分数；尚无版本化依据的 Jones 盘型保持不确定。</p></div></div>{dateLevelMode ? <TimeDependentUnavailable title="整盘结构未计算" detail="当前策略不以日期中点替代本命盘。半球、象限、角续果、群星、几何格局和 Jones 盘型均等待可靠出生时刻。" /> : <><div className="distribution-grid">{snapshot.result.distributions?.map((distribution) => <article key={distribution.dimension}><h3>{({ elements: "四元素", modalities: "三模式", polarities: "阴阳属性" } as Record<string, string>)[distribution.dimension] ?? distribution.dimension}</h3>{distribution.categories.map((category) => { const max = Math.max(...distribution.categories.map((item) => item.count), 1); return <div key={category.category_id}><span>{({ fire: "火", earth: "土", air: "风", water: "水", cardinal: "基本", fixed: "固定", mutable: "变动", positive: "阳性", negative: "阴性" } as Record<string, string>)[category.category_id] ?? category.category_id}</span><i><b style={{ width: `${category.count / max * 100}%` }} /></i><strong>{category.count}</strong></div>; })}</article>)}</div><StructureResults snapshot={snapshot} onOpen={setTarget} /></>}</div>}
 
-            {tab === "classical" && <div className="result-content"><div className="section-copy"><div><small>CLASSICAL & HELLENISTIC CORE</small><h2>昼夜盘、尊贵、太阳状态、接纳、定位星与阿拉伯点</h2><p>古典模块按版本化规则表计算。Hayz、Almuten、综合尊贵分、物理可见性及福点/精神点以外的 Lots 尚未可靠实现。</p></div></div><div className="classical-summary"><div><small>昼夜盘</small><b>{String(snapshot.result.classical?.day_night_status ?? "—")}</b></div><div><small>本质尊贵</small><b>{snapshot.result.dignities?.length ?? 0}</b></div><div><small>接纳</small><b>{snapshot.result.receptions?.length ?? 0}</b></div><div><small>阿拉伯点</small><b>{snapshot.result.lots?.length ?? 0}</b></div></div><div className="fact-card-grid">{classicalEntries.map(([key, value]) => <article key={key}><header><b>{key}</b><button onClick={() => setTarget({ type: "classical", id: key, title: key, fact: toPlain(value) })}>解读</button></header><pre>{toPlain(value)}</pre></article>)}</div></div>}
+            {tab === "classical" && <div className="result-content"><div className="section-copy"><div><small>CLASSICAL & HELLENISTIC CORE</small><h2>昼夜、尊贵、太阳条件、接纳与阿拉伯点</h2><p>古典结果与现代结果共用同一份天文快照，但采用独立、版本化的传统规则表；不再用原始 JSON 代替专业阅读。</p></div></div>{dateLevelMode ? <TimeDependentUnavailable title="古典与希腊化结果未计算" detail="Sect、太阳高度、宫位、Lots、偶然尊贵和许多接纳语境依赖出生时刻。当前快照不会混合部分可算项后冒充完整古典分析。" /> : <ClassicalResults snapshot={snapshot} onOpen={setTarget} />}</div>}
 
             {tab === "technical" && <div className="result-content technical-layout">
-              <div className="technical-main"><div className="section-copy"><div><small>PORTABLE TECHNICAL DOCUMENT</small><h2>完整专业技术推演</h2><p>覆盖输入、设置、天文上下文、全部点位、十二宫、完整相位、结构、古典事实、警告与版本信息。可直接复制给外部模型。</p></div><div className="document-actions"><button onClick={copyTechnical}>复制全文</button><button onClick={() => downloadTechnical("markdown")}>导出 .md</button><button onClick={() => downloadTechnical("plaintext")}>导出 .txt</button></div></div><textarea aria-label="完整本命盘技术推演" value={technicalDocument} onChange={(event) => setTechnicalDocument(event.target.value)} spellCheck={false} /></div>
-              <aside className="ai-panel"><span>OPTIONAL AI CONNECTOR</span><h3>提交至 AI 分析</h3><p>AI 只接收已算好的技术文档，不负责计算星历、星座、宫位或相位。</p><label>服务商<select value={providerId} onChange={(event) => setProviderId(event.target.value as "openai" | "moonshot")}><option value="openai">GPT / OpenAI</option><option value="moonshot">Kimi / Moonshot</option></select></label><label>模型<select value={selectedProvider?.models[0]?.model_id ?? ""} disabled><option>{selectedProvider?.models[0]?.label ?? "未配置"}</option></select></label><label>分析重点（可选）<textarea value={aiFocus} onChange={(event) => setAiFocus(event.target.value)} placeholder="例如：优先分析职业结构与古典尊贵之间的关系" /></label><label className="consent-row"><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} /><span>我同意将这份本命数据发送给所选第三方模型</span></label><button className="ai-submit" disabled={!selectedProvider?.configured || !consent || !snapshot.id.startsWith("calculation-")} onClick={submitAi}>提交至 {selectedProvider?.label}</button><div className="connector-status"><b>{selectedProvider?.configured ? "已配置" : "尚未配置"}</b><p>{selectedProvider?.blocking_reason ?? "等待后台提供方执行器。"}</p></div><button className="copy-fallback" onClick={copyTechnical}>没有 API？复制后自行提交</button></aside>
+              <div className="technical-main"><div className="section-copy"><div><small>PORTABLE ANALYSIS DATA</small><h2>可复制的本命盘分析数据</h2><p>只包含可以交给占星师或外部模型继续分析的事实：点位、宫位、相位、分布、格局、古典状态与输入提醒。</p></div><div className="document-actions"><button onClick={copyTechnical}>复制全文</button><button onClick={() => downloadTechnical("markdown")}>导出 .md</button><button onClick={() => downloadTechnical("plaintext")}>导出 .txt</button><button onClick={downloadSnapshotJson}>专业 JSON</button></div></div><dl className="document-integrity"><div><dt>当前格式</dt><dd>Markdown · {new Blob([technicalDocument]).size} 字节</dd></div><div><dt>文档用途</dt><dd>复制给占星师、GPT、Kimi 或其他外部分析工具。</dd></div><div><dt>数据边界</dt><dd>只输出可用于继续分析的事实；完整 JSON 可单独导出。</dd></div></dl><div className="csv-export"><label>专业数据表<select value={exportTableId} onChange={(event) => setExportTableId(event.target.value as (typeof natalTableExports)[number][0])}>{natalTableExports.map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select></label><button disabled={!snapshot.id.startsWith("calculation-")} onClick={downloadSelectedTable}>导出所选 CSV</button><small>{snapshot.id.startsWith("calculation-") ? "CSV 由同一不可变快照投影，不会重新计算。" : "演示数据仅支持本地 JSON；生成真实快照后开放 CSV。"}</small></div><textarea aria-label="本命盘分析数据" value={technicalDocument} readOnly spellCheck={false} /></div>
+              <aside className="ai-panel"><span>OPTIONAL AI CONNECTOR</span><h3>提交至 AI 分析</h3><p>AI 只接收已算好的分析数据，不负责计算星历、星座、宫位或相位。必须先预览本次载荷，再单独同意。</p><label>服务商<select value={providerId} onChange={(event) => { const next = event.target.value as AiProviderId; const provider = providers.find((item) => item.provider_id === next); setProviderId(next); setModelId(provider?.models[0]?.model_id ?? "deepseek-v4-pro"); setAiPreview(null); setConsent(false); setSubjectDataAuthority(false); }}>{providers.map((provider) => <option key={provider.provider_id} value={provider.provider_id}>{provider.label}{provider.configured ? "" : " · 未配置"}</option>)}</select></label><label>模型<select value={modelId} onChange={(event) => { setModelId(event.target.value as AiModelId); setAiPreview(null); setConsent(false); setSubjectDataAuthority(false); }}>{selectedProvider?.models.map((model) => <option key={model.model_id} value={model.model_id}>{model.label}{model.configured ? "" : " · 未配置"}</option>)}</select></label><label>分析重点（可选）<textarea value={aiFocus} onChange={(event) => { setAiFocus(event.target.value); setAiPreview(null); setConsent(false); setSubjectDataAuthority(false); }} placeholder="例如：优先分析职业结构与古典尊贵之间的关系" /></label><button className="payload-preview-button" disabled={aiPreviewBusy || !snapshot.id.startsWith("calculation-")} onClick={previewAi}>{aiPreviewBusy ? "正在生成预览…" : "预览将发送的载荷"}</button>{aiPreview && <section className="payload-preview"><header><b>本次载荷预览</b><small>尚未发送</small></header><dl><div><dt>分析数据</dt><dd>{aiPreview.document_format} · {aiPreview.character_count} 字符 · 约 {aiPreview.estimated_tokens} tokens</dd></div><div><dt>内容校验</dt><dd><code>{aiPreview.document_content_hash}</code></dd></div><div><dt>载荷校验</dt><dd><code>{aiPreview.payload_hash}</code></dd></div><div><dt>数据目的地</dt><dd>{aiPreview.data_destination}</dd></div><div><dt>响应保存</dt><dd>{aiPreview.store_response ? "随该人物最新结果保存" : "游客／临时结果不保存"}</dd></div><div><dt>保留说明</dt><dd>{aiPreview.retention_policy}</dd></div></dl><details><summary>查看发送内容节选</summary><pre>{aiPreview.preview_excerpt}</pre></details></section>}<label className="consent-row"><input type="checkbox" disabled={!aiPreview} checked={subjectDataAuthority} onChange={(event) => setSubjectDataAuthority(event.target.checked)} /><span>我确认有权提交该人物的资料</span></label><label className="consent-row"><input type="checkbox" disabled={!aiPreview} checked={consent} onChange={(event) => setConsent(event.target.checked)} /><span>我同意发送本次预览中同一校验值的载荷</span></label><button className="ai-submit" disabled={aiSubmitBusy || !selectedProvider?.configured || !aiPreview || !consent || !subjectDataAuthority || !snapshot.id.startsWith("calculation-")} onClick={submitAi}>{aiSubmitBusy ? "DeepSeek 分析中…" : `提交至 ${selectedProvider?.label}`}</button><div className="connector-status"><b>{selectedProvider?.configured ? "已配置" : "尚未配置"}</b><p>{selectedProvider?.blocking_reason ?? "服务端密钥已配置，等待用户预览和授权。"}</p></div>{aiAnalysisText && <label className="ai-result"><span>AI 分析结果</span><textarea aria-label="DeepSeek 分析结果" value={aiAnalysisText} readOnly spellCheck={false} /></label>}<button className="copy-fallback" onClick={copyTechnical}>没有 API？复制后自行提交</button></aside>
             </div>}
           </section>
 
-          {snapshot.warnings.length > 0 && <section className="warning-panel"><h2>计算警告</h2>{snapshot.warnings.map((warning) => <p key={`${warning.code}-${warning.message}`}><b>{warning.code}</b>{warning.message}</p>)}</section>}
+          {snapshot.warnings.length > 0 && <section className="warning-panel"><h2>计算提醒</h2>{snapshot.warnings.map((warning, index) => <p key={`${warning.code}-${warning.message}-${index}`}>{warning.message}</p>)}</section>}
         </section>
       </div>
 
       {personModal && <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setPersonModal(false); }}>
         <section className="person-modal" role="dialog" aria-modal="true" aria-label="新增人物">
-          <header><div><span>SUBJECT LIBRARY</span><h2>新增人物</h2><p>这里只保存可复用的人物资料，不启动本命盘或任何其他计算。</p></div><button onClick={() => setPersonModal(false)} aria-label="关闭">×</button></header>
+          <header><div><span>SUBJECT LIBRARY</span><h2>新增人物</h2><p>{accountWorkspace.authenticated ? "保存为当前账户可复用的人物资料；此动作不会自动计算。" : "游客可建立本次会话人物，但关闭页面后不会保存；计算请使用“新建计算”。"}</p></div><button onClick={() => setPersonModal(false)} aria-label="关闭">×</button></header>
           <PersonFields person={person} onChange={setPerson} />
-          <footer><button onClick={() => setPersonModal(false)}>取消</button><button className="calculate-button" onClick={savePersonOnly}>保存人物</button></footer>
+          <footer><button onClick={() => setPersonModal(false)}>取消</button><button className="calculate-button" onClick={savePersonOnly}>{accountWorkspace.authenticated ? "保存人物" : "用于本次会话"}</button></footer>
+        </section>
+      </div>}
+
+      {authModal && <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setAuthModal(null); }}>
+        <section className="person-modal auth-modal" role="dialog" aria-modal="true" aria-label={authModal === "register" ? "注册 Interstellar" : "登录 Interstellar"}>
+          <header><div><span>PRIVATE WORKSPACE</span><h2>{authModal === "register" ? "创建你的占星工作区" : "欢迎回来"}</h2><p>登录后人物资料、最新本命盘和 AI 分析只对你的账户可见。</p></div><button onClick={() => setAuthModal(null)} aria-label="关闭">×</button></header>
+          <form className="auth-content" onSubmit={(event) => { event.preventDefault(); void submitAccount(); }}>
+            <div className="auth-benefits"><b>账户会保存什么</b><p>人物资料、每个人物最后一次本命盘、计算参数与已完成的 AI 分析。</p><small>游客仍可完整计算，但关闭页面后不保存。</small></div>
+            {authModal === "register" && <label>昵称<input autoComplete="name" value={authDisplayName} onChange={(event) => setAuthDisplayName(event.target.value)} placeholder="如何称呼你" /></label>}
+            <label>邮箱<input type="email" autoComplete="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="name@example.com" /></label>
+            <label>密码<input type="password" autoComplete={authModal === "register" ? "new-password" : "current-password"} value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void submitAccount(); }} placeholder="至少 8 个字符" /></label>
+            {authError && <p className="auth-error">{authError}</p>}
+            <button type="submit" className="auth-submit" disabled={authBusy || !authEmail || authPassword.length < 8}>{authBusy ? "请稍候…" : authModal === "register" ? "注册并进入工作区" : "登录工作区"}</button>
+            <button type="button" className="auth-switch" onClick={() => { setAuthError(""); setAuthModal(authModal === "register" ? "login" : "register"); }}>{authModal === "register" ? "已有账户？直接登录" : "还没有账户？立即注册"}</button>
+          </form>
         </section>
       </div>}
 
@@ -691,8 +1537,8 @@ export default function Home() {
         <section className="person-modal calculation-modal" role="dialog" aria-modal="true" aria-label="新建计算">
           <header><div><span>NEW CALCULATION</span><h2>新建计算</h2><p>{entryModes.find((entry) => entry.id === entryPoint)?.context}</p></div><button onClick={() => setCalculationModal(false)} aria-label="关闭">×</button></header>
           <section className="calculation-step"><div className="step-title"><span>1</span><div><b>选择计算方法</b><small>本命盘当前可运行；其他方法保留入口，但不返回假结果。</small></div></div><div className="calculation-techniques">{chartTechniques.map((technique) => <button key={technique.id} className={technique.status === "active" ? "active" : "planned"} onClick={() => technique.status === "active" ? undefined : setCapabilityTarget(technique)}><b>{technique.label}</b><small>{technique.outputs}</small><i>{technique.status === "active" ? "已选择" : "规划中"}</i></button>)}</div></section>
-          <section className="calculation-step"><div className="step-title"><span>2</span><div><b>选择人物</b><small>可以选择本机人物，也可以直接填写仅用于本次计算的临时人物。</small></div></div>{savedPeople.length > 0 && <div className="subject-picker">{savedPeople.map((saved) => <button key={`${saved.displayName}:${saved.localDate}`} className={person.displayName === saved.displayName && person.localDate === saved.localDate ? "active" : ""} onClick={() => setPerson(saved)}><span>{saved.displayName.slice(0, 1)}</span><b>{saved.displayName}</b><small>{saved.localDate}</small></button>)}</div>}<details className="inline-person" open={!savedPeople.length || !person.displayName}><summary>{person.displayName ? `本次人物：${person.displayName}（展开编辑）` : "填写临时人物"}</summary><PersonFields person={person} onChange={setPerson} /></details></section>
-          <section className="calculation-step"><div className="step-title"><span>3</span><div><b>确认规则与输出</b><small>改变计算参数会生成新的不可变 Snapshot；切换轮盘/相位图不会重算。</small></div></div><section className="modal-settings-summary"><div><small>占星方案</small><b>专业综合本命 v1</b></div><div><small>黄道</small><b>回归黄道</b></div><div><small>宫位制</small><b>{houseSystemOptions.find((item) => item.id === settings.houseSystem)?.label}</b></div><div><small>点位 / 相位</small><b>{Object.values(groups).filter(Boolean).length} 组 / {settings.aspectIds.length || allAspectIds.length} 种</b></div></section><label className="save-person"><input type="checkbox" checked={saveProfile} onChange={(event) => setSaveProfile(event.target.checked)} /><span><b>计算完成后保存临时人物</b><small>不勾选时仅用于本次计算；当前保存范围是本机浏览器。</small></span></label></section>
+          <section className="calculation-step"><div className="step-title"><span>2</span><div><b>选择人物</b><small>{accountWorkspace.authenticated ? "可以选择我的人物，也可以填写仅用于本次计算的临时人物。" : "游客可以填写临时人物并完成计算，但不会保存。"}</small></div></div>{savedPeople.length > 0 && <div className="subject-picker">{savedPeople.map((saved) => <button key={saved.id} className={selectedPersonId === saved.id ? "active" : ""} onClick={() => { setSelectedPersonId(saved.id); setPerson(saved.person); }}><span>{saved.person.displayName.slice(0, 1)}</span><b>{saved.person.displayName}</b><small>{saved.person.localDate}</small></button>)}</div>}<details className="inline-person" open={!savedPeople.length || !person.displayName}><summary>{person.displayName ? `本次人物：${person.displayName}（展开编辑）` : "填写临时人物"}</summary><PersonFields person={person} onChange={(next) => { setPerson(next); if (selectedPersonId && next.displayName !== savedPeople.find((item) => item.id === selectedPersonId)?.person.displayName) setSelectedPersonId(null); }} /></details></section>
+          <section className="calculation-step"><div className="step-title"><span>3</span><div><b>确认规则与输出</b><small>改变计算参数会生成新的计算结果；登录人物会覆盖保存最新一次，不保留旧结果。</small></div></div><section className="modal-settings-summary"><div><small>占星方案</small><b>{analysisSystemOptions.find((item) => item.id === settings.analysisSystem)?.label}</b></div><div><small>黄道</small><b>{settings.zodiac === "tropical" ? "Tropical 回归黄道" : `Sidereal · ${ayanamsaOptions.find((item) => item.id === settings.ayanamsa)?.label}`}</b></div><div><small>宫位制</small><b>{houseSystemOptions.find((item) => item.id === settings.houseSystem)?.label}</b></div><div><small>点位 / 相位</small><b>{Object.values(groups).filter(Boolean).length} 组 / {settings.aspectIds.length || allAspectIds.length} 种</b></div></section><label className="save-person"><input type="checkbox" disabled={!accountWorkspace.authenticated || Boolean(selectedPersonId)} checked={Boolean(selectedPersonId) || saveProfile} onChange={(event) => setSaveProfile(event.target.checked)} /><span><b>{selectedPersonId ? "覆盖该人物的最新本命盘" : accountWorkspace.authenticated ? "计算完成后保存人物与最新结果" : "游客结果不保存"}</b><small>{selectedPersonId ? "旧的本命计算结果不会保留。" : accountWorkspace.authenticated ? "不勾选则只在当前页面使用。" : "登录／注册后才可永久保存。"}</small></span></label></section>
           <footer><button onClick={() => setCalculationModal(false)}>取消</button><button className="calculate-button" disabled={busy} onClick={calculateNatal}>{busy ? "正在计算全部本命事实…" : "计算完整本命盘"}</button></footer>
         </section>
       </div>}

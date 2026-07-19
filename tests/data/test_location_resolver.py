@@ -67,3 +67,25 @@ def test_ocean_location_is_explicitly_unresolved_without_nearest_zone_guess() ->
     assert candidate.timezone.candidates == ()
     assert candidate.timezone.warnings[0]["code"] == "TIMEZONE_UNRESOLVED"
     assert candidate.to_canonical()["timezone_id"] is None
+
+
+def test_dateline_polygon_is_normalized_without_matching_the_opposite_hemisphere() -> None:
+    index = GeoJsonTimezoneIndex(
+        (
+            {
+                "type": "Feature",
+                "properties": {"tzid": "Pacific/Dateline_Test"},
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [[170, -10], [-170, -10], [-170, 10], [170, 10], [170, -10]]
+                    ],
+                },
+            },
+        ),
+        dataset_version="fixture-dateline-v1",
+    )
+
+    assert index.lookup(0, 179) == ("Pacific/Dateline_Test",)
+    assert index.lookup(0, -179) == ("Pacific/Dateline_Test",)
+    assert index.lookup(0, 0) == ()

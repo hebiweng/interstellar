@@ -10,6 +10,7 @@ requires-python = ">=3.13,<3.14"
 dependencies = [
   "pysweph==2.10.3.6",
   "PyYAML==6.0.3",
+  "tzdata==2026.3",
 ]
 
 [tool.hatch.build.targets.wheel]

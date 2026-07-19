@@ -1,0 +1,36 @@
+schema_version: 1.0.0
+gate_id: NATAL-4
+status: completed_at_beta_maturity
+completed_at: '2026-07-19'
+evidence:
+  - path: python/interstellar_core/reporting/contextual.py
+    proves: deterministic_versioned_rules_publish_point_intrinsic_sign_house_motion_house_cusp_and_natal_aspect_layers_without_AI_or_missing_fact_calculation
+  - path: apps/api/interstellar_api/routers/natal_interpretations.py
+    proves: immutable_snapshot_JSON_pointer_batch_endpoint_returns_per_layer_status_meaning_warning_provenance_and_content_hash
+  - path: app/lib/interstellar-api.ts
+    proves: frontend_preserves_published_unavailable_not_applicable_and_input_blocked_layers_instead_of_collapsing_them_into_generic_copy
+  - path: app/page.tsx
+    proves: every_basic_result_click_through_displays_calculation_facts_independent_semantic_layers_boundaries_rule_template_source_maturity_and_hash
+  - path: algorithm-cards/reporting/reporting.contextual_item_interpretation.md
+    proves: contextual_interpretation_algorithm_inputs_outputs_boundaries_sources_and_maturity_are_documented
+verification:
+  commands:
+    - npm run test:web
+    - PYTHONPATH=apps/api:apps/worker:python python3 -m pytest -q tests/reporting/test_contextual.py tests/backend/test_natal_interpretation_api.py
+    - playwright_cli goto http://localhost:3001 snapshot click_first_point_interpretation snapshot screenshot
+  result: passed
+  tests_passed: 31
+  visual_artifacts:
+    - output/playwright/natal-point-layered-interpretation.png
+  browser_checks:
+    - point_click_through_opens_the_contextual_interpretation_drawer
+    - intrinsic_sign_house_and_motion_are_rendered_as_four_separate_layers
+    - each_layer_displays_status_rule_template_maturity_source_and_content_hash
+    - missing_or_blocked_layers_are_not_replaced_by_generic_copy
+maturity_decision:
+  released_maturity: beta
+  reason: basic_deterministic_item_layers_and_boundaries_pass_but_authored_lexicon_coverage_still_excludes_some_minor_points_and_requires_future_professional_editorial_review
+known_limits:
+  - Reference fixture layers are visibly marked Reference_fixture and are not represented as production calculation service output.
+  - Some minor bodies and experimental aspects intentionally return unavailable until a published versioned rule exists.
+  - Whole chart synthesis remains outside this gate; item layers do not claim to be a complete natal report.

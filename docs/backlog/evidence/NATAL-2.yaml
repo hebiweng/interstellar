@@ -1,0 +1,40 @@
+schema_version: 1.0.0
+gate_id: NATAL-2
+status: completed_at_beta_maturity
+completed_at: '2026-07-19'
+evidence:
+  - path: apps/api/interstellar_api/locations.py
+    proves: versioned_geonames_place_candidates_timezone_boundary_resolution_and_explicit_ambiguous_status
+  - path: apps/api/interstellar_api/routers/locations.py
+    proves: searchable_location_api_returns_coordinates_country_timezone_candidates_source_and_precision
+  - path: app/page.tsx
+    proves: subject_or_inline_person_location_confirmation_layered_natal_settings_professional_compact_and_aspect_matrix_same_snapshot_views
+  - path: app/globals.css
+    proves: professional_four_layer_wheel_dark_light_styles_mobile_chart_first_order_and_readable_responsive_layout
+  - path: python/interstellar_core/application/astronomical_snapshot.py
+    proves: unknown_time_uses_full_local_civil_day_sampling_and_blocks_houses_axes_aspects_lots_sect_and_other_time_dependent_results
+  - path: docs/natal-first-slice.yaml
+    proves: professional_wheel_layer_contract_view_switch_no_recalculation_rule_and_unknown_time_render_boundary
+verification:
+  commands:
+    - npm run test:web
+    - PYTHONPATH=apps/api:apps/worker:python python3 -m pytest -q tests/backend/test_m2_calculation_api.py tests/backend/test_location_api.py tests/data/test_location_resolver.py
+  result: passed
+  tests_passed: 25
+  visual_checks:
+    - professional_four_layer_wheel_contains_zodiac_names_point_abbreviations_degrees_houses_axes_inner_aspect_stage_visible_aspect_anchors_and_strength_weighted_aspect_chords
+    - opening_virtual_fixture_derives_complete_major_aspects_from_the_same_longitudes_used_by_the_wheel_without_faking_applying_or_separating
+    - compact_wheel_and_aspect_matrix_switch_without_recalculation
+    - desktop_dark_desktop_light_and_mobile_light_views_are_readable
+    - mobile_orders_chart_before_subject_library_and_collapses_settings_on_first_mount
+    - default_wheel_displays_only_major_aspects_in_the_strongest_top_15_percent_and_reports_visible_over_total_count
+    - top_percent_and_minimum_strength_filters_update_the_wheel_immediately_without_recalculation
+    - calculation_parameter_changes_show_a_pending_state_and_require_explicit_recalculation
+    - all_22_released_house_systems_are_present_in_the_parameter_selector
+maturity_decision:
+  released_maturity: beta
+  reason: view_and_input_contracts_pass_but_dense_point_collision_stress_fixtures_and_server_side_RenderSpec_exports_remain_NATAL_3_work
+known_limits:
+  - Classical terms and faces are not yet optional wheel layers.
+  - Extreme point-density profiles still require tangential collision avoidance and visual regression fixtures.
+  - Professional SVG PNG and PDF export is not complete until NATAL-3.

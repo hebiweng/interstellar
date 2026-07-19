@@ -51,4 +51,11 @@ next-env.d.ts
 apps/**/dist/
 /.wrangler/
 /outputs/
+/output/
+/var/
 /work/
+
+# JPL validation kernels exceed ordinary Git hosting file limits. The exact
+# official URL, size and SHA-256 remain locked in data-manifests; bootstrap with
+# scripts/fetch_jpl_validation_kernels.py after cloning.
+/vendor/jpl-naif/kernels/spk/*.bsp

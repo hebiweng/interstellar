@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "active": {
+    "jpl_spice": {
+      "dataset_id": "jpl_spice",
+      "version": "de442-validation-kernel-set-2025-02-06",
+      "license_identifier": "NASA_JPL_public_information_terms",
+      "license_accepted": true,
+      "artifacts": [
+        {
+          "path": "vendor/jpl-naif/kernels/spk/de442.bsp",
+          "sha256": "8d5001fab315eeff222cc51f7cf7ffcdb43fb38fb9ac73ff09e09a5b361fd388",
+          "size_bytes": 119771136
+        },
+        {
+          "path": "vendor/jpl-naif/kernels/lsk/naif0012.tls",
+          "sha256": "678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b",
+          "size_bytes": 5257
+        },
+        {
+          "path": "vendor/jpl-naif/kernels/pck/pck00011.tpc",
+          "sha256": "3dff7b1dbeceaa01f25467767d3fa25816051c85d162d1edf04acb310ee28bb1",
+          "size_bytes": 131226
+        }
+      ],
+      "verified_at": "2026-07-19T08:10:00Z"
+    }
+  }
+}

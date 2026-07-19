@@ -21,9 +21,19 @@
           "path": "ephe/seas_18.se1",
           "sha256": "a2cd8fc33807c78ca9a700c91c2e042258b12fc4796519e00781440b5ad8b2e2",
           "size_bytes": 223004
+        },
+        {
+          "path": "ephe/seorbel.txt",
+          "sha256": "97b454ff78f4f4716b5cc987a93ca8f33e44ef4b524a165a155a8a4885fd2e18",
+          "size_bytes": 6063
+        },
+        {
+          "path": "ephe/sefstars.txt",
+          "sha256": "18b0dcafbe5b7240773daba2c038a325f5b3fc4163f61e0a7f4e92abd4f517c6",
+          "size_bytes": 136618
         }
       ],
-      "verified_at": "2026-07-18T16:10:00Z"
+      "verified_at": "2026-07-19T07:07:13Z"
     }
   }
 }

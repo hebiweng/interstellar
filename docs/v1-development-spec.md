@@ -763,6 +763,8 @@ V1必须在完整报告之外提供`ContextualInterpretation`。它是对用户�
 
 前端操作固定为`复制全部技术推演`、`导出 Markdown`和`导出纯文本`。复制默认使用当前语言的Markdown，用户可切换纯文本；成功后显示格式、字节数和内容哈希，失败时提供重试和下载替代。浏览器剪贴板权限失败不能丢失已生成文档。
 
+当前实现接口固定为`GET /api/v1/calculations/{snapshot_id}/exports/natal-technical?format=markdown|plaintext`。成功响应必须暴露`X-Interstellar-Document-Hash`、`X-Interstellar-Snapshot-Id`、`X-Interstellar-Input-Fingerprint`和`ETag`，并设置`Cache-Control: private, no-transform`；浏览器不得从正文重新推测哈希，也不得用客户端二次转换的文本冒充服务端导出。
+
 可选AI连接器只接受`TechnicalResultDocument`或其不可变Snapshot引用：
 
 ```json
@@ -787,6 +789,8 @@ V1必须在完整报告之外提供`ContextualInterpretation`。它是对用户�
 提供方目录只能来自部署方配置和允许清单，至少返回`provider_id`、精确`model_id`、显示名、配置/可用状态、数据目的地、隐私政策、保留说明、上下文限制和禁用原因。`openai/GPT`、`moonshot/Kimi`只是初始适配器家族示例，默认状态均为`not_configured`；文档和UI不得据此宣称已经接通。没有配置时可以显示禁用项和原因，也可以完全隐藏提交入口，但复制/下载必须保持可用。
 
 提交前必须预览将发送的Subject、文档格式、章节/字段范围、字符/Token估算、提供方、精确模型、目的、数据目的地、隐私/保留信息和是否保存响应，并为本次载荷单独取得显式同意。系统不得后台提交，不得把一次同意扩展到其他人物、Snapshot、提供方或模型；分析他人资料时还必须确认用户有权发送该资料。凭据只存服务端秘密管理，不进入前端包、Snapshot、技术导出、日志或审计元数据。
+
+当前实现接口为`GET /api/v1/ai/providers`、`POST /api/v1/ai/analyses/preview`和`POST /api/v1/ai/analyses`。预览端点只能在本地构造载荷摘要，不调用第三方；提交端点必须重新计算预览并校验`payload_hash`，变化时返回`AI_PAYLOAD_CHANGED_AFTER_CONSENT`。默认提供方返回`not_configured`及原因；测试适配器只接收技术文档、文档哈希和分析重点，不能取得可变Snapshot对象或星历适配器。
 
 AI响应保存为独立的`OptionalAIArtifact`，标记提供方、精确模型、请求文档哈希、生成时间、是否持久化和`ai_generated=true`。它不能写回Snapshot、Evidence、Finding或确定性逐项解读，也不能成为星历、星座、宫位、逆行、相位或尊贵的事实来源。响应与Snapshot冲突时，界面以确定性事实为准并提示冲突。`NATAL-AI`门禁允许标准部署完全没有已配置第三方模型：必须用契约测试/测试适配器验证配置、禁用、预览、同意和隔离边界，而不是对外声称真实供应商已经接通。
 
@@ -1179,6 +1183,9 @@ V1不提供更新或删除 SubjectVersion/RulePackVersion 的接口。Rule Pack�
 ### 6.9 认证与会话
 
 - 匿名计算不创建账户或会话；
+- 当前本命盘首发采用站内邮箱密码注册：密码使用`scrypt`独立随机盐哈希；登录生成高熵随机会话令牌，浏览器仅通过`HttpOnly + SameSite=Lax + Secure(生产)`Cookie持有，服务端只保存SHA-256令牌哈希并支持退出删除；
+- 当前首发的账户、人物和最新本命盘落在独立SQLite数据库，按`owner_email`强制过滤；每个`person_id`只有一条`natal_results`，重新计算覆盖旧记录；游客不写入该库；
+- Magic Link、短期访问令牌、可轮换刷新令牌和PAT仍是完整V1升级目标，不得把当前邮箱密码首发描述成已完成这些能力；
 - 公共托管使用无密码Email Magic Link，账户邮箱规范化后加密保存；
 - Next.js负责登录界面，FastAPI签发短期访问令牌和可轮换HttpOnly刷新Cookie；
 - 访问令牌有效期15分钟，刷新会话默认30天并支持服务端撤销；
@@ -1558,6 +1565,26 @@ V1发布门禁要求每个计算、模型和图表至少具备一个直接入口
 ## 10. 数据同步与许可证
 
 数据必须先同步到本地版本库或缓存，再供运行时使用；线上计算不实时依赖第三方公共接口。
+
+### 10.0 当前本地基线（2026-07-19）
+
+V1 必需数据源已经全部形成仓库内锁文件和本地制品，`GET /api/v1/datasets`必须从`data-manifests/catalog.yaml`与`data-manifests/locks/*.json`生成只读清单，不得在用户请求期间访问上游。当前门禁为`7/7`：Swiss Ephemeris、IANA tzdb、GeoNames、Timezone Boundary Builder、JPL DE442、IERS finals2000A与Natural Earth。每项同时返回用途、版本、校验和、许可证、本地文件检查与能力状态。
+
+“本地就绪”不等于“算法已发布”：Swiss、IANA、GeoNames和时区边界已进入现有本命运行链；JPL、IERS与Natural Earth分别标记为独立差异适配器、精度适配器和地图渲染器待接。Gaia、MPC、OSM、NASA Eclipse、Wikidata、授权出生资料和商业地图均为未来可选增强，不是当前 V1 本命计算的阻断依赖。现有常用固定星使用锁定的Swiss `sefstars.txt`，常用小行星使用Swiss星历；只有任意长尾对象才需要MPC/Gaia扩展。
+
+当前锁定版本：
+
+| ID | 本地版本 | 当前状态 |
+|---|---|---|
+| `swiss_ephemeris` | `2.10.3-DE441-natal-subset-2026-04-14` | 主计算已启用 |
+| `iana_tzdb` | `2026c` | 历史时区换算已启用 |
+| `geonames` | `cities500-2026-07-19` | 地点检索已启用 |
+| `timezone_boundary_builder` | `2026b-full` | 经纬度到IANA时区解析已启用 |
+| `jpl_spice` | `de442-validation-kernel-set-2025-02-06` | 本地校验数据就绪，适配器待接 |
+| `iers` | `finals2000A-2026-07-19` | 本地精度数据就绪，适配器待接 |
+| `natural_earth` | `5.1.2-110m-minimal-geojson` | 本地地图数据就绪，渲染器待接 |
+
+前端只在“完整技术推演”中展示该清单，不把数据运维入口放进普通排盘主流程。必需数据不完整时显示明确告警；可选增强未本地化时显示“未来可选增强”，不得造成现有本命结果缺失的假象。
 
 | ID | 来源 | 获取 | V1用途 | 许可/要求 | 同步策略 |
 |---|---|---|---|---|---|

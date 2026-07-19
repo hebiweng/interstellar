@@ -110,6 +110,93 @@ def test_whole_sign_cusps_are_implemented_from_ascendant_sign() -> None:
 
 
 @pytest.mark.parametrize(
+    "system",
+    [
+        HouseSystem.EQUAL_MC,
+        HouseSystem.EQUAL_ARIES,
+        HouseSystem.MERIDIAN,
+        HouseSystem.HORIZONTAL,
+        HouseSystem.CARTER_POLI_EQUATORIAL,
+        HouseSystem.APC,
+        HouseSystem.PULLEN_SD,
+        HouseSystem.PULLEN_SR,
+        HouseSystem.SUNSHINE_TREINDL,
+        HouseSystem.SRIPATI,
+    ],
+)
+def test_extended_swiss_house_systems_return_twelve_cusps(system: HouseSystem) -> None:
+    result = HouseCalculator().calculate(
+        julian_day_ut=J2000,
+        latitude_deg=SHANGHAI_LAT,
+        longitude_deg=SHANGHAI_LON,
+        system=system,
+    )
+
+    assert result.status == "available"
+    assert result.requested_system == result.actual_system == system.value
+    assert result.house_set is not None
+    assert len(result.house_set["houses"]) == 12
+    assert sum(house["span_deg"] for house in result.house_set["houses"]) == pytest.approx(360)
+
+
+def test_sidereal_lahiri_houses_are_explicit_and_shifted() -> None:
+    swe.set_sid_mode(swe.SIDM_LAHIRI)
+    result = HouseCalculator().calculate(
+        julian_day_ut=J2000,
+        latitude_deg=SHANGHAI_LAT,
+        longitude_deg=SHANGHAI_LON,
+        system=HouseSystem.PLACIDUS,
+        flags=swe.FLG_SIDEREAL,
+        sidereal_mode=swe.SIDM_LAHIRI,
+    )
+    tropical = HouseCalculator().calculate(
+        julian_day_ut=J2000,
+        latitude_deg=SHANGHAI_LAT,
+        longitude_deg=SHANGHAI_LON,
+        system=HouseSystem.PLACIDUS,
+    )
+
+    assert result.status == "available"
+    assert result.provenance.flags & swe.FLG_SIDEREAL
+    assert result.house_set is not None
+    assert tropical.house_set is not None
+    swe.set_sid_mode(swe.SIDM_LAHIRI)
+    expected_asc = swe.houses_ex2(
+        J2000,
+        SHANGHAI_LAT,
+        SHANGHAI_LON,
+        b"P",
+        swe.FLG_SIDEREAL,
+    )[1][0]
+    assert result.house_set["angles"]["asc"] == pytest.approx(
+        expected_asc,
+        abs=1e-8,
+    )
+    assert result.house_set["angles"]["asc"] != pytest.approx(
+        tropical.house_set["angles"]["asc"],
+        abs=1e-3,
+    )
+
+
+@pytest.mark.parametrize(
+    ("flags", "sidereal_mode"),
+    [(swe.FLG_SIDEREAL, None), (0, swe.SIDM_LAHIRI)],
+)
+def test_sidereal_house_flags_and_mode_cannot_diverge(
+    flags: int,
+    sidereal_mode: int | None,
+) -> None:
+    with pytest.raises(HouseInputError):
+        HouseCalculator().calculate(
+            julian_day_ut=J2000,
+            latitude_deg=SHANGHAI_LAT,
+            longitude_deg=SHANGHAI_LON,
+            flags=flags,
+            sidereal_mode=sidereal_mode,
+        )
+
+
+@pytest.mark.parametrize(
     ("ascendant", "expected_first"),
     [(0, 0), (29.999999, 0), (30, 30), (359.999999, 330), (-1, 330), (360, 0)],
 )

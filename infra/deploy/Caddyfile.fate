@@ -1,0 +1,19 @@
+fate.xiaoguiwk.top {
+  encode zstd gzip
+
+  @api path /api/v1/* /health/live /health/ready
+  handle @api {
+    reverse_proxy interstellar-api:8018
+  }
+
+  handle {
+    reverse_proxy interstellar-web:3000
+  }
+
+  header {
+    Referrer-Policy "strict-origin-when-cross-origin"
+    X-Content-Type-Options "nosniff"
+    X-Frame-Options "DENY"
+  }
+}
+

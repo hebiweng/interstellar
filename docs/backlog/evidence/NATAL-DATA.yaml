@@ -1,0 +1,50 @@
+schema_version: 1.0.0
+gate_id: NATAL-DATA
+status: completed
+completed_at: '2026-07-19'
+objective: all_V1_required_datasets_are_local_versioned_checksum_locked_auditable_and_never_fetched_during_user_calculation_requests
+required_dataset_gate:
+  expected: 7
+  active_local: 7
+  datasets:
+    - swiss_ephemeris
+    - iana_tzdb
+    - geonames
+    - timezone_boundary_builder
+    - jpl_spice
+    - iers
+    - natural_earth
+runtime_active:
+  - swiss_ephemeris
+  - iana_tzdb
+  - geonames
+  - timezone_boundary_builder
+local_source_ready_adapter_pending:
+  - jpl_spice
+  - iers
+  - natural_earth
+optional_non_blocking:
+  - gaia_dr3
+  - minor_planet_center
+  - nasa_eclipse
+  - openstreetmap
+  - wikidata
+  - authorized_birth_data
+  - commercial_map_service
+evidence:
+  - data-manifests/catalog.yaml
+  - data-manifests/locks/swiss-ephemeris-natal-2.10.3.json
+  - data-manifests/locks/natal-location-data-2026-07-19.json
+  - data-manifests/locks/jpl-naif-de442-2026-07-19.json
+  - data-manifests/locks/iers-finals2000a-2026-07-19.json
+  - data-manifests/locks/natural-earth-5.1.2-110m.json
+  - apps/api/interstellar_api/datasets.py
+  - apps/api/interstellar_api/routers/datasets.py
+  - app/page.tsx
+  - tests/backend/test_dataset_api.py
+verification:
+  - 22_dataset_inventory_registry_and_capability_tests_passed
+  - GET_api_v1_datasets_reports_required_7_of_7_active
+  - frontend_technical_tab_reports_V1_required_7_of_7_ready
+  - repository_catalog_validation_passed
+boundary: local_file_presence_does_not_upgrade_an_algorithm_or_renderer_to_Stable

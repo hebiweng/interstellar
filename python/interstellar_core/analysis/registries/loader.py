@@ -138,6 +138,7 @@ _CAPABILITY_FIELDS = frozenset(
         "dependencies",
         "algorithm_card",
         "data_sources",
+        "optional_data_sources",
         "inputs",
         "outputs",
         "validation_profile",
@@ -147,7 +148,12 @@ _CAPABILITY_FIELDS = frozenset(
         "forbidden_outputs",
         "export_presets",
         "view_number_ranges",
+        "current_natal_views",
+        "professional_natal_layers",
         "known_limits",
+        "implemented_house_systems",
+        "product_projection",
+        "user_analysis_document",
     }
 )
 _INPUT_PROFILE_FIELDS = frozenset(
@@ -443,6 +449,16 @@ def _validate_references(
         ):
             if source not in data_source_ids:
                 errors.append(f"capability {identifier}: unknown data source {source!r}")
+        if "optional_data_sources" in record:
+            for source in _string_list(
+                record.get("optional_data_sources"),
+                f"capability {identifier}.optional_data_sources",
+                errors,
+            ):
+                if source not in data_source_ids:
+                    errors.append(
+                        f"capability {identifier}: unknown optional data source {source!r}"
+                    )
         if "known_limits" in record:
             _string_list(
                 record.get("known_limits"),

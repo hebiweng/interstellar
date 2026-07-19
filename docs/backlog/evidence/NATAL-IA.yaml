@@ -1,0 +1,17 @@
+schema_version: 1.0.0
+gate_id: NATAL-IA
+status: completed
+completed_at: '2026-07-19'
+evidence:
+  - path: app/page.tsx
+    proves: restored_global_shell_six_entry_modes_future_technique_shortcuts_and_distinct_subject_vs_calculation_flows
+  - path: tests/rendered-html.test.mjs
+    proves: future_methods_remain_visible_unavailable_actions_have_reasons_and_add_person_does_not_calculate
+verification:
+  commands:
+    - npm run test:web
+  result: passed
+  tests_passed: 6
+known_limits:
+  - Future technique shortcuts are intentionally non-executable until the natal release gate passes and the user explicitly resumes the broader roadmap.
+  - Subject persistence is browser-local in the current vertical slice; durable authenticated workspace persistence is a later natal gate.

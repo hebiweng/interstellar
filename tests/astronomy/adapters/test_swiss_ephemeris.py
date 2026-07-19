@@ -126,6 +126,50 @@ def test_utc_input_matches_julian_day_and_exposes_delta_t() -> None:
     assert from_utc.provenance.delta_t_ephemeris_mode == "moshier"
 
 
+def test_sidereal_lahiri_changes_only_zodiacal_longitude_and_is_traced() -> None:
+    adapter = SwissEphemerisAdapter(mode=SwissEphemerisMode.MOSHIER)
+    tropical = adapter.calculate(julian_day_ut=2451545.0)
+    sidereal = adapter.calculate(
+        julian_day_ut=2451545.0,
+        zodiac="sidereal",
+        ayanamsa="lahiri",
+    )
+
+    tropical_sun = tropical.points[0]
+    sidereal_sun = sidereal.points[0]
+    ayanamsa = sidereal.provenance.ayanamsa_value_deg
+    assert ayanamsa is not None
+    assert sidereal.provenance.zodiac == "sidereal"
+    assert sidereal.provenance.ayanamsa == "lahiri"
+    assert sidereal_sun["position"]["ecliptic"]["longitude_deg"] == pytest.approx(
+        (tropical_sun["position"]["ecliptic"]["longitude_deg"] - ayanamsa) % 360,
+        abs=1e-9,
+    )
+    assert sidereal_sun["position"]["equatorial"] == tropical_sun["position"][
+        "equatorial"
+    ]
+    assert sidereal.provenance.point_flags[0].requested_ecliptic_flags & swe.FLG_SIDEREAL
+    assert not (
+        sidereal.provenance.point_flags[0].requested_equatorial_flags & swe.FLG_SIDEREAL
+    )
+
+
+@pytest.mark.parametrize(
+    ("zodiac", "ayanamsa"),
+    [("tropical", "lahiri"), ("sidereal", None), ("sidereal", "invented")],
+)
+def test_zodiac_and_ayanamsa_must_be_an_explicit_supported_pair(
+    zodiac: str,
+    ayanamsa: str | None,
+) -> None:
+    with pytest.raises(EphemerisInputError):
+        SwissEphemerisAdapter(mode=SwissEphemerisMode.MOSHIER).calculate(
+            julian_day_ut=2451545.0,
+            zodiac=zodiac,  # type: ignore[arg-type]
+            ayanamsa=ayanamsa,
+        )
+
+
 def test_points_match_canonical_point_shape_without_houses_or_aspects() -> None:
     result = SwissEphemerisAdapter(mode=SwissEphemerisMode.MOSHIER).calculate(
         julian_day_ut=2451545.0
@@ -274,7 +318,9 @@ def test_hamburg_tnps_match_swiss_reference_and_remain_hypothetical() -> None:
         "cupido": 244.690811,
         "hades": 77.648938,
         "zeus": 184.965415,
-        "kronos": 87.254207,
+        # Official seorbel.txt (sha256 97b454ff...) overrides the Swiss
+        # built-in fallback elements and is the repository's locked source.
+        "kronos": 87.258494,
         "apollon": 201.147435,
         "admetos": 49.086908,
         "vulkanus": 109.825050,

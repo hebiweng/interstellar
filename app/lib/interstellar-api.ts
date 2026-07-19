@@ -69,9 +69,13 @@ export type NatalSnapshot = {
   input_fingerprint: string;
   engine: { name: string; version: string };
   datasets?: Array<{ id?: string; version?: string }> | Record<string, string>;
+  adapters?: Array<Record<string, unknown>>;
+  normalized_input?: Record<string, unknown>;
+  rule_pack_hash?: string;
   warnings: Array<{ code: string; message: string }>;
   request?: Record<string, unknown>;
   result: {
+    charts?: Array<Record<string, unknown>>;
     points: NatalPoint[];
     houses: NatalHouse[];
     aspects: NatalAspect[];
@@ -80,12 +84,14 @@ export type NatalSnapshot = {
       categories: Array<{ category_id: string; count: number; percentage?: number }>;
     }>;
     structure?: Record<string, unknown>;
+    patterns?: Array<Record<string, unknown>>;
     classical?: Record<string, unknown>;
     dignities?: Array<Record<string, unknown>>;
     lots?: Array<Record<string, unknown>>;
     receptions?: Array<Record<string, unknown>>;
     dispositors?: Record<string, unknown>;
     astronomical_context?: Record<string, unknown>;
+    evidence?: Array<Record<string, unknown>>;
     output_manifest?: Array<Record<string, unknown>>;
   };
 };
@@ -95,15 +101,82 @@ export type NatalPersonInput = {
   relation: "self" | "family" | "partner" | "friend" | "client" | "other";
   localDate: string;
   localTime: string;
+  timePrecision: "minute" | "hour" | "date" | "unknown";
   timezoneId: string;
   placeName: string;
   countryCode: string;
   latitude: number;
   longitude: number;
-  timeConfidence: "high" | "medium" | "low";
+  timeConfidence: "high" | "medium" | "low" | "unknown";
+  locationSourceId?: string;
+  timezoneStatus?: "resolved" | "ambiguous" | "degraded" | "unresolved" | "manual";
+};
+
+export type LocationSearchItem = {
+  id: string;
+  label: string;
+  match_score: number;
+  match_reasons: string[];
+  location: {
+    name: string;
+    country_code: string;
+    admin_path: string[];
+    latitude: number;
+    longitude: number;
+    elevation_m: number | null;
+    timezone_id: string | null;
+    warnings: Array<{ code: string; message: string }>;
+  };
+  timezone_status: "resolved" | "ambiguous" | "degraded" | "unresolved";
+  timezone_candidates: Array<{
+    timezone_id: string;
+    confidence: string;
+    boundary_match: boolean;
+  }>;
+};
+
+export type LocalDatasetItem = {
+  id: string;
+  version: string;
+  status: "discovered" | "downloading" | "validating" | "staged" | "active" | "rejected" | "rolled_back";
+  checksum: string;
+  source_uri: string;
+  license: string;
+  activated_at: string | null;
+  metadata: {
+    name?: string;
+    role?: string;
+    required_for_v1?: boolean;
+    runtime_mode?: string;
+    acquisition_method?: string;
+    crawler?: boolean;
+    local_ready?: boolean;
+    capability_state?: string;
+    lock_file?: string;
+    artifacts?: Array<{
+      path?: string;
+      exists?: boolean;
+      size_matches?: boolean;
+      size_bytes?: number;
+      sha256?: string;
+    }>;
+  };
 };
 
 export type NatalCalculationSettings = {
+  analysisSystem: "integrated" | "modern" | "classical";
+  zodiac: "tropical" | "sidereal";
+  ayanamsa:
+    | "fagan_bradley"
+    | "lahiri"
+    | "deluce"
+    | "raman"
+    | "krishnamurti"
+    | "yukteshwar"
+    | "hipparchos"
+    | "true_revati"
+    | "true_citra"
+    | "galactic_center_0_sagittarius";
   houseSystem:
     | "placidus"
     | "whole_sign"
@@ -116,24 +189,69 @@ export type NatalCalculationSettings = {
     | "topocentric"
     | "morinus"
     | "krusinski"
-    | "vehlow";
+    | "vehlow"
+    | "equal_mc"
+    | "equal_aries"
+    | "meridian"
+    | "horizontal"
+    | "carter_poli_equatorial"
+    | "apc"
+    | "pullen_sd"
+    | "pullen_sr"
+    | "sunshine_treindl"
+    | "sripati";
   nodeType: "true" | "mean" | "both";
   pointIds: string[];
   aspectIds: string[];
   orbOverrides: Record<string, number>;
 };
 
+export type AiProviderId = "deepseek" | "openai" | "moonshot";
+export type AiModelId = "deepseek-v4-flash" | "deepseek-v4-pro" | "gpt" | "kimi";
+
 export type AiProvider = {
-  provider_id: "openai" | "moonshot";
+  provider_id: AiProviderId;
   label: string;
   configured: boolean;
   availability: string;
   blocking_reason?: string;
-  models: Array<{ model_id: "gpt" | "kimi"; label: string; configured: boolean }>;
+  models: Array<{ model_id: AiModelId; label: string; configured: boolean }>;
+};
+
+export type TechnicalDocumentArtifact = {
+  content: string;
+  contentHash: string;
+  snapshotId: string;
+  inputFingerprint: string;
+  format: "markdown" | "plaintext";
+};
+
+export type NatalAiPayloadPreview = {
+  preview_id: string;
+  snapshot_id: string;
+  provider_id: AiProviderId;
+  model_id: AiModelId;
+  provider_configured: boolean;
+  availability: string;
+  blocking_reason?: string | null;
+  document_format: "markdown" | "plaintext" | "json";
+  document_content_hash: string;
+  payload_hash: string;
+  character_count: number;
+  estimated_tokens: number;
+  sections: string[];
+  preview_excerpt: string;
+  analysis_focus?: string | null;
+  data_destination: string;
+  privacy_policy_url?: string | null;
+  retention_policy: string;
+  store_response: boolean;
+  requires_subject_data_authority: boolean;
+  calculation_boundary: string;
 };
 
 export type ItemInterpretation = {
-  status: "available" | "unavailable";
+  status: "available" | "unavailable" | "not_applicable" | "blocked_by_input_quality";
   title?: string;
   facts?: string[];
   meaning?: string;
@@ -143,6 +261,21 @@ export type ItemInterpretation = {
   template_version?: string;
   maturity?: string;
   unavailable_reason?: string;
+  content_hash?: string;
+  layers?: Array<{
+    item_kind: string;
+    label: string;
+    status: "published" | "unavailable" | "not_applicable" | "blocked_by_input_quality";
+    fact: Record<string, unknown>;
+    meaning?: string;
+    unavailable_reason?: string;
+    warnings: string[];
+    content_hash: string;
+    rule_ref?: string;
+    template_version?: string;
+    maturity?: string;
+    source_refs: string[];
+  }>;
 };
 
 export class InterstellarApiError extends Error {
@@ -158,13 +291,7 @@ export class InterstellarApiError extends Error {
 
 function apiBase(): string {
   const configured = process.env.NEXT_PUBLIC_INTERSTELLAR_API_URL?.trim();
-  if (!configured) {
-    throw new InterstellarApiError(
-      "尚未配置计算服务地址。当前可浏览虚拟验收样例，新增人物与真实排盘需连接 Interstellar API。",
-      "API_NOT_CONFIGURED",
-    );
-  }
-  return configured.replace(/\/$/, "");
+  return configured ? configured.replace(/\/$/, "") : "/api/v1";
 }
 
 async function requestJson<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -196,20 +323,67 @@ async function requestJson<T>(path: string, init: RequestInit = {}): Promise<T> 
   return body as T;
 }
 
-async function requestText(path: string): Promise<string> {
+async function requestTextArtifact(
+  path: string,
+  format: "markdown" | "plaintext",
+): Promise<TechnicalDocumentArtifact> {
   const response = await fetch(`${apiBase()}${path}`, {
     headers: { Accept: "text/markdown, text/plain" },
   });
   if (!response.ok) {
-    throw new InterstellarApiError(`技术推演导出失败（${response.status}）`, "EXPORT_FAILED", response.status);
+    throw new InterstellarApiError(`分析数据导出失败（${response.status}）`, "EXPORT_FAILED", response.status);
   }
-  return response.text();
+  const contentHash = response.headers.get("x-interstellar-document-hash") ?? "";
+  const snapshotId = response.headers.get("x-interstellar-snapshot-id") ?? "";
+  const inputFingerprint = response.headers.get("x-interstellar-input-fingerprint") ?? "";
+  if (!contentHash.startsWith("sha256:")) {
+    throw new InterstellarApiError(
+      "分析数据校验失败，无法确认复制与下载来自同一次计算。",
+      "EXPORT_INTEGRITY_MISSING",
+      response.status,
+    );
+  }
+  return {
+    content: await response.text(),
+    contentHash,
+    snapshotId,
+    inputFingerprint,
+    format,
+  };
+}
+
+async function requestFile(path: string, accept: string): Promise<Blob> {
+  const response = await fetch(`${apiBase()}${path}`, { headers: { Accept: accept } });
+  if (!response.ok) {
+    throw new InterstellarApiError(`结构化结果导出失败（${response.status}）`, "EXPORT_FAILED", response.status);
+  }
+  return response.blob();
+}
+
+export async function searchLocations(
+  query: string,
+  options: { countryCode?: string; limit?: number } = {},
+): Promise<LocationSearchItem[]> {
+  const params = new URLSearchParams({ q: query, limit: String(options.limit ?? 8) });
+  if (options.countryCode) params.set("country_code", options.countryCode);
+  const response = await requestJson<{ items: LocationSearchItem[] }>(
+    `/locations/search?${params.toString()}`,
+  );
+  return response.items;
+}
+
+export async function getLocalDatasets(): Promise<LocalDatasetItem[]> {
+  const response = await requestJson<{ items: LocalDatasetItem[] }>(
+    "/datasets?page%5Blimit%5D=100",
+  );
+  return response.items;
 }
 
 export async function createPersonAndNatalCalculation(
   person: NatalPersonInput,
   settings: NatalCalculationSettings,
 ): Promise<{ subjectId: string; subjectVersionId: string; snapshot: NatalSnapshot }> {
+  const timeKnown = person.timePrecision === "minute" || person.timePrecision === "hour";
   const subject = await requestJson<{
     subject: { id: string };
     version: { id: string };
@@ -222,8 +396,8 @@ export async function createPersonAndNatalCalculation(
         display_name: person.displayName,
         time_spec: {
           calendar: "gregorian",
-          local_value: `${person.localDate}T${person.localTime}`,
-          precision: "minute",
+          local_value: timeKnown ? `${person.localDate}T${person.localTime}` : person.localDate,
+          precision: person.timePrecision,
           timezone_id: person.timezoneId,
           utc_candidates: [],
           selected_utc: null,
@@ -251,6 +425,16 @@ export async function createPersonAndNatalCalculation(
     aspect_id,
     orb_deg,
   }));
+  const analysisSystemIds = {
+    integrated: "natal.integrated.v1",
+    modern: "natal.modern.v1",
+    classical: "natal.classical.v1",
+  } as const;
+  const ruleHashes = {
+    integrated: `sha256:${"a".repeat(64)}`,
+    modern: `sha256:${"b".repeat(64)}`,
+    classical: `sha256:${"c".repeat(64)}`,
+  } as const;
   const snapshot = await requestJson<NatalSnapshot>("/calculations", {
     method: "POST",
     body: JSON.stringify({
@@ -258,9 +442,9 @@ export async function createPersonAndNatalCalculation(
       chart: { family: "natal", technique: "natal.standard_chart" },
       settings: {
         calculation_profile_id: "professional.natal.v1",
-        analysis_system_id: "natal.integrated.v1",
-        zodiac: "tropical",
-        ayanamsa: null,
+        analysis_system_id: analysisSystemIds[settings.analysisSystem],
+        zodiac: settings.zodiac,
+        ayanamsa: settings.zodiac === "sidereal" ? settings.ayanamsa : null,
         house_system: settings.houseSystem,
         center: "geocentric",
         coordinate_frame: "ecliptic",
@@ -287,7 +471,7 @@ export async function createPersonAndNatalCalculation(
         },
         custom_parameters: {},
       },
-      rule_pack_hash: `sha256:${"a".repeat(64)}`,
+      rule_pack_hash: ruleHashes[settings.analysisSystem],
       dataset_versions: {},
       outputs: ["snapshot", "json", "markdown_technical", "plaintext_technical"],
     }),
@@ -300,7 +484,17 @@ export async function createPersonAndNatalCalculation(
 }
 
 export function getNatalTechnicalDocument(snapshotId: string, format: "markdown" | "plaintext") {
-  return requestText(`/calculations/${encodeURIComponent(snapshotId)}/exports/natal-technical?format=${format}`);
+  return requestTextArtifact(
+    `/calculations/${encodeURIComponent(snapshotId)}/exports/natal-technical?format=${format}`,
+    format,
+  );
+}
+
+export function getNatalTableExport(snapshotId: string, tableId: string, format: "json" | "csv") {
+  return requestFile(
+    `/calculations/${encodeURIComponent(snapshotId)}/tables/${encodeURIComponent(tableId)}?format=${format}`,
+    format === "csv" ? "text/csv" : "application/json",
+  );
 }
 
 export async function getAiProviders(): Promise<AiProvider[]> {
@@ -308,14 +502,14 @@ export async function getAiProviders(): Promise<AiProvider[]> {
   return result.providers;
 }
 
-export async function submitNatalToAi(input: {
+export async function previewNatalAiPayload(input: {
   snapshotId: string;
-  providerId: "openai" | "moonshot";
-  modelId: "gpt" | "kimi";
+  providerId: AiProviderId;
+  modelId: AiModelId;
   focus?: string;
-  consent: boolean;
-}) {
-  return requestJson<Record<string, unknown>>("/ai/analyses", {
+  storeResponse?: boolean;
+}): Promise<NatalAiPayloadPreview> {
+  return requestJson<NatalAiPayloadPreview>("/ai/analyses/preview", {
     method: "POST",
     body: JSON.stringify({
       snapshot_id: input.snapshotId,
@@ -323,8 +517,38 @@ export async function submitNatalToAi(input: {
       model_id: input.modelId,
       document_format: "markdown",
       analysis_focus: input.focus || null,
+      store_response: input.storeResponse ?? true,
+    }),
+  });
+}
+
+export async function submitNatalToAi(input: {
+  snapshotId: string;
+  providerId: AiProviderId;
+  modelId: AiModelId;
+  focus?: string;
+  consent: boolean;
+  payloadHash: string;
+  authorityForSubjectData: boolean;
+  storeResponse?: boolean;
+}): Promise<{
+  id: string;
+  persisted: boolean;
+  response: { text?: string; model?: string; finish_reason?: string | null };
+}> {
+  return requestJson("/ai/analyses", {
+    method: "POST",
+    body: JSON.stringify({
+      snapshot_id: input.snapshotId,
+      provider_id: input.providerId,
+      model_id: input.modelId,
+      document_format: "markdown",
+      analysis_focus: input.focus || null,
+      payload_hash: input.payloadHash,
       consent_to_send_snapshot: input.consent,
-      store_response: true,
+      authority_for_subject_data: input.authorityForSubjectData,
+      consent_policy_version: "2026-07-19",
+      store_response: input.storeResponse ?? true,
     }),
   });
 }
@@ -333,6 +557,7 @@ export async function getNatalItemInterpretation(
   snapshotId: string,
   itemType: string,
   resultPath: string,
+  options: { includeTimeDependent?: boolean } = {},
 ): Promise<ItemInterpretation> {
   const itemKinds = itemType === "point"
     ? ["point_intrinsic", "point_in_sign", "point_in_house", "motion"]
@@ -343,30 +568,68 @@ export async function getNatalItemInterpretation(
         : itemType === "structure"
           ? ["structure_indicator"]
           : ["classical_condition"];
+  const effectiveItemKinds = options.includeTimeDependent === false
+    ? itemKinds.filter((itemKind) => itemKind !== "point_in_house" && itemKind !== "house_cusp_ruler")
+    : itemKinds;
   const response = await requestJson<{
     interpretations: Array<{
-      status: string;
+      item_kind: string;
+      status: "published" | "unavailable" | "not_applicable" | "blocked_by_input_quality";
       fact: Record<string, unknown>;
       meaning: { text?: string; statement_key?: string } | null;
       unavailable_reason: string | null;
+      warnings: string[];
+      content_hash: string;
       provenance: {
         rule?: { id?: string; version?: string };
         template?: { version?: string };
+        rule_pack?: { id?: string; version?: string; content_hash?: string };
         sources?: Array<{ source_id?: string; title?: string }>;
         maturity?: string;
       };
     }>;
   }>(`/calculations/${encodeURIComponent(snapshotId)}/interpretations/contextual`, {
     method: "POST",
-    body: JSON.stringify({
-      items: itemKinds.map((item_kind) => ({ item_kind, result_path: resultPath, locale: "zh-CN" })),
+      body: JSON.stringify({
+      items: effectiveItemKinds.map((item_kind) => ({
+        item_kind,
+        result_path: resultPath,
+        locale: "zh-CN",
+      })),
     }),
   });
+  const layerLabels: Record<string, string> = {
+    point_intrinsic: "星体自身功能",
+    point_in_sign: "星座表达方式",
+    point_in_house: "所在宫位领域",
+    motion: "运动状态",
+    natal_aspect: "相位互动",
+    house_cusp_ruler: "宫头与宫主链",
+    structure_indicator: "盘面结构",
+    classical_condition: "古典条件",
+  };
+  const layers = response.interpretations.map((item) => ({
+    item_kind: item.item_kind,
+    label: layerLabels[item.item_kind] ?? item.item_kind,
+    status: item.status,
+    fact: item.fact,
+    meaning: item.meaning?.text,
+    unavailable_reason: item.unavailable_reason ?? undefined,
+    warnings: item.warnings ?? [],
+    content_hash: item.content_hash,
+    rule_ref: [item.provenance.rule?.id, item.provenance.rule?.version].filter(Boolean).join("@") || undefined,
+    template_version: item.provenance.template?.version,
+    maturity: item.provenance.maturity,
+    source_refs: item.provenance.sources?.map((source) => source.title ?? source.source_id ?? "").filter(Boolean) ?? [],
+  }));
   const published = response.interpretations.filter((item) => item.status === "published" && item.meaning?.text);
   if (!published.length) {
+    const blocked = response.interpretations.some((item) => item.status === "blocked_by_input_quality");
+    const notApplicable = response.interpretations.every((item) => item.status === "not_applicable");
     return {
-      status: "unavailable",
+      status: blocked ? "blocked_by_input_quality" : notApplicable ? "not_applicable" : "unavailable",
       unavailable_reason: response.interpretations.map((item) => item.unavailable_reason).filter(Boolean).join(" · ") || "没有已发布的逐项解释。",
+      layers,
     };
   }
   return {
@@ -378,5 +641,7 @@ export async function getNatalItemInterpretation(
     source_refs: published.flatMap((item) => item.provenance.sources?.map((source) => source.title ?? source.source_id ?? "") ?? []).filter(Boolean),
     template_version: published[0]?.provenance.template?.version,
     maturity: published[0]?.provenance.maturity,
+    content_hash: layers.map((item) => item.content_hash).join(" · "),
+    layers,
   };
 }

@@ -1,0 +1,37 @@
+FROM python:3.13-slim-bookworm
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/opt/interstellar/apps/api:/opt/interstellar/python
+
+WORKDIR /opt/interstellar
+
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends ca-certificates curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY apps/api/requirements.lock /tmp/interstellar-api-requirements.lock
+RUN python -m pip install --no-cache-dir -r /tmp/interstellar-api-requirements.lock
+
+COPY apps/api ./apps/api
+COPY python ./python
+COPY docs ./docs
+COPY contracts ./contracts
+COPY data-manifests ./data-manifests
+COPY vendor/geonames ./vendor/geonames
+COPY vendor/iana-tzdb ./vendor/iana-tzdb
+COPY vendor/swisseph ./vendor/swisseph
+COPY vendor/timezone-boundary-builder ./vendor/timezone-boundary-builder
+
+RUN groupadd --system --gid 10001 interstellar \
+    && useradd --system --uid 10001 --gid interstellar --home /opt/interstellar interstellar \
+    && mkdir -p /var/lib/interstellar \
+    && chown -R interstellar:interstellar /var/lib/interstellar
+
+USER interstellar
+EXPOSE 8018
+HEALTHCHECK --interval=20s --timeout=5s --start-period=20s --retries=5 \
+  CMD curl --fail --silent http://127.0.0.1:8018/health/ready >/dev/null || exit 1
+
+CMD ["python", "-m", "interstellar_api"]
+

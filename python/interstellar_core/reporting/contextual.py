@@ -101,6 +101,15 @@ _POINT_LABELS = {
     "true_south_node": "真南交点",
     "mean_north_node": "平北交点",
     "mean_south_node": "平南交点",
+    "fortune": "福点",
+    "spirit": "精神点",
+    "lot_basis": "基础点",
+    "lot_eros": "爱欲点",
+    "lot_necessity": "必然点",
+    "lot_courage": "勇气点",
+    "lot_victory": "胜利点",
+    "lot_nemesis": "报应点",
+    "lot_exaltation": "擢升点",
 }
 
 _POINT_MEANINGS = {
@@ -173,8 +182,7 @@ _MOTION_MEANINGS = {
     "direct": "顺行表示该天体的黄经运动方向为通常方向；解读仅指功能较直接地向外展开，不代表吉凶。",
     "retrograde": "逆行表示该天体的黄经运动方向反转；解读可指向回看、内化或反复修订，不代表吉凶。",
     "stationary": (
-        "停滞表示该天体黄经速度接近规则阈值；解读上强调该功能处于转向附近，"
-        "具体阈值以快照为准。"
+        "停滞表示该天体黄经速度接近规则阈值；解读上强调该功能处于转向附近，具体阈值以快照为准。"
     ),
 }
 
@@ -239,8 +247,7 @@ _STRUCTURE_MEANINGS = {
     "same_sign": "多颗参与点集中在同一星座，使该星座的表达方式在盘面结构中被重复强调。",
     "same_house": "多颗参与点集中在同一宫位，使该生活领域成为盘面中的高密度区域。",
     "longitude_cluster": (
-        "多颗参与点落在规则规定的黄经跨度内，构成局部能量集中；"
-        "跨度阈值以结构配置为准。"
+        "多颗参与点落在规则规定的黄经跨度内，构成局部能量集中；跨度阈值以结构配置为准。"
     ),
     "grand_trine": "三个点以三分相闭合，形成相容功能的循环；这是几何结构描述，不等于结果保证。",
     "t_square": "一个对冲轴由第三点分别形成四分相，焦点与对冲两端构成持续调节结构。",
@@ -251,6 +258,30 @@ _STRUCTURE_MEANINGS = {
     "on_angle": "该点位于配置规定的合轴容许度内，因此在盘面结构中具有较高可见度。",
     "near_angle": "该点接近四轴但未进入合轴容许度，结构强调程度低于合轴。",
     "not_near_angle": "该点不在配置规定的近轴范围内；这只是位置事实，不表示该点不重要。",
+}
+
+_STRUCTURE_DIMENSION_LABELS = {
+    "hemispheres": "半球分布",
+    "quadrants": "象限分布",
+    "house_modes": "角续果分布",
+}
+
+_STRUCTURE_CATEGORY_LABELS = {
+    "east": "东半球",
+    "west": "西半球",
+    "above": "上半球",
+    "below": "下半球",
+    "eastern": "东半球",
+    "western": "西半球",
+    "above_horizon": "上半球",
+    "below_horizon": "下半球",
+    "quadrant_1": "第一象限",
+    "quadrant_2": "第二象限",
+    "quadrant_3": "第三象限",
+    "quadrant_4": "第四象限",
+    "angular": "角宫",
+    "succedent": "续宫",
+    "cadent": "果宫",
 }
 
 _DIGNITY_LABELS = {
@@ -272,8 +303,7 @@ _DIGNITY_MEANINGS = {
     "detriment": "失势表示行星位于自身本垣的对宫，描述其功能需要借用不熟悉的表达条件。",
     "fall": "落陷表示行星位于擢升位置的对宫，描述其功能在该表达条件下需要更多调整。",
     "peregrine": (
-        "游走表示当前规则表中没有命中有效本质尊贵或主要失势条件；"
-        "它不是能力高低的客观分数。"
+        "游走表示当前规则表中没有命中有效本质尊贵或主要失势条件；它不是能力高低的客观分数。"
     ),
 }
 
@@ -288,6 +318,30 @@ _SECT_MEANINGS = {
     "day": "昼盘以太阳为昼夜主光体，并按所选古典规则区分昼行星与夜行星的条件。",
     "night": "夜盘以月亮为昼夜主光体，并按所选古典规则区分昼行星与夜行星的条件。",
 }
+
+_LOT_MEANINGS = {
+    "fortune": "福点在希腊化传统中用于组织身体条件、物质处境与非意志性经验这一象征主题。",
+    "spirit": "精神点用于组织意向、选择、行动方向与个人能动性这一象征主题。",
+    "lot_basis": "基础点用于观察福点与精神点之间的结构关系，描述承载行动与处境的象征基础。",
+    "lot_eros": "爱欲点用于组织吸引、欲求、联结动力与价值追求这一象征主题。",
+    "lot_necessity": "必然点用于组织约束、责任、强制条件与必须处理之事这一象征主题。",
+    "lot_courage": "勇气点用于组织主张、冒险、竞争与面对阻力的象征主题。",
+    "lot_victory": "胜利点用于组织成就、认可、支持条件与目标推进这一象征主题。",
+    "lot_nemesis": "报应点用于组织限制、代价、反复压力与需要承担后果这一象征主题。",
+    "lot_exaltation": "擢升点用于组织抬升、荣誉、能见度与被赋予更高期待这一象征主题。",
+}
+
+_PROHIBITED_FATALISTIC_PHRASES = (
+    "一定发生",
+    "必然死亡",
+    "注定死亡",
+    "寿命长度",
+    "保证成功",
+    "保证复合",
+    "必然离婚",
+    "必然发财",
+    "项目一定成功",
+)
 
 _SOURCES = {
     "ALG-REPORT-003": {
@@ -334,9 +388,12 @@ _RULE_PACK_HASH = _canonical_hash(
         "motion": _MOTION_MEANINGS,
         "aspects": _ASPECT_MEANINGS,
         "structure": _STRUCTURE_MEANINGS,
+        "structure_dimensions": _STRUCTURE_DIMENSION_LABELS,
+        "structure_categories": _STRUCTURE_CATEGORY_LABELS,
         "dignity": _DIGNITY_MEANINGS,
         "solar": _SOLAR_MEANINGS,
         "sect": _SECT_MEANINGS,
+        "lots": _LOT_MEANINGS,
     }
 )
 
@@ -390,17 +447,13 @@ def interpret_snapshot_item(
 
 def _resolve_pointer(document: Mapping[str, Any], pointer: str) -> Any:
     if not pointer.startswith("/result/"):
-        raise ContextualInterpretationInputError(
-            "result_path must be a JSON Pointer below /result"
-        )
+        raise ContextualInterpretationInputError("result_path must be a JSON Pointer below /result")
     value: Any = document
     for raw_segment in pointer[1:].split("/"):
         segment = raw_segment.replace("~1", "/").replace("~0", "~")
         if isinstance(value, Mapping):
             if segment not in value:
-                raise ContextualInterpretationInputError(
-                    f"result_path does not exist: {pointer}"
-                )
+                raise ContextualInterpretationInputError(f"result_path does not exist: {pointer}")
             value = value[segment]
         elif isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
             if not segment.isdigit():
@@ -448,11 +501,7 @@ def _fact_only(item: Any) -> dict[str, Any]:
 def _point_fact(item: Mapping[str, Any]) -> dict[str, Any]:
     point_id = _point_id(item)
     position = item.get("position") if isinstance(item.get("position"), Mapping) else {}
-    ecliptic = (
-        position.get("ecliptic")
-        if isinstance(position.get("ecliptic"), Mapping)
-        else {}
-    )
+    ecliptic = position.get("ecliptic") if isinstance(position.get("ecliptic"), Mapping) else {}
     motion_state = position.get("motion_state")
     return {
         "point_id": point_id,
@@ -550,8 +599,7 @@ def _point_in_sign(item: Mapping[str, Any]) -> dict[str, Any]:
         )
     sign_label = _SIGN_LABELS[str(sign_id)]
     text = (
-        f"{_point_label(point_id)}落在{sign_label}：{point_meaning}"
-        f"在这里，这项功能{sign_meaning}。"
+        f"{_point_label(point_id)}落在{sign_label}：{point_meaning}在这里，这项功能{sign_meaning}。"
     )
     return _handler_result(
         status=InterpretationStatus.PUBLISHED,
@@ -793,6 +841,62 @@ def _house_cusp_ruler(item: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def _structure_indicator(item: Mapping[str, Any]) -> dict[str, Any]:
+    dimension = item.get("dimension")
+    if isinstance(dimension, str) and isinstance(item.get("categories"), Sequence):
+        fact = _fact_only(item)
+        dimension_label = _STRUCTURE_DIMENSION_LABELS.get(dimension)
+        if dimension_label is None:
+            return _handler_result(
+                status=InterpretationStatus.UNAVAILABLE,
+                fact=fact,
+                meaning=None,
+                reason="STRUCTURE_CATEGORICAL_RULE_UNAVAILABLE",
+                rule_id="contextual.structure_indicator.categorical.v1",
+                template_key=None,
+                source_ids=("ALG-REPORT-003", "interstellar.modern_semantic_lexicon.v1"),
+            )
+        category_facts: list[dict[str, Any]] = []
+        category_texts: list[str] = []
+        for category in item.get("categories") or ():
+            if not isinstance(category, Mapping):
+                continue
+            category_id = str(category.get("category_id") or "")
+            if category_id not in _STRUCTURE_CATEGORY_LABELS:
+                continue
+            count = int(category.get("count") or 0)
+            point_ids = [str(point_id) for point_id in category.get("point_ids") or ()]
+            category_facts.append(
+                {"category_id": category_id, "count": count, "point_ids": point_ids}
+            )
+            category_texts.append(f"{_STRUCTURE_CATEGORY_LABELS[category_id]} {count} 个点")
+        if not category_texts:
+            return _handler_result(
+                status=InterpretationStatus.UNAVAILABLE,
+                fact=fact,
+                meaning=None,
+                reason="STRUCTURE_CATEGORICAL_FACT_MISSING",
+                rule_id="contextual.structure_indicator.categorical.v1",
+                template_key=None,
+                source_ids=("ALG-REPORT-003", "interstellar.modern_semantic_lexicon.v1"),
+            )
+        text = (
+            f"{dimension_label}：{'；'.join(category_texts)}。"
+            "这是所选点集的位置数量描述，不是人格、吉凶或事件概率评分；"
+            "结论还会随纳入点位、宫位制和出生时间质量变化。"
+        )
+        return _handler_result(
+            status=InterpretationStatus.PUBLISHED,
+            fact=fact,
+            meaning=_statement(
+                f"structure.categorical.{dimension}",
+                text,
+                {"dimension": dimension, "categories": category_facts},
+            ),
+            rule_id="contextual.structure_indicator.categorical.v1",
+            template_key="structure.categorical.zh-CN",
+            source_ids=("ALG-REPORT-003", "interstellar.modern_semantic_lexicon.v1"),
+        )
+
     structure_type = item.get("pattern_type") or item.get("kind") or item.get("band")
     fact = _fact_only(item)
     meaning = _STRUCTURE_MEANINGS.get(str(structure_type))
@@ -931,7 +1035,7 @@ def _classical_condition(item: Mapping[str, Any]) -> dict[str, Any]:
                 source_ids=source_ids,
             )
 
-    if isinstance(item.get("sect"), str):
+    if isinstance(item.get("sect"), str) and "lot_id" not in item:
         sect = str(item["sect"])
         meaning = _SECT_MEANINGS.get(sect)
         if meaning is not None:
@@ -969,6 +1073,115 @@ def _classical_condition(item: Mapping[str, Any]) -> dict[str, Any]:
                 template_key="classical.reception.zh-CN",
                 source_ids=source_ids,
             )
+
+    if isinstance(item.get("edges"), Sequence):
+        edges = [edge for edge in item.get("edges") or () if isinstance(edge, Mapping)]
+        cycles = [cycle for cycle in item.get("cycles") or () if isinstance(cycle, Sequence)]
+        final_dispositors = [str(point_id) for point_id in item.get("final_dispositor_ids") or ()]
+        if not edges:
+            return _handler_result(
+                status=InterpretationStatus.UNAVAILABLE,
+                fact=fact,
+                meaning=None,
+                reason="DISPOSITOR_GRAPH_FACT_MISSING",
+                rule_id="contextual.classical_condition.dispositor.v1",
+                template_key=None,
+                source_ids=source_ids,
+            )
+        final_text = (
+            "、".join(_point_label(point_id) for point_id in final_dispositors)
+            or "无单一最终定位星"
+        )
+        cycle_text = (
+            "；".join(
+                " → ".join(_point_label(str(point_id)) for point_id in cycle) for cycle in cycles
+            )
+            or "无闭合循环"
+        )
+        text = (
+            f"传统定位星链包含 {len(edges)} 条守护关系；"
+            f"最终定位星：{final_text}；循环：{cycle_text}。"
+            "它描述各行星经由星座守护形成的结构传递路径，不等于主导人格排名、吉凶分数或事件结果。"
+        )
+        return _handler_result(
+            status=InterpretationStatus.PUBLISHED,
+            fact=fact,
+            meaning=_statement(
+                "classical.dispositor_graph",
+                text,
+                {
+                    "edge_count": len(edges),
+                    "cycle_count": len(cycles),
+                    "final_dispositor_ids": final_dispositors,
+                },
+            ),
+            rule_id="contextual.classical_condition.dispositor.v1",
+            template_key="classical.dispositor_graph.zh-CN",
+            source_ids=source_ids,
+        )
+
+    if "receptions" in item or "mutual_receptions" in item:
+        receptions = [row for row in item.get("receptions") or () if isinstance(row, Mapping)]
+        mutual = [row for row in item.get("mutual_receptions") or () if isinstance(row, Mapping)]
+        text = (
+            f"当前规则命中 {len(receptions)} 条单向接纳与 {len(mutual)} 组互容。"
+            "接纳描述一颗行星位于另一颗行星的本质尊贵范围；互容表示这种关系双向成立。"
+            "当前文档不要求相位，因此接纳本身不自动表示事件完成、关系和谐或压力已被化解。"
+        )
+        return _handler_result(
+            status=InterpretationStatus.PUBLISHED,
+            fact=fact,
+            meaning=_statement(
+                "classical.reception_document",
+                text,
+                {
+                    "reception_count": len(receptions),
+                    "mutual_reception_count": len(mutual),
+                    "aspect_required": bool(item.get("aspect_required")),
+                },
+            ),
+            rule_id="contextual.classical_condition.reception_document.v1",
+            template_key="classical.reception_document.zh-CN",
+            source_ids=source_ids,
+        )
+
+    if isinstance(item.get("lot_id"), str):
+        lot_id = str(item["lot_id"])
+        meaning = _LOT_MEANINGS.get(lot_id)
+        if meaning is None:
+            return _handler_result(
+                status=InterpretationStatus.UNAVAILABLE,
+                fact=fact,
+                meaning=None,
+                reason="LOT_INTERPRETATION_RULE_UNAVAILABLE",
+                rule_id="contextual.classical_condition.lot.v1",
+                template_key=None,
+                source_ids=source_ids,
+            )
+        sect_label = str(item.get("sect") or "未声明")
+        formula_expression = str(item.get("formula_expression") or "—")
+        text = (
+            f"{_point_label(lot_id)}：{meaning}"
+            f"当前结果采用{sect_label}盘公式“{formula_expression}”。"
+            "该点只提供版本化公式与象征主题，不给出现实事件的确定预测。"
+        )
+        return _handler_result(
+            status=InterpretationStatus.PUBLISHED,
+            fact=fact,
+            meaning=_statement(
+                f"classical.lot.{lot_id}",
+                text,
+                {
+                    "lot_id": lot_id,
+                    "sect": item.get("sect"),
+                    "formula_id": item.get("formula_id"),
+                    "formula_version": item.get("formula_version"),
+                },
+            ),
+            rule_id="contextual.classical_condition.lot.v1",
+            template_key="classical.lot.zh-CN",
+            source_ids=source_ids,
+        )
 
     return _handler_result(
         status=InterpretationStatus.UNAVAILABLE,
@@ -1015,6 +1228,14 @@ def _build_result(
     warnings: tuple[str, ...] = (),
     maturity: str = "experimental",
 ) -> ContextualInterpretation:
+    if meaning is not None:
+        meaning_text = str(meaning.get("text") or "")
+        prohibited = [phrase for phrase in _PROHIBITED_FATALISTIC_PHRASES if phrase in meaning_text]
+        if prohibited:
+            raise RuntimeError(
+                "contextual interpretation contains prohibited fatalistic claim: "
+                + ", ".join(prohibited)
+            )
     template_hash = (
         _canonical_hash(
             {

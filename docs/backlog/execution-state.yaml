@@ -2,11 +2,11 @@ schema_version: 1.0.0
 controller_ref: docs/backlog/execution-controller.yaml
 updated_at: '2026-07-19'
 goal_status: active
-active_stage: natal_priority_release
+active_stage: professional_alpha
 active_month: paused_monthly_roadmap
 active_priority_gate: NATAL-RELEASE
-active_priority_subgate: NATAL-1
-completed_priority_subgates: [NATAL-0]
+active_priority_subgate: NATAL-RELEASE
+completed_priority_subgates: [NATAL-0, NATAL-IA, NATAL-1, NATAL-2, NATAL-3, NATAL-4, NATAL-5, NATAL-DATA, NATAL-TECHNICAL-EXPORT, NATAL-AI]
 stage_status:
   foundation: completed
   professional_alpha: in_progress
@@ -28,15 +28,14 @@ active_work_packages:
   - id: NATAL-TECHNICAL-EXPORT
     task_ref: M5-N006
     owner: interstellar_primary_agent
-    status: pending
-    priority_blocked_by: NATAL-3
+    status: completed
     write_scope: [packages/canonical-schema, apps/api, apps/web, python/interstellar_core/rendering/exports, tests/contracts, tests/rendering/exports, tests/frontend]
     acceptance: markdown_and_plaintext_and_copy_share_one_deterministic_TechnicalResultDocument_hash_include_every_materialized_natal_fact_and_never_silently_compute_more
   - id: NATAL-AI
     task_ref: M5-N007
     owner: interstellar_primary_agent
-    status: pending
-    priority_blocked_by: NATAL-3
+    status: completed_contract_and_test_adapter
+    priority_blocked_by: null
     default_runtime_state: no_provider_configured
     provider_examples_only: [openai_GPT, moonshot_Kimi]
     write_scope: [packages/canonical-schema, apps/api, apps/web, tests/contracts, tests/frontend]
@@ -80,6 +79,15 @@ current_gate_evidence:
   - docs/backlog/evidence/M3.yaml
   - docs/backlog/evidence/M4.yaml
   - docs/backlog/evidence/NATAL-0.yaml
+  - docs/backlog/evidence/NATAL-IA.yaml
+  - docs/backlog/evidence/NATAL-1.yaml
+  - docs/backlog/evidence/NATAL-2.yaml
+  - docs/backlog/evidence/NATAL-3.yaml
+  - docs/backlog/evidence/NATAL-4.yaml
+  - docs/backlog/evidence/NATAL-5.yaml
+  - docs/backlog/evidence/NATAL-DATA.yaml
+  - docs/backlog/evidence/NATAL-TECHNICAL-EXPORT.yaml
+  - docs/backlog/evidence/NATAL-AI.yaml
 open_blockers:
-  - astronomy.ephemeris_core_stable_requires_independent_jpl_positions_and_spice_kernels
-next_action: implement_natal_priority_plan_N1_through_N8_without_starting_other_techniques
+  - astronomy.ephemeris_core_stable_requires_the_now_local_JPL_SPICE_kernel_to_be_wired_to_the_independent_difference_adapter_and_gold_suite
+next_action: complete_NATAL_RELEASE_full_suite_light_and_dark_visual_accessibility_responsive_scroll_performance_privacy_license_and_restore_gates_then_stop
