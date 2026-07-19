@@ -47,6 +47,8 @@ def test_real_placidus_returns_canonical_house_set_and_angles() -> None:
         "houses",
         "angles",
         "sensitive_points",
+        "armc_deg",
+        "vertex_deg",
         "polar_status",
         "warnings",
     }
@@ -62,6 +64,13 @@ def test_real_placidus_returns_canonical_house_set_and_angles() -> None:
     assert house_set["angles"]["dsc"] == pytest.approx(318.9487029561661, abs=1e-10)
     assert house_set["angles"]["mc"] == pytest.approx(44.39180048110061, abs=1e-10)
     assert house_set["angles"]["ic"] == pytest.approx(224.39180048110061, abs=1e-10)
+    assert house_set["armc_deg"] == pytest.approx(house_set["sensitive_points"]["armc"])
+    assert house_set["vertex_deg"] == pytest.approx(
+        house_set["sensitive_points"]["vertex"]
+    )
+    assert sum(house["span_deg"] for house in house_set["houses"]) == pytest.approx(360)
+    assert house_set["houses"][0]["traditional_ruler_ids"] == ["sun"]
+    assert house_set["houses"][0]["modern_ruler_ids"] == ["sun"]
     assert house_set["polar_status"] == "normal"
     assert len(result.cusp_speeds_deg_per_day) == 12
     assert len(result.sensitive_point_speeds_deg_per_day) == 8

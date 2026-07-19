@@ -1,0 +1,390 @@
+schema_version: 1.0.0
+contract_id: interstellar.natal_first_slice.v1
+title_zh: Interstellar 当前优先级——完整本命盘纵向切片
+status: active_blocking_gate
+authority:
+  - current_implementation_priority
+  - natal_homepage_workflow
+  - natal_fact_and_interpretation_scope
+  - competitor_information_dimension_baseline
+  - resume_later_techniques_gate
+
+priority:
+  rule: do_not_expand_transits_returns_relationships_or_other_techniques_until_this_gate_passes
+  retained_roadmap: [six_entry_analysis_center, forecast, relationship, advanced_timing, geography, mundane]
+  current_public_product: global_professional_shell_with_natal_as_the_only_complete_runnable_technique
+  navigation_rule: future_techniques_and_six_entry_paths_remain_visible_with_maturity_and_stage_but_must_not_open_fake_or_duplicate_results
+  appearance_rule: dark_and_light_are_equal_product_themes_dark_remains_the_first_visit_default_and_user_override_is_persisted_locally
+  success_definition: one_person_can_be_added_or_selected_and_receive_a_complete_reproducible_professional_natal_workspace
+
+product_information_architecture:
+  global_primary_navigation: [workspace, analysis_center, subject_library, chart_center, reports]
+  professional_secondary_navigation: [calculation_record, evidence_and_versions, api_and_developer_docs]
+  remove_from_global_primary_navigation: [technical_derivation, calculation_settings, capability_and_dataset_admin]
+  chart_technique_shortcuts:
+    visible: [synastry, natal, transits, current_sky, secondary_progressions, tertiary_progressions, solar_arc, returns, electional_and_horary, geography]
+    current_runnable: [natal]
+    unavailable_behavior: show_scope_required_inputs_and_roadmap_stage_without_creating_a_result_or_reusing_the_natal_view
+  six_entry_paths:
+    source: docs/analysis-catalog.yaml#entry_points
+    surface: analysis_center_and_new_calculation_flow
+    rule: entry_path_prefills_context_but_never_replaces_the_selected_technique_topic_or_intent
+  terminology:
+    astrology_model: 占星规则方案
+    topic_model: 专题模型
+    ai_model: AI提供方与模型
+    render_view: 结果视图
+
+user_journey:
+  anonymous:
+    - open_home_with_clearly_labeled_cached_sample_chart
+    - choose_enter_my_birth_data_or_add_temporary_person
+    - enter_date_time_precision_place_and_source_confidence
+    - review_normalized_timezone_and_natal_settings
+    - calculate_natal_snapshot
+    - home_immediately_switches_to_the_new_natal_chart
+    - inspect_detailed_analysis_and_contextual_interpretations
+    - may_create_account_to_keep_person_and_results
+  authenticated:
+    - open_home_with_primary_self_or_last_selected_person
+    - switch_to_saved_person_or_add_person_and_calculate
+    - choose_save_as_self_or_relationship_role_or_keep_temporary
+    - calculate_and_persist_immutable_subject_version_and_snapshot
+    - reopen_the_same_chart_and_interpretations_later
+  add_person_only:
+    entry: subject_library_add_action
+    purpose: create_or_update_a_reusable_subject_without_starting_a_calculation
+    fields:
+      - display_name
+      - profile_role_self_or_other
+      - relationship_to_owner_optional
+      - birth_date
+      - birth_time_and_precision
+      - unknown_time_explicit
+      - birth_place
+      - timezone_candidates
+      - source_and_confidence
+      - consent_or_private_note_optional
+    default_save_behavior: authenticated_subject_library_persisted
+    completion_route: subject_profile_or_return_to_previous_subject_picker
+    mutation_rule: changing_birth_data_creates_a_new_subject_version_and_never_rewrites_old_snapshots
+  new_calculation:
+    entry: global_new_calculation_action
+    purpose: choose_what_to_calculate_and_then_supply_required_subject_roles
+    steps:
+      - choose_entry_path_and_technique_topic_or_intent
+      - select_existing_subjects_or_create_inline_subjects
+      - choose_rule_preset_and_allowed_parameters
+      - choose_result_views_exports_and_optional_extensions
+      - preflight_dependencies_cost_maturity_and_warnings
+      - run_and_open_result_workspace
+    inline_subject_behavior:
+      default: temporary_for_this_calculation
+      optional: save_to_subject_library_with_relationship_role
+    natal_shortcut: preselect_natal_technique_but_keep_the_same_new_calculation_contract
+
+homepage:
+  primary_content:
+    - global_primary_navigation_and_new_calculation_action
+    - visible_chart_technique_shortcuts_with_natal_active
+    - subject_header_and_time_quality
+    - natal_wheel
+    - essential_warnings
+    - quick_settings_panel
+    - view_natal_details_action
+  desktop_layout:
+    chart: center_or_left_primary_surface
+    settings: right_side_panel_visible_without_opening_a_modal
+    minimum_readable_font_px: 14
+  mobile_layout:
+    chart: first_content
+    settings: bottom_sheet_or_full_page_settings
+    details: full_page_route
+  primary_actions:
+    - {id: natal.subject.select, label_zh: 切换人物}
+    - {id: subject.library.add, label_zh: 新增人物}
+    - {id: calculation.new, label_zh: 新建计算}
+    - {id: natal.details.open, label_zh: 查看本命详析}
+  forbidden:
+    - duplicate_analysis_buttons_opening_the_same_empty_modal
+    - add_person_action_that_implicitly_starts_a_natal_calculation
+    - new_calculation_action_that_requires_creating_a_saved_person
+    - future_technique_button_that_reuses_the_natal_result_or_same_placeholder_modal
+    - long_analysis_content_inside_a_non_scrollable_modal
+    - unlabeled_sample_people_in_the_user_library
+
+birth_place_and_timezone_input:
+  default_place_precision: city_or_town
+  exact_street_or_hospital_required: false
+  reason: birth_time_quality_normally_dominates_street_level_coordinate_difference_and_unnecessary_precision_increases_privacy_cost
+  place_search_result_fields: [display_name, administrative_region, country_name, latitude, longitude, timezone_candidates, source, precision]
+  timezone_control: searchable_candidate_selector_not_free_text
+  timezone_default: derive_candidates_from_selected_place_and_coordinates_then_require_user_confirmation_when_ambiguous
+  coordinates:
+    default: automatically_derived_and_read_only_summary
+    manual_override: optional_advanced_input_with_source_and_warning
+  country_code:
+    astrology_calculation_required: false
+    product_use: geocoding_disambiguation_timezone_resolution_locale_and_attribution
+    ui_rule: derive_and_hide_by_default_not_a_required_birth_form_field
+
+settings_panel:
+  quick_calculation: [astrology_rule_preset, zodiac, house_system, point_profile, aspect_profile, orb_profile]
+  quick_render: [result_view_wheel_or_aspect_grid, visible_point_layers, visible_aspect_lines, labels_and_degrees, color_theme]
+  advanced_groups:
+    - normalized_time_place_timezone_and_confidence
+    - zodiac_and_ayanamsa
+    - house_system_and_high_latitude_policy
+    - planets_nodes_lilith_and_sensitive_points
+    - minor_bodies_fixed_stars_and_tnp
+    - lots_and_custom_points
+    - aspects_and_orb_overrides
+    - classical_tables_and_sect
+    - coordinate_and_center_options
+    - render_and_export_only_options
+  behavior:
+    calculation_change: preview_diff_then_create_or_reuse_a_new_recipe_and_snapshot
+    render_change: update_render_spec_without_recalculation
+    save_as_preset: supported_for_authenticated_user
+    unsupported_option: visible_disabled_with_reason
+    technique_specific_options: shown_only_inside_the_relevant_technique_and_never_dumped_into_natal_settings
+  rule_presets:
+    modern: modern_planets_rulers_aspects_and_interpretation_layer
+    classical: traditional_seven_planets_sect_dignities_receptions_lots_and_classical_interpretation_layer
+    integrated: modern_and_classical_facts_kept_separate_in_one_snapshot
+    custom: user_selected_points_aspects_orbs_rules_and_render_options
+  zodiac_scope:
+    current_stable: [tropical]
+    required_natal_extension: [sidereal_with_explicit_ayanamsa]
+    separate_chart_transform_not_zodiac_toggle: [draconic]
+  house_system_scope:
+    currently_implemented_backend: [placidus, whole_sign, koch, porphyry, regiomontanus, campanus, equal, alcabitius, topocentric, morinus, krusinski, vehlow]
+    immediate_ui_rule: expose_every_backend_supported_system_with_source_and_maturity
+    extension_rule: additional_Swiss_systems_require_enum_schema_algorithm_card_gold_and_high_latitude_tests_before_UI_enablement
+  point_and_aspect_controls:
+    calculation_selection_and_render_visibility_are_separate: true
+    point_groups: [core_planets, outer_planets, angles, nodes, lunar_points, sensitive_points, lots, minor_bodies, fixed_stars, hamburg_TNP, custom_points]
+    aspect_controls: [included_geometry, per_aspect_orb, per_object_class_orb, applying_separating, declination_aspects, mirror_aspects, display_line_switch]
+  appearance:
+    themes: [dark, light]
+    default: dark
+    persistence: local_browser
+    calculation_effect: none
+    acceptance: both_themes_pass_contrast_readability_responsive_and_visual_regression_checks
+
+natal_chart_and_render_semantics:
+  calculation_subject_roles: one_primary_subject
+  default_render: single_wheel
+  multi_wheel_rule: a_double_or_triple_wheel_is_an_overlay_render_for_an_added_chart_layer_not_a_second_natal_method
+  future_overlay_examples: [natal_plus_transit, natal_plus_progression, natal_plus_return, person_A_plus_person_B]
+  result_view_switcher:
+    - natal_wheel
+    - aspect_grid
+    - point_positions
+    - houses_and_rulers
+    - aspect_list
+    - structure_and_patterns
+    - basic_interpretation
+    - classical_interpretation
+    - technical_data_and_export
+  no_recalculation_views: [natal_wheel, aspect_grid, point_positions, houses_and_rulers, aspect_list, technical_data_and_export]
+  interpretation_rule: basic_and_classical_are_versioned_layers_on_the_same_calculated_facts_and_each_eligible_item_has_a_local_interpret_action
+
+calculation_scope:
+  inputs_and_time:
+    - original_local_datetime_and_precision
+    - calendar_and_timezone_source
+    - utc_candidates_and_selected_utc
+    - julian_day_delta_t_gmst_lmst
+    - historical_timezone_confidence_and_warnings
+    - latitude_longitude_elevation_and_location_source
+    - obliquity_precession_nutation_model_versions
+    - sunrise_sunset_and_day_night_status_when_supported
+  default_professional_points:
+    core: [sun, moon, mercury, venus, mars, jupiter, saturn, uranus, neptune, pluto]
+    angles: [asc, dsc, mc, ic]
+    sensitive: [vertex, anti_vertex, east_point, west_point]
+    nodes: [true_north_node, true_south_node, mean_north_node, mean_south_node]
+    lunar_points: [mean_lilith, true_lilith, lunar_perigee]
+    common_minor_bodies: [chiron, ceres, pallas, juno, vesta]
+    lots: [fortune, spirit, eros, necessity, career, wealth, marriage]
+  optional_registered_points:
+    arbitrary_mpc_minor_bodies: on_demand
+    fixed_stars: named_profile_or_search
+    uranian_tnp: experimental_named_profile
+    additional_lots: versioned_named_formulas
+    syzygy: beta_after_formula_and_tests
+    undocumented_or_proprietary_points: blocked_until_independent_formula_source_and_algorithm_card
+  per_point_fields:
+    - ecliptic_longitude_and_sign_degree
+    - ecliptic_latitude
+    - right_ascension_and_declination
+    - distance
+    - longitude_latitude_and_distance_speed
+    - direct_retrograde_stationary_or_not_applicable
+    - house_and_distance_to_cusp
+    - out_of_bounds
+    - oriental_or_occidental_when_applicable
+    - solar_elongation_visibility_cazimi_combust_under_beams_when_applicable
+    - source_dataset_engine_version_and_precision
+  houses:
+    - all_12_cusps_and_spans
+    - asc_mc_armc_vertex_and_related_angles
+    - intercepted_or_repeated_signs
+    - traditional_and_modern_house_rulers
+    - high_latitude_status_and_fallback
+  aspects:
+    - all_selected_point_pairs_not_only_planet_pairs
+    - major_minor_harmonic_declination_and_mirror_sets_by_profile
+    - theoretical_angle_actual_angle_orb_and_orb_ratio
+    - applying_exact_or_separating
+    - cross_sign_and_direction_metadata
+    - configurable_calculation_and_display_switches
+  chart_structure:
+    - elements_modes_polarity
+    - hemispheres_quadrants_and_house_modes
+    - angularity
+    - chart_shape
+    - stellium_and_geometric_patterns
+    - traditional_and_modern_dispositor_chains
+  classical:
+    - sect_and_hayz_when_defined
+    - essential_dignity_domicile_exaltation_triplicity_terms_faces
+    - detriment_fall_and_peregrine
+    - accidental_dignity_angularity_speed_and_motion
+    - solar_condition_and_visibility
+    - traditional_rulership_dispositors_reception_and_mutual_reception
+    - joys_and_selected_hellenistic_lots
+
+competitor_information_baseline:
+  source_fixture: user_supplied_western_export_for_ai_and_reference_screenshots
+  permitted_use: requirements_fixture_only_not_text_or_proprietary_rule_source
+  parity_dimensions:
+    - input_time_location_and_chart_settings
+    - sign_index_and_chart_context
+    - major_planets
+    - angles_nodes_sensitive_points_and_minor_bodies
+    - named_lots_and_hypothetical_point_profiles
+    - all_12_house_cusps
+    - full_selected_aspect_list_with_orb
+    - per_item_interpret_action
+  interstellar_additions:
+    - richer_coordinates_distance_and_velocity
+    - exact_motion_and_station_semantics
+    - applying_separating_actual_angle_and_orb_ratio
+    - house_cusp_distance_and_time_quality
+    - classical_dignity_reception_sect_and_solar_condition
+    - explicit_formula_rule_dataset_and_engine_versions
+    - null_not_applicable_confidence_and_warning_semantics
+    - deterministic_json_csv_markdown_and_plaintext_exports
+  parity_rule: information_dimensions_must_not_be_fewer_but_exact_proprietary_point_identity_is_not_required_without_an_independent_source
+
+detail_analysis:
+  route_kind: dedicated_scrollable_page
+  sections:
+    - {id: basic, label_zh: 基础, groups: [major_planets, angles_and_sensitive_points, nodes_lilith_and_minor_bodies, houses]}
+    - {id: structure, label_zh: 结构, groups: [elements_modes_polarity, hemispheres_quadrants, angularity, chart_shapes_patterns, dispositor_chains]}
+    - {id: aspects, label_zh: 相位, groups: [aspect_table, aspect_grid, aspect_filters, selected_aspect_detail]}
+    - {id: classical, label_zh: 古典, groups: [sect, essential_dignity, accidental_dignity, solar_condition, rulership_dispositors, reception, lots_and_hellenistic_subsection]}
+    - {id: technical, label_zh: 技术数据, groups: [normalized_input, complete_positions, houses, complete_aspects, parameters, provenance, warnings, output_manifest]}
+  density_rule: sections_may_be_collapsed_filtered_paginated_or_virtualized_but_no_calculated_item_is_omitted
+
+technical_result_document:
+  purpose:
+    - professional_review_and_archive
+    - copy_to_external_ai_manually
+    - immutable_input_for_optional_built_in_ai_connector
+  formats: [markdown_technical, plaintext_technical, json, csv_tables]
+  required_sections:
+    - subject_original_and_normalized_time_location
+    - all_effective_natal_settings
+    - astronomical_context_and_time_quality
+    - zodiac_index_and_all_materialized_points
+    - all_12_houses_and_rulers
+    - all_selected_aspects_with_geometry_orb_and_applying_state
+    - distributions_structure_and_patterns
+    - sect_dignities_solar_conditions_dispositors_receptions_and_lots
+    - warnings_provenance_versions_and_reproducibility
+  completeness_rule: serialize_every_materialized_fact_without_silently_calculating_unselected_points
+  primary_actions:
+    - {id: natal.technical.copy, label_zh: 复制全部技术推演}
+    - {id: natal.technical.export_markdown, label_zh: 导出 Markdown}
+    - {id: natal.technical.export_plaintext, label_zh: 导出纯文本}
+    - {id: natal.technical.export_json, label_zh: 导出完整 JSON}
+    - {id: natal.ai.submit, label_zh: 提交至 AI 分析}
+
+optional_ai_analysis_connector:
+  calculation_boundary: AI_only_consumes_immutable_snapshot_or_technical_document_and_never_calculates_ephemeris_signs_houses_or_aspects
+  selection_flow:
+    - open_submit_to_ai_panel_from_technical_result
+    - select_configured_provider_and_exact_operator_allowed_model
+    - preview_data_scope_document_format_privacy_and_retention
+    - optionally_enter_analysis_focus
+    - explicitly_consent_to_send_natal_data
+    - submit_and_track_job_or_receive_blocking_reason
+  initial_provider_families:
+    - {provider_id: openai, family_label: GPT, initial_state: blocked_until_operator_configuration}
+    - {provider_id: moonshot, family_label: Kimi, initial_state: blocked_until_operator_configuration}
+  required_provider_fields:
+    - provider_id
+    - exact_model_id_and_display_name
+    - configured_and_availability
+    - endpoint_region_and_data_destination
+    - privacy_policy_and_retention
+    - supported_document_formats_and_context_limit
+  request_fields:
+    - snapshot_id
+    - provider_id
+    - model_id
+    - document_format
+    - analysis_focus_optional
+    - consent_to_send_snapshot
+    - store_response
+  privacy_rules:
+    - no_background_or_automatic_submission
+    - unconfigured_models_visible_disabled_with_reason
+    - user_previews_payload_scope_before_submit
+    - provider_credentials_never_enter_snapshot_export_or_client_bundle
+    - AI_response_never_overwrites_deterministic_facts
+  manual_fallback: copy_or_export_the_same_deterministic_document_for_external_model_use
+
+item_interpretation:
+  action_label_zh: 解读
+  eligible_items:
+    - planet_or_point_intrinsic_meaning
+    - point_in_sign
+    - point_in_house
+    - motion_state_when_applicable
+    - point_sign_house_synthesis_when_rule_exists
+    - natal_aspect
+    - house_cusp_and_ruler
+    - chart_structure_indicator
+    - classical_condition
+  layers: [intrinsic_function, sign_expression, house_domain, motion_modifier, modern_synthesis, classical_condition, aspect_and_chart_context, evidence_source_and_maturity]
+  interaction:
+    desktop: inline_expansion_or_context_right_inspector
+    mobile: full_height_bottom_sheet_or_detail_page
+    report_document_required: false
+  guardrails:
+    sun_moon_angles_lots_and_calculated_points_motion_may_be_not_applicable: true
+    unknown_birth_time_disables_house_dependent_interpretation: true
+    missing_rule_or_template_shows_fact_and_unpublished_state: true
+    generic_or_ai_fallback: forbidden
+    basic_and_classical_are_separate_and_labeled: true
+
+implementation_gates:
+  - {id: NATAL-0, deliverable: contract_schema_parity_fixture_and_gold_subjects, exit: fields_settings_views_and_null_semantics_are_machine_testable}
+  - {id: NATAL-1, deliverable: professional_natal_calculation_snapshot, exit: default_professional_points_houses_aspects_structure_and_provenance_pass_gold_and_difference_tests}
+  - {id: NATAL-IA, deliverable: restored_global_shell_visible_future_techniques_and_split_subject_vs_calculation_flows, exit: six_entries_and_future_technique_shortcuts_are_reachable_without_fake_results_and_add_person_never_implicitly_calculates}
+  - {id: NATAL-2, deliverable: natal_workspace_location_flow_and_layered_settings, exit: select_or_inline_create_person_confirm_place_timezone_calculate_and_show_wheel_or_aspect_grid_with_recompute_boundaries}
+  - {id: NATAL-3, deliverable: complete_detail_views_and_exports, exit: every_materialized_result_is_reachable_and_technical_export_meets_information_dimension_parity}
+  - {id: NATAL-4, deliverable: basic_contextual_interpretation, exit: eligible_basic_items_have_versioned_rules_templates_sources_and_click_through}
+  - {id: NATAL-5, deliverable: classical_and_structure_interpretation, exit: classical_layers_are_separate_reproducible_and_do_not_emit_prohibited_fatalistic_claims}
+  - {id: NATAL-AI, deliverable: optional_model_catalog_submission_contract_and_manual_export_fallback, exit: configured_models_are_selectable_unconfigured_models_are_disabled_consent_and_payload_preview_are_enforced_and_AI_never_calculates_chart_facts}
+  - {id: NATAL-RELEASE, deliverable: professional_shell_with_complete_natal_alpha, exit: end_to_end_visual_accessibility_performance_privacy_and_restore_gates_pass}
+
+resume_rule:
+  automatic_resume_after_natal_release: forbidden
+  user_authorization_required: true
+  current_stop_condition: NATAL-RELEASE
+  retained_future_entry_points: [transits_and_returns, relationship, predictive_beta, classical_timing, geography, mundane]

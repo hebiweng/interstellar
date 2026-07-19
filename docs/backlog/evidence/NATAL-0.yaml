@@ -1,0 +1,25 @@
+schema_version: 1.0.0
+gate_id: NATAL-0
+status: completed
+completed_at: '2026-07-18'
+evidence:
+  - path: docs/natal-first-slice.yaml
+    proves: current_natal_only_scope_homepage_settings_information_dimensions_and_release_gates
+  - path: packages/canonical-schema/chart-request.schema.json
+    proves: typed_natal_point_aspect_orb_classical_and_high_latitude_settings
+  - path: packages/canonical-schema/chart-result.schema.json
+    proves: professional_point_house_aspect_time_and_provenance_result_fields
+  - path: tests/contracts/specs/natal-first-slice.yaml
+    proves: machine_readable_required_field_and_export_coverage
+  - path: tests/gold/natal/fixtures/natal-first-subjects.yaml
+    proves: exact_unknown_time_and_dst_overlap_gold_inputs
+verification:
+  commands:
+    - python3 scripts/generate_contract_types.py --check
+    - python3 -m pytest tests/contracts/test_natal_first_contract.py tests/contracts/test_contract_quality.py -q
+    - npm run docs:validate
+  result: passed
+  tests_passed: 10
+known_limits:
+  - Gold inputs freeze normalization and null behavior; NATAL-1 must add authoritative numerical ephemeris, houses, aspects, structure, and classical expected values.
+  - Undocumented or proprietary competitor points remain blocked until an independent formula source and algorithm card exist.

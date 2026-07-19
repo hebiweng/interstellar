@@ -1,0 +1,66 @@
+schema_version: 1.0.0
+fixture_id: GOLD-NATAL-001
+collection_id: interstellar.gold.natal_first_subjects.v1
+family: subject_input_collection
+source:
+  source_id: interstellar-natal-first-subject-scenarios-v1
+  title: Interstellar natal-first normalized-input scenarios
+  uri: urn:interstellar:gold:natal:first-subjects:v1
+  license: CC0-1.0
+  independently_captured: true
+  stable_eligible: true
+reference_family: user_supplied_input_contract
+sut_family: interstellar_subject_normalization
+review_status: approved
+maturity: stable
+availability: available
+expected_origin: user_supplied_contract
+expected:
+  subject_count: 3
+  every_subject_has_nonempty_required_behavior: true
+referenced_by: [tests/gold/natal/test_analytic_gold.py]
+subjects:
+  - id: exact_beijing_reference
+    purpose: professional_full_natal_primary_gold_input
+    input:
+      display_name: 北京精确时间样本
+      local_value: '2000-03-01T16:30:00'
+      precision: second
+      timezone: Asia/Shanghai
+      latitude_deg: 39.93
+      longitude_deg: 116.41
+      elevation_m: 43
+    required_behavior:
+      - single_unambiguous_utc_candidate
+      - houses_angles_and_house_interpretation_allowed
+      - all_default_professional_point_groups_requested
+      - source_and_version_metadata_present
+  - id: unknown_time_reference
+    purpose: null_and_not_applicable_semantics
+    input:
+      display_name: 未知出生时间样本
+      local_value: '1990-06-15'
+      precision: unknown
+      timezone: Asia/Shanghai
+      latitude_deg: 39.9042
+      longitude_deg: 116.4074
+      elevation_m: null
+    required_behavior:
+      - no_midnight_assumption
+      - houses_and_angles_blocked_or_candidate_specific
+      - stable_date_level_facts_may_remain
+      - house_dependent_interpretations_unavailable
+  - id: dst_overlap_reference
+    purpose: ambiguous_time_quality_and_candidate_selection
+    input:
+      display_name: 夏令时重叠样本
+      local_value: '2024-11-03T01:30:00'
+      precision: minute
+      timezone: America/New_York
+      latitude_deg: 40.7128
+      longitude_deg: -74.006
+      elevation_m: 10
+    required_behavior:
+      - multiple_utc_candidates_until_user_selection
+      - calculation_blocked_before_candidate_selection
+      - selected_candidate_recorded_in_snapshot

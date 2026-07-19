@@ -50,3 +50,5 @@ generator version and a CI diff check.
 - Snapshot and recipe objects are immutable; replacement creates a new resource.
 - Unknown birth time is represented explicitly and is never normalized to midnight.
 - Units are encoded in field names (`*_deg`, `*_m`, `*_seconds`, `*_au`) where ambiguity is possible.
+- The authoritative motion field is `position.motion_state`; the legacy convenience boolean `retrograde` must never be used to invent a motion interpretation for the Sun, Moon, angles, lots, or calculated points.
+- Natal settings use typed point, lot, aspect, orb, high-latitude, and classical fields. `custom_parameters` is reserved for registered experimental extensions and cannot silently replace a public typed field.

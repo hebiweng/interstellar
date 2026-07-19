@@ -34,19 +34,19 @@ CANONICAL_CONTRACTS: Final[dict[str, ContractDescriptor]] = {
         'schema_id': 'https://interstellar.dev/schemas/v1/calculation-snapshot.schema.json',
         'title': 'CalculationSnapshot',
         'definitions': ('AnalysisModelExecution', 'CalculationResult', 'RecipeExecutionRequest'),
-        'sha256': '047e99ca08a1f3aed361fe10e9a798b457523289aa042f1ae329d4c561179592',
+        'sha256': 'c2ea8516cb32f92e48f994300118a00f5927cada015a06c18781378e7ffeab26',
     },
     'chart-request.schema.json': {
         'schema_id': 'https://interstellar.dev/schemas/v1/chart-request.schema.json',
         'title': 'ChartRequest',
         'definitions': ('ChartDefinition', 'ChartSettings', 'SubjectInput'),
-        'sha256': '8c5f2713f7a8810f85943f83b7e91982f829324dc709cddbcd706a01289aa17f',
+        'sha256': '6d0f984b8d773ccbc7030957e3ef6728578e5284794afa86ab4e20b5e99aff11',
     },
     'chart-result.schema.json': {
         'schema_id': 'https://interstellar.dev/schemas/v1/chart-result.schema.json',
         'title': 'ChartResult',
-        'definitions': ('Aspect', 'AstronomicalContext', 'CelestialPosition', 'Chart', 'House', 'HouseSet', 'Point', 'Provenance'),
-        'sha256': '11433428240824149d1cf9547b637c2a233df362eeb99ce824f46a936d62cfbe',
+        'definitions': ('Aspect', 'AstronomicalContext', 'CelestialPosition', 'Chart', 'ClassicalTableReference', 'EssentialDignityCondition', 'EssentialDignityResult', 'EssentialStatusFact', 'House', 'HouseSet', 'Point', 'Provenance'),
+        'sha256': '3dff9777dbbbd8846e6e4f43025b946640f7b1ed94b565b0c131a5294195ec2e',
     },
     'common.schema.json': {
         'schema_id': 'https://interstellar.dev/schemas/v1/common.schema.json',
@@ -76,7 +76,7 @@ CANONICAL_CONTRACTS: Final[dict[str, ContractDescriptor]] = {
         'schema_id': 'https://interstellar.dev/schemas/v1/output-manifest.schema.json',
         'title': 'OutputManifest',
         'definitions': (),
-        'sha256': '5633482ba2e7e25dc2844b704af971cde356b9ba1cdf64aa596eb65df5a04d79',
+        'sha256': '8198afacd6fe32d30bacf68f4c0721983e26acf9a21f89c35f46c6f2e6bd7aa0',
     },
     'problem-error.schema.json': {
         'schema_id': 'https://interstellar.dev/schemas/v1/problem-error.schema.json',
@@ -128,6 +128,10 @@ ChartResultAspect: TypeAlias = JSONObject
 ChartResultAstronomicalContext: TypeAlias = JSONObject
 ChartResultCelestialPosition: TypeAlias = JSONObject
 ChartResultChart: TypeAlias = JSONObject
+ChartResultClassicalTableReference: TypeAlias = JSONObject
+ChartResultEssentialDignityCondition: TypeAlias = JSONObject
+ChartResultEssentialDignityResult: TypeAlias = JSONObject
+ChartResultEssentialStatusFact: TypeAlias = JSONObject
 ChartResultHouse: TypeAlias = JSONObject
 ChartResultHouseSet: TypeAlias = JSONObject
 ChartResultPoint: TypeAlias = JSONObject
@@ -171,12 +175,14 @@ SubjectSubjectVersion: TypeAlias = JSONObject
 SubjectSubjectVersionInput: TypeAlias = JSONObject
 TimeSpecDocument: TypeAlias = JSONObject
 
-ApiOperationId: TypeAlias = Literal['cancelJob', 'confirmAnalysisRecipe', 'createAnalysisDraft', 'createCalculation', 'createRender', 'createReport', 'createRulePack', 'createRulePackVersion', 'createShare', 'createSubject', 'createSubjectVersion', 'deleteSubject', 'exportProjectArchive', 'getAnalysisDraft', 'getAnalysisIntentVersion', 'getAnalysisModel', 'getAnalysisModelVersion', 'getAnalysisRecipe', 'getArtifact', 'getCalculation', 'getCalculationTable', 'getDatasetVersion', 'getJob', 'getReport', 'getReportRulePackVersion', 'getRulePackVersion', 'getSubject', 'getTopicModelVersion', 'importProjectArchive', 'listAnalysisIntents', 'listAnalysisModels', 'listCalculations', 'listDatasetVersions', 'listDatasets', 'listEntryPoints', 'listReportArtifacts', 'listReportConclusions', 'listReportFindings', 'listReportProfiles', 'listSubjectVersions', 'listSubjects', 'listTechniques', 'listTopicModels', 'renderReport', 'resolveAnalysisRecipe', 'resolveShare', 'revokeShare', 'streamJobEvents', 'updateAnalysisDraft', 'validateCustomAnalysisModel', 'validateReportRulePack', 'validateRulePack']
+ApiOperationId: TypeAlias = Literal['cancelJob', 'confirmAnalysisRecipe', 'createAnalysisDraft', 'createCalculation', 'createNatalAiAnalysis', 'createNatalContextualInterpretations', 'createRender', 'createReport', 'createRulePack', 'createRulePackVersion', 'createShare', 'createSubject', 'createSubjectVersion', 'deleteSubject', 'exportNatalTechnicalDocument', 'exportProjectArchive', 'getAnalysisDraft', 'getAnalysisIntentVersion', 'getAnalysisModel', 'getAnalysisModelVersion', 'getAnalysisRecipe', 'getArtifact', 'getCalculation', 'getCalculationTable', 'getDatasetVersion', 'getJob', 'getReport', 'getReportRulePackVersion', 'getRulePackVersion', 'getSubject', 'getTopicModelVersion', 'importProjectArchive', 'listAnalysisIntents', 'listAnalysisModels', 'listCalculations', 'listDatasetVersions', 'listDatasets', 'listEntryPoints', 'listNatalAiProviders', 'listReportArtifacts', 'listReportConclusions', 'listReportFindings', 'listReportProfiles', 'listSubjectVersions', 'listSubjects', 'listTechniques', 'listTopicModels', 'renderReport', 'resolveAnalysisRecipe', 'resolveShare', 'revokeShare', 'streamJobEvents', 'updateAnalysisDraft', 'validateCustomAnalysisModel', 'validateReportRulePack', 'validateRulePack']
 API_OPERATION_IDS: Final[tuple[ApiOperationId, ...]] = (
     'cancelJob',
     'confirmAnalysisRecipe',
     'createAnalysisDraft',
     'createCalculation',
+    'createNatalAiAnalysis',
+    'createNatalContextualInterpretations',
     'createRender',
     'createReport',
     'createRulePack',
@@ -185,6 +191,7 @@ API_OPERATION_IDS: Final[tuple[ApiOperationId, ...]] = (
     'createSubject',
     'createSubjectVersion',
     'deleteSubject',
+    'exportNatalTechnicalDocument',
     'exportProjectArchive',
     'getAnalysisDraft',
     'getAnalysisIntentVersion',
@@ -208,6 +215,7 @@ API_OPERATION_IDS: Final[tuple[ApiOperationId, ...]] = (
     'listDatasetVersions',
     'listDatasets',
     'listEntryPoints',
+    'listNatalAiProviders',
     'listReportArtifacts',
     'listReportConclusions',
     'listReportFindings',

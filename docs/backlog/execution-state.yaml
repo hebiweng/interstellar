@@ -1,9 +1,12 @@
 schema_version: 1.0.0
 controller_ref: docs/backlog/execution-controller.yaml
-updated_at: '2026-07-18'
+updated_at: '2026-07-19'
 goal_status: active
-active_stage: professional_alpha
-active_month: M5
+active_stage: natal_priority_release
+active_month: paused_monthly_roadmap
+active_priority_gate: NATAL-RELEASE
+active_priority_subgate: NATAL-1
+completed_priority_subgates: [NATAL-0]
 stage_status:
   foundation: completed
   professional_alpha: in_progress
@@ -11,28 +14,64 @@ stage_status:
   professional_pro: pending
   complete_v1: pending
   released: pending
+roadmap_policy:
+  m0_m24_automatic_progression: paused_by_user
+  current_sequence: [NATAL-0, NATAL-IA, NATAL-1, NATAL-2, NATAL-3, NATAL-4, NATAL-5, NATAL-AI, NATAL-RELEASE]
+  after_natal_release: stop_and_wait_for_explicit_user_direction
 
 active_work_packages:
-  - id: M5-TRANSIT-EVENTS
+  - id: NATAL-FIRST-SLICE
     owner: interstellar_primary_agent
     status: in_progress
+    write_scope: [docs/natal-first-slice.yaml, packages/canonical-schema, python/interstellar_core/astrology, apps/web, tests/astrology, tests/frontend]
+    acceptance: saved_or_temporary_person_to_direct_natal_calculation_complete_facts_contextual_interpretation_technical_document_optional_AI_contract_and_NATAL_RELEASE_pass_before_new_technique_expansion
+  - id: NATAL-TECHNICAL-EXPORT
+    task_ref: M5-N006
+    owner: interstellar_primary_agent
+    status: pending
+    priority_blocked_by: NATAL-3
+    write_scope: [packages/canonical-schema, apps/api, apps/web, python/interstellar_core/rendering/exports, tests/contracts, tests/rendering/exports, tests/frontend]
+    acceptance: markdown_and_plaintext_and_copy_share_one_deterministic_TechnicalResultDocument_hash_include_every_materialized_natal_fact_and_never_silently_compute_more
+  - id: NATAL-AI
+    task_ref: M5-N007
+    owner: interstellar_primary_agent
+    status: pending
+    priority_blocked_by: NATAL-3
+    default_runtime_state: no_provider_configured
+    provider_examples_only: [openai_GPT, moonshot_Kimi]
+    write_scope: [packages/canonical-schema, apps/api, apps/web, tests/contracts, tests/frontend]
+    acceptance: provider_catalog_and_disabled_reasons_payload_preview_per_submission_consent_secret_isolation_independent_AI_artifact_and_manual_export_fallback_pass_with_test_adapter_AI_never_calculates_or_overwrites_chart_facts
+    release_note: passing_this_work_package_does_not_assert_that_any_real_third_party_provider_is_connected
+  - id: M5-TRANSIT-EVENTS
+    owner: interstellar_primary_agent
+    status: pending
+    priority_blocked_by: NATAL-RELEASE
     write_scope: [python/interstellar_core/forecast/transits, tests/forecast/transits, algorithm-cards/forecast]
     acceptance: ingress_station_aspect_window_exact_hit_and_retrograde_multi_hit_tolerances_pass
   - id: M5-RETURNS
     owner: interstellar_primary_agent
     status: pending
+    priority_blocked_by: NATAL-RELEASE
     write_scope: [python/interstellar_core/forecast/returns, tests/forecast/returns, algorithm-cards/forecast]
     acceptance: solar_and_lunar_return_multi_solution_location_policy_and_independent_difference_tests_pass
   - id: M5-RENDERING
     owner: interstellar_primary_agent
     status: pending
+    priority_blocked_by: NATAL-RELEASE
     write_scope: [python/interstellar_core/rendering, app/components/rendering, tests/rendering]
     acceptance: single_double_wheel_grid_and_basic_timeline_visual_and_accessibility_gates_pass
   - id: M5-EXPORTS
     owner: interstellar_primary_agent
     status: pending
+    priority_blocked_by: NATAL-RELEASE
     write_scope: [python/interstellar_core/rendering/exports, apps/api, tests/rendering/exports]
     acceptance: RenderSpec_drives_screen_SVG_and_PNG_from_one_source_with_hash_reuse
+  - id: M5-RESULT-DISCLOSURE
+    owner: interstellar_primary_agent
+    status: pending
+    priority_blocked_by: NATAL-RELEASE
+    write_scope: [apps/web, python/interstellar_core/rendering, tests/rendering, docs/professional-workspace-contract.yaml]
+    acceptance: every_materialized_alpha_result_collection_maps_to_a_view_table_or_export_and_transit_aspects_are_context_selectable
 
 current_gate_evidence:
   - docs/backlog/evidence/M0.yaml
@@ -40,6 +79,7 @@ current_gate_evidence:
   - docs/backlog/evidence/M2.yaml
   - docs/backlog/evidence/M3.yaml
   - docs/backlog/evidence/M4.yaml
+  - docs/backlog/evidence/NATAL-0.yaml
 open_blockers:
   - astronomy.ephemeris_core_stable_requires_independent_jpl_positions_and_spice_kernels
-next_action: implement_M5_transit_event_search_and_independent_difference_fixtures_before_returns_and_rendering_integration
+next_action: implement_natal_priority_plan_N1_through_N8_without_starting_other_techniques

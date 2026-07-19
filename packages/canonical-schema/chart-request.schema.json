@@ -29,15 +29,54 @@
       "additionalProperties": false,
       "required": ["zodiac", "house_system", "center", "node_type", "aspect_set_id", "orb_profile_id"],
       "properties": {
+        "calculation_profile_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "analysis_system_id": {"$ref": "common.schema.json#/$defs/Identifier"},
         "zodiac": {"type": "string", "enum": ["tropical", "sidereal", "draconic"]},
         "ayanamsa": {"type": ["string", "null"]},
         "house_system": {"type": "string", "minLength": 1, "maxLength": 40},
         "center": {"type": "string", "enum": ["geocentric", "heliocentric", "topocentric"]},
         "coordinate_frame": {"type": "string", "enum": ["ecliptic", "equatorial", "horizontal"]},
         "node_type": {"type": "string", "enum": ["true", "mean", "both"]},
+        "high_latitude_policy": {"type": "string", "enum": ["block", "allow_distorted", "fallback_whole_sign", "fallback_equal"]},
         "aspect_set_id": {"$ref": "common.schema.json#/$defs/Identifier"},
         "orb_profile_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "point_set_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
         "included_points": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "minor_body_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "fixed_star_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "lot_formula_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "hypothetical_point_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "included_aspect_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "orb_overrides": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["scope", "orb_deg"],
+            "properties": {
+              "scope": {"type": "string", "enum": ["point_pair", "point_class", "aspect", "chart_context"]},
+              "point_a": {"type": ["string", "null"]},
+              "point_b": {"type": ["string", "null"]},
+              "point_class": {"type": ["string", "null"]},
+              "aspect_id": {"type": ["string", "null"]},
+              "chart_context": {"type": ["string", "null"]},
+              "orb_deg": {"type": "number", "minimum": 0, "maximum": 30}
+            }
+          }
+        },
+        "classical_settings": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "rulership_system": {"type": ["string", "null"]},
+            "dignity_table": {"type": ["string", "null"]},
+            "triplicity_table": {"type": ["string", "null"]},
+            "terms_table": {"type": ["string", "null"]},
+            "decan_or_face_table": {"type": ["string", "null"]},
+            "sect_rules": {"type": ["string", "null"]},
+            "lot_formula_set": {"type": ["string", "null"]}
+          }
+        },
         "custom_parameters": {"type": "object", "additionalProperties": true}
       }
     }
@@ -57,7 +96,7 @@
     },
     "outputs": {
       "type": "array",
-      "items": {"type": "string", "enum": ["snapshot", "default_render_manifest", "svg", "png", "pdf", "json", "csv", "ics"]},
+      "items": {"type": "string", "enum": ["snapshot", "default_render_manifest", "svg", "png", "pdf", "json", "csv", "ics", "markdown_technical", "plaintext_technical"]},
       "minItems": 1,
       "uniqueItems": true
     },

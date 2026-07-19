@@ -6,6 +6,8 @@
     "confirmAnalysisRecipe",
     "createAnalysisDraft",
     "createCalculation",
+    "createNatalAiAnalysis",
+    "createNatalContextualInterpretations",
     "createRender",
     "createReport",
     "createRulePack",
@@ -14,6 +16,7 @@
     "createSubject",
     "createSubjectVersion",
     "deleteSubject",
+    "exportNatalTechnicalDocument",
     "exportProjectArchive",
     "getAnalysisDraft",
     "getAnalysisIntentVersion",
@@ -37,6 +40,7 @@
     "listDatasetVersions",
     "listDatasets",
     "listEntryPoints",
+    "listNatalAiProviders",
     "listReportArtifacts",
     "listReportConclusions",
     "listReportFindings",
@@ -82,7 +86,7 @@
       ],
       "file": "calculation-snapshot.schema.json",
       "schema_id": "https://interstellar.dev/schemas/v1/calculation-snapshot.schema.json",
-      "sha256": "047e99ca08a1f3aed361fe10e9a798b457523289aa042f1ae329d4c561179592",
+      "sha256": "c2ea8516cb32f92e48f994300118a00f5927cada015a06c18781378e7ffeab26",
       "title": "CalculationSnapshot"
     },
     {
@@ -93,7 +97,7 @@
       ],
       "file": "chart-request.schema.json",
       "schema_id": "https://interstellar.dev/schemas/v1/chart-request.schema.json",
-      "sha256": "8c5f2713f7a8810f85943f83b7e91982f829324dc709cddbcd706a01289aa17f",
+      "sha256": "6d0f984b8d773ccbc7030957e3ef6728578e5284794afa86ab4e20b5e99aff11",
       "title": "ChartRequest"
     },
     {
@@ -102,6 +106,10 @@
         "AstronomicalContext",
         "CelestialPosition",
         "Chart",
+        "ClassicalTableReference",
+        "EssentialDignityCondition",
+        "EssentialDignityResult",
+        "EssentialStatusFact",
         "House",
         "HouseSet",
         "Point",
@@ -109,7 +117,7 @@
       ],
       "file": "chart-result.schema.json",
       "schema_id": "https://interstellar.dev/schemas/v1/chart-result.schema.json",
-      "sha256": "11433428240824149d1cf9547b637c2a233df362eeb99ce824f46a936d62cfbe",
+      "sha256": "3dff9777dbbbd8846e6e4f43025b946640f7b1ed94b565b0c131a5294195ec2e",
       "title": "ChartResult"
     },
     {
@@ -162,7 +170,7 @@
       "definitions": [],
       "file": "output-manifest.schema.json",
       "schema_id": "https://interstellar.dev/schemas/v1/output-manifest.schema.json",
-      "sha256": "5633482ba2e7e25dc2844b704af971cde356b9ba1cdf64aa596eb65df5a04d79",
+      "sha256": "8198afacd6fe32d30bacf68f4c0721983e26acf9a21f89c35f46c6f2e6bd7aa0",
       "title": "OutputManifest"
     },
     {
@@ -216,7 +224,7 @@
   ],
   "source_of_truth": {
     "openapi": "openapi/openapi.yaml",
-    "openapi_sha256": "0332ff2cdd74eb1121305bc3f09a3409af6f363af6bb75e601517cb886e5dedb",
+    "openapi_sha256": "eb6137385ef92fee96b398153cc8a7e8d924175d0d4424244d4cd1fecd9385a7",
     "schema_directory": "packages/canonical-schema"
   }
 }

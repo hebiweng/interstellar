@@ -1,5 +1,5 @@
 schema_version: 1.3.0
-document_version: 1.3.0-draft.1
+document_version: 1.3.0-draft.2
 product: interstellar
 baseline_date: 2026-07-18
 license_strategy: agpl_open_source
@@ -767,7 +767,12 @@ capabilities:
     algorithm_card: required
     data_sources: []
     inputs: [chart, dignity_table, sect_profile]
-    outputs: [dignities, receptions, dispositors]
+    outputs: [essential_dignities, essential_status_facts, solar_conditions, sect_facts, receptions, dispositors]
+    known_limits:
+      - essential_dignity_default_scope_is_traditional_seven_planets
+      - modern_outer_planet_rulership_is_a_separate_profile_not_classical_dignity
+      - nodes_lots_asteroids_centaur_bodies_and_TNPs_have_no_default_classical_dignity
+      - almuten_scores_and_most_accidental_dignities_are_not_yet_implemented
     validation_profile: astrology_beta
 
   - id: natal.arabic_parts
@@ -1164,6 +1169,46 @@ capabilities:
       - same_report_document_for_all_densities
       - missing_template_falls_back_to_structured_finding
 
+  - id: reporting.contextual_item_interpretation
+    name_zh: 配置与计算项的就地确定性解读
+    category: reporting
+    phase: alpha
+    v1_required: true
+    target_maturity: beta
+    work_package: V1-RPT-001
+    dependencies: [platform.calculation_snapshot, rendering.tables_grids]
+    algorithm_card: required
+    data_sources: []
+    inputs: [snapshot_result_ref, item_kind, interpretation_layer, analysis_system, rule_pack, localized_template]
+    outputs: [fact_layer, basic_modern_layer, classical_layer, related_context, provenance, publication_state]
+    validation_profile: astrology_beta
+    constraints:
+      - no_ai_generation
+      - no_new_astronomical_calculation
+      - modern_and_classical_layers_remain_separate
+      - sun_moon_angles_lots_and_calculated_points_use_not_applicable_motion_when_required
+      - missing_rule_or_template_keeps_fact_visible_and_marks_interpretation_unpublished
+      - full_report_not_required
+
+  - id: ux.calculated_result_disclosure
+    name_zh: 所有已计算结果的专业视图可达性
+    category: ux
+    phase: alpha
+    v1_required: true
+    target_maturity: stable
+    work_package: V1-UI-001
+    dependencies: [platform.calculation_snapshot, rendering.wheels, rendering.tables_grids]
+    algorithm_card: not_required
+    data_sources: []
+    inputs: [calculation_snapshot, output_manifest, view_registry]
+    outputs: [reachable_result_collections, view_or_table_or_export_mapping, omitted_item_count, disclosure_warnings]
+    validation_profile: platform_stable
+    constraints:
+      - every_materialized_collection_maps_to_a_view_table_or_export
+      - filters_pagination_and_virtual_scrolling_may_reduce_density_not_coverage
+      - transit_results_include_cross_chart_aspects_and_exact_hit_metadata
+      - computed_but_unreachable_is_a_release_blocker
+
   - id: reporting.topic_report_packs
     name_zh: 24个专题模型报告规则与双语模板
     category: reporting
@@ -1254,7 +1299,7 @@ capabilities:
     validation_profile: rendering_stable
 
   - id: rendering.exports
-    name_zh: SVG、PNG、PDF、JSON、CSV和ICS导出
+    name_zh: SVG、PNG、PDF、JSON、CSV、ICS及专业技术文本导出
     category: rendering
     phase: beta
     v1_required: true
@@ -1263,8 +1308,14 @@ capabilities:
     dependencies: [rendering.wheels, rendering.tables_grids, platform.async_jobs]
     algorithm_card: not_required
     data_sources: []
-    inputs: [calculation_snapshot, render_spec, export_format]
-    outputs: [svg, png, pdf, json, csv, ics]
+    inputs: [calculation_snapshot, render_spec, export_format, export_preset]
+    outputs: [svg, png, pdf, json, csv, ics, markdown_technical, plaintext_technical]
+    export_presets: [core, professional, full_selected]
+    constraints:
+      - technical_text_is_a_deterministic_snapshot_serializer
+      - full_selected_serializes_only_already_computed_points_and_results
+      - missing_points_require_recipe_extension_preflight
+      - large_point_pair_exports_use_async_budgeted_jobs
     validation_profile: rendering_stable
 
   - id: ux.subject_analysis_workflow

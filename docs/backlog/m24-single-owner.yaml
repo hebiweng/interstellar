@@ -13,6 +13,16 @@ execution_model:
     algorithms: algorithm-cards/catalog.yaml
   monthly_rule: no_month_closes_with_failed_required_gate
   maturity_rule: specification_approved_is_not_implementation_or_stable
+  current_priority_gate:
+    id: NATAL-RELEASE
+    contract: docs/natal-first-slice.yaml
+    blocks_start_of: [M5-001, M5-002, M6-001, M7-001]
+    rule: complete_professional_natal_product_then_stop_until_explicit_user_authorization
+  roadmap_state:
+    m0_m24_execution: paused
+    catalogs_and_future_entry_points: retained
+    current_plan: docs/natal-development-plan.md
+    after_natal_release: do_not_auto_resume
 
 lanes:
   - {id: contract, owns: [schema, openapi, types, migrations]}
@@ -60,12 +70,25 @@ months:
       - {id: M4-004, lane: contract, deliverable: /api/v1核心接口与SDK生成, acceptance: OpenAPI契约测试通过}
       - {id: M4-005, lane: product, deliverable: 工作台信息架构_六入口差异化_滚动与交互状态, acceptance: 每个入口保留entry_point_id和预填上下文_无假按钮_桌面移动端可完整滚动_舒适字号视觉与E2E通过}
   - month: M5
-    objective: 完成Alpha预测与基础渲染
+    objective: 当前优先完成完整本命盘纵向切片_通过后才恢复Alpha预测与基础渲染
     tasks:
+      - {id: M5-N001, lane: contract, deliverable: 本命首切片Schema_设置_竞品信息维度基线, acceptance: NATAL-0通过_不复制专有文字或未知公式}
+      - {id: M5-N001A, lane: product, deliverable: 恢复全局壳层_六类入口_未来盘型快捷按钮, acceptance: NATAL-IA通过_本命唯一完整可运行_未实现项展示阶段与原因_不复用本命结果或相同占位弹窗}
+      - {id: M5-N001B, lane: product, deliverable: 拆分新增人物与新建计算流程, acceptance: 人物库新增只建档_新建计算可选择现有人物或内联临时人物_保存关系人物显式可选}
+      - {id: M5-N002, lane: computation, deliverable: 专业本命点位_宫位_全选相位_结构_古典事实, acceptance: NATAL-1金标准_差异_空值与来源通过_传统七曜status_facts含profile_极性_层级_激活_规则_表版本_竞品66点位夹具不把外行星节点小行星TNP伪装成古典尊贵}
+      - {id: M5-N003, lane: product, deliverable: 首页本命工作区_人物切换_地点时区确认_分层设置_重算边界, acceptance: NATAL-2全流程通过_IANA候选选择_地点自动经纬度_国家代码派生隐藏_无重复入口和长弹窗}
+      - {id: M5-N003A, lane: contract, deliverable: 现代_古典_综合_自定义规则Preset与本命专业参数矩阵, acceptance: 每项参数标明计算或渲染影响_不把预测技法参数混入本命_未实现项禁用有原因}
+      - {id: M5-N003B, lane: computation, deliverable: 本命宫制与黄道扩展, acceptance: 当前12宫制全部暴露并验证_恒星黄道必须携带明确Ayanamsa_龙首盘作为独立变体_高纬与差异测试通过}
+      - {id: M5-N004, lane: product, deliverable: 轮盘_相位网格_点位_宫位_相位_结构_基础解析_古典解析_技术详情全可达, acceptance: NATAL-3通过_每个Snapshot集合有视图表格或导出_同一Snapshot切换视图不重算}
+      - {id: M5-N005, lane: product, deliverable: 指标后解读按钮与基础古典确定性解读, acceptance: NATAL-4_NATAL-5通过_入庙擢升失势落陷多标签不静默丢失_现代守护古典尊贵运动状态分层展示_缺模板显式未发布_不依赖完整报告}
+      - {id: M5-N006, lane: product, deliverable: 本命完整技术推演_Markdown_纯文本_复制与下载, acceptance: 同一Snapshot确定性序列化_落座宫位运动逆行相位结构古典来源版本齐全_同一内容哈希_不静默补算_剪贴板失败可下载}
+      - {id: M5-N007, lane: integration, deliverable: NATAL-AI可选提供方目录_载荷预览_显式同意_独立响应_手动复制兜底, acceptance: 默认无已配置模型_GPT_Kimi仅为示例家族_未配置禁用且有原因_测试适配器验证同意与隔离_AI不得计算或覆盖星盘事实}
+      - {id: M5-N008, lane: quality, deliverable: 本命Only_Professional_Alpha门禁, acceptance: NATAL-0至NATAL-5_NATAL-AI_NATAL-RELEASE的E2E_视觉_可访问_性能_隐私_恢复全部通过}
       - {id: M5-001, lane: computation, deliverable: 行运_事件窗口_站点, acceptance: 逆行多击与精确时刻容差通过}
       - {id: M5-002, lane: computation, deliverable: 太阳返照_月亮返照, acceptance: 多解_地点策略_独立实现通过}
       - {id: M5-003, lane: product, deliverable: 单轮_双轮_网格_基础时间线, acceptance: SVG视觉回归和无障碍表格通过}
       - {id: M5-004, lane: product, deliverable: RenderSpec与SVG_PNG导出, acceptance: 屏幕导出同源且哈希复用}
+      - {id: M5-005, lane: product, deliverable: 行运位置_跨盘相位_精确命中配套视图, acceptance: Snapshot中全部Alpha行运结果可筛选可达_点击保持上下文_无静默遗漏}
   - month: M6
     objective: 交付Professional Alpha
     tasks:
@@ -73,6 +96,7 @@ months:
       - {id: M6-002, lane: product, deliverable: 现代本命_短期行运_关系比较三个模型, acceptance: Recipe_结果_图表_报告闭环}
       - {id: M6-003, lane: product, deliverable: 计算记录与基础技法ReportDocument, acceptance: JSON_HTML_PDF来自同一报告对象}
       - {id: M6-004, lane: quality, deliverable: Alpha恢复_性能_安全_许可门禁, acceptance: 全新Compose部署并完成恢复演练}
+      - {id: M6-005, lane: product, deliverable: 主要落点_本命相位_行运命中的逐项基础解读, acceptance: 点击轮盘或表格项无需报告即可查看事实_基础含义_上下文_来源_未知层显式降级}
   - month: M7
     objective: 扩展坐标、相位和盘型
     tasks:
@@ -94,6 +118,8 @@ months:
       - {id: M9-002, lane: computation, deliverable: 本质_偶然尊贵和昼夜条件, acceptance: EgyptianTerms_DorotheanTriplicity边界通过}
       - {id: M9-003, lane: computation, deliverable: Lots公式与自定义三点, acceptance: 昼夜反转_循环_缺失点测试通过}
       - {id: M9-004, lane: product, deliverable: 古典表格_定位链_技术报告, acceptance: 不输出寿命断言}
+      - {id: M9-005, lane: product, deliverable: 古典逐项解读层, acceptance: 昼夜_尊贵_宫主_接纳_太阳关系可就地查看且不与现代层静默混合}
+      - {id: M9-006, lane: computation, deliverable: 偶然尊贵分项Profile_禁止默认总分, acceptance: 角续果_速度站点顺逆_喜乐宫_Hayz_东西方_可见性逐项锁来源输入阈值不适用语义_未验证项保持Experimental}
   - month: M10
     objective: 完成中点、谐波、固定星与常用小天体
     tasks:
@@ -115,6 +141,7 @@ months:
       - {id: M12-002, lane: product, deliverable: 关系Davison与首批动态关系, acceptance: 时间地点中点和反足点测试通过}
       - {id: M12-003, lane: quality, deliverable: Alpha_Beta目录覆盖报告, acceptance: 对应计算和视图无静默缺失}
       - {id: M12-004, lane: quality, deliverable: Beta安全_性能_恢复门禁, acceptance: 已知限制与成熟度真实}
+      - {id: M12-005, lane: product, deliverable: Markdown_纯文本专业技术全量导出, acceptance: core_professional_full_selected确定性序列化_不静默补算_大点对任务可取消}
   - month: M13
     objective: 建立确定性规则和证据运行时
     tasks:
@@ -178,6 +205,7 @@ months:
       - {id: M21-002, lane: product, deliverable: 中英文确定性模板, acceptance: 缺模板降级结构化Finding}
       - {id: M21-003, lane: product, deliverable: 六种ReportProfile三密度, acceptance: 同一ReportDocument子集关系通过}
       - {id: M21-004, lane: quality, deliverable: 报告覆盖_引用_风险语言审计, acceptance: 无断链结论和禁用概率}
+      - {id: M21-005, lane: quality, deliverable: 逐项解读与综合报告边界审计, acceptance: 原子项就近可达_报告仅聚合_共同证据引用一致}
   - month: M22
     objective: 完成128项专业图形目录
     catalog_scope: render.view_number 1..128
@@ -201,6 +229,7 @@ months:
       - {id: M24-002, lane: quality, deliverable: 全量金标准_差异_契约_视觉_性能回归, acceptance: 所有目标成熟度真实或显式降级}
       - {id: M24-003, lane: platform, deliverable: AGPL源码_镜像_Compose_文档_数据获取器, acceptance: 干净环境可复现}
       - {id: M24-004, lane: product, deliverable: V1已知限制_版本迁移_后续插件路线, acceptance: 不承诺行业不存在的确定答案}
+      - {id: M24-005, lane: quality, deliverable: 全结果可达与逐项解读覆盖报告, acceptance: 每个Snapshot集合存在视图表格或导出_每个已发布解读具备规则模板来源版本成熟度}
 
 global_exit_gate:
   required:

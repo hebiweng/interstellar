@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "active": {
+    "swiss_ephemeris": {
+      "dataset_id": "swiss_ephemeris",
+      "version": "2.10.3-DE441-natal-subset-2026-04-14",
+      "license_identifier": "AGPL-3.0-or-later_OR_Swiss_Ephemeris_Professional_License",
+      "license_accepted": true,
+      "artifacts": [
+        {
+          "path": "ephe/sepl_18.se1",
+          "sha256": "ca1393ceab3a44fbc895887cf789c68819ae6a1cbc9b22225872dbe4ccd99a66",
+          "size_bytes": 484061
+        },
+        {
+          "path": "ephe/semo_18.se1",
+          "sha256": "1ca07bd67c24374d77226180c20a4f9996cba013697894810518e7eb582ca4f7",
+          "size_bytes": 1304771
+        },
+        {
+          "path": "ephe/seas_18.se1",
+          "sha256": "a2cd8fc33807c78ca9a700c91c2e042258b12fc4796519e00781440b5ad8b2e2",
+          "size_bytes": 223004
+        }
+      ],
+      "verified_at": "2026-07-18T16:10:00Z"
+    }
+  }
+}

@@ -8,7 +8,8 @@ interpretation remain explicit later-stage work.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+import math
+from collections.abc import Mapping, Sequence
 from copy import deepcopy
 from dataclasses import asdict
 from datetime import UTC, datetime
@@ -19,10 +20,25 @@ from typing import Any
 from interstellar_core.application.recipe_preflight import canonical_hash
 from interstellar_core.astrology.aspects import (
     OFFICIAL_MAJOR_ASPECTS_V1,
+    OFFICIAL_PROFESSIONAL_NATAL_ASPECTS_V1,
+    OFFICIAL_PROFESSIONAL_NATAL_ORBS_V1,
     OFFICIAL_STANDARD_ORBS_V1,
     AspectContext,
+    AspectOrbAllowance,
     AspectPoint,
+    MajorAspectProfile,
+    OrbProfile,
     find_major_aspects,
+)
+from interstellar_core.astrology.classical import (
+    TRADITIONAL_PLANET_IDS,
+    Sect,
+    calculate_receptions,
+    calculate_supported_lots,
+    calculate_traditional_dispositors,
+    classify_solar_condition,
+    evaluate_essential_dignity,
+    sect_facts,
 )
 from interstellar_core.astrology.distributions import (
     MODERN_TEN_PROFILE_V1,
@@ -36,12 +52,81 @@ from interstellar_core.astrology.houses import (
     HouseSystem,
     assign_points_to_houses,
 )
-from interstellar_core.astronomy.adapters import SwissEphemerisAdapter
-from interstellar_core.astronomy.derived import derive_lunar_phase
+from interstellar_core.astrology.natal import (
+    ANGLE_POINT_IDS,
+    DEFAULT_LOT_IDS,
+    PROFESSIONAL_POINT_IDS,
+    add_opposite_nodes,
+    angle_points_from_house_result,
+    calculate_natal_structure,
+    lot_point_from_fact,
+)
+from interstellar_core.astronomy.adapters import (
+    CORE_POINT_IDS,
+    DIRECT_POINT_REGISTRY,
+    SwissEphemerisAdapter,
+)
+from interstellar_core.astronomy.derived import (
+    derive_lunar_phase,
+    signed_angular_difference,
+)
 
 
 class AstronomicalSnapshotInputError(ValueError):
     """Raised when an M2 request cannot be calculated without guessing."""
+
+
+PROFESSIONAL_CALCULATION_PROFILE_ID = "professional.natal.v1"
+PROFESSIONAL_POINT_SET_ID = "points.professional.default.v1"
+CURRENTLY_DERIVABLE_POINT_IDS = {
+    *ANGLE_POINT_IDS,
+    "true_south_node",
+    "mean_south_node",
+    *DEFAULT_LOT_IDS,
+}
+
+
+def _requested_final_point_ids(settings: Mapping[str, Any]) -> tuple[str, ...]:
+    included = tuple(str(item) for item in settings.get("included_points") or ())
+    if included:
+        candidates = included
+    elif settings.get(
+        "calculation_profile_id"
+    ) == PROFESSIONAL_CALCULATION_PROFILE_ID or PROFESSIONAL_POINT_SET_ID in set(
+        settings.get("point_set_ids") or ()
+    ):
+        candidates = PROFESSIONAL_POINT_IDS
+    else:
+        candidates = CORE_POINT_IDS
+    duplicates = sorted(point_id for point_id in set(candidates) if candidates.count(point_id) > 1)
+    if duplicates:
+        raise AstronomicalSnapshotInputError(
+            "included_points contains duplicate ids: " + ", ".join(duplicates)
+        )
+    supported = set(DIRECT_POINT_REGISTRY) | CURRENTLY_DERIVABLE_POINT_IDS
+    unknown = sorted(set(candidates) - supported)
+    if unknown:
+        raise AstronomicalSnapshotInputError(
+            "included_points contains unsupported natal ids: " + ", ".join(unknown)
+        )
+    return candidates
+
+
+def _direct_point_dependencies(final_ids: tuple[str, ...]) -> tuple[str, ...]:
+    dependencies: list[str] = ["sun", "moon"]
+    if set(final_ids) & set(DEFAULT_LOT_IDS):
+        # The released Hermetic Lot family depends on these five planets. Using
+        # the full locked dependency set also keeps explicit one-Lot requests
+        # reproducible without relying on unrelated selected chart points.
+        dependencies.extend(("mercury", "venus", "mars", "jupiter", "saturn"))
+    for point_id in final_ids:
+        if point_id in DIRECT_POINT_REGISTRY:
+            dependencies.append(point_id)
+        elif point_id == "true_south_node":
+            dependencies.append("true_north_node")
+        elif point_id == "mean_south_node":
+            dependencies.append("mean_north_node")
+    return tuple(dict.fromkeys(dependencies))
 
 
 def _timestamp(value: datetime) -> str:
@@ -96,8 +181,8 @@ def _adapter_warning(warning: Any) -> dict[str, Any]:
 
 
 def _selected_points(
-    points: tuple[dict[str, Any], ...],
-    included_point_ids: list[str],
+    points: Sequence[Mapping[str, Any]],
+    included_point_ids: Sequence[str],
 ) -> list[dict[str, Any]]:
     """Apply the request's point projection without silently ignoring ids."""
 
@@ -114,7 +199,7 @@ def _selected_points(
     unknown = sorted(set(included_point_ids) - set(available))
     if unknown:
         raise AstronomicalSnapshotInputError(
-            "included_points contains unsupported M3 ids: " + ", ".join(unknown)
+            "included_points contains unsupported natal ids: " + ", ".join(unknown)
         )
     return [deepcopy(available[point_id]) for point_id in included_point_ids]
 
@@ -169,21 +254,35 @@ def _place_points(
         placement = placements[point_id]
         point["house"] = placement.house
         longitude = longitudes[point_id]
+        previous_cusp = cusps[placement.house - 1]
         next_cusp = cusps[placement.house % 12]
-        point["distance_to_next_cusp_deg"] = (next_cusp - longitude) % 360
+        span = (next_cusp - previous_cusp) % 360
+        distance_from_previous = (longitude - previous_cusp) % 360
+        distance_to_next = (next_cusp - longitude) % 360
+        point["distance_from_previous_cusp_deg"] = distance_from_previous
+        point["distance_to_next_cusp_deg"] = distance_to_next
+        point["house_position_fraction"] = distance_from_previous / span if span > 0 else None
         if placement.on_cusp:
             point["status_refs"] = [*point.get("status_refs", []), "house.on_cusp"]
         populated_house_set["houses"][placement.house - 1]["point_ids"].append(point_id)
     return points, populated_house_set
 
 
-def _major_aspects(points: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _major_aspects(
+    points: list[dict[str, Any]],
+    *,
+    aspect_profile: MajorAspectProfile,
+    orb_profile: OrbProfile,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     aspect_points = [
         AspectPoint(
             id=str(point["point_id"]),
             longitude_deg=float(point["position"]["ecliptic"]["longitude_deg"]),
-            longitude_speed_deg_per_day=float(
-                point["position"]["velocity"]["longitude_deg_per_day"]
+            longitude_speed_deg_per_day=(
+                float(point["position"]["velocity"]["longitude_deg_per_day"])
+                if point.get("motion_interpretation") == "meaningful"
+                and point["position"]["velocity"].get("longitude_deg_per_day") is not None
+                else None
             ),
         )
         for point in points
@@ -196,9 +295,173 @@ def _major_aspects(points: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 left,
                 right,
                 context=AspectContext.WITHIN_CHART,
+                major_profile=aspect_profile,
+                orb_profile=orb_profile,
             )
         )
-    return sorted(result, key=lambda item: (item["point_a"], item["point_b"], item["type"]))
+    sorted_result = sorted(
+        result,
+        key=lambda item: (item["point_a"], item["point_b"], item["type"]),
+    )
+    pair_count = len(aspect_points) * (len(aspect_points) - 1) // 2
+    return sorted_result, {
+        "selected_point_count": len(aspect_points),
+        "evaluated_pair_count": pair_count,
+        "matched_aspect_count": len(sorted_result),
+        "excluded_pairs": [],
+    }
+
+
+def _aspect_profiles(settings: Mapping[str, Any]) -> tuple[MajorAspectProfile, OrbProfile]:
+    aspect_profiles = {
+        OFFICIAL_MAJOR_ASPECTS_V1.id: OFFICIAL_MAJOR_ASPECTS_V1,
+        OFFICIAL_PROFESSIONAL_NATAL_ASPECTS_V1.id: (OFFICIAL_PROFESSIONAL_NATAL_ASPECTS_V1),
+    }
+    orb_profiles = {
+        OFFICIAL_STANDARD_ORBS_V1.id: OFFICIAL_STANDARD_ORBS_V1,
+        OFFICIAL_PROFESSIONAL_NATAL_ORBS_V1.id: OFFICIAL_PROFESSIONAL_NATAL_ORBS_V1,
+    }
+    try:
+        base_aspects = aspect_profiles[str(settings["aspect_set_id"])]
+    except KeyError as exc:
+        raise AstronomicalSnapshotInputError(
+            "unsupported aspect_set_id: " + str(settings.get("aspect_set_id"))
+        ) from exc
+    try:
+        base_orbs = orb_profiles[str(settings["orb_profile_id"])]
+    except KeyError as exc:
+        supported = ", ".join(sorted(orb_profiles))
+        raise AstronomicalSnapshotInputError(
+            "unsupported orb_profile_id: "
+            + str(settings.get("orb_profile_id"))
+            + "; supported profiles: "
+            + supported
+        ) from exc
+
+    included = tuple(str(item) for item in settings.get("included_aspect_ids") or ())
+    available_aspects = {item.id: item for item in base_aspects.aspects}
+    if included:
+        unknown = sorted(set(included) - set(available_aspects))
+        if unknown:
+            raise AstronomicalSnapshotInputError(
+                "included_aspect_ids contains ids outside the selected aspect set: "
+                + ", ".join(unknown)
+            )
+        selected_aspects = tuple(available_aspects[item] for item in included)
+    else:
+        selected_aspects = base_aspects.aspects
+
+    allowance_by_id = {item.aspect_id: item.orb_deg for item in base_orbs.allowances}
+    for override in settings.get("orb_overrides") or ():
+        if override.get("scope") != "aspect" or not override.get("aspect_id"):
+            raise AstronomicalSnapshotInputError(
+                "the natal slice currently accepts orb overrides scoped to one aspect id"
+            )
+        aspect_id = str(override["aspect_id"])
+        if aspect_id not in available_aspects:
+            raise AstronomicalSnapshotInputError(
+                "orb override references an aspect outside the selected set: " + aspect_id
+            )
+        allowance_by_id[aspect_id] = float(override["orb_deg"])
+
+    aspect_profile = MajorAspectProfile(
+        id=base_aspects.id,
+        version=base_aspects.version,
+        source=base_aspects.source,
+        aspects=selected_aspects,
+    )
+    orb_profile = OrbProfile(
+        id=base_orbs.id,
+        version=base_orbs.version,
+        source=base_orbs.source,
+        allowances=tuple(
+            AspectOrbAllowance(item.id, allowance_by_id[item.id]) for item in selected_aspects
+        ),
+        probe_step_days=base_orbs.probe_step_days,
+        exact_tolerance_deg=base_orbs.exact_tolerance_deg,
+        relative_stationary_threshold_deg_per_day=(
+            base_orbs.relative_stationary_threshold_deg_per_day
+        ),
+        probe_change_tolerance_deg=base_orbs.probe_change_tolerance_deg,
+    )
+    return aspect_profile, orb_profile
+
+
+def _day_night_status(
+    *,
+    sun_point: Mapping[str, Any],
+    latitude_deg: float,
+    longitude_deg: float,
+    greenwich_sidereal_time_deg: float | None,
+    horizon_tolerance_deg: float = 0.25,
+) -> tuple[str, float | None]:
+    """Resolve geometric day/night from Sun altitude without refraction."""
+
+    if greenwich_sidereal_time_deg is None:
+        return "indeterminate", None
+    right_ascension = math.radians(
+        float(sun_point["position"]["equatorial"]["right_ascension_deg"])
+    )
+    declination = math.radians(float(sun_point["position"]["equatorial"]["declination_deg"]))
+    latitude = math.radians(float(latitude_deg))
+    local_sidereal = (float(greenwich_sidereal_time_deg) + float(longitude_deg)) % 360
+    hour_angle = math.radians(local_sidereal) - right_ascension
+    altitude = math.degrees(
+        math.asin(
+            math.sin(latitude) * math.sin(declination)
+            + math.cos(latitude) * math.cos(declination) * math.cos(hour_angle)
+        )
+    )
+    if abs(altitude) <= horizon_tolerance_deg:
+        return "indeterminate", altitude
+    return ("day" if altitude > 0 else "night"), altitude
+
+
+def _enrich_point_conditions(
+    points: list[dict[str, Any]],
+    *,
+    obliquity_deg: float,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Attach explicit OOB, solar proximity, and east/west facts."""
+
+    by_id = {str(point["point_id"]): point for point in points}
+    sun = by_id.get("sun")
+    if sun is None:
+        return points, []
+    sun_longitude = float(sun["position"]["ecliptic"]["longitude_deg"])
+    solar_facts: list[dict[str, Any]] = []
+    physical_kinds = {"luminary", "planet", "dwarf_planet", "asteroid", "centaur"}
+    for point in points:
+        declination = float(point["position"]["equatorial"]["declination_deg"])
+        point["out_of_bounds"] = abs(declination) > abs(obliquity_deg)
+        if point["kind"] not in physical_kinds:
+            point["solar_relation"] = "not_applicable"
+            point["solar_elongation_deg"] = None
+            point["oriental_occidental"] = "not_applicable"
+            point["visibility_state"] = "not_applicable"
+            continue
+        longitude = float(point["position"]["ecliptic"]["longitude_deg"])
+        solar = classify_solar_condition(
+            str(point["point_id"]),
+            longitude,
+            sun_longitude_deg=sun_longitude,
+        )
+        solar_payload = solar.to_dict()
+        solar_facts.append(solar_payload)
+        point["solar_relation"] = solar_payload["relation"]
+        point["solar_elongation_deg"] = solar_payload["separation_deg"]
+        if point["point_id"] == "sun":
+            point["oriental_occidental"] = "not_applicable"
+        else:
+            point["oriental_occidental"] = (
+                "oriental"
+                if signed_angular_difference(longitude, sun_longitude) < 0
+                else "occidental"
+            )
+        # Physical visibility requires a separate heliacal model; solar
+        # proximity must not be relabelled as a visibility determination.
+        point["visibility_state"] = "uncertain"
+    return points, solar_facts
 
 
 def _distribution_documents(
@@ -261,6 +524,70 @@ def _distribution_documents(
     return documents, distribution.availability.value == "available"
 
 
+def _classical_documents(
+    points: list[dict[str, Any]],
+    *,
+    day_night_status: str,
+    sun_altitude_deg: float | None,
+    solar_conditions: list[dict[str, Any]],
+) -> tuple[
+    dict[str, Any],
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+]:
+    """Return explicit traditional facts or an honest unavailable document."""
+
+    longitudes = {
+        str(point["point_id"]): float(point["position"]["ecliptic"]["longitude_deg"])
+        for point in points
+        if str(point["point_id"]) in TRADITIONAL_PLANET_IDS
+    }
+    missing = sorted(set(TRADITIONAL_PLANET_IDS) - set(longitudes))
+    if day_night_status not in {"day", "night"}:
+        return (
+            {
+                "availability": "indeterminate",
+                "unavailable_reasons": ["DAY_NIGHT_STATUS_INDETERMINATE"],
+                "day_night_status": day_night_status,
+                "sun_altitude_deg": sun_altitude_deg,
+                "missing_traditional_planet_ids": missing,
+                "sect": None,
+                "solar_conditions": solar_conditions,
+                "dispositors": None,
+                "receptions": None,
+                "interpretation_boundary": (
+                    "Traditional facts only; no qualitative or predictive interpretation"
+                ),
+            },
+            [],
+            [],
+        )
+
+    sect = Sect(day_night_status)
+    dignity_documents = [
+        evaluate_essential_dignity(point_id, longitude, sect=sect).to_dict()
+        for point_id, longitude in sorted(longitudes.items())
+    ]
+    dispositor_document = calculate_traditional_dispositors(longitudes).to_dict()
+    reception_document = calculate_receptions(longitudes, sect=sect).to_dict()
+    reasons = ["MISSING_TRADITIONAL_PLANETS"] if missing else []
+    classical_document = {
+        "availability": "indeterminate" if reasons else "available",
+        "unavailable_reasons": reasons,
+        "day_night_status": day_night_status,
+        "sun_altitude_deg": sun_altitude_deg,
+        "missing_traditional_planet_ids": missing,
+        "sect": sect_facts(sect).to_dict(),
+        "solar_conditions": solar_conditions,
+        "dispositors": dispositor_document,
+        "receptions": reception_document,
+        "interpretation_boundary": (
+            "Traditional facts only; no qualitative or predictive interpretation"
+        ),
+    }
+    return classical_document, dignity_documents, [reception_document]
+
+
 def create_astronomical_snapshot(
     *,
     snapshot_id: str,
@@ -280,31 +607,129 @@ def create_astronomical_snapshot(
         raise AstronomicalSnapshotInputError("The subject version has no Location.")
     utc_instant = _parse_selected_utc(time_spec)
 
+    settings = request_payload["settings"]
+    final_point_ids = _requested_final_point_ids(settings)
+    direct_point_ids = _direct_point_dependencies(final_point_ids)
     calculator = adapter or SwissEphemerisAdapter(moshier_fallback="record")
-    ephemeris = calculator.calculate(utc_instant=utc_instant)
-    point_by_id = {point["point_id"]: point for point in ephemeris.points}
+    ephemeris = calculator.calculate(
+        utc_instant=utc_instant,
+        point_ids=direct_point_ids,
+    )
+    point_by_id = {str(point["point_id"]): point for point in ephemeris.points}
     lunar = derive_lunar_phase(
         point_by_id["sun"]["position"]["ecliptic"]["longitude_deg"],
         point_by_id["moon"]["position"]["ecliptic"]["longitude_deg"],
     )
-    settings = request_payload["settings"]
-    if settings.get("aspect_set_id") != OFFICIAL_MAJOR_ASPECTS_V1.id:
-        raise AstronomicalSnapshotInputError(
-            "M3 supports aspect_set_id " + OFFICIAL_MAJOR_ASPECTS_V1.id
-        )
-    if settings.get("orb_profile_id") != OFFICIAL_STANDARD_ORBS_V1.id:
-        raise AstronomicalSnapshotInputError(
-            "M3 supports orb_profile_id " + OFFICIAL_STANDARD_ORBS_V1.id
-        )
-    included_point_ids = list(settings.get("included_points") or [])
-    points = _selected_points(ephemeris.points, included_point_ids)
+    aspect_profile, orb_profile = _aspect_profiles(settings)
     house_result = _house_calculation(
         request_payload=request_payload,
         julian_day_ut=ephemeris.julian_day_ut,
         location=location,
     )
+    if ephemeris.true_obliquity_deg is None:
+        raise AstronomicalSnapshotInputError(
+            "Swiss Ephemeris did not return the true obliquity required for canonical "
+            "equatorial coordinates and chart-dependent points."
+        )
+    obliquity_deg = float(ephemeris.true_obliquity_deg)
+    available_points = add_opposite_nodes(
+        ephemeris.points,
+        obliquity_deg=obliquity_deg,
+        julian_day_ut=ephemeris.julian_day_ut,
+    )
+    available_points.extend(
+        angle_points_from_house_result(
+            house_result,
+            obliquity_deg=obliquity_deg,
+            julian_day_ut=ephemeris.julian_day_ut,
+        )
+    )
+    day_night_status, sun_altitude_deg = _day_night_status(
+        sun_point=point_by_id["sun"],
+        latitude_deg=float(location["latitude"]),
+        longitude_deg=float(location["longitude"]),
+        greenwich_sidereal_time_deg=ephemeris.greenwich_sidereal_time_deg,
+    )
+    lot_documents: list[dict[str, Any]] = []
+    point_selection_warnings: list[dict[str, Any]] = []
+    requested_lot_ids = set(DEFAULT_LOT_IDS) & set(final_point_ids)
+    effective_point_ids = final_point_ids
+    if requested_lot_ids and day_night_status in {"day", "night"}:
+        asc_point = next(
+            (point for point in available_points if point["point_id"] == "asc"),
+            None,
+        )
+        if asc_point is None:
+            raise AstronomicalSnapshotInputError(
+                "The requested sect-aware Lots require a calculable Ascendant."
+            )
+        supported_lots = calculate_supported_lots(
+            asc_longitude_deg=float(asc_point["position"]["ecliptic"]["longitude_deg"]),
+            sun_longitude_deg=float(point_by_id["sun"]["position"]["ecliptic"]["longitude_deg"]),
+            moon_longitude_deg=float(point_by_id["moon"]["position"]["ecliptic"]["longitude_deg"]),
+            mercury_longitude_deg=float(
+                point_by_id["mercury"]["position"]["ecliptic"]["longitude_deg"]
+            ),
+            venus_longitude_deg=float(
+                point_by_id["venus"]["position"]["ecliptic"]["longitude_deg"]
+            ),
+            mars_longitude_deg=float(point_by_id["mars"]["position"]["ecliptic"]["longitude_deg"]),
+            jupiter_longitude_deg=float(
+                point_by_id["jupiter"]["position"]["ecliptic"]["longitude_deg"]
+            ),
+            saturn_longitude_deg=float(
+                point_by_id["saturn"]["position"]["ecliptic"]["longitude_deg"]
+            ),
+            sect=Sect(day_night_status),
+        )
+        lot_documents = [
+            lot_fact.to_dict()
+            for lot_fact in supported_lots
+            if lot_fact.lot_id.value in requested_lot_ids
+        ]
+        for lot_fact in supported_lots:
+            if lot_fact.lot_id.value in requested_lot_ids:
+                available_points.append(
+                    lot_point_from_fact(
+                        lot_fact,
+                        obliquity_deg=obliquity_deg,
+                        julian_day_ut=ephemeris.julian_day_ut,
+                    )
+                )
+    elif requested_lot_ids:
+        effective_point_ids = tuple(
+            point_id for point_id in final_point_ids if point_id not in requested_lot_ids
+        )
+        point_selection_warnings.append(
+            _warning(
+                "LOT_REQUIRES_RESOLVED_SECT",
+                "Sect-aware Lots were not fabricated because day/night status is "
+                "indeterminate at the configured horizon tolerance.",
+                details={"point_ids": sorted(requested_lot_ids)},
+            )
+        )
+    points = _selected_points(available_points, effective_point_ids)
+    points, solar_conditions = _enrich_point_conditions(
+        points,
+        obliquity_deg=obliquity_deg,
+    )
     points, house_set = _place_points(points, house_result.house_set)
-    aspects = _major_aspects(points)
+    aspects, aspect_evaluation = _major_aspects(
+        points,
+        aspect_profile=aspect_profile,
+        orb_profile=orb_profile,
+    )
+    structure_document = calculate_natal_structure(points, aspects).to_dict()
+    pattern_documents = [
+        *structure_document["stelliums"]["facts"],
+        *structure_document["geometric_patterns"]["facts"],
+    ]
+    classical_document, dignity_documents, reception_documents = _classical_documents(
+        points,
+        day_night_status=day_night_status,
+        sun_altitude_deg=sun_altitude_deg,
+        solar_conditions=solar_conditions,
+    )
     custom_parameters = settings.get("custom_parameters") or {}
     distribution_profile_id = str(
         custom_parameters.get(
@@ -354,12 +779,16 @@ def create_astronomical_snapshot(
             "ALG-ASTRONOMY-003",
             "ALG-ASTRONOMY-004",
             "ALG-NATAL-003",
+            "ALG-NATAL-004",
+            "ALG-NATAL-005",
         ],
         "rule_refs": [
             "astronomy.ephemeris_core",
             "astronomy.houses_angles",
             "astronomy.aspects",
             "natal.patterns_distributions",
+            "natal.dignity_reception",
+            "natal.arabic_parts",
         ],
     }
     adapter_warnings = [_adapter_warning(item) for item in ephemeris.warnings]
@@ -381,13 +810,50 @@ def create_astronomical_snapshot(
                 details={"profile_id": distribution_profile_id},
             )
         )
-    all_warnings = [*adapter_warnings, *house_warnings, *distribution_warnings]
+    classical_warnings: list[dict[str, Any]] = []
+    if classical_document["availability"] != "available":
+        classical_warnings.append(
+            _warning(
+                "CLASSICAL_FACTS_INDETERMINATE",
+                "Some classical natal facts are indeterminate; inspect the explicit "
+                "unavailable reasons instead of inferring a score.",
+                details={
+                    "reasons": classical_document["unavailable_reasons"],
+                    "missing_traditional_planet_ids": classical_document[
+                        "missing_traditional_planet_ids"
+                    ],
+                },
+            )
+        )
+    all_warnings = [
+        *adapter_warnings,
+        *house_warnings,
+        *point_selection_warnings,
+        *distribution_warnings,
+        *classical_warnings,
+    ]
     chart_id = f"chart-{snapshot_id}"
     astronomical_context = {
         "utc": _timestamp(utc_instant),
         "julian_day_ut": ephemeris.julian_day_ut,
         "julian_day_tt": ephemeris.julian_day_tt,
         "delta_t_seconds": ephemeris.delta_t_seconds,
+        "greenwich_sidereal_time_deg": ephemeris.greenwich_sidereal_time_deg,
+        "local_sidereal_time_deg": (
+            (ephemeris.greenwich_sidereal_time_deg + float(location["longitude"])) % 360
+            if ephemeris.greenwich_sidereal_time_deg is not None
+            else None
+        ),
+        "obliquity_deg": obliquity_deg,
+        "mean_obliquity_deg": ephemeris.mean_obliquity_deg,
+        "nutation_longitude_deg": ephemeris.nutation_longitude_deg,
+        "nutation_obliquity_deg": ephemeris.nutation_obliquity_deg,
+        "sunrise_utc": None,
+        "sunset_utc": None,
+        "day_night_status": day_night_status,
+        "sun_altitude_deg": sun_altitude_deg,
+        "precession_model": "swiss_ephemeris_apparent_of_date",
+        "nutation_model": "swiss_ephemeris_ecl_nut",
         "observer": deepcopy(dict(location)),
         "coordinate_settings": {
             "apparent": ephemeris.provenance.apparent,
@@ -416,11 +882,14 @@ def create_astronomical_snapshot(
         "points": deepcopy(points),
         "house_set": deepcopy(house_set),
         "aspects": deepcopy(aspects),
+        "aspect_evaluation": deepcopy(aspect_evaluation),
         "distributions": deepcopy(distributions),
-        "patterns": [],
-        "dignities": [],
-        "receptions": [],
-        "lots": [],
+        "structure": deepcopy(structure_document),
+        "patterns": deepcopy(pattern_documents),
+        "classical": deepcopy(classical_document),
+        "dignities": deepcopy(dignity_documents),
+        "receptions": deepcopy(reception_documents),
+        "lots": deepcopy(lot_documents),
         "midpoints": [],
         "warnings": deepcopy(all_warnings),
         "provenance": provenance,
@@ -437,11 +906,25 @@ def create_astronomical_snapshot(
         "unavailable": "blocked",
     }[house_result.status]
     distribution_status = "generated" if distributions_available else "blocked"
+    structure_status = (
+        "generated" if structure_document["availability"] == "available" else "blocked"
+    )
+    classical_status = (
+        "generated" if classical_document["availability"] == "available" else "blocked"
+    )
+    lots_requested = bool(set(DEFAULT_LOT_IDS) & set(final_point_ids))
+    lots_status = "generated" if lot_documents else "blocked"
     natal_status = (
         "blocked"
         if house_result.status == "unavailable"
         else "degraded"
-        if house_result.status == "degraded" or not distributions_available
+        if (
+            house_result.status == "degraded"
+            or not distributions_available
+            or structure_status != "generated"
+            or classical_status != "generated"
+            or (lots_requested and lots_status != "generated")
+        )
         else "generated"
     )
     manifests = [
@@ -492,17 +975,71 @@ def create_astronomical_snapshot(
         },
         {
             "output_id": "manifest.natal.patterns_distributions",
-            "status": distribution_status,
+            "status": (
+                "generated"
+                if distribution_status == "generated" and structure_status == "generated"
+                else "blocked"
+            ),
             "calculation_id": "natal.patterns_distributions",
-            "result_pointer": "/result/distributions",
+            "result_pointer": (
+                "/result/structure"
+                if distribution_status == "generated" and structure_status == "generated"
+                else None
+            ),
             "maturity": "experimental",
-            "view_ids": [],
-            "table_ids": ["table.elements", "table.modalities", "table.polarity"],
+            "view_ids": ["view.natal.structure"],
+            "table_ids": [
+                "table.elements",
+                "table.modalities",
+                "table.polarity",
+                "table.chart_patterns",
+            ],
             "export_formats": ["json", "csv"],
             "recommended_primary_view_id": None,
-            "missing_inputs": [] if distributions_available else ["complete_profile_points"],
+            "missing_inputs": (
+                []
+                if distribution_status == "generated" and structure_status == "generated"
+                else ["complete_profile_points_and_houses"]
+            ),
             "warnings": deepcopy(distribution_warnings),
             "algorithm_cards": ["ALG-NATAL-003"],
+            "reproducibility": reproducibility,
+        },
+        {
+            "output_id": "manifest.natal.dignity_reception",
+            "status": classical_status,
+            "calculation_id": "natal.dignity_reception",
+            "result_pointer": "/result/classical" if classical_status == "generated" else None,
+            "maturity": "experimental",
+            "view_ids": ["view.natal.classical"],
+            "table_ids": [
+                "table.essential_dignities",
+                "table.receptions",
+                "graph.dispositor_chain",
+                "table.sect_condition",
+            ],
+            "export_formats": ["json", "csv", "markdown_technical"],
+            "recommended_primary_view_id": None,
+            "missing_inputs": (
+                [] if classical_status == "generated" else ["resolved_sect_and_traditional_seven"]
+            ),
+            "warnings": deepcopy(classical_warnings),
+            "algorithm_cards": ["ALG-NATAL-004"],
+            "reproducibility": reproducibility,
+        },
+        {
+            "output_id": "manifest.natal.arabic_parts",
+            "status": lots_status,
+            "calculation_id": "natal.arabic_parts",
+            "result_pointer": "/result/lots" if lots_status == "generated" else None,
+            "maturity": "experimental",
+            "view_ids": ["view.natal.lots"],
+            "table_ids": ["table.arabic_parts"],
+            "export_formats": ["json", "csv", "markdown_technical"],
+            "recommended_primary_view_id": None,
+            "missing_inputs": [] if lots_status == "generated" else ["requested_lots"],
+            "warnings": deepcopy(point_selection_warnings),
+            "algorithm_cards": ["ALG-NATAL-005"],
             "reproducibility": reproducibility,
         },
         {
@@ -511,7 +1048,13 @@ def create_astronomical_snapshot(
             "calculation_id": "natal.standard_chart",
             "result_pointer": "/result/charts/0" if house_set else None,
             "maturity": "experimental",
-            "view_ids": [],
+            "view_ids": [
+                "wheel.natal",
+                "view.natal.basic",
+                "view.natal.classical",
+                "view.natal.structure",
+                "view.natal.technical_document",
+            ],
             "table_ids": [
                 "table.planet_positions",
                 "table.planet_speeds",
@@ -523,8 +1066,18 @@ def create_astronomical_snapshot(
             ]
             if house_set
             else [],
-            "export_formats": ["json", "csv"] if house_set else [],
-            "recommended_primary_view_id": None,
+            "export_formats": [
+                "svg",
+                "png",
+                "pdf",
+                "json",
+                "csv",
+                "markdown_technical",
+                "plaintext_technical",
+            ]
+            if house_set
+            else [],
+            "recommended_primary_view_id": "wheel.natal" if house_set else None,
             "missing_inputs": [] if house_set else ["astronomy.houses_angles"],
             "warnings": deepcopy([*house_warnings, *distribution_warnings]),
             "algorithm_cards": [
@@ -565,10 +1118,12 @@ def create_astronomical_snapshot(
             "houses": deepcopy(house_set["houses"] if house_set else []),
             "aspects": deepcopy(aspects),
             "distributions": deepcopy(distributions),
-            "patterns": [],
-            "dignities": [],
-            "receptions": [],
-            "lots": [],
+            "structure": deepcopy(structure_document),
+            "patterns": deepcopy(pattern_documents),
+            "classical": deepcopy(classical_document),
+            "dignities": deepcopy(dignity_documents),
+            "receptions": deepcopy(reception_documents),
+            "lots": deepcopy(lot_documents),
             "midpoints": [],
             "directions": [],
             "returns": [],

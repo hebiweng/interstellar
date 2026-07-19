@@ -21,7 +21,7 @@ class SdkGenerationTests(unittest.TestCase):
         for path, content in generate_sdk.expected_outputs().items():
             self.assertTrue(path.is_file(), path)
             self.assertEqual(path.read_text(encoding="utf-8"), content, path)
-        self.assertEqual(len(OPERATIONS), 52)
+        self.assertEqual(len(OPERATIONS), 56)
         self.assertIn("getCalculationTable", OPERATIONS)
         self.assertEqual(OPERATIONS["streamJobEvents"]["method"], "GET")
 

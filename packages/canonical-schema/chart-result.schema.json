@@ -47,17 +47,17 @@
             "altitude_deg": {"type": "number", "minimum": -90, "maximum": 90}
           }
         },
-        "distance_au": {"type": "number", "minimum": 0},
+        "distance_au": {"type": ["number", "null"], "minimum": 0},
         "velocity": {
           "type": "object",
           "additionalProperties": false,
           "required": ["longitude_deg_per_day", "latitude_deg_per_day", "distance_au_per_day"],
           "properties": {
-            "longitude_deg_per_day": {"type": "number"},
-            "latitude_deg_per_day": {"type": "number"},
+            "longitude_deg_per_day": {"type": ["number", "null"]},
+            "latitude_deg_per_day": {"type": ["number", "null"]},
             "right_ascension_deg_per_day": {"type": ["number", "null"]},
             "declination_deg_per_day": {"type": ["number", "null"]},
-            "distance_au_per_day": {"type": "number"}
+            "distance_au_per_day": {"type": ["number", "null"]}
           }
         },
         "motion_state": {"type": "string", "enum": ["direct", "retrograde", "stationary", "not_applicable"]},
@@ -78,10 +78,18 @@
         "sign": {"type": "string", "minLength": 1},
         "degree_in_sign": {"type": "number", "minimum": 0, "exclusiveMaximum": 30},
         "house": {"type": ["integer", "null"], "minimum": 1, "maximum": 12},
+        "distance_from_previous_cusp_deg": {"type": ["number", "null"], "minimum": 0},
         "distance_to_next_cusp_deg": {"type": ["number", "null"], "minimum": 0},
+        "house_position_fraction": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
         "retrograde": {"type": "boolean"},
+        "motion_interpretation": {"type": "string", "enum": ["meaningful", "not_applicable", "indeterminate"]},
         "out_of_bounds": {"type": ["boolean", "null"]},
         "solar_relation": {"type": ["string", "null"], "enum": ["cazimi", "combust", "under_beams", "free", "not_applicable", null]},
+        "solar_elongation_deg": {"type": ["number", "null"], "minimum": 0, "maximum": 180},
+        "visibility_state": {"type": ["string", "null"], "enum": ["visible", "invisible", "uncertain", "not_applicable", null]},
+        "oriental_occidental": {"type": ["string", "null"], "enum": ["oriental", "occidental", "not_applicable", null]},
+        "formula_ref": {"type": ["string", "null"]},
+        "catalog_object_ref": {"type": ["string", "null"]},
         "status_refs": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true}
       }
     },
@@ -94,9 +102,13 @@
         "cusp_longitude_deg": {"type": "number", "minimum": 0, "exclusiveMaximum": 360},
         "sign": {"type": "string", "minLength": 1},
         "degree_in_sign": {"type": "number", "minimum": 0, "exclusiveMaximum": 30},
+        "span_deg": {"type": "number", "exclusiveMinimum": 0, "maximum": 360},
         "ruler_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "traditional_ruler_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
+        "modern_ruler_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
         "point_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
-        "intercepted_signs": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+        "intercepted_signs": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "repeated_cusp_sign": {"type": ["boolean", "null"]}
       }
     },
     "HouseSet": {
@@ -118,6 +130,8 @@
           }
         },
         "sensitive_points": {"type": "object", "additionalProperties": {"type": "number", "minimum": 0, "exclusiveMaximum": 360}},
+        "armc_deg": {"type": ["number", "null"], "minimum": 0, "exclusiveMaximum": 360},
+        "vertex_deg": {"type": ["number", "null"], "minimum": 0, "exclusiveMaximum": 360},
         "polar_status": {"type": "string", "enum": ["normal", "distorted", "unsupported", "degraded"]},
         "warnings": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Warning"}}
       }
@@ -145,6 +159,70 @@
         "rule_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
       }
     },
+    "ClassicalTableReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["table_id", "version", "source_ids", "content_hash"],
+      "properties": {
+        "table_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "version": {"type": "string", "minLength": 1},
+        "source_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1, "uniqueItems": true},
+        "content_hash": {"$ref": "common.schema.json#/$defs/ContentHash"}
+      }
+    },
+    "EssentialDignityCondition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ruler_id", "sign_id", "degree_in_sign", "role", "is_active_for_sect", "table_ref", "rule_id"],
+      "properties": {
+        "kind": {"type": "string", "enum": ["domicile", "exaltation", "triplicity", "term", "face", "detriment", "fall"]},
+        "ruler_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "sign_id": {"type": "string", "minLength": 1},
+        "degree_in_sign": {"type": "number", "minimum": 0, "exclusiveMaximum": 30},
+        "role": {"type": ["string", "null"], "enum": ["day_ruler", "night_ruler", "participating_ruler", null]},
+        "is_active_for_sect": {"type": ["boolean", "null"]},
+        "table_ref": {"$ref": "#/$defs/ClassicalTableReference"},
+        "rule_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "EssentialStatusFact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status_id", "polarity", "level", "active", "label_key", "role", "table_ref", "rule_id"],
+      "properties": {
+        "status_id": {"type": "string", "enum": ["domicile", "exaltation", "triplicity", "term", "face", "detriment", "fall", "peregrine"]},
+        "polarity": {"type": "string", "enum": ["dignity", "debility", "neutral"]},
+        "level": {"type": "string", "enum": ["major", "minor", "derived"]},
+        "active": {"type": "boolean"},
+        "label_key": {"type": "string", "minLength": 1},
+        "role": {"type": ["string", "null"], "enum": ["day_ruler", "night_ruler", "participating_ruler", null]},
+        "table_ref": {"oneOf": [{"$ref": "#/$defs/ClassicalTableReference"}, {"type": "null"}]},
+        "rule_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "EssentialDignityResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["point_id", "longitude_deg", "sign_id", "degree_in_sign", "sect", "applicable", "unavailable_reason", "profile_id", "dignities", "debilities", "peregrine", "status_facts", "algorithm_card_id", "rule_ids", "source_ids", "excluded_capabilities"],
+      "properties": {
+        "point_id": {"$ref": "common.schema.json#/$defs/Identifier"},
+        "longitude_deg": {"type": "number", "minimum": 0, "exclusiveMaximum": 360},
+        "sign_id": {"type": "string", "minLength": 1},
+        "degree_in_sign": {"type": "number", "minimum": 0, "exclusiveMaximum": 30},
+        "sect": {"type": "string", "enum": ["day", "night"]},
+        "applicable": {"type": "boolean"},
+        "unavailable_reason": {"type": ["string", "null"]},
+        "profile_id": {"type": "string", "minLength": 1},
+        "dignities": {"type": "array", "items": {"$ref": "#/$defs/EssentialDignityCondition"}},
+        "debilities": {"type": "array", "items": {"$ref": "#/$defs/EssentialDignityCondition"}},
+        "peregrine": {"type": ["boolean", "null"]},
+        "status_facts": {"type": "array", "items": {"$ref": "#/$defs/EssentialStatusFact"}},
+        "algorithm_card_id": {"type": "string", "minLength": 1},
+        "rule_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "source_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "excluded_capabilities": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+      }
+    },
     "AstronomicalContext": {
       "type": "object",
       "additionalProperties": false,
@@ -154,9 +232,18 @@
         "julian_day_ut": {"type": "number"},
         "julian_day_tt": {"type": "number"},
         "delta_t_seconds": {"type": "number"},
-        "greenwich_sidereal_time_deg": {"type": "number", "minimum": 0, "exclusiveMaximum": 360},
-        "local_sidereal_time_deg": {"type": "number", "minimum": 0, "exclusiveMaximum": 360},
+        "greenwich_sidereal_time_deg": {"type": ["number", "null"], "minimum": 0, "exclusiveMaximum": 360},
+        "local_sidereal_time_deg": {"type": ["number", "null"], "minimum": 0, "exclusiveMaximum": 360},
         "obliquity_deg": {"type": "number"},
+        "mean_obliquity_deg": {"type": ["number", "null"]},
+        "nutation_longitude_deg": {"type": ["number", "null"]},
+        "nutation_obliquity_deg": {"type": ["number", "null"]},
+        "sunrise_utc": {"type": ["string", "null"], "format": "date-time"},
+        "sunset_utc": {"type": ["string", "null"], "format": "date-time"},
+        "day_night_status": {"type": ["string", "null"], "enum": ["day", "night", "polar_day", "polar_night", "indeterminate", null]},
+        "sun_altitude_deg": {"type": ["number", "null"], "minimum": -90, "maximum": 90},
+        "precession_model": {"type": ["string", "null"]},
+        "nutation_model": {"type": ["string", "null"]},
         "observer": {"$ref": "location.schema.json"},
         "coordinate_settings": {"type": "object", "additionalProperties": true},
         "provenance": {"$ref": "#/$defs/Provenance"},
@@ -179,8 +266,34 @@
         "points": {"type": "array", "items": {"$ref": "#/$defs/Point"}},
         "house_set": {"oneOf": [{"$ref": "#/$defs/HouseSet"}, {"type": "null"}]},
         "aspects": {"type": "array", "items": {"$ref": "#/$defs/Aspect"}},
+        "aspect_evaluation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["selected_point_count", "evaluated_pair_count", "matched_aspect_count", "excluded_pairs"],
+          "properties": {
+            "selected_point_count": {"type": "integer", "minimum": 0},
+            "evaluated_pair_count": {"type": "integer", "minimum": 0},
+            "matched_aspect_count": {"type": "integer", "minimum": 0},
+            "excluded_pairs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["point_a", "point_b", "reason"],
+                "properties": {
+                  "point_a": {"$ref": "common.schema.json#/$defs/Identifier"},
+                  "point_b": {"$ref": "common.schema.json#/$defs/Identifier"},
+                  "reason": {"type": "string", "minLength": 1}
+                }
+              }
+            }
+          }
+        },
         "distributions": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "structure": {"type": "object", "additionalProperties": true},
         "patterns": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+        "classical": {"type": "object", "additionalProperties": true},
+        "essential_dignities": {"type": "array", "items": {"$ref": "#/$defs/EssentialDignityResult"}},
         "dignities": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
         "receptions": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
         "lots": {"type": "array", "items": {"type": "object", "additionalProperties": true}},

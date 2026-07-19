@@ -1,0 +1,237 @@
+schema_version: 1.0.0
+fixture_id: interstellar.contract.competitor_natal_parity.v1
+source:
+  kind: user_supplied_technical_export
+  basename: pasted-text.txt
+  sha256: 3a440830fbacdcc2f055af4cfd0a151bf37322051dea437043a1221698b72a7b
+  observed_line_count: 369
+  permitted_use: requirements_and_field_parity_fixture_only
+  forbidden_uses:
+    - proprietary_formula_source
+    - interpretation_text_source
+    - authority_for_dignity_or_lot_rules
+
+observed_inventory:
+  point_rows: 66
+  house_rows: 12
+  aspect_rows: 262
+  aspect_type_count: 10
+  sign_index_rows: 12
+
+parity_policy:
+  comparison_unit: information_dimensions_and_declared_inventory
+  point_inventory_rule: every_source_row_must_be_accounted_for_without_fabricating_unknown_formulas
+  house_rule: all_12_cusps_and_their_source_fields_must_be_representable
+  aspect_rule: source_geometry_set_must_be_a_subset_of_the_selected_interstellar_profile
+  aspect_count_is_release_floor: false
+  aspect_count_rationale:
+    - matched_count_changes_with_selected_point_set
+    - matched_count_changes_with_aspect_set
+    - matched_count_changes_with_orb_profile_and_overrides
+    - a_larger_count_does_not_prove_more_accurate_geometry
+  aspect_quality_gates:
+    - deterministic_pair_evaluation
+    - no_duplicate_point_pair_and_aspect_type
+    - exact_and_actual_angles
+    - orb_and_orb_ratio
+    - applying_state_and_direction
+    - versioned_aspect_and_orb_profiles
+    - rule_references_and_reproducibility
+  target_executable_source_point_rows: 66
+  current_executable_source_point_rows: 41
+  release_status: blocked
+
+source_input_and_settings:
+  - {source_field: chart_type, source_label: 盘型, status: covered, contract_paths: [ChartDefinition.family, ChartDefinition.technique]}
+  - {source_field: birth_local_time, source_label: 出生时间, status: covered, contract_paths: [TimeSpec.local_value, TimeSpec.precision, TimeSpec.selected_utc]}
+  - {source_field: birth_coordinates, source_label: 经纬度, status: covered, contract_paths: [Location.longitude, Location.latitude]}
+  - {source_field: birth_timezone, source_label: 时区, status: covered, contract_paths: [TimeSpec.timezone_id, TimeSpec.utc_candidates, TimeSpec.selected_utc]}
+  - {source_field: inspection_time, source_label: 行运/查看时间, status: contract_only_not_natal_runtime, contract_paths: [ChartDefinition.reference_time]}
+  - {source_field: inspection_timezone, source_label: 行运时区, status: contract_only_not_natal_runtime, contract_paths: [ChartDefinition.reference_time.TimeSpec.timezone_id]}
+  - {source_field: inspection_location, source_label: 行运地点, status: contract_only_not_natal_runtime, contract_paths: [ChartDefinition.reference_location]}
+  - {source_field: house_system, source_label: 宫制, status: covered, contract_paths: [ChartSettings.house_system]}
+  - {source_field: zodiac, source_label: 黄道, status: covered, contract_paths: [ChartSettings.zodiac]}
+  - {source_field: wheel_mode, source_label: 单双盘, status: generic_render_option_not_typed, contract_paths: [RenderSpec.options]}
+  - {source_field: return_inner_chart, source_label: 返照内盘, status: outside_natal_runtime, contract_paths: [ChartDefinition.family, RenderSpec.options]}
+
+source_astronomical_context:
+  - {source_field: chart_local_time, source_label: 时间, status: covered, contract_paths: [Chart.time_spec, AstronomicalContext.utc]}
+  - {source_field: sunrise, source_label: 日出, status: schema_declared_runtime_null, contract_paths: [AstronomicalContext.sunrise_utc]}
+  - {source_field: sunset, source_label: 日落, status: schema_declared_runtime_null, contract_paths: [AstronomicalContext.sunset_utc]}
+
+interstellar_astronomical_additions:
+  - julian_day_ut
+  - julian_day_tt
+  - delta_t_seconds
+  - greenwich_sidereal_time_deg
+  - local_sidereal_time_deg
+  - obliquity_deg
+  - mean_obliquity_deg
+  - nutation_longitude_deg
+  - nutation_obliquity_deg
+  - day_night_status
+  - sun_altitude_deg
+  - precession_model
+  - nutation_model
+  - observer
+  - coordinate_settings
+  - provenance
+  - uncertainty
+
+sign_index:
+  - {index: 1, source_label: 白羊, interstellar_id: aries}
+  - {index: 2, source_label: 金牛, interstellar_id: taurus}
+  - {index: 3, source_label: 双子, interstellar_id: gemini}
+  - {index: 4, source_label: 巨蟹, interstellar_id: cancer}
+  - {index: 5, source_label: 狮子, interstellar_id: leo}
+  - {index: 6, source_label: 处女, interstellar_id: virgo}
+  - {index: 7, source_label: 天秤, interstellar_id: libra}
+  - {index: 8, source_label: 天蝎, interstellar_id: scorpio}
+  - {index: 9, source_label: 射手, interstellar_id: sagittarius}
+  - {index: 10, source_label: 摩羯, interstellar_id: capricorn}
+  - {index: 11, source_label: 水瓶, interstellar_id: aquarius}
+  - {index: 12, source_label: 双鱼, interstellar_id: pisces}
+
+point_inventory:
+  - {ordinal: 1, source_label: 太阳, category: major, coverage_status: covered, interstellar_ids: [sun]}
+  - {ordinal: 2, source_label: 月亮, category: major, coverage_status: covered, interstellar_ids: [moon]}
+  - {ordinal: 3, source_label: 水星, category: major, coverage_status: covered, interstellar_ids: [mercury]}
+  - {ordinal: 4, source_label: 金星, category: major, coverage_status: covered, interstellar_ids: [venus]}
+  - {ordinal: 5, source_label: 火星, category: major, coverage_status: covered, interstellar_ids: [mars]}
+  - {ordinal: 6, source_label: 木星, category: major, coverage_status: covered, interstellar_ids: [jupiter]}
+  - {ordinal: 7, source_label: 土星, category: major, coverage_status: covered, interstellar_ids: [saturn]}
+  - {ordinal: 8, source_label: 天王星, category: major, coverage_status: covered, interstellar_ids: [uranus]}
+  - {ordinal: 9, source_label: 海王星, category: major, coverage_status: covered, interstellar_ids: [neptune]}
+  - {ordinal: 10, source_label: 冥王星, category: major, coverage_status: covered, interstellar_ids: [pluto]}
+  - {ordinal: 11, source_label: 上升点, category: angle, coverage_status: covered, interstellar_ids: [asc]}
+  - {ordinal: 12, source_label: 天底, category: angle, coverage_status: covered, interstellar_ids: [ic]}
+  - {ordinal: 13, source_label: 下降点, category: angle, coverage_status: covered, interstellar_ids: [dsc]}
+  - {ordinal: 14, source_label: 天顶, category: angle, coverage_status: covered, interstellar_ids: [mc]}
+  - {ordinal: 15, source_label: 北交点, category: node, coverage_status: covered_parameterized, interstellar_ids: [true_north_node, mean_north_node], variant_parameter: node_type}
+  - {ordinal: 16, source_label: 南交点, category: node, coverage_status: covered_parameterized, interstellar_ids: [true_south_node, mean_south_node], variant_parameter: node_type}
+  - {ordinal: 17, source_label: 宿命点, category: sensitive_point, coverage_status: covered, interstellar_ids: [vertex]}
+  - {ordinal: 18, source_label: 东方点, category: sensitive_point, coverage_status: covered, interstellar_ids: [east_point]}
+  - {ordinal: 19, source_label: 福点, category: lot, coverage_status: covered, interstellar_ids: [fortune]}
+  - {ordinal: 20, source_label: 精神点, category: lot, coverage_status: covered, interstellar_ids: [spirit]}
+  - {ordinal: 21, source_label: 基础点, category: lot, coverage_status: covered, interstellar_ids: [lot_basis]}
+  - {ordinal: 22, source_label: 擢升点, category: lot, coverage_status: covered, interstellar_ids: [lot_exaltation]}
+  - {ordinal: 23, source_label: 爱神点, category: lot, coverage_status: covered, interstellar_ids: [lot_eros]}
+  - {ordinal: 24, source_label: 必然点, category: lot, coverage_status: covered, interstellar_ids: [lot_necessity]}
+  - {ordinal: 25, source_label: 勇气点, category: lot, coverage_status: covered, interstellar_ids: [lot_courage]}
+  - {ordinal: 26, source_label: 胜利点, category: lot, coverage_status: covered, interstellar_ids: [lot_victory]}
+  - {ordinal: 27, source_label: 复仇点, category: lot, coverage_status: covered, interstellar_ids: [lot_nemesis]}
+  - {ordinal: 28, source_label: 商品点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: identity_formula_and_translation_unverified, independent_source_required: true}
+  - {ordinal: 29, source_label: 财富点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: formula_variant_not_locked, independent_source_required: true}
+  - {ordinal: 30, source_label: 婚姻点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: formula_variant_not_locked, independent_source_required: true}
+  - {ordinal: 31, source_label: 男婚点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: formula_and_sect_rule_unverified, independent_source_required: true}
+  - {ordinal: 32, source_label: 女婚点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: formula_and_sect_rule_unverified, independent_source_required: true}
+  - {ordinal: 33, source_label: 离婚点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: formula_and_source_unverified, independent_source_required: true}
+  - {ordinal: 34, source_label: 儿子点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: formula_and_source_unverified, independent_source_required: true}
+  - {ordinal: 35, source_label: 女儿点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: formula_and_source_unverified, independent_source_required: true}
+  - {ordinal: 36, source_label: 父亲点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: formula_and_source_unverified, independent_source_required: true}
+  - {ordinal: 37, source_label: 母亲点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: formula_and_source_unverified, independent_source_required: true}
+  - {ordinal: 38, source_label: 信仰点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: formula_and_source_unverified, independent_source_required: true}
+  - {ordinal: 39, source_label: 兄弟点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: formula_and_source_unverified, independent_source_required: true}
+  - {ordinal: 40, source_label: 爱情点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: identity_and_formula_unverified_against_eros_lot, independent_source_required: true}
+  - {ordinal: 41, source_label: 继承点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: formula_and_source_unverified, independent_source_required: true}
+  - {ordinal: 42, source_label: 疾病点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: formula_and_source_unverified, independent_source_required: true}
+  - {ordinal: 43, source_label: 背叛点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: formula_and_source_unverified, independent_source_required: true}
+  - {ordinal: 44, source_label: 游戏点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: formula_and_source_unverified, independent_source_required: true}
+  - {ordinal: 45, source_label: 危险点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: formula_source_and_safety_review_required, independent_source_required: true}
+  - {ordinal: 46, source_label: 死亡点, category: lot, coverage_status: research_blocked, interstellar_ids: [], gap_reason: formula_source_and_high_risk_safety_review_required, independent_source_required: true}
+  - {ordinal: 47, source_label: 莉莉丝, category: lunar_point, coverage_status: covered_parameterized, interstellar_ids: [mean_lilith, true_lilith], variant_parameter: lilith_definition}
+  - {ordinal: 48, source_label: 紫炁, category: custom_point, coverage_status: research_blocked, interstellar_ids: [], gap_reason: astronomical_identity_and_formula_unverified, independent_source_required: true}
+  - {ordinal: 49, source_label: 朔望点, category: lunar_point, coverage_status: research_blocked, interstellar_ids: [], gap_reason: syzygy_definition_and_reference_lunation_not_implemented, independent_source_required: true}
+  - {ordinal: 50, source_label: 凯龙星, category: centaur, coverage_status: covered, interstellar_ids: [chiron]}
+  - {ordinal: 51, source_label: 谷神星, category: asteroid, coverage_status: covered, interstellar_ids: [ceres]}
+  - {ordinal: 52, source_label: 智神星, category: asteroid, coverage_status: covered, interstellar_ids: [pallas]}
+  - {ordinal: 53, source_label: 婚神星, category: asteroid, coverage_status: covered, interstellar_ids: [juno]}
+  - {ordinal: 54, source_label: 灶神星, category: asteroid, coverage_status: covered, interstellar_ids: [vesta]}
+  - {ordinal: 55, source_label: 丘比特, category: hypothetical, coverage_status: covered, interstellar_ids: [cupido]}
+  - {ordinal: 56, source_label: 哈得斯, category: hypothetical, coverage_status: covered, interstellar_ids: [hades]}
+  - {ordinal: 57, source_label: 宙斯, category: hypothetical, coverage_status: covered, interstellar_ids: [zeus]}
+  - {ordinal: 58, source_label: 克洛诺斯, category: hypothetical, coverage_status: covered, interstellar_ids: [kronos]}
+  - {ordinal: 59, source_label: 阿波罗, category: hypothetical, coverage_status: covered, interstellar_ids: [apollon]}
+  - {ordinal: 60, source_label: 阿得门图斯, category: hypothetical, coverage_status: covered, interstellar_ids: [admetos]}
+  - {ordinal: 61, source_label: 弗卡奴斯, category: hypothetical, coverage_status: covered, interstellar_ids: [vulkanus]}
+  - {ordinal: 62, source_label: 波塞冬, category: hypothetical, coverage_status: covered, interstellar_ids: [poseidon]}
+  - {ordinal: 63, source_label: 人龙星, category: centaur, coverage_status: research_blocked, interstellar_ids: [], gap_reason: minor_body_not_in_runtime_registry, independent_source_required: true}
+  - {ordinal: 64, source_label: 爱神星, category: asteroid, coverage_status: research_blocked, interstellar_ids: [], gap_reason: minor_body_not_in_runtime_registry_and_distinct_from_eros_lot, independent_source_required: true}
+  - {ordinal: 65, source_label: 灵神星, category: asteroid, coverage_status: research_blocked, interstellar_ids: [], gap_reason: minor_body_not_in_runtime_registry, independent_source_required: true}
+  - {ordinal: 66, source_label: 创神星, category: dwarf_planet, coverage_status: research_blocked, interstellar_ids: [], gap_reason: minor_body_not_in_runtime_registry, independent_source_required: true}
+
+interstellar_professional_profile:
+  calculation_profile_id: professional.natal.v1
+  point_set_id: points.professional.default.v1
+  materialized_point_count: 47
+  source_rows_covered: 41
+  source_rows_declared_not_materialized: 0
+  source_rows_research_blocked: 25
+  variant_and_additional_materialized_ids:
+    - mean_north_node
+    - mean_south_node
+    - true_lilith
+    - anti_vertex
+    - west_point
+    - lunar_perigee
+
+house_contract:
+  source_rows: 12
+  source_fields: [number, sign, degree_in_sign]
+  interstellar_required_fields: [number, cusp_longitude_deg, sign, degree_in_sign, ruler_ids, point_ids]
+  interstellar_additions: [span_deg, traditional_ruler_ids, modern_ruler_ids, intercepted_signs, repeated_cusp_sign]
+
+aspect_observation:
+  source_rows: 262
+  source_fields: [point_a, type, point_b, orb_deg]
+  types:
+    - {source_label: 六合, interstellar_id: sextile, angle_deg: 60, observed_rows: 45}
+    - {source_label: 刑, interstellar_id: square, angle_deg: 90, observed_rows: 44}
+    - {source_label: 拱, interstellar_id: trine, angle_deg: 120, observed_rows: 39}
+    - {source_label: 五分, interstellar_id: quintile, angle_deg: 72, observed_rows: 26}
+    - {source_label: 合, interstellar_id: conjunction, angle_deg: 0, observed_rows: 20}
+    - {source_label: 辅八分, interstellar_id: semioctile, angle_deg: 22.5, observed_rows: 19}
+    - {source_label: 十二分, interstellar_id: semisextile, angle_deg: 30, observed_rows: 19}
+    - {source_label: 辅十二分, interstellar_id: semiduodecile, angle_deg: 15, observed_rows: 17}
+    - {source_label: 八分, interstellar_id: semisquare, angle_deg: 45, observed_rows: 17}
+    - {source_label: 冲, interstellar_id: opposition, angle_deg: 180, observed_rows: 16}
+  interstellar_profile_id: official.aspects.professional_natal.v1
+  interstellar_required_fields:
+    - aspect_id
+    - point_a
+    - point_b
+    - context
+    - type
+    - exact_angle_deg
+    - actual_angle_deg
+    - orb_deg
+    - orb_ratio
+    - applying_state
+    - direction
+    - strength
+    - exact_hits
+    - rule_refs
+
+schema_assertions:
+  chart_definition: [family, technique, reference_time, reference_location]
+  chart_settings: [zodiac, house_system, node_type, aspect_set_id, orb_profile_id, point_set_ids, included_points, minor_body_ids, lot_formula_ids, hypothetical_point_ids, included_aspect_ids, orb_overrides]
+  time_spec: [local_value, precision, timezone_id, utc_candidates, selected_utc, confidence, uncertainty_seconds]
+  location: [latitude, longitude, timezone_id, source, accuracy_m]
+  point: [point_id, kind, position, sign, degree_in_sign, house, retrograde, formula_ref, catalog_object_ref]
+  house: [number, cusp_longitude_deg, sign, degree_in_sign, ruler_ids, point_ids]
+  aspect: [aspect_id, point_a, point_b, context, type, exact_angle_deg, actual_angle_deg, orb_deg, orb_ratio, applying_state, direction, strength, exact_hits, rule_refs]
+  astronomical_context: [utc, julian_day_ut, julian_day_tt, delta_t_seconds, sunrise_utc, sunset_utc, day_night_status, observer, coordinate_settings, provenance, uncertainty]
+
+gap_gate:
+  status: blocked
+  blocking_counts:
+    declared_not_materialized_points: 0
+    research_blocked_points: 25
+    runtime_null_astronomical_fields: 2
+    generic_or_out_of_scope_setting_fields: 5
+  ready_when:
+    - all_66_source_point_rows_are_executable_or_have_an_approved_independent_source_waiver
+    - sunrise_and_sunset_are_materialized_or_explicitly_removed_from_the_product_parity_claim
+    - wheel_mode_is_typed_in_the_render_contract
+    - all_field_dimension_contract_tests_pass
+    - aspect_quality_gates_pass_for_the_selected_point_aspect_and_orb_profiles

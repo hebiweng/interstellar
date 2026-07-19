@@ -1,0 +1,437 @@
+schema_version: 1.0.0
+contract_id: interstellar.professional_workspace.v1
+title_zh: Interstellar 专业工作台、分析选择与参数契约
+authoritative_for:
+  - primary_navigation
+  - analysis_entry_presentation
+  - subject_library_and_inline_subject_behavior
+  - analysis_system_exposure
+  - professional_chart_workspace
+  - calculation_and_render_parameter_boundaries
+  - calculated_result_disclosure
+  - contextual_item_interpretation
+  - preset_persistence
+  - result_and_report_retention
+
+audiences:
+  professional_user:
+    surfaces: [workspace, subjects, analysis, calculations, reports, chart_library, method_library]
+    technical_ids_default_visibility: collapsed
+  developer_or_operator:
+    surfaces: [api, capability_registry, dataset_licenses, schema_versions, system_health]
+    navigation_location: settings.developer
+  result_reader:
+    technical_information_scope: only_versions_rules_sources_confidence_and_evidence_used_by_current_result
+
+information_architecture:
+  single_primary_action:
+    id: action.new_analysis
+    label_zh: 新建分析
+    rule: all_analysis_ctas_invoke_the_same_builder_with_distinct_prefilled_context
+  top_navigation:
+    - workspace
+    - subjects
+    - action.new_analysis
+    - calculations
+    - reports
+    - chart_library
+    - method_library
+    - account
+  developer_navigation:
+    parent: account.settings.developer
+    items: [api, capability_registry, dataset_and_license_registry, schema_registry, system_status]
+  forbidden_duplicate_primary_labels:
+    - 开始新的分析
+    - 打开统一分析中心
+    - 新增分析
+  left_navigation:
+    purpose: select_subject_or_context_not_select_analysis_capability
+    groups: [my_profile, people, relationships, projects_and_events, organizations, recent]
+  global_vs_result_scope:
+    chart_library: all_registered_views_and_requirements
+    result_charts: only_views_available_or_reachable_from_current_snapshot
+    method_library: user_facing_methods_models_parameters_and_limits
+    result_evidence: only_current_result_provenance_and_evidence
+
+analysis_center:
+  selection_catalogs:
+    - id: entry.technique
+      label_zh: 计算技法
+      user_question: 要直接计算哪种盘或技法
+    - id: entry.topic_model
+      label_zh: 专题模型
+      user_question: 要分析哪个生活或研究主题
+    - id: entry.intent
+      label_zh: 分析目的
+      user_question: 想解决什么现实问题
+  contextual_launchers:
+    - id: entry.object_context
+      visible_label_policy: dynamic_by_subject_kind
+      labels:
+        person: 分析当前人物
+        relationship: 分析当前关系
+        project: 分析当前项目
+        event: 分析当前事件
+        organization: 分析当前组织
+        question: 分析当前问题
+      behavior: prefill_subject_version_and_show_valid_object_actions
+    - id: entry.personal_dashboard
+      label_zh: 从个人仪表盘开始
+      behavior: prefill_primary_self_and_current_time
+    - id: entry.context_shortcut
+      label_zh: 从关系、项目、时间或地点开始
+      behavior: prefill_subject_roles_time_range_or_target_locations
+  presentation_rule: contextual_launchers_are_not_rendered_as_peer_catalog_tabs
+  stable_context_fields:
+    - entry_point_id
+    - source_surface
+    - subject_roles
+    - subject_version_ids
+    - time_context
+    - target_locations
+    - requested_view_ids
+  builder_steps:
+    - select_technique_topic_or_intent
+    - select_or_add_subjects_and_context
+    - confirm_analysis_system_rule_pack_and_parameters
+    - select_optional_calculations_views_reports_and_exports
+    - inspect_preflight_and_run
+  item_card_contract:
+    primary: user_facing_name
+    secondary: concise_purpose_and_applicable_questions
+    metadata: [required_inputs, primary_outputs, exclusions, maturity]
+    technical_id: collapsed_or_expert_mode
+    forbidden_primary_secondary_content: raw_internal_id_only
+
+model_exposure:
+  analysis_model_product_label_zh: 分析体系
+  user_selectable_official_systems:
+    - natal.modern.v1
+    - natal.classical.v1
+    - natal.hellenistic.v1
+    - natal.integrated.v1
+  default_behavior:
+    technique_entry: resolve_recommended_system_from_official_preset_user_may_change
+    topic_entry: topic_core_selects_required_base_models_only_declared_overrides_allowed
+    intent_entry: resolver_selects_topic_and_base_models_then_user_reviews
+  placement: builder_step_3
+  not_a_peer_catalog_rule: analysis_models_are_not_shown_beside_topic_models_as_equivalent_products
+  expert_mode:
+    may_select_compatible_analysis_system: true
+    may_clone_to_custom_model_spec: true
+    incompatible_systems_visible_with_reason: true
+    changes_create_new_recipe: true
+
+subject_workspace:
+  personal_workspace:
+    primary_self:
+      maximum_active_profiles: 1
+      optional: true
+    saved_subject_roles: [self, other]
+    relationship_to_owner:
+      - partner
+      - parent
+      - child
+      - sibling
+      - relative
+      - friend
+      - colleague
+      - client
+      - other
+    sections: [my_profile, people_library, relationship_library, calculation_history, saved_reports, privacy_and_data]
+  analysis_subject_choices:
+    - saved_subject_version
+    - inline_temporary_subject
+  inline_subject:
+    save_to_library_default: false
+    logged_in_user_may_keep_temporary: true
+    result_action: save_subject_to_library
+    promotion_behavior:
+      - create_subject_and_immutable_subject_version
+      - match_inline_input_by_canonical_content_hash
+      - create_non_mutating_snapshot_subject_link
+      - never_rewrite_existing_calculation_snapshot
+    save_fields: [profile_role, relationship_to_owner, display_name, labels, source_and_consent_note]
+  privacy:
+    default_visibility: private_workspace_only
+    public_listing: forbidden
+    share_requires_explicit_revocable_expiring_link: true
+
+professional_chart_workspace:
+  goal: show_the_full_professional_chart_inventory_without_computing_everything_on_open
+  primary_tabs:
+    - natal
+    - current_sky
+    - natal_transit
+    - secondary_progression
+    - solar_arc
+    - returns
+    - relationships
+    - classical_and_advanced
+    - more
+  wheel_modes: [single, bi_wheel, tri_wheel, quad_wheel, custom_multi_wheel]
+  companion_views: [positions, houses, aspects, aspect_grid, dignities, lots, midpoints, patterns, timelines]
+  calculated_result_disclosure:
+    rule: every_materialized_result_item_is_reachable_in_a_domain_view_or_accessible_data_table
+    default_expansion: curated_primary_items_only
+    complete_access: filters_search_pagination_or_virtual_scrolling_may_be_used_but_must_not_omit_items
+    output_manifest_must_map_every_result_collection_to_at_least_one_view_or_export: true
+    chart_companion_requirements:
+      natal: [wheel, positions, houses, natal_aspects, aspect_grid]
+      current_sky: [wheel, positions, sky_aspects, ingress_and_station_events]
+      natal_transit: [bi_wheel, natal_positions, transit_positions, cross_chart_aspects, aspect_grid, exact_hits_and_windows]
+      secondary_progression: [bi_wheel, progressed_positions, progressed_to_natal_aspects, progressed_phase_and_events]
+      returns: [bi_wheel, return_positions, return_aspects, return_to_natal_aspects, exact_return_metadata]
+      relationships: [bi_wheel, both_position_sets, directional_cross_aspects, both_house_overlays, aspect_grid]
+    computed_but_hidden_without_a_reachable_view_or_export: forbidden
+  visible_state_for_each_view:
+    - generated
+    - renderable_from_snapshot
+    - calculation_required
+    - additional_input_required
+    - unavailable
+  computation_policy:
+    sample_first_open:
+      eager: [cached_sample_modern_natal_summary]
+      forbidden: [transits, returns, relationships, maps, reports]
+    saved_or_confirmed_person:
+      eager:
+        - normalized_time_and_location
+        - natal_core_points_houses_aspects
+        - natal_standard_snapshot
+      shared_cache:
+        - current_sky_snapshot
+      on_demand:
+        - natal_transit
+        - secondary_progression
+        - solar_arc
+        - returns
+        - annual_and_long_cycle
+      additional_context_required:
+        relationship_views: secondary_person
+        relocation_views: target_location
+        project_views: explicit_event_anchor
+    navigation_never_implies_compute_all: true
+    background_prefetch_requires_user_enabled_preset: true
+    every_non_eager_run_requires_recipe_or_declared_prefetch_recipe: true
+  standard_workspace_presets:
+    - id: workspace.natal_core.v1
+      eager: [wheel.natal, table.planet_positions, table.houses, grid.aspects]
+    - id: workspace.current_cycle.v1
+      on_demand: [wheel.current_sky, wheel.bi_natal_transit, table.active_triggers, timeline.transit_gantt]
+    - id: workspace.predictive_research.v1
+      on_demand: [wheel.bi_natal_secondary, wheel.bi_natal_solar_arc, wheel.bi_natal_solar_return, timeline.multi_technique]
+
+professional_parameters:
+  parameter_change_semantics:
+    calculation_parameter: creates_new_analysis_recipe_and_snapshot_or_reuses_exact_fingerprint
+    render_parameter: creates_new_render_spec_only
+    layout_preference: changes_workspace_layout_only
+  quick_calculation_settings:
+    - analysis_system_id
+    - zodiac
+    - house_system
+    - aspect_set_id
+    - orb_profile_id
+    - point_set_ids
+    - wheel_mode
+  advanced_calculation_settings:
+    zodiac:
+      values: [tropical, sidereal, draconic]
+      dependent_fields: [ayanamsa]
+    ayanamsa:
+      values: [lahiri, fagan_bradley, raman, krishnamurti, yukteshwar, true_chitrapaksha, true_revati, de_luce, custom]
+    center: [geocentric, heliocentric, topocentric]
+    coordinate_frame: [ecliptic, equatorial, horizontal]
+    node_type: [true, mean, both]
+    house_systems:
+      - placidus
+      - whole_sign
+      - equal
+      - equal_mc
+      - koch
+      - porphyry
+      - regiomontanus
+      - campanus
+      - alcabitius
+      - topocentric
+      - morinus
+      - vehlow
+      - meridian
+      - horizontal
+      - krusinski
+      - gauquelin
+      - apc
+      - axial_rotation
+    point_sets:
+      core_luminaries_and_planets: [sun, moon, mercury, venus, mars, jupiter, saturn, uranus, neptune, pluto]
+      classical_seven: [sun, moon, mercury, venus, mars, jupiter, saturn]
+      lunar_nodes_and_points: configurable
+      angles_and_sensitive_points: configurable
+      common_minor_bodies: configurable
+      fixed_stars: configurable_catalog
+      arbitrary_mpc_minor_bodies: on_demand_by_id
+      uranian_tnp_and_hypothetical: experimental_configurable_registry
+      custom_points: formula_or_registered_point
+    lots_sets:
+      core: [fortune, spirit]
+      common: [fortune, spirit, eros, necessity, career, wealth, marriage]
+      extended: official_versioned_catalog
+      custom: explicit_formula_selection
+      product_rule: select_named_lots_not_an_opaque_number_only
+    aspect_settings:
+      aspect_set_id: required
+      included_aspect_ids: configurable
+      calculation_enabled_by_aspect: configurable
+      applying_separating: configurable
+      cross_sign: configurable
+      declination_parallel_contraparallel: configurable
+      orb_profile_id: required
+      orb_override_precedence:
+        - exact_point_pair_override
+        - point_class_override
+        - aspect_override
+        - chart_context_override
+        - orb_profile_default
+      custom_orb_profile_is_versioned: true
+    classical_settings:
+      - rulership_system
+      - dignity_table
+      - triplicity_table
+      - terms_table
+      - decan_or_face_table
+      - sect_rules
+      - lot_formula_set
+    time_and_relationship_settings:
+      - time_range
+      - moving_points
+      - exact_passes
+      - return_location_policy
+      - progression_variant
+      - solar_arc_key
+      - comparison_directionality
+  render_settings:
+    - visible_layers
+    - visible_point_ids
+    - visible_aspect_ids
+    - aspect_line_filters
+    - labels_and_degrees
+    - color_theme
+    - wheel_mode
+    - ring_order
+    - accessibility
+    - export_size_and_format
+  calculation_render_boundary_examples:
+    hide_existing_aspect_line: render_only
+    remove_aspect_from_calculation_and_tables: calculation
+    hide_minor_body_label: render_only
+    add_uncomputed_minor_body: calculation
+  preset_persistence:
+    official_presets_immutable: true
+    user_presets: [calculation_preset, render_preset, workspace_view_preset]
+    actions: [save_as, duplicate, rename, archive, restore_defaults, export, import]
+    saved_preset_changes_future_runs_only: true
+
+contextual_item_interpretation:
+  purpose: explain_a_selected_calculated_item_in_its_own_context_without_requiring_a_full_report
+  relationship_to_reports:
+    item_interpretation: local_atomic_or_small_configuration_explanation
+    report_center: curated_deduplicated_cross_item_synthesis_only
+    full_report_is_not_required_to_read_an_item_explanation: true
+    item_interpretation_does_not_create_new_astronomical_facts: true
+  supported_item_kinds:
+    - point_placement
+    - house_cusp
+    - natal_aspect
+    - cross_chart_aspect
+    - transit_hit
+    - ingress
+    - station
+    - return_hit
+    - dignity
+    - reception
+    - lot
+    - midpoint
+    - pattern
+    - timing_period
+  interpretation_layers:
+    - id: fact
+      label_zh: 事实
+      content: exact_snapshot_fields_units_null_semantics_and_time_window
+    - id: basic_modern
+      label_zh: 基础含义
+      content: planet_function_plus_sign_expression_plus_house_domain_plus_motion_and_aspect_context
+    - id: classical
+      label_zh: 古典状态
+      content: sect_essential_and_accidental_dignity_rulership_reception_visibility_and_condition
+    - id: related_context
+      label_zh: 相位与上下文
+      content: connected_points_applying_separating_exact_passes_counter_context_and_related_views
+    - id: provenance
+      label_zh: 证据与来源
+      content: raw_fact_paths_rule_pack_template_source_version_maturity_and_warnings
+  placement_composition:
+    atomic_inputs: [point_identity, sign, degree, house, motion_state]
+    optional_context: [aspects, rulership, dignity, reception, sect, solar_relationship, visibility, patterns]
+    modern_and_classical_must_remain_separate: true
+    synthesis_requires_an_explicit_rule: true
+    no_blind_text_concatenation: true
+  motion_semantics:
+    allowed: [direct, retrograde, stationary_retrograde, stationary_direct, indeterminate, not_applicable]
+    not_applicable_examples: [sun, moon, angles, lots, calculated_hypothetical_points]
+    rule: never_present_not_applicable_as_a_meaningful_direct_motion_interpretation
+  interaction:
+    triggers: [wheel_point, wheel_aspect_line, table_row, grid_cell, timeline_event, explicit_interpret_action]
+    desktop_surface: inline_row_expansion_or_context_preserving_right_inspector
+    tablet_mobile_surface: context_preserving_bottom_sheet_or_detail_route
+    selection_must_remain_visible: true
+    default_content: fact_then_one_or_two_sentence_interpretation
+    expand_actions: [show_modern_layer, show_classical_layer, show_related_context, show_provenance]
+    missing_interpretation_behavior: show_fact_and_explicitly_state_interpretation_not_published
+    forbidden_fallback: generic_unversioned_generated_text
+  transit_aspect_detail_required_fields:
+    - moving_point
+    - natal_or_target_point
+    - aspect
+    - actual_angle
+    - orb
+    - applying_or_separating
+    - orb_entry
+    - exact_passes
+    - orb_exit
+    - repeated_hit_sequence
+    - source_and_target_chart_roles
+  unknown_time_behavior:
+    house_and_angle_interpretation: disabled_or_candidate_specific
+    sign_and_date_stable_facts: may_remain_available
+    warning_must_be_adjacent: true
+  publication_gate:
+    required: [finding_rule_or_configuration_rule, localized_template, source_record, version, maturity, regression_fixture]
+    missing_gate_result: facts_remain_available_interpretation_is_unpublished
+
+retention:
+  anonymous_sync: no_server_business_persistence
+  anonymous_async_max_ttl_hours: 24
+  account_subjects_snapshots_and_report_documents: until_user_or_account_deletion
+  regenerable_render_and_report_artifact_cache_days: 30
+  runtime_metadata_days: 30
+  signed_download_url_minutes: 5
+  deletion:
+    choices: [delete_subject_only_keep_historical_snapshots, delete_subject_and_related_private_results]
+    physical_cleanup_max_days: 30
+
+alpha_acceptance:
+  - one_primary_new_analysis_action_and_no_duplicate_peer_ctas
+  - three_selection_catalogs_and_three_contextual_launchers_are_explained_and_distinct
+  - item_cards_use_purpose_text_not_raw_internal_id_as_primary_secondary_copy
+  - analysis_system_is_reviewable_in_step_3_and_compatible_overrides_change_recipe_hash
+  - full_chart_tab_inventory_is_visible_with_explicit_generated_or_required_state
+  - every_calculated_alpha_result_collection_is_reachable_in_a_view_table_or_export
+  - natal_and_transit_aspect_tables_show_all_computed_items_with_filters_and_virtual_scrolling
+  - clicking_a_placement_or_aspect_opens_contextual_fact_and_interpretation_without_generating_a_report
+  - modern_and_classical_layers_are_labeled_separately_and_missing_layers_are_explicit
+  - natal_core_is_eager_only_after_subject_confirmation_and_advanced_charts_are_on_demand
+  - calculation_and_render_parameter_changes_have_distinct_hash_and_recompute_behavior
+  - primary_self_saved_other_inline_temporary_and_promote_to_library_flows_pass
+  - two_accounts_cannot_list_read_export_or_share_each_others_private_resources
+  - snapshot_report_and_regenerable_artifact_retention_behave_as_declared

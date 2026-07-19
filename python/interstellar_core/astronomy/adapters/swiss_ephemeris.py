@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import math
 import threading
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
@@ -40,7 +41,18 @@ SIGN_IDS: tuple[str, ...] = (
 class BodyDefinition:
     point_id: str
     swiss_id: int
-    kind: Literal["luminary", "planet", "dwarf_planet"]
+    kind: Literal[
+        "luminary",
+        "planet",
+        "dwarf_planet",
+        "asteroid",
+        "centaur",
+        "node",
+        "lunar_point",
+        "hypothetical",
+    ]
+    catalog_object_ref: str | None = None
+    formula_ref: str = "ephemeris.swiss.geocentric_apparent.v1"
 
 
 BODY_DEFINITIONS: tuple[BodyDefinition, ...] = (
@@ -54,6 +66,100 @@ BODY_DEFINITIONS: tuple[BodyDefinition, ...] = (
     BodyDefinition("uranus", swe.URANUS, "planet"),
     BodyDefinition("neptune", swe.NEPTUNE, "planet"),
     BodyDefinition("pluto", swe.PLUTO, "dwarf_planet"),
+)
+
+# Directly calculable Swiss objects. Opposite nodes and all chart-dependent
+# points remain explicit derived facts in the chart pipeline.
+EXTENDED_BODY_DEFINITIONS: tuple[BodyDefinition, ...] = (
+    BodyDefinition("true_north_node", swe.TRUE_NODE, "node"),
+    BodyDefinition("mean_north_node", swe.MEAN_NODE, "node"),
+    BodyDefinition("mean_lilith", swe.MEAN_APOG, "lunar_point"),
+    BodyDefinition("true_lilith", swe.OSCU_APOG, "lunar_point"),
+    BodyDefinition("lunar_perigee", swe.INTP_PERG, "lunar_point"),
+    BodyDefinition("chiron", swe.CHIRON, "centaur", "mpc:2060"),
+    BodyDefinition("ceres", swe.CERES, "asteroid", "mpc:1"),
+    BodyDefinition("pallas", swe.PALLAS, "asteroid", "mpc:2"),
+    BodyDefinition("juno", swe.JUNO, "asteroid", "mpc:3"),
+    BodyDefinition("vesta", swe.VESTA, "asteroid", "mpc:4"),
+)
+
+# Hamburg/Trans-Neptunian points use Swiss Ephemeris' published built-in
+# hypothetical orbital elements (h40-h47). They are not physical objects and
+# therefore remain explicitly typed and marked experimental in the natal point
+# registry.  They are nevertheless deterministic Swiss calculations and do not
+# require asteroid ephemeris files.
+HAMBURG_TNP_DEFINITIONS: tuple[BodyDefinition, ...] = (
+    BodyDefinition(
+        "cupido",
+        swe.CUPIDO,
+        "hypothetical",
+        "swiss:h40",
+        "ephemeris.swiss.hypothetical_orbit.v1",
+    ),
+    BodyDefinition(
+        "hades",
+        swe.HADES,
+        "hypothetical",
+        "swiss:h41",
+        "ephemeris.swiss.hypothetical_orbit.v1",
+    ),
+    BodyDefinition(
+        "zeus",
+        swe.ZEUS,
+        "hypothetical",
+        "swiss:h42",
+        "ephemeris.swiss.hypothetical_orbit.v1",
+    ),
+    BodyDefinition(
+        "kronos",
+        swe.KRONOS,
+        "hypothetical",
+        "swiss:h43",
+        "ephemeris.swiss.hypothetical_orbit.v1",
+    ),
+    BodyDefinition(
+        "apollon",
+        swe.APOLLON,
+        "hypothetical",
+        "swiss:h44",
+        "ephemeris.swiss.hypothetical_orbit.v1",
+    ),
+    BodyDefinition(
+        "admetos",
+        swe.ADMETOS,
+        "hypothetical",
+        "swiss:h45",
+        "ephemeris.swiss.hypothetical_orbit.v1",
+    ),
+    BodyDefinition(
+        "vulkanus",
+        swe.VULKANUS,
+        "hypothetical",
+        "swiss:h46",
+        "ephemeris.swiss.hypothetical_orbit.v1",
+    ),
+    BodyDefinition(
+        "poseidon",
+        swe.POSEIDON,
+        "hypothetical",
+        "swiss:h47",
+        "ephemeris.swiss.hypothetical_orbit.v1",
+    ),
+)
+HAMBURG_TNP_POINT_IDS: tuple[str, ...] = tuple(
+    definition.point_id for definition in HAMBURG_TNP_DEFINITIONS
+)
+DIRECT_POINT_DEFINITIONS: tuple[BodyDefinition, ...] = (
+    *BODY_DEFINITIONS,
+    *EXTENDED_BODY_DEFINITIONS,
+    *HAMBURG_TNP_DEFINITIONS,
+)
+DIRECT_POINT_REGISTRY: dict[str, BodyDefinition] = {
+    definition.point_id: definition for definition in DIRECT_POINT_DEFINITIONS
+}
+CORE_POINT_IDS: tuple[str, ...] = tuple(item.point_id for item in BODY_DEFINITIONS)
+PROFESSIONAL_DIRECT_POINT_IDS: tuple[str, ...] = tuple(
+    item.point_id for item in DIRECT_POINT_DEFINITIONS
 )
 
 
@@ -128,6 +234,11 @@ class EphemerisResult:
     julian_day_tt: float
     delta_t_seconds: float
     utc_instant: str | None
+    true_obliquity_deg: float | None
+    mean_obliquity_deg: float | None
+    nutation_longitude_deg: float | None
+    nutation_obliquity_deg: float | None
+    greenwich_sidereal_time_deg: float | None
     points: tuple[dict[str, Any], ...]
     provenance: AdapterProvenance
     warnings: tuple[AdapterWarning, ...]
@@ -138,6 +249,11 @@ class EphemerisResult:
             "julian_day_tt": self.julian_day_tt,
             "delta_t_seconds": self.delta_t_seconds,
             "utc_instant": self.utc_instant,
+            "true_obliquity_deg": self.true_obliquity_deg,
+            "mean_obliquity_deg": self.mean_obliquity_deg,
+            "nutation_longitude_deg": self.nutation_longitude_deg,
+            "nutation_obliquity_deg": self.nutation_obliquity_deg,
+            "greenwich_sidereal_time_deg": self.greenwich_sidereal_time_deg,
             "points": list(self.points),
             "provenance": asdict(self.provenance),
             "warnings": [asdict(warning) for warning in self.warnings],
@@ -152,7 +268,12 @@ class _RawCalculation:
 
 
 class SwissEphemerisAdapter:
-    """Calculate ten core bodies with explicit engine and fallback provenance."""
+    """Calculate a declared Swiss point projection with explicit provenance.
+
+    The no-argument default remains the original ten-body projection for API
+    compatibility. Extended points are opt-in; unsupported identifiers and
+    missing ephemeris files are errors rather than silent omissions.
+    """
 
     _backend_lock = threading.RLock()
 
@@ -185,6 +306,7 @@ class SwissEphemerisAdapter:
         *,
         utc_instant: datetime | None = None,
         julian_day_ut: float | None = None,
+        point_ids: Iterable[str] | None = None,
     ) -> EphemerisResult:
         jd_ut, normalized_utc = self._normalize_time(
             utc_instant=utc_instant,
@@ -196,11 +318,12 @@ class SwissEphemerisAdapter:
         points: list[dict[str, Any]] = []
         warnings: list[AdapterWarning] = []
         flag_records: list[PointFlagRecord] = []
+        definitions = self._point_definitions(point_ids)
 
         with self._backend_lock:
             if self.ephemeris_path is not None:
                 self._backend.set_ephe_path(self.ephemeris_path)
-            for body in BODY_DEFINITIONS:
+            for body in definitions:
                 ecliptic = self._calculate_raw(jd_ut, body, ecliptic_flags)
                 equatorial = self._calculate_raw(jd_ut, body, equatorial_flags)
                 self._validate_return_flags(body, ecliptic, required_flags=swe.FLG_SPEED)
@@ -242,11 +365,8 @@ class SwissEphemerisAdapter:
                 )
 
             actual_modes = tuple(dict.fromkeys(record.actual_mode for record in flag_records))
-            if len(actual_modes) != 1:
-                raise EphemerisFlagsError(
-                    f"core body calculations mixed ephemeris modes: {actual_modes}"
-                )
             delta_t_days, delta_t_message = self._delta_t(jd_ut, actual_modes[0])
+            earth_orientation = self._earth_orientation(jd_ut, requested_mode_flag)
 
         if delta_t_message:
             warnings.append(
@@ -281,10 +401,63 @@ class SwissEphemerisAdapter:
             julian_day_tt=jd_ut + delta_t_days,
             delta_t_seconds=delta_t_seconds,
             utc_instant=normalized_utc,
+            true_obliquity_deg=earth_orientation[0],
+            mean_obliquity_deg=earth_orientation[1],
+            nutation_longitude_deg=earth_orientation[2],
+            nutation_obliquity_deg=earth_orientation[3],
+            greenwich_sidereal_time_deg=earth_orientation[4],
             points=tuple(points),
             provenance=provenance,
             warnings=tuple(warnings),
         )
+
+    def _earth_orientation(
+        self,
+        julian_day_ut: float,
+        mode_flag: int,
+    ) -> tuple[float | None, float | None, float | None, float | None, float | None]:
+        try:
+            raw = self._backend.calc_ut(julian_day_ut, swe.ECL_NUT, mode_flag)
+            values = raw[0]
+            if not isinstance(values, (tuple, list)) or len(values) < 4:
+                raise ValueError("ECL_NUT did not return four orientation values")
+            orientation = tuple(float(value) for value in values[:4])
+            if not all(math.isfinite(value) for value in orientation):
+                raise ValueError("ECL_NUT returned non-finite values")
+        except Exception:
+            orientation = (None, None, None, None)
+        sidtime = getattr(self._backend, "sidtime", None)
+        if sidtime is None:
+            gst = None
+        else:
+            try:
+                gst = float(sidtime(julian_day_ut)) * 15 % 360
+                if not math.isfinite(gst):
+                    gst = None
+            except Exception:
+                gst = None
+        return (*orientation, gst)
+
+    def _point_definitions(
+        self,
+        point_ids: Iterable[str] | None,
+    ) -> tuple[BodyDefinition, ...]:
+        if point_ids is None:
+            return BODY_DEFINITIONS
+        normalized = tuple(str(point_id) for point_id in point_ids)
+        if not normalized:
+            raise EphemerisInputError("point_ids must contain at least one point")
+        duplicates = sorted(
+            point_id for point_id in set(normalized) if normalized.count(point_id) > 1
+        )
+        if duplicates:
+            raise EphemerisInputError("point_ids contains duplicate ids: " + ", ".join(duplicates))
+        unknown = sorted(set(normalized) - set(DIRECT_POINT_REGISTRY))
+        if unknown:
+            raise EphemerisInputError(
+                "point_ids contains unsupported direct Swiss ids: " + ", ".join(unknown)
+            )
+        return tuple(DIRECT_POINT_REGISTRY[point_id] for point_id in normalized)
 
     def _delta_t(self, julian_day_ut: float, actual_mode: str) -> tuple[float, str]:
         mode_flag = {
@@ -490,10 +663,20 @@ class SwissEphemerisAdapter:
             "sign": SIGN_IDS[sign_index],
             "degree_in_sign": normalized_longitude - sign_index * 30,
             "house": None,
+            "distance_from_previous_cusp_deg": None,
             "distance_to_next_cusp_deg": None,
-            "retrograde": lon_speed < 0,
+            "house_position_fraction": None,
+            "retrograde": motion_state == "retrograde",
+            "motion_interpretation": (
+                "not_applicable" if body.point_id in {"sun", "moon"} else "meaningful"
+            ),
             "out_of_bounds": None,
             "solar_relation": None,
+            "solar_elongation_deg": None,
+            "visibility_state": None,
+            "oriental_occidental": None,
+            "formula_ref": body.formula_ref,
+            "catalog_object_ref": body.catalog_object_ref,
             "status_refs": [f"motion.{motion_state}"],
         }
 

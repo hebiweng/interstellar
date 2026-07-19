@@ -35,6 +35,7 @@ class ApiSettings(BaseModel):
     server_host: str = Field(default="127.0.0.1", min_length=1, max_length=255)
     server_port: int = Field(default=8018, ge=1, le=65535)
     cors_allowed_origins: tuple[str, ...] = ()
+    swiss_ephemeris_path: str | None = None
 
     @field_validator("request_id_header")
     @classmethod
@@ -77,5 +78,8 @@ class ApiSettings(BaseModel):
                 origin.strip()
                 for origin in read("CORS_ALLOWED_ORIGINS", "").split(",")
                 if origin.strip()
+            ),
+            swiss_ephemeris_path=(
+                read("SWISS_EPHEMERIS_PATH", "").strip() or None
             ),
         )

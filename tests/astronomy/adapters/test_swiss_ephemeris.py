@@ -139,10 +139,18 @@ def test_points_match_canonical_point_shape_without_houses_or_aspects() -> None:
             "sign",
             "degree_in_sign",
             "house",
+            "distance_from_previous_cusp_deg",
             "distance_to_next_cusp_deg",
+            "house_position_fraction",
             "retrograde",
+            "motion_interpretation",
             "out_of_bounds",
             "solar_relation",
+            "solar_elongation_deg",
+            "visibility_state",
+            "oriental_occidental",
+            "formula_ref",
+            "catalog_object_ref",
             "status_refs",
         }
         assert point["house"] is None
@@ -218,7 +226,82 @@ def test_stationary_classification_uses_explicit_threshold() -> None:
     assert all(
         point["position"]["motion_state"] == "stationary" for point in result.points
     )
-    assert all(point["retrograde"] is True for point in result.points)
+    assert all(point["retrograde"] is False for point in result.points)
+
+
+def test_declared_extended_projection_is_ordered_and_traced() -> None:
+    requested = (
+        "sun",
+        "true_north_node",
+        "mean_north_node",
+        "mean_lilith",
+        "true_lilith",
+        "lunar_perigee",
+        "chiron",
+        "ceres",
+        "pallas",
+        "juno",
+        "vesta",
+    )
+    result = SwissEphemerisAdapter(
+        mode=SwissEphemerisMode.MOSHIER,
+        _backend=FakeBackend(),  # type: ignore[arg-type]
+    ).calculate(julian_day_ut=2451545.0, point_ids=requested)
+
+    assert tuple(point["point_id"] for point in result.points) == requested
+    assert (
+        tuple(record.point_id for record in result.provenance.point_flags) == requested
+    )
+    assert result.points[1]["kind"] == "node"
+    assert result.points[3]["kind"] == "lunar_point"
+    assert result.points[6]["kind"] == "centaur"
+    assert result.points[7]["catalog_object_ref"] == "mpc:1"
+
+
+def test_hamburg_tnps_match_swiss_reference_and_remain_hypothetical() -> None:
+    from pathlib import Path
+
+    from interstellar_core.astronomy.adapters import HAMBURG_TNP_POINT_IDS
+
+    ephemeris_path = (
+        Path(__file__).resolve().parents[3] / "vendor" / "swisseph" / "ephe"
+    )
+    result = SwissEphemerisAdapter(ephemeris_path=ephemeris_path).calculate(
+        utc_instant=datetime(2000, 3, 1, 8, 30, tzinfo=UTC),
+        point_ids=HAMBURG_TNP_POINT_IDS,
+    )
+    expected = {
+        "cupido": 244.690811,
+        "hades": 77.648938,
+        "zeus": 184.965415,
+        "kronos": 87.254207,
+        "apollon": 201.147435,
+        "admetos": 49.086908,
+        "vulkanus": 109.825050,
+        "poseidon": 214.574483,
+    }
+    assert tuple(point["point_id"] for point in result.points) == HAMBURG_TNP_POINT_IDS
+    for point in result.points:
+        assert point["kind"] == "hypothetical"
+        assert point["formula_ref"] == "ephemeris.swiss.hypothetical_orbit.v1"
+        assert point["catalog_object_ref"].startswith("swiss:h")
+        assert point["position"]["ecliptic"]["longitude_deg"] == pytest.approx(
+            expected[point["point_id"]], abs=1e-6
+        )
+
+
+@pytest.mark.parametrize(
+    "point_ids",
+    [(), ("sun", "sun"), ("sun", "invented_point")],
+)
+def test_declared_point_projection_rejects_empty_duplicate_or_unknown_ids(
+    point_ids: tuple[str, ...],
+) -> None:
+    with pytest.raises(EphemerisInputError):
+        SwissEphemerisAdapter(
+            mode=SwissEphemerisMode.MOSHIER,
+            _backend=FakeBackend(),  # type: ignore[arg-type]
+        ).calculate(julian_day_ut=2451545.0, point_ids=point_ids)
 
 
 @pytest.mark.parametrize(

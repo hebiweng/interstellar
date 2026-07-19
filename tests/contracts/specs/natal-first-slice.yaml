@@ -1,0 +1,67 @@
+schema_version: 1.0.0
+fixture_id: interstellar.contract.natal_first_slice.v1
+source_contract: docs/natal-first-slice.yaml
+chart_settings_required_properties:
+  - calculation_profile_id
+  - analysis_system_id
+  - zodiac
+  - house_system
+  - center
+  - node_type
+  - high_latitude_policy
+  - aspect_set_id
+  - orb_profile_id
+  - point_set_ids
+  - included_points
+  - minor_body_ids
+  - fixed_star_ids
+  - lot_formula_ids
+  - hypothetical_point_ids
+  - included_aspect_ids
+  - orb_overrides
+  - classical_settings
+point_required_or_declared_properties:
+  - point_id
+  - kind
+  - position
+  - sign
+  - degree_in_sign
+  - house
+  - distance_from_previous_cusp_deg
+  - distance_to_next_cusp_deg
+  - house_position_fraction
+  - retrograde
+  - motion_interpretation
+  - out_of_bounds
+  - solar_relation
+  - visibility_state
+  - oriental_occidental
+  - formula_ref
+  - catalog_object_ref
+house_required_or_declared_properties:
+  - number
+  - cusp_longitude_deg
+  - sign
+  - degree_in_sign
+  - span_deg
+  - ruler_ids
+  - traditional_ruler_ids
+  - modern_ruler_ids
+  - point_ids
+aspect_required_properties:
+  - aspect_id
+  - point_a
+  - point_b
+  - context
+  - type
+  - exact_angle_deg
+  - actual_angle_deg
+  - orb_deg
+  - orb_ratio
+  - applying_state
+  - direction
+  - strength
+  - exact_hits
+  - rule_refs
+required_technical_exports: [json, csv, markdown_technical, plaintext_technical]
+motion_non_interpretive_point_examples: [sun, moon, asc, mc, fortune]

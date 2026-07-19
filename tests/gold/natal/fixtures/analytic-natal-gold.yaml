@@ -1,0 +1,199 @@
+schema_version: 1.0.0
+collection_id: interstellar.gold.natal_analytic.v1
+cases:
+  - fixture_id: GOLD-SIGN-001
+    family: sign_boundaries
+    source:
+      source_id: tropical-equal-sign-partition-v1
+      title: Hand-tabulated twelve equal 30 degree tropical signs
+      uri: urn:interstellar:analytic:tropical-sign-partition:v1
+      license: CC0-1.0
+      independently_captured: true
+      stable_eligible: true
+    reference_family: hand_tabulated_zodiac_partition
+    sut_family: interstellar_sign_taxonomy
+    review_status: approved
+    maturity: stable
+    availability: available
+    expected_origin: hand_calculated
+    input:
+      longitudes_deg: [0.0, 29.999999, 30.0, 59.999999, 60.0, 329.999999, 330.0, 359.999999]
+    expected:
+      sign_ids: [aries, aries, taurus, taurus, gemini, aquarius, pisces, pisces]
+    tolerance: {degree: 0.0}
+    referenced_by: [tests/gold/natal/test_analytic_gold.py]
+
+  - fixture_id: GOLD-MOTION-001
+    family: motion_state
+    source:
+      source_id: signed-longitude-speed-classification-v1
+      title: Analytic signed-speed motion-state boundaries
+      uri: urn:interstellar:analytic:motion-state:v1
+      license: CC0-1.0
+      independently_captured: true
+      stable_eligible: true
+    reference_family: analytic_signed_speed_classifier
+    sut_family: interstellar_motion_classifier
+    review_status: approved
+    maturity: stable
+    availability: available
+    expected_origin: analytic_formula
+    input:
+      threshold_deg_per_day: 0.01
+      samples_deg_per_day: [-0.0100001, -0.01, 0.0, 0.01, 0.0100001]
+    expected:
+      states: [retrograde, stationary, stationary, stationary, direct]
+    tolerance: {speed_deg_per_day: 0.0}
+    referenced_by: [tests/gold/natal/test_analytic_gold.py]
+
+  - fixture_id: GOLD-HOUSE-001
+    family: house_derived_boundaries
+    source:
+      source_id: hand-derived-whole-equal-porphyry-cusps-v1
+      title: Hand-derived Whole Sign, Equal and Porphyry cusp and placement boundaries
+      uri: urn:interstellar:analytic:house-derived-boundaries:v1
+      license: CC0-1.0
+      independently_captured: true
+      stable_eligible: true
+    reference_family: analytic_house_geometry
+    sut_family: interstellar_house_placement
+    review_status: approved
+    maturity: stable
+    availability: available
+    expected_origin: hand_calculated
+    input:
+      systems:
+        - system: whole_sign
+          ascendant_deg: 29.999999
+          placement_longitudes_deg: [0.0, 29.999999, 30.0, 359.999999]
+        - system: equal
+          ascendant_deg: 15.0
+          placement_longitudes_deg: [0.0, 15.0, 44.999999, 45.0, 359.0]
+        - system: porphyry
+          ascendant_deg: 100.0
+          mc_deg: 20.0
+          placement_longitudes_deg: [19.0, 20.0, 99.0, 100.0, 280.0]
+    expected:
+      systems:
+        - system: whole_sign
+          cusps_deg: [0.0, 30.0, 60.0, 90.0, 120.0, 150.0, 180.0, 210.0, 240.0, 270.0, 300.0, 330.0]
+          houses: [1, 1, 2, 12]
+          on_cusp: [true, false, true, false]
+        - system: equal
+          cusps_deg: [15.0, 45.0, 75.0, 105.0, 135.0, 165.0, 195.0, 225.0, 255.0, 285.0, 315.0, 345.0]
+          houses: [12, 1, 1, 2, 12]
+          on_cusp: [false, true, false, true, false]
+        - system: porphyry
+          cusps_deg: [100.0, 133.33333333333334, 166.66666666666669, 200.0, 226.66666666666666, 253.33333333333334, 280.0, 313.3333333333333, 346.6666666666667, 20.0, 46.666666666666664, 73.33333333333333]
+          houses: [9, 10, 12, 1, 7]
+          on_cusp: [false, true, false, true, true]
+    tolerance: {degree: 1.0e-9}
+    referenced_by: [tests/gold/natal/test_analytic_gold.py]
+
+  - fixture_id: GOLD-ASPECT-003
+    family: major_aspect_boundaries
+    source:
+      source_id: hand-derived-major-aspect-geometry-v1
+      title: Hand-derived five-major-aspect and inclusive-orb boundaries
+      uri: urn:interstellar:analytic:major-aspect-boundaries:v1
+      license: CC0-1.0
+      independently_captured: true
+      stable_eligible: true
+    reference_family: analytic_circular_geometry
+    sut_family: interstellar_aspect_engine
+    review_status: approved
+    maturity: stable
+    availability: available
+    expected_origin: hand_calculated
+    input:
+      samples:
+        - {id: conjunction_cross_zero, a_deg: 359.0, b_deg: 1.0}
+        - {id: sextile_orb_boundary, a_deg: 0.0, b_deg: 64.0}
+        - {id: square_exact, a_deg: 10.0, b_deg: 100.0}
+        - {id: trine_exact, a_deg: 0.0, b_deg: 120.0}
+        - {id: opposition_exact, a_deg: 10.0, b_deg: 190.0}
+        - {id: sextile_just_outside, a_deg: 0.0, b_deg: 64.000001}
+    expected:
+      samples:
+        - {id: conjunction_cross_zero, matched: true, type: conjunction, actual_angle_deg: 2.0, orb_deg: 2.0, orb_ratio: 0.75}
+        - {id: sextile_orb_boundary, matched: true, type: sextile, actual_angle_deg: 64.0, orb_deg: 4.0, orb_ratio: 0.0}
+        - {id: square_exact, matched: true, type: square, actual_angle_deg: 90.0, orb_deg: 0.0, orb_ratio: 1.0}
+        - {id: trine_exact, matched: true, type: trine, actual_angle_deg: 120.0, orb_deg: 0.0, orb_ratio: 1.0}
+        - {id: opposition_exact, matched: true, type: opposition, actual_angle_deg: 180.0, orb_deg: 0.0, orb_ratio: 1.0}
+        - {id: sextile_just_outside, matched: false}
+    tolerance: {degree: 1.0e-12}
+    referenced_by: [tests/gold/natal/test_analytic_gold.py]
+
+  - fixture_id: GOLD-STRUCTURE-001
+    family: distribution_structure
+    source:
+      source_id: hand-tabulated-modern-ten-distribution-v1
+      title: Hand-tabulated modern ten-body element, modality and polarity distribution
+      uri: urn:interstellar:analytic:modern-ten-distribution:v1
+      license: CC0-1.0
+      independently_captured: true
+      stable_eligible: true
+    reference_family: manual_distribution_tabulation
+    sut_family: interstellar_distribution_engine
+    review_status: approved
+    maturity: stable
+    availability: available
+    expected_origin: hand_calculated
+    input:
+      points:
+        - {point_id: sun, longitude_deg: 0.0}
+        - {point_id: moon, longitude_deg: 30.0}
+        - {point_id: mercury, longitude_deg: 60.0}
+        - {point_id: venus, longitude_deg: 90.0}
+        - {point_id: mars, longitude_deg: 120.0}
+        - {point_id: jupiter, longitude_deg: 150.0}
+        - {point_id: saturn, longitude_deg: 180.0}
+        - {point_id: uranus, longitude_deg: 210.0}
+        - {point_id: neptune, longitude_deg: 240.0}
+        - {point_id: pluto, longitude_deg: 270.0}
+    expected:
+      dimensions:
+        elements:
+          fire: {raw_count: 3, weighted_score: 4.0, percentage: 33.33333333333333}
+          earth: {raw_count: 3, weighted_score: 4.0, percentage: 33.33333333333333}
+          air: {raw_count: 2, weighted_score: 2.0, percentage: 16.666666666666664}
+          water: {raw_count: 2, weighted_score: 2.0, percentage: 16.666666666666664}
+        modalities:
+          cardinal: {raw_count: 4, weighted_score: 5.0, percentage: 41.66666666666667}
+          fixed: {raw_count: 3, weighted_score: 4.0, percentage: 33.33333333333333}
+          mutable: {raw_count: 3, weighted_score: 3.0, percentage: 25.0}
+        polarities:
+          positive: {raw_count: 5, weighted_score: 6.0, percentage: 50.0}
+          negative: {raw_count: 5, weighted_score: 6.0, percentage: 50.0}
+    tolerance: {percentage: 1.0e-12}
+    referenced_by: [tests/gold/natal/test_analytic_gold.py]
+
+  - fixture_id: GOLD-STRUCTURE-002
+    family: geometry_pattern_reference
+    source:
+      source_id: analytic-grand-trine-reference-v1
+      title: Analytic exact grand-trine geometry reserved for the future pattern engine
+      uri: urn:interstellar:analytic:grand-trine:v1
+      license: CC0-1.0
+      independently_captured: true
+      stable_eligible: true
+    reference_family: analytic_circular_geometry
+    sut_family: interstellar_pattern_engine
+    review_status: approved
+    maturity: experimental
+    availability: available
+    expected_origin: analytic_formula
+    input:
+      points:
+        - {point_id: alpha, longitude_deg: 0.0}
+        - {point_id: beta, longitude_deg: 120.0}
+        - {point_id: gamma, longitude_deg: 240.0}
+    expected:
+      implementation_status: reference_only_until_pattern_engine_exists
+      pattern_type: grand_trine
+      required_edges:
+        - {point_a: alpha, point_b: beta, angle_deg: 120.0}
+        - {point_a: alpha, point_b: gamma, angle_deg: 120.0}
+        - {point_a: beta, point_b: gamma, angle_deg: 120.0}
+    tolerance: {degree: 1.0e-12}
+    referenced_by: [tests/gold/natal/test_analytic_gold.py]

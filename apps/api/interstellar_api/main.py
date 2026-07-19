@@ -18,6 +18,10 @@ from interstellar_api.routers.m1_workflow import router as m1_workflow_router
 from interstellar_api.routers.m2_calculations import router as m2_calculations_router
 from interstellar_api.routers.m4_catalogs import router as m4_catalogs_router
 from interstellar_api.routers.m4_jobs import router as m4_jobs_router
+from interstellar_api.routers.natal_ai import router as natal_ai_router
+from interstellar_api.routers.natal_interpretations import (
+    router as natal_interpretations_router,
+)
 from interstellar_api.workflow_store import WorkflowStore
 
 
@@ -75,6 +79,8 @@ def create_app(settings: ApiSettings | None = None) -> FastAPI:
     app.include_router(m2_calculations_router)
     app.include_router(m4_catalogs_router)
     app.include_router(m4_jobs_router)
+    app.include_router(natal_interpretations_router)
+    app.include_router(natal_ai_router)
     return app
 
 

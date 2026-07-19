@@ -37,6 +37,7 @@ _ANALYSIS_ROOT_FIELDS = frozenset(
         "title_zh",
         "authoritative_for",
         "product_rules",
+        "contextual_interpretation_policy",
         "entry_points",
         "unified_analysis_center",
         "recipe_resolution_policy",
@@ -144,7 +145,9 @@ _CAPABILITY_FIELDS = frozenset(
         "constraint",
         "constraints",
         "forbidden_outputs",
+        "export_presets",
         "view_number_ranges",
+        "known_limits",
     }
 )
 _INPUT_PROFILE_FIELDS = frozenset(
@@ -440,6 +443,12 @@ def _validate_references(
         ):
             if source not in data_source_ids:
                 errors.append(f"capability {identifier}: unknown data source {source!r}")
+        if "known_limits" in record:
+            _string_list(
+                record.get("known_limits"),
+                f"capability {identifier}.known_limits",
+                errors,
+            )
 
     declared_base = analysis.get("base_analysis_models")
     if not isinstance(declared_base, dict):

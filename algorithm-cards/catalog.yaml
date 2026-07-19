@@ -29,8 +29,8 @@ cards:
   - {card_id: ALG-NATAL-001, capability_id: natal.standard_chart, path: algorithm-cards/natal/natal.standard_chart.md, phase: alpha, status: review, implementation_status: in_progress}
   - {card_id: ALG-NATAL-002, capability_id: natal.unknown_time_mode, path: algorithm-cards/natal/natal.unknown_time_mode.md, phase: alpha, status: review, implementation_status: not_started}
   - {card_id: ALG-NATAL-003, capability_id: natal.patterns_distributions, path: algorithm-cards/natal/natal.patterns_distributions.md, phase: alpha, status: review, implementation_status: in_progress}
-  - {card_id: ALG-NATAL-004, capability_id: natal.dignity_reception, path: algorithm-cards/natal/natal.dignity_reception.md, phase: beta, status: review, implementation_status: not_started}
-  - {card_id: ALG-NATAL-005, capability_id: natal.arabic_parts, path: algorithm-cards/natal/natal.arabic_parts.md, phase: beta, status: review, implementation_status: not_started}
+  - {card_id: ALG-NATAL-004, capability_id: natal.dignity_reception, path: algorithm-cards/natal/natal.dignity_reception.md, phase: beta, status: review, implementation_status: in_progress}
+  - {card_id: ALG-NATAL-005, capability_id: natal.arabic_parts, path: algorithm-cards/natal/natal.arabic_parts.md, phase: beta, status: review, implementation_status: in_progress}
   - {card_id: ALG-NATAL-006, capability_id: natal.midpoints, path: algorithm-cards/natal/natal.midpoints.md, phase: beta, status: review, implementation_status: not_started}
   - {card_id: ALG-NATAL-007, capability_id: natal.harmonics, path: algorithm-cards/natal/natal.harmonics.md, phase: beta, status: review, implementation_status: not_started}
   - {card_id: ALG-FORECAST-001, capability_id: forecast.transits, path: algorithm-cards/forecast/forecast.transits.md, phase: alpha, status: review, implementation_status: not_started}
@@ -57,6 +57,7 @@ cards:
   - {card_id: ALG-TOPIC-001, capability_id: topic.structured_evidence, path: algorithm-cards/topic/topic.structured_evidence.md, phase: pro, status: review, implementation_status: not_started}
   - {card_id: ALG-REPORT-001, capability_id: reporting.structured_report_engine, path: algorithm-cards/reporting/reporting.structured_report_engine.md, phase: beta, status: review, implementation_status: not_started}
   - {card_id: ALG-REPORT-002, capability_id: reporting.topic_report_packs, path: algorithm-cards/reporting/reporting.topic_report_packs.md, phase: pro, status: review, implementation_status: not_started}
+  - {card_id: ALG-REPORT-003, capability_id: reporting.contextual_item_interpretation, path: algorithm-cards/reporting/reporting.contextual_item_interpretation.md, phase: alpha, status: review, implementation_status: implemented}
   - {card_id: ALG-RENDER-001, capability_id: rendering.wheels, path: algorithm-cards/rendering/rendering.wheels.md, phase: alpha, status: review, implementation_status: not_started}
   - {card_id: ALG-RENDER-002, capability_id: rendering.timelines_ephemeris, path: algorithm-cards/rendering/rendering.timelines_ephemeris.md, phase: beta, status: review, implementation_status: not_started}
   - {card_id: ALG-RENDER-003, capability_id: rendering.maps, path: algorithm-cards/rendering/rendering.maps.md, phase: pro, status: review, implementation_status: not_started}

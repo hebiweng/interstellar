@@ -11,11 +11,16 @@ from interstellar_core.application.astronomical_snapshot import (
     AstronomicalSnapshotInputError,
     create_astronomical_snapshot,
 )
+from interstellar_core.application.natal_technical_export import (
+    NatalTechnicalExportError,
+    render_natal_technical_document,
+)
 from interstellar_core.application.snapshot_tables import (
     SnapshotTableError,
     build_snapshot_table,
     table_json_bytes,
 )
+from interstellar_core.astronomy.adapters import SwissEphemerisAdapter
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from interstellar_api.errors import ErrorCode, ProblemException
@@ -60,16 +65,49 @@ class ChartDefinitionPayload(StrictModel):
     comparison_subjects: list[SubjectReferencePayload] = Field(default_factory=list)
 
 
+class OrbOverridePayload(StrictModel):
+    scope: Literal["point_pair", "point_class", "aspect", "chart_context"]
+    point_a: str | None = None
+    point_b: str | None = None
+    point_class: str | None = None
+    aspect_id: str | None = None
+    chart_context: str | None = None
+    orb_deg: float = Field(ge=0, le=30)
+
+
+class ClassicalSettingsPayload(StrictModel):
+    rulership_system: str | None = None
+    dignity_table: str | None = None
+    triplicity_table: str | None = None
+    terms_table: str | None = None
+    decan_or_face_table: str | None = None
+    sect_rules: str | None = None
+    lot_formula_set: str | None = None
+
+
 class ChartSettingsPayload(StrictModel):
+    calculation_profile_id: str | None = Field(default=None, min_length=1, max_length=160)
+    analysis_system_id: str | None = Field(default=None, min_length=1, max_length=160)
     zodiac: Literal["tropical", "sidereal", "draconic"]
     ayanamsa: str | None = None
     house_system: str = Field(min_length=1, max_length=40)
     center: Literal["geocentric", "heliocentric", "topocentric"]
     coordinate_frame: Literal["ecliptic", "equatorial", "horizontal"] | None = None
     node_type: Literal["true", "mean", "both"]
+    high_latitude_policy: Literal[
+        "block", "allow_distorted", "fallback_whole_sign", "fallback_equal"
+    ] | None = None
     aspect_set_id: str = Field(min_length=1, max_length=160)
     orb_profile_id: str = Field(min_length=1, max_length=160)
+    point_set_ids: list[str] = Field(default_factory=list)
     included_points: list[str] = Field(default_factory=list)
+    minor_body_ids: list[str] = Field(default_factory=list)
+    fixed_star_ids: list[str] = Field(default_factory=list)
+    lot_formula_ids: list[str] = Field(default_factory=list)
+    hypothetical_point_ids: list[str] = Field(default_factory=list)
+    included_aspect_ids: list[str] = Field(default_factory=list)
+    orb_overrides: list[OrbOverridePayload] = Field(default_factory=list)
+    classical_settings: ClassicalSettingsPayload | None = None
     custom_parameters: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -87,7 +125,18 @@ class ChartRequestPayload(StrictModel):
     rule_pack_hash: str = Field(pattern=r"^(?:sha256|hmac-sha256):[A-Fa-f0-9]{32,128}$")
     dataset_versions: dict[str, str]
     outputs: list[
-        Literal["snapshot", "default_render_manifest", "svg", "png", "pdf", "json", "csv", "ics"]
+        Literal[
+            "snapshot",
+            "default_render_manifest",
+            "svg",
+            "png",
+            "pdf",
+            "json",
+            "csv",
+            "ics",
+            "markdown_technical",
+            "plaintext_technical",
+        ]
     ] = Field(min_length=1)
     input_fingerprint: str | None = None
 
@@ -141,6 +190,10 @@ async def create_calculation(payload: ChartRequestPayload, request: Request) -> 
             subject_version=subject_version,
             now=datetime.now(UTC),
             engine_version=request.app.state.settings.service_version,
+            adapter=SwissEphemerisAdapter(
+                moshier_fallback="record",
+                ephemeris_path=request.app.state.settings.swiss_ephemeris_path,
+            ),
         )
     except AstronomicalSnapshotInputError as exc:
         raise _unsupported({"subject.time_spec": str(exc)}) from exc
@@ -187,4 +240,50 @@ async def get_calculation_table(
         content=table_json_bytes(table),
         media_type="application/json",
         headers=headers,
+    )
+
+
+@router.get("/calculations/{snapshot_id}/exports/natal-technical")
+async def get_natal_technical_export(
+    snapshot_id: str,
+    request: Request,
+    output_format: Literal["markdown", "plaintext"] = Query(
+        default="markdown",
+        alias="format",
+    ),
+) -> Response:
+    try:
+        snapshot = request.app.state.workflow_store.get_snapshot(snapshot_id)
+    except WorkflowRecordNotFound as exc:
+        raise ProblemException(
+            status=status.HTTP_404_NOT_FOUND,
+            code=ErrorCode.NOT_FOUND,
+            detail="Calculation snapshot was not found.",
+        ) from exc
+    try:
+        document = render_natal_technical_document(
+            snapshot,
+            output_format=output_format,
+        )
+    except NatalTechnicalExportError as exc:
+        raise ProblemException(
+            status=status.HTTP_409_CONFLICT,
+            code=ErrorCode.INVALID_REQUEST,
+            detail=str(exc),
+        ) from exc
+    extension = "md" if output_format == "markdown" else "txt"
+    return Response(
+        content=document.encode("utf-8"),
+        media_type=(
+            "text/markdown; charset=utf-8"
+            if output_format == "markdown"
+            else "text/plain; charset=utf-8"
+        ),
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="{snapshot_id}-natal-technical.{extension}"'
+            ),
+            "X-Interstellar-Snapshot-ID": snapshot_id,
+            "X-Interstellar-Input-Fingerprint": snapshot["input_fingerprint"],
+        },
     )

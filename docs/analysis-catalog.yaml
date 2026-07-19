@@ -18,6 +18,18 @@ product_rules:
   proprietary_commercial_models_executable_without_license: false
   every_v1_capability_must_be_reachable: true
   reachability_paths: [direct_entry, dependency, analysis_recipe]
+  every_materialized_result_item_must_be_reachable: true
+  contextual_item_interpretation_requires_full_report: false
+  report_center_role: curated_deduplicated_cross_item_synthesis
+
+contextual_interpretation_policy:
+  item_kinds: [point_placement, house_cusp, natal_aspect, cross_chart_aspect, transit_hit, ingress, station, return_hit, dignity, reception, lot, midpoint, pattern, timing_period]
+  layers: [fact, basic_modern, classical, related_context, provenance]
+  trigger_surfaces: [wheel_point, wheel_aspect_line, data_table_row, aspect_grid_cell, timeline_event]
+  missing_template_behavior: show_fact_and_unpublished_interpretation_state
+  no_ai_or_unversioned_generic_fallback: true
+  modern_and_classical_separate: true
+  report_inclusion_requires_aggregation_conflict_and_priority_rules: true
 
 entry_points:
   - id: entry.technique
@@ -327,6 +339,8 @@ report_profile_contract:
   missing_dependency_behavior: preflight_never_auto_compute
   every_conclusion_must_link_to_evidence: true
   every_evidence_must_link_to_snapshot_path: true
+  excludes_complete_atomic_result_listing_by_default: true
+  atomic_results_remain_available_in_contextual_views: true
 
 report_profiles:
   - id: report.calculation_record.v1

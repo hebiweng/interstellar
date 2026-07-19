@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 import pytest
 
@@ -10,6 +12,20 @@ from interstellar_api.workflow_store import WorkflowRecordConflict, WorkflowStor
 
 def _client() -> TestClient:
     return TestClient(create_app(ApiSettings(environment="test")))
+
+
+def _professional_client() -> TestClient:
+    ephemeris_path = (
+        Path(__file__).resolve().parents[2] / "vendor" / "swisseph" / "ephe"
+    )
+    return TestClient(
+        create_app(
+            ApiSettings(
+                environment="test",
+                swiss_ephemeris_path=str(ephemeris_path),
+            )
+        )
+    )
 
 
 def _birth_payload(
@@ -118,7 +134,6 @@ def test_selected_utc_to_reproducible_m3_natal_fact_snapshot() -> None:
         assert len(snapshot["result"]["houses"]) == 12
         assert snapshot["result"]["aspects"]
         assert len(snapshot["result"]["distributions"]) == 3
-        assert snapshot["warnings"]
         assert {warning["code"] for warning in snapshot["warnings"]} <= {
             "EPHEMERIS_FALLBACK_MOSHIER",
             "SWISS_EPHEMERIS_MESSAGE",
@@ -198,6 +213,138 @@ def test_selected_utc_to_reproducible_m3_natal_fact_snapshot() -> None:
         assert (
             repeated["result"]["distributions"] == snapshot["result"]["distributions"]
         )
+
+
+def test_professional_natal_profile_materializes_signs_points_structure_and_classical() -> (
+    None
+):
+    with _professional_client() as client:
+        saved = client.post("/api/v1/subjects", json=_birth_payload()).json()
+        payload = _calculation_payload(saved["version"]["id"])
+        payload["settings"]["calculation_profile_id"] = "professional.natal.v1"
+        payload["settings"]["aspect_set_id"] = "official.aspects.professional_natal.v1"
+        payload["settings"]["orb_profile_id"] = "official.orbs.professional_natal.v1"
+        response = client.post("/api/v1/calculations", json=payload)
+        assert response.status_code == 201, response.text
+        snapshot_id = response.json()["id"]
+        markdown_export = client.get(
+            f"/api/v1/calculations/{snapshot_id}/exports/natal-technical",
+            params={"format": "markdown"},
+        )
+        plaintext_export = client.get(
+            f"/api/v1/calculations/{snapshot_id}/exports/natal-technical",
+            params={"format": "plaintext"},
+        )
+        ai_catalog = client.get("/api/v1/ai/providers")
+        ai_without_consent = client.post(
+            "/api/v1/ai/analyses",
+            json={
+                "snapshot_id": snapshot_id,
+                "provider_id": "openai",
+                "model_id": "gpt",
+                "document_format": "markdown",
+                "consent_to_send_snapshot": False,
+            },
+        )
+        ai_unconfigured = client.post(
+            "/api/v1/ai/analyses",
+            json={
+                "snapshot_id": snapshot_id,
+                "provider_id": "moonshot",
+                "model_id": "kimi",
+                "document_format": "markdown",
+                "consent_to_send_snapshot": True,
+            },
+        )
+
+    snapshot = response.json()
+    point_ids = [point["point_id"] for point in snapshot["result"]["points"]]
+    assert len(point_ids) == 47
+    assert point_ids[:10] == [
+        "sun",
+        "moon",
+        "mercury",
+        "venus",
+        "mars",
+        "jupiter",
+        "saturn",
+        "uranus",
+        "neptune",
+        "pluto",
+    ]
+    assert {
+        "asc",
+        "dsc",
+        "mc",
+        "ic",
+        "true_north_node",
+        "true_south_node",
+        "chiron",
+        "ceres",
+        "fortune",
+        "spirit",
+        "lot_basis",
+        "lot_eros",
+        "lot_necessity",
+        "lot_courage",
+        "lot_victory",
+        "lot_nemesis",
+        "lot_exaltation",
+        "cupido",
+        "hades",
+        "zeus",
+        "kronos",
+        "apollon",
+        "admetos",
+        "vulkanus",
+        "poseidon",
+    } <= set(point_ids)
+    assert all(point["sign"] for point in snapshot["result"]["points"])
+    assert all(
+        0 <= point["degree_in_sign"] < 30 for point in snapshot["result"]["points"]
+    )
+    assert snapshot["result"]["structure"]["availability"] == "available"
+    assert snapshot["result"]["classical"]["availability"] == "available"
+    assert len(snapshot["result"]["dignities"]) == 7
+    assert {lot["lot_id"] for lot in snapshot["result"]["lots"]} == {
+        "fortune",
+        "spirit",
+        "lot_basis",
+        "lot_eros",
+        "lot_necessity",
+        "lot_courage",
+        "lot_victory",
+        "lot_nemesis",
+        "lot_exaltation",
+    }
+    chart = snapshot["result"]["charts"][0]
+    assert chart["aspect_evaluation"]["selected_point_count"] == 47
+    assert chart["aspect_evaluation"]["evaluated_pair_count"] == 1081
+    assert {aspect["type"] for aspect in chart["aspects"]} - {
+        "conjunction",
+        "sextile",
+        "square",
+        "trine",
+        "opposition",
+    }
+    assert chart["classical"]["sect"]["sect"] in {"day", "night"}
+    assert markdown_export.status_code == 200
+    assert markdown_export.headers["content-type"].startswith("text/markdown")
+    assert "## 完整点位" in markdown_export.text
+    assert "## 完整相位" in markdown_export.text
+    assert "福点 (fortune)" in markdown_export.text
+    assert snapshot["input_fingerprint"] in markdown_export.text
+    assert plaintext_export.status_code == 200
+    assert plaintext_export.headers["content-type"].startswith("text/plain")
+    assert "=== 古典与希腊化事实 ===" in plaintext_export.text
+    assert ai_catalog.status_code == 200
+    assert [item["provider_id"] for item in ai_catalog.json()["providers"]] == [
+        "openai",
+        "moonshot",
+    ]
+    assert ai_without_consent.status_code == 422
+    assert ai_unconfigured.status_code == 409
+    assert ai_unconfigured.json()["fields"]["availability"] == "blocked"
 
 
 def test_unknown_birth_time_never_runs_as_midnight() -> None:

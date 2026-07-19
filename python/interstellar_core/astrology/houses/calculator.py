@@ -32,6 +32,27 @@ SIGN_IDS: tuple[str, ...] = (
     "pisces",
 )
 
+TRADITIONAL_SIGN_RULERS: dict[str, tuple[str, ...]] = {
+    "aries": ("mars",),
+    "taurus": ("venus",),
+    "gemini": ("mercury",),
+    "cancer": ("moon",),
+    "leo": ("sun",),
+    "virgo": ("mercury",),
+    "libra": ("venus",),
+    "scorpio": ("mars",),
+    "sagittarius": ("jupiter",),
+    "capricorn": ("saturn",),
+    "aquarius": ("saturn",),
+    "pisces": ("jupiter",),
+}
+MODERN_SIGN_RULERS: dict[str, tuple[str, ...]] = {
+    **TRADITIONAL_SIGN_RULERS,
+    "scorpio": ("pluto",),
+    "aquarius": ("uranus",),
+    "pisces": ("neptune",),
+}
+
 SWISS_HOUSE_CODES: dict[HouseSystem, bytes] = {
     HouseSystem.PLACIDUS: b"P",
     HouseSystem.KOCH: b"K",
@@ -311,18 +332,44 @@ class HouseCalculator:
         polar_status: str,
         warnings: tuple[HouseWarning, ...],
     ) -> dict[str, Any]:
+        cusp_signs = [SIGN_IDS[min(int(cusp // 30), 11)] for cusp in cusps]
+        repeated_signs = {
+            sign for sign in cusp_signs if cusp_signs.count(sign) > 1
+        }
+        intercepted_by_house: dict[int, list[str]] = {
+            number: [] for number in range(1, 13)
+        }
+        cusp_sign_set = set(cusp_signs)
+        for sign_index, sign in enumerate(SIGN_IDS):
+            if sign in cusp_sign_set:
+                continue
+            midpoint = sign_index * 30 + 15
+            for index, start in enumerate(cusps):
+                end = cusps[(index + 1) % 12]
+                if 0 < (midpoint - start) % 360 < (end - start) % 360:
+                    intercepted_by_house[index + 1].append(sign)
+                    break
+
         houses = []
         for index, cusp in enumerate(cusps):
             sign_index = min(int(cusp // 30), 11)
+            sign = SIGN_IDS[sign_index]
+            span = (cusps[(index + 1) % 12] - cusp) % 360
+            traditional = TRADITIONAL_SIGN_RULERS[sign]
+            modern = MODERN_SIGN_RULERS[sign]
             houses.append(
                 {
                     "number": index + 1,
                     "cusp_longitude_deg": cusp,
-                    "sign": SIGN_IDS[sign_index],
+                    "sign": sign,
                     "degree_in_sign": cusp - sign_index * 30,
-                    "ruler_ids": [],
+                    "span_deg": span,
+                    "ruler_ids": list(dict.fromkeys((*traditional, *modern))),
+                    "traditional_ruler_ids": list(traditional),
+                    "modern_ruler_ids": list(modern),
                     "point_ids": [],
-                    "intercepted_signs": [],
+                    "intercepted_signs": intercepted_by_house[index + 1],
+                    "repeated_cusp_sign": sign in repeated_signs,
                 }
             )
         asc, mc = ascmc[0], ascmc[1]
@@ -338,6 +385,8 @@ class HouseCalculator:
             "sensitive_points": {
                 point_id: ascmc[index] for index, point_id in enumerate(SENSITIVE_POINT_IDS)
             },
+            "armc_deg": ascmc[2],
+            "vertex_deg": ascmc[3],
             "polar_status": polar_status,
             "warnings": [warning.to_canonical() for warning in warnings],
         }

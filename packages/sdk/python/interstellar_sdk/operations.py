@@ -21,6 +21,14 @@ OPERATIONS: Final[dict[str, dict[str, str]]] = {
         "method": "POST",
         "path": "/api/v1/calculations"
     },
+    "createNatalAiAnalysis": {
+        "method": "POST",
+        "path": "/api/v1/ai/analyses"
+    },
+    "createNatalContextualInterpretations": {
+        "method": "POST",
+        "path": "/api/v1/calculations/{id}/interpretations/contextual"
+    },
     "createRender": {
         "method": "POST",
         "path": "/api/v1/renders"
@@ -52,6 +60,10 @@ OPERATIONS: Final[dict[str, dict[str, str]]] = {
     "deleteSubject": {
         "method": "DELETE",
         "path": "/api/v1/subjects/{id}"
+    },
+    "exportNatalTechnicalDocument": {
+        "method": "GET",
+        "path": "/api/v1/calculations/{id}/exports/natal-technical"
     },
     "exportProjectArchive": {
         "method": "POST",
@@ -144,6 +156,10 @@ OPERATIONS: Final[dict[str, dict[str, str]]] = {
     "listEntryPoints": {
         "method": "GET",
         "path": "/api/v1/entry-points"
+    },
+    "listNatalAiProviders": {
+        "method": "GET",
+        "path": "/api/v1/ai/providers"
     },
     "listReportArtifacts": {
         "method": "GET",

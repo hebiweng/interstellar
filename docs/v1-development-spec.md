@@ -2,17 +2,17 @@
 
 | 字段 | 值 |
 |---|---|
-| 文档版本 | 1.3.0-draft.1 |
-| 基线日期 | 2026-07-18 |
+| 文档版本 | 1.4.0-natal-priority |
+| 基线日期 | 2026-07-19 |
 | 产品版本 | Interstellar V1 |
-| 研发周期 | 24 个月；第 6 个月交付 Professional Alpha |
+| 当前研发周期 | 本命盘 N0—N8；完成后停止 |
 | 目标读者 | 主代理（唯一责任主体）、受托子代理、可选外部评议者与未来维护者 |
 | 技术栈 | Next.js + TypeScript；FastAPI + Python；PostgreSQL/PostGIS；Redis；S3/MinIO |
 | 发布方式 | AGPL 开源；公共限流服务；Docker Compose 自托管 |
 
-本说明书是 V1 的研发基线。开发任务、接口、数据模型、测试和发布验收共同以本文、[分析入口、模型、目的与报告目录](./analysis-catalog.yaml)、[机器可读计算目录](./calculation-catalog.yaml)、[全量计算与结果说明](./calculation-result-catalog.md)、[146项图形目录](./render-catalog.yaml)及[能力矩阵](./capabilities.yaml)为准。实际编码还必须遵守[Canonical JSON Schema](../packages/canonical-schema/README.md)、[OpenAPI 3.1](../openapi/openapi.yaml)、[算法卡目录](../algorithm-cards/catalog.yaml)、[官方 Preset](../presets/official/analysis-model-presets.yaml)、[官方规则包](../rules/official/)、[报告契约与双语模板](../reports/)、[数据 Manifest](../data-manifests/catalog.yaml)、[测试规范](../tests/)和[M0—M24 单一主责 Backlog](./backlog/m24-single-owner.yaml)。涉及占星流派差异或复杂公式的工作项，必须先根据[算法卡模板](./algorithm-card-template.md)完成算法卡；没有算法卡的能力不得标记为 `Stable`。
+本说明书保留完整平台的技术基线，但当前实现与验收必须先遵守[本命盘优先开发计划](./natal-development-plan.md)和[完整本命盘纵向切片契约](./natal-first-slice.yaml)。除全局入口预留外，行运、返照、关系和其他新技法全部暂停；`NATAL-RELEASE`通过后也不得自动恢复，必须等待用户明确授权。当前开发任务、接口、数据模型、测试和发布验收共同以这两份本命文档、本文、[专业工作台、分析选择与参数契约](./professional-workspace-contract.yaml)、[Canonical JSON Schema](../packages/canonical-schema/README.md)、[OpenAPI 3.1](../openapi/openapi.yaml)、[算法卡目录](../algorithm-cards/catalog.yaml)和[测试规范](../tests/)为准。涉及占星流派差异或复杂公式的工作项，必须先根据[算法卡模板](./algorithm-card-template.md)完成算法卡；没有算法卡的能力不得标记为 `Stable`。其余完整计算和图形目录继续保留，但不授权当前实现。
 
-各类规范职责不可互相替代：本文定义架构和开发方式；分析目录定义“用户如何进入、模型如何组合、报告如何形成”；计算目录定义“算什么、返回什么”；图形目录定义“画什么、消费哪些结果”；能力矩阵定义阶段、依赖、成熟度和测试状态；Schema/OpenAPI 定义机器契约；算法卡定义公式与变体；Preset/Rule Pack/Report Template 定义确定性编排与表达；数据 Manifest 定义来源和许可；Backlog 与测试规范定义实施顺序和完成证据。任何实现只有同时完成这些追踪才算进入范围。
+各类规范职责不可互相替代：本文定义架构和开发方式；专业工作台契约定义导航、对象选择、多盘工作台、模型暴露、参数分层、Preset和保留策略；分析目录定义“用户如何进入、模型如何组合、报告如何形成”；计算目录定义“算什么、返回什么”；图形目录定义“画什么、消费哪些结果”；能力矩阵定义阶段、依赖、成熟度和测试状态；Schema/OpenAPI 定义机器契约；算法卡定义公式与变体；Preset/Rule Pack/Report Template 定义确定性编排与表达；数据 Manifest 定义来源和许可；Backlog 与测试规范定义实施顺序和完成证据。任何实现只有同时完成这些追踪才算进入范围。
 
 ## 1. 目标、范围与约束
 
@@ -30,13 +30,15 @@
 - 中英文界面、字段、错误和开发文档；
 - SVG/PNG/PDF/JSON/CSV/ICS/项目归档导出；
 - 匿名计算和可选云端工作区；
+- 本命Snapshot的Markdown/纯文本完整技术推演、复制和下载；
+- 默认禁用、仅向部署方已配置提供方提交既有技术文档的可选AI连接器；
 - 允许后续接入新占术系统的公共平台协议。
 - 完整实现机器可读目录当前登记的99项专业计算基线，并为每项结果生成可追踪的 `OutputManifest`；
 - 逐项交付图形目录编号1—128；编号129—146属于V1后消费者产品，但必须在总目录保留稳定 `view_id` 和数据依赖。
 
 ### 1.2 V1 不做
 
-- AI 解读、AI 对话、自然语言控制；
+- 内置或默认开启的AI解读、AI对话、自然语言控制，以及任何由AI生成星历、星座、宫位、相位或逆行事实的路径；本命首切片只交付默认禁用的可选提交连接器，不附带已接通模型；
 - 普通消费者简化模式、每日推送和订阅内容；
 - CRM、预约、支付、咨询交付、团队协作；
 - 八字、紫微斗数、奇门遁甲和印度占星的领域实现；
@@ -59,6 +61,7 @@
 10. **可追踪覆盖**：每个公开结果必须回溯到计算条目、能力、算法卡和数据版本；每个图必须只消费 Canonical Result，不得在渲染层补算占星事实。
 11. **单一责任主体**：主代理对范围、领域决策、集成、验证、成熟度和发布负唯一责任；子代理不具有独立变更公共契约或签署Stable的权限。
 12. **独立双实现**：领域算法必须有生产实现和不共享关键逻辑的参考实现/参考引擎；主代理以差异报告、金标准和属性测试统一验收。
+13. **外发必须同意**：出生资料或计算结果发送到外部AI提供方前，必须展示精确提供方/模型、字段范围、目的、数据目的地、隐私/保留策略并获得本次提交的显式同意；不得后台发送、复用模糊同意或因配置缺失静默切换提供方。
 
 ## 2. 总体架构
 
@@ -95,6 +98,7 @@ flowchart LR
 | `jobs` | 长任务、进度、取消、重试、超时 | 持有领域状态真相 |
 | `datasets` | 数据版本、来源、许可证、同步状态 | 静默更新线上结果 |
 | `imports_exports` | CSV/JSON/ICS/项目归档 | 导出明文密钥或凭据 |
+| `optional_ai_connectors` | 已配置提供方目录、载荷预览、显式同意、提交状态和独立响应产物 | 计算或修正任何占星事实；宣称未配置模型已经接通 |
 | `sharing` | 可撤销、可过期分享 | 永久公开私有对象 |
 | `observability` | 日志、指标、审计、追踪 | 记录明文出生资料 |
 
@@ -165,6 +169,9 @@ docs/                     研发与项目文档
 | V1-DAT-001 | M0-M2 | P0 | 数据清单和同步框架 | V1-FND-001 | DatasetVersion、来源和许可台账 |
 | V1-ENG-001 | M1-M3 | P0 | 计算流水线与 Swiss Adapter | V1-SCH-001,V1-TIM-001,V1-DAT-001 | 标准化输入到快照 |
 | V1-NAT-001 | M2-M4 | P0 | 本命基础计算 | V1-ENG-001 | 天体、轴点、宫位、相位、统计 |
+| V1-NAT-002 | M5 | P0 | 本命人物到计算闭环 | V1-NAT-001,V1-SUB-001,V1-UI-001 | 保存人物/临时人物、确认后直接计算、首页切换结果和完整事实展示 |
+| V1-NAT-003 | M5 | P0 | 本命完整技术推演 | V1-NAT-002 | Markdown/纯文本确定性文档、复制、下载、内容哈希和来源版本 |
+| V1-AIX-001 | M5 | P1 | 可选AI提交连接器 | V1-NAT-003,V1-SEC-001 | 配置目录、禁用态、载荷预览、显式同意、独立响应和手动导出兜底；不包含默认可用模型 |
 | V1-REL-001 | M3-M5 | P0 | 比较盘与组合盘 | V1-NAT-001 | 跨盘相位、宫位覆盖、组合盘 |
 | V1-TRN-001 | M3-M5 | P0 | 行运和返照 | V1-NAT-001,V1-JOB-001 | 事件命中和太阳/月亮返照 |
 | V1-RND-001 | M2-M6 | P0 | 基础渲染 | V1-SCH-001,V1-NAT-001 | 单/双轮、网格、表、PNG/SVG |
@@ -277,6 +284,21 @@ ChartFamily       natal | transit | progression | direction | return | relations
 | `location` | 名称、WGS84经纬度、来源 | 海拔、行政层级、城市实体ID | 不能用地图视口中心代替选择地点 |
 
 关系、项目、组织和国家对象必须固定引用的对象版本；参与人物产生新版本时，系统只提示可升级，不得静默替换历史引用。
+
+#### 4.2.1 本命人物输入与直接计算闭环
+
+“添加人物”的主行为不是单独建档，而是以该人物生成本命结果。前端使用同一份`PersonInputDraft`支持两种提交模式：
+
+| 模式 | 身份要求 | 持久化 | 计算行为 |
+|---|---|---|---|
+| `saved_person` | 已登录 | 创建`Subject`和不可变`SubjectVersion`；可标记本人或关系角色 | 版本创建成功后立即用该版本确认本命Recipe并计算 |
+| `temporary_person` | 匿名或已登录 | 不进入人物库；匿名结果仅短期保存 | 以内联Subject确认完全相同的本命Recipe并计算 |
+
+必填输入为显示名称/代号、出生日期、时间精度、出生地点或明确的无地点降级、资料来源和可信度；出生时间、UTC候选选择、海拔、备注和关系角色按输入条件显示。提交前必须展示规范化地点、IANA时区、UTC候选、历史时区警告和所有本命设置。用户确认后直接创建计算，不得返回“人物已添加”后要求从其他入口重新选择一次。
+
+成功响应必须把工作台主对象切换为新计算对象，并至少显示每个已选点的星座、星座内精确度数、宫位或明确的不可用原因、速度和运动状态。`retrograde | direct | stationary | not_applicable | unknown`必须区分；太阳、月亮、轴点、Lots和计算型虚点按其定义返回`not_applicable`，未知时间造成的宫位/轴点缺失返回`unknown`和警告。已登录用户可把临时人物在计算后显式保存为本人或关系人物；保存时创建新`SubjectVersion`，已有临时Snapshot保持原输入引用和内容哈希不变。
+
+验收覆盖：保存人物、临时人物、匿名短期结果、计算后保存、DST双候选、未知时间、高纬宫位降级、计算失败后保留输入、重复提交幂等和旧Snapshot不被新版本修改。
 
 ### 4.3 TimeSpec
 
@@ -541,13 +563,15 @@ project | event | horary | electional | relocation | mundane
 | 类型 | 定义 | 数量/来源 | 是否直接执行 |
 |---|---|---:|---|
 | `CalculationTechnique` | 一个确定性计算技法，如本命、行运、次限、太阳弧、比较盘 | `calculation-catalog.yaml` | 由Recipe展开后执行 |
-| `AnalysisModel` | 可复用的后端分析编排构件 | 12个内置版本 | 不作为营销卡片；由TopicModel/Intent引用 |
+| `AnalysisModel` | 可复用的后端分析编排构件；前端以“分析体系/流派预设”在构建器第三步供专业用户复核或兼容覆盖 | 12个内置版本 | 不与TopicModel并列为营销卡片；由技法Preset、TopicModel或Intent解析后执行 |
 | `TopicModel` | 用户可选择的专题模型卡 | `analysis-catalog.yaml`中的24项 | 先解析为Recipe |
 | `AnalysisIntent` | 用户想解决的分析目的 | `analysis-catalog.yaml`中的35项 | 先解析为TopicModel和Recipe |
 | `RulePack` | 证据提取、主题映射、聚合和判断规则 | 版本化目录 | 在确定性沙箱中执行 |
 | `OutputPreset` | 默认图表、表格、报告和导出组合 | 版本化目录 | 仅选择输出，不补算事实 |
 
 24个TopicModel统一采用“核心配方锁定、有限参数覆盖、可选扩展”策略。修改核心组件、顺序、规则或默认值时必须复制为`CustomModelSpec`，不得仍显示官方模型ID。商业作者专有模型、文本和权重在没有书面授权时只能作为研究参考名称，不能注册为可执行模型。
+
+前端不得把12个AnalysisModel与24个TopicModel混排为同级“模型商城”。用户先选择技法、专题或目的；随后在构建器第三步查看系统解析出的分析体系。技法入口可以在兼容范围内切换现代、古典、希腊化或综合体系；TopicModel和Intent只开放各版本声明的覆盖项。任何体系、流派或计算参数变化都必须生成新的Recipe内容哈希，不能只改变下拉框文案。
 
 `AnalysisDraft`是用户尚未确认的可变草稿；`AnalysisRecipe`是预检后产生的不可变执行计划：
 
@@ -675,6 +699,97 @@ ConflictRule → PriorityRule → ConclusionTemplate → SectionDefinition
 
 六类`ReportProfile`和三种展示密度以`analysis-catalog.yaml`为准。摘要、标准和完整技术版必须来自同一个`ReportDocument`，不能重新计算或重新解释。切换密度不增加计算；新增技法属于Recipe扩展，必须重新预检。
 
+#### 4.12.1 配置解读与逐项上下文解读
+
+V1必须在完整报告之外提供`ContextualInterpretation`。它是对用户当前选中的一个计算项或一个很小的配置组合进行确定性说明，不等于`ReportDocument`，也不得要求用户先生成报告。典型对象包括：行星落座/落宫、宫头、相位、跨盘相位、行运命中、进入、停滞、返照命中、尊贵、接纳、阿拉伯点、中点、格局和时间主星期段。
+
+最小结构如下：
+
+```json
+{
+  "id": "ci_01J...",
+  "item_ref": {"snapshot_id": "calc_01J...", "result_path": "charts[1].aspects[27]"},
+  "item_kind": "transit_hit",
+  "layers": {
+    "fact": {"moving_point": "saturn", "target_point": "sun", "aspect": "square", "orb": 0.42, "phase": "applying"},
+    "basic_modern": {"statement_key": "transit.saturn.square.sun.applying.v1"},
+    "classical": null,
+    "related_context": {"exact_passes": [], "counter_evidence_refs": []}
+  },
+  "rule_pack": {"id": "interpretation.transit.basic.v1", "version": "1.0.0", "hash": "sha256:..."},
+  "template": {"locale": "zh-CN", "key": "transit.saturn.square.sun.applying.v1", "version": "1.0.0"},
+  "maturity": "beta",
+  "warnings": []
+}
+```
+
+行星位置解读按层组合：
+
+```text
+行星功能
+＋星座表达方式
+＋宫位生活领域
+＋运动状态修饰
+＋相位、尊贵、宫主、接纳和昼夜等上下文
+```
+
+现代层与古典层分别生成、分别标注来源，只有存在显式综合规则时才进入综合结论，禁止把若干模板机械拼成一段话。太阳、月亮、轴点、Lots和计算型虚点的运动状态必须使用`not_applicable`或其严格定义，不能把“不逆行”包装为一项有意义的顺行解释。出生时间未知时，落宫、角点和依赖它们的解读关闭或按候选盘分别显示，不能借用假定午夜生成含义。
+
+古典本质尊贵的直接展示字段固定为`profile_id / applicable / unavailable_reason / dignities[] / debilities[] / peregrine / status_facts[]`。每个`status_fact`包含`status_id`、`polarity`、`level`、`active`、`label_key`、三分角色、表引用和规则ID。紧凑点位表默认显示全部激活的主要状态；同一点同时失势和落陷时不得只保留一个。三分、界、面和非当值状态在详情展开。传统七曜以外的点返回明确不可用；天王星水瓶等只能在“现代守护”层显示，月交点、小行星、Lots和汉堡TNP不得套用来源不明的古典入庙/落陷标签。
+
+逐项解读的发布门禁为：已登记配置规则、双语模板、公开或授权来源、版本、成熟度和回归样本。缺少任何一项时仍完整展示计算事实，并显示“该层解读尚未发布”；不得回退到无版本的通用文字。完整报告只聚合已经发布且满足阈值的Finding，负责跨配置去重、矛盾处理和重要性排序。
+
+#### 4.12.2 本命技术推演与可选AI提交连接器
+
+`TechnicalResultDocument`是`CalculationSnapshot`的确定性序列化产物，不是`ReportDocument`，也不是新的计算。Markdown与纯文本必须由同一中间文档渲染，复制和下载复用同一个`content_hash`：
+
+```json
+{
+  "id": "trd_01J...",
+  "snapshot_id": "calc_01J...",
+  "document_kind": "natal_technical_derivation",
+  "preset": "full_selected",
+  "format": "markdown",
+  "locale": "zh-CN",
+  "included_result_paths": ["charts[0].points", "charts[0].houses", "charts[0].aspects"],
+  "omitted_uncomputed_groups": ["asteroids.user_selected"],
+  "schema_version": "1.0.0",
+  "content_hash": "sha256:...",
+  "created_at": "2026-07-19T12:00:00Z"
+}
+```
+
+本命完整技术推演按固定章节输出：原始/规范化人物时间地点、时间质量和警告、生效设置、天文上下文、点位落座/度数/宫位/速度/运动状态、12宫头、选中相位全集、结构统计/格局、古典昼夜/尊贵/太阳条件/定位星/接纳/Lots，以及引擎、算法、Rule Pack、数据集、公式来源、成熟度和可复现信息。空值、`unknown`和`not_applicable`必须原样保留，禁止为文字完整性猜值。`full_selected`只覆盖当前Snapshot已经物化的点和相位；新增对象或全点对必须回到Recipe预检。
+
+前端操作固定为`复制全部技术推演`、`导出 Markdown`和`导出纯文本`。复制默认使用当前语言的Markdown，用户可切换纯文本；成功后显示格式、字节数和内容哈希，失败时提供重试和下载替代。浏览器剪贴板权限失败不能丢失已生成文档。
+
+可选AI连接器只接受`TechnicalResultDocument`或其不可变Snapshot引用：
+
+```json
+{
+  "snapshot_id": "calc_01J...",
+  "technical_document_id": "trd_01J...",
+  "provider_id": "openai",
+  "model_id": "operator-configured-exact-id",
+  "document_format": "markdown",
+  "analysis_focus": "optional user text",
+  "consent": {
+    "accepted": true,
+    "payload_hash": "sha256:...",
+    "policy_version": "2026-07-19",
+    "accepted_at": "2026-07-19T12:01:00Z",
+    "authority_for_subject_data": true
+  },
+  "store_response": false
+}
+```
+
+提供方目录只能来自部署方配置和允许清单，至少返回`provider_id`、精确`model_id`、显示名、配置/可用状态、数据目的地、隐私政策、保留说明、上下文限制和禁用原因。`openai/GPT`、`moonshot/Kimi`只是初始适配器家族示例，默认状态均为`not_configured`；文档和UI不得据此宣称已经接通。没有配置时可以显示禁用项和原因，也可以完全隐藏提交入口，但复制/下载必须保持可用。
+
+提交前必须预览将发送的Subject、文档格式、章节/字段范围、字符/Token估算、提供方、精确模型、目的、数据目的地、隐私/保留信息和是否保存响应，并为本次载荷单独取得显式同意。系统不得后台提交，不得把一次同意扩展到其他人物、Snapshot、提供方或模型；分析他人资料时还必须确认用户有权发送该资料。凭据只存服务端秘密管理，不进入前端包、Snapshot、技术导出、日志或审计元数据。
+
+AI响应保存为独立的`OptionalAIArtifact`，标记提供方、精确模型、请求文档哈希、生成时间、是否持久化和`ai_generated=true`。它不能写回Snapshot、Evidence、Finding或确定性逐项解读，也不能成为星历、星座、宫位、逆行、相位或尊贵的事实来源。响应与Snapshot冲突时，界面以确定性事实为准并提示冲突。`NATAL-AI`门禁允许标准部署完全没有已配置第三方模型：必须用契约测试/测试适配器验证配置、禁用、预览、同意和隔离边界，而不是对外声称真实供应商已经接通。
+
 ### 4.13 核心状态机
 
 状态必须由服务端控制，客户端只发送命令，不允许直接改终态：
@@ -685,6 +800,8 @@ AnalysisRecipe: resolved → confirmed → superseded | expired
 Calculation: queued → running → succeeded | partial | failed | cancelled | timed_out
 Report: draft → resolving → queued → generating → ready | partial | failed | cancelled
 RenderArtifact: requested → rendering → ready | failed | expired
+TechnicalResultDocument: requested → serializing → ready | failed | expired
+OptionalAISubmission: previewed → consented | rejected; consented → queued; queued → running | cancelled; running → ready | failed | cancelled
 DatasetSync: discovered → downloading → validating → staged → active | rejected | rolled_back
 ```
 
@@ -842,6 +959,11 @@ DatasetSync: discovered → downloading → validating → staged → active | r
 | `REPORT_TEMPLATE_MISSING` | 422 | 否 | 使用结构化Finding或切换语言 |
 | `RENDER_DEPENDENCY_MISSING` | 422 | 否 | 追加计算并重新预检 |
 | `LICENSE_RESTRICTED` | 403 | 否 | 移除未授权模型或数据 |
+| `AI_PROVIDER_NOT_CONFIGURED` | 422 | 否 | 使用手动复制/导出，或由部署方完成配置 |
+| `AI_MODEL_NOT_ALLOWED` | 422 | 否 | 选择提供方目录内实际允许的精确模型 |
+| `AI_EXPLICIT_CONSENT_REQUIRED` | 422 | 否 | 预览本次载荷并明确同意后重新提交 |
+| `AI_PAYLOAD_CHANGED_AFTER_CONSENT` | 409 | 否 | 载荷已变化，重新预览并同意新哈希 |
+| `AI_PROVIDER_UNAVAILABLE` | 503 | 是 | 保留技术文档，稍后重试或手动复制 |
 
 ### 6.2 分析目录、草稿与配方解析
 
@@ -956,6 +1078,24 @@ GET  /reports/{id}/artifacts
 `POST /reports`必须引用已完成快照或已确认Recipe，并指定`report_profile_id`。服务端先返回报告依赖预检；若缺少计算，只能返回`additional_calculation_required`及可生成的技术报告，不得自动追加技法。摘要、标准和完整技术版引用同一`report_document_id`和版本。
 
 报告响应必须包含：报告规则包版本、模板版本、语言、Finding数量、被阈值排除的Finding数量、缺失章节、成熟度、警告和证据覆盖率。`GET /reports/{id}/findings`支持按主题、时间、证据类型和优先级游标分页。
+
+### 6.5.2 本命技术文档与可选AI提交
+
+```text
+POST /calculations/{id}/technical-documents
+GET  /technical-documents/{id}
+GET  /technical-documents/{id}/content
+
+GET  /optional-ai/providers
+POST /optional-ai/submissions/preview
+POST /optional-ai/submissions
+GET  /optional-ai/submissions/{id}
+POST /optional-ai/submissions/{id}/cancel
+```
+
+`POST /calculations/{id}/technical-documents`接收`format=markdown|plaintext`、`preset=core|professional|full_selected`和`locale`。服务端只读取指定不可变Snapshot并返回同源`TechnicalResultDocument`；同步生成可直接返回`201`，超出大小预算则返回`202 Job`。`GET /content`返回正确的`Content-Type`和`Content-Disposition`，Markdown使用`text/markdown; charset=utf-8`，纯文本使用`text/plain; charset=utf-8`。复制动作由前端读取同一内容端点完成，不维护另一份拼接逻辑。
+
+`GET /optional-ai/providers`只返回部署方已登记的提供方/模型及其`configured | unavailable | not_configured | disabled_by_policy`状态，不返回凭据。`POST /optional-ai/submissions/preview`以技术文档、提供方和精确模型为输入，返回不可变`payload_hash`、章节/字段范围、大小估算、数据目的地、隐私/保留说明和阻断原因，不调用第三方。`POST /optional-ai/submissions`必须携带同一`payload_hash`和显式同意对象；载荷变化返回`AI_PAYLOAD_CHANGED_AFTER_CONSENT`，未配置返回`AI_PROVIDER_NOT_CONFIGURED`，绝不自动改用另一模型。标准部署可以没有任何`configured`模型，此时NATAL确定性计算、复制和下载流程仍应全部通过。
 
 ### 6.6 Jobs 与 SSE
 
@@ -1194,33 +1334,49 @@ flowchart LR
 
 Preset版本进入内容哈希。只调整UI排序或文案不提升算法Preset版本；改变计算默认、证据语义或输出字段至少提升Minor版本，并提供旧Preset迁移说明。
 
+### 7.7.1 专业参数、点集和容许度覆盖
+
+完整参数分组、默认集合和计算/渲染边界以`professional-workspace-contract.yaml#professional_parameters`为准。实现必须至少满足：
+
+- 快捷层提供分析体系、黄道、宫位制、相位集、容许度Profile、点集和轮盘模式；
+- 专业层提供Ayanamsa、中心、坐标系、交点模式、逐类天体/虚点、小行星、固定星、阿拉伯点、TNP、古典表、时间技法变体和关系方向性；
+- 阿拉伯点使用“核心/常用/扩展/自定义公式”命名集合，不提供语义不明的纯数量滑杆；
+- 相位计算选择与相位线显示必须分离；隐藏已计算相位线只改RenderSpec，移除相位计算则产生新Recipe和Snapshot；
+- 自定义容许度覆盖顺序固定为“精确点对→点类别→相位→盘型语境→Profile默认”，每层均需版本化并进入内容哈希；
+- 官方Preset不可修改；用户可另存计算Preset、渲染Preset和工作区视图Preset，并支持复制、归档、恢复默认、导入和导出；
+- 不支持的点、表、公式或技法变体必须返回阻断或显式降级，不能被`custom_parameters`静默吞掉。
+
 ## 8. 前端工作台
 
 ### 8.1 信息架构
 
 ```text
-顶部：当前对象 / 新建分析 / 全部能力 / 任务 / 导出 / 账户
-左侧：示例对象、用户对象库、对象分类、最近结果和已存预设
-中央：个人仪表盘、分析中心、结果工作台、图表中心或报告阅读器
+顶部：工作台 / 人物与对象 / 新建分析 / 计算记录 / 报告 / 图表库 / 方法库 / 账户
+左侧：我的资料 / 人物 / 关系 / 项目与事件 / 组织 / 最近使用
+中央：个人仪表盘、对象页、分析构建器、结果工作台、图表库、方法库或报告阅读器
 结果导航：概览 / 星盘与图表 / 时间线 / 报告 / 数据与证据
 底部数据坞：位置 / 宫位 / 相位 / 尊贵 / 周期 / 事件 / OutputManifest
 右侧检查器：当前配方 / 输入 / 参数 / 计算计划 / 结果 / 证据 / 版本
 ```
 
-首次进入只显示一个内置虚拟人物及其预计算、缓存的现代本命摘要，必须永久显示“虚拟示例/缓存结果”。页面打开时不得计算行运、年度、关系、地图或报告。示例对象不得混入用户对象计数、最近使用、导出和分析统计；用户可以重置示例或基于示例创建副本。左侧对象库不得预置多个身份不明的虚构人物。
+全站只有一个主动作`新建分析`。任何“分析此人/当前关系/当前项目/生成此图”按钮都复用同一构建器并携带不同上下文，不得同时出现“开始新的分析”“打开统一分析中心”“新增分析”等指向同一空弹窗的同级CTA。左侧只负责选择对象和上下文，不承担能力目录导航；全局“图表库”与结果中的“本次可用图表”必须分开，不能再以“全部图表/图表中心/146项目录”重复出现。
+
+“方法库”面向专业用户，以用途、输入、输出、流派、参数和限制解释能力；原始ID默认折叠。“能力注册表、数据集与许可证、Schema、API和系统状态”属于开发者/运维信息，移到`账户→设置→开发者`。结果页“数据与证据”只展示本次使用的引擎、规则、参数、数据版本、可信度和证据。
+
+首次进入只显示一个内置虚拟人物及其预计算、缓存的现代本命摘要，必须永久显示“虚拟示例/缓存结果”。页面打开时不得计算行运、年度、关系、地图或报告。示例对象不得混入用户对象计数、最近使用、导出和分析统计；用户可以重置示例或基于示例创建副本。左侧对象库不得预置多个身份不明的虚构人物。用户确认或保存真实人物后，专业星盘工作台必须立即展示完整盘型标签及其“已生成/可直接渲染/需计算/需补输入/不可用”状态；显示入口不等于自动执行全部计算。
 
 ### 8.2 六类入口与统一分析中心
 
-所有入口汇入同一个`AnalysisDraft → AnalysisRecipe → Preflight → CalculationSnapshot`流程。入口只负责预填上下文，不得形成六套后端逻辑：
+所有入口汇入同一个`AnalysisDraft → AnalysisRecipe → Preflight → CalculationSnapshot`流程。六类入口分成三种选择目录和三种上下文启动器，不得机械渲染成六个同级标签，也不得形成六套后端逻辑：
 
 1. **按计算技法排盘**：用户明确选技法；默认不添加解释模型，服务端只补必需依赖和标准图表包。
 2. **按专题模型分析**：展示24个真实TopicModel卡；核心配方锁定，只允许声明过的参数覆盖和兼容扩展。
-3. **从对象或已有星盘进入**：预填对象版本，根据对象类型展示固定快捷操作。
-4. **从个人仪表盘进入**：预填当前人物和当前时间，提供短期、年度、长期、专题、关系和地理快捷卡。
-5. **按分析目的进入**：展示35个AnalysisIntent，服务端解析所需TopicModel、技法和输出。
+3. **按分析目的进入**：展示35个AnalysisIntent，服务端解析所需TopicModel、技法和输出。
+4. **从对象或已有星盘进入**：预填对象版本，根据对象类型动态显示“分析当前人物/关系/项目/事件/组织/问题”和固定快捷操作。
+5. **从个人仪表盘进入**：预填当前人物和当前时间，提供短期、年度、长期、专题、关系和地理快捷卡。
 6. **从时间、关系、项目或地点快捷进入**：预填相应上下文，仍进入统一预检。
 
-顶部“新建分析”打开统一分析中心，固定标签为：最近使用、计算技法、专题模型、分析目的、收藏与预设、全部能力。搜索覆盖技法、专题模型、目的、对象和图表，不搜索未授权商业报告文本。
+顶部“新建分析”打开统一分析中心，固定目录为：最近使用、计算技法、专题模型、分析目的、收藏与预设、全部能力。后三种上下文启动器只改变构建器标题、对象角色、时间/地点和推荐动作，不能伪装成第四至第六个目录标签。搜索覆盖技法、专题模型、目的、对象和图表，不搜索未授权商业报告文本。
 
 ### 8.3 新增并分析与对象快捷操作
 
@@ -1231,10 +1387,12 @@ Preset版本进入内容哈希。只调整UI排序或文案不提升算法Preset
 3. 选择本次要做的技法、专题模型或分析目的；
 4. 解析地点、时区、UTC候选、第二对象、时间范围或目标地点；
 5. 用户解决歧义，未知出生时间保持未知；
-6. 云端模式创建不可变`SubjectVersion`；匿名模式使用内联对象；
+6. 用户可以选择人物库版本或内联临时对象；内联对象默认不保存，云端用户明确勾选后才创建不可变`SubjectVersion`；匿名模式始终使用内联对象；
 7. 进入Recipe预检，而不是保存后停在空对象页。
 
-对象快捷操作的完整矩阵以`analysis-catalog.yaml#object_action_matrix`为准。出生时间校正显示为未来能力，并说明缺少可靠标准答案，不得在V1伪装可用。
+对象快捷操作的完整矩阵以`analysis-catalog.yaml#object_action_matrix`为准。“对象快捷”只作为内部入口ID，用户可见名称必须按对象类型动态显示。出生时间校正显示为未来能力，并说明缺少可靠标准答案，不得在V1伪装可用。
+
+每个个人Workspace最多有一个活动的“主要本人档案”，也允许没有。其他人物以本人之外的独立Subject保存，并可标记伴侣、父母、子女、兄弟姐妹、亲属、朋友、同事、客户或其他关系。个人中心至少提供我的资料、人物库、关系库、计算历史、报告和隐私数据六区。登录用户在分析中临时录入人物时，“保存到人物库”默认关闭；结果页允许转存，但只能创建新Subject/SubjectVersion和非破坏性关联，不得重写既有Snapshot。
 
 个人仪表盘固定显示：当前人物与时间质量、缓存本命摘要、按需当前触发、7/30/90天与1/3年范围入口、四类时间模型、专题入口、关系动态、地理入口、近期任务和数据警告。除缓存本命摘要外均为可执行卡片或已有结果状态，不在加载页面时批量计算。
 
@@ -1245,10 +1403,16 @@ Preset版本进入内容哈希。只调整UI排序或文案不提升算法Preset
 ```text
 1 选择入口项
 → 2 选择/新增对象和上下文
-→ 3 确认模型、技法、Rule Pack和允许参数
+→ 3 确认分析体系、技法、Rule Pack和允许参数
 → 4 选择可选扩展、图表和报告
 → 5 查看预检并运行
 ```
+
+第一步的每张技法、专题和目的卡必须以用户语言说明“分析什么、需要什么输入、主要输出什么、不包含什么、成熟度如何”；`natal.standard_chart`等内部ID只能出现在折叠技术详情或专家模式，不能占据主要副标题。
+
+第三步将AnalysisModel显示为“分析体系/流派预设”。技法入口可在兼容范围内切换现代、古典、希腊化和综合体系；专题和目的入口展示解析结果，只开放模型版本声明的覆盖项。快捷设置包含体系、黄道、宫位制、相位集、容许度、点集和轮盘模式；高级设置按黄道/Ayanamsa、中心与坐标、宫位、天体与虚点、小行星/固定星/TNP、相位与容许度、阿拉伯点、古典表、时间技法和关系方向性分组。完整字段、集合和覆盖优先级必须实现`professional-workspace-contract.yaml#professional_parameters`，不能仅依赖无约束`custom_parameters`。
+
+用户可以将本次设置另存为计算Preset、渲染Preset或工作区视图Preset。计算Preset变更会生成新Recipe；隐藏标签、相位线或图层只生成新RenderSpec；工作区分屏和面板布局只保存View State。三类设置不得互相覆盖。
 
 预检页必须分组展示：
 
@@ -1275,6 +1439,14 @@ Preset版本进入内容哈希。只调整UI排序或文案不提升算法Preset
 | 报告 | 六种ReportProfile、三种密度、章节和生成状态 |
 | 数据与证据 | RawFact、Evidence、Finding、Conclusion、算法和版本 |
 
+专业星盘工作台固定提供“本命、当前天空、本命＋行运、次限、太阳弧、返照、关系、古典与高级、更多”盘型入口，并提供单轮、双轮、三轮、四轮和自定义多轮模式。用户确认真实人物后只预计算可复用的本命核心事实与标准Snapshot；当前天空使用共享时间缓存；行运、次限、太阳弧、返照、年度和长期周期按需计算；关系、迁移和项目盘在缺少第二人物、目标地点或事件锚点时显示补充输入，而不是静默运行。
+
+每种盘型必须同时登记主图、配套位置数据、宫位、相位/跨盘相位、关键派生项和事件数据。例如“本命＋行运”完成后至少显示双轮盘、本命位置、行运位置、行运对本命相位表、相位网格、容许度进入/精确/离开时间和逆行多次命中。已经写入Snapshot的结果不得只存在于JSON或报告技术附录；允许用筛选、搜索、分页和虚拟滚动控制密度，但每个结果项必须可达，并由`OutputManifest`映射到一个视图、可访问表格或导出。
+
+轮盘点位、相位线、表格行、相位网格单元格和时间线事件均可触发“逐项解读”。桌面端在当前行附近展开或在保留选中状态的右侧检查器显示；平板/移动端使用保留上下文的底部抽屉或详情路由。检查器固定标签为`事实 / 基础含义 / 古典状态 / 相位与上下文 / 证据与来源`。默认先显示原始事实和一至两句已发布解读，用户再展开详细规则；该动作只读取现有Snapshot和版本化规则，不自动追加天文计算，也不创建完整报告。
+
+盘型入口可以立即全部可见，但每项必须显示`已生成 | 可由快照渲染 | 需要计算 | 需要额外输入 | 不可用`。切换到未生成盘型先展示预计依赖、耗时和输出，再进入Recipe确认；除用户显式启用的背景预取Preset外，不得因为浏览标签而全量计算。当前策略和标准工作区Preset以`professional-workspace-contract.yaml#professional_chart_workspace`为准。
+
 图表中心必须展示`render-catalog.yaml`全部146项，按家族、阶段、成熟度和状态筛选。每项明确显示：已生成、可由当前快照渲染、需要追加计算、不可用或V1后消费者能力。点击“需要追加计算”必须回到Recipe扩展预检；不能在图表页静默启动计算。
 
 V1发布门禁要求每个计算、模型和图表至少具备一个直接入口、依赖路径或Recipe引用；没有可达路径的项目必须移到未来/实验目录。100%可达不等于100%默认展示或高频计算。
@@ -1284,6 +1456,8 @@ V1发布门禁要求每个计算、模型和图表至少具备一个直接入口
 报告页提供六种ReportProfile：计算记录、技法分析、专题模型、目的综合、对象档案和研究比较。生成前展示现有依赖、缺失计算、规则包、模板语言、章节预览和成熟度。
 
 报告阅读器默认标准密度，并允许切换摘要和完整技术版；切换密度不得新建报告或重新计算。正文每个Conclusion提供“查看证据”，依次下钻至Finding、Evidence和RawFact。报告模板缺失时显示结构化Finding；报告规则缺失时只允许计算记录或技术报告。
+
+报告中心不承担逐条罗列所有行星、相位和时间命中的职责。它只呈现经过规则筛选、聚合、去重、反证处理和排序的综合内容；未被报告选中的计算项仍可在相应星盘、数据表、相位表或时间线中查看并逐项解读。逐项解读和完整报告可以引用同一Evidence与模板片段，但二者拥有不同ID、缓存和发布门禁。
 
 ### 8.7 状态、响应式与无障碍要求
 
@@ -1332,7 +1506,7 @@ V1发布门禁要求每个计算、模型和图表至少具备一个直接入口
 
 滚动所有权固定如下：桌面端应用根节点锁定为视口高度，顶部栏固定；左侧对象栏、中央工作区、右侧检查器和弹窗正文分别拥有独立、可见且可键盘滚动的容器。页面内容不得依赖浏览器缩小比例才能到达，底部操作栏不得覆盖最后一项内容。平板和移动端取消根节点滚动锁，使用文档流；打开弹窗时只锁背景，弹窗正文保持滚动，关闭后恢复原滚动位置。必须测试`800px`高桌面、`667px`高移动端、内容溢出、长目录、长预检和`200%`缩放。
 
-信息架构验收以“用户下一步是否唯一且可解释”为准：默认台面只展示示例对象、已有缓存和六个开始入口；计算目录、图表目录、报告目录属于不同任务空间，不在同一屏平铺全部能力。高频操作就近展示，低频专业参数进入检查器或二级面板；用户始终能看到当前对象、当前入口、当前选择、是否会计算以及返回修改路径。
+信息架构验收以“用户下一步是否唯一且可解释”为准：默认台面只展示示例或当前对象、已有缓存、唯一`新建分析`主动作、最近计算与报告；三种选择目录在分析中心内展示，三种上下文入口只作为对象页和快捷动作预填。计算目录、图表目录、报告目录属于不同任务空间，不在同一屏平铺全部能力。高频操作就近展示，低频专业参数进入检查器或二级面板；用户始终能看到当前对象、当前入口、当前选择、是否会计算以及返回修改路径。
 
 ## 9. 图形和导出
 
@@ -1368,9 +1542,18 @@ V1发布门禁要求每个计算、模型和图表至少具备一个直接入口
 - PNG支持透明背景和1x/2x/4x；
 - PDF嵌入字体或使用许可明确的字体子集；
 - JSON是完整快照；CSV按表分别导出并附元数据；
+- Markdown和纯文本提供“专业技术全量导出”，它们只是Canonical Snapshot的确定性序列化，不生成新的解释或占星结论；
 - ICS只导出用户选择的时间事件并包含时区；
 - 项目归档为版本化ZIP，包含manifest、对象版本、快照、Rule Pack和可选渲染物；
 - 导入先校验校验和、Schema版本和压缩炸弹风险，再写入新Workspace资源。
+
+“专业技术全量导出”至少包含：格式/Schema版本、盘型、原始和规范化时间地点、时区候选与可信度、全部生效参数、盘层说明、选中点集、每个点的位置/宫位/速度/运动状态/古典状态引用、12宫头、选中相位全集、警告、算法/规则/数据版本、公式来源和免责声明。相位行不能只保留文案，必须同时保留双方稳定ID、理论角、实际角、容许度、容许度比例和入出相；阿拉伯点必须保留公式、昼夜分支与来源；TNP、用户点和来源不明特殊点必须显示真实/假想类别与成熟度。
+
+导出Preset至少提供：`core`（主要天体、四轴、宫位、主要相位）、`professional`（所选点集、次要相位、尊贵和Lots）、`full_selected`（对本次已计算的全部点进行全量序列化）。`full_selected`不得自动补算未选小行星、固定星、TNP或Lots；需要更多点时必须返回Recipe扩展预检。大量全点对相位必须经过点数、相位数、输出大小和耗时预算，超过同步阈值进入Job。
+
+当前本命首切片将Markdown/纯文本从M7—M12通用导出能力前置到M5：`natal.technical.copy`、`natal.technical.export_markdown`和`natal.technical.export_plaintext`必须在`NATAL-3`后可用，并通过独立的`M5-N006`验收。复制与两种下载必须引用同一`TechnicalResultDocument`和`content_hash`；复制成功提示格式/大小/哈希，剪贴板失败时保留下载入口。M12只负责把同一契约推广到行运、关系、返照和其他盘型，不得重复实现一套本命专用拼接器。
+
+公开竞品或用户导入文本只能作为字段覆盖和差异测试夹具，不能成为公式、尊贵、解释或翻译的权威来源。尚未有公开文献或自有规则卡的婚姻细分、离婚、儿女、继承、商品、危险、死亡、背叛、游戏等Lots，以及“紫炁”等特殊点，只能进入待研究注册表；完成稳定ID、公式、昼夜规则、来源、测试和许可审查后才能执行。涉及死亡、灾祸和寿命的点默认关闭且不得生成确定性结论。
 
 ## 10. 数据同步与许可证
 
@@ -1604,12 +1787,16 @@ V1必须随代码交付以下Runbook：API 5xx、队列积压、Worker失联、�
 - 支持主要天体、轴点、宫位、主要相位、逆行、元素和模式；
 - 单轮、双轮、相位网格、位置表和基础时间线可用；
 - 匿名计算和云端对象版本工作流完整；
+- 保存人物和仅本次临时人物共享同一本命输入/预检/计算链路；提交的完成条件是本命Snapshot可见，不是仅创建对象；
+- 本命点位表直接展示星座、精确度数、宫位和`direct/retrograde/stationary/not_applicable/unknown`运动状态；
 - 台面示例人物有明确标识；统一分析中心和计算技法/专题/目的/对象快捷入口的首批纵向切片可用；
 - 新增人物不是孤立建档：新增并分析→选择内容→Recipe预检→运行的完整流程可用；
 - `natal.modern.v1`、`forecast.short_transit.v1`和`relationship.comparison.v1`可用；
 - 三个Alpha TopicModel卡可解析；24个专题模型和35个目的均可检索并显示阶段、依赖或阻断原因；
 - 计算记录报告和基础技法报告可以生成结构化JSON、HTML和PDF；
 - SVG/PNG/JSON/CSV可导出；
+- 本命完整技术推演可复制并导出Markdown/纯文本，所有格式可追溯同一Snapshot、设置和内容哈希且不追加计算；
+- 可选AI提交连接器默认无已配置模型；未配置时明确禁用并保留手动复制，测试适配器下通过提供方/精确模型/载荷预览/显式同意/响应隔离门禁，不能因此声称GPT、Kimi等真实第三方已接通；
 - REST、异步任务、SSE、取消和限流可用；
 - 关键时间和天体位置通过金标准与差异测试；
 - Docker Compose可在全新机器上按文档启动。
@@ -1723,6 +1910,6 @@ CI必须阻断以下情况：
 
 ## 18. M0—M24 开发资产状态
 
-当前可直接用于拆分、编码和验收的资产索引见[M0—M24 开发资产与开工说明](./m24-development-assets.md)。该文件记录当前真实状态：12个模型、24个专题、35个目的、99项计算和146项视图已形成稳定目录；50张算法卡已纳入逐阶段实现与验证；15个Canonical Schema、46条API路径/52个操作、14个数据Manifest和M0—M24共100个任务已落盘。
+当前可直接用于拆分、编码和验收的资产索引见[M0—M24 开发资产与开工说明](./m24-development-assets.md)。该文件记录当前真实状态：12个模型、24个专题、35个目的、99项计算和146项视图已形成稳定目录；51张算法卡已纳入逐阶段实现与验证；15个Canonical Schema、46条API路径/52个操作、14个数据Manifest和M0—M24月度任务及当前本命优先门禁已落盘。
 
 这里的“可直接开发”只表示输入契约、公式选择、依赖、输出、降级和验收不再依赖聊天上下文，不表示业务代码已经完成。算法卡只有在生产实现、独立参考实现差异验证和主代理复核完成后才能从`review`升级为`approved`；能力只有满足本说明书成熟度门禁后才能升级为`Stable`。

@@ -13,7 +13,7 @@
     "maturity": {"$ref": "common.schema.json#/$defs/Maturity"},
     "view_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
     "table_ids": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Identifier"}, "uniqueItems": true},
-    "export_formats": {"type": "array", "items": {"type": "string", "enum": ["svg", "png", "pdf", "json", "csv", "ics", "project_archive"]}, "uniqueItems": true},
+    "export_formats": {"type": "array", "items": {"type": "string", "enum": ["svg", "png", "pdf", "json", "csv", "ics", "markdown_technical", "plaintext_technical", "project_archive"]}, "uniqueItems": true},
     "recommended_primary_view_id": {"type": ["string", "null"]},
     "missing_inputs": {"type": "array", "items": {"type": "string"}},
     "warnings": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Warning"}},

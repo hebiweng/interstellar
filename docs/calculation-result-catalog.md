@@ -149,12 +149,14 @@
 
 | calculation_id | 结果 | target_release | maturity |
 |---|---|---|---|
-| `classical.essential_dignity.v1` | 入庙、擢升、失势、落陷、三分性、界、面、游走、Almuten、分项与总分 | beta | beta |
-| `classical.accidental_dignity.v1` | 宫位、速度、顺逆、日核/燃烧/光束下、喜乐宫、昼夜、Hayz、东西方、吉凶相位、可见性 | beta | beta |
+| `classical.essential_dignity.v1` | 传统七曜入庙、擢升、失势、落陷、三分性、界、面、游走；语言无关`status_facts`含来源、层级、极性和激活状态。Almuten/分项总分在Profile与算法卡完成前显式排除 | beta | beta |
+| `classical.accidental_dignity.v1` | 分项交付宫位角续果、速度/站点/顺逆、日核/燃烧/光束下、喜乐宫、昼夜、Hayz、东西方、吉凶相位和可见性；当前仅太阳关系与显式昼夜成员已实现，其余保持Experimental且不得返回空壳总分 | beta | beta |
 | `classical.condition.v1` | 夹制、围困、Bonification、Maltreatment、光线传递/收集、禁止、挫败、返回、完成 | pro | beta |
 | `classical.life_points.v1` | Hyleg、Alcocoden、Anareta、Prorogator、Apheta、生命主星与年限分配 | v1 | experimental |
 
 `classical.life_points.v1` 仅供专业研究，必须默认关闭，不得生成寿命、死亡日期或灾祸断言；未通过专业评审时可随 V1 发布为 Experimental，但不得伪装成 Stable。
+
+本质尊贵默认仅适用于传统七曜。天王星/海王星/冥王星的现代共同守护必须作为现代守护层单独显示；月交点、Lots、Vertex、小行星、半人马体、汉堡TNP和来源不明特殊点没有默认古典尊贵表，返回`POINT_OUTSIDE_TRADITIONAL_SEVEN`。紧凑表格可显示入庙/擢升/失势/落陷等主要标签，但不得静默丢弃同点并存状态，例如水星双鱼必须保留失势和落陷。
 
 ### 2.11 阿拉伯点
 

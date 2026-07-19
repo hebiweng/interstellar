@@ -5,7 +5,8 @@ import "./globals.css";
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
   const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "localhost:3001";
-  const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  const localHost = /^(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/.test(host);
+  const protocol = requestHeaders.get("x-forwarded-proto") ?? (localHost ? "http" : "https");
   const baseUrl = new URL(`${protocol}://${host}`);
   const socialImage = new URL("/og.png", baseUrl).toString();
 
@@ -14,6 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: "Interstellar · 专业占星研究工作台",
     description: "可复现、可验证、可追溯的专业西方占星计算与研究工作台。",
     applicationName: "Interstellar",
+    icons: { icon: "/favicon.svg" },
     openGraph: {
       title: "Interstellar · Professional Astrology Workspace",
       description: "Professional astrology calculation, visualization, and evidence workspace.",
