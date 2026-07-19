@@ -16,8 +16,8 @@ RUN python -m pip install --no-cache-dir -r /tmp/interstellar-api-requirements.l
 COPY apps/api ./apps/api
 COPY python ./python
 COPY docs ./docs
-COPY contracts ./contracts
 COPY data-manifests ./data-manifests
+COPY presets ./presets
 COPY vendor/geonames ./vendor/geonames
 COPY vendor/iana-tzdb ./vendor/iana-tzdb
 COPY vendor/swisseph ./vendor/swisseph
@@ -34,4 +34,3 @@ HEALTHCHECK --interval=20s --timeout=5s --start-period=20s --retries=5 \
   CMD curl --fail --silent http://127.0.0.1:8018/health/ready >/dev/null || exit 1
 
 CMD ["python", "-m", "interstellar_api"]
-
