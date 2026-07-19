@@ -128,3 +128,42 @@ def test_latest_natal_overwrites_and_accounts_are_isolated(tmp_path) -> None:
             },
         )
         assert forbidden.status_code == 404
+
+
+def test_account_preferences_validate_default_person_and_clear_on_delete(tmp_path) -> None:
+    with client(tmp_path) as test_client:
+        register(test_client)
+        initial = test_client.get("/api/v1/account/workspace").json()
+        assert initial["preferences"] == {
+            "defaultPersonId": None,
+            "sampleVisible": True,
+        }
+        saved = test_client.post(
+            "/api/v1/account/workspace",
+            json={
+                "action": "save_person",
+                "person": {"displayName": "默认人物", "relation": "self"},
+            },
+        ).json()
+        person_id = saved["id"]
+        preferences = test_client.patch(
+            "/api/v1/account/preferences",
+            json={"default_person_id": person_id, "sample_visible": False},
+        )
+        assert preferences.status_code == 200
+        assert preferences.json()["preferences"] == {
+            "defaultPersonId": person_id,
+            "sampleVisible": False,
+        }
+        invalid = test_client.patch(
+            "/api/v1/account/preferences",
+            json={"default_person_id": "somebody-elses-person"},
+        )
+        assert invalid.status_code == 404
+        deleted = test_client.post(
+            "/api/v1/account/workspace",
+            json={"action": "delete_person", "personId": person_id},
+        )
+        assert deleted.status_code == 200
+        after = test_client.get("/api/v1/account/preferences").json()["preferences"]
+        assert after == {"defaultPersonId": None, "sampleVisible": False}

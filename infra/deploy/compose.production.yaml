@@ -2,6 +2,8 @@ name: interstellar-production
 
 x-runtime-defaults: &runtime-defaults
   restart: unless-stopped
+  init: true
+  stop_grace_period: 20s
   security_opt:
     - no-new-privileges:true
   networks:
@@ -25,6 +27,8 @@ services:
       PORT: "3000"
     expose:
       - "3000"
+    mem_limit: 384m
+    pids_limit: 128
     read_only: true
     tmpfs:
       - /tmp:size=32m,mode=1777
@@ -52,14 +56,24 @@ services:
       INTERSTELLAR_LOG_LEVEL: INFO
       INTERSTELLAR_CORS_ALLOWED_ORIGINS: https://fate.xiaoguiwk.top
       INTERSTELLAR_ACCOUNT_DATABASE_PATH: /var/lib/interstellar/accounts.sqlite3
+      # Small-memory production profile: timezone selection uses the official
+      # GeoNames IANA hint and remains user-confirmed. Mount the full TBB
+      # archive and override these two variables only on hosts with >=4 GiB.
+      INTERSTELLAR_TIMEZONE_BOUNDARIES_PATH: ${INTERSTELLAR_TIMEZONE_BOUNDARIES_PATH:-/opt/interstellar/deploy-data/timezone-boundaries-geonames-fallback.geojson}
+      INTERSTELLAR_TIMEZONE_BOUNDARIES_DATASET_VERSION: ${INTERSTELLAR_TIMEZONE_BOUNDARIES_DATASET_VERSION:-geonames-hint-only-v1}
       INTERSTELLAR_AUTH_COOKIE_NAME: interstellar_session
       INTERSTELLAR_AUTH_SESSION_DAYS: "30"
       INTERSTELLAR_AUTH_COOKIE_SECURE: "true"
+      INTERSTELLAR_ADMIN_BOOTSTRAP_EMAIL: ${INTERSTELLAR_ADMIN_BOOTSTRAP_EMAIL:-}
+      INTERSTELLAR_ADMIN_BOOTSTRAP_PASSWORD: ${INTERSTELLAR_ADMIN_BOOTSTRAP_PASSWORD:-}
+      INTERSTELLAR_ADMIN_MASTER_KEY: ${INTERSTELLAR_ADMIN_MASTER_KEY:-}
       INTERSTELLAR_DEEPSEEK_API_KEY: ${INTERSTELLAR_DEEPSEEK_API_KEY:-}
       INTERSTELLAR_DEEPSEEK_BASE_URL: ${INTERSTELLAR_DEEPSEEK_BASE_URL:-https://api.deepseek.com}
       INTERSTELLAR_DEEPSEEK_MODEL: ${INTERSTELLAR_DEEPSEEK_MODEL:-deepseek-v4-pro}
     expose:
       - "8018"
+    mem_limit: 1024m
+    pids_limit: 192
     volumes:
       - ${INTERSTELLAR_DATA_DIR:-/opt/interstellar/data}:/var/lib/interstellar
     read_only: true

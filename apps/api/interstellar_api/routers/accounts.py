@@ -29,6 +29,8 @@ class WorkspaceAction(BaseModel):
         "save_latest_natal",
         "save_ai_analysis",
         "delete_person",
+        "set_default_person",
+        "set_sample_visibility",
     ]
     personId: str | None = None
     person: dict[str, Any] | None = None
@@ -39,6 +41,14 @@ class WorkspaceAction(BaseModel):
     analysisDocumentHash: str | None = None
     aiAnalysisText: str | None = None
     aiModelId: str | None = None
+    sampleVisible: bool | None = None
+
+
+class AccountPreferencesUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    default_person_id: str | None = None
+    sample_visible: bool | None = None
 
 
 def store(request: Request) -> AccountStore:
@@ -51,6 +61,14 @@ def account_error(error: AccountError, *, default_status: int = 422) -> JSONResp
         "AUTHENTICATION_FAILED": 401,
         "LOGIN_REQUIRED": 401,
         "FORBIDDEN": 403,
+        "ACCOUNT_DISABLED": 403,
+        "ACCOUNT_SUSPENDED": 403,
+        "LAST_SUPER_ADMIN": 409,
+        "ACCOUNT_NOT_FOUND": 404,
+        "PROVIDER_NOT_FOUND": 404,
+        "MODEL_NOT_FOUND": 404,
+        "MASTER_KEY_REQUIRED": 409,
+        "PROVIDER_KEY_MISSING": 409,
         "PERSON_NOT_FOUND": 404,
         "NATAL_RESULT_NOT_FOUND": 404,
     }.get(error.code, default_status)
@@ -102,6 +120,9 @@ def register(
     except AccountError as error:
         return account_error(error)
     set_session_cookie(response, request, token)
+    store(request).record_event(
+        "account_registered", actor_email=user["email"], metadata={"route": "register"}
+    )
     return {"authenticated": True, "user": user}
 
 
@@ -125,6 +146,9 @@ def login(
         lifetime_days=request.app.state.settings.auth_session_days,
     )
     set_session_cookie(response, request, token)
+    store(request).record_event(
+        "account_login", actor_email=user["email"], metadata={"route": "login"}
+    )
     return {"authenticated": True, "user": user}
 
 
@@ -145,6 +169,7 @@ def get_workspace(request: Request) -> dict[str, Any]:
         "authenticated": True,
         "user": user,
         "people": store(request).workspace(user["email"]),
+        "preferences": store(request).preferences(user["email"]),
     }
 
 
@@ -158,11 +183,31 @@ def update_workspace(action: WorkspaceAction, request: Request) -> dict[str, Any
         )
     payload = action.model_dump()
     try:
+        if action.action == "set_default_person":
+            return {
+                "preferences": store(request).set_default_person(
+                    user["email"], action.personId
+                )
+            }
+        if action.action == "set_sample_visibility":
+            if action.sampleVisible is None:
+                raise AccountError("INVALID_PREFERENCES", "缺少示例显示设置。")
+            return {
+                "preferences": store(request).set_sample_visibility(
+                    user["email"], action.sampleVisible
+                )
+            }
         if action.action == "save_person":
             identifier, saved_at = store(request).save_person(
                 user["email"],
                 action.person or {},
                 action.personId,
+            )
+            store(request).record_event(
+                "object_updated" if action.personId else "object_created",
+                actor_email=user["email"],
+                success=True,
+                metadata={"object_type": "person"},
             )
             return {"id": identifier, "savedAt": saved_at}
         person_id = action.personId or ""
@@ -175,8 +220,60 @@ def update_workspace(action: WorkspaceAction, request: Request) -> dict[str, Any
                 action.aiAnalysisText or "",
                 action.aiModelId,
             )
+            store(request).record_event(
+                "report_generated",
+                actor_email=user["email"],
+                success=True,
+                metadata={"analysis_type": "natal", "model_id": action.aiModelId or ""},
+            )
             return {"personId": person_id, "saved": True}
         store(request).delete_person(user["email"], person_id)
+        store(request).record_event(
+            "object_deleted",
+            actor_email=user["email"],
+            success=True,
+            metadata={"object_type": "person"},
+        )
         return {"personId": person_id, "deleted": True}
+    except AccountError as error:
+        return account_error(error)
+
+
+@router.get("/preferences", response_model=None)
+def get_preferences(request: Request) -> dict[str, Any] | JSONResponse:
+    user = current_user(request)
+    if user is None:
+        return account_error(
+            AccountError("LOGIN_REQUIRED", "登录后才能保存偏好设置。"),
+            default_status=401,
+        )
+    return {"preferences": store(request).preferences(user["email"])}
+
+
+@router.patch("/preferences", response_model=None)
+def patch_preferences(
+    payload: AccountPreferencesUpdate, request: Request
+) -> dict[str, Any] | JSONResponse:
+    user = current_user(request)
+    if user is None:
+        return account_error(
+            AccountError("LOGIN_REQUIRED", "登录后才能保存偏好设置。"),
+            default_status=401,
+        )
+    if not payload.model_fields_set:
+        return account_error(AccountError("INVALID_PREFERENCES", "没有需要更新的设置。"))
+    try:
+        preferences = store(request).preferences(user["email"])
+        if "default_person_id" in payload.model_fields_set:
+            preferences = store(request).set_default_person(
+                user["email"], payload.default_person_id
+            )
+        if "sample_visible" in payload.model_fields_set:
+            if payload.sample_visible is None:
+                raise AccountError("INVALID_PREFERENCES", "示例显示设置不能为空。")
+            preferences = store(request).set_sample_visibility(
+                user["email"], payload.sample_visible
+            )
+        return {"preferences": preferences}
     except AccountError as error:
         return account_error(error)

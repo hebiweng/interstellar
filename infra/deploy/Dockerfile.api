@@ -2,6 +2,7 @@ FROM python:3.13-slim-bookworm
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
+    MALLOC_ARENA_MAX=2 \
     PYTHONPATH=/opt/interstellar/apps/api:/opt/interstellar/python
 
 WORKDIR /opt/interstellar
@@ -22,6 +23,7 @@ COPY vendor/geonames ./vendor/geonames
 COPY vendor/iana-tzdb ./vendor/iana-tzdb
 COPY vendor/swisseph ./vendor/swisseph
 COPY vendor/timezone-boundary-builder ./vendor/timezone-boundary-builder
+COPY infra/deploy/timezone-boundaries-geonames-fallback.geojson ./deploy-data/timezone-boundaries-geonames-fallback.geojson
 
 RUN groupadd --system --gid 10001 interstellar \
     && useradd --system --uid 10001 --gid interstellar --home /opt/interstellar interstellar \

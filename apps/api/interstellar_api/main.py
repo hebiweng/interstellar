@@ -18,6 +18,8 @@ from interstellar_api.middleware import install_request_context
 from interstellar_api.readiness import ProbeResult, ReadinessRegistry
 from interstellar_api.recipe_registry import load_repository_recipe_registry
 from interstellar_api.routers.accounts import router as accounts_router
+from interstellar_api.routers.admin import router as admin_router
+from interstellar_api.routers.analytics import router as analytics_router
 from interstellar_api.routers.datasets import router as datasets_router
 from interstellar_api.routers.health import router as health_router
 from interstellar_api.routers.locations import router as locations_router
@@ -44,14 +46,30 @@ def create_app(settings: ApiSettings | None = None) -> FastAPI:
     )
     app.state.settings = resolved
     app.state.dataset_inventory = load_local_dataset_inventory()
-    app.state.account_store = AccountStore(resolved.account_database_path)
+    app.state.account_store = AccountStore(
+        resolved.account_database_path,
+        master_key=(
+            resolved.admin_master_key.get_secret_value()
+            if resolved.admin_master_key is not None
+            else None
+        ),
+    )
+    if resolved.admin_bootstrap_email:
+        app.state.account_store.ensure_super_admin(
+            resolved.admin_bootstrap_email,
+            (
+                resolved.admin_bootstrap_password.get_secret_value()
+                if resolved.admin_bootstrap_password is not None
+                else None
+            ),
+        )
     app.state.location_resolver = load_location_resolver(resolved)
     if resolved.cors_allowed_origins:
         app.add_middleware(
             CORSMiddleware,
             allow_origins=list(resolved.cors_allowed_origins),
             allow_credentials=True,
-            allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
+            allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
             allow_headers=[
                 "Accept",
                 "Content-Type",
@@ -131,6 +149,8 @@ def create_app(settings: ApiSettings | None = None) -> FastAPI:
     install_request_context(app, request_id_header=resolved.request_id_header)
     app.include_router(health_router)
     app.include_router(accounts_router)
+    app.include_router(admin_router)
+    app.include_router(analytics_router)
     app.include_router(datasets_router)
     app.include_router(locations_router)
     app.include_router(m1_workflow_router)

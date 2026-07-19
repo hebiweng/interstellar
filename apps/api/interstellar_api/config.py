@@ -74,6 +74,9 @@ class ApiSettings(BaseModel):
     auth_cookie_name: str = Field(default="interstellar_session", min_length=1, max_length=80)
     auth_session_days: int = Field(default=30, ge=1, le=365)
     auth_cookie_secure: bool = False
+    admin_bootstrap_email: str | None = None
+    admin_bootstrap_password: SecretStr | None = Field(default=None, exclude=True, repr=False)
+    admin_master_key: SecretStr | None = Field(default=None, exclude=True, repr=False)
 
     @field_validator("request_id_header")
     @classmethod
@@ -194,5 +197,16 @@ class ApiSettings(BaseModel):
                     "true" if read("ENVIRONMENT", "development") == "production" else "false",
                 ),
                 name=f"{prefix}AUTH_COOKIE_SECURE",
+            ),
+            admin_bootstrap_email=read("ADMIN_BOOTSTRAP_EMAIL", "").strip() or None,
+            admin_bootstrap_password=(
+                SecretStr(read("ADMIN_BOOTSTRAP_PASSWORD", ""))
+                if read("ADMIN_BOOTSTRAP_PASSWORD", "")
+                else None
+            ),
+            admin_master_key=(
+                SecretStr(read("ADMIN_MASTER_KEY", ""))
+                if read("ADMIN_MASTER_KEY", "")
+                else None
             ),
         )

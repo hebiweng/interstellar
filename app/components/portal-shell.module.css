@@ -1,0 +1,255 @@
+.shell {
+  min-height: 100vh;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 78% -12%, color-mix(in srgb, var(--violet) 11%, transparent), transparent 32rem),
+    radial-gradient(circle at 24% -18%, color-mix(in srgb, var(--blue) 10%, transparent), transparent 34rem),
+    var(--bg);
+}
+
+.header {
+  position: sticky;
+  z-index: 30;
+  top: 0;
+  display: grid;
+  min-height: 68px;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) auto;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  background: var(--header-bg);
+  box-shadow: 0 12px 34px var(--shadow);
+  backdrop-filter: blur(18px);
+}
+
+.brand {
+  display: flex;
+  min-height: 68px;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  border-right: 1px solid var(--line);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.mark {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--blue) 55%, transparent);
+  border-radius: 50%;
+  color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 7%, transparent);
+  font-size: 18px;
+}
+
+.brandText {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.brandText b {
+  font-size: 15px;
+  letter-spacing: .16em;
+}
+
+.brandText small {
+  overflow: hidden;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .07em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav {
+  display: flex;
+  min-width: 0;
+  height: 68px;
+  align-items: stretch;
+  padding-left: 12px;
+  overflow-x: auto;
+}
+
+.nav a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 17px;
+  color: var(--muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nav a:hover,
+.nav a[data-active="true"] {
+  color: var(--text);
+}
+
+.nav a[data-active="true"]::after {
+  position: absolute;
+  right: 17px;
+  bottom: -1px;
+  left: 17px;
+  height: 2px;
+  background: var(--blue);
+  content: "";
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px 0 10px;
+}
+
+.theme,
+.secondary,
+.primary {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.theme,
+.secondary {
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  background: var(--panel);
+}
+
+.theme:hover,
+.secondary:hover {
+  color: var(--text);
+  border-color: var(--blue);
+}
+
+.theme {
+  width: 40px;
+  padding: 0;
+  color: var(--gold);
+  font-size: 17px;
+}
+
+.primary {
+  padding: 0 16px;
+  border: 1px solid color-mix(in srgb, var(--blue) 65%, transparent);
+  color: #07111b;
+  background: linear-gradient(180deg, #a5d6ff, #70b9f8);
+  box-shadow: 0 9px 26px rgba(65, 151, 224, .16);
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.main {
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  padding: 34px clamp(18px, 3.5vw, 52px) 80px;
+}
+
+.eyebrow {
+  display: block;
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 26px;
+}
+
+.pageHeader h1 {
+  margin: 10px 0 8px;
+  font-size: clamp(30px, 4vw, 48px);
+  font-weight: 580;
+  letter-spacing: -.04em;
+}
+
+.pageHeader p {
+  max-width: 760px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+@media (max-width: 920px) {
+  .header {
+    grid-template-columns: 1fr auto;
+  }
+
+  .brand {
+    border-right: 0;
+  }
+
+  .nav {
+    position: fixed;
+    z-index: 30;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 58px;
+    justify-content: space-around;
+    padding: 0;
+    border-top: 1px solid var(--line);
+    background: var(--header-bg);
+    backdrop-filter: blur(18px);
+  }
+
+  .nav a {
+    flex: 1;
+    justify-content: center;
+    padding: 0 8px;
+    font-size: 13px;
+  }
+
+  .nav a[data-active="true"]::after {
+    right: 25%;
+    top: 0;
+    bottom: auto;
+    left: 25%;
+  }
+
+  .actions .secondary {
+    display: none;
+  }
+
+  .main {
+    padding-bottom: 94px;
+  }
+}
+
+@media (max-width: 600px) {
+  .brandText small,
+  .actions .primary {
+    display: none;
+  }
+
+  .brand {
+    padding-left: 14px;
+  }
+
+  .actions {
+    padding-right: 14px;
+  }
+
+  .pageHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

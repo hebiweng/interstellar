@@ -15,14 +15,24 @@ export type LatestNatalRecord = {
 export type WorkspacePerson = {
   id: string;
   person: NatalPersonInput;
+  createdAt?: string;
   savedAt: string;
   latestNatal: LatestNatalRecord | null;
 };
 
 export type AccountWorkspace = {
   authenticated: boolean;
-  user: { email: string; displayName: string } | null;
+  user: {
+    email: string;
+    displayName: string;
+    role?: "user" | "admin" | "super_admin";
+    status?: "active" | "disabled" | "suspended" | "pending_deletion";
+  } | null;
   people: WorkspacePerson[];
+  preferences?: {
+    defaultPersonId: string | null;
+    sampleVisible: boolean;
+  };
 };
 
 function accountApiBase(): string {
@@ -80,6 +90,27 @@ export function saveAccountPerson(person: NatalPersonInput, personId?: string) {
   return workspaceRequest<{ id: string; savedAt: string }>({
     method: "POST",
     body: JSON.stringify({ action: "save_person", personId, person }),
+  });
+}
+
+export function deleteAccountPerson(personId: string) {
+  return workspaceRequest<{ personId: string; deleted: true }>({
+    method: "POST",
+    body: JSON.stringify({ action: "delete_person", personId }),
+  });
+}
+
+export function setDefaultAccountPerson(personId: string | null) {
+  return workspaceRequest<{ preferences: NonNullable<AccountWorkspace["preferences"]> }>({
+    method: "POST",
+    body: JSON.stringify({ action: "set_default_person", personId }),
+  });
+}
+
+export function setAccountSampleVisibility(sampleVisible: boolean) {
+  return workspaceRequest<{ preferences: NonNullable<AccountWorkspace["preferences"]> }>({
+    method: "POST",
+    body: JSON.stringify({ action: "set_sample_visibility", sampleVisible }),
   });
 }
 

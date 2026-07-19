@@ -9,6 +9,7 @@ description = "Interstellar versioned HTTP API foundation"
 requires-python = ">=3.13,<3.14"
 dependencies = [
   "alembic==1.18.5",
+  "cryptography==48.0.0",
   "fastapi==0.136.1",
   "pydantic==2.13.3",
   "psycopg[binary]==3.3.4",

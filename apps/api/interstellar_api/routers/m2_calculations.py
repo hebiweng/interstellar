@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from datetime import UTC, datetime
 from typing import Any, Literal
 from uuid import uuid4
@@ -26,6 +27,7 @@ from interstellar_core.astronomy.adapters import AYANAMSA_MODES, SwissEphemerisA
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from interstellar_api.errors import ErrorCode, ProblemException
+from interstellar_api.routers.accounts import current_user
 from interstellar_api.workflow_store import WorkflowRecordNotFound
 
 router = APIRouter(prefix="/api/v1", tags=["M2 Calculations"])
@@ -154,6 +156,13 @@ def _unsupported(fields: dict[str, Any]) -> ProblemException:
 
 @router.post("/calculations", status_code=status.HTTP_201_CREATED)
 async def create_calculation(payload: ChartRequestPayload, request: Request) -> dict[str, Any]:
+    started = time.monotonic()
+    analytics_user = current_user(request)
+    analytics_metadata = {
+        "chart_family": payload.chart.family,
+        "technique": payload.chart.technique,
+        "analysis_type": payload.settings.analysis_system_id or "natal",
+    }
     if payload.subject.inline_subject is not None:
         raise _unsupported(
             {"subject.inline_subject": "planned after durable anonymous input wiring"}
@@ -211,8 +220,22 @@ async def create_calculation(payload: ChartRequestPayload, request: Request) -> 
             ),
         )
     except AstronomicalSnapshotInputError as exc:
+        request.app.state.account_store.record_event(
+            "calculation_failed",
+            actor_email=analytics_user["email"] if analytics_user else None,
+            success=False,
+            duration_ms=round((time.monotonic() - started) * 1_000),
+            metadata={**analytics_metadata, "error_code": "astronomical_input"},
+        )
         raise _unsupported({"subject.time_spec": str(exc)}) from exc
     request.app.state.workflow_store.put_snapshot(snapshot)
+    request.app.state.account_store.record_event(
+        "calculation_completed",
+        actor_email=analytics_user["email"] if analytics_user else None,
+        success=True,
+        duration_ms=round((time.monotonic() - started) * 1_000),
+        metadata=analytics_metadata,
+    )
     return snapshot
 
 
@@ -288,6 +311,13 @@ async def get_natal_technical_export(
             detail=str(exc),
         ) from exc
     extension = "md" if output_format == "markdown" else "txt"
+    user = current_user(request)
+    request.app.state.account_store.record_event(
+        "report_exported",
+        actor_email=user["email"] if user else None,
+        success=True,
+        metadata={"export_format": output_format, "analysis_type": "natal"},
+    )
     return Response(
         content=document.encode("utf-8"),
         media_type=(

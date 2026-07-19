@@ -628,15 +628,17 @@ export async function getNatalItemInterpretation(
     const notApplicable = response.interpretations.every((item) => item.status === "not_applicable");
     return {
       status: blocked ? "blocked_by_input_quality" : notApplicable ? "not_applicable" : "unavailable",
-      unavailable_reason: response.interpretations.map((item) => item.unavailable_reason).filter(Boolean).join(" · ") || "没有已发布的逐项解释。",
+      unavailable_reason: blocked
+        ? "这项解读需要更可靠的出生时间或完整宫位资料。"
+        : notApplicable
+          ? "这项运动或条件不适用于当前点位。"
+          : "这项计算已经完成，解释内容仍在补充中。",
       layers,
     };
   }
   return {
     status: "available",
-    facts: published.map((item) => JSON.stringify(item.fact, null, 2)),
     meaning: published.map((item) => item.meaning?.text).filter(Boolean).join("\n\n"),
-    synthesis: "以上各层均来自同一不可变快照。逐项解释不自动升级为整盘结论。",
     rule_refs: published.map((item) => [item.provenance.rule?.id, item.provenance.rule?.version].filter(Boolean).join("@")).filter(Boolean),
     source_refs: published.flatMap((item) => item.provenance.sources?.map((source) => source.title ?? source.source_id ?? "") ?? []).filter(Boolean),
     template_version: published[0]?.provenance.template?.version,

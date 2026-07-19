@@ -1,15 +1,19 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
+import { join } from "node:path";
 import test from "node:test";
 import { Miniflare } from "miniflare";
 
 async function render() {
-  const workerPath = new URL("../dist/server/index.js", import.meta.url).pathname;
+  const serverRoot = new URL("../dist/server", import.meta.url).pathname;
+  const workerPath = join(serverRoot, "index.js");
+  const emittedModules = (await readdir(serverRoot, { recursive: true }))
+    .filter((path) => path.endsWith(".js") || path.endsWith(".mjs"))
+    .map((path) => join(serverRoot, path));
   const miniflare = new Miniflare({
-    scriptPath: workerPath,
-    modules: true,
-    modulesRules: [
-      { type: "ESModule", include: ["**/*.js", "**/*.mjs"] },
+    modules: [
+      { type: "ESModule", path: workerPath },
+      ...emittedModules.filter((path) => path !== workerPath).map((path) => ({ type: "ESModule", path })),
     ],
     compatibilityDate: "2026-05-15",
     compatibilityFlags: ["nodejs_compat"],
@@ -38,12 +42,10 @@ test("server-renders the natal-first Interstellar workspace", async () => {
   const html = await response.text();
   assert.match(html, /<title>Interstellar · 专业占星研究工作台<\/title>/i);
   assert.match(html, /PROFESSIONAL ASTROLOGY/);
-  assert.match(html, /阿斯特拉/);
-  assert.match(html, /新建计算/);
-  assert.match(html, /计算方法/);
-  assert.match(html, /本命轮盘/);
-  assert.match(html, /星座、度数、宫位与运动状态/);
-  assert.match(html, /分析数据与导出/);
+  assert.match(html, /新建分析/);
+  assert.match(html, /技法排盘/);
+  assert.match(html, /正在读取工作台/);
+  assert.match(html, /游客模式/);
   assert.doesNotMatch(html, /VIRTUAL FIXTURE|当前展示静态虚拟验收样例/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
@@ -103,13 +105,26 @@ test("separates subject creation, calculations, future methods, and theme choice
   assert.match(page, /此动作不会自动计算/);
   assert.match(page, /本命盘当前可运行；其他方法保留入口/);
   assert.match(page, /IANA 时区/);
-  assert.match(page, /系统自动填写经纬度、国家和 IANA 时区/);
+  assert.match(page, /选择后自动填写经纬度、国家和 IANA 时区/);
   assert.match(page, /searchLocations/);
   assert.match(page, /地点数据未能唯一确认时区，必须人工确认/);
   assert.match(page, /Light/);
   assert.match(page, /Dark/);
   assert.doesNotMatch(page, />技术推演<\/button>/);
   assert.doesNotMatch(page, />计算设置<\/button>/);
+});
+
+test("keeps the object library limited to reusable fact records", async () => {
+  const page = await readFile(new URL("../app/objects/page.tsx", import.meta.url), "utf8");
+  assert.match(page, /对象库不发起计算，也不展示分析入口/);
+  assert.match(page, /saveAccountPerson/);
+  assert.match(page, /修改资料/);
+  assert.match(page, /设为默认/);
+  assert.match(page, /删除示例/);
+  assert.doesNotMatch(page, />打开最新本命</);
+  assert.doesNotMatch(page, />开始本命分析</);
+  assert.doesNotMatch(page, />重新分析</);
+  assert.doesNotMatch(page, /new-analysis=1/);
 });
 
 test("keeps scroll ownership readable on desktop and mobile", async () => {
@@ -168,10 +183,12 @@ test("renders versioned item interpretation layers without generic fallback", as
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   const api = await readFile(new URL("../app/lib/interstellar-api.ts", import.meta.url), "utf8");
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
-  assert.match(page, /分层解读/);
-  assert.match(page, /只展示当前已发布且适用于这份出生资料的解释/);
-  assert.match(page, /尚无解读/);
-  assert.match(page, /输入受限/);
+  assert.match(page, /计算事实/);
+  assert.match(page, /解读内容准备中/);
+  assert.match(page, /出生资料不足/);
+  assert.match(page, /此项不适用/);
+  assert.doesNotMatch(page, /组合阅读边界|只展示当前已发布且适用于这份出生资料的解释|尚无解读/);
+  assert.doesNotMatch(api, /JSON\.stringify\(item\.fact/);
   assert.match(page, /Reference fixture/);
   assert.doesNotMatch(page, /value\.status === ["']available["']/);
   assert.match(api, /blocked_by_input_quality/);

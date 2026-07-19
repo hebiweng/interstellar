@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import inspect
 import json
+import time
 from datetime import UTC, datetime
 from typing import Any, Literal
 from uuid import uuid4
@@ -22,7 +23,10 @@ from interstellar_core.application.natal_technical_export import (
 )
 from pydantic import BaseModel, ConfigDict, Field
 
+from interstellar_api.account_store import AccountError
+from interstellar_api.deepseek import execute_openai_compatible_analysis
 from interstellar_api.errors import ErrorCode, ProblemException
+from interstellar_api.routers.accounts import current_user
 from interstellar_api.workflow_store import WorkflowRecordNotFound
 
 router = APIRouter(prefix="/api/v1/ai", tags=["Natal AI Connectors"])
@@ -34,8 +38,8 @@ class StrictModel(BaseModel):
 
 class NatalAiPreviewRequest(StrictModel):
     snapshot_id: str = Field(min_length=1, max_length=160)
-    provider_id: Literal["deepseek", "openai", "moonshot"]
-    model_id: Literal["deepseek-v4-flash", "deepseek-v4-pro", "gpt", "kimi"]
+    provider_id: str = Field(min_length=1, max_length=64)
+    model_id: str = Field(min_length=1, max_length=160)
     document_format: Literal["markdown", "plaintext", "json"] = "markdown"
     analysis_focus: str | None = Field(default=None, max_length=4_000)
     store_response: bool = True
@@ -126,6 +130,40 @@ def provider_catalog(request: Request | None = None) -> list[dict[str, Any]]:
         override = overrides.get(key)
         if isinstance(override, dict):
             provider.update({item: value for item, value in override.items() if item != "secret"})
+    if request is not None:
+        configured = request.app.state.account_store.list_providers(admin=False)
+        for provider in configured:
+            translated = {
+                "provider_id": provider["provider_id"],
+                "label": provider["display_name"],
+                "configured": True,
+                "availability": "configured",
+                "blocking_reason": None,
+                "data_destination": provider["base_url"],
+                "privacy_policy_url": None,
+                "retention_policy": "由平台运营方配置并披露",
+                "models": [
+                    {
+                        "model_id": model["model_id"],
+                        "label": model["display_name"],
+                        "configured": True,
+                        "context_limit": model.get("options", {}).get("context_limit"),
+                    }
+                    for model in provider["models"]
+                ],
+            }
+            existing = next(
+                (item for item in catalog if item["provider_id"] == provider["provider_id"]),
+                None,
+            )
+            if existing is None:
+                catalog.append(translated)
+            else:
+                existing.update(translated)
+        # Preserve the explicit unavailable development catalog for existing
+        # integration clients, but production users only see enabled providers.
+        if request.app.state.settings.environment == "production":
+            catalog = [item for item in catalog if item.get("configured")]
     return catalog
 
 
@@ -133,8 +171,16 @@ def _provider(
     request: Request, provider_id: str, model_id: str
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     provider = next(
-        item for item in provider_catalog(request) if item["provider_id"] == provider_id
+        (item for item in provider_catalog(request) if item["provider_id"] == provider_id),
+        None,
     )
+    if provider is None:
+        raise ProblemException(
+            status=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            code=ErrorCode.INVALID_REQUEST,
+            detail="The requested provider is not enabled by the operator.",
+            fields={"provider_id": provider_id},
+        )
     model = next(
         (item for item in provider.get("models", []) if item.get("model_id") == model_id),
         None,
@@ -303,7 +349,35 @@ async def create_natal_ai_analysis(
                 "payload_hash": preview["payload_hash"],
             },
         )
+    dynamic_config: dict[str, Any] | None = None
+    try:
+        dynamic_config = request.app.state.account_store.get_model_config(
+            payload.provider_id, payload.model_id, include_secret=True
+        )
+    except AccountError:
+        dynamic_config = None
     executor = getattr(request.app.state, "natal_ai_executor", None)
+    if dynamic_config is not None and dynamic_config.get("provider_enabled"):
+        platform_prompt = request.app.state.account_store.get_platform_ai_prompt()
+
+        async def configured_executor(executor_payload: dict[str, Any]) -> dict[str, Any]:
+            model_timeout = (dynamic_config.get("options") or {}).get("timeout_seconds")
+            return await execute_openai_compatible_analysis(
+                executor_payload,
+                api_key=str(dynamic_config.get("api_key") or ""),
+                base_url=str(dynamic_config["base_url"]),
+                model=str(dynamic_config["model_id"]),
+                timeout=(
+                    int(model_timeout)
+                    if isinstance(model_timeout, (int, float))
+                    else int(dynamic_config["timeout"])
+                ),
+                platform_prompt=str(platform_prompt["platform_prompt"]),
+                model_prompt=str(dynamic_config.get("pre_analysis_prompt") or ""),
+                options=dynamic_config.get("options") or {},
+            )
+
+        executor = configured_executor
     if executor is None:
         raise ProblemException(
             status=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -312,18 +386,65 @@ async def create_natal_ai_analysis(
         )
     snapshot = _snapshot(request, payload.snapshot_id)
     document = _document(snapshot, payload.document_format)
-    execution_result = executor(
-        {
-            "provider_id": payload.provider_id,
-            "model_id": payload.model_id,
-            "technical_document": document,
-            "technical_document_hash": preview["document_content_hash"],
-            "payload_hash": preview["payload_hash"],
-            "analysis_focus": payload.analysis_focus,
-        }
+    analytics_user = current_user(request)
+    event_metadata = {
+        "provider_id": payload.provider_id,
+        "model_id": payload.model_id,
+        "analysis_type": "natal",
+        "prompt_version": (
+            f"{platform_prompt['version']}/"
+            f"{dynamic_config.get('prompt_version') or 'model-default'}"
+            if dynamic_config is not None and dynamic_config.get("provider_enabled")
+            else "platform-fixed"
+        ),
+    }
+    request.app.state.account_store.record_event(
+        "ai_requested",
+        actor_email=analytics_user["email"] if analytics_user else None,
+        metadata=event_metadata,
     )
-    if inspect.isawaitable(execution_result):
-        execution_result = await execution_result
+    started = time.monotonic()
+    try:
+        execution_result = executor(
+            {
+                "provider_id": payload.provider_id,
+                "model_id": payload.model_id,
+                "technical_document": document,
+                "technical_document_hash": preview["document_content_hash"],
+                "payload_hash": preview["payload_hash"],
+                "analysis_focus": payload.analysis_focus,
+            }
+        )
+        if inspect.isawaitable(execution_result):
+            execution_result = await execution_result
+    except Exception:
+        request.app.state.account_store.record_event(
+            "ai_failed",
+            actor_email=analytics_user["email"] if analytics_user else None,
+            success=False,
+            duration_ms=round((time.monotonic() - started) * 1_000),
+            metadata=event_metadata,
+        )
+        raise
+    usage = execution_result.get("usage") if isinstance(execution_result, dict) else None
+    completed_metadata = dict(event_metadata)
+    if isinstance(execution_result, dict) and execution_result.get("prompt_hash"):
+        completed_metadata["prompt_hash"] = execution_result["prompt_hash"]
+    if isinstance(usage, dict):
+        for source, target in (
+            ("prompt_tokens", "input_tokens"),
+            ("completion_tokens", "output_tokens"),
+            ("total_tokens", "total_tokens"),
+        ):
+            if isinstance(usage.get(source), int):
+                completed_metadata[target] = usage[source]
+    request.app.state.account_store.record_event(
+        "ai_completed",
+        actor_email=analytics_user["email"] if analytics_user else None,
+        success=True,
+        duration_ms=round((time.monotonic() - started) * 1_000),
+        metadata=completed_metadata,
+    )
     artifact = {
         "id": f"optional-ai-artifact-{uuid4()}",
         "snapshot_id": payload.snapshot_id,
@@ -336,6 +457,12 @@ async def create_natal_ai_analysis(
         "persisted": payload.store_response,
         "response": execution_result,
         "calculation_writeback": False,
+        "prompt_version": completed_metadata["prompt_version"],
+        "prompt_hash": (
+            execution_result.get("prompt_hash")
+            if isinstance(execution_result, dict)
+            else None
+        ),
     }
     if payload.store_response:
         request.app.state.optional_ai_artifacts[artifact["id"]] = artifact
