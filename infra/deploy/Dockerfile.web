@@ -24,10 +24,8 @@ WORKDIR /opt/interstellar
 RUN groupadd --system --gid 10001 interstellar \
     && useradd --system --uid 10001 --gid interstellar --home /opt/interstellar interstellar
 
-COPY --from=build --chown=interstellar:interstellar /opt/interstellar/package.json ./package.json
-COPY --from=build --chown=interstellar:interstellar /opt/interstellar/node_modules ./node_modules
-COPY --from=build --chown=interstellar:interstellar /opt/interstellar/dist ./dist
+COPY --from=build --chown=interstellar:interstellar /opt/interstellar/dist/standalone ./
 
 USER interstellar
 EXPOSE 3000
-CMD ["./node_modules/.bin/vinext", "start"]
+CMD ["node", "server.js"]
