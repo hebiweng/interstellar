@@ -71,7 +71,7 @@ COMPOSE_PARALLEL_LIMIT=1 docker compose --env-file /opt/interstellar/.env -f inf
 docker compose --env-file /opt/interstellar/.env -f infra/deploy/compose.production.yaml up -d --no-build
 ```
 
-7. 将独立公共Caddy容器连接到`interstellar-internal`网络，把`infra/deploy/Caddyfile.fate`站点块加入其配置，先执行`caddy validate`再reload。
+7. 生产Compose会启动只属于Interstellar的`interstellar-edge` Caddy容器，使用`infra/deploy/Caddyfile.fate`并连接`interstellar-internal`网络；该入口不依赖Ledger。首次启动前确认服务器80/443未被其他服务占用。
 8. 等待HTTPS证书签发，检查Compose健康、容器内存、API readiness、主页和浏览器同源API。
 9. 完成注册、登录、游客计算、账户隔离、对象库新增/编辑/删除/默认、推荐方案预检、工作台最新本命恢复和DeepSeek提交验收。对象库不得出现打开结果或重新分析按钮。
 10. 验证普通用户`403`、管理员登录、用户停用/恢复、最后超级管理员保护、密钥掩码、提示词配置和审计日志。
