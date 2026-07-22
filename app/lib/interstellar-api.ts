@@ -62,6 +62,33 @@ export type NatalAspect = {
   rule_refs?: string[];
 };
 
+export type NatalFixedStar = {
+  star_id: string;
+  name: string;
+  label_zh: string;
+  catalog_designation?: string | null;
+  magnitude_v: number;
+  sign: string;
+  degree_in_sign: number;
+  position: {
+    ecliptic: { longitude_deg: number; latitude_deg: number };
+    equatorial: { right_ascension_deg: number; declination_deg: number };
+    frame: string;
+    center: string;
+    epoch: string;
+  };
+};
+
+export type NatalFixedStarContact = {
+  contact_id: string;
+  star_id: string;
+  point_id: string;
+  type: "conjunction";
+  orb_deg: number;
+  orb_allowance_deg: number;
+  strength: number;
+};
+
 export type NatalSnapshot = {
   id: string;
   status: string;
@@ -88,6 +115,14 @@ export type NatalSnapshot = {
     classical?: Record<string, unknown>;
     dignities?: Array<Record<string, unknown>>;
     lots?: Array<Record<string, unknown>>;
+    fixed_stars?: NatalFixedStar[];
+    fixed_star_contacts?: NatalFixedStarContact[];
+    special_degrees?: Record<string, unknown>;
+    mirror_points?: Record<string, unknown>;
+    midpoints?: Record<string, unknown>;
+    profections?: Record<string, unknown> | null;
+    firdaria?: Record<string, unknown> | null;
+    zodiacal_releasing?: Record<string, unknown>;
     receptions?: Array<Record<string, unknown>>;
     dispositors?: Record<string, unknown>;
     astronomical_context?: Record<string, unknown>;
@@ -171,8 +206,12 @@ export type NatalCalculationSettings = {
     | "lahiri"
     | "deluce"
     | "raman"
+    | "ushashashi"
     | "krishnamurti"
+    | "djwhal_khul"
     | "yukteshwar"
+    | "jn_bhasin"
+    | "true_pushya"
     | "hipparchos"
     | "true_revati"
     | "true_citra"
@@ -201,9 +240,21 @@ export type NatalCalculationSettings = {
     | "sunshine_treindl"
     | "sripati";
   nodeType: "true" | "mean" | "both";
+  center: "geocentric" | "topocentric";
   pointIds: string[];
+  disabledPointIds: string[];
+  fixedStarIds: string[];
+  fixedStarOrb: number;
+  mirrorOrb: number;
+  midpointOrb: number;
+  triplicityTable: "dorothean" | "ptolemaic";
+  termsTable: "egyptian" | "ptolemaic";
   aspectIds: string[];
   orbOverrides: Record<string, number>;
+  globalOrb: number | null;
+  chartOrb: number | null;
+  pointClassOrbs: Record<string, number>;
+  pointPairOrbs: Array<{ pointA: string; pointB: string; orb: number }>;
 };
 
 export type AiProviderId = "deepseek" | "openai" | "moonshot";
@@ -420,11 +471,25 @@ export async function createPersonAndNatalCalculation(
     }),
   });
 
-  const orbOverrides = Object.entries(settings.orbOverrides).map(([aspect_id, orb_deg]) => ({
-    scope: "aspect",
-    aspect_id,
-    orb_deg,
-  }));
+  const orbOverrides: Array<Record<string, string | number>> = [];
+  if (settings.globalOrb != null) {
+    orbOverrides.push({ scope: "chart_context", orb_deg: settings.globalOrb });
+  }
+  if (settings.chartOrb != null) {
+    orbOverrides.push({ scope: "chart_context", chart_context: "within_chart", orb_deg: settings.chartOrb });
+  }
+  for (const [aspect_id, orb_deg] of Object.entries(settings.orbOverrides)) {
+    orbOverrides.push({ scope: "aspect", aspect_id, orb_deg });
+  }
+  for (const [point_class, orb_deg] of Object.entries(settings.pointClassOrbs)) {
+    orbOverrides.push({ scope: "point_class", point_class, orb_deg });
+  }
+  for (const pair of settings.pointPairOrbs) {
+    const [point_a, point_b] = [pair.pointA, pair.pointB].sort();
+    if (point_a && point_b && point_a !== point_b) {
+      orbOverrides.push({ scope: "point_pair", point_a, point_b, orb_deg: pair.orb });
+    }
+  }
   const analysisSystemIds = {
     integrated: "natal.integrated.v1",
     modern: "natal.modern.v1",
@@ -446,7 +511,7 @@ export async function createPersonAndNatalCalculation(
         zodiac: settings.zodiac,
         ayanamsa: settings.zodiac === "sidereal" ? settings.ayanamsa : null,
         house_system: settings.houseSystem,
-        center: "geocentric",
+        center: settings.center ?? "geocentric",
         coordinate_frame: "ecliptic",
         node_type: settings.nodeType,
         high_latitude_policy: "block",
@@ -455,7 +520,7 @@ export async function createPersonAndNatalCalculation(
         point_set_ids: settings.pointIds.length ? [] : ["points.professional.default.v1"],
         included_points: settings.pointIds,
         minor_body_ids: [],
-        fixed_star_ids: [],
+        fixed_star_ids: settings.fixedStarIds ?? [],
         lot_formula_ids: ["fortune", "spirit", "lot_eros", "lot_necessity", "lot_courage", "lot_victory", "lot_nemesis", "lot_exaltation"],
         hypothetical_point_ids: ["cupido", "hades", "zeus", "kronos", "apollon", "admetos", "vulkanus", "poseidon"],
         included_aspect_ids: settings.aspectIds,
@@ -463,13 +528,17 @@ export async function createPersonAndNatalCalculation(
         classical_settings: {
           rulership_system: "traditional_and_modern",
           dignity_table: "traditional.dignities.v1",
-          triplicity_table: "dorothean.v1",
-          terms_table: "egyptian.v1",
+          triplicity_table: `${settings.triplicityTable}.v1`,
+          terms_table: `${settings.termsTable}.v1`,
           decan_or_face_table: "chaldean.v1",
           sect_rules: "classical.sect.explicit.v1",
           lot_formula_set: "hellenistic_lots_extended.v1",
         },
-        custom_parameters: {},
+        custom_parameters: {
+          fixed_star_conjunction_orb_deg: settings.fixedStarOrb ?? 1,
+          mirror_contact_orb_deg: settings.mirrorOrb ?? 1,
+          midpoint_hit_orb_deg: settings.midpointOrb ?? 1,
+        },
       },
       rule_pack_hash: ruleHashes[settings.analysisSystem],
       dataset_versions: {},

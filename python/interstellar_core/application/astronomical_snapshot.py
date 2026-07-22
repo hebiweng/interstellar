@@ -30,12 +30,16 @@ from interstellar_core.astrology.aspects import (
     AspectOrbAllowance,
     AspectPoint,
     MajorAspectProfile,
+    OrbOverrideSet,
     OrbProfile,
     find_major_aspects,
+    parse_orb_overrides,
 )
 from interstellar_core.astrology.classical import (
     TRADITIONAL_PLANET_IDS,
     Sect,
+    TermsTable,
+    TriplicityTable,
     calculate_receptions,
     calculate_supported_lots,
     calculate_traditional_dispositors,
@@ -58,11 +62,21 @@ from interstellar_core.astrology.houses import (
 from interstellar_core.astrology.natal import (
     ANGLE_POINT_IDS,
     DEFAULT_LOT_IDS,
+    DEFAULT_SPECIAL_DEGREE_PROFILE,
     PROFESSIONAL_POINT_IDS,
     add_opposite_nodes,
     angle_points_from_house_result,
+    calculate_midpoints,
+    calculate_mirror_points,
     calculate_natal_structure,
+    calculate_special_degrees,
     lot_point_from_fact,
+    mirror_profile,
+)
+from interstellar_core.astrology.timing import (
+    calculate_annual_profections,
+    calculate_firdaria,
+    calculate_zodiacal_releasing,
 )
 from interstellar_core.astronomy.adapters import (
     AYANAMSA_MODES,
@@ -73,6 +87,10 @@ from interstellar_core.astronomy.adapters import (
 from interstellar_core.astronomy.derived import (
     derive_lunar_phase,
     signed_angular_difference,
+)
+from interstellar_core.astronomy.fixed_stars import (
+    SwissFixedStarCalculator,
+    calculate_fixed_star_contacts,
 )
 
 
@@ -215,6 +233,7 @@ def _house_calculation(
     location: Mapping[str, Any],
 ) -> Any:
     settings = request_payload["settings"]
+    zodiac = str(settings.get("zodiac", "tropical"))
     custom_parameters = settings.get("custom_parameters") or {}
     if not isinstance(custom_parameters, Mapping):
         raise AstronomicalSnapshotInputError("settings.custom_parameters must be an object")
@@ -299,6 +318,7 @@ def _major_aspects(
     *,
     aspect_profile: MajorAspectProfile,
     orb_profile: OrbProfile,
+    orb_overrides: OrbOverrideSet,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     aspect_points = [
         AspectPoint(
@@ -313,6 +333,14 @@ def _major_aspects(
         )
         for point in points
     ]
+    point_classes = {
+        str(point["point_id"]): (
+            "luminary"
+            if str(point["point_id"]) in {"sun", "moon"}
+            else str(point.get("kind") or "other")
+        )
+        for point in points
+    }
     result = []
     for left, right in combinations(aspect_points, 2):
         result.extend(
@@ -323,6 +351,8 @@ def _major_aspects(
                 context=AspectContext.WITHIN_CHART,
                 major_profile=aspect_profile,
                 orb_profile=orb_profile,
+                orb_overrides=orb_overrides,
+                point_classes=point_classes,
             )
         )
     sorted_result = sorted(
@@ -334,11 +364,18 @@ def _major_aspects(
         "selected_point_count": len(aspect_points),
         "evaluated_pair_count": pair_count,
         "matched_aspect_count": len(sorted_result),
+        "orb_override_set": {
+            "id": orb_overrides.id,
+            "version": orb_overrides.version,
+            "rule_count": len(orb_overrides.rules),
+        },
         "excluded_pairs": [],
     }
 
 
-def _aspect_profiles(settings: Mapping[str, Any]) -> tuple[MajorAspectProfile, OrbProfile]:
+def _aspect_profiles(
+    settings: Mapping[str, Any],
+) -> tuple[MajorAspectProfile, OrbProfile, OrbOverrideSet]:
     aspect_profiles = {
         OFFICIAL_MAJOR_ASPECTS_V1.id: OFFICIAL_MAJOR_ASPECTS_V1,
         OFFICIAL_PROFESSIONAL_NATAL_ASPECTS_V1.id: (OFFICIAL_PROFESSIONAL_NATAL_ASPECTS_V1),
@@ -377,18 +414,18 @@ def _aspect_profiles(settings: Mapping[str, Any]) -> tuple[MajorAspectProfile, O
     else:
         selected_aspects = base_aspects.aspects
 
-    allowance_by_id = {item.aspect_id: item.orb_deg for item in base_orbs.allowances}
-    for override in settings.get("orb_overrides") or ():
-        if override.get("scope") != "aspect" or not override.get("aspect_id"):
-            raise AstronomicalSnapshotInputError(
-                "the natal slice currently accepts orb overrides scoped to one aspect id"
-            )
-        aspect_id = str(override["aspect_id"])
-        if aspect_id not in available_aspects:
-            raise AstronomicalSnapshotInputError(
-                "orb override references an aspect outside the selected set: " + aspect_id
-            )
-        allowance_by_id[aspect_id] = float(override["orb_deg"])
+    try:
+        orb_overrides = parse_orb_overrides(
+            settings.get("orb_overrides"),
+            known_aspect_ids=available_aspects,
+            known_point_classes={
+                "luminary", "planet", "angle", "node", "lunar_point",
+                "dwarf_planet", "asteroid", "centaur", "lot", "hamburg",
+                "hypothetical", "sensitive_point", "other",
+            },
+        )
+    except ValueError as exc:
+        raise AstronomicalSnapshotInputError(f"invalid orb overrides: {exc}") from exc
 
     aspect_profile = MajorAspectProfile(
         id=base_aspects.id,
@@ -401,7 +438,8 @@ def _aspect_profiles(settings: Mapping[str, Any]) -> tuple[MajorAspectProfile, O
         version=base_orbs.version,
         source=base_orbs.source,
         allowances=tuple(
-            AspectOrbAllowance(item.id, allowance_by_id[item.id]) for item in selected_aspects
+            AspectOrbAllowance(item.id, base_orbs.effective_orb(item.id))
+            for item in selected_aspects
         ),
         probe_step_days=base_orbs.probe_step_days,
         exact_tolerance_deg=base_orbs.exact_tolerance_deg,
@@ -410,7 +448,7 @@ def _aspect_profiles(settings: Mapping[str, Any]) -> tuple[MajorAspectProfile, O
         ),
         probe_change_tolerance_deg=base_orbs.probe_change_tolerance_deg,
     )
-    return aspect_profile, orb_profile
+    return aspect_profile, orb_profile, orb_overrides
 
 
 def _day_night_status(
@@ -556,6 +594,8 @@ def _classical_documents(
     day_night_status: str,
     sun_altitude_deg: float | None,
     solar_conditions: list[dict[str, Any]],
+    terms_table: TermsTable,
+    triplicity_table: TriplicityTable,
 ) -> tuple[
     dict[str, Any],
     list[dict[str, Any]],
@@ -579,6 +619,8 @@ def _classical_documents(
                 "missing_traditional_planet_ids": missing,
                 "sect": None,
                 "solar_conditions": solar_conditions,
+                "terms_table": terms_table.value,
+                "triplicity_table": triplicity_table.value,
                 "dispositors": None,
                 "receptions": None,
                 "interpretation_boundary": (
@@ -591,11 +633,22 @@ def _classical_documents(
 
     sect = Sect(day_night_status)
     dignity_documents = [
-        evaluate_essential_dignity(point_id, longitude, sect=sect).to_dict()
+        evaluate_essential_dignity(
+            point_id,
+            longitude,
+            sect=sect,
+            terms_table=terms_table,
+            triplicity_table=triplicity_table,
+        ).to_dict()
         for point_id, longitude in sorted(longitudes.items())
     ]
     dispositor_document = calculate_traditional_dispositors(longitudes).to_dict()
-    reception_document = calculate_receptions(longitudes, sect=sect).to_dict()
+    reception_document = calculate_receptions(
+        longitudes,
+        sect=sect,
+        terms_table=terms_table,
+        triplicity_table=triplicity_table,
+    ).to_dict()
     reasons = ["MISSING_TRADITIONAL_PLANETS"] if missing else []
     classical_document = {
         "availability": "indeterminate" if reasons else "available",
@@ -605,6 +658,8 @@ def _classical_documents(
         "missing_traditional_planet_ids": missing,
         "sect": sect_facts(sect).to_dict(),
         "solar_conditions": solar_conditions,
+        "terms_table": terms_table.value,
+        "triplicity_table": triplicity_table.value,
         "dispositors": dispositor_document,
         "receptions": reception_document,
         "interpretation_boundary": (
@@ -612,6 +667,37 @@ def _classical_documents(
         ),
     }
     return classical_document, dignity_documents, [reception_document]
+
+
+def _classical_tables(settings: Mapping[str, Any]) -> tuple[TermsTable, TriplicityTable]:
+    classical_settings = settings.get("classical_settings") or {}
+    if not isinstance(classical_settings, Mapping):
+        raise AstronomicalSnapshotInputError("classical_settings must be an object")
+    raw_terms = str(classical_settings.get("terms_table") or "egyptian.v1")
+    raw_triplicity = str(
+        classical_settings.get("triplicity_table") or "dorothean.v1"
+    )
+    terms_by_id = {
+        "egyptian": TermsTable.EGYPTIAN,
+        "egyptian.v1": TermsTable.EGYPTIAN,
+        "ptolemaic": TermsTable.PTOLEMAIC,
+        "ptolemaic.v1": TermsTable.PTOLEMAIC,
+    }
+    triplicity_by_id = {
+        "dorothean": TriplicityTable.DOROTHEAN,
+        "dorothean.v1": TriplicityTable.DOROTHEAN,
+        "ptolemaic": TriplicityTable.PTOLEMAIC,
+        "ptolemaic.v1": TriplicityTable.PTOLEMAIC,
+    }
+    if raw_terms not in terms_by_id:
+        raise AstronomicalSnapshotInputError(
+            "unsupported classical terms_table: " + raw_terms
+        )
+    if raw_triplicity not in triplicity_by_id:
+        raise AstronomicalSnapshotInputError(
+            "unsupported classical triplicity_table: " + raw_triplicity
+        )
+    return terms_by_id[raw_terms], triplicity_by_id[raw_triplicity]
 
 
 def _date_level_instants(
@@ -715,6 +801,8 @@ def create_date_level_astronomical_snapshot(
             point_ids=direct_point_ids,
             zodiac=str(settings.get("zodiac", "tropical")),
             ayanamsa=settings.get("ayanamsa"),
+            center=str(settings.get("center", "geocentric")),
+            observer=location,
         )
         for instant in probes
     )
@@ -1058,21 +1146,24 @@ def create_astronomical_snapshot(
     utc_instant = _parse_selected_utc(time_spec)
 
     settings = request_payload["settings"]
+    zodiac = str(settings.get("zodiac", "tropical"))
     final_point_ids = _requested_final_point_ids(settings)
     direct_point_ids = _direct_point_dependencies(final_point_ids)
     calculator = adapter or SwissEphemerisAdapter(moshier_fallback="record")
     ephemeris = calculator.calculate(
         utc_instant=utc_instant,
         point_ids=direct_point_ids,
-        zodiac=str(settings.get("zodiac", "tropical")),
+        zodiac=zodiac,
         ayanamsa=settings.get("ayanamsa"),
+        center=str(settings.get("center", "geocentric")),
+        observer=location,
     )
     point_by_id = {str(point["point_id"]): point for point in ephemeris.points}
     lunar = derive_lunar_phase(
         point_by_id["sun"]["position"]["ecliptic"]["longitude_deg"],
         point_by_id["moon"]["position"]["ecliptic"]["longitude_deg"],
     )
-    aspect_profile, orb_profile = _aspect_profiles(settings)
+    aspect_profile, orb_profile, orb_overrides = _aspect_profiles(settings)
     house_result = _house_calculation(
         request_payload=request_payload,
         julian_day_ut=ephemeris.julian_day_ut,
@@ -1166,23 +1257,119 @@ def create_astronomical_snapshot(
         obliquity_deg=obliquity_deg,
     )
     points, house_set = _place_points(points, house_result.house_set)
+    fixed_star_ids = tuple(str(item) for item in settings.get("fixed_star_ids") or ())
+    custom_parameters = settings.get("custom_parameters") or {}
+    fixed_star_orb = float(
+        custom_parameters.get("fixed_star_conjunction_orb_deg", 1.0)
+    )
+    try:
+        fixed_star_result = SwissFixedStarCalculator(
+            ephemeris_path=calculator.ephemeris_path,
+        ).calculate(
+            julian_day_ut=ephemeris.julian_day_ut,
+            star_ids=fixed_star_ids,
+            zodiac=zodiac,
+            ayanamsa=settings.get("ayanamsa"),
+        )
+        fixed_star_contacts = calculate_fixed_star_contacts(
+            fixed_star_result.stars,
+            points,
+            conjunction_orb_deg=fixed_star_orb,
+        ) if fixed_star_ids else []
+    except ValueError as exc:
+        raise AstronomicalSnapshotInputError(str(exc)) from exc
     aspects, aspect_evaluation = _major_aspects(
         points,
         aspect_profile=aspect_profile,
         orb_profile=orb_profile,
+        orb_overrides=orb_overrides,
     )
+    mirror_document = calculate_mirror_points(
+        points,
+        profile=mirror_profile(
+            contact_orb_deg=float(custom_parameters.get("mirror_contact_orb_deg", 1.0))
+        ),
+    ).to_dict()
+    if zodiac == "tropical":
+        special_degree_document = calculate_special_degrees(points).to_dict()
+    else:
+        special_degree_document = {
+            "availability": "not_applicable",
+            "unavailable_reason": "TROPICAL_ZODIAC_REQUIRED",
+            "points": [],
+            "critical_degrees": {
+                "status": "not_evaluated",
+                "table_id": None,
+                "reason_code": "TROPICAL_ZODIAC_REQUIRED",
+                "rule_ids": [],
+                "source_ids": [],
+            },
+            "provenance": {
+                "capability_id": "natal.special_degrees.v1",
+                "profile_id": DEFAULT_SPECIAL_DEGREE_PROFILE.profile_id,
+                "profile_zodiac": DEFAULT_SPECIAL_DEGREE_PROFILE.zodiac,
+                "interpretation_boundary": (
+                    "The selected sidereal zodiac was not evaluated against a tropical-only "
+                    "special-degree profile"
+                ),
+            },
+        }
+    midpoint_document = calculate_midpoints(
+        points,
+        source_point_ids=("sun", "moon", "mercury", "venus", "mars", "jupiter"),
+        aspect_profile=aspect_profile,
+        hit_orb_deg=float(custom_parameters.get("midpoint_hit_orb_deg", 1.0)),
+    ).to_dict()
     structure_document = calculate_natal_structure(points, aspects).to_dict()
     pattern_documents = [
         *structure_document["stelliums"]["facts"],
         *structure_document["geometric_patterns"]["facts"],
     ]
+    terms_table, triplicity_table = _classical_tables(settings)
     classical_document, dignity_documents, reception_documents = _classical_documents(
         points,
         day_night_status=day_night_status,
         sun_altitude_deg=sun_altitude_deg,
         solar_conditions=solar_conditions,
+        terms_table=terms_table,
+        triplicity_table=triplicity_table,
     )
-    custom_parameters = settings.get("custom_parameters") or {}
+    local_birth_value = str(time_spec.get("local_value") or "")
+    try:
+        birth_date = datetime.fromisoformat(local_birth_value).date()
+    except ValueError as exc:
+        raise AstronomicalSnapshotInputError(
+            "selected natal time requires an ISO local birth date"
+        ) from exc
+    asc_point = next((point for point in points if point["point_id"] == "asc"), None)
+    profection_document = (
+        calculate_annual_profections(
+            birth_date=birth_date,
+            ascendant_sign=str(asc_point["sign"]),
+            as_of=now.date(),
+        )
+        if asc_point is not None
+        else None
+    )
+    firdaria_document = (
+        calculate_firdaria(
+            birth_utc=utc_instant,
+            sect=Sect(day_night_status),
+            as_of=now,
+        )
+        if day_night_status in {"day", "night"}
+        else None
+    )
+    zodiacal_releasing_documents: dict[str, Any] = {}
+    for lot_id in ("fortune", "spirit"):
+        lot_point = next((point for point in points if point["point_id"] == lot_id), None)
+        if lot_point is not None:
+            zodiacal_releasing_documents[lot_id] = calculate_zodiacal_releasing(
+                lot_id=lot_id,
+                lot_sign=str(lot_point["sign"]),
+                birth_utc=utc_instant,
+                as_of=now,
+            )
     distribution_profile_id = str(
         custom_parameters.get(
             "distribution_profile_id",
@@ -1233,6 +1420,12 @@ def create_astronomical_snapshot(
             "ALG-NATAL-003",
             "ALG-NATAL-004",
             "ALG-NATAL-005",
+            *(["ALG-NATAL-SPECIAL-DEGREES-001"] if zodiac == "tropical" else []),
+            "ALG-NATAL-MIRROR-POINTS-001",
+            "ALG-NATAL-MIDPOINTS-001",
+            "ALG-TIMING-PROFECTIONS-001",
+            "ALG-TIMING-FIRDARIA-001",
+            "ALG-TIMING-ZR-001",
         ],
         "rule_refs": [
             "astronomy.ephemeris_core",
@@ -1241,6 +1434,12 @@ def create_astronomical_snapshot(
             "natal.patterns_distributions",
             "natal.dignity_reception",
             "natal.arabic_parts",
+            *(["natal.special_degrees.v1"] if zodiac == "tropical" else []),
+            "aspect.mirror.v1",
+            "natal.midpoints",
+            "timing.annual_profections",
+            "timing.firdaria",
+            "timing.zodiacal_releasing",
         ],
     }
     adapter_warnings = [_adapter_warning(item) for item in ephemeris.warnings]
@@ -1342,7 +1541,14 @@ def create_astronomical_snapshot(
         "dignities": deepcopy(dignity_documents),
         "receptions": deepcopy(reception_documents),
         "lots": deepcopy(lot_documents),
-        "midpoints": [],
+        "fixed_stars": deepcopy(list(fixed_star_result.stars)),
+        "fixed_star_contacts": deepcopy(fixed_star_contacts),
+        "special_degrees": deepcopy(special_degree_document),
+        "mirror_points": deepcopy(mirror_document),
+        "midpoints": deepcopy(midpoint_document),
+        "profections": deepcopy(profection_document),
+        "firdaria": deepcopy(firdaria_document),
+        "zodiacal_releasing": deepcopy(zodiacal_releasing_documents),
         "warnings": deepcopy(all_warnings),
         "provenance": provenance,
     }
@@ -1366,6 +1572,7 @@ def create_astronomical_snapshot(
     )
     lots_requested = bool(set(DEFAULT_LOT_IDS) & set(final_point_ids))
     lots_status = "generated" if lot_documents else "blocked"
+    fixed_stars_status = "generated" if fixed_star_ids else "not_requested"
     natal_status = (
         "blocked"
         if house_result.status == "unavailable"
@@ -1495,6 +1702,95 @@ def create_astronomical_snapshot(
             "reproducibility": reproducibility,
         },
         {
+            "output_id": "manifest.astronomy.fixed_stars",
+            "status": fixed_stars_status,
+            "calculation_id": "astronomy.fixed_stars",
+            "result_pointer": "/result/fixed_stars" if fixed_star_ids else None,
+            "maturity": "experimental",
+            "view_ids": ["view.natal.fixed_stars"] if fixed_star_ids else [],
+            "table_ids": ["table.fixed_stars", "table.fixed_star_contacts"]
+            if fixed_star_ids
+            else [],
+            "export_formats": ["json", "csv"] if fixed_star_ids else [],
+            "recommended_primary_view_id": None,
+            "missing_inputs": [] if fixed_star_ids else ["fixed_star_ids"],
+            "warnings": [],
+            "algorithm_cards": ["ALG-ASTRONOMY-FIXED-STARS-001"],
+            "reproducibility": reproducibility,
+        },
+        {
+            "output_id": "manifest.natal.special_degrees",
+            "status": "generated" if zodiac == "tropical" else "blocked",
+            "calculation_id": "natal.special_degrees.v1",
+            "result_pointer": "/result/special_degrees" if zodiac == "tropical" else None,
+            "maturity": "experimental",
+            "view_ids": ["view.natal.special_degrees"] if zodiac == "tropical" else [],
+            "table_ids": ["table.special_degrees"] if zodiac == "tropical" else [],
+            "export_formats": ["json", "plaintext_technical"] if zodiac == "tropical" else [],
+            "recommended_primary_view_id": None,
+            "missing_inputs": [] if zodiac == "tropical" else ["zodiac:tropical"],
+            "warnings": [],
+            "algorithm_cards": ["ALG-NATAL-SPECIAL-DEGREES-001"],
+            "reproducibility": reproducibility,
+        },
+        {
+            "output_id": "manifest.natal.mirror_points",
+            "status": "generated",
+            "calculation_id": "aspect.mirror.v1",
+            "result_pointer": "/result/mirror_points",
+            "maturity": "experimental",
+            "view_ids": ["view.natal.mirror_points"],
+            "table_ids": ["table.mirror_points", "table.mirror_contacts"],
+            "export_formats": ["json", "plaintext_technical"],
+            "recommended_primary_view_id": None,
+            "missing_inputs": [],
+            "warnings": [],
+            "algorithm_cards": ["ALG-NATAL-MIRROR-POINTS-001"],
+            "reproducibility": reproducibility,
+        },
+        {
+            "output_id": "manifest.natal.midpoints",
+            "status": "generated",
+            "calculation_id": "natal.midpoints",
+            "result_pointer": "/result/midpoints",
+            "maturity": "experimental",
+            "view_ids": ["view.natal.midpoints"],
+            "table_ids": ["table.midpoints", "table.midpoint_hits"],
+            "export_formats": ["json", "plaintext_technical"],
+            "recommended_primary_view_id": None,
+            "missing_inputs": [],
+            "warnings": [],
+            "algorithm_cards": ["ALG-NATAL-MIDPOINTS-001"],
+            "reproducibility": reproducibility,
+        },
+        {
+            "output_id": "manifest.timing.natal_periods",
+            "status": "generated" if profection_document and firdaria_document else "blocked",
+            "calculation_id": "timing.natal_periods",
+            "result_pointer": "/result/profections" if profection_document else None,
+            "maturity": "experimental",
+            "view_ids": ["view.natal.firdaria", "view.natal.profections", "view.natal.zr"],
+            "table_ids": [
+                "table.annual_profections",
+                "table.firdaria",
+                "table.zodiacal_releasing",
+            ],
+            "export_formats": ["json", "plaintext_technical"],
+            "recommended_primary_view_id": None,
+            "missing_inputs": (
+                []
+                if profection_document and firdaria_document
+                else ["resolved_ascendant_and_sect"]
+            ),
+            "warnings": [],
+            "algorithm_cards": [
+                "ALG-TIMING-PROFECTIONS-001",
+                "ALG-TIMING-FIRDARIA-001",
+                "ALG-TIMING-ZR-001",
+            ],
+            "reproducibility": reproducibility,
+        },
+        {
             "output_id": "manifest.natal.standard_chart",
             "status": natal_status,
             "calculation_id": "natal.standard_chart",
@@ -1576,7 +1872,14 @@ def create_astronomical_snapshot(
             "dignities": deepcopy(dignity_documents),
             "receptions": deepcopy(reception_documents),
             "lots": deepcopy(lot_documents),
-            "midpoints": [],
+            "fixed_stars": deepcopy(list(fixed_star_result.stars)),
+            "fixed_star_contacts": deepcopy(fixed_star_contacts),
+            "special_degrees": deepcopy(special_degree_document),
+            "mirror_points": deepcopy(mirror_document),
+            "midpoints": deepcopy(midpoint_document),
+            "profections": deepcopy(profection_document),
+            "firdaria": deepcopy(firdaria_document),
+            "zodiacal_releasing": deepcopy(zodiacal_releasing_documents),
             "directions": [],
             "returns": [],
             "periods": [],

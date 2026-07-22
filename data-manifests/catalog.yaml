@@ -27,8 +27,8 @@ datasets:
       runtime_mode: local_read_only_versioned_files
     version:
       strategy: exact_upstream_release
-      pinned: 2.10.3-DE441-natal-subset-2026-04-14
-      source_verified_at: '2026-07-19'
+      pinned: 2.10.3-DE441-natal-common-minor-bodies-2026-07-20
+      source_verified_at: '2026-07-20'
       placeholder_rule: set_release_number_and_file_inventory_before_promotion
     integrity:
       state: verified
@@ -38,6 +38,20 @@ datasets:
         - {path: vendor/swisseph/ephe/seas_18.se1, sha256: a2cd8fc33807c78ca9a700c91c2e042258b12fc4796519e00781440b5ad8b2e2}
         - {path: vendor/swisseph/ephe/seorbel.txt, sha256: 97b454ff78f4f4716b5cc987a93ca8f33e44ef4b524a165a155a8a4885fd2e18}
         - {path: vendor/swisseph/ephe/sefstars.txt, sha256: 18b0dcafbe5b7240773daba2c038a325f5b3fc4163f61e0a7f4e92abd4f517c6}
+        - {path: vendor/swisseph/ephe/ast0/se00005s.se1, sha256: fe62a2091c88c4a39d429027987b99ef4a2c37f413f0f9bc77c65466a665032b}
+        - {path: vendor/swisseph/ephe/ast0/se00010s.se1, sha256: dc58fe8d2f98ae63e3c37bbac1f6c57b6be3a0fb2effb84bba7202f7f9bb327b}
+        - {path: vendor/swisseph/ephe/ast0/se00016s.se1, sha256: 494ceb60d14147ad8cbaa7a9a3242cc8ac410ab47e2dc9e91d6badd2d1d2527c}
+        - {path: vendor/swisseph/ephe/ast0/se00433s.se1, sha256: 6eb9c8ac6e14347d6f8980b562b2b701d1eb9d529c0dd77bac5f2b563daf0b00}
+        - {path: vendor/swisseph/ephe/ast7/se07066s.se1, sha256: 92142312772073c6377501dd0f81a7d8c95bf354f37f92c7b0d47435577bb0c8}
+        - {path: vendor/swisseph/ephe/ast10/se10199s.se1, sha256: 9b8ffcbad4350e493045ac53f096e9b73282a076f8b7ec140af2c68f6edce5d8}
+        - {path: vendor/swisseph/ephe/ast20/se20000s.se1, sha256: 023d1bee812ae6877634591dc10815784cd469e447a423066df8f3dec8efcae2}
+        - {path: vendor/swisseph/ephe/ast28/se28978s.se1, sha256: 7a42d3288a6fc639057f43fee4bcf41f58ad1871fa5abff9e4318b8fef726eea}
+        - {path: vendor/swisseph/ephe/ast50/se50000s.se1, sha256: 375d366d70369a5f23cb26c0eb68cd34cdf7af5f3e43d66387cffe84b7c443a9}
+        - {path: vendor/swisseph/ephe/ast90/se90377s.se1, sha256: 6bdaeb90e7c9ec4d2bf50341ebb876f7e5a24d1f64f81943565d9f64d9911373}
+        - {path: vendor/swisseph/ephe/ast90/se90482s.se1, sha256: d524eb964f7e00ed834cc6c6647fbb11394c2592d4b80c969e888419f4a98dfa}
+        - {path: vendor/swisseph/ephe/ast136/s136108s.se1, sha256: 4886fda88a5c41ab7891865814c8ba758665e83e33e77e7c40c3ce7e95a5c5fe}
+        - {path: vendor/swisseph/ephe/ast136/s136199s.se1, sha256: 6c5a853ca59df0b67c705d11d81a7e8688a1c3c937a1a55308365f95e641316c}
+        - {path: vendor/swisseph/ephe/ast136/s136472s.se1, sha256: fb4bf2fa2a8cf7b1fdbecce299bb33e3b738e5bd29b355b942640c234fa3d3dc}
       verify_each_file: true
     license:
       identifier: AGPL-3.0-or-later_OR_Swiss_Ephemeris_Professional_License

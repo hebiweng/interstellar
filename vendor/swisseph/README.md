@@ -11,6 +11,14 @@ current natal-first slice.
 | `ephe/seorbel.txt` | Swiss fictitious-body orbital elements, including Hamburg TNP definitions | `aloistr/swisseph` official repository | `97b454ff78f4f4716b5cc987a93ca8f33e44ef4b524a165a155a8a4885fd2e18` |
 | `ephe/sefstars.txt` | Swiss fixed-star catalogue (stars brighter than magnitude 5) | `aloistr/swisseph` official repository | `18b0dcafbe5b7240773daba2c038a325f5b3fc4163f61e0a7f4e92abd4f517c6` |
 
+The active dataset lock also pins 14 official Swiss short asteroid files
+(1500--2099) for the professional 20-object common-minor-body preset.  The
+machine-readable paths, sizes and SHA-256 values are in
+`data-manifests/locks/swiss-ephemeris-natal-2.10.3.json`; the source is the
+official Swiss Ephemeris `all_ast` download tree.  Together with Chiron,
+Ceres, Pallas, Juno, Vesta and Pholus in the standard distribution, this
+releases a deterministic 20-object preset without runtime downloads.
+
 Source URL:
 `https://raw.githubusercontent.com/aloistr/swisseph/master/ephe/`
 

@@ -97,6 +97,9 @@ _POINT_LABELS = {
     "anti_vertex": "反宿命点",
     "east_point": "东方点",
     "west_point": "西方点",
+    "mean_lilith": "平黑月莉莉丝",
+    "true_lilith": "真黑月莉莉丝",
+    "lunar_perigee": "月球近地点",
     "true_north_node": "真北交点",
     "true_south_node": "真南交点",
     "mean_north_node": "平北交点",
@@ -110,6 +113,34 @@ _POINT_LABELS = {
     "lot_victory": "胜利点",
     "lot_nemesis": "报应点",
     "lot_exaltation": "擢升点",
+    "chiron": "凯龙星",
+    "ceres": "谷神星",
+    "pallas": "智神星",
+    "juno": "婚神星",
+    "vesta": "灶神星",
+    "pholus": "福洛斯",
+    "nessus": "涅索斯",
+    "chariklo": "查里克洛",
+    "asteroid_eros": "爱神星",
+    "psyche": "灵神星",
+    "eris": "阋神星",
+    "sedna": "赛德娜",
+    "haumea": "妊神星",
+    "makemake": "鸟神星",
+    "quaoar": "创神星",
+    "orcus": "亡神星",
+    "ixion": "伊克西翁",
+    "varuna": "伐楼拿",
+    "astraea": "义神星",
+    "hygiea": "健神星",
+    "cupido": "丘比特",
+    "hades": "哈得斯",
+    "zeus": "宙斯",
+    "kronos": "克洛诺斯",
+    "apollon": "阿波罗",
+    "admetos": "阿得门图斯",
+    "vulkanus": "弗卡奴斯",
+    "poseidon": "波塞冬",
 }
 
 _POINT_MEANINGS = {
@@ -131,6 +162,53 @@ _POINT_MEANINGS = {
     "true_south_node": "真南交点是真北交点的对点，解读上用于标记熟悉或惯性的路径。",
     "mean_north_node": "平北交点是平滑化的月球交点，解读上用于标记发展方向。",
     "mean_south_node": "平南交点是平北交点的对点，解读上用于标记熟悉或惯性的路径。",
+    "vertex": "宿命点是由黄道与主垂圈交点计算出的关系敏感点，常用于观察被动相遇与外部触发。",
+    "anti_vertex": "反宿命点是宿命点的对点，与宿命点共同构成一条关系触发轴。",
+    "east_point": "东方点是以当地东方地平语义构造的敏感点，用于补充个体面向环境的呈现方式。",
+    "west_point": "西方点是东方点的对点，用于补充一对一回应与环境反馈的象征主题。",
+    "mean_lilith": "平黑月莉莉丝是月球远地点的平滑化位置，用于观察疏离、边界和未被驯化的情绪主题。",
+    "true_lilith": "真黑月莉莉丝是月球远地点的振荡位置，用于观察疏离、边界和未被驯化的情绪主题。",
+    "lunar_perigee": (
+        "月球近地点标记月球轨道最接近地球的一端，"
+        "用于补充本能反应与依附强度的象征阅读。"
+    ),
+    "fortune": "福点以昼夜公式结合上升、太阳与月亮，用于组织身体条件、物质处境与非意志性经验。",
+    "spirit": "精神点以昼夜公式结合上升、太阳与月亮，用于组织意向、选择与个人能动性。",
+    "lot_basis": "基础点用于观察福点与精神点之间的结构关系，以及行动与处境的承载基础。",
+    "lot_eros": "爱欲点用于组织吸引、欲求、联结动力与价值追求的象征主题。",
+    "lot_necessity": "必然点用于组织约束、责任、强制条件与必须处理之事的象征主题。",
+    "lot_courage": "勇气点用于组织主张、冒险、竞争与面对阻力的象征主题。",
+    "lot_victory": "胜利点用于组织成就、认可、支持条件与目标推进的象征主题。",
+    "lot_nemesis": "报应点用于组织限制、代价、反复压力与承担后果的象征主题。",
+    "lot_exaltation": "擢升点用于组织抬升、荣誉、能见度与更高期待的象征主题。",
+    "chiron": "凯龙星常用于观察创伤经验、修复过程以及把个人经验转化为帮助他人的方式。",
+    "ceres": "谷神星常用于观察照料、滋养、分离与重新建立安全感的方式。",
+    "pallas": "智神星常用于观察模式识别、策略判断与以技巧解决问题的方式。",
+    "juno": "婚神星常用于观察承诺、平等、契约与长期伴侣关系中的期待。",
+    "vesta": "灶神星常用于观察专注、奉献、内在秩序与需要保留的私人空间。",
+    "pholus": "福洛斯常用于观察小触发引发连锁变化、释放积累议题的过程。",
+    "nessus": "涅索斯常用于观察权力边界、伤害循环与停止重复模式的责任。",
+    "chariklo": "查里克洛常用于观察容纳、见证、疗愈边界与为复杂经验保留空间的能力。",
+    "asteroid_eros": "爱神星常用于观察欲望、迷恋、创造冲动与亲密吸引的表达。",
+    "psyche": "灵神星常用于观察敏感性、信任、内在联结与被理解的需要。",
+    "eris": "阋神星常用于观察排斥感、不平等经验以及对既有秩序提出挑战的方式。",
+    "sedna": "赛德娜常用于观察长期孤立、背弃经验以及在极端处境中重建力量的主题。",
+    "haumea": "妊神星常用于观察再生、创造、身体自主与从内部生成新形式的能力。",
+    "makemake": "鸟神星常用于观察生存智慧、资源适应与独立创造秩序的方式。",
+    "quaoar": "创神星常用于观察通过节律、规则和命名把混沌组织成可持续形式的倾向。",
+    "orcus": "亡神星常用于观察誓言、承诺、违约后果与个人原则的边界。",
+    "ixion": "伊克西翁常用于观察越界、特权与为重复选择承担责任的主题。",
+    "varuna": "伐楼拿常用于观察规则、誓约、道德秩序与维护整体结构的责任。",
+    "astraea": "义神星常用于观察公平、判断、理想标准与何时选择退出失衡环境。",
+    "hygiea": "健神星常用于观察预防、日常维护、清洁秩序与持续照顾身心的习惯。",
+    "cupido": "丘比特是汉堡学派假想点，用于组织结合、群体、艺术与组织关系的主题。",
+    "hades": "哈得斯是汉堡学派假想点，用于组织隐蔽、消耗、陈旧与困难条件的主题。",
+    "zeus": "宙斯是汉堡学派假想点，用于组织定向意志、创造冲动与发动能力的主题。",
+    "kronos": "克洛诺斯是汉堡学派假想点，用于组织权威、独立、地位与高标准的主题。",
+    "apollon": "阿波罗是汉堡学派假想点，用于组织扩展、知识、商业与多重连接的主题。",
+    "admetos": "阿得门图斯是汉堡学派假想点，用于组织收缩、凝固、耐力与停滞的主题。",
+    "vulkanus": "弗卡奴斯是汉堡学派假想点，用于组织力量、强度、执行与推动力的主题。",
+    "poseidon": "波塞冬是汉堡学派假想点，用于组织思想、精神取向、澄清与理念传播的主题。",
 }
 
 _SIGN_LABELS = {
@@ -161,6 +239,36 @@ _SIGN_MEANINGS = {
     "capricorn": "以规划、承担责任和建立长期结构的方式表达",
     "aquarius": "以独立、系统思考和连接群体议题的方式表达",
     "pisces": "以感受、想象和渗透边界的方式表达",
+}
+
+_SIGN_STRENGTHS = {
+    "aries": "果断、勇于开始、反应迅速",
+    "taurus": "稳定、耐心、重视实际成果",
+    "gemini": "好奇、灵活、善于交换信息",
+    "cancer": "体贴、保护、重视情感联结",
+    "leo": "热情、创造、自信表达",
+    "virgo": "细致、务实、善于改进",
+    "libra": "公平、合作、善于协调",
+    "scorpio": "专注、洞察、面对复杂议题",
+    "sagittarius": "开放、乐观、追求成长",
+    "capricorn": "负责、克制、长期建设",
+    "aquarius": "独立、创新、系统思考",
+    "pisces": "共情、想象、包容细腻",
+}
+
+_SIGN_CHALLENGES = {
+    "aries": "急躁、过快定论或忽略他人节奏",
+    "taurus": "固执、抗拒变化或过度依赖熟悉感",
+    "gemini": "分散、反复或停留在信息表面",
+    "cancer": "防御、情绪化或难以离开安全区",
+    "leo": "自尊敏感、戏剧化或过度需要认可",
+    "virgo": "挑剔、焦虑或过度追求完美",
+    "libra": "犹豫、回避冲突或过度迁就",
+    "scorpio": "猜疑、控制或难以放下紧张关系",
+    "sagittarius": "夸大、跳过细节或承诺过多",
+    "capricorn": "严苛、悲观或把责任扩大为压力",
+    "aquarius": "疏离、固守观点或忽视个体感受",
+    "pisces": "逃避、理想化或边界不清",
 }
 
 _HOUSE_MEANINGS = {
@@ -384,6 +492,8 @@ _RULE_PACK_HASH = _canonical_hash(
         "version": RULE_PACK_VERSION,
         "points": _POINT_MEANINGS,
         "signs": _SIGN_MEANINGS,
+        "sign_strengths": _SIGN_STRENGTHS,
+        "sign_challenges": _SIGN_CHALLENGES,
         "houses": _HOUSE_MEANINGS,
         "motion": _MOTION_MEANINGS,
         "aspects": _ASPECT_MEANINGS,
@@ -600,6 +710,8 @@ def _point_in_sign(item: Mapping[str, Any]) -> dict[str, Any]:
     sign_label = _SIGN_LABELS[str(sign_id)]
     text = (
         f"{_point_label(point_id)}落在{sign_label}：{point_meaning}在这里，这项功能{sign_meaning}。"
+        f"可用优势包括{_SIGN_STRENGTHS[str(sign_id)]}；需要留意"
+        f"{_SIGN_CHALLENGES[str(sign_id)]}。"
     )
     return _handler_result(
         status=InterpretationStatus.PUBLISHED,
@@ -645,6 +757,7 @@ def _point_in_house(item: Mapping[str, Any]) -> dict[str, Any]:
     text = (
         f"{_point_label(point_id)}落在第{house}宫：{point_meaning}"
         f"这项功能主要通过{_HOUSE_MEANINGS[house]}被体验和表达。"
+        "与其他点位的支持性或张力相位会改变表达难度，需要回到整盘相位共同判断。"
     )
     return _handler_result(
         status=InterpretationStatus.PUBLISHED,

@@ -8,6 +8,7 @@ import pytest
 import swisseph as swe
 
 from interstellar_core.astronomy.adapters import (
+    AYANAMSA_MODES,
     EphemerisFallbackError,
     EphemerisInputError,
     SwissEphemerisAdapter,
@@ -31,6 +32,13 @@ EXPECTED_POINT_IDS = (
     "neptune",
     "pluto",
 )
+
+
+def test_published_ayanamsa_catalog_includes_supported_consumer_choices() -> None:
+    assert AYANAMSA_MODES["ushashashi"] == swe.SIDM_USHASHASHI
+    assert AYANAMSA_MODES["djwhal_khul"] == swe.SIDM_DJWHAL_KHUL
+    assert AYANAMSA_MODES["jn_bhasin"] == swe.SIDM_JN_BHASIN
+    assert AYANAMSA_MODES["true_pushya"] == swe.SIDM_TRUE_PUSHYA
 
 
 class FakeBackend:
@@ -235,6 +243,40 @@ def test_versions_modes_and_return_flags_are_preserved() -> None:
         assert record.actual_mode == "moshier"
 
 
+def test_topocentric_center_uses_observer_and_does_not_leak_into_geocentric_calls() -> None:
+    adapter = SwissEphemerisAdapter(mode=SwissEphemerisMode.MOSHIER)
+    geocentric_before = adapter.calculate(julian_day_ut=2451545.0)
+    topocentric = adapter.calculate(
+        julian_day_ut=2451545.0,
+        center="topocentric",
+        observer={"longitude": 121.4737, "latitude": 31.2304, "elevation_m": 4},
+    )
+    geocentric_after = adapter.calculate(julian_day_ut=2451545.0)
+
+    assert topocentric.provenance.center == "topocentric"
+    assert all(
+        point["position"]["center"] == "topocentric" for point in topocentric.points
+    )
+    assert all(
+        record.returned_ecliptic_flags & swe.FLG_TOPOCTR
+        for record in topocentric.provenance.point_flags
+    )
+    assert geocentric_before.points == geocentric_after.points
+    assert geocentric_after.provenance.center == "geocentric"
+
+
+def test_topocentric_center_requires_valid_observer() -> None:
+    adapter = SwissEphemerisAdapter(mode=SwissEphemerisMode.MOSHIER)
+    with pytest.raises(EphemerisInputError, match="requires an observer"):
+        adapter.calculate(julian_day_ut=2451545.0, center="topocentric")
+    with pytest.raises(EphemerisInputError, match="out of range"):
+        adapter.calculate(
+            julian_day_ut=2451545.0,
+            center="topocentric",
+            observer={"longitude": 181, "latitude": 0},
+        )
+
+
 def test_swiss_to_moshier_fallback_is_visible_or_blocked() -> None:
     recording = SwissEphemerisAdapter(
         mode=SwissEphemerisMode.SWISS,
@@ -334,6 +376,68 @@ def test_hamburg_tnps_match_swiss_reference_and_remain_hypothetical() -> None:
         assert point["position"]["ecliptic"]["longitude_deg"] == pytest.approx(
             expected[point["point_id"]], abs=1e-6
         )
+
+
+def test_common_minor_body_preset_uses_locked_swiss_files_without_fallback() -> None:
+    from pathlib import Path
+
+    from interstellar_core.astronomy.adapters import COMMON_MINOR_BODY_POINT_IDS
+
+    ephemeris_path = (
+        Path(__file__).resolve().parents[3] / "vendor" / "swisseph" / "ephe"
+    )
+    result = SwissEphemerisAdapter(
+        ephemeris_path=ephemeris_path,
+        moshier_fallback="error",
+    ).calculate(
+        utc_instant=datetime(2000, 3, 1, 8, 30, tzinfo=UTC),
+        point_ids=COMMON_MINOR_BODY_POINT_IDS,
+    )
+
+    assert len(result.points) == 20
+    assert tuple(point["point_id"] for point in result.points) == (
+        "chiron",
+        "ceres",
+        "pallas",
+        "juno",
+        "vesta",
+        "pholus",
+        "nessus",
+        "chariklo",
+        "asteroid_eros",
+        "psyche",
+        "eris",
+        "sedna",
+        "haumea",
+        "makemake",
+        "quaoar",
+        "orcus",
+        "ixion",
+        "varuna",
+        "astraea",
+        "hygiea",
+    )
+    assert result.provenance.actual_modes == ("swiss",)
+    assert not any(
+        warning.code == "EPHEMERIS_FALLBACK_MOSHIER" for warning in result.warnings
+    )
+    expected_longitudes = {
+        "nessus": 276.891057,
+        "chariklo": 148.183140,
+        "asteroid_eros": 275.772019,
+        "psyche": 356.730400,
+        "eris": 18.848430,
+        "sedna": 45.383580,
+        "quaoar": 248.688181,
+        "hygiea": 245.982723,
+    }
+    for point in result.points:
+        assert point["catalog_object_ref"].startswith("mpc:")
+        assert point["kind"] in {"asteroid", "centaur", "dwarf_planet"}
+        if point["point_id"] in expected_longitudes:
+            assert point["position"]["ecliptic"]["longitude_deg"] == pytest.approx(
+                expected_longitudes[point["point_id"]], abs=1e-6
+            )
 
 
 @pytest.mark.parametrize(

@@ -12,6 +12,7 @@ export type NatalRenderControls = {
   showAxes: boolean;
   showPointLeaders: boolean;
   showPointDegrees: boolean;
+  showFixedStarContacts: boolean;
   showAspectLines: boolean;
   showLegend: boolean;
   majorAspectsOnly: boolean;
@@ -108,6 +109,7 @@ export function buildNatalRenderSpec(
       "zodiac",
       "point_band",
       "points",
+      ...(variant === "professional" && controls.showFixedStarContacts ? ["fixed_star_contacts"] : []),
       ...(!dateLevel && (controls.showHouseLines || controls.showHouseNumbers) ? ["houses"] : []),
       ...(!dateLevel && controls.showAxes ? ["axes"] : []),
       ...(!dateLevel && controls.showAspectLines ? ["aspect_stage", "aspect_lines"] : []),
@@ -132,10 +134,10 @@ export function buildNatalRenderSpec(
     accessibility: {
       color_blind_safe: true,
       include_data_alternative: true,
-      title: dateLevel ? "日期级星座位置图" : `${variant === "professional" ? "专业" : "简洁"}本命盘轮盘`,
+      title: dateLevel ? "日期级星座位置图" : "本命轮盘",
       description: dateLevel
         ? "出生时刻未知，仅展示日期级天体位置，不生成宫位、轴点或相位。"
-        : "包含黄道度数、星座、点位、十二宫、四轴、中心相位舞台和相位弦线。",
+        : "包含黄道度数、星座、点位、固定星合相标记、十二宫、四轴、中心相位舞台和相位弦线。",
     },
     options: {
       variant,

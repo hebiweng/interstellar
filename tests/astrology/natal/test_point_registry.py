@@ -33,9 +33,8 @@ def test_eros_lot_and_eros_asteroid_are_distinct_and_no_blocked_formula_is_faked
 ):
     assert POINT_REGISTRY["lot_eros"].availability == "available"
     assert POINT_REGISTRY["lot_eros"].formula_ref == "lot.eros.paulus.v1"
-    assert POINT_REGISTRY["asteroid_eros"].availability == "blocked"
+    assert POINT_REGISTRY["asteroid_eros"].availability == "available"
     assert POINT_REGISTRY["asteroid_eros"].catalog_object_ref == "mpc:433"
-    assert "se00433s.se1" in POINT_REGISTRY["asteroid_eros"].requirements
     assert all(
         POINT_REGISTRY[point_id].formula_ref is None
         for point_id in BLOCKED_COMPETITOR_POINT_IDS
@@ -55,9 +54,9 @@ def test_registry_document_is_json_safe_and_content_addressed() -> None:
     )
 
 
-def test_professional_default_projection_has_47_released_registered_points() -> None:
-    assert len(PROFESSIONAL_POINT_IDS) == 47
-    assert len(set(PROFESSIONAL_POINT_IDS)) == 47
+def test_professional_default_projection_has_62_released_registered_points() -> None:
+    assert len(PROFESSIONAL_POINT_IDS) == 62
+    assert len(set(PROFESSIONAL_POINT_IDS)) == 62
     assert all(
         POINT_REGISTRY[point_id].availability == "available"
         for point_id in PROFESSIONAL_POINT_IDS

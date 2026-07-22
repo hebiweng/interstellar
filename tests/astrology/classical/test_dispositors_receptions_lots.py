@@ -175,6 +175,9 @@ def test_supported_hermetic_lots_match_locked_competitor_reference_case() -> Non
         assert by_id[lot_id].longitude_deg == pytest.approx(longitude, abs=2e-5)
         assert by_id[lot_id].formula_id
         assert by_id[lot_id].source_ids
+    assert by_id["lot_exaltation"].rule_ids == (
+        "classical.lot.exaltation.paulus.v1",
+    )
 
 
 def test_supported_planetary_lots_reverse_operands_at_night() -> None:

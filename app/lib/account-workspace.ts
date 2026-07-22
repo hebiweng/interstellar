@@ -130,9 +130,9 @@ export function saveLatestNatal(input: {
   });
 }
 
-export function saveLatestAiAnalysis(personId: string, aiAnalysisText: string, aiModelId: string) {
+export function saveLatestAiAnalysis(personId: string, snapshotId: string, aiAnalysisText: string, aiModelId: string) {
   return workspaceRequest<{ personId: string; saved: boolean }>({
     method: "POST",
-    body: JSON.stringify({ action: "save_ai_analysis", personId, aiAnalysisText, aiModelId }),
+    body: JSON.stringify({ action: "save_ai_analysis", personId, snapshotId, aiAnalysisText, aiModelId }),
   });
 }

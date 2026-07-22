@@ -180,8 +180,11 @@ async def create_calculation(payload: ChartRequestPayload, request: Request) -> 
         incompatible["settings.ayanamsa"] = "sidereal zodiac requires one of: " + ", ".join(
             sorted(AYANAMSA_MODES)
         )
-    if payload.settings.center != "geocentric":
-        incompatible["settings.center"] = "M2 supports geocentric positions only"
+    if payload.settings.center == "heliocentric":
+        incompatible["settings.center"] = (
+            "heliocentric charts require separate Earth/Sun-origin and house semantics; "
+            "use geocentric or topocentric for natal.standard_chart"
+        )
     if payload.settings.coordinate_frame == "horizontal":
         incompatible["settings.coordinate_frame"] = (
             "horizontal coordinates require M7 observer work"

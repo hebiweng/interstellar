@@ -19,28 +19,31 @@ from interstellar_core.astrology.classical.sources import (
     ALG_DIGNITY_RECEPTION,
     PROFILE_TRADITIONAL_ESSENTIAL_V1,
     RULE_DETRIMENT_V1,
-    RULE_EXALTATION_V1,
+    RULE_ESSENTIAL_EXALTATION_V1,
     RULE_FACES_V1,
     RULE_FALL_V1,
     RULE_PEREGRINE_V1,
-    RULE_TERMS_V1,
+    RULE_TERMS_EGYPTIAN_V1,
+    RULE_TERMS_PTOLEMAIC_V1,
     RULE_TRADITIONAL_RULERSHIP_V1,
-    RULE_TRIPLICITY_V1,
+    RULE_TRIPLICITY_DOROTHEAN_V1,
+    RULE_TRIPLICITY_PTOLEMAIC_V1,
 )
 from interstellar_core.astrology.classical.tables import (
     CHALDEAN_FACES_TABLE_REF,
-    DOROTHEAN_TRIPLICITIES,
-    DOROTHEAN_TRIPLICITY_TABLE_REF,
-    EGYPTIAN_TERMS_TABLE_REF,
     EXALTATION_RULER_BY_SIGN,
     EXALTATION_TABLE_REF,
     SIGN_ELEMENTS,
     TRADITIONAL_PLANET_IDS,
     TRADITIONAL_RULERSHIP_TABLE_REF,
+    TermsTable,
+    TriplicityTable,
     face_ruler,
     opposite_sign,
     sign_and_degree,
     term_ruler,
+    terms_table_data,
+    triplicity_table_data,
 )
 
 
@@ -103,11 +106,23 @@ def dignity_rulers_at(
     longitude_deg: float,
     *,
     sect: Sect,
+    terms_table: TermsTable = TermsTable.EGYPTIAN,
+    triplicity_table: TriplicityTable = TriplicityTable.DOROTHEAN,
 ) -> tuple[DignityCondition, ...]:
     """Return every positive essential-dignity lord at one zodiacal degree."""
 
     sect = require_sect(sect)
     sign_id, degree = sign_and_degree(longitude_deg)
+    _, terms_table_ref = terms_table_data(terms_table)
+    triplicities, triplicity_table_ref = triplicity_table_data(triplicity_table)
+    terms_rule_id = {
+        TermsTable.EGYPTIAN: RULE_TERMS_EGYPTIAN_V1,
+        TermsTable.PTOLEMAIC: RULE_TERMS_PTOLEMAIC_V1,
+    }[terms_table]
+    triplicity_rule_id = {
+        TriplicityTable.DOROTHEAN: RULE_TRIPLICITY_DOROTHEAN_V1,
+        TriplicityTable.PTOLEMAIC: RULE_TRIPLICITY_PTOLEMAIC_V1,
+    }[triplicity_table]
     conditions: list[DignityCondition] = [
         _condition(
             kind=DignityKind.DOMICILE,
@@ -127,11 +142,14 @@ def dignity_rulers_at(
                 sign_id=sign_id,
                 degree_in_sign=degree,
                 table_ref=EXALTATION_TABLE_REF,
-                rule_id=RULE_EXALTATION_V1,
+                rule_id=RULE_ESSENTIAL_EXALTATION_V1,
             )
         )
-    triplicity = DOROTHEAN_TRIPLICITIES[SIGN_ELEMENTS[sign_id]]
+    triplicity = triplicities[SIGN_ELEMENTS[sign_id]]
     for role in (TriplicityRole.DAY, TriplicityRole.NIGHT, TriplicityRole.PARTICIPATING):
+        ruler_id = triplicity.ruler_for(role)
+        if ruler_id is None:
+            continue
         active = (
             role is TriplicityRole.PARTICIPATING
             or (role is TriplicityRole.DAY and sect is Sect.DAY)
@@ -140,24 +158,26 @@ def dignity_rulers_at(
         conditions.append(
             _condition(
                 kind=DignityKind.TRIPLICITY,
-                ruler_id=triplicity.ruler_for(role),
+                ruler_id=ruler_id,
                 sign_id=sign_id,
                 degree_in_sign=degree,
-                table_ref=DOROTHEAN_TRIPLICITY_TABLE_REF,
-                rule_id=RULE_TRIPLICITY_V1,
+                table_ref=triplicity_table_ref,
+                rule_id=triplicity_rule_id,
                 role=role,
                 is_active_for_sect=active,
             )
         )
-    term_id, _ = term_ruler(sign_id, degree)
+    # Resolve through the released table API; do not use the raw mapping above
+    # so validation and half-open boundary behavior stay centralized.
+    term_id, _ = term_ruler(sign_id, degree, terms_table=terms_table)
     conditions.append(
         _condition(
             kind=DignityKind.TERM,
             ruler_id=term_id,
             sign_id=sign_id,
             degree_in_sign=degree,
-            table_ref=EGYPTIAN_TERMS_TABLE_REF,
-            rule_id=RULE_TERMS_V1,
+            table_ref=terms_table_ref,
+            rule_id=terms_rule_id,
         )
     )
     face_id, _ = face_ruler(sign_id, degree)
@@ -179,14 +199,26 @@ def evaluate_essential_dignity(
     longitude_deg: float,
     *,
     sect: Sect,
+    terms_table: TermsTable = TermsTable.EGYPTIAN,
+    triplicity_table: TriplicityTable = TriplicityTable.DOROTHEAN,
 ) -> EssentialDignityResult:
     sect = require_sect(sect)
     sign_id, degree = sign_and_degree(longitude_deg)
+    _, terms_table_ref = terms_table_data(terms_table)
+    _, triplicity_table_ref = triplicity_table_data(triplicity_table)
+    terms_rule_id = {
+        TermsTable.EGYPTIAN: RULE_TERMS_EGYPTIAN_V1,
+        TermsTable.PTOLEMAIC: RULE_TERMS_PTOLEMAIC_V1,
+    }[terms_table]
+    triplicity_rule_id = {
+        TriplicityTable.DOROTHEAN: RULE_TRIPLICITY_DOROTHEAN_V1,
+        TriplicityTable.PTOLEMAIC: RULE_TRIPLICITY_PTOLEMAIC_V1,
+    }[triplicity_table]
     rule_ids = (
         RULE_TRADITIONAL_RULERSHIP_V1,
-        RULE_EXALTATION_V1,
-        RULE_TRIPLICITY_V1,
-        RULE_TERMS_V1,
+        RULE_ESSENTIAL_EXALTATION_V1,
+        triplicity_rule_id,
+        terms_rule_id,
         RULE_FACES_V1,
         RULE_DETRIMENT_V1,
         RULE_FALL_V1,
@@ -198,8 +230,8 @@ def evaluate_essential_dignity(
             for table_ref in (
                 TRADITIONAL_RULERSHIP_TABLE_REF,
                 EXALTATION_TABLE_REF,
-                DOROTHEAN_TRIPLICITY_TABLE_REF,
-                EGYPTIAN_TERMS_TABLE_REF,
+                triplicity_table_ref,
+                terms_table_ref,
                 CHALDEAN_FACES_TABLE_REF,
             )
             for source_id in table_ref.source_ids
@@ -227,7 +259,12 @@ def evaluate_essential_dignity(
 
     dignities = [
         condition
-        for condition in dignity_rulers_at(longitude_deg, sect=sect)
+        for condition in dignity_rulers_at(
+            longitude_deg,
+            sect=sect,
+            terms_table=terms_table,
+            triplicity_table=triplicity_table,
+        )
         if condition.ruler_id == point_id
     ]
     debilities: list[DignityCondition] = []

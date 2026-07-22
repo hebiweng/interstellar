@@ -623,6 +623,7 @@ class AccountStore:
         self,
         owner_email: str,
         person_id: str,
+        snapshot_id: str,
         text: str,
         model_id: str | None,
     ) -> None:
@@ -634,12 +635,21 @@ class AccountStore:
             cursor = connection.execute(
                 """
                 UPDATE natal_results SET ai_analysis_text = ?, ai_model_id = ?
-                WHERE person_id = ? AND owner_email = ?
+                WHERE person_id = ? AND owner_email = ? AND snapshot_id = ?
                 """,
-                (cleaned, model_id, person_id, owner_email),
+                (cleaned, model_id, person_id, owner_email, snapshot_id),
             )
             if cursor.rowcount == 0:
-                raise AccountError("NATAL_RESULT_NOT_FOUND", "请先为该人物完成本命盘计算。")
+                latest = connection.execute(
+                    "SELECT snapshot_id FROM natal_results WHERE person_id = ? AND owner_email = ?",
+                    (person_id, owner_email),
+                ).fetchone()
+                if latest is None:
+                    raise AccountError("NATAL_RESULT_NOT_FOUND", "请先为该人物完成本命盘计算。")
+                raise AccountError(
+                    "STALE_AI_ANALYSIS",
+                    "星盘已重新计算，这次旧版本分析没有覆盖最新结果。",
+                )
 
     def delete_person(self, owner_email: str, person_id: str) -> None:
         with self._lock, self._connect() as connection:

@@ -43,9 +43,11 @@ test("server-renders the natal-first Interstellar workspace", async () => {
   assert.match(html, /<title>Interstellar · 专业占星研究工作台<\/title>/i);
   assert.match(html, /PROFESSIONAL ASTROLOGY/);
   assert.match(html, /新建分析/);
-  assert.match(html, /技法排盘/);
+  assert.match(html, /本命盘/);
+  assert.match(html, /行运盘/);
+  assert.match(html, /13分盘/);
   assert.match(html, /正在读取工作台/);
-  assert.match(html, /游客模式/);
+  assert.doesNotMatch(html, /技法排盘/);
   assert.doesNotMatch(html, /VIRTUAL FIXTURE|当前展示静态虚拟验收样例/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
@@ -62,7 +64,7 @@ test("defines real natal input, deterministic settings, item interpretations, an
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   assert.match(page, /保存为当前账户可复用的人物资料；此动作不会自动计算/);
   assert.match(page, /计算完整本命盘/);
-  assert.match(page, /六种分析入口/);
+  assert.match(page, /14 种排盘/);
   assert.match(page, /专业综合本命 v1/);
   assert.match(page, /Tropical 回归黄道/);
   assert.match(page, /Sidereal 恒星黄道/);
@@ -75,28 +77,23 @@ test("defines real natal input, deterministic settings, item interpretations, an
   assert.match(page, /相位计算（需重新计算）/);
   assert.match(page, /星座落点与表达方式/);
   assert.match(page, /主要相位矩阵/);
-  assert.match(page, /专业轮盘/);
-  assert.match(page, /简洁轮盘/);
+  assert.match(page, /本命轮盘/);
+  assert.match(page, /查看结果/);
+  assert.match(page, /本命盘计算结果/);
   assert.match(page, /wheelPointLabels/);
   assert.match(page, /professional-point-label/);
   assert.match(page, /sign-name-label/);
   assert.match(page, /getNatalItemInterpretation/);
-  assert.match(page, /提交至 AI 分析/);
-  assert.match(page, /AI 只接收已算好的分析数据/);
-  assert.match(page, /复制全文/);
-  assert.match(page, /导出 \.md/);
-  assert.match(page, /导出 \.txt/);
-  assert.match(page, /专业 JSON/);
-  assert.match(page, /专业数据表/);
-  assert.match(page, /导出所选 CSV/);
-  assert.match(page, /只输出可用于继续分析的事实/);
+  assert.match(page, /刷新 DeepSeek 分析/);
+  assert.match(page, /只有点击右上角“刷新”时才会/);
+  assert.match(page, /按当前参数重新计算/);
+  assert.match(page, /复制数据/);
+  assert.match(page, /导出 TXT/);
+  assert.doesNotMatch(page, /导出 \.md|专业 JSON|导出所选 CSV/);
   assert.doesNotMatch(page, /dataset-audit/);
   assert.doesNotMatch(page, /结构化证据与原始高级结果/);
   assert.doesNotMatch(page, /定位星链/);
-  assert.match(page, /预览将发送的载荷/);
-  assert.match(page, /本次载荷预览/);
-  assert.match(page, /我确认有权提交该人物的资料/);
-  assert.match(page, /同意发送本次预览中同一校验值的载荷/);
+  assert.doesNotMatch(page, /预览将发送的载荷|本次载荷预览/);
 });
 
 test("separates subject creation, calculations, future methods, and theme choice", async () => {
@@ -130,10 +127,11 @@ test("keeps the object library limited to reusable fact records", async () => {
 test("keeps scroll ownership readable on desktop and mobile", async () => {
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   assert.match(css, /body\s*\{[^}]*min-height:\s*100%;/s);
-  assert.match(css, /\.person-sidebar\s*\{[^}]*overflow-y:\s*auto;/s);
+  assert.match(css, /\.settings-panel\s*\{[^}]*overflow-y:\s*auto;/s);
+  assert.match(css, /\.workbench-grid\s*\{[^}]*grid-template-columns:/s);
+  assert.match(css, /\.workbench-grid > \.settings-panel\s*\{[^}]*order:\s*1;/s);
   assert.match(css, /\.result-content:has\(\.data-table\)[^}]*overflow-x:\s*auto;/s);
-  assert.match(css, /@media \(max-width: 900px\)[\s\S]*\.person-sidebar\s*\{[^}]*position:\s*static;/s);
-  assert.match(css, /@media \(max-width: 900px\)[\s\S]*\.main-workspace\s*\{[^}]*order:\s*1;/s);
+  assert.match(css, /@media \(max-width: 900px\)[\s\S]*\.settings-panel, \.ai-insight-panel\s*\{[^}]*position:\s*static;/s);
   assert.match(css, /\.modal-backdrop[^}]*overflow:\s*auto;/s);
 });
 
@@ -156,21 +154,22 @@ test("defines a layered professional natal wheel and compact alternate view", as
 test("keeps user-facing analysis data portable and developer metadata out of the report", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   const api = await readFile(new URL("../app/lib/interstellar-api.ts", import.meta.url), "utf8");
-  assert.match(page, /可复制的本命盘分析数据/);
-  assert.match(page, /只包含可以交给占星师或外部模型继续分析的事实/);
+  assert.match(page, /本命盘分析数据/);
+  assert.match(page, /可复制给占星师或外部模型继续分析/);
+  assert.match(page, /复制数据/);
+  assert.match(page, /导出 TXT/);
   assert.doesNotMatch(page, /RESULT DISCLOSURE & COVERAGE/);
   assert.doesNotMatch(page, /任何没有视图或导出映射的新结果都会标记为发布阻塞/);
   assert.match(api, /output_manifest\?: Array/);
   assert.match(api, /evidence\?: Array/);
 });
 
-test("uses one RenderSpec for screen SVG and SVG PNG PDF exports", async () => {
+test("uses one RenderSpec on screen without exposing wheel export controls", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   const exporter = await readFile(new URL("../app/lib/render-export.ts", import.meta.url), "utf8");
   assert.match(page, /buildNatalRenderSpec/);
   assert.match(page, /renderSpec=\{natalRenderSpec\}/);
-  assert.match(page, /同源导出/);
-  assert.match(page, /downloadNatalGraphic/);
+  assert.doesNotMatch(page, /同源导出|downloadNatalGraphic|导出 SVG|导出 PNG|导出 PDF/);
   assert.match(exporter, /view_id: "wheel\.natal"/);
   assert.match(exporter, /serializeSvgWithComputedStyles/);
   assert.match(exporter, /rasterizeSerializedSvg/);

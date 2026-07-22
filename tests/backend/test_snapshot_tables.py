@@ -24,6 +24,17 @@ TABLE_IDS = (
     "table.arabic_parts",
 )
 
+NATAL_EXTENSION_TABLE_IDS = (
+    "table.special_degrees",
+    "table.mirror_points",
+    "table.mirror_contacts",
+    "table.midpoints",
+    "table.midpoint_hits",
+    "table.annual_profections",
+    "table.firdaria",
+    "table.zodiacal_releasing",
+)
+
 
 def _table_ref() -> dict:
     return {
@@ -339,13 +350,13 @@ def test_professional_natal_snapshot_reaches_every_declared_specialized_table() 
             for manifest in snapshot["result"]["output_manifest"]
             for table_id in manifest["table_ids"]
         }
-        assert set(TABLE_IDS) <= declared
+        assert set(TABLE_IDS + NATAL_EXTENSION_TABLE_IDS) <= declared
 
         tables = {
             table_id: client.get(
                 f"/api/v1/calculations/{snapshot['id']}/tables/{table_id}"
             )
-            for table_id in TABLE_IDS
+            for table_id in TABLE_IDS + NATAL_EXTENSION_TABLE_IDS
         }
 
     assert all(response.status_code == 200 for response in tables.values())
@@ -363,3 +374,15 @@ def test_professional_natal_snapshot_reaches_every_declared_specialized_table() 
         "lot_victory",
         "lot_nemesis",
     }
+    assert tables["table.special_degrees"].json()["rows"]
+    assert tables["table.mirror_points"].json()["rows"]
+    assert tables["table.midpoints"].json()["rows"]
+    assert len(tables["table.annual_profections"].json()["rows"]) == 100
+    assert any(
+        row["level"] == "major"
+        for row in tables["table.firdaria"].json()["rows"]
+    )
+    assert {
+        row["lot_id"]
+        for row in tables["table.zodiacal_releasing"].json()["rows"]
+    } == {"fortune", "spirit"}

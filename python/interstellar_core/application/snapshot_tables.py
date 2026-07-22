@@ -437,6 +437,133 @@ def _arabic_part_rows(snapshot: Mapping[str, Any]) -> tuple[dict[str, Any], ...]
     )
 
 
+def _fixed_star_rows(snapshot: Mapping[str, Any]) -> tuple[dict[str, Any], ...]:
+    return tuple(
+        {
+            "star_id": star.get("star_id"),
+            "name": star.get("name"),
+            "label_zh": star.get("label_zh"),
+            "catalog_designation": star.get("catalog_designation"),
+            "magnitude_v": star.get("magnitude_v"),
+            "sign": star.get("sign"),
+            "degree_in_sign": star.get("degree_in_sign"),
+            "longitude_deg": _nested(star, "position", "ecliptic", "longitude_deg"),
+            "latitude_deg": _nested(star, "position", "ecliptic", "latitude_deg"),
+            "right_ascension_deg": _nested(
+                star, "position", "equatorial", "right_ascension_deg"
+            ),
+            "declination_deg": _nested(
+                star, "position", "equatorial", "declination_deg"
+            ),
+        }
+        for star in _mapping_rows(_result_value(snapshot, "fixed_stars"))
+    )
+
+
+def _fixed_star_contact_rows(snapshot: Mapping[str, Any]) -> tuple[dict[str, Any], ...]:
+    return tuple(
+        {
+            "contact_id": contact.get("contact_id"),
+            "star_id": contact.get("star_id"),
+            "point_id": contact.get("point_id"),
+            "type": contact.get("type"),
+            "orb_deg": contact.get("orb_deg"),
+            "orb_allowance_deg": contact.get("orb_allowance_deg"),
+            "strength": contact.get("strength"),
+        }
+        for contact in _mapping_rows(_result_value(snapshot, "fixed_star_contacts"))
+    )
+
+
+def _special_degree_rows(snapshot: Mapping[str, Any]) -> tuple[dict[str, Any], ...]:
+    document = _result_value(snapshot, "special_degrees")
+    points = document.get("points") if isinstance(document, Mapping) else ()
+    return tuple(
+        {
+            "point_id": item.get("point_id"),
+            "longitude_deg": item.get("longitude_deg"),
+            "sign_id": item.get("sign_id"),
+            "degree_in_sign": item.get("degree_in_sign"),
+            "decan_index": item.get("decan_index"),
+            "in_via_combusta": item.get("in_via_combusta"),
+            "in_terminal_degree_29": item.get("in_terminal_degree_29"),
+            "rule_ids": _joined(item.get("rule_ids")),
+        }
+        for item in _mapping_rows(points)
+    )
+
+
+def _mirror_point_rows(snapshot: Mapping[str, Any]) -> tuple[dict[str, Any], ...]:
+    document = _result_value(snapshot, "mirror_points")
+    points = document.get("mirror_points") if isinstance(document, Mapping) else ()
+    return tuple(dict(item) for item in _mapping_rows(points))
+
+
+def _mirror_contact_rows(snapshot: Mapping[str, Any]) -> tuple[dict[str, Any], ...]:
+    document = _result_value(snapshot, "mirror_points")
+    contacts = document.get("contacts") if isinstance(document, Mapping) else ()
+    return tuple(dict(item) for item in _mapping_rows(contacts))
+
+
+def _midpoint_rows(snapshot: Mapping[str, Any]) -> tuple[dict[str, Any], ...]:
+    document = _result_value(snapshot, "midpoints")
+    rows = document.get("midpoints") if isinstance(document, Mapping) else ()
+    return tuple(dict(item) for item in _mapping_rows(rows))
+
+
+def _midpoint_hit_rows(snapshot: Mapping[str, Any]) -> tuple[dict[str, Any], ...]:
+    document = _result_value(snapshot, "midpoints")
+    rows = document.get("hits") if isinstance(document, Mapping) else ()
+    return tuple(dict(item) for item in _mapping_rows(rows))
+
+
+def _profection_rows(snapshot: Mapping[str, Any]) -> tuple[dict[str, Any], ...]:
+    document = _result_value(snapshot, "profections")
+    rows = document.get("periods") if isinstance(document, Mapping) else ()
+    return tuple(
+        {**dict(item), "time_lord_ids": _joined(item.get("time_lord_ids"))}
+        for item in _mapping_rows(rows)
+    )
+
+
+def _firdaria_rows(snapshot: Mapping[str, Any]) -> tuple[dict[str, Any], ...]:
+    document = _result_value(snapshot, "firdaria")
+    if not isinstance(document, Mapping):
+        return ()
+    major = (
+        {"level": "major", **dict(item), "minor_lord_id": None}
+        for item in _mapping_rows(document.get("major_periods"))
+    )
+    minor = (
+        {"level": "minor", "duration_years": None, **dict(item)}
+        for item in _mapping_rows(document.get("sub_periods"))
+    )
+    return tuple((*major, *minor))
+
+
+def _zodiacal_releasing_rows(snapshot: Mapping[str, Any]) -> tuple[dict[str, Any], ...]:
+    documents = _result_value(snapshot, "zodiacal_releasing")
+    if not isinstance(documents, Mapping):
+        return ()
+    rows: list[dict[str, Any]] = []
+    for lot_id, document in documents.items():
+        if not isinstance(document, Mapping):
+            continue
+        levels = document.get("levels")
+        if not isinstance(levels, Mapping):
+            continue
+        for level in ("L1", "L2"):
+            rows.extend(
+                {
+                    "lot_id": lot_id,
+                    **dict(item),
+                    "time_lord_ids": _joined(item.get("time_lord_ids")),
+                }
+                for item in _mapping_rows(levels.get(level))
+            )
+    return tuple(rows)
+
+
 _POINT_COLUMNS = (
     "point_id",
     "kind",
@@ -611,6 +738,94 @@ _TABLE_BUILDERS: dict[str, tuple[tuple[str, ...], TableBuilder]] = {
         ),
         _arabic_part_rows,
     ),
+    "table.fixed_stars": (
+        (
+            "star_id",
+            "name",
+            "label_zh",
+            "catalog_designation",
+            "magnitude_v",
+            "sign",
+            "degree_in_sign",
+            "longitude_deg",
+            "latitude_deg",
+            "right_ascension_deg",
+            "declination_deg",
+        ),
+        _fixed_star_rows,
+    ),
+    "table.fixed_star_contacts": (
+        (
+            "contact_id",
+            "star_id",
+            "point_id",
+            "type",
+            "orb_deg",
+            "orb_allowance_deg",
+            "strength",
+        ),
+        _fixed_star_contact_rows,
+    ),
+    "table.special_degrees": (
+        (
+            "point_id", "longitude_deg", "sign_id", "degree_in_sign", "decan_index",
+            "in_via_combusta", "in_terminal_degree_29", "rule_ids",
+        ),
+        _special_degree_rows,
+    ),
+    "table.mirror_points": (
+        (
+            "point_id", "longitude_deg", "antiscia_longitude_deg", "antiscia_sign_id",
+            "antiscia_degree_in_sign", "contra_antiscia_longitude_deg",
+            "contra_antiscia_sign_id", "contra_antiscia_degree_in_sign", "rule_ids",
+        ),
+        _mirror_point_rows,
+    ),
+    "table.mirror_contacts": (
+        (
+            "contact_id", "contact_type", "point_a", "point_b",
+            "point_a_longitude_deg", "point_b_longitude_deg",
+            "point_a_mirror_longitude_deg", "point_b_mirror_longitude_deg",
+            "separation_from_exact_deg", "orb_deg", "orb_fraction_remaining", "rule_id",
+        ),
+        _mirror_contact_rows,
+    ),
+    "table.midpoints": (
+        (
+            "midpoint_id", "point_a", "point_b", "point_a_longitude_deg",
+            "point_b_longitude_deg", "direct_midpoint_deg", "indirect_midpoint_deg",
+            "ambiguous", "rule_id",
+        ),
+        _midpoint_rows,
+    ),
+    "table.midpoint_hits": (
+        (
+            "hit_id", "midpoint_id", "midpoint_type", "target_point_id", "aspect_id",
+            "exact_angle_deg", "actual_angle_deg", "orb_deg", "orb_allowance_deg", "rule_id",
+        ),
+        _midpoint_hit_rows,
+    ),
+    "table.annual_profections": (
+        (
+            "age", "start_date", "end_date", "activated_house", "activated_sign",
+            "time_lord_ids", "current",
+        ),
+        _profection_rows,
+    ),
+    "table.firdaria": (
+        (
+            "level", "period_id", "major_lord_id", "minor_lord_id", "duration_years",
+            "start_utc", "end_utc", "current",
+        ),
+        _firdaria_rows,
+    ),
+    "table.zodiacal_releasing": (
+        (
+            "lot_id", "period_id", "parent_period_id", "level", "sign_id",
+            "time_lord_ids", "start_utc", "end_utc", "current",
+        ),
+        _zodiacal_releasing_rows,
+    ),
 }
 
 _EMPTY_ROWS_ARE_VALID = frozenset(
@@ -621,6 +836,10 @@ _EMPTY_ROWS_ARE_VALID = frozenset(
         "graph.dispositor_chain",
         "table.sect_condition",
         "table.arabic_parts",
+        "table.fixed_star_contacts",
+        "table.mirror_contacts",
+        "table.midpoint_hits",
+        "table.zodiacal_releasing",
     }
 )
 
