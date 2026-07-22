@@ -64,8 +64,10 @@ test("defines real natal input, deterministic settings, item interpretations, an
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   assert.match(page, /保存为当前账户可复用的人物资料；此动作不会自动计算/);
   assert.match(page, /计算完整本命盘/);
-  assert.match(page, /14 种排盘/);
-  assert.match(page, /专业综合本命 v1/);
+  assert.match(page, /14 种盘型/);
+  assert.match(page, /label: "现代"/);
+  assert.match(page, /label: "古典"/);
+  assert.match(page, /label: "特殊"/);
   assert.match(page, /Tropical 回归黄道/);
   assert.match(page, /Sidereal 恒星黄道/);
   assert.match(page, /岁差体系 Ayanamsa/);
@@ -80,6 +82,9 @@ test("defines real natal input, deterministic settings, item interpretations, an
   assert.match(page, /本命轮盘/);
   assert.match(page, /查看结果/);
   assert.match(page, /本命盘计算结果/);
+  assert.match(page, /chart-workspace-card/);
+  assert.match(page, /朔望点/);
+  assert.match(page, /紫炁/);
   assert.match(page, /wheelPointLabels/);
   assert.match(page, /professional-point-label/);
   assert.match(page, /sign-name-label/);
@@ -94,6 +99,7 @@ test("defines real natal input, deterministic settings, item interpretations, an
   assert.doesNotMatch(page, /结构化证据与原始高级结果/);
   assert.doesNotMatch(page, /定位星链/);
   assert.doesNotMatch(page, /预览将发送的载荷|本次载荷预览/);
+  assert.doesNotMatch(page, /规则方案/);
 });
 
 test("separates subject creation, calculations, future methods, and theme choice", async () => {
@@ -131,7 +137,7 @@ test("keeps scroll ownership readable on desktop and mobile", async () => {
   assert.match(css, /\.workbench-grid\s*\{[^}]*grid-template-columns:/s);
   assert.match(css, /\.workbench-grid > \.settings-panel\s*\{[^}]*order:\s*1;/s);
   assert.match(css, /\.result-content:has\(\.data-table\)[^}]*overflow-x:\s*auto;/s);
-  assert.match(css, /@media \(max-width: 900px\)[\s\S]*\.settings-panel, \.ai-insight-panel\s*\{[^}]*position:\s*static;/s);
+  assert.match(css, /@media \(max-width: 900px\)[\s\S]*\.settings-panel, \.chart-workspace-card, \.ai-insight-panel\s*\{[^}]*position:\s*static;/s);
   assert.match(css, /\.modal-backdrop[^}]*overflow:\s*auto;/s);
 });
 
@@ -149,6 +155,7 @@ test("defines a layered professional natal wheel and compact alternate view", as
   assert.match(css, /\.professional-point-label/);
   assert.match(css, /\.sign-name-label/);
   assert.match(css, /\.aspect-stage-ring/);
+  assert.doesNotMatch(css, /perspective:|rotateY\(|backface-visibility/);
 });
 
 test("keeps user-facing analysis data portable and developer metadata out of the report", async () => {
