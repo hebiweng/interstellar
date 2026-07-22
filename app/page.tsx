@@ -1322,6 +1322,7 @@ export default function Home() {
   const [aiSubmitBusy, setAiSubmitBusy] = useState(false);
   const [aiAnalysisText, setAiAnalysisText] = useState("");
   const activeSnapshotIdRef = useRef(snapshot.id);
+  const subjectSwitcherRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const storedTheme = window.localStorage.getItem("interstellar.theme");
@@ -1335,6 +1336,24 @@ export default function Home() {
   useEffect(() => {
     activeSnapshotIdRef.current = snapshot.id;
   }, [snapshot.id]);
+
+  useEffect(() => {
+    if (!personMenuOpen) return;
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      if (event.target instanceof Node && !subjectSwitcherRef.current?.contains(event.target)) {
+        setPersonMenuOpen(false);
+      }
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setPersonMenuOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutsidePointer);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsidePointer);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [personMenuOpen]);
 
   useEffect(() => {
     if (!natalGuideOpen || natalGuideText) return;
@@ -1769,7 +1788,7 @@ export default function Home() {
           if (item === "对象库") window.location.href = "/objects";
         }}>{item}</button>)}</nav>
         <div className="site-actions">
-          <div className="subject-switcher">
+          <div className="subject-switcher" ref={subjectSwitcherRef}>
             <button className="subject-switcher-trigger" aria-haspopup="menu" aria-expanded={personMenuOpen} onClick={() => setPersonMenuOpen((value) => !value)}><span>{hasActiveSubject ? subjectName.slice(0, 1) : "＋"}</span><span><b>{hasActiveSubject ? subjectName : "选择人物"}</b><small>{hasActiveSubject ? person.localDate || "生日未填写" : "添加或选择人物"}</small></span><i>{personMenuOpen ? "▴" : "▾"}</i></button>
             {personMenuOpen && <div className="subject-switcher-menu" role="menu">
               {savedPeople.slice(0, 5).map((saved) => <button role="menuitem" key={saved.id} className={selectedPersonId === saved.id ? "active" : ""} onClick={() => { selectWorkspacePerson(saved); setPersonMenuOpen(false); }}><span>{saved.person.displayName.slice(0, 1)}</span><span><b>{saved.person.displayName}</b><small>{saved.person.localDate || "生日未填写"}</small></span><i>{selectedPersonId === saved.id ? "当前" : saved.latestNatal ? "切换" : "计算"}</i></button>)}
@@ -1789,14 +1808,14 @@ export default function Home() {
 
           <div className="workbench-grid">
             <article className="wheel-panel chart-workspace-card">
-              <div className="panel-heading"><div className="wheel-heading-main"><div><small>{showCalculationResults ? "CALCULATION RESULTS" : dateLevelMode ? "DATE-LEVEL POSITION VIEW" : "NATAL CHART"}</small><h2>{showCalculationResults ? "本命盘计算结果" : dateLevelMode ? "日期级星座位置图" : "本命轮盘"}</h2></div><button className="natal-guide-link" onClick={() => setNatalGuideOpen(true)}>什么是本命盘？</button></div></div>
+              <div className="panel-heading"><div className="wheel-heading-main"><div><small>{showCalculationResults ? "CALCULATION RESULTS" : dateLevelMode ? "DATE-LEVEL POSITION VIEW" : "NATAL CHART"}</small><h2>{showCalculationResults ? "本命盘计算结果" : dateLevelMode ? "日期级星座位置图" : "本命轮盘"}</h2></div><div className="wheel-heading-actions">{!showCalculationResults && <div className="view-switcher" aria-label="轮盘视图切换"><button className={chartView === "professional" ? "active" : ""} onClick={() => setChartView("professional")}>{dateLevelMode ? "位置图" : "轮盘"}</button><button className={chartView === "compact" ? "active" : ""} onClick={() => setChartView("compact")}>简洁</button><button disabled={dateLevelMode} className={chartView === "aspect_grid" ? "active" : ""} onClick={() => setChartView("aspect_grid")}>相位矩阵</button></div>}<button className="natal-guide-link" onClick={() => setNatalGuideOpen(true)}>什么是本命盘？</button></div></div></div>
               {showCalculationResults ? <>
                 <div className="calculation-view-toolbar"><button onClick={() => setShowCalculationResults(false)}>← 返回轮盘</button><span>{snapshot.result.points.length} 点 · {snapshot.result.aspects.length} 相位</span></div>
                 <nav className="calculation-result-tabs" aria-label="本命盘计算结果分类">{calculationResultTabs.map((item) => <button key={item.id} className={calculationTab === item.id ? "active" : ""} onClick={() => setCalculationTab(item.id)}>{item.label}</button>)}</nav>
                 <CalculationResults snapshot={snapshot} tab={calculationTab} />
               </> : <>
                 <div className="wheel-canvas-area">
-                  <div className="wheel-overlay-toolbar"><button className="result-flip-button" onClick={() => setShowCalculationResults(true)}>查看结果</button><div className="view-switcher"><button className={chartView === "professional" ? "active" : ""} onClick={() => setChartView("professional")}>{dateLevelMode ? "位置图" : "轮盘"}</button><button className={chartView === "compact" ? "active" : ""} onClick={() => setChartView("compact")}>简洁</button><button disabled={dateLevelMode} className={chartView === "aspect_grid" ? "active" : ""} onClick={() => setChartView("aspect_grid")}>相位矩阵</button></div></div>
+                  <div className="wheel-overlay-toolbar"><button className="result-flip-button" onClick={() => setShowCalculationResults(true)}>查看结果</button></div>
                   {chartView === "aspect_grid" && !dateLevelMode ? <AspectGrid snapshot={snapshot} onOpen={openAspect} /> : <NatalWheel snapshot={snapshot} renderSpec={natalRenderSpec} controls={effectiveWheelControls} />}
                 </div>
                 <footer><span>{appliedSettings.zodiac === "tropical" ? "回归黄道" : `恒星黄道 · ${ayanamsaOptions.find((item) => item.id === appliedSettings.ayanamsa)?.label}`}</span>{!dateLevelMode && <span>{houseSystemOptions.find((item) => item.id === appliedSettings.houseSystem)?.label}</span>}<span>{natalRenderSpec.options.visible_point_ids.length}/{snapshot.result.points.length} 点</span><span>计算相位 {snapshot.result.aspects.length} 条</span><span>轮盘绘制 {natalRenderSpec.options.visible_aspect_count} 条</span></footer>
@@ -1804,7 +1823,7 @@ export default function Home() {
             </article>
 
             <aside className="settings-panel">
-              <div className="settings-title"><div><small>CALCULATION SETTINGS</small><h2>本命盘参数</h2></div><span>{settingsDirty ? "待应用" : "已生效"}</span></div>
+              <div className="settings-title"><div><small>CALCULATION SETTINGS</small><h2>本命盘参数</h2></div><div className="settings-title-actions"><span className="settings-title-status">{settingsDirty ? "待应用" : "已生效"}</span><button className="settings-header-calculate" disabled={busy} onClick={calculateNatal} aria-label={settingsDirty ? "重新计算并应用参数" : "按当前参数重新计算"}>{busy ? "计算中…" : settingsDirty ? "应用并计算" : "计算"}</button></div></div>
               <div className="preset-shortcuts" aria-label="本命盘预设">{natalCalculationPresets.map((preset) => <button key={preset.id} className={selectedPresetId === preset.id ? "active" : ""} onClick={() => applyNatalPreset(preset.id)}><b>{preset.label}</b><small>{preset.badge}</small></button>)}</div>
               <label>黄道制<select value={settings.zodiac} onChange={(event) => setSettings({ ...settings, zodiac: event.target.value as NatalCalculationSettings["zodiac"] })}><option value="tropical">Tropical 回归黄道</option><option value="sidereal">Sidereal 恒星黄道</option></select><small>切换黄道并重新计算后，点位、相位与轮盘会一起更新。</small></label>
               {settings.zodiac === "sidereal" && <label>岁差体系 Ayanamsa<select value={settings.ayanamsa} onChange={(event) => setSettings({ ...settings, ayanamsa: event.target.value as NatalCalculationSettings["ayanamsa"] })}>{ayanamsaOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select><small>岁差体系会写入本次计算结果与导出的分析数据。</small></label>}

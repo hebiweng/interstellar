@@ -83,6 +83,11 @@ test("defines real natal input, deterministic settings, item interpretations, an
   assert.match(page, /查看结果/);
   assert.match(page, /本命盘计算结果/);
   assert.match(page, /chart-workspace-card/);
+  assert.match(page, /subjectSwitcherRef/);
+  assert.match(page, /document\.addEventListener\("pointerdown", closeOnOutsidePointer\)/);
+  assert.match(page, /aria-label="轮盘视图切换"/);
+  assert.match(page, /settings-header-calculate/);
+  assert.match(page, /应用并计算/);
   assert.match(page, /朔望点/);
   assert.match(page, /紫炁/);
   assert.match(page, /wheelPointLabels/);

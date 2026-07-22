@@ -229,8 +229,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .wheel-panel footer { display: flex; min-height: 40px; flex-wrap: wrap; align-items: center; gap: 8px 18px; padding: 8px 18px; border-top: 1px solid var(--line-soft); color: var(--faint); font-family: var(--mono); font-size: 11px; }
 
 .settings-panel { position: sticky; top: 76px; max-height: calc(100vh - 92px); min-height: 690px; overflow-x: hidden; overflow-y: auto; scrollbar-gutter: stable; }
-.settings-title { position: sticky; z-index: 3; top: 0; background: color-mix(in srgb, var(--panel-2) 96%, transparent); backdrop-filter: blur(12px); }
-.settings-title button { width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); background: transparent; cursor: pointer; }
+.settings-title { position: sticky; z-index: 3; top: 0; gap: 8px; padding: 0 12px; background: color-mix(in srgb, var(--panel-2) 96%, transparent); backdrop-filter: blur(12px); }
+.settings-title small { font-size: 9px; letter-spacing: .08em; white-space: nowrap; }
+.settings-title-actions { display: flex; align-items: center; gap: 7px; }
+.settings-title .settings-header-calculate { width: auto; min-width: 54px; height: 32px; padding: 0 10px; border: 1px solid rgba(139, 202, 255, .55); border-radius: 7px; color: #07111b; background: linear-gradient(180deg, #a5d6ff, #70b9f8); cursor: pointer; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.settings-title .settings-header-calculate:disabled { cursor: wait; opacity: .64; }
 .settings-panel > label, .ai-panel > label { display: flex; flex-direction: column; gap: 7px; margin: 15px 16px; color: var(--muted); }
 .settings-panel select, .settings-panel input, .ai-panel select, .ai-panel textarea, .person-modal input, .person-modal select { width: 100%; min-height: 42px; padding: 0 11px; border: 1px solid var(--line); border-radius: 7px; color: var(--text); background: var(--field-bg); }
 .settings-panel label small { color: var(--faint); font-size: 12px; line-height: 1.5; }
@@ -752,7 +755,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .workbench-grid > .chart-workspace-card { order: 2; min-width: 0; }
 .workbench-grid > .ai-insight-panel { order: 3; }
 .settings-panel { top: 126px; height: calc(100vh - 142px); min-height: 690px; max-height: calc(100vh - 142px); }
-.settings-title > span { padding: 4px 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--gold); font-family: var(--mono); font-size: 10px; }
+.settings-title-status { padding: 4px 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--gold); font-family: var(--mono); font-size: 10px; white-space: nowrap; }
 .preset-shortcuts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--line-soft); }
 .preset-shortcuts button { display: flex; min-height: 48px; flex-direction: column; align-items: flex-start; justify-content: center; gap: 3px; padding: 7px 9px; border: 1px solid var(--line-soft); border-radius: 7px; text-align: left; background: var(--panel); cursor: pointer; }
 .preset-shortcuts button b { font-size: 12px; }
@@ -761,6 +764,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .wheel-heading-main { display: flex !important; min-width: 0 !important; align-items: center; gap: 12px !important; }
 .wheel-heading-main { justify-content: space-between; width: 100%; }
 .wheel-heading-main > div { min-width: 105px; }
+.wheel-heading-actions { display: flex; min-width: 0; align-self: flex-end; align-items: center; justify-content: flex-end; gap: 12px; }
 .result-flip-button, .natal-guide-link { min-height: 31px; padding: 0 10px; border: 1px solid var(--line); border-radius: 6px; color: var(--blue); background: var(--panel); cursor: pointer; white-space: nowrap; }
 .natal-guide-link { min-height: 0; padding: 2px 0; border: 0; color: var(--faint); background: transparent; font-size: 11px; }
 .natal-guide-link:hover { color: var(--blue); }
@@ -898,6 +902,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   .subject-switcher-menu { position: fixed; top: 72px; right: 10px; left: 10px; width: auto; }
   .panel-heading { align-items: stretch; }
   .wheel-heading-main { flex-wrap: wrap; }
+  .wheel-heading-actions { width: 100%; flex-wrap: wrap; justify-content: flex-start; }
   .natal-guide-link { margin-left: auto; }
   .wheel-overlay-toolbar { position: static; margin: 10px; }
   .analysis-technique-section > header { align-items: flex-start; flex-direction: column; }
