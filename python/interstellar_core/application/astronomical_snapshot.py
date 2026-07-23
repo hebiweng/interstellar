@@ -451,6 +451,19 @@ def _aspect_profiles(
     return aspect_profile, orb_profile, orb_overrides
 
 
+def resolve_aspect_profiles(
+    settings: Mapping[str, Any],
+) -> tuple[MajorAspectProfile, OrbProfile, OrbOverrideSet]:
+    """Resolve the shared aspect geometry, allowances, and user overrides.
+
+    Single-chart calculations and cross-chart techniques intentionally use the
+    same resolver so changing an aspect set or orb hierarchy cannot produce two
+    different meanings in natal, current-sky, transit, or progression results.
+    """
+
+    return _aspect_profiles(settings)
+
+
 def _day_night_status(
     *,
     sun_point: Mapping[str, Any],
@@ -1135,7 +1148,7 @@ def create_astronomical_snapshot(
     engine_version: str,
     adapter: SwissEphemerisAdapter | None = None,
 ) -> dict[str, Any]:
-    """Calculate a canonical M3 natal fact snapshot."""
+    """Calculate a canonical single-chart astronomical fact snapshot."""
 
     time_spec = subject_version.get("time_spec")
     location = subject_version.get("location")
@@ -1334,12 +1347,13 @@ def create_astronomical_snapshot(
         terms_table=terms_table,
         triplicity_table=triplicity_table,
     )
+    is_natal = str(request_payload["chart"]["family"]) == "natal"
     local_birth_value = str(time_spec.get("local_value") or "")
     try:
         birth_date = datetime.fromisoformat(local_birth_value).date()
     except ValueError as exc:
         raise AstronomicalSnapshotInputError(
-            "selected natal time requires an ISO local birth date"
+            "selected chart time requires an ISO local date"
         ) from exc
     asc_point = next((point for point in points if point["point_id"] == "asc"), None)
     profection_document = (
@@ -1348,7 +1362,7 @@ def create_astronomical_snapshot(
             ascendant_sign=str(asc_point["sign"]),
             as_of=now.date(),
         )
-        if asc_point is not None
+        if is_natal and asc_point is not None
         else None
     )
     firdaria_document = (
@@ -1357,19 +1371,20 @@ def create_astronomical_snapshot(
             sect=Sect(day_night_status),
             as_of=now,
         )
-        if day_night_status in {"day", "night"}
+        if is_natal and day_night_status in {"day", "night"}
         else None
     )
     zodiacal_releasing_documents: dict[str, Any] = {}
-    for lot_id in ("fortune", "spirit"):
-        lot_point = next((point for point in points if point["point_id"] == lot_id), None)
-        if lot_point is not None:
-            zodiacal_releasing_documents[lot_id] = calculate_zodiacal_releasing(
-                lot_id=lot_id,
-                lot_sign=str(lot_point["sign"]),
-                birth_utc=utc_instant,
-                as_of=now,
-            )
+    if is_natal:
+        for lot_id in ("fortune", "spirit"):
+            lot_point = next((point for point in points if point["point_id"] == lot_id), None)
+            if lot_point is not None:
+                zodiacal_releasing_documents[lot_id] = calculate_zodiacal_releasing(
+                    lot_id=lot_id,
+                    lot_sign=str(lot_point["sign"]),
+                    birth_utc=utc_instant,
+                    as_of=now,
+                )
     distribution_profile_id = str(
         custom_parameters.get(
             "distribution_profile_id",
@@ -1836,6 +1851,53 @@ def create_astronomical_snapshot(
             "reproducibility": reproducibility,
         },
     ]
+    if not is_natal:
+        manifests = [
+            manifest
+            for manifest in manifests
+            if manifest["output_id"] != "manifest.timing.natal_periods"
+        ]
+        chart_manifest = manifests[-1]
+        chart_family = str(request_payload["chart"]["family"])
+        chart_technique = str(request_payload["chart"]["technique"])
+        if chart_family == "progression" and chart_technique == "progression.secondary":
+            chart_manifest.update({
+                "output_id": "manifest.progression.secondary",
+                "calculation_id": "progression.secondary",
+                "view_ids": [
+                    "wheel.secondary_progression",
+                    "view.secondary_progression.basic",
+                    "view.secondary_progression.aspects",
+                ],
+                "recommended_primary_view_id": (
+                    "wheel.secondary_progression" if house_set else None
+                ),
+                "algorithm_cards": [
+                    "ALG-TIMING-SECONDARY-PROGRESSION-001",
+                    "ALG-ASTRONOMY-001",
+                    "ALG-ASTRONOMY-003",
+                    "ALG-ASTRONOMY-004",
+                ],
+            })
+        else:
+            chart_manifest.update({
+                "output_id": "manifest.mundane.current_sky",
+                "calculation_id": "mundane.current_sky",
+                "view_ids": [
+                    "wheel.current_sky",
+                    "view.current_sky.basic",
+                    "view.current_sky.aspects",
+                    "view.current_sky.events",
+                ],
+                "recommended_primary_view_id": (
+                    "wheel.current_sky" if house_set else None
+                ),
+                "algorithm_cards": [
+                    "ALG-ASTRONOMY-001",
+                    "ALG-ASTRONOMY-003",
+                    "ALG-ASTRONOMY-004",
+                ],
+            })
     lunar_result = {
         **asdict(lunar),
         "phase": lunar.phase.value,

@@ -62,12 +62,20 @@ test("renders site-specific social metadata", async () => {
 
 test("defines real natal input, deterministic settings, item interpretations, and AI boundary", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const presets = await readFile(new URL("../app/lib/natal-presets.ts", import.meta.url), "utf8");
   assert.match(page, /保存为当前账户可复用的人物资料；此动作不会自动计算/);
   assert.match(page, /计算完整本命盘/);
   assert.match(page, /14 种盘型/);
-  assert.match(page, /label: "现代"/);
-  assert.match(page, /label: "古典"/);
-  assert.match(page, /label: "特殊"/);
+  assert.match(presets, /label: "现代"/);
+  assert.match(presets, /label: "古典"/);
+  assert.match(presets, /label: "特殊"/);
+  assert.match(presets, /houseSystem: "placidus"/);
+  assert.match(presets, /houseSystem: "alcabitius"/);
+  assert.match(presets, /houseSystem: "whole_sign"/);
+  assert.match(presets, /orbMode: "classical_starlight"/);
+  assert.match(presets, /conjunction: 7/);
+  assert.match(presets, /opposition: 6/);
+  assert.match(presets, /nodeType: "true"/);
   assert.match(page, /Tropical 回归黄道/);
   assert.match(page, /Sidereal 恒星黄道/);
   assert.match(page, /岁差体系 Ayanamsa/);
@@ -95,7 +103,9 @@ test("defines real natal input, deterministic settings, item interpretations, an
   assert.match(page, /sign-name-label/);
   assert.match(page, /getNatalItemInterpretation/);
   assert.match(page, /刷新 DeepSeek 分析/);
-  assert.match(page, /只有点击右上角“刷新”时才会/);
+  assert.match(page, /只有点击“刷新”才会提交/);
+  assert.match(page, /SafeMarkdownDocument markdown=\{aiAnalysisText\}/);
+  assert.match(page, /盘面速览/);
   assert.match(page, /按当前参数重新计算/);
   assert.match(page, /复制数据/);
   assert.match(page, /导出 TXT/);

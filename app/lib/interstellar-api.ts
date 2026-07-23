@@ -147,6 +147,55 @@ export type NatalPersonInput = {
   timezoneStatus?: "resolved" | "ambiguous" | "degraded" | "unresolved" | "manual";
 };
 
+export type CurrentSkyInput = {
+  localDate: string;
+  localTime: string;
+  timezoneId: string;
+  placeName: string;
+  countryCode: string;
+  latitude: number;
+  longitude: number;
+};
+
+export type ChartComparison = {
+  id: string;
+  status: string;
+  maturity: string;
+  warnings: Array<{ code?: string; message?: string }>;
+  result: {
+    context: "transit" | "progression";
+    reference_snapshot_id: string;
+    moving_snapshot_id: string;
+    cross_aspects: Array<NatalAspect & {
+      moving_point_id: string;
+      reference_point_id: string;
+      context: "transit" | "progression";
+    }>;
+    moving_points_in_reference_houses: Array<{
+      moving_point_id: string;
+      reference_house: number;
+      on_cusp: boolean;
+      cusp_number: number | null;
+      rule_ref: string;
+    }>;
+    provenance: {
+      aspect_profile: string;
+      orb_profile: string;
+      orb_override_set: string;
+    };
+  };
+};
+
+export type SecondaryProgressionResult = {
+  id: string;
+  status: string;
+  reference_snapshot_id: string;
+  target_date: string;
+  progressed_time: string;
+  progressed_snapshot: NatalSnapshot;
+  comparison: ChartComparison;
+};
+
 export type LocationSearchItem = {
   id: string;
   label: string;
@@ -200,6 +249,7 @@ export type LocalDatasetItem = {
 
 export type NatalCalculationSettings = {
   analysisSystem: "integrated" | "modern" | "classical";
+  orbMode: "modern_aspect" | "classical_starlight";
   zodiac: "tropical" | "sidereal";
   ayanamsa:
     | "fagan_bradley"
@@ -430,19 +480,118 @@ export async function getLocalDatasets(): Promise<LocalDatasetItem[]> {
   return response.items;
 }
 
-export async function createPersonAndNatalCalculation(
-  person: NatalPersonInput,
-  settings: NatalCalculationSettings,
-): Promise<{ subjectId: string; subjectVersionId: string; snapshot: NatalSnapshot }> {
-  const timeKnown = person.timePrecision === "minute" || person.timePrecision === "hour";
-  const subject = await requestJson<{
+type RunnableChart = {
+  family: "natal" | "mundane";
+  technique: "natal.standard_chart" | "mundane.current_sky";
+  analysisNamespace: "natal" | "mundane";
+};
+
+async function createWorkflowSubject(version: Record<string, unknown>) {
+  return requestJson<{
     subject: { id: string };
     version: { id: string };
   }>("/subjects", {
     method: "POST",
     body: JSON.stringify({
       workspace_id: "workspace-browser-local",
-      version: {
+      version,
+    }),
+  });
+}
+
+function buildOrbOverrides(settings: NatalCalculationSettings) {
+  const orbOverrides: Array<Record<string, string | number>> = [];
+  if (settings.globalOrb != null) {
+    orbOverrides.push({ scope: "chart_context", orb_deg: settings.globalOrb });
+  }
+  if (settings.chartOrb != null) {
+    orbOverrides.push({ scope: "chart_context", chart_context: "within_chart", orb_deg: settings.chartOrb });
+  }
+  for (const [aspect_id, orb_deg] of Object.entries(settings.orbOverrides)) {
+    orbOverrides.push({ scope: "aspect", aspect_id, orb_deg });
+  }
+  for (const [point_class, orb_deg] of Object.entries(settings.pointClassOrbs)) {
+    orbOverrides.push({ scope: "point_class", point_class, orb_deg });
+  }
+  for (const pair of settings.pointPairOrbs) {
+    const [point_a, point_b] = [pair.pointA, pair.pointB].sort();
+    if (point_a && point_b && point_a !== point_b) {
+      orbOverrides.push({ scope: "point_pair", point_a, point_b, orb_deg: pair.orb });
+    }
+  }
+  return orbOverrides;
+}
+
+function buildSharedChartSettings(
+  settings: NatalCalculationSettings,
+  analysisNamespace: RunnableChart["analysisNamespace"],
+) {
+  return {
+    calculation_profile_id: "professional.natal.v1",
+    analysis_system_id: `${analysisNamespace}.${settings.analysisSystem}.v1`,
+    zodiac: settings.zodiac,
+    ayanamsa: settings.zodiac === "sidereal" ? settings.ayanamsa : null,
+    house_system: settings.houseSystem,
+    center: settings.center,
+    coordinate_frame: "ecliptic",
+    node_type: settings.nodeType,
+    high_latitude_policy: "block",
+    aspect_set_id: "official.aspects.professional_natal.v1",
+    orb_profile_id: "official.orbs.professional_natal.v1",
+    point_set_ids: settings.pointIds.length ? [] : ["points.professional.default.v1"],
+    included_points: settings.pointIds,
+    minor_body_ids: [],
+    fixed_star_ids: settings.fixedStarIds,
+    lot_formula_ids: ["fortune", "spirit", "lot_eros", "lot_necessity", "lot_courage", "lot_victory", "lot_nemesis", "lot_exaltation"],
+    hypothetical_point_ids: ["cupido", "hades", "zeus", "kronos", "apollon", "admetos", "vulkanus", "poseidon"],
+    included_aspect_ids: settings.aspectIds,
+    orb_overrides: buildOrbOverrides(settings),
+    classical_settings: {
+      rulership_system: "traditional_and_modern",
+      dignity_table: "traditional.dignities.v1",
+      triplicity_table: `${settings.triplicityTable}.v1`,
+      terms_table: `${settings.termsTable}.v1`,
+      decan_or_face_table: "chaldean.v1",
+      sect_rules: "classical.sect.explicit.v1",
+      lot_formula_set: "hellenistic_lots_extended.v1",
+    },
+    custom_parameters: {
+      fixed_star_conjunction_orb_deg: settings.fixedStarOrb,
+      mirror_contact_orb_deg: settings.mirrorOrb,
+      midpoint_hit_orb_deg: settings.midpointOrb,
+    },
+  };
+}
+
+async function calculateSingleChart(
+  subjectVersionId: string,
+  chart: RunnableChart,
+  settings: NatalCalculationSettings,
+) {
+  const ruleHashSeed = chart.family === "mundane"
+    ? "d"
+    : ({ integrated: "a", modern: "b", classical: "c" } as const)[settings.analysisSystem];
+  return requestJson<NatalSnapshot>("/calculations", {
+    method: "POST",
+    body: JSON.stringify({
+      subject: { subject_version_id: subjectVersionId },
+      chart: { family: chart.family, technique: chart.technique },
+      settings: buildSharedChartSettings(settings, chart.analysisNamespace),
+      rule_pack_hash: `sha256:${ruleHashSeed.repeat(64)}`,
+      dataset_versions: {},
+      outputs: chart.family === "natal"
+        ? ["snapshot", "json", "markdown_technical", "plaintext_technical"]
+        : ["snapshot", "json"],
+    }),
+  });
+}
+
+export async function createPersonAndNatalCalculation(
+  person: NatalPersonInput,
+  settings: NatalCalculationSettings,
+): Promise<{ subjectId: string; subjectVersionId: string; snapshot: NatalSnapshot }> {
+  const timeKnown = person.timePrecision === "minute" || person.timePrecision === "hour";
+  const subject = await createWorkflowSubject({
         kind: "person",
         display_name: person.displayName,
         time_spec: {
@@ -467,89 +616,128 @@ export async function createPersonAndNatalCalculation(
         },
         attributes: { relation: person.relation },
         source: { kind: "user_input", description: "Created with natal calculation" },
-      },
-    }),
   });
-
-  const orbOverrides: Array<Record<string, string | number>> = [];
-  if (settings.globalOrb != null) {
-    orbOverrides.push({ scope: "chart_context", orb_deg: settings.globalOrb });
-  }
-  if (settings.chartOrb != null) {
-    orbOverrides.push({ scope: "chart_context", chart_context: "within_chart", orb_deg: settings.chartOrb });
-  }
-  for (const [aspect_id, orb_deg] of Object.entries(settings.orbOverrides)) {
-    orbOverrides.push({ scope: "aspect", aspect_id, orb_deg });
-  }
-  for (const [point_class, orb_deg] of Object.entries(settings.pointClassOrbs)) {
-    orbOverrides.push({ scope: "point_class", point_class, orb_deg });
-  }
-  for (const pair of settings.pointPairOrbs) {
-    const [point_a, point_b] = [pair.pointA, pair.pointB].sort();
-    if (point_a && point_b && point_a !== point_b) {
-      orbOverrides.push({ scope: "point_pair", point_a, point_b, orb_deg: pair.orb });
-    }
-  }
-  const analysisSystemIds = {
-    integrated: "natal.integrated.v1",
-    modern: "natal.modern.v1",
-    classical: "natal.classical.v1",
-  } as const;
-  const ruleHashes = {
-    integrated: `sha256:${"a".repeat(64)}`,
-    modern: `sha256:${"b".repeat(64)}`,
-    classical: `sha256:${"c".repeat(64)}`,
-  } as const;
-  const snapshot = await requestJson<NatalSnapshot>("/calculations", {
-    method: "POST",
-    body: JSON.stringify({
-      subject: { subject_version_id: subject.version.id },
-      chart: { family: "natal", technique: "natal.standard_chart" },
-      settings: {
-        calculation_profile_id: "professional.natal.v1",
-        analysis_system_id: analysisSystemIds[settings.analysisSystem],
-        zodiac: settings.zodiac,
-        ayanamsa: settings.zodiac === "sidereal" ? settings.ayanamsa : null,
-        house_system: settings.houseSystem,
-        center: settings.center ?? "geocentric",
-        coordinate_frame: "ecliptic",
-        node_type: settings.nodeType,
-        high_latitude_policy: "block",
-        aspect_set_id: "official.aspects.professional_natal.v1",
-        orb_profile_id: "official.orbs.professional_natal.v1",
-        point_set_ids: settings.pointIds.length ? [] : ["points.professional.default.v1"],
-        included_points: settings.pointIds,
-        minor_body_ids: [],
-        fixed_star_ids: settings.fixedStarIds ?? [],
-        lot_formula_ids: ["fortune", "spirit", "lot_eros", "lot_necessity", "lot_courage", "lot_victory", "lot_nemesis", "lot_exaltation"],
-        hypothetical_point_ids: ["cupido", "hades", "zeus", "kronos", "apollon", "admetos", "vulkanus", "poseidon"],
-        included_aspect_ids: settings.aspectIds,
-        orb_overrides: orbOverrides,
-        classical_settings: {
-          rulership_system: "traditional_and_modern",
-          dignity_table: "traditional.dignities.v1",
-          triplicity_table: `${settings.triplicityTable}.v1`,
-          terms_table: `${settings.termsTable}.v1`,
-          decan_or_face_table: "chaldean.v1",
-          sect_rules: "classical.sect.explicit.v1",
-          lot_formula_set: "hellenistic_lots_extended.v1",
-        },
-        custom_parameters: {
-          fixed_star_conjunction_orb_deg: settings.fixedStarOrb ?? 1,
-          mirror_contact_orb_deg: settings.mirrorOrb ?? 1,
-          midpoint_hit_orb_deg: settings.midpointOrb ?? 1,
-        },
-      },
-      rule_pack_hash: ruleHashes[settings.analysisSystem],
-      dataset_versions: {},
-      outputs: ["snapshot", "json", "markdown_technical", "plaintext_technical"],
-    }),
-  });
+  const snapshot = await calculateSingleChart(subject.version.id, {
+    family: "natal",
+    technique: "natal.standard_chart",
+    analysisNamespace: "natal",
+  }, settings);
   return {
     subjectId: subject.subject.id,
     subjectVersionId: subject.version.id,
     snapshot,
   };
+}
+
+export async function createCurrentSkyCalculation(
+  input: CurrentSkyInput,
+  settings: NatalCalculationSettings,
+): Promise<{ subjectId: string; subjectVersionId: string; snapshot: NatalSnapshot }> {
+  const subject = await createWorkflowSubject({
+        kind: "event",
+        display_name: `${input.localDate} ${input.localTime} 天象`,
+        time_spec: {
+          calendar: "gregorian",
+          local_value: `${input.localDate}T${input.localTime}`,
+          precision: "minute",
+          timezone_id: input.timezoneId,
+          utc_candidates: [],
+          selected_utc: null,
+          confidence: "high",
+          source: { kind: "user_input", description: "Current-sky target moment" },
+          warnings: [],
+        },
+        location: {
+          name: input.placeName,
+          country_code: input.countryCode || undefined,
+          latitude: input.latitude,
+          longitude: input.longitude,
+          timezone_id: input.timezoneId,
+          source: "user_input",
+          warnings: [],
+        },
+        attributes: { chart_role: "current_sky_reference" },
+        source: { kind: "user_input", description: "Created for a current-sky calculation" },
+  });
+  const snapshot = await calculateSingleChart(subject.version.id, {
+    family: "mundane",
+    technique: "mundane.current_sky",
+    analysisNamespace: "mundane",
+  }, settings);
+  return {
+    subjectId: subject.subject.id,
+    subjectVersionId: subject.version.id,
+    snapshot,
+  };
+}
+
+export async function createTransitComparison(
+  natalSnapshot: NatalSnapshot,
+  currentSkySnapshotId: string,
+  settings: NatalCalculationSettings,
+): Promise<ChartComparison> {
+  return requestJson<ChartComparison>("/calculations/comparisons", {
+    method: "POST",
+    body: JSON.stringify({
+      reference_snapshot: natalSnapshot,
+      moving_snapshot_id: currentSkySnapshotId,
+      context: "transit",
+      settings: buildSharedChartSettings(settings, "natal"),
+    }),
+  });
+}
+
+export async function createSecondaryProgression(
+  natalSnapshot: NatalSnapshot,
+  person: NatalPersonInput,
+  targetDate: string,
+  settings: NatalCalculationSettings,
+): Promise<SecondaryProgressionResult> {
+  const reusableSnapshot = natalSnapshot.normalized_input
+    ? natalSnapshot
+    : {
+        ...natalSnapshot,
+        normalized_input: {
+          subject_version: {
+            id: `legacy-natal-subject-${natalSnapshot.id}`,
+            kind: "person",
+            display_name: person.displayName,
+            time_spec: {
+              calendar: "gregorian",
+              local_value: person.timePrecision === "date" || person.timePrecision === "unknown"
+                ? person.localDate
+                : `${person.localDate}T${person.localTime}`,
+              precision: person.timePrecision,
+              timezone_id: person.timezoneId,
+              selected_utc: null,
+              utc_candidates: [],
+              confidence: person.timeConfidence,
+              source: { kind: "legacy_snapshot_metadata_recovery" },
+              warnings: [],
+            },
+            location: {
+              name: person.placeName,
+              country_code: person.countryCode,
+              latitude: person.latitude,
+              longitude: person.longitude,
+              timezone_id: person.timezoneId,
+              source: "legacy_snapshot_metadata_recovery",
+              warnings: [],
+            },
+            attributes: {},
+            source: { kind: "legacy_snapshot_metadata_recovery" },
+          },
+        },
+      };
+  return requestJson<SecondaryProgressionResult>("/calculations/secondary-progressions", {
+    method: "POST",
+    body: JSON.stringify({
+      reference_snapshot: reusableSnapshot,
+      target_date: targetDate,
+      settings: buildSharedChartSettings(settings, "natal"),
+      rule_pack_hash: `sha256:${"b".repeat(64)}`,
+    }),
+  });
 }
 
 export function getNatalTechnicalDocument(snapshotId: string, format: "markdown" | "plaintext") {

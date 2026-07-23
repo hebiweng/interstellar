@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import {
+  createCurrentSkyCalculation,
   createPersonAndNatalCalculation,
+  createSecondaryProgression,
+  createTransitComparison,
   getAiProviders,
   getNatalItemInterpretation,
   getNatalTechnicalDocument,
@@ -12,6 +15,8 @@ import {
   searchLocations,
   submitNatalToAi,
   type AiProvider,
+  type ChartComparison,
+  type CurrentSkyInput,
   type ItemInterpretation,
   type NatalAspect,
   type NatalCalculationSettings,
@@ -20,6 +25,7 @@ import {
   type NatalPoint,
   type NatalSnapshot,
   type LocationSearchItem,
+  type SecondaryProgressionResult,
 } from "./lib/interstellar-api";
 import {
   getAccountWorkspace,
@@ -41,9 +47,25 @@ import {
   type RenderSpec,
 } from "./lib/render-export";
 import { recordAnalyticsEvent } from "./lib/analytics";
+import { buildCurrentSkyConsumerInsight, buildNatalConsumerInsight } from "./lib/consumer-insight";
+import {
+  classicalStarlightPairOrbs,
+  cloneNatalPointGroups,
+  cloneNatalSettings,
+  identifyNatalPreset,
+  identifyTimingPreset,
+  natalCalculationPresets,
+  normalizeNatalSettings,
+  timingCalculationPresets,
+  type NatalPointGroups,
+  type NatalPresetId,
+} from "./lib/natal-presets";
 
 type ResultTab = "basic" | "signs" | "houses" | "aspects" | "structure" | "classical" | "technical";
 type CalculationTab = "features" | "planets" | "houses" | "firdaria" | "profections" | "lots" | "stars" | "fortune_zr" | "spirit_zr" | "mirrors" | "degrees" | "rays" | "midpoints";
+type CurrentSkyResultTab = "features" | "planets" | "houses" | "lots" | "stars" | "mirrors" | "degrees" | "rays" | "midpoints" | "aspects" | "events";
+type TransitResultTab = "overview" | "features" | "planets" | "houses" | "lots" | "stars" | "mirrors" | "degrees" | "rays" | "midpoints" | "aspects" | "cross_aspects" | "reference_houses";
+type SecondaryResultTab = "overview" | "features" | "planets" | "houses" | "lots" | "stars" | "mirrors" | "degrees" | "rays" | "midpoints" | "aspects" | "cross_aspects" | "reference_houses";
 type ChartView = "professional" | "compact" | "aspect_grid";
 type ThemeMode = "dark" | "light";
 type EntryPointId = "technique" | "topic" | "intent" | "object" | "personal" | "context";
@@ -70,9 +92,9 @@ const entryModes: Array<{ id: EntryPointId; title: string; description: string; 
 
 const chartTechniques: Array<{ id: TechniqueId; label: string; status: "active" | "planned"; stage: string; inputs: string; outputs: string }> = [
   { id: "natal", label: "本命盘", status: "active", stage: "当前", inputs: "一名人物的出生时间与地点", outputs: "单轮盘、相位图、基础与古典结果" },
-  { id: "transits", label: "行运盘", status: "planned", stage: "规划中", inputs: "人物＋目标时刻或时间范围", outputs: "本命＋行运双轮、命中与时间轴" },
-  { id: "current_sky", label: "天象盘", status: "planned", stage: "规划中", inputs: "时刻与地点", outputs: "当前天空单盘、天象事件" },
-  { id: "secondary_progressions", label: "次限盘", status: "planned", stage: "规划中", inputs: "人物＋目标日期", outputs: "本命＋次限双轮、推运月相" },
+  { id: "transits", label: "行运盘", status: "active", stage: "可用", inputs: "人物＋目标时刻或时间范围", outputs: "本命＋行运双轮、跨盘相位与本命落宫" },
+  { id: "current_sky", label: "天象盘", status: "active", stage: "当前", inputs: "时刻与地点", outputs: "当前天空单盘、天象事件" },
+  { id: "secondary_progressions", label: "次限盘", status: "active", stage: "可用", inputs: "人物＋目标日期", outputs: "本命＋次限双轮、推运月相" },
   { id: "tertiary_progressions", label: "三限盘", status: "planned", stage: "规划中", inputs: "人物＋目标日期", outputs: "本命＋三限双轮、时间线" },
   { id: "solar_return", label: "日返盘", status: "planned", stage: "规划中", inputs: "人物＋目标年份与地点", outputs: "太阳返照盘与年度主题" },
   { id: "lunar_return", label: "月返盘", status: "planned", stage: "规划中", inputs: "人物＋目标月份与地点", outputs: "月亮返照盘与月度主题" },
@@ -100,6 +122,64 @@ const calculationResultTabs: Array<{ id: CalculationTab; label: string }> = [
   { id: "rays", label: "光线" },
   { id: "midpoints", label: "中点" },
 ];
+
+const currentSkyResultTabs: Array<{ id: CurrentSkyResultTab; label: string }> = [
+  { id: "features", label: "特征" },
+  { id: "planets", label: "行星" },
+  { id: "houses", label: "宫位" },
+  { id: "aspects", label: "相位" },
+  { id: "lots", label: "阿拉伯点" },
+  { id: "stars", label: "恒星" },
+  { id: "mirrors", label: "映点" },
+  { id: "degrees", label: "特殊度数" },
+  { id: "rays", label: "光线" },
+  { id: "midpoints", label: "中点" },
+  { id: "events", label: "天象" },
+];
+
+const currentSkySharedResultTabs = new Set<CurrentSkyResultTab>(
+  ["features", "planets", "houses", "lots", "stars", "mirrors", "degrees", "rays", "midpoints"],
+);
+
+const secondaryResultTabs: Array<{ id: SecondaryResultTab; label: string }> = [
+  { id: "overview", label: "总览" },
+  { id: "features", label: "特征" },
+  { id: "planets", label: "次限点位" },
+  { id: "houses", label: "次限宫位" },
+  { id: "aspects", label: "次限相位" },
+  { id: "cross_aspects", label: "跨盘相位" },
+  { id: "reference_houses", label: "本命落宫" },
+  { id: "lots", label: "阿拉伯点" },
+  { id: "stars", label: "恒星" },
+  { id: "mirrors", label: "映点" },
+  { id: "degrees", label: "特殊度数" },
+  { id: "rays", label: "光线" },
+  { id: "midpoints", label: "中点" },
+];
+
+const transitResultTabs: Array<{ id: TransitResultTab; label: string }> = [
+  { id: "overview", label: "总览" },
+  { id: "features", label: "特征" },
+  { id: "planets", label: "行运点位" },
+  { id: "houses", label: "行运宫位" },
+  { id: "aspects", label: "天象相位" },
+  { id: "cross_aspects", label: "跨盘相位" },
+  { id: "reference_houses", label: "本命落宫" },
+  { id: "lots", label: "阿拉伯点" },
+  { id: "stars", label: "恒星" },
+  { id: "mirrors", label: "映点" },
+  { id: "degrees", label: "特殊度数" },
+  { id: "rays", label: "光线" },
+  { id: "midpoints", label: "中点" },
+];
+
+const transitSharedResultTabs = new Set<TransitResultTab>(
+  ["features", "planets", "houses", "lots", "stars", "mirrors", "degrees", "rays", "midpoints"],
+);
+
+const secondarySharedResultTabs = new Set<SecondaryResultTab>(
+  ["features", "planets", "houses", "lots", "stars", "mirrors", "degrees", "rays", "midpoints"],
+);
 
 const fallbackTimezoneOptions = [
   "Asia/Shanghai", "Asia/Hong_Kong", "Asia/Taipei", "Asia/Tokyo", "Asia/Singapore",
@@ -230,6 +310,22 @@ const aspectMarks: Record<string, string> = {
   novile: "N", septile: "S", biseptile: "bS", triseptile: "tS", undecile: "U", decile: "D",
 };
 
+const lunarPhaseNames: Record<string, string> = {
+  new_moon: "新月",
+  waxing_crescent: "蛾眉月",
+  first_quarter: "上弦月",
+  waxing_gibbous: "盈凸月",
+  full_moon: "满月",
+  waning_gibbous: "亏凸月",
+  last_quarter: "下弦月",
+  waning_crescent: "残月",
+};
+
+function lunarPhaseLabel(value: unknown) {
+  const id = typeof value === "string" ? value : "";
+  return lunarPhaseNames[id] ?? (id || "未提供");
+}
+
 const pointGroups = {
   core: ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"],
   angles: ["asc", "mc", "true_north_node", "true_south_node", "mean_lilith", "fortune", "spirit", "ic", "dsc", "vertex", "east_point"],
@@ -244,50 +340,10 @@ const unavailableVirtualPoints = [
   { id: "zi_qi", reason: "尚无已核定的天文身份与计算公式" },
 ] as const;
 
-type NatalPresetId = "modern" | "classical" | "special" | "custom";
-
 const majorAspectIds = ["conjunction", "opposition", "trine", "square", "sextile"];
 const professionalAspectIds = [
   ...majorAspectIds,
   "semisextile", "semisquare", "sesquisquare", "quincunx", "quintile", "biquintile",
-];
-
-const natalCalculationPresets: Array<{
-  id: Exclude<NatalPresetId, "custom">;
-  label: string;
-  badge: string;
-  description: string;
-  basis: string;
-  settings: Partial<NatalCalculationSettings>;
-  groups: Record<keyof typeof pointGroups, boolean>;
-}> = [
-  {
-    id: "modern",
-    label: "现代",
-    badge: "回归黄道",
-    description: "十大行星、四轴、月交点、Placidus 宫位与现代常用相位。",
-    basis: "宫位算法与点位坐标由 Swiss Ephemeris 2.10 实现；不附加平台自创规则。",
-    settings: { analysisSystem: "modern", zodiac: "tropical", houseSystem: "placidus", aspectIds: professionalAspectIds, triplicityTable: "dorothean", termsTable: "egyptian", disabledPointIds: [...pointGroups.asteroids.filter((id) => !["chiron", "juno"].includes(id)), "true_south_node", "mean_north_node", "mean_south_node", "true_lilith", "lunar_perigee", "spirit", "dsc", "ic", "vertex", "anti_vertex", "east_point", "west_point"] },
-    groups: { core: true, angles: true, lunar: true, asteroids: true, lots: false, hamburg: false },
-  },
-  {
-    id: "classical",
-    label: "古典",
-    badge: "七曜整宫",
-    description: "优先读取七曜、昼夜、尊贵、接纳、太阳条件和赫尔墨斯点。",
-    basis: "采用整宫制、多罗修斯三分主星表、埃及界及有文献依据的古典规则。",
-    settings: { analysisSystem: "classical", zodiac: "tropical", houseSystem: "whole_sign", aspectIds: majorAspectIds, triplicityTable: "dorothean", termsTable: "egyptian", disabledPointIds: ["uranus", "neptune", "pluto", "true_south_node", "mean_north_node", "mean_south_node", "mean_lilith", "true_lilith", "lunar_perigee", "spirit", "dsc", "ic", "vertex", "anti_vertex", "east_point", "west_point"] },
-    groups: { core: true, angles: true, lunar: true, asteroids: false, lots: true, hamburg: false },
-  },
-  {
-    id: "special",
-    label: "特殊",
-    badge: "回归黄道·整宫",
-    description: "回归黄道、整宫制、七曜与主要相位，集中查看特殊度数、映点和传统结构。",
-    basis: "特殊方案保持回归黄道与整宫制；恒星黄道需要用户主动选择，避免隐藏流派假设。",
-    settings: { analysisSystem: "integrated", zodiac: "tropical", ayanamsa: "fagan_bradley", houseSystem: "whole_sign", aspectIds: majorAspectIds, triplicityTable: "dorothean", termsTable: "egyptian", disabledPointIds: ["uranus", "neptune", "pluto", "true_south_node", "mean_north_node", "mean_south_node", "mean_lilith", "true_lilith", "lunar_perigee", "spirit", "dsc", "ic", "vertex", "anti_vertex", "east_point", "west_point"] },
-    groups: { core: true, angles: true, lunar: true, asteroids: false, lots: true, hamburg: false },
-  },
 ];
 
 const pointGroupLabels: Record<keyof typeof pointGroups, string> = {
@@ -361,9 +417,7 @@ const allPointGroupsEnabled: Record<keyof typeof pointGroups, boolean> = {
   core: true, angles: true, lunar: true, asteroids: true, lots: true, hamburg: true,
 };
 
-const defaultModernGroups: Record<keyof typeof pointGroups, boolean> = {
-  core: true, angles: true, lunar: true, asteroids: true, lots: false, hamburg: false,
-};
+const defaultModernGroups: NatalPointGroups = cloneNatalPointGroups(natalCalculationPresets[0].groups);
 
 const defaultWheelGroups: Record<keyof typeof pointGroups, boolean> = {
   core: true, angles: true, lunar: true, asteroids: false, lots: false, hamburg: false,
@@ -517,15 +571,24 @@ const defaultPerson: NatalPersonInput = {
   timeConfidence: "high", timezoneStatus: "resolved",
 };
 
-const defaultSettings: NatalCalculationSettings = {
-  analysisSystem: "modern", zodiac: "tropical", ayanamsa: "fagan_bradley",
-  houseSystem: "placidus", nodeType: "both", center: "geocentric", pointIds: [],
-  disabledPointIds: [...pointGroups.asteroids.filter((id) => !["chiron", "juno"].includes(id)), "true_south_node", "mean_north_node", "mean_south_node", "true_lilith", "lunar_perigee", "spirit", "dsc", "ic", "vertex", "anti_vertex", "east_point", "west_point"],
-  fixedStarIds: fixedStarOptions.map(([id]) => id), fixedStarOrb: 1, mirrorOrb: 1, midpointOrb: 1,
-  triplicityTable: "dorothean", termsTable: "egyptian",
-  aspectIds: professionalAspectIds, orbOverrides: {}, globalOrb: null, chartOrb: null,
-  pointClassOrbs: {}, pointPairOrbs: [],
-};
+const defaultSettings: NatalCalculationSettings = cloneNatalSettings(natalCalculationPresets[0].settings);
+const defaultTimingSettings: NatalCalculationSettings = cloneNatalSettings(timingCalculationPresets[0].settings);
+const defaultTimingGroups: NatalPointGroups = cloneNatalPointGroups(timingCalculationPresets[0].groups);
+
+function effectivePointIds(
+  settings: NatalCalculationSettings,
+  groups: Record<keyof typeof pointGroups, boolean>,
+) {
+  return (Object.entries(groups) as Array<[keyof typeof pointGroups, boolean]>)
+    .filter(([, enabled]) => enabled)
+    .flatMap(([group]) => [...pointGroups[group]])
+    .filter((pointId) => {
+      if (settings.disabledPointIds.includes(pointId)) return false;
+      if (settings.nodeType === "true") return !pointId.startsWith("mean_north_node") && !pointId.startsWith("mean_south_node");
+      if (settings.nodeType === "mean") return !pointId.startsWith("true_north_node") && !pointId.startsWith("true_south_node");
+      return true;
+    });
+}
 
 function formatDegree(value: number) {
   const totalSeconds = Math.round(value * 3600);
@@ -581,7 +644,7 @@ function renderGuideInline(value: string): ReactNode[] {
   );
 }
 
-function NatalGuideDocument({ markdown }: { markdown: string }) {
+function SafeMarkdownDocument({ markdown }: { markdown: string }) {
   const lines = markdown.split("\n");
   const content: ReactNode[] = [];
   let index = 0;
@@ -965,6 +1028,65 @@ function NatalWheel({ snapshot, renderSpec, controls }: { snapshot: NatalSnapsho
   );
 }
 
+function ComparisonWheel({
+  natalSnapshot,
+  movingSnapshot,
+  comparison,
+  renderSpec,
+  controls,
+  chartLabel,
+  movingLabel,
+}: {
+  natalSnapshot: NatalSnapshot;
+  movingSnapshot: NatalSnapshot;
+  comparison: ChartComparison;
+  renderSpec: RenderSpec;
+  controls: NatalRenderControls;
+  chartLabel: string;
+  movingLabel: string;
+}) {
+  const asc = natalSnapshot.result.points.find((point) => point.point_id === "asc")?.position.ecliptic.longitude_deg
+    ?? natalSnapshot.result.houses[0]?.cusp_longitude_deg ?? 0;
+  const angleFor = (longitude: number) => (180 - (longitude - asc)) * Math.PI / 180;
+  const xy = (longitude: number, radius: number) => ({
+    x: Number((320 + Math.cos(angleFor(longitude)) * radius).toFixed(6)),
+    y: Number((320 - Math.sin(angleFor(longitude)) * radius).toFixed(6)),
+  });
+  const natalPoints = new Map(natalSnapshot.result.points.map((point) => [point.point_id, point]));
+  const movingPoints = new Map(movingSnapshot.result.points.map((point) => [point.point_id, point]));
+  const movingVisible = movingSnapshot.result.points
+    .filter((point) => controls.visiblePointIds.includes(point.point_id))
+    .filter((point) => [...pointGroups.core, "true_north_node", "mean_north_node"].includes(point.point_id))
+    .sort((left, right) => left.position.ecliptic.longitude_deg - right.position.ecliptic.longitude_deg);
+  const strongestCrossAspects = [...comparison.result.cross_aspects]
+    .sort((left, right) => right.strength - left.strength || left.orb_deg - right.orb_deg)
+    .slice(0, Math.max(6, Math.ceil(comparison.result.cross_aspects.length * 0.15)));
+  return <div className="transit-wheel-stack">
+    <NatalWheel snapshot={natalSnapshot} renderSpec={renderSpec} controls={controls} />
+    <svg className="transit-wheel-overlay" viewBox="0 0 640 640" role="img" aria-label={`${chartLabel}外圈与跨盘相位`}>
+      <title>{chartLabel}外圈与跨盘相位</title>
+      <desc>本命盘作为固定内层，{movingLabel}作为变化层，并连接最明显的跨盘相位。</desc>
+      <circle cx="320" cy="320" r="220" className="transit-layer-ring" />
+      {strongestCrossAspects.map((aspect) => {
+        const moving = movingPoints.get(aspect.moving_point_id);
+        const reference = natalPoints.get(aspect.reference_point_id);
+        if (!moving || !reference) return null;
+        const start = xy(moving.position.ecliptic.longitude_deg, 138);
+        const end = xy(reference.position.ecliptic.longitude_deg, 138);
+        const hard = ["square", "opposition", "semisquare", "sesquisquare"].includes(aspect.type);
+        return <line key={aspect.aspect_id} x1={start.x} y1={start.y} x2={end.x} y2={end.y} className={`transit-cross-aspect ${hard ? "hard" : "soft"}`} style={{ opacity: .25 + aspect.strength * .55 }} />;
+      })}
+      {movingVisible.map((point) => {
+        const longitude = point.position.ecliptic.longitude_deg;
+        const anchor = xy(longitude, 220);
+        const label = xy(longitude, 207);
+        return <g key={`transit-${point.point_id}`} className="transit-moving-point"><line x1={anchor.x} y1={anchor.y} x2={label.x} y2={label.y} /><circle cx={label.x} cy={label.y} r="10" /><text x={label.x} y={label.y + 1}>{wheelPointLabels[point.point_id] ?? pointNames[point.point_id]?.slice(0, 1) ?? "•"}</text>{point.retrograde && <text x={label.x + 9} y={label.y - 9} className="point-retrograde">R</text>}</g>;
+      })}
+    </svg>
+    <div className="transit-wheel-legend"><span><i className="natal-dot" />本命内层</span><span><i className="moving-dot" />{movingLabel}</span><span>{comparison.result.cross_aspects.length} 条跨盘相位</span></div>
+  </div>;
+}
+
 function AspectGrid({ snapshot, onOpen }: { snapshot: NatalSnapshot; onOpen: (aspect: NatalAspect) => void }) {
   const preferred = [...pointGroups.core, "asc", "mc", "true_north_node", "fortune"];
   const points = preferred
@@ -1268,7 +1390,487 @@ function PersonFields({ person, onChange }: { person: NatalPersonInput; onChange
   </div>;
 }
 
+function SharedAdvancedCalculationFields({
+  settings,
+  groups,
+  chartLabel,
+  onSettingsChange,
+  onGroupsChange,
+}: {
+  settings: NatalCalculationSettings;
+  groups: NatalPointGroups;
+  chartLabel: string;
+  onSettingsChange: (settings: NatalCalculationSettings) => void;
+  onGroupsChange: (groups: NatalPointGroups) => void;
+}) {
+  return <>
+    {settings.zodiac === "sidereal" && <label>岁差体系 Ayanamsa<select value={settings.ayanamsa} onChange={(event) => onSettingsChange({ ...settings, ayanamsa: event.target.value as NatalCalculationSettings["ayanamsa"] })}>{ayanamsaOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select><small>重新计算后，点位、相位与轮盘会一起切换到所选恒星黄道。</small></label>}
+    <label>观测中心<select value={settings.center} onChange={(event) => onSettingsChange({ ...settings, center: event.target.value as NatalCalculationSettings["center"] })}><option value="geocentric">Geocentric 地心</option><option value="topocentric">Topocentric 地点拓扑中心</option></select><small>拓扑中心会使用当前地点经纬度重新计算，不只是改变显示名称。</small></label>
+    <fieldset><legend>古典规则表（需重新计算）</legend><label>三分主星表<select value={settings.triplicityTable} onChange={(event) => onSettingsChange({ ...settings, triplicityTable: event.target.value as NatalCalculationSettings["triplicityTable"] })}><option value="dorothean">多罗修斯表</option><option value="ptolemaic">托勒密表</option></select></label><label>界表<select value={settings.termsTable} onChange={(event) => onSettingsChange({ ...settings, termsTable: event.target.value as NatalCalculationSettings["termsTable"] })}><option value="egyptian">埃及界</option><option value="ptolemaic">托勒密界</option></select></label></fieldset>
+    <fieldset><legend>计算点位（需重新计算）</legend>{(Object.keys(pointGroups) as Array<keyof typeof pointGroups>).map((group) => <div className="point-selection-group" key={`${chartLabel}-${group}`}><label className="check-option"><input type="checkbox" checked={groups[group]} onChange={(event) => { const enabled = event.target.checked; onGroupsChange({ ...groups, [group]: enabled }); if (enabled) onSettingsChange({ ...settings, disabledPointIds: settings.disabledPointIds.filter((id) => !pointGroups[group].includes(id as never)) }); }} /><span>{pointGroupLabels[group]}</span><small>{groups[group] ? pointGroups[group].filter((id) => !settings.disabledPointIds.includes(id)).length : 0}/{group === "angles" ? pointGroups[group].length + unavailableVirtualPoints.length : pointGroups[group].length}</small></label><details><summary>逐项选择</summary><div>{pointGroups[group].map((id) => <label className="check-option" key={`${chartLabel}-${group}-${id}`}><input type="checkbox" disabled={!groups[group]} checked={groups[group] && !settings.disabledPointIds.includes(id)} onChange={(event) => onSettingsChange({ ...settings, disabledPointIds: event.target.checked ? settings.disabledPointIds.filter((item) => item !== id) : [...settings.disabledPointIds, id] })} /><span>{pointNames[id] ?? id}</span></label>)}{group === "angles" && unavailableVirtualPoints.map((item) => <label className="check-option unavailable-point" key={`${chartLabel}-${item.id}`} title={item.reason}><input type="checkbox" disabled /><span>{pointNames[item.id]}</span><small>暂不可用</small></label>)}</div></details></div>)}</fieldset>
+    <fieldset><legend>固定星（需重新计算）</legend><label className="check-option"><input type="checkbox" checked={settings.fixedStarIds.length === fixedStarOptions.length} onChange={(event) => onSettingsChange({ ...settings, fixedStarIds: event.target.checked ? fixedStarOptions.map(([id]) => id) : [] })} /><span>24 颗常用固定星</span><small>{settings.fixedStarIds.length}/{fixedStarOptions.length}</small></label><details className="orb-overrides"><summary>逐颗选择固定星</summary><div>{fixedStarOptions.map(([id, label]) => <label className="check-option" key={`${chartLabel}-${id}`}><input type="checkbox" checked={settings.fixedStarIds.includes(id)} onChange={(event) => onSettingsChange({ ...settings, fixedStarIds: event.target.checked ? [...settings.fixedStarIds, id] : settings.fixedStarIds.filter((item) => item !== id) })} /><span>{label}</span></label>)}</div></details><label>固定星合相范围 {settings.fixedStarOrb.toFixed(1)}°<input type="range" min="0.1" max="3" step="0.1" value={settings.fixedStarOrb} onChange={(event) => onSettingsChange({ ...settings, fixedStarOrb: Number(event.target.value) })} /></label></fieldset>
+    <fieldset><legend>特殊事实（需重新计算）</legend><label>映点／反映点接触范围 {settings.mirrorOrb.toFixed(1)}°<input type="range" min="0" max="5" step="0.1" value={settings.mirrorOrb} onChange={(event) => onSettingsChange({ ...settings, mirrorOrb: Number(event.target.value) })} /><small>每个点位的映点位置都会计算；这个数值控制多接近才算接触。</small></label><label>中点命中范围 {settings.midpointOrb.toFixed(1)}°<input type="range" min="0" max="5" step="0.1" value={settings.midpointOrb} onChange={(event) => onSettingsChange({ ...settings, midpointOrb: Number(event.target.value) })} /></label></fieldset>
+    <fieldset><legend>相位计算（需重新计算）</legend><label className="check-option"><input type="checkbox" checked={!settings.aspectIds.length} onChange={(event) => onSettingsChange({ ...settings, aspectIds: event.target.checked ? [] : [...majorAspectIds] })} /><span>完整专业相位集</span><small>{allAspectIds.length}</small></label><div className="aspect-toggle-grid">{allAspectIds.map((aspect) => <button type="button" key={`${chartLabel}-${aspect}`} className={!settings.aspectIds.length || settings.aspectIds.includes(aspect) ? "on" : ""} onClick={() => { const base = settings.aspectIds.length ? settings.aspectIds : [...allAspectIds]; onSettingsChange({ ...settings, aspectIds: base.includes(aspect) ? base.filter((id) => id !== aspect) : [...base, aspect] }); }}>{aspectNames[aspect] ?? aspect}</button>)}</div><details className="orb-overrides"><summary>容许度层级（全局／盘型／相位／类别／点位对）</summary><div className="orb-hierarchy"><div className="orb-level-grid"><label><span>全局</span><input type="number" min="0" max="30" step="0.1" placeholder="规则默认" value={settings.globalOrb ?? ""} onChange={(event) => onSettingsChange({ ...settings, globalOrb: event.target.value === "" ? null : Number(event.target.value) })} /></label><label><span>{chartLabel}</span><input type="number" min="0" max="30" step="0.1" placeholder="继承全局" value={settings.chartOrb ?? ""} onChange={(event) => onSettingsChange({ ...settings, chartOrb: event.target.value === "" ? null : Number(event.target.value) })} /></label></div><h4>指定相位</h4><div className="orb-level-grid">{allAspectIds.map((aspect) => <label key={`${chartLabel}-orb-${aspect}`}><span>{aspectNames[aspect] ?? aspect}</span><input type="number" min="0" max="30" step="0.1" placeholder="继承上级" value={settings.orbOverrides[aspect] ?? ""} onChange={(event) => { const next = { ...settings.orbOverrides }; if (event.target.value === "") delete next[aspect]; else next[aspect] = Number(event.target.value); onSettingsChange({ ...settings, orbOverrides: next }); }} /></label>)}</div><h4>点位类别</h4><div className="orb-level-grid">{orbPointClassOptions.map(([id, label]) => <label key={`${chartLabel}-class-orb-${id}`}><span>{label}</span><input type="number" min="0" max="30" step="0.1" placeholder="继承上级" value={settings.pointClassOrbs[id] ?? ""} onChange={(event) => { const next = { ...settings.pointClassOrbs }; if (event.target.value === "") delete next[id]; else next[id] = Number(event.target.value); onSettingsChange({ ...settings, pointClassOrbs: next }); }} /></label>)}</div><h4>指定点位对</h4><div className="point-pair-orbs">{settings.pointPairOrbs.map((pair, index) => <div className="point-pair-row" key={`${chartLabel}-${pair.pointA}:${pair.pointB}:${index}`}><select aria-label={`${chartLabel}点位对 ${index + 1} 第一个点`} value={pair.pointA} onChange={(event) => { const next = [...settings.pointPairOrbs]; next[index] = { ...pair, pointA: event.target.value }; onSettingsChange({ ...settings, pointPairOrbs: next }); }}>{orbPointOptions.map((id) => <option value={id} key={`${chartLabel}-a-${index}-${id}`}>{pointNames[id] ?? id}</option>)}</select><select aria-label={`${chartLabel}点位对 ${index + 1} 第二个点`} value={pair.pointB} onChange={(event) => { const next = [...settings.pointPairOrbs]; next[index] = { ...pair, pointB: event.target.value }; onSettingsChange({ ...settings, pointPairOrbs: next }); }}>{orbPointOptions.map((id) => <option value={id} key={`${chartLabel}-b-${index}-${id}`}>{pointNames[id] ?? id}</option>)}</select><input aria-label={`${chartLabel}点位对 ${index + 1} 容许度`} type="number" min="0" max="30" step="0.1" value={pair.orb} onChange={(event) => { const next = [...settings.pointPairOrbs]; next[index] = { ...pair, orb: Number(event.target.value) }; onSettingsChange({ ...settings, pointPairOrbs: next }); }} /><button type="button" aria-label={`删除${chartLabel}点位对 ${index + 1}`} onClick={() => onSettingsChange({ ...settings, pointPairOrbs: settings.pointPairOrbs.filter((_, pairIndex) => pairIndex !== index) })}>×</button></div>)}<button type="button" className="add-point-pair" onClick={() => onSettingsChange({ ...settings, pointPairOrbs: [...settings.pointPairOrbs, { pointA: "sun", pointB: "moon", orb: 8 }] })}>＋ 添加点位对</button></div><small className="orb-precedence">优先级：指定点位对 ＞ 点位类别 ＞ 指定相位 ＞ {chartLabel} ＞ 全局 ＞ 规则预设。</small></div></details></fieldset>
+  </>;
+}
+
+function TechniqueGuideDialog({
+  open,
+  title,
+  path,
+  onClose,
+}: {
+  open: boolean;
+  title: string;
+  path: string;
+  onClose: () => void;
+}) {
+  const [markdown, setMarkdown] = useState("");
+  useEffect(() => {
+    let active = true;
+    if (!open || markdown) return () => { active = false; };
+    fetch(path, { cache: "no-store" })
+      .then((response) => {
+        if (!response.ok) throw new Error(String(response.status));
+        return response.text();
+      })
+      .then((text) => {
+        const content = text
+          .replace(/^\uFEFF?---\r?\n[\s\S]*?\r?\n---\r?\n/, "")
+          .trim();
+        if (active) setMarkdown(content);
+      })
+      .catch(() => { if (active) setMarkdown(`# ${title}\n\n说明暂时无法读取，请稍后重试。`); });
+    return () => { active = false; };
+  }, [markdown, open, path, title]);
+  if (!open) return null;
+  return <div className="modal-backdrop" onMouseDown={(event) => { if (event.currentTarget === event.target) onClose(); }}><section className="modal-card natal-guide-modal" role="dialog" aria-modal="true" aria-label={title}><header><div><small>CHART GUIDE</small><h2>{title}</h2></div><button onClick={onClose} aria-label={`关闭${title}`}>×</button></header><div className="natal-guide-content">{markdown ? <SafeMarkdownDocument markdown={markdown} /> : <p>正在读取说明…</p>}</div></section></div>;
+}
+
+function CurrentSkyWorkspace({ theme }: { theme: ThemeMode }) {
+  const [input, setInput] = useState<CurrentSkyInput>({
+    localDate: "2026-07-23",
+    localTime: "12:00",
+    timezoneId: "Asia/Shanghai",
+    placeName: "上海",
+    countryCode: "CN",
+    latitude: 31.2304,
+    longitude: 121.4737,
+  });
+  const [settings, setSettings] = useState<NatalCalculationSettings>(() => cloneNatalSettings(defaultSettings));
+  const [groups, setGroups] = useState<Record<keyof typeof pointGroups, boolean>>(() => cloneNatalPointGroups(defaultModernGroups));
+  const [appliedSettings, setAppliedSettings] = useState<NatalCalculationSettings>(() => cloneNatalSettings(defaultSettings));
+  const [appliedGroups, setAppliedGroups] = useState<Record<keyof typeof pointGroups, boolean>>(() => cloneNatalPointGroups(defaultModernGroups));
+  const [appliedInput, setAppliedInput] = useState<CurrentSkyInput | null>(null);
+  const [snapshot, setSnapshot] = useState<NatalSnapshot | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState("选择目标时刻与地点后点击计算；天象盘不会读取或叠加任何人物。");
+  const [chartView, setChartView] = useState<ChartView>("professional");
+  const [guideOpen, setGuideOpen] = useState(false);
+  const [resultTab, setResultTab] = useState<CurrentSkyResultTab>("features");
+  const [wheelControls] = useState<Omit<NatalRenderControls, "visiblePointIds">>({ ...defaultWheelControls });
+  const presetId = useMemo(() => identifyNatalPreset(settings, groups), [settings, groups]);
+
+  useEffect(() => {
+    const parts = new Intl.DateTimeFormat("sv-SE", {
+      timeZone: "Asia/Shanghai",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(new Date());
+    const value = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+    queueMicrotask(() => setInput((current) => ({
+      ...current,
+      localDate: `${value.year}-${value.month}-${value.day}`,
+      localTime: `${value.hour}:${value.minute}`,
+    })));
+  }, []);
+
+  const visiblePointIds = useMemo(() => effectivePointIds(appliedSettings, appliedGroups), [appliedSettings, appliedGroups]);
+  const controls = useMemo<NatalRenderControls>(() => ({
+    ...wheelControls,
+    visiblePointIds,
+  }), [wheelControls, visiblePointIds]);
+  const renderSpec = useMemo(
+    () => snapshot ? buildNatalRenderSpec(snapshot, chartView === "compact" ? "compact" : "professional", theme, controls, "current_sky") : null,
+    [snapshot, chartView, theme, controls],
+  );
+  const insight = useMemo(() => snapshot ? buildCurrentSkyConsumerInsight(snapshot) : null, [snapshot]);
+
+  function applyPreset(id: Exclude<NatalPresetId, "custom">) {
+    const preset = natalCalculationPresets.find((item) => item.id === id);
+    if (!preset) return;
+    setSettings(cloneNatalSettings(preset.settings));
+    setGroups(cloneNatalPointGroups(preset.groups));
+  }
+
+  async function calculate() {
+    const pointIds = effectivePointIds(settings, groups);
+    const requestSettings = cloneNatalSettings({
+      ...settings,
+      pointIds,
+      pointPairOrbs: settings.orbMode === "classical_starlight"
+        ? classicalStarlightPairOrbs(pointIds, settings.pointPairOrbs)
+        : settings.pointPairOrbs,
+    });
+    setBusy(true);
+    setNotice("正在计算目标时刻的真实天体、宫位、相位与月相…");
+    try {
+      const result = await createCurrentSkyCalculation(input, requestSettings);
+      setSnapshot(result.snapshot);
+      setAppliedInput({ ...input });
+      setAppliedSettings(cloneNatalSettings(requestSettings));
+      setAppliedGroups(cloneNatalPointGroups(groups));
+      setChartView("professional");
+      setResultTab("features");
+      setNotice("天象盘已更新。修改参数不会自动生效，需要再次点击计算。");
+    } catch (error) {
+      setNotice(error instanceof InterstellarApiError ? `${error.code}：${error.message}` : `天象盘计算失败：${error instanceof Error ? error.message : "未知错误"}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const context = snapshot ? asRecord(snapshot.result.astronomical_context) : {};
+  const lunarPhase = asRecord(context.lunar_phase);
+  const strongestAspects = snapshot ? [...snapshot.result.aspects].sort((left, right) => right.strength - left.strength).slice(0, 5) : [];
+  const stationaryPoints = snapshot?.result.points.filter((point) => point.position.motion_state === "stationary") ?? [];
+  const retrogradePoints = snapshot?.result.points.filter((point) => point.retrograde) ?? [];
+
+  return <section className="main-workspace current-sky-workspace">
+    {notice && <div className="app-toast" role="status"><p>{notice}</p><button onClick={() => setNotice("")} aria-label="关闭提示">×</button></div>}
+    <div className="workbench-grid">
+      <article className="wheel-panel chart-workspace-card">
+        <div className="panel-heading"><div className="wheel-heading-main"><div><small>CURRENT SKY · SINGLE CHART</small><h2>天象盘</h2></div><div className="wheel-heading-actions">{snapshot && <><button className="result-flip-button" onClick={() => document.getElementById("current-sky-results")?.scrollIntoView({ behavior: "smooth", block: "start" })}>查看结果</button><div className="view-switcher" aria-label="天象盘视图切换"><button className={chartView === "professional" ? "active" : ""} onClick={() => setChartView("professional")}>轮盘</button><button className={chartView === "compact" ? "active" : ""} onClick={() => setChartView("compact")}>简洁</button><button className={chartView === "aspect_grid" ? "active" : ""} onClick={() => setChartView("aspect_grid")}>相位矩阵</button></div></>}<button className="natal-guide-link" onClick={() => setGuideOpen(true)}>什么是天象盘？</button></div></div></div>
+        <div className="wheel-canvas-area">{snapshot && renderSpec ? chartView === "aspect_grid" ? <AspectGrid snapshot={snapshot} onOpen={() => undefined} /> : <NatalWheel snapshot={snapshot} renderSpec={renderSpec} controls={controls} /> : <div className="sky-empty-state"><span>☼</span><h3>天空尚未计算</h3><p>这里始终是一张纯天象单盘，不会叠加人物本命盘。</p><button onClick={() => void calculate()} disabled={busy}>{busy ? "计算中…" : "计算当前天象"}</button></div>}</div>
+        <footer><span>{(appliedInput ?? input).localDate} {(appliedInput ?? input).localTime}</span><span>{(appliedInput ?? input).placeName}</span><span>{appliedSettings.zodiac === "tropical" ? "回归黄道" : "恒星黄道"}</span><span>{houseSystemOptions.find((item) => item.id === appliedSettings.houseSystem)?.label}</span></footer>
+      </article>
+
+      <aside className="settings-panel">
+        <div className="settings-title"><div><small>CURRENT SKY SETTINGS</small><h2>天象盘参数</h2></div><div className="settings-title-actions"><span className="settings-title-status">单盘</span><button className="settings-header-calculate" disabled={busy} onClick={() => void calculate()}>{busy ? "计算中…" : "计算"}</button></div></div>
+        <div className="preset-shortcuts" aria-label="天象盘预设">{natalCalculationPresets.map((preset) => <button key={preset.id} className={presetId === preset.id ? "active" : ""} onClick={() => applyPreset(preset.id)}><b>{preset.label}</b><small>{preset.badge}</small></button>)}</div>
+        <p className="sky-person-boundary"><b>不关联人物</b><span>只计算指定时刻与地点的天空；个人影响请使用行运盘。</span></p>
+        <label>目标日期<input type="date" value={input.localDate} onChange={(event) => setInput({ ...input, localDate: event.target.value })} /></label>
+        <label>目标时间<input type="time" value={input.localTime} onChange={(event) => setInput({ ...input, localTime: event.target.value })} /></label>
+        <label>地点<input value={input.placeName} onChange={(event) => setInput({ ...input, placeName: event.target.value })} /></label>
+        <label>IANA 时区<select value={input.timezoneId} onChange={(event) => setInput({ ...input, timezoneId: event.target.value })}>{fallbackTimezoneOptions.map((timezone) => <option key={timezone}>{timezone}</option>)}</select></label>
+        <details className="advanced-location"><summary>经纬度</summary><div><label>纬度<input type="number" step="0.0001" value={input.latitude} onChange={(event) => setInput({ ...input, latitude: Number(event.target.value) })} /></label><label>经度<input type="number" step="0.0001" value={input.longitude} onChange={(event) => setInput({ ...input, longitude: Number(event.target.value) })} /></label></div></details>
+        <label>黄道制<select value={settings.zodiac} onChange={(event) => setSettings({ ...settings, zodiac: event.target.value as NatalCalculationSettings["zodiac"] })}><option value="tropical">Tropical 回归黄道</option><option value="sidereal">Sidereal 恒星黄道</option></select></label>
+        <label>宫位制<select value={settings.houseSystem} onChange={(event) => setSettings({ ...settings, houseSystem: event.target.value as NatalCalculationSettings["houseSystem"] })}>{houseSystemOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
+        <label>交点类型<select value={settings.nodeType} onChange={(event) => setSettings({ ...settings, nodeType: event.target.value as NatalCalculationSettings["nodeType"] })}><option value="true">真交点</option><option value="mean">平均交点</option><option value="both">两者</option></select></label>
+        <label>相位容许度体系<select value={settings.orbMode} onChange={(event) => setSettings({ ...settings, orbMode: event.target.value as NatalCalculationSettings["orbMode"] })}><option value="modern_aspect">现代－按相位</option><option value="classical_starlight">古典－星光容许度</option></select></label>
+        <SharedAdvancedCalculationFields settings={settings} groups={groups} chartLabel="天象盘" onSettingsChange={setSettings} onGroupsChange={setGroups} />
+        <button className="settings-calculate" disabled={busy} onClick={() => void calculate()}>{busy ? "正在计算…" : "按当前参数重新计算"}</button>
+      </aside>
+
+      <aside className="ai-insight-panel">
+        <header><div><small>SKY INSIGHT · LOCAL</small><h2>天象速览</h2></div></header>
+        {snapshot && insight ? <article className="instant-insight"><section className="instant-theme"><span>现在的大环境</span><h3>{insight.title}</h3><p>{insight.summary}</p></section><section className="insight-dimensions">{insight.dimensions.map((dimension) => <div key={dimension.id}><header><b>{dimension.label}</b><strong>{dimension.score}</strong></header><i><span style={{ width: `${dimension.score}%` }} /></i><small>{dimension.note}</small></div>)}</section><section className="aspect-balance"><header><b>顺势的地方与容易卡住的地方</b></header><div><span className="supportive" style={{ flex: insight.aspectBalance.supportive || 0.25 }} /><span className="tension" style={{ flex: insight.aspectBalance.tension || 0.25 }} /><span className="neutral" style={{ flex: insight.aspectBalance.neutral || 0.25 }} /></div><footer><span>容易配合 {insight.aspectBalance.supportive}</span><span>需要协调 {insight.aspectBalance.tension}</span><span>彼此相连 {insight.aspectBalance.neutral}</span></footer><p>{insight.aspectBalance.meaning}</p></section><section className="top-signals"><header><b>最值得留意的三个天象组合</b><small>直接说明它们会带来怎样的节奏</small></header>{insight.signals.map((signal) => <div key={signal.id}><span>{signal.strength}</span><p><b>{signal.title}</b><small>{signal.detail}</small><em>{signal.meaning}</em></p></div>)}</section><section className="insight-advice"><div><b>这时比较适合</b>{insight.strengths.map((item) => <p key={item}>• {item}</p>)}</div><div><b>安排事情时注意</b>{insight.reminders.map((item) => <p key={item}>• {item}</p>)}</div></section><section className="insight-closing"><b>最后提醒</b><p>{insight.closing}</p></section></article> : <div className="ai-waiting"><b>等待计算</b><p>计算完成后会马上用大白话说明这个时段的整体节奏、顺势点和需要注意的地方，不调用大模型。</p></div>}
+        <footer><span>{lunarPhase.phase ? `月相：${lunarPhaseLabel(lunarPhase.phase)}` : "纯天象单盘"}</span><small>个人触发、落入本命宫位和跨盘相位将在行运盘中提供。</small></footer>
+      </aside>
+    </div>
+
+    {snapshot && <section className="result-section sky-result-section" id="current-sky-results">
+      <div className="section-copy"><div><small>CURRENT SKY CALCULATION</small><h2>天象盘计算结果</h2><p>与本命盘共用行星、宫位、相位、古典事实、固定星、映点、特殊度数和中点计算；不生成任何依赖人物出生时刻的法达、小限或黄道释放。</p></div><span className="count-chip">{snapshot.result.points.length} 点 · {snapshot.result.aspects.length} 相位</span></div>
+      <nav className="calculation-result-tabs" aria-label="天象盘计算结果分类">{currentSkyResultTabs.map((item) => <button key={item.id} className={resultTab === item.id ? "active" : ""} onClick={() => setResultTab(item.id)}>{item.label}</button>)}</nav>
+      {currentSkySharedResultTabs.has(resultTab) && <CalculationResults snapshot={snapshot} tab={resultTab as CalculationTab} />}
+      {resultTab === "aspects" && <div className="calculation-result-content"><div className="aspect-table"><div className="aspect-head"><span>点位 A</span><span>相位</span><span>点位 B</span><span>实际角距</span><span>容许度</span><span>阶段</span><span>强度</span></div>{snapshot.result.aspects.map((aspect) => <div className="aspect-row" key={aspect.aspect_id}><span>{pointNames[aspect.point_a] ?? aspect.point_a}</span><b>{aspectNames[aspect.type] ?? aspect.type}</b><span>{pointNames[aspect.point_b] ?? aspect.point_b}</span><span>{aspect.actual_angle_deg.toFixed(3)}°</span><span>{aspect.orb_deg.toFixed(3)}°</span><span>{aspectPhaseLabel(aspect.applying_state) ?? "—"}</span><span>{Math.round(aspect.strength * 100)}%</span></div>)}</div></div>}
+      {resultTab === "events" && <div className="calculation-result-content"><div className="section-copy"><div><small>EXACT MOMENT SKY FACTS</small><h2>目标时刻天象</h2><p>这里展示本次精确时刻已经成立的事实。换座、精确相位、停驻和食相的前后时间搜索会使用同一单盘内核另行生成时间轴。</p></div></div><div className="fact-card-grid"><article className="professional-card"><h3>月相</h3><p>{lunarPhaseLabel(lunarPhase.phase)}；月龄约 {Number(lunarPhase.lunar_age_days ?? 0).toFixed(1)} 天，亮面约 {Math.round(Number(lunarPhase.illumination_fraction ?? 0) * 100)}%。</p></article><article className="professional-card"><h3>逆行行星</h3><p>{retrogradePoints.map((point) => pointNames[point.point_id] ?? point.point_id).join("、") || "当前所选点位中无逆行行星"}</p></article><article className="professional-card"><h3>停驻点位</h3><p>{stationaryPoints.map((point) => pointNames[point.point_id] ?? point.point_id).join("、") || "当前精确时刻没有点位处于停驻阈值内"}</p></article><article className="professional-card"><h3>最紧密相位</h3><p>{strongestAspects.slice(0, 3).map((aspect) => `${pointNames[aspect.point_a] ?? aspect.point_a}${aspectNames[aspect.type] ?? aspect.type}${pointNames[aspect.point_b] ?? aspect.point_b}（${aspect.orb_deg.toFixed(2)}°）`).join("；") || "当前相位集没有命中"}</p></article></div></div>}
+    </section>}
+    <TechniqueGuideDialog open={guideOpen} title="什么是天象盘？" path="/current-sky-guide.md" onClose={() => setGuideOpen(false)} />
+  </section>;
+}
+
+function TransitWorkspace({
+  theme,
+  person,
+  latestNatalSnapshot,
+}: {
+  theme: ThemeMode;
+  person: NatalPersonInput;
+  latestNatalSnapshot: NatalSnapshot;
+}) {
+  const [input, setInput] = useState<CurrentSkyInput>({
+    localDate: "2026-07-23",
+    localTime: "12:00",
+    timezoneId: person.timezoneId || "Asia/Shanghai",
+    placeName: person.placeName || "上海",
+    countryCode: person.countryCode || "CN",
+    latitude: person.latitude,
+    longitude: person.longitude,
+  });
+  const [settings, setSettings] = useState<NatalCalculationSettings>(() => cloneNatalSettings(defaultTimingSettings));
+  const [groups, setGroups] = useState<NatalPointGroups>(() => cloneNatalPointGroups(defaultTimingGroups));
+  const [appliedSettings, setAppliedSettings] = useState<NatalCalculationSettings>(() => cloneNatalSettings(defaultTimingSettings));
+  const [appliedGroups, setAppliedGroups] = useState<NatalPointGroups>(() => cloneNatalPointGroups(defaultTimingGroups));
+  const [appliedInput, setAppliedInput] = useState<CurrentSkyInput | null>(null);
+  const [movingLayer, setMovingLayer] = useState<NatalSnapshot | null>(null);
+  const [comparison, setComparison] = useState<ChartComparison | null>(null);
+  const [wheelMode, setWheelMode] = useState<"single" | "double">("double");
+  const [guideOpen, setGuideOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState(`选择目标时刻后点击计算；行运盘会把当时的天空与${person.displayName}的本命盘比较。`);
+  const [resultTab, setResultTab] = useState<TransitResultTab>("overview");
+  const presetId = useMemo(() => identifyTimingPreset(settings, groups), [settings, groups]);
+  const visiblePointIds = useMemo(() => effectivePointIds(appliedSettings, appliedGroups), [appliedSettings, appliedGroups]);
+  const controls = useMemo<NatalRenderControls>(() => ({ ...defaultWheelControls, visiblePointIds }), [visiblePointIds]);
+  const renderSpec = useMemo(
+    () => buildNatalRenderSpec(latestNatalSnapshot, "professional", theme, controls),
+    [latestNatalSnapshot, theme, controls],
+  );
+  const movingRenderSpec = useMemo(
+    () => movingLayer ? buildNatalRenderSpec(movingLayer, "professional", theme, controls, "current_sky") : null,
+    [movingLayer, theme, controls],
+  );
+
+  useEffect(() => {
+    const parts = new Intl.DateTimeFormat("sv-SE", {
+      timeZone: person.timezoneId || "Asia/Shanghai",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(new Date());
+    const value = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+    queueMicrotask(() => setInput((current) => ({
+      ...current,
+      localDate: `${value.year}-${value.month}-${value.day}`,
+      localTime: `${value.hour}:${value.minute}`,
+    })));
+  }, [person.timezoneId]);
+
+  function applyPreset(id: Exclude<NatalPresetId, "custom">) {
+    const preset = timingCalculationPresets.find((item) => item.id === id);
+    if (!preset) return;
+    setSettings(cloneNatalSettings(preset.settings));
+    setGroups(cloneNatalPointGroups(preset.groups));
+  }
+
+  async function calculate() {
+    if (person.timePrecision === "date" || person.timePrecision === "unknown") {
+      setNotice("行运盘需要可靠的出生时刻来确定本命宫位和四轴；当前人物只有日期，不能用午夜代替。");
+      return;
+    }
+    const pointIds = effectivePointIds(settings, groups);
+    const requestSettings = cloneNatalSettings({
+      ...settings,
+      pointIds,
+      pointPairOrbs: settings.orbMode === "classical_starlight"
+        ? classicalStarlightPairOrbs(pointIds, settings.pointPairOrbs)
+        : settings.pointPairOrbs,
+    });
+    setBusy(true);
+    setNotice("正在同时计算本命固定层和目标时刻天象层，然后检查跨盘相位与落宫…");
+    try {
+      const sky = await createCurrentSkyCalculation(input, requestSettings);
+      const compared = await createTransitComparison(latestNatalSnapshot, sky.snapshot.id, requestSettings);
+      setMovingLayer(sky.snapshot);
+      setComparison(compared);
+      setAppliedInput({ ...input });
+      setAppliedSettings(cloneNatalSettings(requestSettings));
+      setAppliedGroups(cloneNatalPointGroups(groups));
+      setWheelMode("double");
+      setResultTab("overview");
+      setNotice("行运盘已更新。修改日期、地点或参数后，需要再次点击计算才会生效。");
+    } catch (error) {
+      setNotice(error instanceof InterstellarApiError ? `${error.code}：${error.message}` : `行运盘计算失败：${error instanceof Error ? error.message : "未知错误"}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const strongest = comparison ? [...comparison.result.cross_aspects].sort((left, right) => right.strength - left.strength).slice(0, 4) : [];
+  const houseHighlights = comparison ? comparison.result.moving_points_in_reference_houses.filter((item) => ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"].includes(item.moving_point_id)) : [];
+
+  return <section className="main-workspace transit-workspace">
+    {notice && <div className="app-toast" role="status"><p>{notice}</p><button onClick={() => setNotice("")} aria-label="关闭提示">×</button></div>}
+    <div className="workbench-grid">
+      <article className="wheel-panel chart-workspace-card">
+        <div className="panel-heading"><div className="wheel-heading-main"><div><small>TRANSITS · NATAL + CURRENT SKY</small><h2>{person.displayName}的行运盘</h2></div><div className="wheel-heading-actions">{comparison && <><button className="result-flip-button" onClick={() => document.getElementById("transit-results")?.scrollIntoView({ behavior: "smooth", block: "start" })}>查看结果</button><div className="view-switcher" aria-label="行运盘单双盘切换"><button className={wheelMode === "single" ? "active" : ""} onClick={() => setWheelMode("single")}>单盘</button><button className={wheelMode === "double" ? "active" : ""} onClick={() => setWheelMode("double")}>双盘</button></div></>}<button className="natal-guide-link" onClick={() => setGuideOpen(true)}>什么是行运盘？</button></div></div></div>
+        <div className="wheel-canvas-area">{movingLayer && comparison ? wheelMode === "double" ? <ComparisonWheel natalSnapshot={latestNatalSnapshot} movingSnapshot={movingLayer} comparison={comparison} renderSpec={renderSpec} controls={controls} chartLabel="行运盘" movingLabel="行运外层" /> : movingRenderSpec ? <NatalWheel snapshot={movingLayer} renderSpec={movingRenderSpec} controls={controls} /> : null : <div className="sky-empty-state"><span>◎</span><h3>行运盘尚未计算</h3><p>会直接读取当前人物上一次本命计算结果，再叠加现代预设的目标时刻天空。</p><button onClick={() => void calculate()} disabled={busy}>{busy ? "计算中…" : "计算行运盘"}</button></div>}</div>
+        <footer><span>{person.displayName} · {person.localDate}</span><span>目标 {(appliedInput ?? input).localDate} {(appliedInput ?? input).localTime}</span><span>{(appliedInput ?? input).placeName}</span><span>{appliedSettings.zodiac === "tropical" ? "回归黄道" : "恒星黄道"}</span></footer>
+      </article>
+
+      <aside className="settings-panel">
+        <div className="settings-title"><div><small>TRANSIT SETTINGS</small><h2>行运盘参数</h2></div><div className="settings-title-actions"><span className="settings-title-status">双盘</span><button className="settings-header-calculate" disabled={busy} onClick={() => void calculate()}>{busy ? "计算中…" : "计算"}</button></div></div>
+        <div className="preset-shortcuts" aria-label="行运盘预设">{timingCalculationPresets.map((preset) => <button key={preset.id} className={presetId === preset.id ? "active" : ""} onClick={() => applyPreset(preset.id)}><b>{preset.label}</b><small>{preset.badge}</small></button>)}</div>
+        <p className="sky-person-boundary"><b>当前人物：{person.displayName}</b><span>本命盘固定不动；日期和地点只改变外层的行运天空。</span></p>
+        <label>目标日期<input type="date" value={input.localDate} onChange={(event) => setInput({ ...input, localDate: event.target.value })} /></label>
+        <label>目标时间<input type="time" value={input.localTime} onChange={(event) => setInput({ ...input, localTime: event.target.value })} /></label>
+        <label>行运地点<input value={input.placeName} onChange={(event) => setInput({ ...input, placeName: event.target.value })} /></label>
+        <label>IANA 时区<select value={input.timezoneId} onChange={(event) => setInput({ ...input, timezoneId: event.target.value })}>{fallbackTimezoneOptions.map((timezone) => <option key={timezone}>{timezone}</option>)}</select></label>
+        <details className="advanced-location"><summary>行运地点经纬度</summary><div><label>纬度<input type="number" step="0.0001" value={input.latitude} onChange={(event) => setInput({ ...input, latitude: Number(event.target.value) })} /></label><label>经度<input type="number" step="0.0001" value={input.longitude} onChange={(event) => setInput({ ...input, longitude: Number(event.target.value) })} /></label></div></details>
+        <label>黄道制<select value={settings.zodiac} onChange={(event) => setSettings({ ...settings, zodiac: event.target.value as NatalCalculationSettings["zodiac"] })}><option value="tropical">Tropical 回归黄道</option><option value="sidereal">Sidereal 恒星黄道</option></select></label>
+        <label>宫位制<select value={settings.houseSystem} onChange={(event) => setSettings({ ...settings, houseSystem: event.target.value as NatalCalculationSettings["houseSystem"] })}>{houseSystemOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
+        <label>交点类型<select value={settings.nodeType} onChange={(event) => setSettings({ ...settings, nodeType: event.target.value as NatalCalculationSettings["nodeType"] })}><option value="true">真交点</option><option value="mean">平均交点</option><option value="both">两者</option></select></label>
+        <label>相位容许度体系<select value={settings.orbMode} onChange={(event) => setSettings({ ...settings, orbMode: event.target.value as NatalCalculationSettings["orbMode"] })}><option value="modern_aspect">现代－按相位</option><option value="classical_starlight">古典－星光容许度</option></select></label>
+        <SharedAdvancedCalculationFields settings={settings} groups={groups} chartLabel="行运盘" onSettingsChange={setSettings} onGroupsChange={setGroups} />
+        <button className="settings-calculate" disabled={busy} onClick={() => void calculate()}>{busy ? "正在计算…" : "按当前参数重新计算"}</button>
+      </aside>
+
+      <aside className="ai-insight-panel">
+        <header><div><small>TRANSIT INSIGHT · LOCAL</small><h2>这段时间怎么看</h2></div></header>
+        {comparison ? <article className="instant-insight"><section className="instant-theme"><span>先看重点</span><h3>{strongest.length ? "有几组本命主题正在被明显触动" : "当前没有特别紧密的跨盘相位"}</h3><p>行运盘不是说一定会发生什么，而是告诉你：这段时间哪些个人主题更容易被环境碰到，处理事情时可以把注意力放在哪里。</p></section><section className="top-signals"><header><b>最明显的行运触发</b><small>数字越高，当前关系越紧密</small></header>{strongest.map((aspect) => <div key={aspect.aspect_id}><span>{Math.round(aspect.strength * 100)}</span><p><b>行运{pointNames[aspect.moving_point_id] ?? aspect.moving_point_id} {aspectNames[aspect.type] ?? aspect.type} 本命{pointNames[aspect.reference_point_id] ?? aspect.reference_point_id}</b><small>{aspect.applying_state === "applying" ? "影响正在变得明显" : aspect.applying_state === "separating" ? "影响已经开始缓和" : "当前较为明显"}</small><em>{["square", "opposition", "quincunx"].includes(aspect.type) ? "外在节奏和你原来的习惯不完全一致，容易感觉被催促或被迫调整。先处理最现实的问题，会比硬扛更省力。" : "外在条件比较容易带动你原本就有的能力和倾向。主动安排相关事情，比等待机会自己出现更有效。"}</em></p></div>)}</section><section className="insight-advice"><div><b>行运行星落到本命哪里</b>{houseHighlights.slice(0, 5).map((item) => <p key={item.moving_point_id}>• {pointNames[item.moving_point_id] ?? item.moving_point_id}落入本命第{item.reference_house}宫：近期更容易把注意力带到“{houseDomains[item.reference_house - 1]}”。</p>)}</div><div><b>怎么使用</b><p>• 先看最紧密、正在接近的关系，再看它落入哪个生活领域。</p><p>• 不要把单个相位当作事件结论，要结合现实处境和自己的选择。</p></div></section></article> : <div className="ai-waiting"><b>等待计算</b><p>计算完成后会立刻说明哪些本命主题被触动、落入哪些生活领域，不调用大模型。</p></div>}
+        <footer><span>本地即时解读</span><small>只有点击计算才会更新；修改参数不会自动提交。</small></footer>
+      </aside>
+    </div>
+
+    {comparison && movingLayer && <section className="result-section sky-result-section" id="transit-results">
+      <div className="section-copy"><div><small>TRANSIT CALCULATION</small><h2>行运盘计算结果</h2><p>本命层保持最后一次计算结果；本页完整展示目标时刻天象单盘、天象盘内相位、与本命的跨盘相位及落入本命宫位。</p></div><span className="count-chip">{movingLayer.result.points.length} 点 · {comparison.result.cross_aspects.length} 跨盘相位</span></div>
+      <nav className="calculation-result-tabs" aria-label="行运盘计算结果分类">{transitResultTabs.map((item) => <button key={item.id} className={resultTab === item.id ? "active" : ""} onClick={() => setResultTab(item.id)}>{item.label}</button>)}</nav>
+      {resultTab === "overview" && <div className="calculation-result-content"><div className="calculation-summary-grid"><article><span>本命点位</span><b>{latestNatalSnapshot.result.points.length}</b><small>上一次已计算结果</small></article><article><span>行运点位</span><b>{movingLayer.result.points.length}</b><small>目标时刻天空</small></article><article><span>天象盘内相位</span><b>{movingLayer.result.aspects.length}</b><small>行运点位彼此关系</small></article><article><span>跨盘相位</span><b>{comparison.result.cross_aspects.length}</b><small>行运点对本命点</small></article></div></div>}
+      {transitSharedResultTabs.has(resultTab) && <CalculationResults snapshot={movingLayer} tab={resultTab as CalculationTab} />}
+      {resultTab === "aspects" && <div className="calculation-result-content"><div className="aspect-table"><div className="aspect-head"><span>行运点 A</span><span>相位</span><span>行运点 B</span><span>实际角距</span><span>容许度</span><span>阶段</span><span>强度</span></div>{movingLayer.result.aspects.map((aspect) => <div className="aspect-row" key={aspect.aspect_id}><span>{pointNames[aspect.point_a] ?? aspect.point_a}</span><b>{aspectNames[aspect.type] ?? aspect.type}</b><span>{pointNames[aspect.point_b] ?? aspect.point_b}</span><span>{aspect.actual_angle_deg.toFixed(3)}°</span><span>{aspect.orb_deg.toFixed(3)}°</span><span>{aspectPhaseLabel(aspect.applying_state) ?? "—"}</span><span>{Math.round(aspect.strength * 100)}%</span></div>)}</div></div>}
+      {resultTab === "cross_aspects" && <div className="calculation-result-content"><div className="aspect-table"><div className="aspect-head"><span>行运点</span><span>相位</span><span>本命点</span><span>实际角距</span><span>偏差</span><span>阶段</span><span>强度</span></div>{comparison.result.cross_aspects.map((aspect) => <div className="aspect-row" key={aspect.aspect_id}><span>{pointNames[aspect.moving_point_id] ?? aspect.moving_point_id}</span><b>{aspectNames[aspect.type] ?? aspect.type}</b><span>{pointNames[aspect.reference_point_id] ?? aspect.reference_point_id}</span><span>{aspect.actual_angle_deg.toFixed(3)}°</span><span>{aspect.orb_deg.toFixed(3)}°</span><span>{aspectPhaseLabel(aspect.applying_state) ?? "—"}</span><span>{Math.round(aspect.strength * 100)}%</span></div>)}</div></div>}
+      {resultTab === "reference_houses" && <div className="calculation-result-content"><div className="wide-result-table house-result-table"><div className="wide-result-head"><span>行运点</span><span>落入本命宫位</span><span>生活领域</span><span>是否贴近宫头</span><span>宫头编号</span></div>{comparison.result.moving_points_in_reference_houses.map((item) => <div className="wide-result-row" key={item.moving_point_id}><b>{pointNames[item.moving_point_id] ?? item.moving_point_id}</b><span>第{item.reference_house}宫</span><span>{houseDomains[item.reference_house - 1]}</span><span>{item.on_cusp ? "是" : "否"}</span><span>{item.cusp_number ?? "—"}</span></div>)}</div></div>}
+    </section>}
+    <TechniqueGuideDialog open={guideOpen} title="什么是行运盘？" path="/transit-guide.md" onClose={() => setGuideOpen(false)} />
+  </section>;
+}
+
+function SecondaryProgressionsWorkspace({
+  theme,
+  person,
+  latestNatalSnapshot,
+}: {
+  theme: ThemeMode;
+  person: NatalPersonInput;
+  latestNatalSnapshot: NatalSnapshot;
+}) {
+  const today = new Date().toISOString().slice(0, 10);
+  const [targetDate, setTargetDate] = useState(today);
+  const [settings, setSettings] = useState<NatalCalculationSettings>(() => cloneNatalSettings(defaultTimingSettings));
+  const [groups, setGroups] = useState<NatalPointGroups>(() => cloneNatalPointGroups(defaultTimingGroups));
+  const [appliedSettings, setAppliedSettings] = useState<NatalCalculationSettings>(() => cloneNatalSettings(defaultTimingSettings));
+  const [appliedGroups, setAppliedGroups] = useState<NatalPointGroups>(() => cloneNatalPointGroups(defaultTimingGroups));
+  const [appliedTargetDate, setAppliedTargetDate] = useState<string | null>(null);
+  const [result, setResult] = useState<SecondaryProgressionResult | null>(null);
+  const [wheelMode, setWheelMode] = useState<"single" | "double">("double");
+  const [guideOpen, setGuideOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState(`选择目标日期后点击计算；系统会直接读取${person.displayName}上一次本命结果，只计算新的次限层。`);
+  const [resultTab, setResultTab] = useState<SecondaryResultTab>("overview");
+  const presetId = useMemo(() => identifyTimingPreset(settings, groups), [settings, groups]);
+  const visiblePointIds = useMemo(() => effectivePointIds(appliedSettings, appliedGroups), [appliedSettings, appliedGroups]);
+  const controls = useMemo<NatalRenderControls>(() => ({ ...defaultWheelControls, visiblePointIds }), [visiblePointIds]);
+  const natalRenderSpec = useMemo(
+    () => buildNatalRenderSpec(latestNatalSnapshot, "professional", theme, controls),
+    [latestNatalSnapshot, theme, controls],
+  );
+  const progressedSnapshot = result?.progressed_snapshot ?? null;
+  const comparison = result?.comparison ?? null;
+  const progressedRenderSpec = useMemo(
+    () => progressedSnapshot ? buildNatalRenderSpec(progressedSnapshot, "professional", theme, controls, "current_sky") : null,
+    [progressedSnapshot, theme, controls],
+  );
+
+  function applyPreset(id: Exclude<NatalPresetId, "custom">) {
+    const preset = timingCalculationPresets.find((item) => item.id === id);
+    if (!preset) return;
+    setSettings(cloneNatalSettings(preset.settings));
+    setGroups(cloneNatalPointGroups(preset.groups));
+  }
+
+  async function calculate() {
+    if (person.timePrecision === "date" || person.timePrecision === "unknown") {
+      setNotice("次限盘需要可靠的出生时刻；当前人物只有日期，不能用午夜代替。");
+      return;
+    }
+    const pointIds = effectivePointIds(settings, groups);
+    const requestSettings = cloneNatalSettings({
+      ...settings,
+      pointIds,
+      pointPairOrbs: settings.orbMode === "classical_starlight"
+        ? classicalStarlightPairOrbs(pointIds, settings.pointPairOrbs)
+        : settings.pointPairOrbs,
+    });
+    setBusy(true);
+    setNotice("正在换算次限日期、计算次限点位，并与上一次本命结果比较…");
+    try {
+      const calculated = await createSecondaryProgression(
+        latestNatalSnapshot,
+        person,
+        targetDate,
+        requestSettings,
+      );
+      setResult(calculated);
+      setAppliedTargetDate(targetDate);
+      setAppliedSettings(cloneNatalSettings(requestSettings));
+      setAppliedGroups(cloneNatalPointGroups(groups));
+      setWheelMode("double");
+      setResultTab("overview");
+      setNotice("次限盘已更新。修改目标日期或参数后，需要再次点击计算才会生效。");
+    } catch (error) {
+      setNotice(error instanceof InterstellarApiError ? `${error.code}：${error.message}` : `次限盘计算失败：${error instanceof Error ? error.message : "未知错误"}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const strongest = comparison
+    ? [...comparison.result.cross_aspects].sort((left, right) => right.strength - left.strength || left.orb_deg - right.orb_deg).slice(0, 5)
+    : [];
+  const progressedMoon = progressedSnapshot?.result.points.find((point) => point.point_id === "moon");
+  const progressedSun = progressedSnapshot?.result.points.find((point) => point.point_id === "sun");
+  const lunarPhase = asRecord(asRecord(progressedSnapshot?.result.astronomical_context).lunar_phase);
+  const houseHighlights = comparison?.result.moving_points_in_reference_houses
+    .filter((item) => ["sun", "moon", "mercury", "venus", "mars"].includes(item.moving_point_id))
+    .slice(0, 5) ?? [];
+
+  return <section className="main-workspace secondary-progressions-workspace">
+    {notice && <div className="app-toast" role="status"><p>{notice}</p><button onClick={() => setNotice("")} aria-label="关闭提示">×</button></div>}
+    <div className="workbench-grid">
+      <article className="wheel-panel chart-workspace-card">
+        <div className="panel-heading"><div className="wheel-heading-main"><div><small>SECONDARY PROGRESSIONS · NATAL + PROGRESSED</small><h2>{person.displayName}的次限盘</h2></div><div className="wheel-heading-actions">{result && <><button className="result-flip-button" onClick={() => document.getElementById("secondary-results")?.scrollIntoView({ behavior: "smooth", block: "start" })}>查看结果</button><div className="view-switcher" aria-label="次限盘单双盘切换"><button className={wheelMode === "single" ? "active" : ""} onClick={() => setWheelMode("single")}>单盘</button><button className={wheelMode === "double" ? "active" : ""} onClick={() => setWheelMode("double")}>双盘</button></div></>}<button className="natal-guide-link" onClick={() => setGuideOpen(true)}>什么是次限盘？</button></div></div></div>
+        <div className="wheel-canvas-area">{progressedSnapshot && comparison ? wheelMode === "double" ? <ComparisonWheel natalSnapshot={latestNatalSnapshot} movingSnapshot={progressedSnapshot} comparison={comparison} renderSpec={natalRenderSpec} controls={controls} chartLabel="次限盘" movingLabel="次限外层" /> : progressedRenderSpec ? <NatalWheel snapshot={progressedSnapshot} renderSpec={progressedRenderSpec} controls={controls} /> : null : <div className="sky-empty-state"><span>◔</span><h3>次限盘尚未计算</h3><p>本命盘保持上一次计算结果不动，只按现代预设计算目标日期对应的次限层。</p><button onClick={() => void calculate()} disabled={busy}>{busy ? "计算中…" : "计算次限盘"}</button></div>}</div>
+        <footer><span>{person.displayName} · {person.localDate}</span><span>目标 {appliedTargetDate ?? targetDate}</span><span>{result ? `次限时刻 ${result.progressed_time.replace("T", " ")}` : "一年对应一日"}</span><span>{appliedSettings.zodiac === "tropical" ? "回归黄道" : "恒星黄道"}</span></footer>
+      </article>
+
+      <aside className="settings-panel">
+        <div className="settings-title"><div><small>SECONDARY PROGRESSION SETTINGS</small><h2>次限盘参数</h2></div><div className="settings-title-actions"><span className="settings-title-status">双盘</span><button className="settings-header-calculate" disabled={busy} onClick={() => void calculate()}>{busy ? "计算中…" : "计算"}</button></div></div>
+        <div className="preset-shortcuts" aria-label="次限盘预设">{timingCalculationPresets.map((preset) => <button key={preset.id} className={presetId === preset.id ? "active" : ""} onClick={() => applyPreset(preset.id)}><b>{preset.label}</b><small>{preset.badge}</small></button>)}</div>
+        <p className="sky-person-boundary"><b>固定本命：{person.displayName}</b><span>本命点位与宫位直接读取上一次结果；默认只给次限层加载现代预设。</span></p>
+        <label>目标日期<input type="date" min={person.localDate} value={targetDate} onChange={(event) => setTargetDate(event.target.value)} /><small>系统按出生日至目标日的实际天数换算次限时刻，一年人生对应出生后一日。</small></label>
+        <label>黄道制<select value={settings.zodiac} onChange={(event) => setSettings({ ...settings, zodiac: event.target.value as NatalCalculationSettings["zodiac"] })}><option value="tropical">Tropical 回归黄道</option><option value="sidereal">Sidereal 恒星黄道</option></select></label>
+        <label>宫位制<select value={settings.houseSystem} onChange={(event) => setSettings({ ...settings, houseSystem: event.target.value as NatalCalculationSettings["houseSystem"] })}>{houseSystemOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
+        <label>交点类型<select value={settings.nodeType} onChange={(event) => setSettings({ ...settings, nodeType: event.target.value as NatalCalculationSettings["nodeType"] })}><option value="true">真交点</option><option value="mean">平均交点</option><option value="both">两者</option></select></label>
+        <label>相位容许度体系<select value={settings.orbMode} onChange={(event) => setSettings({ ...settings, orbMode: event.target.value as NatalCalculationSettings["orbMode"] })}><option value="modern_aspect">现代－按相位</option><option value="classical_starlight">古典－星光容许度</option></select></label>
+        <SharedAdvancedCalculationFields settings={settings} groups={groups} chartLabel="次限盘" onSettingsChange={setSettings} onGroupsChange={setGroups} />
+        <button className="settings-calculate" disabled={busy} onClick={() => void calculate()}>{busy ? "正在计算…" : "按当前参数重新计算"}</button>
+      </aside>
+
+      <aside className="ai-insight-panel">
+        <header><div><small>PROGRESSION INSIGHT · LOCAL</small><h2>这一阶段怎么看</h2></div></header>
+        {result && progressedSnapshot && comparison ? <article className="instant-insight">
+          <section className="instant-theme"><span>先看内在变化</span><h3>{progressedMoon ? `次限月亮走到${signNames[progressedMoon.sign] ?? progressedMoon.sign}，生活重心正在换挡` : "次限层显示正在发生的内在变化"}</h3><p>次限盘讲的不是某天一定会发生什么，而是你在这个人生阶段更容易在意什么、怎样理解自己，以及哪些旧习惯正在慢慢改变。它变化得比行运慢，适合看几个月到几年的主题。</p></section>
+          <section className="fact-card-grid"><article className="professional-card"><h3>次限月亮</h3><p>{progressedMoon ? `${signNames[progressedMoon.sign] ?? progressedMoon.sign} ${formatDegree(progressedMoon.degree_in_sign)}，次限盘第${progressedMoon.house ?? "—"}宫。它最能说明这段时间情绪和注意力自然会往哪里走。` : "当前点位设置没有计算月亮。"}</p></article><article className="professional-card"><h3>次限太阳</h3><p>{progressedSun ? `${signNames[progressedSun.sign] ?? progressedSun.sign} ${formatDegree(progressedSun.degree_in_sign)}，次限盘第${progressedSun.house ?? "—"}宫。它更像一条缓慢变化的主线，说明你正在长成怎样的自己。` : "当前点位设置没有计算太阳。"}</p></article><article className="professional-card"><h3>次限月相</h3><p>{lunarPhase.phase ? `${lunarPhaseLabel(lunarPhase.phase)}。它用太阳与月亮的相对位置，说明这个阶段更像开始、推进、调整，还是收尾。` : "当前结果没有月相事实。"}</p></article></section>
+          <section className="top-signals"><header><b>最明显的五个变化信号</b><small>越靠前，次限点位与原来本命位置贴得越近</small></header>{strongest.map((aspect) => <div key={aspect.aspect_id}><span>{Math.round(aspect.strength * 100)}</span><p><b>次限{pointNames[aspect.moving_point_id] ?? aspect.moving_point_id} {aspectNames[aspect.type] ?? aspect.type} 本命{pointNames[aspect.reference_point_id] ?? aspect.reference_point_id}</b><small>{aspect.applying_state === "applying" ? "这个主题正在加强" : aspect.applying_state === "separating" ? "这个主题正在走过高点" : "这个主题正处在明显位置"}</small><em>{["square", "opposition", "quincunx"].includes(aspect.type) ? "你现在的感受或做法和原来的习惯有些不合拍，需要重新安排优先顺序。它更像成长中的磨合，不等于坏事。" : "你现在的变化比较容易接上原本的长处。把想法落实到日常行动，会比只等感受自然过去更有用。"}</em></p></div>)}</section>
+          <section className="insight-advice"><div><b>变化落在生活哪里</b>{houseHighlights.map((item) => <p key={item.moving_point_id}>• 次限{pointNames[item.moving_point_id] ?? item.moving_point_id}落入本命第{item.reference_house}宫：这一阶段更容易围绕“{houseDomains[item.reference_house - 1]}”发生内在调整。</p>)}</div><div><b>怎么使用</b><p>• 先看次限月亮，再看正在接近的紧密跨盘相位。</p><p>• 同一个主题持续出现，才值得放到现实计划里认真观察。</p><p>• 次限盘说的是阶段倾向，不是替你决定选择，也不是事件保证。</p></div></section>
+        </article> : <div className="ai-waiting"><b>等待计算</b><p>计算完成后会立即用大白话说明次限月亮、次限太阳、次限月相和最明显的成长主题，不调用大模型。</p></div>}
+        <footer><span>本地即时解读</span><small>只有点击计算才会更新；修改日期或参数不会自动提交。</small></footer>
+      </aside>
+    </div>
+
+    {result && progressedSnapshot && comparison && <section className="result-section sky-result-section" id="secondary-results">
+      <div className="section-copy"><div><small>SECONDARY PROGRESSION CALCULATION</small><h2>次限盘计算结果</h2><p>本命层保持最后一次计算结果；本页完整展示次限单盘事实、次限盘内相位、与本命的跨盘相位及落入本命宫位。</p></div><span className="count-chip">{progressedSnapshot.result.points.length} 点 · {comparison.result.cross_aspects.length} 跨盘相位</span></div>
+      <nav className="calculation-result-tabs" aria-label="次限盘计算结果分类">{secondaryResultTabs.map((item) => <button key={item.id} className={resultTab === item.id ? "active" : ""} onClick={() => setResultTab(item.id)}>{item.label}</button>)}</nav>
+      {resultTab === "overview" && <div className="calculation-result-content"><div className="calculation-summary-grid"><article><span>固定本命点位</span><b>{latestNatalSnapshot.result.points.length}</b><small>直接读取上一次结果</small></article><article><span>次限点位</span><b>{progressedSnapshot.result.points.length}</b><small>{result.progressed_time.replace("T", " ")}</small></article><article><span>次限盘内相位</span><b>{progressedSnapshot.result.aspects.length}</b><small>次限点位彼此关系</small></article><article><span>跨盘相位</span><b>{comparison.result.cross_aspects.length}</b><small>次限点位对本命点位</small></article></div></div>}
+      {secondarySharedResultTabs.has(resultTab) && <CalculationResults snapshot={progressedSnapshot} tab={resultTab as CalculationTab} />}
+      {resultTab === "aspects" && <div className="calculation-result-content"><div className="aspect-table"><div className="aspect-head"><span>次限点 A</span><span>相位</span><span>次限点 B</span><span>实际角距</span><span>容许度</span><span>阶段</span><span>强度</span></div>{progressedSnapshot.result.aspects.map((aspect) => <div className="aspect-row" key={aspect.aspect_id}><span>{pointNames[aspect.point_a] ?? aspect.point_a}</span><b>{aspectNames[aspect.type] ?? aspect.type}</b><span>{pointNames[aspect.point_b] ?? aspect.point_b}</span><span>{aspect.actual_angle_deg.toFixed(3)}°</span><span>{aspect.orb_deg.toFixed(3)}°</span><span>{aspectPhaseLabel(aspect.applying_state) ?? "—"}</span><span>{Math.round(aspect.strength * 100)}%</span></div>)}</div></div>}
+      {resultTab === "cross_aspects" && <div className="calculation-result-content"><div className="aspect-table"><div className="aspect-head"><span>次限点</span><span>相位</span><span>本命点</span><span>实际角距</span><span>偏差</span><span>阶段</span><span>强度</span></div>{comparison.result.cross_aspects.map((aspect) => <div className="aspect-row" key={aspect.aspect_id}><span>{pointNames[aspect.moving_point_id] ?? aspect.moving_point_id}</span><b>{aspectNames[aspect.type] ?? aspect.type}</b><span>{pointNames[aspect.reference_point_id] ?? aspect.reference_point_id}</span><span>{aspect.actual_angle_deg.toFixed(3)}°</span><span>{aspect.orb_deg.toFixed(3)}°</span><span>{aspectPhaseLabel(aspect.applying_state) ?? "—"}</span><span>{Math.round(aspect.strength * 100)}%</span></div>)}</div></div>}
+      {resultTab === "reference_houses" && <div className="calculation-result-content"><div className="wide-result-table house-result-table"><div className="wide-result-head"><span>次限点</span><span>落入本命宫位</span><span>生活领域</span><span>贴近宫头</span><span>宫头编号</span></div>{comparison.result.moving_points_in_reference_houses.map((item) => <div className="wide-result-row" key={item.moving_point_id}><b>{pointNames[item.moving_point_id] ?? item.moving_point_id}</b><span>第{item.reference_house}宫</span><span>{houseDomains[item.reference_house - 1]}</span><span>{item.on_cusp ? "是" : "否"}</span><span>{item.cusp_number ?? "—"}</span></div>)}</div></div>}
+    </section>}
+    <TechniqueGuideDialog open={guideOpen} title="什么是次限盘？" path="/secondary-progressions-guide.md" onClose={() => setGuideOpen(false)} />
+  </section>;
+}
+
 export default function Home() {
+  const [activeTechnique, setActiveTechnique] = useState<"natal" | "current_sky" | "transits" | "secondary_progressions">("natal");
   const [snapshot, setSnapshot] = useState<NatalSnapshot>(sampleSnapshot);
   const [subjectName, setSubjectName] = useState("阿特拉斯");
   const [tab, setTab] = useState<ResultTab>("basic");
@@ -1283,7 +1885,6 @@ export default function Home() {
   const [analysisCenterOpen, setAnalysisCenterOpen] = useState(false);
   const [capabilityTarget, setCapabilityTarget] = useState<(typeof chartTechniques)[number] | null>(null);
   const [entryPoint, setEntryPoint] = useState<EntryPointId>("technique");
-  const [selectedPresetId, setSelectedPresetId] = useState<NatalPresetId>("modern");
   // The server and the first browser render must use identical values. Browser
   // preferences are applied after hydration so React never has to reconcile
   // different theme labels/icons or responsive panel state.
@@ -1293,6 +1894,10 @@ export default function Home() {
   const [appliedSettings, setAppliedSettings] = useState<NatalCalculationSettings>(defaultSettings);
   const [groups, setGroups] = useState<Record<keyof typeof pointGroups, boolean>>({ ...defaultModernGroups });
   const [appliedGroups, setAppliedGroups] = useState<Record<keyof typeof pointGroups, boolean>>({ ...defaultModernGroups });
+  const selectedPresetId = useMemo(
+    () => identifyNatalPreset(settings, groups),
+    [settings, groups],
+  );
   const [wheelGroups, setWheelGroups] = useState<Record<keyof typeof pointGroups, boolean>>({ ...defaultWheelGroups });
   const [wheelControls, setWheelControls] = useState<Omit<NatalRenderControls, "visiblePointIds">>({ ...defaultWheelControls });
   const [saveProfile, setSaveProfile] = useState(false);
@@ -1321,6 +1926,7 @@ export default function Home() {
   ]);
   const [aiSubmitBusy, setAiSubmitBusy] = useState(false);
   const [aiAnalysisText, setAiAnalysisText] = useState("");
+  const [analysisMode, setAnalysisMode] = useState<"instant" | "ai">("instant");
   const activeSnapshotIdRef = useRef(snapshot.id);
   const subjectSwitcherRef = useRef<HTMLDivElement>(null);
 
@@ -1425,6 +2031,7 @@ export default function Home() {
     theme,
     effectiveWheelControls,
   ), [snapshot, chartView, theme, effectiveWheelControls]);
+  const consumerInsight = useMemo(() => buildNatalConsumerInsight(snapshot), [snapshot]);
 
   function showSampleSubject() {
     setSnapshot(sampleSnapshot);
@@ -1438,6 +2045,7 @@ export default function Home() {
     setTechnicalDocument(buildLocalTechnicalDocument(sampleSnapshot, "阿特拉斯"));
     setTechnicalDocumentHash("虚拟样例 · 未生成服务端内容哈希");
     setAiAnalysisText("");
+    setAnalysisMode("instant");
     setHasActiveSubject(true);
     setHasActiveSnapshot(true);
   }
@@ -1582,15 +2190,16 @@ export default function Home() {
     }
     const latest = saved.latestNatal;
     setSnapshot(latest.snapshot);
-    const savedSettings = { ...defaultSettings, ...latest.settings };
+    const savedSettings = normalizeNatalSettings(latest.settings);
     setSettings(savedSettings);
-    setAppliedSettings(savedSettings);
-    const savedGroups = { ...allPointGroupsEnabled, ...latest.groups } as Record<keyof typeof pointGroups, boolean>;
+    setAppliedSettings(cloneNatalSettings(savedSettings));
+    const savedGroups = { ...defaultModernGroups, ...latest.groups } as Record<keyof typeof pointGroups, boolean>;
     setGroups(savedGroups);
     setAppliedGroups(savedGroups);
     setTechnicalDocument(latest.analysisDocument);
     setTechnicalDocumentHash(latest.analysisDocumentHash);
     setAiAnalysisText(latest.aiAnalysisText ?? "");
+    setAnalysisMode("instant");
     setTab("basic");
     setChartView("professional");
     setHasActiveSnapshot(true);
@@ -1606,9 +2215,8 @@ export default function Home() {
   function applyNatalPreset(presetId: Exclude<NatalPresetId, "custom">) {
     const preset = natalCalculationPresets.find((item) => item.id === presetId);
     if (!preset) return;
-    setSelectedPresetId(presetId);
-    setSettings({ ...defaultSettings, ...preset.settings });
-    setGroups({ ...preset.groups });
+    setSettings(cloneNatalSettings(preset.settings));
+    setGroups(cloneNatalPointGroups(preset.groups));
   }
 
   async function calculateNatal() {
@@ -1621,22 +2229,24 @@ export default function Home() {
     setBusy(true); setNotice(dateLevelRequested
       ? "正在计算完整当地日期范围、天体位置区间与跨星座风险；不会伪造出生时刻…"
       : "正在标准化时间、计算星历、宫位、相位、结构与古典事实…");
-    const selectedPointIds = (Object.entries(groups) as Array<[keyof typeof pointGroups, boolean]>)
-      .filter(([, enabled]) => enabled).flatMap(([group]) => [...pointGroups[group]]);
-    const pointIds = selectedPointIds.filter((pointId) => {
-      if (settings.disabledPointIds.includes(pointId)) return false;
-      if (settings.nodeType === "true") return !pointId.startsWith("mean_north_node") && !pointId.startsWith("mean_south_node");
-      if (settings.nodeType === "mean") return !pointId.startsWith("true_north_node") && !pointId.startsWith("true_south_node");
-      return true;
-    });
+    const pointIds = effectivePointIds(settings, groups);
     const allGroupsEnabled = Object.values(groups).every(Boolean);
     try {
-      const result = await createPersonAndNatalCalculation(person, { ...settings, pointIds: allGroupsEnabled && settings.nodeType === "both" && settings.disabledPointIds.length === 0 ? [] : pointIds });
-      setSnapshot(result.snapshot); setSubjectName(person.displayName); setHasActiveSubject(true); setHasActiveSnapshot(true); setAppliedSettings({ ...settings }); setAppliedGroups({ ...groups }); setCalculationModal(false); setTab(settings.analysisSystem === "classical" ? "classical" : "basic"); setChartView("professional");
+      const effectivePointIds = allGroupsEnabled && settings.nodeType === "both" && settings.disabledPointIds.length === 0 ? [] : pointIds;
+      const requestSettings = cloneNatalSettings({
+        ...settings,
+        pointIds: effectivePointIds,
+        pointPairOrbs: settings.orbMode === "classical_starlight"
+          ? classicalStarlightPairOrbs(pointIds, settings.pointPairOrbs)
+          : settings.pointPairOrbs,
+      });
+      const result = await createPersonAndNatalCalculation(person, requestSettings);
+      setSnapshot(result.snapshot); setSubjectName(person.displayName); setHasActiveSubject(true); setHasActiveSnapshot(true); setAppliedSettings(cloneNatalSettings(settings)); setAppliedGroups({ ...groups }); setCalculationModal(false); setTab(settings.analysisSystem === "classical" ? "classical" : "basic"); setChartView("professional");
       const document = await getNatalTechnicalDocument(result.snapshot.id, "plaintext");
       setTechnicalDocument(document.content);
       setTechnicalDocumentHash(document.contentHash);
       setAiAnalysisText("");
+      setAnalysisMode("instant");
       if (accountWorkspace.authenticated && (selectedPersonId || saveProfile)) {
         const saved = await saveAccountPerson(person, selectedPersonId ?? undefined);
         setSelectedPersonId(saved.id);
@@ -1700,6 +2310,7 @@ export default function Home() {
   }
 
   async function refreshAiAnalysis() {
+    setAnalysisMode("ai");
     if (settingsDirty) {
       setNotice("存在尚未应用的参数，请先点击左侧“按当前参数重新计算”。");
       return;
@@ -1781,41 +2392,51 @@ export default function Home() {
   return (
     <main className="natal-app">
       <header className="site-header">
-        <button className="brand-button" onClick={() => { setTab("basic"); window.scrollTo({ top: 0, behavior: "smooth" }); }}><span className="brand-mark">✦</span><span><b>INTERSTELLAR</b><small>PROFESSIONAL ASTROLOGY</small></span></button>
+        <button className="brand-button" onClick={() => { setActiveTechnique("natal"); setTab("basic"); window.scrollTo({ top: 0, behavior: "smooth" }); }}><span className="brand-mark">✦</span><span><b>INTERSTELLAR</b><small>PROFESSIONAL ASTROLOGY</small></span></button>
         <nav>{globalNavigation.map((item) => <button key={item} className={item === "工作台" ? "active" : ""} onClick={() => {
           if (item === "工作台") window.scrollTo({ top: 0, behavior: "smooth" });
           if (item === "分析中心") setAnalysisCenterOpen(true);
           if (item === "对象库") window.location.href = "/objects";
         }}>{item}</button>)}</nav>
         <div className="site-actions">
-          <div className="subject-switcher" ref={subjectSwitcherRef}>
+          {activeTechnique !== "current_sky" && <div className="subject-switcher" ref={subjectSwitcherRef}>
             <button className="subject-switcher-trigger" aria-haspopup="menu" aria-expanded={personMenuOpen} onClick={() => setPersonMenuOpen((value) => !value)}><span>{hasActiveSubject ? subjectName.slice(0, 1) : "＋"}</span><span><b>{hasActiveSubject ? subjectName : "选择人物"}</b><small>{hasActiveSubject ? person.localDate || "生日未填写" : "添加或选择人物"}</small></span><i>{personMenuOpen ? "▴" : "▾"}</i></button>
             {personMenuOpen && <div className="subject-switcher-menu" role="menu">
               {savedPeople.slice(0, 5).map((saved) => <button role="menuitem" key={saved.id} className={selectedPersonId === saved.id ? "active" : ""} onClick={() => { selectWorkspacePerson(saved); setPersonMenuOpen(false); }}><span>{saved.person.displayName.slice(0, 1)}</span><span><b>{saved.person.displayName}</b><small>{saved.person.localDate || "生日未填写"}</small></span><i>{selectedPersonId === saved.id ? "当前" : saved.latestNatal ? "切换" : "计算"}</i></button>)}
               {!savedPeople.length && <p>{accountWorkspace.authenticated ? "人物库中还没有人物。" : "登录后可以保存并切换人物。"}</p>}
-              <button className="subject-library-link" onClick={() => { window.location.href = "/objects"; }}>编辑／添加／删除人物，请前往人物库 →</button>
+              <button className="subject-library-link" onClick={() => { window.location.href = "/objects"; }}>编辑／添加／删除 →</button>
             </div>}
-          </div>
+          </div>}
           <button className="theme-toggle" onClick={toggleTheme} aria-label={`切换到${theme === "dark" ? "浅色" : "深色"}主题`} title={`当前${theme === "dark" ? "深色" : "浅色"}主题`}><span>{theme === "dark" ? "☀" : "☾"}</span><small>{theme === "dark" ? "Light" : "Dark"}</small></button>{accountWorkspace.authenticated ? <div className="account-menu"><button onClick={() => { window.location.href = "/account"; }}>{accountWorkspace.user?.displayName}</button>{accountWorkspace.user?.role && accountWorkspace.user.role !== "user" && <button onClick={() => { window.location.href = "/admin"; }}>后台</button>}<button onClick={signOut}>退出</button></div> : <button className="account-action" onClick={() => { setAuthError(""); setAuthModal("login"); }}>登录／注册</button>}<button className="primary-action" onClick={() => openNewCalculation()}>＋ 新建分析</button>
         </div>
       </header>
 
-      <nav className="technique-strip" aria-label="盘型切换">{chartTechniques.map((technique) => <button key={technique.id} className={technique.status === "active" ? "active" : "planned"} onClick={() => { if (technique.status === "active") { setShowCalculationResults(false); window.scrollTo({ top: 0, behavior: "smooth" }); } else setCapabilityTarget(technique); }}><b>{technique.label}</b><small>{technique.status === "active" ? "当前" : "规划中"}</small></button>)}</nav>
+      <nav className="technique-strip" aria-label="盘型切换">{chartTechniques.map((technique) => <button key={technique.id} className={technique.id === activeTechnique ? "active" : technique.status === "active" ? "" : "planned"} onClick={() => { if (technique.id === "natal" || technique.id === "current_sky" || technique.id === "transits" || technique.id === "secondary_progressions") { setActiveTechnique(technique.id); setShowCalculationResults(false); window.scrollTo({ top: 0, behavior: "smooth" }); } else setCapabilityTarget(technique); }}><b>{technique.label}</b><small>{technique.id === activeTechnique ? "当前" : technique.status === "active" ? "可用" : "规划中"}</small></button>)}</nav>
 
       <div className="natal-layout">
-        {!workspaceResolved ? <section className="main-workspace empty-workspace"><div><span>◌</span><h1>正在读取工作台</h1><p>正在确认默认人物、示例人物和最近添加人物。</p></div></section> : !hasActiveSnapshot ? <section className="main-workspace empty-workspace"><div><span>✦</span><h1>{hasActiveSubject ? `${subjectName}尚未计算本命盘` : "开始第一次本命分析"}</h1><p>{hasActiveSubject ? "人物资料已经准备好，点击下方按钮确认推荐参数并生成第一份本命结果。" : "当前没有默认人物、示例人物或已保存人物。新建分析后即可在这里查看轮盘、相位矩阵和专业数据。"}</p><button className="primary-action" onClick={() => openNewCalculation("technique", hasActiveSubject ? person : undefined)}>＋ 新建分析</button></div></section> : <section className="main-workspace">
+        {activeTechnique === "current_sky" ? <CurrentSkyWorkspace theme={theme} /> : !workspaceResolved ? <section className="main-workspace empty-workspace"><div><span>◌</span><h1>正在读取工作台</h1><p>正在确认默认人物、示例人物和最近添加人物。</p></div></section> : !hasActiveSnapshot ? <section className="main-workspace empty-workspace"><div><span>✦</span><h1>{hasActiveSubject ? `${subjectName}尚未计算本命盘` : "开始第一次本命分析"}</h1><p>{hasActiveSubject ? `${activeTechnique === "natal" ? "本命盘" : "这个盘型"}需要先有一份本命计算结果。点击下方按钮确认参数并生成本命盘。` : "当前没有默认人物、示例人物或已保存人物。新建分析后即可继续。"}</p><button className="primary-action" onClick={() => openNewCalculation("technique", hasActiveSubject ? person : undefined)}>＋ 新建分析</button></div></section> : activeTechnique === "transits" ? <TransitWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} /> : activeTechnique === "secondary_progressions" ? <SecondaryProgressionsWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} /> : <section className="main-workspace">
           {notice && <div className="app-toast" role="status"><p>{notice}</p><button onClick={() => setNotice("")} aria-label="关闭提示">×</button></div>}
 
           <div className="workbench-grid">
             <article className="wheel-panel chart-workspace-card">
-              <div className="panel-heading"><div className="wheel-heading-main"><div><small>{showCalculationResults ? "CALCULATION RESULTS" : dateLevelMode ? "DATE-LEVEL POSITION VIEW" : "NATAL CHART"}</small><h2>{showCalculationResults ? "本命盘计算结果" : dateLevelMode ? "日期级星座位置图" : "本命轮盘"}</h2></div><div className="wheel-heading-actions">{!showCalculationResults && <div className="view-switcher" aria-label="轮盘视图切换"><button className={chartView === "professional" ? "active" : ""} onClick={() => setChartView("professional")}>{dateLevelMode ? "位置图" : "轮盘"}</button><button className={chartView === "compact" ? "active" : ""} onClick={() => setChartView("compact")}>简洁</button><button disabled={dateLevelMode} className={chartView === "aspect_grid" ? "active" : ""} onClick={() => setChartView("aspect_grid")}>相位矩阵</button></div>}<button className="natal-guide-link" onClick={() => setNatalGuideOpen(true)}>什么是本命盘？</button></div></div></div>
+              <div className="panel-heading">
+                <div className="wheel-heading-main">
+                  <div><small>{showCalculationResults ? "CALCULATION RESULTS" : dateLevelMode ? "DATE-LEVEL POSITION VIEW" : "NATAL CHART"}</small><h2>{showCalculationResults ? "本命盘计算结果" : dateLevelMode ? "日期级星座位置图" : "本命轮盘"}</h2></div>
+                  <div className="wheel-heading-actions">
+                    {!showCalculationResults && <>
+                      <button className="result-flip-button" onClick={() => setShowCalculationResults(true)}>查看结果</button>
+                      <div className="view-switcher" aria-label="轮盘视图切换"><button className={chartView === "professional" ? "active" : ""} onClick={() => setChartView("professional")}>{dateLevelMode ? "位置图" : "轮盘"}</button><button className={chartView === "compact" ? "active" : ""} onClick={() => setChartView("compact")}>简洁</button><button disabled={dateLevelMode} className={chartView === "aspect_grid" ? "active" : ""} onClick={() => setChartView("aspect_grid")}>相位矩阵</button></div>
+                    </>}
+                    <button className="natal-guide-link" onClick={() => setNatalGuideOpen(true)}>什么是本命盘？</button>
+                  </div>
+                </div>
+              </div>
               {showCalculationResults ? <>
                 <div className="calculation-view-toolbar"><button onClick={() => setShowCalculationResults(false)}>← 返回轮盘</button><span>{snapshot.result.points.length} 点 · {snapshot.result.aspects.length} 相位</span></div>
                 <nav className="calculation-result-tabs" aria-label="本命盘计算结果分类">{calculationResultTabs.map((item) => <button key={item.id} className={calculationTab === item.id ? "active" : ""} onClick={() => setCalculationTab(item.id)}>{item.label}</button>)}</nav>
                 <CalculationResults snapshot={snapshot} tab={calculationTab} />
               </> : <>
                 <div className="wheel-canvas-area">
-                  <div className="wheel-overlay-toolbar"><button className="result-flip-button" onClick={() => setShowCalculationResults(true)}>查看结果</button></div>
                   {chartView === "aspect_grid" && !dateLevelMode ? <AspectGrid snapshot={snapshot} onOpen={openAspect} /> : <NatalWheel snapshot={snapshot} renderSpec={natalRenderSpec} controls={effectiveWheelControls} />}
                 </div>
                 <footer><span>{appliedSettings.zodiac === "tropical" ? "回归黄道" : `恒星黄道 · ${ayanamsaOptions.find((item) => item.id === appliedSettings.ayanamsa)?.label}`}</span>{!dateLevelMode && <span>{houseSystemOptions.find((item) => item.id === appliedSettings.houseSystem)?.label}</span>}<span>{natalRenderSpec.options.visible_point_ids.length}/{snapshot.result.points.length} 点</span><span>计算相位 {snapshot.result.aspects.length} 条</span><span>轮盘绘制 {natalRenderSpec.options.visible_aspect_count} 条</span></footer>
@@ -1830,10 +2451,11 @@ export default function Home() {
               <label>宫位制<select value={settings.houseSystem} onChange={(event) => setSettings({ ...settings, houseSystem: event.target.value as NatalCalculationSettings["houseSystem"] })}>{houseSystemOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
               <label>观测中心<select value={settings.center} onChange={(event) => setSettings({ ...settings, center: event.target.value as NatalCalculationSettings["center"] })}><option value="geocentric">Geocentric 地心</option><option value="topocentric">Topocentric 出生地点拓扑中心</option></select><small>拓扑中心使用出生地点经纬度与海拔重新计算天体坐标；不是只改变图形标签。日心盘具有不同的太阳／地球和宫位语义，将作为独立盘型开放。</small></label>
               <label>交点类型<select value={settings.nodeType} onChange={(event) => setSettings({ ...settings, nodeType: event.target.value as NatalCalculationSettings["nodeType"] })}><option value="both">真交点＋平均交点</option><option value="true">真交点</option><option value="mean">平均交点</option></select></label>
-              <fieldset><legend>古典规则表（需重新计算）</legend><label>三分主星表<select value={settings.triplicityTable} onChange={(event) => { setSelectedPresetId("custom"); setSettings({ ...settings, triplicityTable: event.target.value as NatalCalculationSettings["triplicityTable"] }); }}><option value="dorothean">多罗修斯表</option><option value="ptolemaic">托勒密表</option></select><small>用于本质尊贵与接纳计算。</small></label><label>界表<select value={settings.termsTable} onChange={(event) => { setSelectedPresetId("custom"); setSettings({ ...settings, termsTable: event.target.value as NatalCalculationSettings["termsTable"] }); }}><option value="egyptian">埃及界</option><option value="ptolemaic">托勒密界</option></select><small>切换后逐星界主与相关接纳会重新计算。</small></label></fieldset>
+              <label>相位容许度体系<select value={settings.orbMode} onChange={(event) => setSettings({ ...settings, orbMode: event.target.value as NatalCalculationSettings["orbMode"] })}><option value="modern_aspect">现代－按相位</option><option value="classical_starlight">古典－星光容许度</option></select><small>{settings.orbMode === "classical_starlight" ? "取两个点位各自星光容许度中较小的值，计算时写入可审计的点位对规则。" : "按每种相位的独立容许度计算；三套预设会载入文档中的对应数值。"}</small></label>
+              <fieldset><legend>古典规则表（需重新计算）</legend><label>三分主星表<select value={settings.triplicityTable} onChange={(event) => setSettings({ ...settings, triplicityTable: event.target.value as NatalCalculationSettings["triplicityTable"] })}><option value="dorothean">多罗修斯表</option><option value="ptolemaic">托勒密表</option></select><small>用于本质尊贵与接纳计算。</small></label><label>界表<select value={settings.termsTable} onChange={(event) => setSettings({ ...settings, termsTable: event.target.value as NatalCalculationSettings["termsTable"] })}><option value="egyptian">埃及界</option><option value="ptolemaic">托勒密界</option></select><small>切换后逐星界主与相关接纳会重新计算。</small></label></fieldset>
               <fieldset><legend>计算点位（需重新计算）</legend>{(Object.keys(pointGroups) as Array<keyof typeof pointGroups>).map((group) => <div className="point-selection-group" key={group}><label className="check-option"><input type="checkbox" checked={groups[group]} onChange={(event) => { const enabled = event.target.checked; setGroups({ ...groups, [group]: enabled }); if (enabled) setSettings({ ...settings, disabledPointIds: settings.disabledPointIds.filter((id) => !pointGroups[group].includes(id as never)) }); }} /><span>{pointGroupLabels[group]}</span><small>{groups[group] ? pointGroups[group].filter((id) => !settings.disabledPointIds.includes(id)).length : 0}/{group === "angles" ? pointGroups[group].length + unavailableVirtualPoints.length : pointGroups[group].length}</small></label><details><summary>逐项选择</summary><div>{pointGroups[group].map((id) => <label className="check-option" key={`${group}-${id}`}><input type="checkbox" disabled={!groups[group]} checked={groups[group] && !settings.disabledPointIds.includes(id)} onChange={(event) => setSettings({ ...settings, disabledPointIds: event.target.checked ? settings.disabledPointIds.filter((item) => item !== id) : [...settings.disabledPointIds, id] })} /><span>{pointNames[id] ?? id}</span></label>)}{group === "angles" && unavailableVirtualPoints.map((item) => <label className="check-option unavailable-point" key={item.id} title={item.reason}><input type="checkbox" disabled /><span>{pointNames[item.id]}</span><small>暂不可用</small></label>)}</div></details></div>)}</fieldset>
               <fieldset><legend>固定星（需重新计算）</legend><label className="check-option"><input type="checkbox" checked={settings.fixedStarIds.length === fixedStarOptions.length} onChange={(event) => setSettings({ ...settings, fixedStarIds: event.target.checked ? fixedStarOptions.map(([id]) => id) : [] })} /><span>24 颗常用固定星</span><small>{settings.fixedStarIds.length}/{fixedStarOptions.length}</small></label><details className="orb-overrides"><summary>逐颗选择固定星</summary><div>{fixedStarOptions.map(([id, label]) => <label className="check-option" key={id}><input type="checkbox" checked={settings.fixedStarIds.includes(id)} onChange={(event) => setSettings({ ...settings, fixedStarIds: event.target.checked ? [...settings.fixedStarIds, id] : settings.fixedStarIds.filter((item) => item !== id) })} /><span>{label}</span></label>)}</div></details><label>固定星合相容许度 {settings.fixedStarOrb.toFixed(1)}°<input type="range" min="0.1" max="3" step="0.1" value={settings.fixedStarOrb} onChange={(event) => setSettings({ ...settings, fixedStarOrb: Number(event.target.value) })} /><small>仅计算固定星与所选本命点位的合相，默认 1°；固定星不会被冒充为行星加入普通相位矩阵。</small></label></fieldset>
-              <fieldset><legend>特殊事实（需重新计算）</legend><label>映点／反映点接触容许度 {settings.mirrorOrb.toFixed(1)}°<input type="range" min="0" max="5" step="0.1" value={settings.mirrorOrb} onChange={(event) => { setSelectedPresetId("custom"); setSettings({ ...settings, mirrorOrb: Number(event.target.value) }); }} /><small>每个点位的映点与反映点位置始终生成；该值只控制点位之间是否构成映点接触。</small></label><label>中点命中容许度 {settings.midpointOrb.toFixed(1)}°<input type="range" min="0" max="5" step="0.1" value={settings.midpointOrb} onChange={(event) => { setSelectedPresetId("custom"); setSettings({ ...settings, midpointOrb: Number(event.target.value) }); }} /><small>以日、月、水、金、火、木的直接／间接中点检查当前相位集。</small></label><small>特殊度数只输出可追溯的面、燃烧之路与 29 度事实，不附加无来源的吉凶判断。</small></fieldset>
+              <fieldset><legend>特殊事实（需重新计算）</legend><label>映点／反映点接触容许度 {settings.mirrorOrb.toFixed(1)}°<input type="range" min="0" max="5" step="0.1" value={settings.mirrorOrb} onChange={(event) => setSettings({ ...settings, mirrorOrb: Number(event.target.value) })} /><small>每个点位的映点与反映点位置始终生成；该值只控制点位之间是否构成映点接触。</small></label><label>中点命中容许度 {settings.midpointOrb.toFixed(1)}°<input type="range" min="0" max="5" step="0.1" value={settings.midpointOrb} onChange={(event) => setSettings({ ...settings, midpointOrb: Number(event.target.value) })} /><small>以日、月、水、金、火、木的直接／间接中点检查当前相位集。</small></label><small>特殊度数只输出可追溯的面、燃烧之路与 29 度事实，不附加无来源的吉凶判断。</small></fieldset>
               <fieldset><legend>相位计算（需重新计算）</legend><label className="check-option"><input type="checkbox" checked={!settings.aspectIds.length} onChange={(event) => setSettings({ ...settings, aspectIds: event.target.checked ? [] : ["conjunction", "opposition", "trine", "square", "sextile"] })} /><span>完整专业相位集</span><small>{allAspectIds.length}</small></label><div className="aspect-toggle-grid">{allAspectIds.map((aspect) => <button key={aspect} className={!settings.aspectIds.length || settings.aspectIds.includes(aspect) ? "on" : ""} onClick={() => { const base = settings.aspectIds.length ? settings.aspectIds : [...allAspectIds]; setSettings({ ...settings, aspectIds: base.includes(aspect) ? base.filter((id) => id !== aspect) : [...base, aspect] }); }}>{aspectNames[aspect] ?? aspect}</button>)}</div><details className="orb-overrides"><summary>容许度层级（全局／盘型／相位／类别／点位对）</summary><div className="orb-hierarchy"><div className="orb-level-grid"><label><span>全局</span><input type="number" min="0" max="30" step="0.1" placeholder="规则默认" value={settings.globalOrb ?? ""} onChange={(event) => setSettings({ ...settings, globalOrb: event.target.value === "" ? null : Number(event.target.value) })} /></label><label><span>本命盘</span><input type="number" min="0" max="30" step="0.1" placeholder="继承全局" value={settings.chartOrb ?? ""} onChange={(event) => setSettings({ ...settings, chartOrb: event.target.value === "" ? null : Number(event.target.value) })} /></label></div><h4>指定相位</h4><div className="orb-level-grid">{allAspectIds.map((aspect) => <label key={`orb-${aspect}`}><span>{aspectNames[aspect] ?? aspect}</span><input type="number" min="0" max="30" step="0.1" placeholder="继承上级" value={settings.orbOverrides[aspect] ?? ""} onChange={(event) => { const next = { ...settings.orbOverrides }; if (event.target.value === "") delete next[aspect]; else next[aspect] = Number(event.target.value); setSettings({ ...settings, orbOverrides: next }); }} /></label>)}</div><h4>点位类别</h4><div className="orb-level-grid">{orbPointClassOptions.map(([id, label]) => <label key={`class-orb-${id}`}><span>{label}</span><input type="number" min="0" max="30" step="0.1" placeholder="继承上级" value={settings.pointClassOrbs[id] ?? ""} onChange={(event) => { const next = { ...settings.pointClassOrbs }; if (event.target.value === "") delete next[id]; else next[id] = Number(event.target.value); setSettings({ ...settings, pointClassOrbs: next }); }} /></label>)}</div><h4>指定点位对</h4><div className="point-pair-orbs">{settings.pointPairOrbs.map((pair, index) => <div className="point-pair-row" key={`${pair.pointA}:${pair.pointB}:${index}`}><select aria-label={`点位对 ${index + 1} 第一个点`} value={pair.pointA} onChange={(event) => { const next = [...settings.pointPairOrbs]; next[index] = { ...pair, pointA: event.target.value }; setSettings({ ...settings, pointPairOrbs: next }); }}>{orbPointOptions.map((id) => <option value={id} key={`a-${index}-${id}`}>{pointNames[id] ?? id}</option>)}</select><select aria-label={`点位对 ${index + 1} 第二个点`} value={pair.pointB} onChange={(event) => { const next = [...settings.pointPairOrbs]; next[index] = { ...pair, pointB: event.target.value }; setSettings({ ...settings, pointPairOrbs: next }); }}>{orbPointOptions.map((id) => <option value={id} key={`b-${index}-${id}`}>{pointNames[id] ?? id}</option>)}</select><input aria-label={`点位对 ${index + 1} 容许度`} type="number" min="0" max="30" step="0.1" value={pair.orb} onChange={(event) => { const next = [...settings.pointPairOrbs]; next[index] = { ...pair, orb: Number(event.target.value) }; setSettings({ ...settings, pointPairOrbs: next }); }} /><button aria-label={`删除点位对 ${index + 1}`} onClick={() => setSettings({ ...settings, pointPairOrbs: settings.pointPairOrbs.filter((_, pairIndex) => pairIndex !== index) })}>×</button></div>)}<button className="add-point-pair" onClick={() => setSettings({ ...settings, pointPairOrbs: [...settings.pointPairOrbs, { pointA: "sun", pointB: "moon", orb: 8 }] })}>＋ 添加点位对</button></div><small className="orb-precedence">优先级：指定点位对 ＞ 点位类别 ＞ 指定相位 ＞ 本命盘 ＞ 全局 ＞ 规则预设。</small></div></details></fieldset>
               <fieldset className="wheel-display-settings"><legend>轮盘显示（即时生效）</legend><p className="settings-help">这些选项只改变当前轮盘的视觉显示，不会改变计算结果。</p><h3>显示点位</h3>{(Object.keys(pointGroups) as Array<keyof typeof pointGroups>).map((group) => <label className="check-option" key={`wheel-${group}`}><input type="checkbox" checked={wheelGroups[group]} onChange={(event) => setWheelGroups({ ...wheelGroups, [group]: event.target.checked })} /><span>{pointGroupLabels[group]}</span><small>{pointGroups[group].length}</small></label>)}<h3>图层</h3><div className="display-toggle-grid">{([
                 ["showDegreeTicks", "360°刻度"], ["showZodiacNames", "星座名称"], ["showZodiacDegrees", "星座度数"], ["showHouseLines", "宫位分割线"], ["showHouseNumbers", "宫位数字"], ["showAxes", "四轴"], ["showPointLeaders", "点位引线"], ["showPointDegrees", "点位度数"], ["showFixedStarContacts", "固定星合相标记"], ["showAspectLines", "中心相位线"], ["showLegend", "相位图例"],
@@ -1844,9 +2466,22 @@ export default function Home() {
             </aside>
 
             <aside className="ai-insight-panel" aria-live="polite">
-              <header><div><small>DEEPSEEK ANALYSIS</small><h2>智能分析</h2></div><button aria-label="刷新 DeepSeek 分析" disabled={aiSubmitBusy || settingsDirty || !snapshot.id.startsWith("calculation-")} onClick={() => void refreshAiAnalysis()}>{aiSubmitBusy ? "分析中…" : "↻ 刷新"}</button></header>
-              {settingsDirty ? <div className="ai-waiting"><b>参数尚未应用</b><p>请先在左侧点击“重新计算并应用参数”。DeepSeek 不会分析尚未生效的修改。</p></div> : aiSubmitBusy ? <div className="ai-waiting"><span className="analysis-spinner">✦</span><b>正在分析中</b><p>正在读取当前计算结果，请稍候。离开本页不会触发新的分析请求。</p></div> : aiAnalysisText ? <article className="ai-analysis-copy">{aiAnalysisText}</article> : <div className="ai-waiting"><b>尚未生成分析</b><p>只有点击右上角“刷新”时才会把当前已计算的本命盘提交给 DeepSeek。</p></div>}
-              <footer><span>{selectedPersonId ? "成功后覆盖该人物上一次分析" : "游客结果不会永久保存"}</span><small>修改参数不会自动计算，也不会自动提交分析。</small></footer>
+              <header>
+                <div><small>{analysisMode === "instant" ? "INSTANT CHART INSIGHT" : "DEEPSEEK ANALYSIS"}</small><h2>{analysisMode === "instant" ? "盘面速览" : "智能分析"}</h2></div>
+                <div className="analysis-header-actions">
+                  <button className={analysisMode === "ai" ? "active" : ""} onClick={() => setAnalysisMode(analysisMode === "ai" ? "instant" : "ai")}>{analysisMode === "ai" ? "返回速览" : "✦ 问 AI"}</button>
+                  <button aria-label="刷新 DeepSeek 分析" disabled={aiSubmitBusy || settingsDirty || !snapshot.id.startsWith("calculation-")} onClick={() => void refreshAiAnalysis()}>{aiSubmitBusy ? "分析中…" : "↻ 刷新"}</button>
+                </div>
+              </header>
+              {analysisMode === "instant" ? <article className="instant-insight">
+                <section className="instant-theme"><span>当前主题</span><h3>{consumerInsight.title}</h3><p>{consumerInsight.summary}</p></section>
+                <section className="insight-dimensions">{consumerInsight.dimensions.map((dimension) => <div key={dimension.id}><header><b>{dimension.label}</b><strong>{dimension.score}</strong></header><i><span style={{ width: `${dimension.score}%` }} /></i><small>{dimension.note}</small></div>)}</section>
+                <section className="aspect-balance"><header><b>顺手的地方与拉扯的地方</b></header><div><span className="supportive" style={{ flex: consumerInsight.aspectBalance.supportive || 0.25 }} /><span className="tension" style={{ flex: consumerInsight.aspectBalance.tension || 0.25 }} /><span className="neutral" style={{ flex: consumerInsight.aspectBalance.neutral || 0.25 }} /></div><footer><span>容易配合 {consumerInsight.aspectBalance.supportive}</span><span>需要协调 {consumerInsight.aspectBalance.tension}</span><span>彼此相连 {consumerInsight.aspectBalance.neutral}</span></footer><p>{consumerInsight.aspectBalance.meaning}</p></section>
+                <section className="top-signals"><header><b>最值得留意的三个组合</b><small>它们在盘里表现得最明显</small></header>{consumerInsight.signals.length ? consumerInsight.signals.map((signal) => <div key={signal.id}><span>{signal.strength}</span><p><b>{signal.title}</b><small>{signal.detail}</small><em>{signal.meaning}</em></p></div>) : <p>当前参数下没有特别突出的组合，可以先看上面的整体节奏。</p>}</section>
+                <section className="insight-advice"><div><b>你比较顺手的部分</b>{consumerInsight.strengths.map((item) => <p key={item}>• {item}</p>)}</div><div><b>给自己的两个提醒</b>{consumerInsight.reminders.map((item) => <p key={item}>• {item}</p>)}</div></section>
+                <section className="insight-closing"><b>怎么使用这份速览</b><p>{consumerInsight.closing}</p></section>
+              </article> : settingsDirty ? <div className="ai-waiting"><b>参数尚未应用</b><p>请先在左侧点击“重新计算并应用参数”。DeepSeek 不会分析尚未生效的修改。</p></div> : aiSubmitBusy ? <div className="ai-waiting"><span className="analysis-spinner">✦</span><b>正在分析中</b><p>正在读取当前计算结果，请稍候。离开本页不会触发新的分析请求。</p></div> : aiAnalysisText ? <article className="ai-analysis-copy"><SafeMarkdownDocument markdown={aiAnalysisText} /></article> : <div className="ai-waiting"><b>尚未生成分析</b><p>“问 AI”只切换视图；只有点击“刷新”才会提交当前已计算的本命盘。</p></div>}
+              <footer><span>{analysisMode === "instant" ? "本地模型 · 计算完成即可显示" : selectedPersonId ? "成功后覆盖该人物上一次分析" : "游客结果不会永久保存"}</span><small>修改参数不会自动计算，也不会自动提交分析。</small></footer>
             </aside>
           </div>
 
@@ -1924,14 +2559,14 @@ export default function Home() {
           <section className="calculation-step"><div className="step-title"><span>1</span><div><b>选择计算方法</b><small>本命盘当前可运行；其他方法保留入口，但不返回假结果。</small></div></div><div className="calculation-techniques">{chartTechniques.map((technique) => <button key={technique.id} className={technique.status === "active" ? "active" : "planned"} onClick={() => technique.status === "active" ? undefined : setCapabilityTarget(technique)}><b>{technique.label}</b><small>{technique.outputs}</small><i>{technique.status === "active" ? "已选择" : "规划中"}</i></button>)}</div></section>
           <section className="calculation-step"><div className="step-title"><span>2</span><div><b>选择人物</b><small>{accountWorkspace.authenticated ? "可以选择我的人物，也可以填写仅用于本次计算的临时人物。" : "游客可以填写临时人物并完成计算，但不会保存。"}</small></div></div>{savedPeople.length > 0 && <div className="subject-picker">{savedPeople.map((saved) => <button key={saved.id} className={selectedPersonId === saved.id ? "active" : ""} onClick={() => { setSelectedPersonId(saved.id); setPerson(saved.person); }}><span>{saved.person.displayName.slice(0, 1)}</span><b>{saved.person.displayName}</b><small>{saved.person.localDate}</small></button>)}</div>}<details className="inline-person" open={!savedPeople.length || !person.displayName}><summary>{person.displayName ? `本次人物：${person.displayName}（展开编辑）` : "填写临时人物"}</summary><PersonFields person={person} onChange={(next) => { setPerson(next); if (selectedPersonId && next.displayName !== savedPeople.find((item) => item.id === selectedPersonId)?.person.displayName) setSelectedPersonId(null); }} /></details></section>
           <section className="calculation-step"><div className="step-title"><span>3</span><div><b>选择推荐方案</b><small>推荐方案只是一组有来源说明的常用默认值；你仍可检查并修改关键参数。</small></div></div><div className="calculation-presets">{natalCalculationPresets.map((preset) => <button key={preset.id} className={selectedPresetId === preset.id ? "active" : ""} onClick={() => applyNatalPreset(preset.id)}><span>{preset.badge}</span><b>{preset.label}</b><p>{preset.description}</p><small>{preset.basis}</small></button>)}</div></section>
-          <section className="calculation-step"><div className="step-title"><span>4</span><div><b>检查关键参数</b><small>这里只展示最影响结果的参数；完整点位、相位与容许度仍可在工作台参数面板调整。</small></div></div><div className="calculation-key-settings"><label>黄道体系<select value={settings.zodiac} onChange={(event) => { setSelectedPresetId("custom"); setSettings({ ...settings, zodiac: event.target.value as NatalCalculationSettings["zodiac"] }); }}><option value="tropical">Tropical 回归黄道</option><option value="sidereal">Sidereal 恒星黄道</option></select></label><label>宫位制<select value={settings.houseSystem} onChange={(event) => { setSelectedPresetId("custom"); setSettings({ ...settings, houseSystem: event.target.value as NatalCalculationSettings["houseSystem"] }); }}>{houseSystemOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>{settings.zodiac === "sidereal" && <label>岁差体系<select value={settings.ayanamsa} onChange={(event) => { setSelectedPresetId("custom"); setSettings({ ...settings, ayanamsa: event.target.value as NatalCalculationSettings["ayanamsa"] }); }}>{ayanamsaOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>}<label>点位范围<select value={groups.hamburg ? "all" : groups.lots ? "professional" : "modern"} onChange={(event) => { setSelectedPresetId("custom"); const value = event.target.value; setGroups(value === "all" ? { core: true, angles: true, lunar: true, asteroids: true, lots: true, hamburg: true } : value === "professional" ? { core: true, angles: true, lunar: true, asteroids: true, lots: true, hamburg: false } : { core: true, angles: true, lunar: true, asteroids: true, lots: false, hamburg: false }); }}><option value="modern">现代常用点位</option><option value="professional">专业点位（含阿拉伯点）</option><option value="all">全部已发布点位（含汉堡虚星）</option></select></label><label>相位范围<select value={settings.aspectIds.length === majorAspectIds.length ? "major" : settings.aspectIds.length === professionalAspectIds.length ? "professional" : "all"} onChange={(event) => { setSelectedPresetId("custom"); const value = event.target.value; setSettings({ ...settings, aspectIds: value === "major" ? majorAspectIds : value === "professional" ? professionalAspectIds : [] }); }}><option value="major">五大主要相位</option><option value="professional">专业常用相位</option><option value="all">全部已发布相位</option></select></label></div><section className="effective-parameter-preview"><header><b>本次生效参数</b><span>{selectedPresetId === "custom" ? "自定义" : natalCalculationPresets.find((item) => item.id === selectedPresetId)?.badge}</span></header><dl><div><dt>黄道</dt><dd>{settings.zodiac === "tropical" ? "回归黄道" : `恒星黄道 · ${ayanamsaOptions.find((item) => item.id === settings.ayanamsa)?.label}`}</dd></div><div><dt>宫位</dt><dd>{houseSystemOptions.find((item) => item.id === settings.houseSystem)?.label}</dd></div><div><dt>点位组</dt><dd>{Object.values(groups).filter(Boolean).length} / {Object.keys(groups).length}</dd></div><div><dt>相位</dt><dd>{settings.aspectIds.length || allAspectIds.length} 种</dd></div><div><dt>输出</dt><dd>轮盘、相位矩阵、数据表、基本／星座／宫位／结构／古典／导出</dd></div></dl><p>修改参数后需要重新计算，结果才会更新。</p></section><label className="save-person"><input type="checkbox" disabled={!accountWorkspace.authenticated || Boolean(selectedPersonId)} checked={Boolean(selectedPersonId) || saveProfile} onChange={(event) => setSaveProfile(event.target.checked)} /><span><b>{selectedPersonId ? "覆盖该人物的最新本命盘" : accountWorkspace.authenticated ? "计算完成后保存人物与最新结果" : "游客结果不保存"}</b><small>{selectedPersonId ? "旧的本命计算结果不会保留。" : accountWorkspace.authenticated ? "不勾选则只在当前页面使用。" : "登录／注册后才可永久保存。"}</small></span></label>{accountWorkspace.authenticated && <label className="save-person"><input type="checkbox" disabled={!selectedPersonId && !saveProfile} checked={setAsDefault} onChange={(event) => setSetAsDefault(event.target.checked)} /><span><b>设为工作台默认人物</b><small>下次打开工作台时优先展示这个人物；之后可在对象库修改或取消。</small></span></label>}</section>
+          <section className="calculation-step"><div className="step-title"><span>4</span><div><b>检查关键参数</b><small>这里只展示最影响结果的参数；完整点位、相位与容许度仍可在工作台参数面板调整。</small></div></div><div className="calculation-key-settings"><label>黄道体系<select value={settings.zodiac} onChange={(event) => setSettings({ ...settings, zodiac: event.target.value as NatalCalculationSettings["zodiac"] })}><option value="tropical">Tropical 回归黄道</option><option value="sidereal">Sidereal 恒星黄道</option></select></label><label>宫位制<select value={settings.houseSystem} onChange={(event) => setSettings({ ...settings, houseSystem: event.target.value as NatalCalculationSettings["houseSystem"] })}>{houseSystemOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>{settings.zodiac === "sidereal" && <label>岁差体系<select value={settings.ayanamsa} onChange={(event) => setSettings({ ...settings, ayanamsa: event.target.value as NatalCalculationSettings["ayanamsa"] })}>{ayanamsaOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>}<label>点位范围<select value={groups.hamburg ? "all" : groups.lots ? "professional" : "modern"} onChange={(event) => { const value = event.target.value; setGroups(value === "all" ? { core: true, angles: true, lunar: true, asteroids: true, lots: true, hamburg: true } : value === "professional" ? { core: true, angles: true, lunar: true, asteroids: true, lots: true, hamburg: false } : { core: true, angles: true, lunar: true, asteroids: true, lots: false, hamburg: false }); }}><option value="modern">现代常用点位</option><option value="professional">专业点位（含阿拉伯点）</option><option value="all">全部已发布点位（含汉堡虚星）</option></select></label><label>相位范围<select value={settings.aspectIds.length === majorAspectIds.length ? "major" : settings.aspectIds.length === professionalAspectIds.length ? "professional" : "all"} onChange={(event) => { const value = event.target.value; setSettings({ ...settings, aspectIds: value === "major" ? majorAspectIds : value === "professional" ? professionalAspectIds : [] }); }}><option value="major">五大主要相位</option><option value="professional">专业常用相位</option><option value="all">全部已发布相位</option></select></label></div><section className="effective-parameter-preview"><header><b>本次生效参数</b><span>{selectedPresetId === "custom" ? "自定义" : natalCalculationPresets.find((item) => item.id === selectedPresetId)?.badge}</span></header><dl><div><dt>黄道</dt><dd>{settings.zodiac === "tropical" ? "回归黄道" : `恒星黄道 · ${ayanamsaOptions.find((item) => item.id === settings.ayanamsa)?.label}`}</dd></div><div><dt>宫位</dt><dd>{houseSystemOptions.find((item) => item.id === settings.houseSystem)?.label}</dd></div><div><dt>点位组</dt><dd>{Object.values(groups).filter(Boolean).length} / {Object.keys(groups).length}</dd></div><div><dt>相位</dt><dd>{settings.aspectIds.length || allAspectIds.length} 种</dd></div><div><dt>输出</dt><dd>轮盘、相位矩阵、数据表、基本／星座／宫位／结构／古典／导出</dd></div></dl><p>修改参数后需要重新计算，结果才会更新。</p></section><label className="save-person"><input type="checkbox" disabled={!accountWorkspace.authenticated || Boolean(selectedPersonId)} checked={Boolean(selectedPersonId) || saveProfile} onChange={(event) => setSaveProfile(event.target.checked)} /><span><b>{selectedPersonId ? "覆盖该人物的最新本命盘" : accountWorkspace.authenticated ? "计算完成后保存人物与最新结果" : "游客结果不保存"}</b><small>{selectedPersonId ? "旧的本命计算结果不会保留。" : accountWorkspace.authenticated ? "不勾选则只在当前页面使用。" : "登录／注册后才可永久保存。"}</small></span></label>{accountWorkspace.authenticated && <label className="save-person"><input type="checkbox" disabled={!selectedPersonId && !saveProfile} checked={setAsDefault} onChange={(event) => setSetAsDefault(event.target.checked)} /><span><b>设为工作台默认人物</b><small>下次打开工作台时优先展示这个人物；之后可在对象库修改或取消。</small></span></label>}</section>
           <footer><button onClick={() => setCalculationModal(false)}>取消</button><button className="calculate-button" disabled={busy} onClick={calculateNatal}>{busy ? "正在计算全部本命事实…" : "计算完整本命盘"}</button></footer>
         </section>
       </div>}
 
       {analysisCenterOpen && <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setAnalysisCenterOpen(false); }}><section className="person-modal analysis-center" role="dialog" aria-modal="true" aria-label="分析中心"><header><div><span>ANALYSIS CENTER</span><h2>分析中心</h2><p>可以按排盘技法、专题、目的、对象或时间周期进入；14 种盘型保留快速切换入口。</p></div><button onClick={() => setAnalysisCenterOpen(false)} aria-label="关闭">×</button></header><div className="entry-mode-grid">{entryModes.map((entry, index) => <article key={entry.id}><span>{String(index + 1).padStart(2, "0")}</span><h3>{entry.title}</h3><p>{entry.description}</p><small>{entry.context}</small><button onClick={() => { setAnalysisCenterOpen(false); openNewCalculation(entry.id); }}>从这里开始</button></article>)}</div><div className="analysis-technique-section"><header><div><small>CHART TYPES</small><h3>14 种盘型</h3></div><p>本命盘当前可用，其他盘型将在各自参数与计算完成后开放。</p></header><div className="technique-center-grid">{chartTechniques.map((technique, index) => <button key={technique.id} className={technique.status === "active" ? "active" : "planned"} onClick={() => { setAnalysisCenterOpen(false); if (technique.status === "active") { setShowCalculationResults(false); window.scrollTo({ top: 0, behavior: "smooth" }); } else setCapabilityTarget(technique); }}><span>{String(index + 1).padStart(2, "0")}</span><b>{technique.label}</b><small>{technique.status === "active" ? "进入本命盘" : "规划中"}</small></button>)}</div></div></section></div>}
 
-      {natalGuideOpen && <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setNatalGuideOpen(false); }}><section className="person-modal natal-guide-modal" role="dialog" aria-modal="true" aria-label="什么是本命盘"><header><div><span>本命盘说明</span><h2>什么是本命盘？</h2><p>盘面内容、资料要求、核心要素与基本解读方法。</p></div><button onClick={() => setNatalGuideOpen(false)} aria-label="关闭">×</button></header><article className="natal-guide-content">{natalGuideText ? <NatalGuideDocument markdown={natalGuideText} /> : "正在载入…"}</article></section></div>}
+      {natalGuideOpen && <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setNatalGuideOpen(false); }}><section className="person-modal natal-guide-modal" role="dialog" aria-modal="true" aria-label="什么是本命盘"><header><div><span>本命盘说明</span><h2>什么是本命盘？</h2><p>盘面内容、资料要求、核心要素与基本解读方法。</p></div><button onClick={() => setNatalGuideOpen(false)} aria-label="关闭">×</button></header><article className="natal-guide-content">{natalGuideText ? <SafeMarkdownDocument markdown={natalGuideText} /> : "正在载入…"}</article></section></div>}
 
       {capabilityTarget && <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setCapabilityTarget(null); }}><section className="person-modal capability-modal" role="dialog" aria-modal="true" aria-label={`${capabilityTarget.label}能力说明`}><header><div><span>规划中</span><h2>{capabilityTarget.label}</h2><p>这项排盘暂未开放。</p></div><button onClick={() => setCapabilityTarget(null)} aria-label="关闭">×</button></header><div className="capability-detail"><dl><div><dt>需要资料</dt><dd>{capabilityTarget.inputs}</dd></div><div><dt>计划内容</dt><dd>{capabilityTarget.outputs}</dd></div></dl></div><footer><button className="calculate-button" onClick={() => setCapabilityTarget(null)}>我知道了</button></footer></section></div>}
       {target && <InterpretationDrawer target={target} snapshot={snapshot} onClose={() => setTarget(null)} />}

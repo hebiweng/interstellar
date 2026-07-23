@@ -3,15 +3,20 @@
 from __future__ import annotations
 
 import time
-from datetime import UTC, datetime
+from copy import deepcopy
+from datetime import UTC, date, datetime, timedelta
 from typing import Any, Literal
 from uuid import uuid4
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from fastapi import APIRouter, Query, Request, Response, status
 from interstellar_core.application.astronomical_snapshot import (
     AstronomicalSnapshotInputError,
     create_astronomical_snapshot,
     create_date_level_astronomical_snapshot,
+)
+from interstellar_core.application.chart_comparison import (
+    create_cross_chart_comparison,
 )
 from interstellar_core.application.natal_technical_export import (
     NatalTechnicalExportError,
@@ -23,6 +28,7 @@ from interstellar_core.application.snapshot_tables import (
     build_snapshot_table,
     table_json_bytes,
 )
+from interstellar_core.astrology.aspects import AspectContext
 from interstellar_core.astronomy.adapters import AYANAMSA_MODES, SwissEphemerisAdapter
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -145,6 +151,31 @@ class ChartRequestPayload(StrictModel):
     input_fingerprint: str | None = None
 
 
+class ChartComparisonPayload(StrictModel):
+    reference_snapshot_id: str | None = Field(default=None, min_length=1, max_length=160)
+    reference_snapshot: dict[str, Any] | None = None
+    moving_snapshot_id: str = Field(min_length=1, max_length=160)
+    context: Literal["transit", "progression"]
+    settings: ChartSettingsPayload
+
+    @model_validator(mode="after")
+    def exactly_one_reference_snapshot(self) -> ChartComparisonPayload:
+        if (self.reference_snapshot_id is None) == (self.reference_snapshot is None):
+            raise ValueError(
+                "provide exactly one of reference_snapshot_id or reference_snapshot"
+            )
+        return self
+
+
+class SecondaryProgressionPayload(StrictModel):
+    reference_snapshot: dict[str, Any]
+    target_date: date
+    settings: ChartSettingsPayload
+    rule_pack_hash: str = Field(
+        pattern=r"^(?:sha256|hmac-sha256):[A-Fa-f0-9]{32,128}$"
+    )
+
+
 def _unsupported(fields: dict[str, Any]) -> ProblemException:
     return ProblemException(
         status=status.HTTP_422_UNPROCESSABLE_CONTENT,
@@ -167,8 +198,21 @@ async def create_calculation(payload: ChartRequestPayload, request: Request) -> 
         raise _unsupported(
             {"subject.inline_subject": "planned after durable anonymous input wiring"}
         )
-    if payload.chart.family != "natal":
-        raise _unsupported({"chart.family": "M2 supports natal astronomical snapshots only"})
+    supported_techniques = {
+        "natal": "natal.standard_chart",
+        "mundane": "mundane.current_sky",
+    }
+    expected_technique = supported_techniques.get(payload.chart.family)
+    if expected_technique is None:
+        raise _unsupported({
+            "chart.family": "This synchronous slice supports natal and mundane current-sky charts"
+        })
+    if payload.chart.technique != expected_technique:
+        raise _unsupported({
+            "chart.technique": (
+                f"{payload.chart.family} requires technique {expected_technique!r} in this slice"
+            )
+        })
     incompatible: dict[str, str] = {}
     if payload.settings.zodiac == "draconic":
         incompatible["settings.zodiac"] = (
@@ -203,6 +247,14 @@ async def create_calculation(payload: ChartRequestPayload, request: Request) -> 
             code=ErrorCode.NOT_FOUND,
             detail="Subject version was not found.",
         ) from exc
+    expected_subject_kind = "person" if payload.chart.family == "natal" else "event"
+    if subject_version.get("kind") != expected_subject_kind:
+        raise _unsupported({
+            "subject.kind": (
+                f"{payload.chart.technique} requires a {expected_subject_kind!r} subject; "
+                "current-sky calculations never reuse or overlay a person"
+            )
+        })
 
     request_document = payload.model_dump(mode="json", exclude_none=True)
     try:
@@ -240,6 +292,239 @@ async def create_calculation(payload: ChartRequestPayload, request: Request) -> 
         metadata=analytics_metadata,
     )
     return snapshot
+
+
+def _snapshot_technique(snapshot: dict[str, Any]) -> str | None:
+    result = snapshot.get("result")
+    charts = result.get("charts") if isinstance(result, dict) else None
+    chart = charts[0] if isinstance(charts, list) and charts else None
+    return chart.get("technique") if isinstance(chart, dict) else None
+
+
+def _progressed_subject_version(
+    reference_snapshot: dict[str, Any],
+    target_date: date,
+) -> tuple[dict[str, Any], datetime]:
+    normalized = reference_snapshot.get("normalized_input")
+    if not isinstance(normalized, dict):
+        raise AstronomicalSnapshotInputError(
+            "the natal snapshot does not contain its normalized birth input"
+        )
+    natal_subject = normalized.get("subject_version")
+    if not isinstance(natal_subject, dict):
+        raise AstronomicalSnapshotInputError(
+            "the natal snapshot does not contain a reusable subject version"
+        )
+    time_spec = natal_subject.get("time_spec")
+    location = natal_subject.get("location")
+    if not isinstance(time_spec, dict) or not isinstance(location, dict):
+        raise AstronomicalSnapshotInputError(
+            "secondary progressions require natal time and location"
+        )
+    if time_spec.get("precision") not in {"minute", "hour"}:
+        raise AstronomicalSnapshotInputError(
+            "secondary progressions require a known birth time"
+        )
+    local_value = time_spec.get("local_value")
+    timezone_id = time_spec.get("timezone_id") or location.get("timezone_id")
+    if not isinstance(local_value, str) or not isinstance(timezone_id, str):
+        raise AstronomicalSnapshotInputError(
+            "secondary progressions require local birth time and IANA timezone"
+        )
+    try:
+        birth_local = datetime.fromisoformat(local_value)
+        zone = ZoneInfo(timezone_id)
+    except (ValueError, ZoneInfoNotFoundError) as exc:
+        raise AstronomicalSnapshotInputError(
+            "the natal local time or timezone cannot be resolved"
+        ) from exc
+    if birth_local.tzinfo is not None:
+        birth_local = birth_local.astimezone(zone).replace(tzinfo=None)
+    elapsed_days = (target_date - birth_local.date()).days
+    if elapsed_days < 0:
+        raise AstronomicalSnapshotInputError(
+            "the secondary-progression target date cannot precede birth"
+        )
+
+    # Standard secondary progression: one mean tropical year of life maps to
+    # one ephemeris day after birth. Retain the natal civil time and place.
+    progressed_local = birth_local + timedelta(days=elapsed_days / 365.24219893)
+    progressed_zoned = progressed_local.replace(tzinfo=zone)
+    progressed_utc = progressed_zoned.astimezone(UTC)
+    progressed_subject = deepcopy(natal_subject)
+    progressed_subject.update({
+        "id": f"progression-subject-{uuid4()}",
+        "kind": "event",
+        "display_name": (
+            f"{natal_subject.get('display_name') or 'Natal subject'} "
+            f"secondary progression {target_date.isoformat()}"
+        ),
+    })
+    progressed_utc_text = (
+        progressed_utc.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    )
+    progressed_subject["time_spec"] = {
+        **deepcopy(time_spec),
+        "local_value": progressed_local.replace(second=0, microsecond=0).isoformat(
+            timespec="minutes"
+        ),
+        "precision": "minute",
+        "selected_utc": progressed_utc_text,
+        "utc_candidates": [progressed_utc_text],
+        "confidence": time_spec.get("confidence") or "unknown",
+        "source": {
+            "kind": "derived",
+            "description": (
+                "Secondary progression: one tropical year of life equals "
+                "one ephemeris day after birth"
+            ),
+        },
+        "warnings": [],
+    }
+    progressed_subject["location"] = deepcopy(location)
+    progressed_subject["attributes"] = {
+        **deepcopy(natal_subject.get("attributes") or {}),
+        "chart_role": "secondary_progression",
+        "reference_snapshot_id": reference_snapshot.get("id"),
+        "target_date": target_date.isoformat(),
+        "progression_key": "1_mean_tropical_year_to_1_day",
+    }
+    return progressed_subject, progressed_local
+
+
+@router.post("/calculations/comparisons", status_code=status.HTTP_201_CREATED)
+async def create_calculation_comparison(
+    payload: ChartComparisonPayload,
+    request: Request,
+) -> dict[str, Any]:
+    try:
+        reference_snapshot = (
+            payload.reference_snapshot
+            if payload.reference_snapshot is not None
+            else request.app.state.workflow_store.get_snapshot(
+                payload.reference_snapshot_id
+            )
+        )
+        moving_snapshot = request.app.state.workflow_store.get_snapshot(
+            payload.moving_snapshot_id
+        )
+    except WorkflowRecordNotFound as exc:
+        raise ProblemException(
+            status=status.HTTP_404_NOT_FOUND,
+            code=ErrorCode.NOT_FOUND,
+            detail="One or both comparison snapshots were not found.",
+        ) from exc
+
+    expected_techniques = (
+        ("natal.standard_chart", "mundane.current_sky")
+        if payload.context == "transit"
+        else ("natal.standard_chart", "progression.secondary")
+    )
+    actual_techniques = (
+        _snapshot_technique(reference_snapshot),
+        _snapshot_technique(moving_snapshot),
+    )
+    if actual_techniques != expected_techniques:
+        raise _unsupported({
+            "comparison.snapshots": (
+                f"{payload.context} requires {expected_techniques[0]!r} as the fixed "
+                f"reference and {expected_techniques[1]!r} as the moving layer"
+            )
+        })
+
+    try:
+        comparison_result = create_cross_chart_comparison(
+            reference_snapshot=reference_snapshot,
+            moving_snapshot=moving_snapshot,
+            settings=payload.settings.model_dump(mode="json", exclude_none=True),
+            context=(
+                AspectContext.TRANSIT
+                if payload.context == "transit"
+                else AspectContext.PROGRESSION
+            ),
+        )
+    except AstronomicalSnapshotInputError as exc:
+        raise _unsupported({"comparison.snapshots": str(exc)}) from exc
+
+    comparison = {
+        "id": f"comparison-{uuid4()}",
+        "status": "complete",
+        "maturity": "implemented",
+        "result": comparison_result,
+        "warnings": [],
+    }
+    request.app.state.workflow_store.put_snapshot(comparison)
+    return comparison
+
+
+@router.post("/calculations/secondary-progressions", status_code=status.HTTP_201_CREATED)
+async def create_secondary_progression(
+    payload: SecondaryProgressionPayload,
+    request: Request,
+) -> dict[str, Any]:
+    if _snapshot_technique(payload.reference_snapshot) != "natal.standard_chart":
+        raise _unsupported({
+            "reference_snapshot": (
+                "secondary progressions require the active person's last natal snapshot"
+            )
+        })
+    try:
+        progressed_subject, progressed_local = _progressed_subject_version(
+            payload.reference_snapshot,
+            payload.target_date,
+        )
+        settings_document = payload.settings.model_dump(mode="json", exclude_none=True)
+        request_document = {
+            "subject": {"subject_version_id": progressed_subject["id"]},
+            "chart": {
+                "family": "progression",
+                "technique": "progression.secondary",
+            },
+            "settings": settings_document,
+            "rule_pack_hash": payload.rule_pack_hash,
+            "dataset_versions": {},
+            "outputs": ["snapshot", "json"],
+        }
+        progressed_snapshot = create_astronomical_snapshot(
+            snapshot_id=f"calculation-{uuid4()}",
+            request_payload=request_document,
+            subject_version=progressed_subject,
+            now=datetime.now(UTC),
+            engine_version=request.app.state.settings.service_version,
+            adapter=SwissEphemerisAdapter(
+                moshier_fallback="record",
+                ephemeris_path=request.app.state.settings.swiss_ephemeris_path,
+            ),
+        )
+        comparison_result = create_cross_chart_comparison(
+            reference_snapshot=payload.reference_snapshot,
+            moving_snapshot=progressed_snapshot,
+            settings=settings_document,
+            context=AspectContext.PROGRESSION,
+        )
+    except AstronomicalSnapshotInputError as exc:
+        raise _unsupported({"secondary_progression": str(exc)}) from exc
+
+    comparison = {
+        "id": f"comparison-{uuid4()}",
+        "status": "complete",
+        "maturity": "implemented",
+        "result": comparison_result,
+        "warnings": [],
+    }
+    request.app.state.workflow_store.put_snapshot(progressed_snapshot)
+    request.app.state.workflow_store.put_snapshot(comparison)
+    return {
+        "id": f"secondary-progression-{uuid4()}",
+        "status": "complete",
+        "reference_snapshot_id": payload.reference_snapshot.get("id"),
+        "target_date": payload.target_date.isoformat(),
+        "progressed_time": progressed_local.replace(
+            second=0, microsecond=0
+        ).isoformat(timespec="minutes"),
+        "progressed_snapshot": progressed_snapshot,
+        "comparison": comparison,
+    }
 
 
 @router.get("/calculations/{snapshot_id}/tables/{table_id}")
