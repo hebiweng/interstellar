@@ -1860,10 +1860,16 @@ function SecondaryProgressionsWorkspace({
   theme,
   person,
   latestNatalSnapshot,
+  savedPeople,
+  selectedPersonId,
+  onSelectPerson,
 }: {
   theme: ThemeMode;
   person: NatalPersonInput;
   latestNatalSnapshot: NatalSnapshot;
+  savedPeople: WorkspacePerson[];
+  selectedPersonId: string | null;
+  onSelectPerson: (person: WorkspacePerson) => void;
 }) {
   const today = new Date().toISOString().slice(0, 10);
   const [targetDate, setTargetDate] = useState(today);
@@ -1874,6 +1880,7 @@ function SecondaryProgressionsWorkspace({
   const [appliedTargetDate, setAppliedTargetDate] = useState<string | null>(null);
   const [result, setResult] = useState<SecondaryProgressionResult | null>(null);
   const [wheelMode, setWheelMode] = useState<"single" | "double">("double");
+  const [chartView, setChartView] = useState<"professional" | "compact" | "aspect_grid">("professional");
   const [guideOpen, setGuideOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState(`选择目标日期后点击计算；系统会直接读取${person.displayName}上一次本命结果，只计算新的次限层。`);
@@ -1887,23 +1894,35 @@ function SecondaryProgressionsWorkspace({
   }, []);
   const [resultTab, setResultTab] = useState<SecondaryResultTab>("overview");
   const [showCalculationResults, setShowCalculationResults] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [personMenuOpen, setPersonMenuOpen] = useState(false);
+  const personMenuRef = useRef<HTMLDivElement>(null);
   const presetId = useMemo(() => identifyTimingPreset(settings, groups), [settings, groups]);
   const visiblePointIds = useMemo(() => effectivePointIds(appliedSettings, appliedGroups), [appliedSettings, appliedGroups]);
   const controls = useMemo<NatalRenderControls>(() => ({ ...defaultWheelControls, visiblePointIds }), [visiblePointIds]);
   const natalRenderSpec = useMemo(
-    () => buildNatalRenderSpec(latestNatalSnapshot, "professional", theme, controls),
-    [latestNatalSnapshot, theme, controls],
+    () => buildNatalRenderSpec(latestNatalSnapshot, chartView === "compact" ? "compact" : "professional", theme, controls),
+    [latestNatalSnapshot, chartView, theme, controls],
   );
   const progressedSnapshot = result?.progressed_snapshot ?? null;
   const comparison = result?.comparison ?? null;
   const progressedRenderSpec = useMemo(
-    () => progressedSnapshot ? buildNatalRenderSpec(progressedSnapshot, "professional", theme, controls, "current_sky") : null,
-    [progressedSnapshot, theme, controls],
+    () => progressedSnapshot ? buildNatalRenderSpec(progressedSnapshot, chartView === "compact" ? "compact" : "professional", theme, controls, "current_sky") : null,
+    [progressedSnapshot, chartView, theme, controls],
   );
   const secondaryInsight = useMemo(
     () => result ? buildSecondaryProgressionConsumerInsight(result, latestNatalSnapshot) : null,
     [result, latestNatalSnapshot],
   );
+
+  useEffect(() => {
+    if (!personMenuOpen) return;
+    const close = (e: PointerEvent) => { if (personMenuRef.current && !personMenuRef.current.contains(e.target as Node)) setPersonMenuOpen(false); };
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setPersonMenuOpen(false); };
+    document.addEventListener("pointerdown", close);
+    document.addEventListener("keydown", esc);
+    return () => { document.removeEventListener("pointerdown", close); document.removeEventListener("keydown", esc); };
+  }, [personMenuOpen]);
 
   function applyPreset(id: Exclude<NatalPresetId, "custom">) {
     const preset = timingCalculationPresets.find((item) => item.id === id);
@@ -1962,29 +1981,87 @@ function SecondaryProgressionsWorkspace({
     {notice && <div className="app-toast" role="status"><p>{notice}</p><button onClick={() => setNotice("")} aria-label="关闭提示">×</button></div>}
     <div className="workbench-grid">
       <article className="wheel-panel chart-workspace-card">
-        <div className="panel-heading"><div className="wheel-heading-main"><div><small>SECONDARY PROGRESSIONS · NATAL + PROGRESSED</small><h2>{person.displayName}的次限盘</h2></div><div className="wheel-heading-actions">{result && <><button className="result-flip-button" onClick={() => setShowCalculationResults(true)}>查看结果</button><div className="view-switcher" aria-label="次限盘单双盘切换"><button className={wheelMode === "single" ? "active" : ""} onClick={() => setWheelMode("single")}>单盘</button><button className={wheelMode === "double" ? "active" : ""} onClick={() => setWheelMode("double")}>双盘</button></div></>}<button className="natal-guide-link" onClick={() => setGuideOpen(true)}>什么是次限盘？</button></div></div><div className="chart-selector-bar chart-selector-bar-single"><label>目标日期<input type="date" min={person.localDate} value={targetDate} onChange={(event) => setTargetDate(event.target.value)} /></label><small>系统按出生日至目标日的实际天数换算次限时刻，一年人生对应出生后一日。</small></div></div>
+        <div className="panel-heading">
+          <div className="wheel-heading-main">
+            <div><small>SECONDARY PROGRESSIONS</small><h2>次限轮盘</h2></div>
+            <div className="wheel-heading-actions">
+              {!showCalculationResults && <>
+                <div className="view-switcher" aria-label="轮盘视图切换">
+                  <button className={chartView === "professional" ? "active" : ""} onClick={() => setChartView("professional")}>轮盘</button>
+                  <button className={chartView === "compact" ? "active" : ""} onClick={() => setChartView("compact")}>简洁</button>
+                  <button className={chartView === "aspect_grid" ? "active" : ""} onClick={() => setChartView("aspect_grid")}>相位矩阵</button>
+                </div>
+                {result && <div className="view-switcher" aria-label="单双盘切换">
+                  <button className={wheelMode === "single" ? "active" : ""} onClick={() => setWheelMode("single")}>单盘</button>
+                  <button className={wheelMode === "double" ? "active" : ""} onClick={() => setWheelMode("double")}>双盘</button>
+                </div>}
+              </>}
+              {result && <button className="result-flip-button" onClick={() => setShowCalculationResults(!showCalculationResults)}>{showCalculationResults ? "返回轮盘" : "查看结果"}</button>}
+              <button className="natal-guide-link" onClick={() => setGuideOpen(true)}>什么是次限盘？</button>
+            </div>
+          </div>
+        </div>
         {showCalculationResults ? (
           <SecondaryCalculationPanel result={result} resultTab={resultTab} setResultTab={setResultTab} onBack={() => setShowCalculationResults(false)} />
         ) : (
           <>
-            <div className="wheel-canvas-area">{progressedSnapshot && comparison ? wheelMode === "double" ? <ComparisonWheel natalSnapshot={latestNatalSnapshot} movingSnapshot={progressedSnapshot} comparison={comparison} renderSpec={natalRenderSpec} controls={controls} chartLabel="次限盘" movingLabel="次限外层" /> : progressedRenderSpec ? <NatalWheel snapshot={progressedSnapshot} renderSpec={progressedRenderSpec} controls={controls} /> : null : <div className="sky-empty-state"><span>◔</span><h3>次限盘尚未计算</h3><p>本命盘保持上一次计算结果不动，只按现代预设计算目标日期对应的次限层。</p><button onClick={() => void calculate()} disabled={busy}>{busy ? "计算中…" : "计算次限盘"}</button></div>}</div>
+            <div className="wheel-canvas-area wheel-canvas-area--fit">
+              {progressedSnapshot && comparison ? (
+                chartView === "aspect_grid" ? (
+                  <AspectGrid snapshot={progressedSnapshot} onOpen={() => undefined} />
+                ) : wheelMode === "double" ? (
+                  <ComparisonWheel natalSnapshot={latestNatalSnapshot} movingSnapshot={progressedSnapshot} comparison={comparison} renderSpec={natalRenderSpec} controls={controls} chartLabel="次限盘" movingLabel="次限外层" />
+                ) : progressedRenderSpec ? (
+                  <NatalWheel snapshot={progressedSnapshot} renderSpec={progressedRenderSpec} controls={controls} />
+                ) : null
+              ) : <div className="sky-empty-state"><span>◔</span><h3>次限盘尚未计算</h3><p>本命盘保持上一次计算结果不动，只按现代预设计算目标日期对应的次限层。</p><button onClick={() => void calculate()} disabled={busy}>{busy ? "计算中…" : "计算次限盘"}</button></div>}
+            </div>
             <footer><span>{person.displayName} · {person.localDate}</span><span>目标 {appliedTargetDate ?? targetDate}</span><span>{result ? `次限时刻 ${result.progressed_time.replace("T", " ")}` : "一年对应一日"}</span><span>{appliedSettings.zodiac === "tropical" ? "回归黄道" : "恒星黄道"}</span></footer>
           </>
         )}
       </article>
 
-      <aside className="settings-panel">
-        <div className="settings-title"><div><small>SECONDARY PROGRESSION SETTINGS</small><h2>次限盘参数</h2></div><div className="settings-title-actions"><span className="settings-title-status">双盘</span><button className="settings-header-calculate" disabled={busy} onClick={() => void calculate()}>{busy ? "计算中…" : "计算"}</button></div></div>
-        <div className="preset-shortcuts" aria-label="次限盘预设">{timingCalculationPresets.map((preset) => <button key={preset.id} className={presetId === preset.id ? "active" : ""} onClick={() => applyPreset(preset.id)}><b>{preset.label}</b><small>{preset.badge}</small></button>)}</div>
-        <p className="sky-person-boundary"><b>固定本命：{person.displayName}</b><span>本命点位与宫位直接读取上一次结果；默认只给次限层加载现代预设。</span></p>
+      <aside className="settings-panel settings-panel-secondary">
+        <div className="settings-title"><div><small>PROGRESSION SETTINGS</small><h2>次限盘参数</h2></div><div className="settings-title-actions"><button className="advanced-settings-trigger" onClick={() => setDrawerOpen(true)}>专业参数</button></div></div>
 
-        <label>黄道制<select value={settings.zodiac} onChange={(event) => setSettings({ ...settings, zodiac: event.target.value as NatalCalculationSettings["zodiac"] })}><option value="tropical">Tropical 回归黄道</option><option value="sidereal">Sidereal 恒星黄道</option></select></label>
-        <label>宫位制<select value={settings.houseSystem} onChange={(event) => setSettings({ ...settings, houseSystem: event.target.value as NatalCalculationSettings["houseSystem"] })}>{houseSystemOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
-        <label>交点类型<select value={settings.nodeType} onChange={(event) => setSettings({ ...settings, nodeType: event.target.value as NatalCalculationSettings["nodeType"] })}><option value="true">真交点</option><option value="mean">平均交点</option><option value="both">两者</option></select></label>
-        <label>相位容许度体系<select value={settings.orbMode} onChange={(event) => setSettings({ ...settings, orbMode: event.target.value as NatalCalculationSettings["orbMode"] })}><option value="modern_aspect">现代－按相位</option><option value="classical_starlight">古典－星光容许度</option></select></label>
-        <SharedAdvancedCalculationFields settings={settings} groups={groups} chartLabel="次限盘" onSettingsChange={setSettings} onGroupsChange={setGroups} />
-        <button className="settings-calculate" disabled={busy} onClick={() => void calculate()}>{busy ? "正在计算…" : "按当前参数重新计算"}</button>
+        <div className="secondary-person-card">
+          <div className="secondary-person-selector" ref={personMenuRef}>
+            <button className="secondary-person-trigger" onClick={() => setPersonMenuOpen(v => !v)} aria-haspopup="menu" aria-expanded={personMenuOpen}>
+              <span className="secondary-person-avatar">{person.displayName.slice(0, 1) || "？"}</span>
+              <span className="secondary-person-info"><b>{person.displayName || "选择人物"}</b><small>{person.localDate || "生日未填写"}</small></span>
+              <i>{personMenuOpen ? "▴" : "▾"}</i>
+            </button>
+            {personMenuOpen && <div className="secondary-person-menu" role="menu">
+              {savedPeople.slice(0, 5).map((saved) => <button role="menuitem" key={saved.id} className={selectedPersonId === saved.id ? "active" : ""} onClick={() => { onSelectPerson(saved); setPersonMenuOpen(false); }}><span>{saved.person.displayName.slice(0, 1)}</span><span><b>{saved.person.displayName}</b><small>{saved.person.localDate || "生日未填写"}</small></span></button>)}
+              {!savedPeople.length && <p>{savedPeople.length === 0 ? "暂无已保存人物" : ""}</p>}
+            </div>}
+          </div>
+        </div>
+
+        <div className="secondary-fields">
+          <label className="secondary-field-label">目标日期<input type="date" min={person.localDate} value={targetDate} onChange={(e) => setTargetDate(e.target.value)} /></label>
+          <small className="secondary-field-hint">一年人生对应出生后一日</small>
+        </div>
+
+        <div className="preset-shortcuts" aria-label="次限盘预设">{timingCalculationPresets.map((preset) => <button key={preset.id} className={presetId === preset.id ? "active" : ""} onClick={() => applyPreset(preset.id)}><b>{preset.label}</b><small>{preset.badge}</small></button>)}</div>
+
+        <button className="settings-calculate" disabled={busy} onClick={() => void calculate()}>{busy ? "计算中…" : "计算次限盘"}</button>
+
+        <p className="settings-boundary">修改目标日期或参数后，需要再次点击计算才会生效。专业参数（黄道制、宫位制、交点类型等）点击上方「专业参数」按钮配置。</p>
       </aside>
+
+      {drawerOpen && <div className="drawer-backdrop" onClick={() => setDrawerOpen(false)}><aside className="settings-drawer" onClick={(e) => e.stopPropagation()}>
+        <header className="drawer-header"><h2>次限盘专业参数</h2><button className="drawer-close" onClick={() => setDrawerOpen(false)} aria-label="关闭">×</button></header>
+        <div className="drawer-body">
+          <p className="sky-person-boundary"><b>固定本命：{person.displayName}</b><span>本命点位与宫位直接读取上一次结果；默认只给次限层加载现代预设。</span></p>
+          <label>黄道制<select value={settings.zodiac} onChange={(event) => setSettings({ ...settings, zodiac: event.target.value as NatalCalculationSettings["zodiac"] })}><option value="tropical">Tropical 回归黄道</option><option value="sidereal">Sidereal 恒星黄道</option></select></label>
+          <label>宫位制<select value={settings.houseSystem} onChange={(event) => setSettings({ ...settings, houseSystem: event.target.value as NatalCalculationSettings["houseSystem"] })}>{houseSystemOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
+          <label>交点类型<select value={settings.nodeType} onChange={(event) => setSettings({ ...settings, nodeType: event.target.value as NatalCalculationSettings["nodeType"] })}><option value="true">真交点</option><option value="mean">平均交点</option><option value="both">两者</option></select></label>
+          <label>相位容许度体系<select value={settings.orbMode} onChange={(event) => setSettings({ ...settings, orbMode: event.target.value as NatalCalculationSettings["orbMode"] })}><option value="modern_aspect">现代－按相位</option><option value="classical_starlight">古典－星光容许度</option></select></label>
+          <SharedAdvancedCalculationFields settings={settings} groups={groups} chartLabel="次限盘" onSettingsChange={setSettings} onGroupsChange={setGroups} />
+        </div>
+        <footer className="drawer-footer"><button className="settings-calculate" disabled={busy} onClick={() => { void calculate(); setDrawerOpen(false); }}>{busy ? "正在计算…" : "应用并计算"}</button></footer>
+      </aside></div>}
 
       <aside className="ai-insight-panel">
         <header><div><small>PROGRESSION INSIGHT · LOCAL</small><h2>这一阶段怎么看</h2></div></header>
@@ -1993,7 +2070,7 @@ function SecondaryProgressionsWorkspace({
           <section className="insight-dimensions">{secondaryInsight.dimensions.map((dimension) => <div key={dimension.id}><header><b>{dimension.label}</b><strong>{dimension.score}</strong></header><i><span style={{ width: `${dimension.score}%` }} /></i><small>{dimension.note}</small></div>)}</section>
           <section className="aspect-balance"><header><b>顺势的地方与容易卡住的地方</b></header><div><span className="supportive" style={{ flex: secondaryInsight.aspectBalance.supportive || 0.25 }} /><span className="tension" style={{ flex: secondaryInsight.aspectBalance.tension || 0.25 }} /><span className="neutral" style={{ flex: secondaryInsight.aspectBalance.neutral || 0.25 }} /></div><footer><span>容易配合 {secondaryInsight.aspectBalance.supportive}</span><span>需要协调 {secondaryInsight.aspectBalance.tension}</span><span>彼此相连 {secondaryInsight.aspectBalance.neutral}</span></footer><p>{secondaryInsight.aspectBalance.meaning}</p></section>
           <section className="top-signals"><header><b>最明显的变化信号</b><small>越靠前，当前关系越紧密</small></header>{secondaryInsight.signals.map((signal) => <div key={signal.id}><span>{signal.strength}</span><p><b>{signal.title}</b><small>{signal.detail}</small><em>{signal.meaning}</em></p></div>)}</section>
-          <section className="insight-advice"><div><b>变化落在生活哪里</b>{houseHighlights.map((item) => <p key={item.moving_point_id}>• 次限{pointNames[item.moving_point_id] ?? item.moving_point_id}落入本命第{item.reference_house}宫：这一阶段更容易围绕“{houseDomains[item.reference_house - 1]}”发生内在调整。</p>)}</div><div><b>怎么使用</b><p>{secondaryInsight.strengths.map((item) => <p key={item}>• {item}</p>)}</p><p>{secondaryInsight.reminders.map((item) => <p key={item}>• {item}</p>)}</p></div></section>
+          <section className="insight-advice"><div><b>变化落在生活哪里</b>{houseHighlights.map((item) => <p key={item.moving_point_id}>• 次限{pointNames[item.moving_point_id] ?? item.moving_point_id}落入本命第{item.reference_house}宫：这一阶段更容易围绕"{houseDomains[item.reference_house - 1]}"发生内在调整。</p>)}</div><div><b>怎么使用</b><p>{secondaryInsight.strengths.map((item) => <p key={item}>• {item}</p>)}</p><p>{secondaryInsight.reminders.map((item) => <p key={item}>• {item}</p>)}</p></div></section>
           <section className="insight-closing"><b>最后提醒</b><p>{secondaryInsight.closing}</p></section>
         </article> : <div className="ai-waiting"><b>等待计算</b><p>计算完成后会立即用大白话说明次限月亮、次限太阳、次限月相和最明显的成长主题，不调用大模型。</p></div>}
         <footer><span>本地即时解读</span><small>只有点击计算才会更新；修改日期或参数不会自动提交。</small></footer>
@@ -2058,6 +2135,8 @@ export default function Home() {
   const [feedbackContact, setFeedbackContact] = useState("");
   const [feedbackBusy, setFeedbackBusy] = useState(false);
   const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
+  const [moreTechniquesOpen, setMoreTechniquesOpen] = useState(false);
+  const moreTechniquesRef = useRef<HTMLDivElement>(null);
   const [target, setTarget] = useState<InterpretationTarget | null>(null);
   const [technicalDocument, setTechnicalDocument] = useState(() => buildLocalTechnicalDocument(sampleSnapshot, "阿特拉斯"));
   const [technicalDocumentHash, setTechnicalDocumentHash] = useState("虚拟样例 · 未生成服务端内容哈希");
@@ -2102,6 +2181,15 @@ export default function Home() {
       document.removeEventListener("keydown", closeOnEscape);
     };
   }, [personMenuOpen]);
+
+  useEffect(() => {
+    if (!moreTechniquesOpen) return;
+    const close = (e: PointerEvent) => { if (moreTechniquesRef.current && !moreTechniquesRef.current.contains(e.target as Node)) setMoreTechniquesOpen(false); };
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setMoreTechniquesOpen(false); };
+    document.addEventListener("pointerdown", close);
+    document.addEventListener("keydown", esc);
+    return () => { document.removeEventListener("pointerdown", close); document.removeEventListener("keydown", esc); };
+  }, [moreTechniquesOpen]);
 
   useEffect(() => {
     if (!natalGuideOpen || natalGuideText) return;
@@ -2553,10 +2641,10 @@ export default function Home() {
         </div>
       </header>
 
-      <nav className="technique-strip" aria-label="盘型切换">{chartTechniques.map((technique) => <button key={technique.id} className={technique.id === activeTechnique ? "active" : technique.status === "active" ? "" : "planned"} onClick={() => { if (technique.id === "natal" || technique.id === "current_sky" || technique.id === "transits" || technique.id === "secondary_progressions") { setActiveTechnique(technique.id); setShowCalculationResults(false); window.scrollTo({ top: 0, behavior: "smooth" }); } else setCapabilityTarget(technique); }}><b>{technique.label}</b><small>{technique.id === activeTechnique ? "当前" : technique.status === "active" ? "可用" : "规划中"}</small></button>)}</nav>
+      <nav className="technique-strip" aria-label="盘型切换">{chartTechniques.slice(0, 11).map((technique) => <button key={technique.id} className={technique.id === activeTechnique ? "active" : technique.status === "active" ? "" : "planned"} onClick={() => { if (technique.id === "natal" || technique.id === "current_sky" || technique.id === "transits" || technique.id === "secondary_progressions") { setActiveTechnique(technique.id); setShowCalculationResults(false); window.scrollTo({ top: 0, behavior: "smooth" }); } else setCapabilityTarget(technique); }}><b>{technique.label}</b><small>{technique.id === activeTechnique ? "当前" : technique.status === "active" ? "可用" : "规划中"}</small></button>)}<div className="technique-more" ref={moreTechniquesRef}><button className={`technique-more-trigger${moreTechniquesOpen ? " active" : ""}`} onClick={() => setMoreTechniquesOpen(v => !v)} aria-label="更多盘型"><b>☰</b><small>更多</small></button>{moreTechniquesOpen && <div className="technique-more-menu" role="menu">{chartTechniques.slice(11).map((technique) => <button key={technique.id} role="menuitem" className={technique.id === activeTechnique ? "active" : "planned"} onClick={() => { setMoreTechniquesOpen(false); setCapabilityTarget(technique); }}><b>{technique.label}</b><small>{technique.status === "active" ? "可用" : "规划中"}</small></button>)}</div>}</div></nav>
 
       <div className="natal-layout">
-        {activeTechnique === "current_sky" ? <CurrentSkyWorkspace theme={theme} /> : !workspaceResolved ? <section className="main-workspace empty-workspace"><div><span>◌</span><h1>正在读取工作台</h1><p>正在确认默认人物、示例人物和最近添加人物。</p></div></section> : !hasActiveSnapshot ? <section className="main-workspace empty-workspace"><div><span>✦</span><h1>{hasActiveSubject ? `${subjectName}尚未计算本命盘` : "开始第一次本命分析"}</h1><p>{hasActiveSubject ? `${activeTechnique === "natal" ? "本命盘" : "这个盘型"}需要先有一份本命计算结果。点击下方按钮确认参数并生成本命盘。` : "当前没有默认人物、示例人物或已保存人物。新建分析后即可继续。"}</p><button className="primary-action" onClick={() => openNewCalculation("technique", hasActiveSubject ? person : undefined)}>＋ 新建分析</button></div></section> : activeTechnique === "transits" ? <TransitWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} /> : activeTechnique === "secondary_progressions" ? <SecondaryProgressionsWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} /> : <section className="main-workspace">
+        {activeTechnique === "current_sky" ? <CurrentSkyWorkspace theme={theme} /> : !workspaceResolved ? <section className="main-workspace empty-workspace"><div><span>◌</span><h1>正在读取工作台</h1><p>正在确认默认人物、示例人物和最近添加人物。</p></div></section> : !hasActiveSnapshot ? <section className="main-workspace empty-workspace"><div><span>✦</span><h1>{hasActiveSubject ? `${subjectName}尚未计算本命盘` : "开始第一次本命分析"}</h1><p>{hasActiveSubject ? `${activeTechnique === "natal" ? "本命盘" : "这个盘型"}需要先有一份本命计算结果。点击下方按钮确认参数并生成本命盘。` : "当前没有默认人物、示例人物或已保存人物。新建分析后即可继续。"}</p><button className="primary-action" onClick={() => openNewCalculation("technique", hasActiveSubject ? person : undefined)}>＋ 新建分析</button></div></section> : activeTechnique === "transits" ? <TransitWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} /> : activeTechnique === "secondary_progressions" ? <SecondaryProgressionsWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} savedPeople={savedPeople} selectedPersonId={selectedPersonId} onSelectPerson={selectWorkspacePerson} /> : <section className="main-workspace">
           {notice && <div className="app-toast" role="status"><p>{notice}</p><button onClick={() => setNotice("")} aria-label="关闭提示">×</button></div>}
 
           <div className="workbench-grid">
