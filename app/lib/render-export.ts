@@ -12,6 +12,7 @@ export type NatalRenderControls = {
   showAxes: boolean;
   showPointLeaders: boolean;
   showPointDegrees: boolean;
+  showFixedStarContacts: boolean;
   showAspectLines: boolean;
   showLegend: boolean;
   majorAspectsOnly: boolean;
@@ -21,7 +22,7 @@ export type NatalRenderControls = {
 };
 
 export type RenderSpec = {
-  view_id: "wheel.natal";
+  view_id: "wheel.natal" | "wheel.current_sky";
   locale: "zh-CN";
   theme: "dark" | "light" | "print_light";
   width: number;
@@ -57,6 +58,7 @@ export type RenderSpec = {
     };
     date_level: boolean;
     background: string;
+    chart_kind: "natal" | "current_sky";
   };
 };
 
@@ -89,6 +91,7 @@ export function buildNatalRenderSpec(
   variant: NatalWheelVariant,
   theme: "dark" | "light",
   controls: NatalRenderControls,
+  chartKind: "natal" | "current_sky" = "natal",
 ): RenderSpec {
   const dateLevel = isDateLevelRenderSnapshot(snapshot);
   const requestedPointIds = new Set(controls.visiblePointIds);
@@ -97,7 +100,7 @@ export function buildNatalRenderSpec(
     .map((point) => point.point_id);
   const visibleAspects = selectVisibleNatalAspects(snapshot, controls);
   return {
-    view_id: "wheel.natal",
+    view_id: chartKind === "current_sky" ? "wheel.current_sky" : "wheel.natal",
     locale: "zh-CN",
     theme,
     width: 1280,
@@ -108,6 +111,7 @@ export function buildNatalRenderSpec(
       "zodiac",
       "point_band",
       "points",
+      ...(variant === "professional" && controls.showFixedStarContacts ? ["fixed_star_contacts"] : []),
       ...(!dateLevel && (controls.showHouseLines || controls.showHouseNumbers) ? ["houses"] : []),
       ...(!dateLevel && controls.showAxes ? ["axes"] : []),
       ...(!dateLevel && controls.showAspectLines ? ["aspect_stage", "aspect_lines"] : []),
@@ -132,10 +136,12 @@ export function buildNatalRenderSpec(
     accessibility: {
       color_blind_safe: true,
       include_data_alternative: true,
-      title: dateLevel ? "日期级星座位置图" : `${variant === "professional" ? "专业" : "简洁"}本命盘轮盘`,
+      title: dateLevel ? "日期级星座位置图" : chartKind === "current_sky" ? "天象轮盘" : "本命轮盘",
       description: dateLevel
         ? "出生时刻未知，仅展示日期级天体位置，不生成宫位、轴点或相位。"
-        : "包含黄道度数、星座、点位、十二宫、四轴、中心相位舞台和相位弦线。",
+        : chartKind === "current_sky"
+          ? "包含目标时刻和地点的黄道度数、星座、点位、十二宫、四轴及天象相位，不叠加任何人物。"
+          : "包含黄道度数、星座、点位、固定星合相标记、十二宫、四轴、中心相位舞台和相位弦线。",
     },
     options: {
       variant,
@@ -153,6 +159,7 @@ export function buildNatalRenderSpec(
       },
       date_level: dateLevel,
       background: theme === "light" ? "#f3f6fa" : "#07111b",
+      chart_kind: chartKind,
     },
   };
 }

@@ -70,6 +70,15 @@ export type AdminAiProvider = {
   updatedAt: string | null;
 };
 
+
+export type AdminMetrics = {
+  cpu_percent: number;
+  memory_percent: number;
+  total_requests: number;
+  active_users_24h: number;
+  ai_calls_24h: number;
+  exports_24h: number;
+};
 export type AdminAiPrompt = {
   platformPrompt: string;
   version: string;
@@ -343,4 +352,7 @@ export function restoreDefaultAiPrompt() {
     method: "PATCH",
     body: JSON.stringify({ platform_prompt: "", version: "platform-default" }),
   }).then((body) => ({ ...body, safetyBoundaryLabel: "服务端不可覆盖安全边界" }));
+}
+export async function getAdminMetrics(): Promise<AdminMetrics> {
+  return adminRequest<AdminMetrics>("/metrics");
 }

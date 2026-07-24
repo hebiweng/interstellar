@@ -1,0 +1,4 @@
+# Enforce LF line endings for shell scripts regardless of OS.
+# Without this, git clone on Windows produces CRLF files that break
+# Linux containers (Redis, MinIO init scripts fail with "not found").
+*.sh text eol=lf

@@ -31,6 +31,7 @@ CalculationMode = Literal[
 
 SRC_SWISS_PROGRAMMING = "source.swiss_ephemeris.programming_manual"
 SRC_SWISS_HYPOTHETICAL = "source.swiss_ephemeris.hypothetical_planets"
+SRC_SWISS_ASTEROID_FILES = "source.swiss_ephemeris.asteroid_files"
 SRC_MPC_ORBITS = "source.minor_planet_center.orbits"
 SRC_PAULUS_INTRODUCTORY_MATTERS = "source.paulus.introductory_matters"
 SRC_ROBERT_HAND_LOT_OF_BASIS = "source.robert_hand.lot_or_part_of_fortune"
@@ -139,6 +140,12 @@ SOURCE_REGISTRY: dict[str, SourceRegistryEntry] = {
             SRC_SWISS_HYPOTHETICAL,
             "Swiss Ephemeris hypothetical planets list",
             "https://www.astro.com/swisseph/hyplist.htm",
+            "official_documentation",
+        ),
+        SourceRegistryEntry(
+            SRC_SWISS_ASTEROID_FILES,
+            "Swiss Ephemeris asteroid ephemeris files",
+            "https://www.astro.com/swisseph/swedownload_e.htm",
             "official_documentation",
         ),
         SourceRegistryEntry(
@@ -530,23 +537,17 @@ _competitor_entries: list[PointRegistryEntry] = [
         for point_id, label, catalog in _TNP_LABELS
     ],
     *[
-        _blocked(
+        _point(
             point_id,
             label,
             category,
-            "the object is registered but its Swiss asteroid ephemeris file "
-            "is not shipped in the V1 dataset",
-            mode="external_ephemeris",
+            "external_ephemeris",
+            "ephemeris.swiss.geocentric_apparent.v1",
             catalog=f"mpc:{number}",
-            source_refs=(SRC_MPC_ORBITS, SRC_SWISS_PROGRAMMING),
-            requirements=(
-                f"se{number:05d}s.se1",
-                f"vendor/swisseph/ephe/ast{number // 1000}/se{number:05d}s.se1",
-                "dataset_manifest.source_uri",
-                "dataset_manifest.sha256",
-                "dataset_manifest.coverage_1500_2099",
-                "dataset_manifest.swiss_ephemeris_version",
-                "dataset_manifest.license",
+            source_refs=(
+                SRC_SWISS_ASTEROID_FILES,
+                SRC_MPC_ORBITS,
+                SRC_SWISS_PROGRAMMING,
             ),
         )
         for point_id, label, category, number in (
@@ -601,6 +602,41 @@ _interstellar_extra_entries: tuple[PointRegistryEntry, ...] = (
         "derived",
         "angle.west_point.opposition.v1",
     ),
+    _point(
+        "pholus",
+        "福洛斯",
+        "centaur",
+        "swiss_ephemeris",
+        "ephemeris.swiss.geocentric_apparent.v1",
+        catalog="mpc:5145",
+    ),
+    *[
+        _point(
+            point_id,
+            label,
+            category,
+            "external_ephemeris",
+            "ephemeris.swiss.geocentric_apparent.v1",
+            catalog=f"mpc:{number}",
+            source_refs=(
+                SRC_SWISS_ASTEROID_FILES,
+                SRC_MPC_ORBITS,
+                SRC_SWISS_PROGRAMMING,
+            ),
+        )
+        for point_id, label, category, number in (
+            ("chariklo", "女凯龙星", "centaur", 10199),
+            ("eris", "阋神星", "dwarf_planet", 136199),
+            ("sedna", "塞德娜", "dwarf_planet", 90377),
+            ("haumea", "妊神星", "dwarf_planet", 136108),
+            ("makemake", "鸟神星", "dwarf_planet", 136472),
+            ("orcus", "亡神星", "dwarf_planet", 90482),
+            ("ixion", "伊克西翁", "dwarf_planet", 28978),
+            ("varuna", "伐楼拿", "dwarf_planet", 20000),
+            ("astraea", "义神星", "asteroid", 5),
+            ("hygiea", "健神星", "asteroid", 10),
+        )
+    ],
 )
 
 _all_entries = (*_competitor_entries, *_interstellar_extra_entries)

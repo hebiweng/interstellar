@@ -1,3 +1,23 @@
+FROM python:3.13-slim-bookworm AS location-data
+
+WORKDIR /source
+COPY vendor/geonames/cities500-2026-07-19.zip ./cities500.zip
+COPY vendor/geonames/admin1CodesASCII-2026-07-19.txt ./admin1CodesASCII.txt
+COPY vendor/geonames/admin2Codes-2026-07-19.txt ./admin2Codes.txt
+COPY scripts/data/build_geonames_country_subset.py /usr/local/bin/build_geonames_country_subset.py
+RUN python /usr/local/bin/build_geonames_country_subset.py \
+      --places /source/cities500.zip \
+      --admin1 /source/admin1CodesASCII.txt \
+      --admin2 /source/admin2Codes.txt \
+      --country-code CN \
+      --source-version 2026-07-19 \
+      --output-dir /output/geonames \
+# Rename CN-subset files to match the canonical paths in .env.example so that
+# the API code discovers them without any environment-variable overrides.
+&& mv /output/geonames/cities500-CN-2026-07-19.zip /output/geonames/cities500-2026-07-19.zip \
+&& mv /output/geonames/admin1CodesASCII-CN-2026-07-19.txt /output/geonames/admin1CodesASCII-2026-07-19.txt \
+&& mv /output/geonames/admin2Codes-CN-2026-07-19.txt /output/geonames/admin2Codes-2026-07-19.txt
+
 FROM python:3.13-slim-bookworm
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -12,17 +32,17 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY apps/api/requirements.lock /tmp/interstellar-api-requirements.lock
-RUN python -m pip install --no-cache-dir -r /tmp/interstellar-api-requirements.lock
+RUN python -m pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r /tmp/interstellar-api-requirements.lock
 
 COPY apps/api ./apps/api
+COPY apps/worker ./apps/worker
 COPY python ./python
 COPY docs ./docs
 COPY data-manifests ./data-manifests
 COPY presets ./presets
-COPY vendor/geonames ./vendor/geonames
+COPY --from=location-data /output/geonames ./vendor/geonames
 COPY vendor/iana-tzdb ./vendor/iana-tzdb
 COPY vendor/swisseph ./vendor/swisseph
-COPY vendor/timezone-boundary-builder ./vendor/timezone-boundary-builder
 COPY infra/deploy/timezone-boundaries-geonames-fallback.geojson ./deploy-data/timezone-boundaries-geonames-fallback.geojson
 
 RUN groupadd --system --gid 10001 interstellar \

@@ -35,6 +35,7 @@ class WorkspaceAction(BaseModel):
     personId: str | None = None
     person: dict[str, Any] | None = None
     snapshot: dict[str, Any] | None = None
+    snapshotId: str | None = None
     settings: dict[str, Any] | None = None
     groups: dict[str, Any] | None = None
     analysisDocument: str | None = None
@@ -71,6 +72,7 @@ def account_error(error: AccountError, *, default_status: int = 422) -> JSONResp
         "PROVIDER_KEY_MISSING": 409,
         "PERSON_NOT_FOUND": 404,
         "NATAL_RESULT_NOT_FOUND": 404,
+        "STALE_AI_ANALYSIS": 409,
     }.get(error.code, default_status)
     return JSONResponse(
         status_code=status,
@@ -214,9 +216,12 @@ def update_workspace(action: WorkspaceAction, request: Request) -> dict[str, Any
         if action.action == "save_latest_natal":
             return store(request).save_latest_natal(user["email"], person_id, payload)
         if action.action == "save_ai_analysis":
+            if not action.snapshotId:
+                raise AccountError("INVALID_AI_ANALYSIS", "缺少本次分析对应的星盘版本。")
             store(request).save_ai_analysis(
                 user["email"],
                 person_id,
+                action.snapshotId,
                 action.aiAnalysisText or "",
                 action.aiModelId,
             )

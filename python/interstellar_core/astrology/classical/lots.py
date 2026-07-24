@@ -14,8 +14,8 @@ from interstellar_core.astrology.classical.sources import (
     RULE_BASIS_V1,
     RULE_COURAGE_V1,
     RULE_EROS_V1,
-    RULE_EXALTATION_V1,
     RULE_FORTUNE_V1,
+    RULE_LOT_EXALTATION_V1,
     RULE_NECESSITY_V1,
     RULE_NEMESIS_V1,
     RULE_SPIRIT_V1,
@@ -299,7 +299,7 @@ def calculate_supported_lots(
         formula_expression=exaltation_expression,
         operands=exaltation_operands,
         sect=sect,
-        rule_id=RULE_EXALTATION_V1,
+        rule_id=RULE_LOT_EXALTATION_V1,
     )
     return (
         fortune,

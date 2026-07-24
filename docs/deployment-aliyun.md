@@ -33,18 +33,24 @@ Internet
 
 ## 3. 小内存运行档
 
-当前全球Timezone Boundary Builder文件解压后约168 MB，原实现会在API启动时把全部GeoJSON和几何索引载入内存。生产Compose因此默认使用仓库内的空边界FeatureCollection，并使用GeoNames官方IANA时区提示作为降级候选：
+当前全球Timezone Boundary Builder文件解压后约168 MB，全球GeoNames `cities500`在现有内存索引中也会造成约640 MB启动峰值。生产镜像因此从锁定的官方GeoNames发行版确定性生成中国大陆地点子集，并使用仓库内的空边界FeatureCollection和GeoNames官方IANA时区提示作为降级候选：
 
-- 地点搜索和经纬度仍来自本地GeoNames；
+- 地点搜索和经纬度仍来自本地、版本化的GeoNames，生产首发仅包含`CN`记录；
+- 全球原始包保留在开发/数据源层，未被伪装为生产已加载能力；
 - 时区候选标记为`dataset_hint_only`，必须由用户确认；
 - 不伪装为精确多边形匹配；
-- API限制为1024 MB，Web限制为384 MB；
+- API与Web镜像均只复制运行所需文件；Web使用Vinext standalone产物；
+- API限制为384 MB，Web限制为256 MB；
 - 2 GiB服务器必须顺序构建镜像，不能并行构建。
 
-4 GiB及以上主机需要精确边界时，可启用镜像内锁定的完整官方ZIP（或只读挂载同版本文件），并覆盖：
+4 GiB及以上主机需要全球地点或精确边界时，可只读挂载锁定的完整官方文件，并覆盖GeoNames与Timezone Boundary Builder路径和版本变量。生产精简镜像本身不再携带这两份全球数据。
 
 ```text
-INTERSTELLAR_TIMEZONE_BOUNDARIES_PATH=/opt/interstellar/vendor/timezone-boundary-builder/timezones-2026b.geojson.zip
+INTERSTELLAR_GEONAMES_PATH=/mnt/interstellar-data/geonames/cities500-2026-07-19.zip
+INTERSTELLAR_GEONAMES_ADMIN1_PATH=/mnt/interstellar-data/geonames/admin1CodesASCII-2026-07-19.txt
+INTERSTELLAR_GEONAMES_ADMIN2_PATH=/mnt/interstellar-data/geonames/admin2Codes-2026-07-19.txt
+INTERSTELLAR_GEONAMES_DATASET_VERSION=cities500-2026-07-19
+INTERSTELLAR_TIMEZONE_BOUNDARIES_PATH=/mnt/interstellar-data/timezone-boundary-builder/timezones-2026b.geojson.zip
 INTERSTELLAR_TIMEZONE_BOUNDARIES_DATASET_VERSION=2026b-full
 ```
 
@@ -65,7 +71,7 @@ COMPOSE_PARALLEL_LIMIT=1 docker compose --env-file /opt/interstellar/.env -f inf
 docker compose --env-file /opt/interstellar/.env -f infra/deploy/compose.production.yaml up -d --no-build
 ```
 
-7. 将独立公共Caddy容器连接到`interstellar-internal`网络，把`infra/deploy/Caddyfile.fate`站点块加入其配置，先执行`caddy validate`再reload。
+7. 生产Compose会启动只属于Interstellar的`interstellar-edge` Caddy容器，使用`infra/deploy/Caddyfile.fate`并连接`interstellar-internal`网络；该入口不依赖Ledger。首次启动前确认服务器80/443未被其他服务占用。
 8. 等待HTTPS证书签发，检查Compose健康、容器内存、API readiness、主页和浏览器同源API。
 9. 完成注册、登录、游客计算、账户隔离、对象库新增/编辑/删除/默认、推荐方案预检、工作台最新本命恢复和DeepSeek提交验收。对象库不得出现打开结果或重新分析按钮。
 10. 验证普通用户`403`、管理员登录、用户停用/恢复、最后超级管理员保护、密钥掩码、提示词配置和审计日志。

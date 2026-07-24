@@ -19,18 +19,26 @@ from interstellar_core.astrology.classical.sources import (
     RULE_RECEPTION_V1,
     SRC_LILLY_CHRISTIAN_ASTROLOGY,
 )
+from interstellar_core.astrology.classical.tables import TermsTable, TriplicityTable
 
 
 def calculate_receptions(
     point_longitudes_deg: Mapping[str, float],
     *,
     sect: Sect,
+    terms_table: TermsTable = TermsTable.EGYPTIAN,
+    triplicity_table: TriplicityTable = TriplicityTable.DOROTHEAN,
 ) -> ReceptionResult:
     sect = require_sect(sect)
     receptions: list[Reception] = []
     supplied_ids = set(point_longitudes_deg)
     for guest_id in sorted(point_longitudes_deg):
-        for condition in dignity_rulers_at(point_longitudes_deg[guest_id], sect=sect):
+        for condition in dignity_rulers_at(
+            point_longitudes_deg[guest_id],
+            sect=sect,
+            terms_table=terms_table,
+            triplicity_table=triplicity_table,
+        ):
             if condition.ruler_id == guest_id or condition.ruler_id not in supplied_ids:
                 continue
             if (
