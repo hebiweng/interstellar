@@ -1,5 +1,6 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import {
@@ -1982,21 +1983,17 @@ function SecondaryProgressionsWorkspace({
     <div className="workbench-grid">
       <article className="wheel-panel chart-workspace-card">
         <div className="panel-heading">
-          <div className="wheel-heading-main">
+          <div className="panel-heading">
             <div><small>SECONDARY PROGRESSIONS</small><h2>次限轮盘</h2></div>
-            <div className="wheel-heading-actions">
+            <div className="panel-tools">
               {!showCalculationResults && <>
-                <div className="view-switcher" aria-label="轮盘视图切换">
-                  <button className={chartView === "professional" ? "active" : ""} onClick={() => setChartView("professional")}>轮盘</button>
-                  <button className={chartView === "compact" ? "active" : ""} onClick={() => setChartView("compact")}>简洁</button>
-                  <button className={chartView === "aspect_grid" ? "active" : ""} onClick={() => setChartView("aspect_grid")}>相位矩阵</button>
-                </div>
-                {result && <div className="view-switcher" aria-label="单双盘切换">
-                  <button className={wheelMode === "single" ? "active" : ""} onClick={() => setWheelMode("single")}>单盘</button>
-                  <button className={wheelMode === "double" ? "active" : ""} onClick={() => setWheelMode("double")}>双盘</button>
-                </div>}
+                {chartView === "aspect_grid" ? <button className="view-toggle" onClick={() => setChartView("professional")} title="轮盘"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg></button> : <>
+                  <button className="view-toggle" onClick={() => setChartView(chartView === "professional" ? "compact" : "professional")} title={chartView === "professional" ? "简洁" : "轮盘"}>{chartView === "professional" ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/></svg> : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>}</button>
+                  <button className="view-toggle" onClick={() => setChartView("aspect_grid")} title="相位矩阵"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></button>
+                </>}
+                {result && <button className="view-toggle" onClick={() => setWheelMode(wheelMode === "single" ? "double" : "single")} title={wheelMode === "single" ? "双盘" : "单盘"}>{wheelMode === "single" ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/></svg> : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/></svg>}</button>}
               </>}
-              {result && <button className="result-flip-button" onClick={() => setShowCalculationResults(!showCalculationResults)}>{showCalculationResults ? "返回轮盘" : "查看结果"}</button>}
+              {result && <button className="result-flip-button" onClick={() => setShowCalculationResults(!showCalculationResults)} title={showCalculationResults ? "返回轮盘" : "查看结果"}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="10" x2="9" y2="21"/></svg></button>}
               <button className="natal-guide-link" onClick={() => setGuideOpen(true)}>什么是次限盘？</button>
             </div>
           </div>
@@ -2136,7 +2133,16 @@ export default function Home() {
   const [feedbackBusy, setFeedbackBusy] = useState(false);
   const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
   const [moreTechniquesOpen, setMoreTechniquesOpen] = useState(false);
+  const [moreTechniquesStyle, setMoreTechniquesStyle] = useState<React.CSSProperties>({});
   const moreTechniquesRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!moreTechniquesOpen) return;
+    const onPointerDown = (e: PointerEvent) => { if (moreTechniquesRef.current && !moreTechniquesRef.current.contains(e.target as Node)) setMoreTechniquesOpen(false); };
+    const onKeyDown = (e: KeyboardEvent) => { if (e.key === "Escape") setMoreTechniquesOpen(false); };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => { document.removeEventListener("pointerdown", onPointerDown); document.removeEventListener("keydown", onKeyDown); };
+  }, [moreTechniquesOpen]);
   const [target, setTarget] = useState<InterpretationTarget | null>(null);
   const [technicalDocument, setTechnicalDocument] = useState(() => buildLocalTechnicalDocument(sampleSnapshot, "阿特拉斯"));
   const [technicalDocumentHash, setTechnicalDocumentHash] = useState("虚拟样例 · 未生成服务端内容哈希");
@@ -2641,7 +2647,17 @@ export default function Home() {
         </div>
       </header>
 
-      <nav className="technique-strip" aria-label="盘型切换">{chartTechniques.slice(0, 11).map((technique) => <button key={technique.id} className={technique.id === activeTechnique ? "active" : technique.status === "active" ? "" : "planned"} onClick={() => { if (technique.id === "natal" || technique.id === "current_sky" || technique.id === "transits" || technique.id === "secondary_progressions") { setActiveTechnique(technique.id); setShowCalculationResults(false); window.scrollTo({ top: 0, behavior: "smooth" }); } else setCapabilityTarget(technique); }}><b>{technique.label}</b><small>{technique.id === activeTechnique ? "当前" : technique.status === "active" ? "可用" : "规划中"}</small></button>)}<div className="technique-more" ref={moreTechniquesRef}><button className={`technique-more-trigger${moreTechniquesOpen ? " active" : ""}`} onClick={() => setMoreTechniquesOpen(v => !v)} aria-label="更多盘型"><b>☰</b><small>更多</small></button>{moreTechniquesOpen && <div className="technique-more-menu" role="menu">{chartTechniques.slice(11).map((technique) => <button key={technique.id} role="menuitem" className={technique.id === activeTechnique ? "active" : "planned"} onClick={() => { setMoreTechniquesOpen(false); setCapabilityTarget(technique); }}><b>{technique.label}</b><small>{technique.status === "active" ? "可用" : "规划中"}</small></button>)}</div>}</div></nav>
+      <nav className="technique-strip" aria-label="盘型切换">{chartTechniques.slice(0, 11).map((technique) => <button key={technique.id} className={technique.id === activeTechnique ? "active" : technique.status === "active" ? "" : "planned"} onClick={() => { if (technique.id === "natal" || technique.id === "current_sky" || technique.id === "transits" || technique.id === "secondary_progressions") { setActiveTechnique(technique.id); setShowCalculationResults(false); window.scrollTo({ top: 0, behavior: "smooth" }); } else setCapabilityTarget(technique); }}><b>{technique.label}</b><small>{technique.id === activeTechnique ? "当前" : technique.status === "active" ? "可用" : "规划中"}</small></button>)}<div className="technique-more" ref={moreTechniquesRef}><button className={`technique-more-trigger${moreTechniquesOpen ? " active" : ""}`} onClick={() => {
+                if (moreTechniquesOpen) { setMoreTechniquesOpen(false); }
+                else {
+                  const btn = moreTechniquesRef.current?.querySelector(".technique-more-trigger");
+                  if (btn) {
+                    const rect = btn.getBoundingClientRect();
+                    setMoreTechniquesStyle({ top: rect.bottom + 6, right: window.innerWidth - rect.right });
+                  }
+                  setMoreTechniquesOpen(true);
+                }
+              }} aria-label="更多盘型"><b>☰</b><small>更多</small></button>{moreTechniquesOpen && createPortal(<div className="technique-more-menu" style={moreTechniquesStyle} role="menu">{chartTechniques.slice(11).map((technique) => <button key={technique.id} role="menuitem" className={technique.id === activeTechnique ? "active" : "planned"} onClick={() => { setMoreTechniquesOpen(false); setCapabilityTarget(technique); }}><b>{technique.label}</b><small>{technique.status === "active" ? "可用" : "规划中"}</small></button>)}</div>, document.body)}</div></nav>
 
       <div className="natal-layout">
         {activeTechnique === "current_sky" ? <CurrentSkyWorkspace theme={theme} /> : !workspaceResolved ? <section className="main-workspace empty-workspace"><div><span>◌</span><h1>正在读取工作台</h1><p>正在确认默认人物、示例人物和最近添加人物。</p></div></section> : !hasActiveSnapshot ? <section className="main-workspace empty-workspace"><div><span>✦</span><h1>{hasActiveSubject ? `${subjectName}尚未计算本命盘` : "开始第一次本命分析"}</h1><p>{hasActiveSubject ? `${activeTechnique === "natal" ? "本命盘" : "这个盘型"}需要先有一份本命计算结果。点击下方按钮确认参数并生成本命盘。` : "当前没有默认人物、示例人物或已保存人物。新建分析后即可继续。"}</p><button className="primary-action" onClick={() => openNewCalculation("technique", hasActiveSubject ? person : undefined)}>＋ 新建分析</button></div></section> : activeTechnique === "transits" ? <TransitWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} /> : activeTechnique === "secondary_progressions" ? <SecondaryProgressionsWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} savedPeople={savedPeople} selectedPersonId={selectedPersonId} onSelectPerson={selectWorkspacePerson} /> : <section className="main-workspace">

@@ -151,17 +151,17 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .hero-grid { display: grid; max-width: 1560px; grid-template-columns: minmax(0, 1fr); gap: 14px; margin: 0 auto; }
 .hero-grid.with-settings { grid-template-columns: minmax(500px, 1fr) 330px; }
 .wheel-panel, .settings-panel, .result-section, .warning-panel { border: 1px solid var(--line); border-radius: 13px; background: linear-gradient(180deg, var(--panel-2), var(--panel)); box-shadow: 0 20px 55px var(--shadow); }
-.panel-heading, .settings-title { display: flex; min-height: 66px; align-items: center; justify-content: space-between; gap: 16px; padding: 0 18px; border-bottom: 1px solid var(--line-soft); }
+.panel-heading, .settings-title { display: flex; min-height: 48px; align-items: center; justify-content: space-between; gap: 12px; padding: 0 14px; border-bottom: 1px solid var(--line-soft); }
 .panel-heading > div:first-child { min-width: 168px; }
-.panel-heading h2, .settings-title h2 { margin: 4px 0 0; font-size: 18px; }
+.panel-heading h2, .settings-title h2 { margin: 2px 0 0; font-size: 16px; }
 .panel-heading > div:last-child { display: flex; gap: 6px; }
 .panel-heading > div:last-child span { padding: 4px 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-family: var(--mono); font-size: 11px; }
-.panel-tools { flex: 1; flex-direction: column; align-items: flex-end; justify-content: center; }
-.view-switcher { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; }
-.view-switcher button { min-height: 30px; padding: 0 10px; border: 1px solid var(--line); color: var(--muted); background: var(--panel); cursor: pointer; }
+.panel-tools { display: flex; flex: 1; flex-direction: row; align-items: center; justify-content: flex-end; gap: 8px; }
+.view-switcher { display: flex; flex-wrap: nowrap; align-items: center; justify-content: flex-end; }
+.view-switcher button { min-height: 30px; padding: 0 8px; border: 1px solid var(--line); color: var(--muted); background: var(--panel); cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .view-switcher button:first-child { border-radius: 6px 0 0 6px; }
+.view-switcher button:last-child { border-radius: 0 6px 6px 0; }
 .view-switcher button + button { border-left: 0; }
-.view-switcher button:nth-child(3) { margin-right: 6px; border-radius: 0 6px 6px 0; }
 .view-switcher button:disabled { color: var(--faint); cursor: not-allowed; opacity: .48; }
 .view-switcher button.active { color: #07111b; border-color: var(--blue); background: var(--blue); }
 .graphic-export-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 5px; }
@@ -226,7 +226,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .wheel-legend text { fill: var(--faint); font-family: var(--mono); font-size: 6.5px; }
 .compact-wheel .degree-tick { opacity: .42; }
 .compact-wheel .point-degree-label, .compact-wheel .wheel-legend { display: none; }
-.wheel-panel footer { display: flex; min-height: 40px; flex-wrap: wrap; align-items: center; gap: 8px 18px; padding: 8px 18px; border-top: 1px solid var(--line-soft); color: var(--faint); font-family: var(--mono); font-size: 11px; }
+.wheel-panel footer { display: flex; min-height: 32px; flex-wrap: wrap; align-items: center; gap: 8px 18px; padding: 6px 14px; border-top: 1px solid var(--line-soft); color: var(--faint); font-family: var(--mono); font-size: 11px; }
 
 .settings-panel { position: sticky; top: 76px; max-height: calc(100vh - 92px); min-height: 690px; overflow-x: hidden; overflow-y: auto; scrollbar-gutter: stable; }
 .settings-title { position: sticky; z-index: 3; top: 0; gap: 8px; padding: 0 12px; background: color-mix(in srgb, var(--panel-2) 96%, transparent); backdrop-filter: blur(12px); }
@@ -754,21 +754,23 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .workbench-grid > .settings-panel { order: 1; }
 .workbench-grid > .chart-workspace-card { order: 2; min-width: 0; }
 .workbench-grid > .ai-insight-panel { order: 3; }
-.settings-panel { top: 126px; height: calc(100vh - 142px); min-height: 690px; max-height: calc(100vh - 142px); }
+.settings-panel { top: 126px; height: calc(100vh - 142px); min-height: 420px; max-height: calc(100vh - 142px); }
 .settings-title-status { padding: 4px 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--gold); font-family: var(--mono); font-size: 10px; white-space: nowrap; }
-.preset-shortcuts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--line-soft); }
-.preset-shortcuts button { display: flex; min-height: 48px; flex-direction: column; align-items: flex-start; justify-content: center; gap: 3px; padding: 7px 9px; border: 1px solid var(--line-soft); border-radius: 7px; text-align: left; background: var(--panel); cursor: pointer; }
+.preset-shortcuts { display: flex; flex-direction: column; gap: 4px; padding: 8px 12px; border-bottom: 1px solid var(--line-soft); }
+.preset-shortcuts button { display: flex; min-height: 34px; flex-direction: row; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 10px; border: 1px solid var(--line-soft); border-radius: 7px; text-align: left; background: var(--panel); cursor: pointer; }
 .preset-shortcuts button b { font-size: 12px; }
-.preset-shortcuts button small { color: var(--faint); font-size: 9px; }
+.preset-shortcuts button small { color: var(--faint); font-size: 10px; }
 .preset-shortcuts button.active { color: var(--blue); border-color: var(--blue); background: rgba(87, 170, 240, .07); }
 .wheel-heading-main { display: flex !important; min-width: 0 !important; align-items: center; gap: 12px !important; }
 .wheel-heading-main { justify-content: space-between; width: 100%; }
 .wheel-heading-main > div { min-width: 105px; }
 .wheel-heading-actions { display: flex; min-width: 0; align-self: flex-end; align-items: center; justify-content: flex-end; gap: 12px; }
-.result-flip-button, .natal-guide-link { min-height: 31px; padding: 0 10px; border: 1px solid var(--line); border-radius: 6px; color: var(--blue); background: var(--panel); cursor: pointer; white-space: nowrap; }
+.result-flip-button, .natal-guide-link { min-height: 30px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; color: var(--blue); background: var(--panel); cursor: pointer; white-space: nowrap; display: flex; align-items: center; justify-content: center; }
+.view-toggle { min-height: 30px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); background: var(--panel); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.view-toggle:hover { color: var(--blue); border-color: var(--blue); }
 .natal-guide-link { min-height: 0; padding: 2px 0; border: 0; color: var(--faint); background: transparent; font-size: 11px; }
 .natal-guide-link:hover { color: var(--blue); }
-.chart-workspace-card { position: sticky; top: 126px; display: flex; height: calc(100vh - 142px); min-height: 690px; max-height: calc(100vh - 142px); flex-direction: column; overflow: hidden; }
+.chart-workspace-card { position: sticky; top: 126px; display: flex; height: calc(100vh - 142px); min-height: 420px; max-height: calc(100vh - 142px); flex-direction: column; overflow: hidden; }
 .wheel-canvas-area { position: relative; min-height: 0; flex: 1; overflow: auto; }
 .wheel-overlay-toolbar { position: absolute; z-index: 4; top: 12px; left: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 7px; border: 1px solid var(--line-soft); border-radius: 9px; background: color-mix(in srgb, var(--panel) 92%, transparent); box-shadow: 0 10px 28px var(--shadow); backdrop-filter: blur(12px); }
 .wheel-overlay-toolbar .view-switcher { justify-content: flex-start; }
@@ -1141,8 +1143,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   padding-top: 0;
 }
 .settings-panel-secondary .settings-title {
-  padding: 0 18px;
-  min-height: 58px;
+  padding: 0 14px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1174,7 +1176,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
 /* Person card inside secondary sidebar */
 .secondary-person-card {
-  padding: 12px 16px;
+  padding: 8px 14px;
   border-bottom: 1px solid var(--line-soft);
 }
 .secondary-person-selector {
@@ -1279,7 +1281,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
 /* Secondary fields */
 .secondary-fields {
-  padding: 12px 16px;
+  padding: 8px 14px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -1394,19 +1396,25 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   align-items: center;
   justify-content: center;
 }
-.wheel-canvas-area--fit .natal-wheel,
-.wheel-canvas-area--fit .transit-wheel-stack,
-.wheel-canvas-area--fit .aspect-grid {
-  width: auto;
+.wheel-canvas-area--fit > .natal-wheel,
+.wheel-canvas-area--fit > .aspect-grid {
+  width: 100%;
   height: auto;
-  max-width: min(92%, calc(100vh - 260px));
+  max-width: 92%;
+  max-height: calc(100% - 10px);
+  margin: auto;
+}
+.wheel-canvas-area--fit > .transit-wheel-stack {
+  width: 100%;
+  max-width: 92%;
+  height: auto;
   max-height: calc(100% - 10px);
   margin: auto;
 }
 
 /* Technique strip: more menu */
 .technique-more {
-  position: relative;
+  position: static;
   display: flex;
   align-items: stretch;
 }
@@ -1439,10 +1447,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   border-color: var(--blue);
 }
 .technique-more-menu {
-  position: absolute;
+  position: fixed;
   z-index: 50;
-  top: calc(100% + 6px);
-  right: 0;
   min-width: 140px;
   padding: 6px;
   border: 1px solid var(--line);
@@ -1481,6 +1487,32 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 }
 .technique-more-menu button.active small {
   color: #07111b;
+}
+
+/* === Secondary progressions: compact card heights === */
+.secondary-progressions-workspace .workbench-grid {
+  align-items: stretch;
+}
+.secondary-progressions-workspace .chart-workspace-card {
+  position: relative;
+  top: auto;
+  height: min(680px, calc(100vh - 142px));
+  min-height: 420px;
+  max-height: 760px;
+}
+.secondary-progressions-workspace .settings-panel {
+  position: relative;
+  top: auto;
+  height: min(680px, calc(100vh - 142px));
+  min-height: 420px;
+  max-height: 760px;
+}
+.secondary-progressions-workspace .ai-insight-panel {
+  position: relative;
+  top: auto;
+  height: min(680px, calc(100vh - 142px));
+  min-height: 420px;
+  max-height: 760px;
 }
 
 /* Non-natal interpretation section (below workbench) */
