@@ -2136,7 +2136,6 @@ export default function Home() {
   const [feedbackBusy, setFeedbackBusy] = useState(false);
   const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
   const [moreTechniquesOpen, setMoreTechniquesOpen] = useState(false);
-  const [moreTechniquesStyle, setMoreTechniquesStyle] = useState<React.CSSProperties>({});
   const moreTechniquesRef = useRef<HTMLDivElement>(null);
   const [target, setTarget] = useState<InterpretationTarget | null>(null);
   const [technicalDocument, setTechnicalDocument] = useState(() => buildLocalTechnicalDocument(sampleSnapshot, "阿特拉斯"));
@@ -2191,15 +2190,6 @@ export default function Home() {
     document.addEventListener("keydown", esc);
     return () => { document.removeEventListener("pointerdown", close); document.removeEventListener("keydown", esc); };
   }, [moreTechniquesOpen]);
-
-  function openMoreTechniquesMenu() {
-    const trigger = moreTechniquesRef.current?.querySelector(".technique-more-trigger");
-    if (trigger) {
-      const rect = trigger.getBoundingClientRect();
-      setMoreTechniquesStyle({ top: rect.bottom + 6, right: window.innerWidth - rect.right });
-    }
-    setMoreTechniquesOpen(true);
-  }
 
   useEffect(() => {
     if (!natalGuideOpen || natalGuideText) return;
@@ -2651,7 +2641,7 @@ export default function Home() {
         </div>
       </header>
 
-      <nav className="technique-strip" aria-label="盘型切换">{chartTechniques.slice(0, 11).map((technique) => <button key={technique.id} className={technique.id === activeTechnique ? "active" : technique.status === "active" ? "" : "planned"} onClick={() => { if (technique.id === "natal" || technique.id === "current_sky" || technique.id === "transits" || technique.id === "secondary_progressions") { setActiveTechnique(technique.id); setShowCalculationResults(false); window.scrollTo({ top: 0, behavior: "smooth" }); } else setCapabilityTarget(technique); }}><b>{technique.label}</b><small>{technique.id === activeTechnique ? "当前" : technique.status === "active" ? "可用" : "规划中"}</small></button>)}<div className="technique-more" ref={moreTechniquesRef}><button className={`technique-more-trigger${moreTechniquesOpen ? " active" : ""}`} onClick={() => { if (moreTechniquesOpen) setMoreTechniquesOpen(false); else openMoreTechniquesMenu(); }} aria-label="更多盘型"><b>☰</b><small>更多</small></button>{moreTechniquesOpen && <div className="technique-more-menu" style={moreTechniquesStyle} role="menu">{chartTechniques.slice(11).map((technique) => <button key={technique.id} role="menuitem" className={technique.id === activeTechnique ? "active" : "planned"} onClick={() => { setMoreTechniquesOpen(false); setCapabilityTarget(technique); }}><b>{technique.label}</b><small>{technique.status === "active" ? "可用" : "规划中"}</small></button>)}</div>}</div></nav>
+      <nav className="technique-strip" aria-label="盘型切换">{chartTechniques.slice(0, 11).map((technique) => <button key={technique.id} className={technique.id === activeTechnique ? "active" : technique.status === "active" ? "" : "planned"} onClick={() => { if (technique.id === "natal" || technique.id === "current_sky" || technique.id === "transits" || technique.id === "secondary_progressions") { setActiveTechnique(technique.id); setShowCalculationResults(false); window.scrollTo({ top: 0, behavior: "smooth" }); } else setCapabilityTarget(technique); }}><b>{technique.label}</b><small>{technique.id === activeTechnique ? "当前" : technique.status === "active" ? "可用" : "规划中"}</small></button>)}<div className="technique-more" ref={moreTechniquesRef}><button className={`technique-more-trigger${moreTechniquesOpen ? " active" : ""}`} onClick={() => setMoreTechniquesOpen(v => !v)} aria-label="更多盘型"><b>☰</b><small>更多</small></button>{moreTechniquesOpen && <div className="technique-more-menu" role="menu">{chartTechniques.slice(11).map((technique) => <button key={technique.id} role="menuitem" className={technique.id === activeTechnique ? "active" : "planned"} onClick={() => { setMoreTechniquesOpen(false); setCapabilityTarget(technique); }}><b>{technique.label}</b><small>{technique.status === "active" ? "可用" : "规划中"}</small></button>)}</div>}</div></nav>
 
       <div className="natal-layout">
         {activeTechnique === "current_sky" ? <CurrentSkyWorkspace theme={theme} /> : !workspaceResolved ? <section className="main-workspace empty-workspace"><div><span>◌</span><h1>正在读取工作台</h1><p>正在确认默认人物、示例人物和最近添加人物。</p></div></section> : !hasActiveSnapshot ? <section className="main-workspace empty-workspace"><div><span>✦</span><h1>{hasActiveSubject ? `${subjectName}尚未计算本命盘` : "开始第一次本命分析"}</h1><p>{hasActiveSubject ? `${activeTechnique === "natal" ? "本命盘" : "这个盘型"}需要先有一份本命计算结果。点击下方按钮确认参数并生成本命盘。` : "当前没有默认人物、示例人物或已保存人物。新建分析后即可继续。"}</p><button className="primary-action" onClick={() => openNewCalculation("technique", hasActiveSubject ? person : undefined)}>＋ 新建分析</button></div></section> : activeTechnique === "transits" ? <TransitWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} /> : activeTechnique === "secondary_progressions" ? <SecondaryProgressionsWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} savedPeople={savedPeople} selectedPersonId={selectedPersonId} onSelectPerson={selectWorkspacePerson} /> : <section className="main-workspace">
