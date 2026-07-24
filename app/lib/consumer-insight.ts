@@ -1,4 +1,4 @@
-import type { NatalAspect, NatalSnapshot } from "./interstellar-api";
+import type { ChartComparison, NatalAspect, NatalPoint, NatalSnapshot, SecondaryProgressionResult } from "./interstellar-api";
 
 export type ConsumerInsightDimension = {
   id: "action" | "emotion" | "expression" | "stability";
@@ -293,4 +293,421 @@ export function buildCurrentSkyConsumerInsight(snapshot: NatalSnapshot): Consume
       label: labels[dimension.id],
     })),
   };
+}
+
+export function buildTransitConsumerInsight(
+  comparison: ChartComparison,
+  _latestNatalSnapshot: NatalSnapshot,
+  movingLayer: NatalSnapshot,
+): ConsumerInsight {
+  const base = buildNatalConsumerInsight(movingLayer, "current_sky");
+  const cross = [...comparison.result.cross_aspects].sort((a, b) => b.strength - a.strength || a.orb_deg - b.orb_deg);
+  const top = cross.slice(0, 5);
+  const houses = [...comparison.result.moving_points_in_reference_houses]
+    .filter((h) => ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"].includes(h.moving_point_id))
+    .slice(0, 6);
+  const strongest = top[0];
+
+  const movingLabel = (id: string) => pointLabels[id] ?? id;
+  const refLabel = (id: string) => pointLabels[id] ?? id;
+  const aspectLabel = (type: string) => aspectLabels[type] ?? type;
+  const houseDomain = (n: number) => {
+    const domains = ["自我与起点", "价值与资源", "交流与日常", "家庭与根基", "创造与表达", "工作与健康", "关系与伴侣", "共有资源与转化", "远行与信念", "事业与公共形象", "社群与未来", "内在与释放"];
+    return domains[n - 1] ?? `第${n}宫`;
+  };
+
+  const title = strongest
+    ? `${movingLabel(strongest.moving_point_id)}${aspectLabel(strongest.type)}本命${refLabel(strongest.reference_point_id)}`
+    : base.title;
+  const summary = strongest
+    ? `这段时间最显眼的行运是${movingLabel(strongest.moving_point_id)}${aspectLabel(strongest.type)}本命${refLabel(strongest.reference_point_id)}。这会把外在的“${pointMeanings[strongest.moving_point_id] ?? "变化"}”和你命里的“${pointMeanings[strongest.reference_point_id] ?? "核心主题"}”勾到一起，是近期最值得留意的入口。`
+    : base.summary;
+
+  const signals = top.slice(0, 3).map((aspect) => {
+    const moving = movingLabel(aspect.moving_point_id);
+    const reference = refLabel(aspect.reference_point_id);
+    const phase = aspect.applying_state === "exact" ? "目前非常明显" : aspect.applying_state === "applying" ? "影响正在接近" : "影响正在缓和";
+    const templates: Record<string, string> = {
+      conjunction: `行运${moving}正在合相你的本命${reference}：两件事暂时分不开，外在的“${pointMeanings[aspect.moving_point_id] ?? "变化"}”会直接点燃你命里的“${pointMeanings[aspect.reference_point_id] ?? "核心主题"}”。`,
+      trine: `行运${moving}三分本命${reference}：这是比较容易找到资源的一段，外部变化会顺着你的内在节奏走，适合主动推进。`,
+      sextile: `行运${moving}六分本命${reference}：机会型触发，需要你主动搭把手，才会从“可能”变成“真的有用”。`,
+      square: `行运${moving}刑克本命${reference}：两种需求会互相较劲，你容易在“${pointMeanings[aspect.moving_point_id] ?? "外部变化"}”和“${pointMeanings[aspect.reference_point_id] ?? "自身需要"}”之间感到拉扯。`,
+      opposition: `行运${moving}对冲本命${reference}：关系或外部事件会把矛盾摆到台面上，需要你在对立面之间做协调。`,
+    };
+    return {
+      id: aspect.aspect_id,
+      title: `${moving} ${aspectLabel(aspect.type)} 本命${reference}`,
+      detail: phase,
+      meaning: templates[aspect.type] ?? `行运${moving}正在${aspectLabel(aspect.type)}你的本命${reference}：这是近期值得关注的触发。`,
+      strength: Math.round(aspect.strength * 100),
+    };
+  });
+
+  if (houses.length > 0) {
+    const h = houses[0];
+    signals.push({
+      id: `house-${h.moving_point_id}`,
+      title: `${movingLabel(h.moving_point_id)}落入本命第${h.reference_house}宫`,
+      detail: h.on_cusp ? "贴近宫头，影响力更强" : "已进入该生活领域",
+      meaning: `行运${movingLabel(h.moving_point_id)}正在经过你的本命第${h.reference_house}宫（${houseDomain(h.reference_house)}），这会把“${pointMeanings[h.moving_point_id] ?? "外部变化"}”的主题带到你的现实生活中。`,
+      strength: h.on_cusp ? 92 : 70,
+    });
+  }
+
+  const supportiveCount = cross.filter((a) => supportiveAspectIds.has(a.type)).length;
+  const tensionCount = cross.filter((a) => tensionAspectIds.has(a.type)).length;
+  const balanceMeaning = supportiveCount > tensionCount
+    ? "跨盘相位里顺手的比较多，适合借势推进、沟通合作。"
+    : tensionCount > supportiveCount
+      ? "跨盘相位里需要协调的比较多，近期遇到对抗时先排优先级。"
+      : "顺势与压力比较均衡，边做边看会更稳。";
+
+  const strengths = top.length > 0
+    ? [`${movingLabel(top[0].moving_point_id)}与${refLabel(top[0].reference_point_id)}的触发最近，值得优先观察。`]
+    : base.strengths;
+  const reminders = [
+    houses.length > 0 ? `${movingLabel(houses[0].moving_point_id)}进入本命第${houses[0].reference_house}宫，留意这个领域是否开始冒出新事务。` : "行运不只是触发，也要看落到哪个生活领域。",
+    "单个相位不代表事件结论，结合现实处境和你自己的选择才有意义。",
+  ];
+  const closing = `行运盘显示的是当前天空和你本命之间的互动。重点不是“会发生什么事”，而是“哪些主题被点亮了”，以及你准备怎么回应。`;
+
+  return {
+    ...base,
+    title,
+    summary,
+    signals: signals.slice(0, 4),
+    aspectBalance: { ...base.aspectBalance, meaning: balanceMeaning },
+    strengths,
+    reminders,
+    closing,
+  };
+}
+
+export function buildSecondaryProgressionConsumerInsight(
+  result: SecondaryProgressionResult,
+  _latestNatalSnapshot: NatalSnapshot,
+): ConsumerInsight {
+  const progressed = result.progressed_snapshot;
+  const comparison = result.comparison;
+  const base = buildNatalConsumerInsight(progressed, "current_sky");
+  const cross = [...comparison.result.cross_aspects].sort((a, b) => b.strength - a.strength || a.orb_deg - b.orb_deg);
+  const top = cross.slice(0, 5);
+  const houses = [...comparison.result.moving_points_in_reference_houses]
+    .filter((h) => ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"].includes(h.moving_point_id))
+    .slice(0, 6);
+  const progressedMoon = progressed.result.points.find((p) => p.point_id === "moon");
+  const progressedSun = progressed.result.points.find((p) => p.point_id === "sun");
+
+  const movingLabel = (id: string) => pointLabels[id] ?? id;
+  const refLabel = (id: string) => pointLabels[id] ?? id;
+  const aspectLabel = (type: string) => aspectLabels[type] ?? type;
+  const houseDomain = (n: number) => {
+    const domains = ["自我与起点", "价值与资源", "交流与日常", "家庭与根基", "创造与表达", "工作与健康", "关系与伴侣", "共有资源与转化", "远行与信念", "事业与公共形象", "社群与未来", "内在与释放"];
+    return domains[n - 1] ?? `第${n}宫`;
+  };
+
+  const title = progressedMoon
+    ? `次限月亮在${progressedMoon.sign}，推进你的情绪节奏`
+    : top.length > 0
+      ? `次限${movingLabel(top[0].moving_point_id)}${aspectLabel(top[0].type)}本命${refLabel(top[0].reference_point_id)}`
+      : "次限盘正在缓慢推进你的生命主题";
+  const summary = progressedMoon
+    ? `次限月亮 moved into ${progressedMoon.sign}，代表你内在的情绪需求和反应方式正在经历一段较长期的调整。它不会制造突发事件，而是悄悄改变你看待关系和安全感的方式。`
+    : base.summary;
+
+  const signals = top.slice(0, 3).map((aspect) => {
+    const moving = movingLabel(aspect.moving_point_id);
+    const reference = refLabel(aspect.reference_point_id);
+    const phase = aspect.applying_state === "exact" ? "目前非常聚焦" : aspect.applying_state === "applying" ? "影响正在深化" : "影响正在过去";
+    const templates: Record<string, string> = {
+      conjunction: `次限${moving}合相本命${reference}：内在节奏正在与你的核心主题重合，这是长期转化较明显的阶段。`,
+      trine: `次限${moving}三分本命${reference}：内在发展顺着你本命的资源走，适合顺势而为。`,
+      sextile: `次限${moving}六分本命${reference}：有机会出现，但需要你先跨出一小步。`,
+      square: `次限${moving}刑克本命${reference}：内在成长与外部结构之间会有张力，需要调整节奏。`,
+      opposition: `次限${moving}对冲本命${reference}：关系或外部事件会让你看见对立的两边，需要整合。`,
+    };
+    return {
+      id: aspect.aspect_id,
+      title: `次限${moving} ${aspectLabel(aspect.type)} 本命${reference}`,
+      detail: phase,
+      meaning: templates[aspect.type] ?? `次限${moving}正在${aspectLabel(aspect.type)}你的本命${reference}：这是长期推进中值得关注的线索。`,
+      strength: Math.round(aspect.strength * 100),
+    };
+  });
+
+  if (progressedMoon) {
+    signals.unshift({
+      id: "progressed-moon",
+      title: `次限月亮在${progressedMoon.sign}`,
+      detail: "情绪基调正在转变",
+      meaning: `次限月亮走到${progressedMoon.sign}，接下来一段时间你的情绪需求和被照顾的方式会偏向这个星座的特质。`,
+      strength: 88,
+    });
+  }
+
+  if (houses.length > 0) {
+    const h = houses[0];
+    signals.push({
+      id: `house-${h.moving_point_id}`,
+      title: `次限${movingLabel(h.moving_point_id)}进入本命第${h.reference_house}宫`,
+      detail: h.on_cusp ? "贴近宫头，主题更明显" : "长期影响这个领域",
+      meaning: `次限${movingLabel(h.moving_point_id)}正在经过你的本命第${h.reference_house}宫（${houseDomain(h.reference_house)}），这是长期被点亮的生命领域。`,
+      strength: h.on_cusp ? 92 : 70,
+    });
+  }
+
+  const strengths = progressedMoon
+    ? [`次限月亮在${progressedMoon.sign}，情绪节奏与这个星座的特质更合拍。`]
+    : base.strengths;
+  const reminders = [
+    progressedSun ? `次限太阳在${progressedSun.sign}，长期目标和自我表达的方向正在转向这个星座的特质。` : "次限盘反映的是长期趋势，不是单一日期的突发事件。",
+    "次限的变化通常以年为单位，给它一些时间，观察主题如何展开。",
+  ];
+  const closing = "次限盘像一条慢速播放的成长线。它不会说今天会发生什么，但能说明你现在处在哪一段长期主题里。";
+
+  return {
+    ...base,
+    title,
+    summary,
+    signals: signals.slice(0, 4),
+    strengths,
+    reminders,
+    closing,
+  };
+}
+
+// Consumer-friendly interpretation cards for non-natal charts
+
+export type InterpretationCard = {
+  id: string;
+  title: string;
+  subtitle?: string;
+  bullets: string[];
+  emphasis?: string;
+};
+
+export type InterpretationSection = {
+  id: string;
+  label: string;
+  cards: InterpretationCard[];
+};
+
+const signLabels: Record<string, string> = {
+  aries: "白羊座", taurus: "金牛座", gemini: "双子座", cancer: "巨蟹座",
+  leo: "狮子座", virgo: "处女座", libra: "天秤座", scorpio: "天蝎座",
+  sagittarius: "射手座", capricorn: "摩羯座", aquarius: "水瓶座", pisces: "双鱼座",
+};
+
+const signThemes: Record<string, string> = {
+  aries: "强调启动、行动和抢先一步",
+  taurus: "强调稳定、价值和逐步落实",
+  gemini: "强调沟通、信息和多角度尝试",
+  cancer: "强调情绪、照顾和安全感",
+  leo: "强调表达、创造和获得关注",
+  virgo: "强调整理、服务和完善细节",
+  libra: "强调关系、平衡和合作",
+  scorpio: "强调深入、转化和掌控",
+  sagittarius: "强调探索、信念和扩展视野",
+  capricorn: "强调目标、责任和长期积累",
+  aquarius: "强调独立、变化和群体视角",
+  pisces: "强调共情、想象和边界消融",
+};
+
+const houseLabels: Record<number, string> = {
+  1: "自我、形象和出发方式", 2: "价值、资源和安全感", 3: "沟通、学习和日常",
+  4: "家庭、根基和情绪", 5: "创造、玩乐和恋爱", 6: "工作、健康和习惯",
+  7: "关系、合作和伴侣", 8: "共有资源、转化和危机", 9: "远行、信念和高等教育",
+  10: "事业、公共形象和成就", 11: "社群、未来和理想", 12: "内在、释放和潜意识",
+};
+
+const pointThemes: Record<string, string> = {
+  sun: "核心意志和自我表达", moon: "情绪需求和安全感", mercury: "思考和沟通方式",
+  venus: "关系和价值观", mars: "行动和冲动", jupiter: "成长和信念",
+  saturn: "责任和限制", uranus: "变化和突破", neptune: "想象和理想化",
+  pluto: "深层转化", asc: "外在形象和起点", mc: "事业和公共目标",
+  true_north_node: "成长方向", mean_north_node: "成长方向",
+};
+
+const aspectThemes: Record<string, string> = {
+  conjunction: "两颗星的功能正在融合，主题会叠加",
+  sextile: "有机会互相配合，但需要主动迈出一步",
+  square: "两边有张力，需要调整节奏",
+  trine: "能量顺畅，容易自然发挥",
+  opposition: "对立的两边需要整合，常体现在关系或外部事件中",
+  quincunx: "难以直接协调，需要弹性和变通",
+  semisextile: "相邻但主题不同，需要磨合",
+  semisquare: "轻微摩擦，容易带来急躁或紧张",
+  sesquisquare: "持续压力，需要找到释放口",
+};
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+}
+
+function pointNarrative(point: NatalPoint, prefix = ""): string {
+  const pointName = pointLabels[point.point_id] ?? point.point_id;
+  const sign = signLabels[point.sign] ?? point.sign;
+  const signTheme = signThemes[point.sign] ?? "强调当前主题";
+  const house = point.house ? `第${point.house}宫（${houseLabels[point.house]}）` : "";
+  const retro = point.retrograde ? "当前逆行，相关主题适合先回顾、再推进。" : "";
+  return `${prefix}${pointName}落在${sign}${house ? "，" + house : ""}，${signTheme}。${retro}`;
+}
+
+function aspectNarrative(aspect: NatalAspect, prefix = ""): string {
+  const a = pointLabels[aspect.point_a] ?? aspect.point_a;
+  const b = pointLabels[aspect.point_b] ?? aspect.point_b;
+  const typeTheme = aspectThemes[aspect.type] ?? "形成联系";
+  const phase = aspect.applying_state === "applying" ? "正在增强" : aspect.applying_state === "exact" ? "正在精确" : aspect.applying_state === "separating" ? "正在减弱" : "当前阶段较平稳";
+  return `${prefix}${a}与${b}${typeTheme}。影响${phase}，容许度 ${aspect.orb_deg.toFixed(2)}°。`;
+}
+
+function crossAspectNarrative(aspect: NatalAspect & { moving_point_id: string; reference_point_id: string }, context: "transit" | "progression"): string {
+  const moving = pointLabels[aspect.moving_point_id] ?? aspect.moving_point_id;
+  const ref = pointLabels[aspect.reference_point_id] ?? aspect.reference_point_id;
+  const typeTheme = aspectThemes[aspect.type] ?? "形成联系";
+  const phase = aspect.applying_state === "applying" ? "正在接近" : aspect.applying_state === "exact" ? "正在精确触发" : aspect.applying_state === "separating" ? "正在离开" : "当前阶段较平稳";
+  const prefix = context === "progression" ? "次限" : "行运";
+  return `${prefix}${moving}正在${phase}你命中的${ref}，${typeTheme}。`;
+}
+
+function houseNarrative(pointId: string, houseNumber: number, context: "current_sky" | "transit" | "progression"): string {
+  const pointName = pointLabels[pointId] ?? pointId;
+  const house = houseLabels[houseNumber] ?? `第${houseNumber}宫`;
+  const prefix = context === "current_sky" ? "" : context === "transit" ? "行运" : "次限";
+  return `${prefix}${pointName}的行程正把你的注意力带到${house}领域。`;
+}
+
+function buildEventSection(snapshot: NatalSnapshot): InterpretationSection {
+  const context = asRecord(snapshot.result.astronomical_context);
+  const lunarPhase = asRecord(context.lunar_phase);
+  const phase = String(lunarPhase.phase ?? "—");
+  const illumination = Math.round(Number(lunarPhase.illumination_fraction ?? 0) * 100);
+  const age = Number(lunarPhase.lunar_age_days ?? 0).toFixed(1);
+  const retrogradePoints = snapshot.result.points.filter((p) => p.retrograde).map((p) => pointLabels[p.point_id] ?? p.point_id);
+  const stationaryPoints = snapshot.result.points.filter((p) => p.position.motion_state === "stationary").map((p) => pointLabels[p.point_id] ?? p.point_id);
+  const cards: InterpretationCard[] = [];
+  cards.push({
+    id: "lunar-phase",
+    title: "月相",
+    subtitle: `亮面约 ${illumination}% · 月龄 ${age} 天`,
+    bullets: [`当前月相为 ${phase}。`, `月亮快速移动，月相描述的是短期周期与情绪节奏。`],
+  });
+  if (retrogradePoints.length) {
+    cards.push({ id: "retrograde", title: "逆行行星", bullets: [`${retrogradePoints.join("、")} 正在逆行。`, `逆行期间适合回顾、修正、重新评估，而非强行启动。`] });
+  }
+  if (stationaryPoints.length) {
+    cards.push({ id: "stationary", title: "停驻点位", bullets: [`${stationaryPoints.join("、")} 接近停驻。`, `行星停驻前后状态转换较明显，容易带来开始、转折或收尾。`] });
+  }
+  const strongest = [...snapshot.result.aspects].sort((a, b) => b.strength - a.strength).slice(0, 3);
+  if (strongest.length) {
+    cards.push({ id: "strongest-aspects", title: "最紧密相位", bullets: strongest.map((a) => aspectNarrative(a)) });
+  }
+  return { id: "events", label: "天象", cards };
+}
+
+export function buildCurrentSkyInterpretationSections(snapshot: NatalSnapshot): InterpretationSection[] {
+  const corePoints = snapshot.result.points.filter((p) => ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"].includes(p.point_id));
+  const planetCards = corePoints.map((p) => ({
+    id: `point-${p.point_id}`,
+    title: `${pointLabels[p.point_id] ?? p.point_id}在${signLabels[p.sign] ?? p.sign}${p.house ? `第${p.house}宫` : ""}`,
+    subtitle: p.retrograde ? "当前逆行" : undefined,
+    bullets: [pointNarrative(p)],
+  }));
+  const topAspects = [...snapshot.result.aspects].sort((a, b) => b.strength - a.strength).slice(0, 6);
+  const aspectCards = topAspects.map((a) => ({
+    id: a.aspect_id,
+    title: `${pointLabels[a.point_a] ?? a.point_a} ${aspectLabels[a.type] ?? a.type} ${pointLabels[a.point_b] ?? a.point_b}`,
+    subtitle: `容许度 ${a.orb_deg.toFixed(2)}° · 强度 ${Math.round(a.strength * 100)}`,
+    bullets: [aspectNarrative(a)],
+  }));
+  const houseCards = snapshot.result.houses
+    .filter((h) => h.point_ids.length > 0)
+    .map((h) => ({
+      id: `house-${h.number}`,
+      title: `第${h.number}宫 · ${signLabels[h.sign] ?? h.sign}`,
+      subtitle: `${h.point_ids.length} 个点位`,
+      bullets: h.point_ids.map((pid) => `${pointLabels[pid] ?? pid} 落在这里`),
+      emphasis: houseLabels[h.number],
+    }));
+  return [
+    { id: "planets", label: "行星", cards: planetCards },
+    { id: "houses", label: "宫位", cards: houseCards },
+    { id: "aspects", label: "相位", cards: aspectCards },
+    buildEventSection(snapshot),
+  ];
+}
+
+export function buildTransitInterpretationSections(comparison: ChartComparison, movingLayer: NatalSnapshot): InterpretationSection[] {
+  const cross = [...comparison.result.cross_aspects].sort((a, b) => b.strength - a.strength || a.orb_deg - b.orb_deg).slice(0, 6);
+  const crossCards = cross.map((a) => ({
+    id: a.aspect_id,
+    title: `行运${pointLabels[a.moving_point_id] ?? a.moving_point_id} ${aspectLabels[a.type] ?? a.type} 本命${pointLabels[a.reference_point_id] ?? a.reference_point_id}`,
+    subtitle: `强度 ${Math.round(a.strength * 100)} · ${a.applying_state === "applying" ? "正在接近" : a.applying_state === "exact" ? "正在精确" : "正在离开"}`,
+    bullets: [crossAspectNarrative(a, "transit")],
+  }));
+  const houses = [...comparison.result.moving_points_in_reference_houses].slice(0, 8);
+  const houseCards = houses.map((h) => ({
+    id: `house-${h.moving_point_id}`,
+    title: `行运${pointLabels[h.moving_point_id] ?? h.moving_point_id} 落入本命第${h.reference_house}宫`,
+    subtitle: h.on_cusp ? "贴近宫头" : "已进入该领域",
+    bullets: [houseNarrative(h.moving_point_id, h.reference_house, "transit")],
+  }));
+  const corePoints = movingLayer.result.points.filter((p) => ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"].includes(p.point_id));
+  const planetCards = corePoints.map((p) => ({
+    id: `point-${p.point_id}`,
+    title: `行运${pointLabels[p.point_id] ?? p.point_id}在${signLabels[p.sign] ?? p.sign}${p.house ? `第${p.house}宫` : ""}`,
+    subtitle: p.retrograde ? "当前逆行" : undefined,
+    bullets: [pointNarrative(p, "行运")],
+  }));
+  const topAspects = [...movingLayer.result.aspects].sort((a, b) => b.strength - a.strength).slice(0, 6);
+  const aspectCards = topAspects.map((a) => ({
+    id: a.aspect_id,
+    title: `行运${pointLabels[a.point_a] ?? a.point_a} ${aspectLabels[a.type] ?? a.type} 行运${pointLabels[a.point_b] ?? a.point_b}`,
+    subtitle: `容许度 ${a.orb_deg.toFixed(2)}°`,
+    bullets: [aspectNarrative(a, "行运")],
+  }));
+  return [
+    { id: "cross", label: "本命触发", cards: crossCards },
+    { id: "reference_houses", label: "落宫", cards: houseCards },
+    { id: "planets", label: "行星", cards: planetCards },
+    { id: "aspects", label: "相位", cards: aspectCards },
+  ];
+}
+
+export function buildSecondaryProgressionInterpretationSections(result: SecondaryProgressionResult): InterpretationSection[] {
+  const comparison = result.comparison;
+  const movingLayer = result.progressed_snapshot;
+  const cross = [...comparison.result.cross_aspects].sort((a, b) => b.strength - a.strength || a.orb_deg - b.orb_deg).slice(0, 6);
+  const crossCards = cross.map((a) => ({
+    id: a.aspect_id,
+    title: `次限${pointLabels[a.moving_point_id] ?? a.moving_point_id} ${aspectLabels[a.type] ?? a.type} 本命${pointLabels[a.reference_point_id] ?? a.reference_point_id}`,
+    subtitle: `强度 ${Math.round(a.strength * 100)} · ${a.applying_state === "applying" ? "正在接近" : a.applying_state === "exact" ? "正在精确" : "正在离开"}`,
+    bullets: [crossAspectNarrative(a, "progression")],
+  }));
+  const houses = [...comparison.result.moving_points_in_reference_houses].slice(0, 8);
+  const houseCards = houses.map((h) => ({
+    id: `house-${h.moving_point_id}`,
+    title: `次限${pointLabels[h.moving_point_id] ?? h.moving_point_id} 落入本命第${h.reference_house}宫`,
+    subtitle: h.on_cusp ? "贴近宫头" : "长期影响该领域",
+    bullets: [houseNarrative(h.moving_point_id, h.reference_house, "progression")],
+  }));
+  const corePoints = movingLayer.result.points.filter((p) => ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"].includes(p.point_id));
+  const planetCards = corePoints.map((p) => ({
+    id: `point-${p.point_id}`,
+    title: `次限${pointLabels[p.point_id] ?? p.point_id}在${signLabels[p.sign] ?? p.sign}${p.house ? `第${p.house}宫` : ""}`,
+    bullets: [pointNarrative(p, "次限")],
+  }));
+  const topAspects = [...movingLayer.result.aspects].sort((a, b) => b.strength - a.strength).slice(0, 6);
+  const aspectCards = topAspects.map((a) => ({
+    id: a.aspect_id,
+    title: `次限${pointLabels[a.point_a] ?? a.point_a} ${aspectLabels[a.type] ?? a.type} 次限${pointLabels[a.point_b] ?? a.point_b}`,
+    subtitle: `容许度 ${a.orb_deg.toFixed(2)}°`,
+    bullets: [aspectNarrative(a, "次限")],
+  }));
+  return [
+    { id: "cross", label: "本命触发", cards: crossCards },
+    { id: "reference_houses", label: "落宫", cards: houseCards },
+    { id: "planets", label: "行星", cards: planetCards },
+    { id: "aspects", label: "相位", cards: aspectCards },
+  ];
 }

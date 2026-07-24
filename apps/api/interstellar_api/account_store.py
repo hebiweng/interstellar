@@ -69,6 +69,13 @@ def iso(value: datetime | None = None) -> str:
     return (value or utc_now()).isoformat().replace("+00:00", "Z")
 
 
+DEFAULT_PLATFORM_AI_PROMPT = (
+    "请用大白话、结构清晰的方式给出占星解读。"
+    "先给出核心结论，再解释原因，最后给出1-3条可执行的建议。"
+    "避免使用难懂的行业术语；如果必须使用，请在括号里给出通俗解释。"
+    "保持亲切、克制，不制造焦虑，不说绝对化的命运预言。"
+)
+
 class AccountStore:
     """Small SQLite repository with account isolation and latest-only natal results."""
 
@@ -212,8 +219,22 @@ class AccountStore:
                     updated_by TEXT,
                     updated_at TEXT NOT NULL
                 );
-                """
-            )
+                
+                CREATE TABLE IF NOT EXISTS feedback (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    type TEXT NOT NULL,
+                    content TEXT NOT NULL,
+                    contact TEXT,
+                    user_email TEXT,
+                    status TEXT NOT NULL DEFAULT 'pending',
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS feedback_status_idx
+                    ON feedback(status);
+                CREATE INDEX IF NOT EXISTS feedback_created_at_idx
+                    ON feedback(created_at);
+"""            )
             self._migrate_accounts(connection)
             self._migrate_model_configs(connection)
             self._migrate_provider_configs(connection)
@@ -1068,6 +1089,121 @@ class AccountStore:
             "byRole": {row["role"]: row["count"] for row in roles},
         }
 
+
+    # -- Feedback -------------------------------------------------------
+
+    def save_feedback(
+        self,
+        type_value: str,
+        content_value: str,
+        contact_value: str | None = None,
+        user_email_value: str | None = None,
+    ) -> dict[str, Any]:
+        feedback_type = str(type_value).strip()
+        if feedback_type not in {"bug", "feature", "other"}:
+            feedback_type = "other"
+        content = str(content_value).strip()
+        if not content or len(content) > 5000:
+            raise AccountError("INVALID_FEEDBACK", "反馈内容不能为空，且不能超过 5000 字。")
+        contact = str(contact_value).strip() if contact_value else None
+        user_email = None
+        if user_email_value:
+            user_email = self.normalize_email(user_email_value)
+        now = iso()
+        with self._lock, self._connect() as connection:
+            cursor = connection.execute(
+                """
+                INSERT INTO feedback
+                    (type, content, contact, user_email, status, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (feedback_type, content, contact, user_email, "pending", now, now),
+            )
+            feedback_id = cursor.lastrowid
+        return {
+            "id": feedback_id,
+            "type": feedback_type,
+            "content": content,
+            "contact": contact,
+            "userEmail": user_email,
+            "status": "pending",
+            "createdAt": now,
+            "updatedAt": now,
+        }
+
+    def list_feedback(
+        self,
+        *,
+        status: str | None = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> dict[str, Any]:
+        clauses = ["1 = 1"]
+        values: list[Any] = []
+        if status:
+            clauses.append("status = ?")
+            values.append(status)
+        where = " AND ".join(clauses)
+        with self._connect() as connection:
+            total = connection.execute(
+                f"SELECT COUNT(*) AS count FROM feedback WHERE {where}", values
+            ).fetchone()["count"]
+            rows = connection.execute(
+                f"""
+                SELECT id, type, content, contact, user_email, status, created_at, updated_at
+                FROM feedback WHERE {where}
+                ORDER BY created_at DESC
+                LIMIT ? OFFSET ?
+                """,
+                (*values, limit, offset),
+            ).fetchall()
+        return {
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+            "items": [
+                {
+                    "id": row["id"],
+                    "type": row["type"],
+                    "content": row["content"],
+                    "contact": row["contact"],
+                    "userEmail": row["user_email"],
+                    "status": row["status"],
+                    "createdAt": row["created_at"],
+                    "updatedAt": row["updated_at"],
+                }
+                for row in rows
+            ],
+        }
+
+    def update_feedback_status(self, feedback_id: int, status_value: str) -> dict[str, Any]:
+        status = str(status_value).strip()
+        if status not in {"pending", "resolved"}:
+            raise AccountError("INVALID_FEEDBACK_STATUS", "反馈状态只能是 pending 或 resolved。")
+        now = iso()
+        with self._lock, self._connect() as connection:
+            connection.execute(
+                "UPDATE feedback SET status = ?, updated_at = ? WHERE id = ?",
+                (status, now, feedback_id),
+            )
+            row = connection.execute(
+                """SELECT id, type, content, contact, user_email, status, created_at, updated_at
+                FROM feedback WHERE id = ?""",
+                (feedback_id,),
+            ).fetchone()
+        if row is None:
+            raise AccountError("FEEDBACK_NOT_FOUND", "反馈不存在。")
+        return {
+            "id": row["id"],
+            "type": row["type"],
+            "content": row["content"],
+            "contact": row["contact"],
+            "userEmail": row["user_email"],
+            "status": row["status"],
+            "createdAt": row["created_at"],
+            "updatedAt": row["updated_at"],
+        }
+
     # -- Provider and prompt configuration ------------------------------
 
     def _encrypt_secret(self, value: str) -> str:
@@ -1363,6 +1499,8 @@ class AccountStore:
             )
         return self.get_model_config(provider_id, model_id, include_secret=False)
 
+
+
     def get_platform_ai_prompt(self) -> dict[str, Any]:
         with self._connect() as connection:
             row = connection.execute(
@@ -1419,7 +1557,7 @@ class AccountStore:
         return self.get_platform_ai_prompt()
 
     def restore_platform_ai_prompt(self, *, actor_email: str) -> dict[str, Any]:
-        return self.set_platform_ai_prompt("", None, actor_email=actor_email)
+        return self.set_platform_ai_prompt(DEFAULT_PLATFORM_AI_PROMPT, None, actor_email=actor_email)
 
     @staticmethod
     def _audit_in_connection(

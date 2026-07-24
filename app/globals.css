@@ -981,3 +981,165 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   .analysis-technique-section > header { align-items: flex-start; flex-direction: column; }
   .technique-center-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 14px; }
 }
+
+/* Feedback UI */
+.feedback-button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  padding: 0 15px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  background: var(--panel);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+}
+
+.feedback-button:hover {
+  color: var(--text);
+  border-color: var(--blue);
+}
+
+.feedback-modal {
+  width: min(640px, calc(100vw - 40px));
+}
+
+.feedback-modal .feedback-form {
+  display: grid;
+  gap: 18px;
+  padding: 23px;
+}
+
+.feedback-modal .feedback-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.feedback-modal .feedback-form select,
+.feedback-modal .feedback-form textarea,
+.feedback-modal .feedback-form input {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--field-bg);
+  font: inherit;
+  font-size: 14px;
+}
+
+.feedback-modal .feedback-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.feedback-success,
+.feedback-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.feedback-success {
+  color: var(--green);
+  background: color-mix(in srgb, var(--green) 10%, transparent);
+}
+
+.feedback-error {
+  color: var(--red);
+  background: color-mix(in srgb, var(--red) 10%, transparent);
+}
+
+@media (max-width: 640px) {
+  .feedback-modal .feedback-form {
+    padding: 18px;
+  }
+}
+
+/* Guide modal backdrop: match natal guide opaque card design */
+.guide-modal-backdrop .modal-card,
+.guide-modal-backdrop .person-modal {
+  background: var(--modal-bg);
+}
+
+:root[data-theme="light"] .guide-modal-backdrop .modal-card,
+:root[data-theme="light"] .guide-modal-backdrop .person-modal {
+  background: #ffffff;
+}
+
+/* Chart selector bar (date/location above wheel) */
+.chart-selector-bar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel-2);
+}
+
+.chart-selector-bar-single {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 320px;
+}
+
+.chart-selector-bar label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.chart-selector-bar input,
+.chart-selector-bar select {
+  width: 100%;
+  min-height: 34px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text);
+  background: var(--field-bg);
+  font: inherit;
+  font-size: 13px;
+}
+
+.chart-selector-bar small {
+  grid-column: 1 / -1;
+  color: var(--faint);
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+@media (max-width: 960px) {
+  .chart-selector-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .chart-selector-bar-single {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .chart-selector-bar {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Non-natal interpretation section (below workbench) */
+.non-natal-interpretation { margin-top: 16px; }
+.non-natal-interpretation .interpretation-overview { display: grid; gap: 16px; }
+.interpretation-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.interpretation-card { display: flex; flex-direction: column; gap: 8px; padding: 14px; }
+.interpretation-card h3 { margin: 0; font-size: 14px; line-height: 1.35; }
+.interpretation-card small { color: var(--faint); font-size: 10px; }
+.interpretation-card ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.interpretation-card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.interpretation-empty { padding: 30px 20px; text-align: center; color: var(--muted); }
