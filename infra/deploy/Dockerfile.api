@@ -11,7 +11,12 @@ RUN python /usr/local/bin/build_geonames_country_subset.py \
       --admin2 /source/admin2Codes.txt \
       --country-code CN \
       --source-version 2026-07-19 \
-      --output-dir /output/geonames
+      --output-dir /output/geonames \
+# Rename CN-subset files to match the canonical paths in .env.example so that
+# the API code discovers them without any environment-variable overrides.
+&& mv /output/geonames/cities500-CN-2026-07-19.zip /output/geonames/cities500-2026-07-19.zip \
+&& mv /output/geonames/admin1CodesASCII-CN-2026-07-19.txt /output/geonames/admin1CodesASCII-2026-07-19.txt \
+&& mv /output/geonames/admin2Codes-CN-2026-07-19.txt /output/geonames/admin2Codes-2026-07-19.txt
 
 FROM python:3.13-slim-bookworm
 
@@ -27,9 +32,10 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY apps/api/requirements.lock /tmp/interstellar-api-requirements.lock
-RUN python -m pip install --no-cache-dir -r /tmp/interstellar-api-requirements.lock
+RUN python -m pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r /tmp/interstellar-api-requirements.lock
 
 COPY apps/api ./apps/api
+COPY apps/worker ./apps/worker
 COPY python ./python
 COPY docs ./docs
 COPY data-manifests ./data-manifests
