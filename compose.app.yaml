@@ -1,0 +1,109 @@
+# Local full-stack Docker Compose overlay.
+# Combines with compose.yaml (infrastructure) to run web + api + worker in containers.
+#
+# Usage:
+#   docker compose -f compose.yaml -f compose.app.yaml up -d --build
+#
+# This file follows the same conventions as compose.yaml:
+#   - service defaults (restart, security, logging, network)
+#   - resource limits appropriate for local development
+#   - health checks aligned with each service's actual contract
+
+x-app-defaults: &app-defaults
+  restart: unless-stopped
+  networks:
+    - backend
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  # ── FastAPI backend ──────────────────────────────────────────────────
+  api:
+    <<: *app-defaults
+    build:
+      context: .
+      dockerfile: infra/deploy/Dockerfile.api
+    image: interstellar-api:local
+    env_file:
+      - .env
+    environment:
+      INTERSTELLAR_API_HOST: 0.0.0.0
+      INTERSTELLAR_ACCOUNT_DATABASE_PATH: /var/lib/interstellar/accounts.sqlite3
+      # Use the fallback timezone resolver (smaller image; no full TBB archive).
+      # GeoNames paths are auto-discovered from the container's vendor/geonames/
+      # directory where the Dockerfile location-data stage already produces
+      # files matching the canonical names in .env.example.
+      INTERSTELLAR_TIMEZONE_BOUNDARIES_PATH: /opt/interstellar/deploy-data/timezone-boundaries-geonames-fallback.geojson
+      INTERSTELLAR_TIMEZONE_BOUNDARIES_DATASET_VERSION: geonames-hint-only-v1
+    ports:
+      - "127.0.0.1:${INTERSTELLAR_API_PORT:-8018}:8018"
+    volumes:
+      - api-data:/var/lib/interstellar
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8018/health/ready"]
+      interval: 20s
+      timeout: 5s
+      start_period: 20s
+      retries: 5
+    mem_limit: 1024m
+
+  # ── Background worker (heartbeat + job runner) ──────────────────────
+  worker:
+    <<: *app-defaults
+    image: interstellar-api:local
+    # PYTHONPATH must include both worker and core python packages
+    environment:
+      PYTHONPATH: /opt/interstellar/apps/worker:/opt/interstellar/python
+      INTERSTELLAR_WORKER_HEARTBEAT_PATH: /tmp/interstellar-worker-heartbeat.json
+      INTERSTELLAR_WORKER_HEARTBEAT_INTERVAL_SECONDS: "10"
+      INTERSTELLAR_WORKER_HEARTBEAT_MAX_AGE_SECONDS: "30"
+    command: ["python", "-m", "interstellar_worker"]
+    # Override the API image's HTTP healthcheck with a heartbeat-file check
+    # that matches the worker's own contract (python -m interstellar_worker --check).
+    healthcheck:
+      test: ["CMD", "python", "-m", "interstellar_worker", "--check"]
+      interval: 20s
+      timeout: 10s
+      start_period: 15s
+      retries: 5
+    depends_on:
+      api:
+        condition: service_healthy
+    mem_limit: 256m
+
+  # ── Next.js frontend (standalone build) ─────────────────────────────
+  web:
+    <<: *app-defaults
+    build:
+      context: .
+      dockerfile: infra/deploy/Dockerfile.web
+      args:
+        NEXT_PUBLIC_INTERSTELLAR_API_URL: ${NEXT_PUBLIC_INTERSTELLAR_API_URL:-http://127.0.0.1:8018/api/v1}
+    image: interstellar-web:local
+    environment:
+      NEXT_PUBLIC_INTERSTELLAR_API_URL: ${NEXT_PUBLIC_INTERSTELLAR_API_URL:-http://127.0.0.1:8018/api/v1}
+    ports:
+      - "127.0.0.1:3000:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      start_period: 20s
+      retries: 5
+    depends_on:
+      api:
+        condition: service_healthy
+    mem_limit: 384m
+
+volumes:
+  api-data:
