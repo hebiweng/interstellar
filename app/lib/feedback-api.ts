@@ -1,3 +1,5 @@
+import { fetchWithTimeout, parseJsonErrorBody, type FetchOptions } from "./api-client";
+
 export type FeedbackType = "bug" | "feature" | "other";
 
 export type FeedbackInput = {
@@ -24,28 +26,27 @@ export class FeedbackApiError extends Error {
   }
 }
 
-function apiBase(): string {
-  const configured = process.env.NEXT_PUBLIC_INTERSTELLAR_API_URL?.trim();
-  return configured ? configured.replace(/\/$/, "") : "/api/v1";
-}
+const DEFAULT_TIMEOUT_MS = 30_000;
 
-async function feedbackRequest<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${apiBase()}${path}`, {
-    ...init,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers ?? {}),
-    },
+async function feedbackRequest<T>(path: string, init?: FetchOptions): Promise<T> {
+  const response = await fetchWithTimeout(path, {
+    method: init?.method,
+    body: init?.body,
+    headers: init?.headers,
+    timeoutMs: init?.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+    signal: init?.signal,
   });
-  const body = (await response.json().catch(() => null)) as { message?: string; error?: string; detail?: string } | null;
+  const errorBody = await parseJsonErrorBody(response);
   if (!response.ok) {
     throw new FeedbackApiError(
-      body?.message ?? body?.detail ?? body?.error ?? `反馈请求失败（${response.status}）`,
+      errorBody?.message ?? errorBody?.detail ?? `反馈请求失败（${response.status}）`,
       response.status,
     );
   }
-  return body as T;
+  if (errorBody?.raw == null) {
+    throw new FeedbackApiError("反馈请求返回了空响应。", response.status);
+  }
+  return errorBody.raw as T;
 }
 
 export async function submitFeedback(input: FeedbackInput): Promise<{ ok: boolean; feedback: FeedbackRecord }> {

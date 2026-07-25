@@ -1,3 +1,5 @@
+import { apiBase } from "./api-client";
+
 export type AnalyticsEventName =
   | "page_view"
   | "analysis_started"
@@ -17,23 +19,36 @@ type AnalyticsPayload = {
 };
 
 function analyticsEndpoint(): string {
-  const configured = process.env.NEXT_PUBLIC_INTERSTELLAR_API_URL?.trim();
-  const apiBase = configured ? configured.replace(/\/$/, "") : "/api/v1";
-  return `${apiBase}/analytics/events`;
+  return `${apiBase()}/analytics/events`;
 }
 
 /**
  * Best-effort operational telemetry. Product actions must never fail because
  * analytics is unavailable, and payloads intentionally exclude chart facts,
  * names, birth data, free text, and exported document content.
+ *
+ * 使用 navigator.sendBeacon 优先（页面卸载时也能发出），失败时回退到
+ * fetchWithTimeout 的 noRetry 模式。所有错误静默吞掉，保持 void 语义。
  */
 export function recordAnalyticsEvent(payload: AnalyticsPayload): void {
   if (typeof window === "undefined") return;
-  void fetch(analyticsEndpoint(), {
+  const url = analyticsEndpoint();
+  const body = JSON.stringify(payload);
+
+  if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+    const blob = new Blob([body], { type: "application/json" });
+    try {
+      if (navigator.sendBeacon(url, blob)) return;
+    } catch {
+      // sendBeacon 不可用或被拒绝，回退到 fetch
+    }
+  }
+
+  void fetch(url, {
     method: "POST",
     credentials: "include",
     keepalive: true,
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body,
   }).catch(() => undefined);
 }

@@ -1,3 +1,9 @@
+import {
+  fetchWithTimeout,
+  parseJsonErrorBody,
+  type FetchOptions,
+} from "./api-client";
+
 export type NatalPoint = {
   point_id: string;
   kind: string;
@@ -89,6 +95,74 @@ export type NatalFixedStarContact = {
   strength: number;
 };
 
+/** 本命盘结构指标（加强类型，替代 Record<string, unknown>）。 */
+export type NatalStructure = {
+  chart_shape?: string;
+  chart_shape_label?: string;
+  hemisphere_emphasis?: Record<string, number>;
+  quadrant_emphasis?: Record<string, number>;
+  element_distribution?: Record<string, number>;
+  mode_distribution?: Record<string, number>;
+  polarity_distribution?: Record<string, number>;
+  signature_sign?: string;
+  signature_house?: number | null;
+  [key: string]: unknown;
+};
+
+/** 古典条件结果（加强类型）。 */
+export type NatalClassical = {
+  dignities?: Array<{
+    point_id: string;
+    essential_dignity?: string;
+    debility?: string;
+    rulership_sign?: string | null;
+    exaltation_sign?: string | null;
+    detriment_sign?: string | null;
+    fall_sign?: string | null;
+    triplicity_ruler?: string | null;
+    term_ruler?: string | null;
+    face_ruler?: string | null;
+    mutual_reception?: string | null;
+    [key: string]: unknown;
+  }>;
+  lots?: Array<{
+    lot_id: string;
+    name?: string;
+    longitude_deg?: number;
+    sign?: string;
+    degree_in_sign?: number;
+    house?: number | null;
+    formula_ref?: string;
+    [key: string]: unknown;
+  }>;
+  receptions?: Array<{
+    point_a: string;
+    point_b: string;
+    relationship: string;
+    [key: string]: unknown;
+  }>;
+  dispositors?: {
+    final_dispositor?: string | null;
+    chain?: Array<{ point_id: string; sign: string; role: string }>;
+    [key: string]: unknown;
+  };
+  sect?: {
+    diurnal?: boolean;
+    sect_ruler?: string;
+    benefic_of_sect?: string;
+    malefic_of_sect?: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+};
+
+/** 特殊度数结果（加强类型）。 */
+export type NatalSpecialDegrees = {
+  anaretic_points?: Array<{ point_id: string; degree: number }>;
+  critical_points?: Array<{ point_id: string; degree: number }>;
+  [key: string]: unknown;
+};
+
 export type NatalSnapshot = {
   id: string;
   status: string;
@@ -110,14 +184,14 @@ export type NatalSnapshot = {
       dimension: string;
       categories: Array<{ category_id: string; count: number; percentage?: number }>;
     }>;
-    structure?: Record<string, unknown>;
+    structure?: NatalStructure;
     patterns?: Array<Record<string, unknown>>;
-    classical?: Record<string, unknown>;
+    classical?: NatalClassical;
     dignities?: Array<Record<string, unknown>>;
     lots?: Array<Record<string, unknown>>;
     fixed_stars?: NatalFixedStar[];
     fixed_star_contacts?: NatalFixedStarContact[];
-    special_degrees?: Record<string, unknown>;
+    special_degrees?: NatalSpecialDegrees;
     mirror_points?: Record<string, unknown>;
     midpoints?: Record<string, unknown>;
     profections?: Record<string, unknown> | null;
@@ -390,20 +464,20 @@ export class InterstellarApiError extends Error {
   }
 }
 
-function apiBase(): string {
-  const configured = process.env.NEXT_PUBLIC_INTERSTELLAR_API_URL?.trim();
-  return configured ? configured.replace(/\/$/, "") : "/api/v1";
-}
+/** 计算请求超时（占星计算可能较慢）。 */
+const CALCULATION_TIMEOUT_MS = 60_000;
+/** AI 分析请求超时（AI 调用可能很慢）。 */
+const AI_TIMEOUT_MS = 120_000;
+/** 默认请求超时。 */
+const DEFAULT_TIMEOUT_MS = 30_000;
 
-async function requestJson<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const response = await fetch(`${apiBase()}${path}`, {
-    ...init,
-    headers: {
-      Accept: "application/json, application/problem+json",
-      ...(init.body ? { "Content-Type": "application/json" } : {}),
-      ...init.headers,
-    },
-  });
+/** 规则包标识符（替代 fake hash 占位符）。 */
+const RULE_PACK_ID_NATAL = "rule-pack:natal:professional.v1";
+const RULE_PACK_ID_MUNDANE = "rule-pack:mundane:current-sky.v1";
+const RULE_PACK_ID_PROGRESSION = "rule-pack:progression:secondary.v1";
+
+async function requestJson<T>(path: string, init: FetchOptions = {}): Promise<T> {
+  const response = await fetchWithTimeout(path, init);
   const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
   if (!contentType.includes("json")) {
     throw new InterstellarApiError(
@@ -412,27 +486,34 @@ async function requestJson<T>(path: string, init: RequestInit = {}): Promise<T> 
       response.status,
     );
   }
-  const body = await response.json() as Record<string, unknown>;
+  const errorBody = await parseJsonErrorBody(response);
   if (!response.ok) {
-    const fields = body.fields && typeof body.fields === "object"
-      ? ` ${JSON.stringify(body.fields)}`
+    const detail = errorBody?.detail ?? `API 请求失败（${response.status}）`;
+    const code = errorBody?.code ?? "API_REQUEST_FAILED";
+    const fields = errorBody?.fields && typeof errorBody.fields === "object"
+      ? ` ${JSON.stringify(errorBody.fields)}`
       : "";
-    const detail = typeof body.detail === "string" ? body.detail : `API 请求失败（${response.status}）`;
-    const code = typeof body.code === "string" ? body.code : "API_REQUEST_FAILED";
     throw new InterstellarApiError(`${detail}${fields}`, code, response.status);
   }
-  return body as T;
+  if (errorBody?.raw == null) {
+    throw new InterstellarApiError("计算服务返回了空响应。", "EMPTY_RESPONSE", response.status);
+  }
+  return errorBody.raw as T;
 }
 
 async function requestTextArtifact(
   path: string,
   format: "markdown" | "plaintext",
 ): Promise<TechnicalDocumentArtifact> {
-  const response = await fetch(`${apiBase()}${path}`, {
-    headers: { Accept: "text/markdown, text/plain" },
+  const response = await fetchWithTimeout(path, {
+    accept: "text/markdown, text/plain",
+    timeoutMs: DEFAULT_TIMEOUT_MS,
   });
   if (!response.ok) {
-    throw new InterstellarApiError(`分析数据导出失败（${response.status}）`, "EXPORT_FAILED", response.status);
+    const errorBody = await parseJsonErrorBody(response);
+    const detail = errorBody?.detail ?? `分析数据导出失败（${response.status}）`;
+    const code = errorBody?.code ?? "EXPORT_FAILED";
+    throw new InterstellarApiError(detail, code, response.status);
   }
   const contentHash = response.headers.get("x-interstellar-document-hash") ?? "";
   const snapshotId = response.headers.get("x-interstellar-snapshot-id") ?? "";
@@ -454,9 +535,15 @@ async function requestTextArtifact(
 }
 
 async function requestFile(path: string, accept: string): Promise<Blob> {
-  const response = await fetch(`${apiBase()}${path}`, { headers: { Accept: accept } });
+  const response = await fetchWithTimeout(path, {
+    accept,
+    timeoutMs: DEFAULT_TIMEOUT_MS,
+  });
   if (!response.ok) {
-    throw new InterstellarApiError(`结构化结果导出失败（${response.status}）`, "EXPORT_FAILED", response.status);
+    const errorBody = await parseJsonErrorBody(response);
+    const detail = errorBody?.detail ?? `结构化结果导出失败（${response.status}）`;
+    const code = errorBody?.code ?? "EXPORT_FAILED";
+    throw new InterstellarApiError(detail, code, response.status);
   }
   return response.blob();
 }
@@ -496,6 +583,7 @@ async function createWorkflowSubject(version: Record<string, unknown>) {
       workspace_id: "workspace-browser-local",
       version,
     }),
+    timeoutMs: DEFAULT_TIMEOUT_MS,
   });
 }
 
@@ -568,21 +656,22 @@ async function calculateSingleChart(
   chart: RunnableChart,
   settings: NatalCalculationSettings,
 ) {
-  const ruleHashSeed = chart.family === "mundane"
-    ? "d"
-    : ({ integrated: "a", modern: "b", classical: "c" } as const)[settings.analysisSystem];
+  const rulePackId = chart.family === "mundane"
+    ? RULE_PACK_ID_MUNDANE
+    : RULE_PACK_ID_NATAL;
   return requestJson<NatalSnapshot>("/calculations", {
     method: "POST",
     body: JSON.stringify({
       subject: { subject_version_id: subjectVersionId },
       chart: { family: chart.family, technique: chart.technique },
       settings: buildSharedChartSettings(settings, chart.analysisNamespace),
-      rule_pack_hash: `sha256:${ruleHashSeed.repeat(64)}`,
+      rule_pack_id: rulePackId,
       dataset_versions: {},
       outputs: chart.family === "natal"
         ? ["snapshot", "json", "markdown_technical", "plaintext_technical"]
         : ["snapshot", "json"],
     }),
+    timeoutMs: CALCULATION_TIMEOUT_MS,
   });
 }
 
@@ -684,6 +773,7 @@ export async function createTransitComparison(
       context: "transit",
       settings: buildSharedChartSettings(settings, "natal"),
     }),
+    timeoutMs: CALCULATION_TIMEOUT_MS,
   });
 }
 
@@ -735,8 +825,9 @@ export async function createSecondaryProgression(
       reference_snapshot: reusableSnapshot,
       target_date: targetDate,
       settings: buildSharedChartSettings(settings, "natal"),
-      rule_pack_hash: `sha256:${"b".repeat(64)}`,
+      rule_pack_id: RULE_PACK_ID_PROGRESSION,
     }),
+    timeoutMs: CALCULATION_TIMEOUT_MS,
   });
 }
 
@@ -776,6 +867,7 @@ export async function previewNatalAiPayload(input: {
       analysis_focus: input.focus || null,
       store_response: input.storeResponse ?? true,
     }),
+    timeoutMs: DEFAULT_TIMEOUT_MS,
   });
 }
 
@@ -807,15 +899,24 @@ export async function submitNatalToAi(input: {
       consent_policy_version: "2026-07-19",
       store_response: input.storeResponse ?? true,
     }),
+    timeoutMs: AI_TIMEOUT_MS,
   });
 }
 
-export async function getNatalItemInterpretation(
-  snapshotId: string,
-  itemType: string,
-  resultPath: string,
-  options: { includeTimeDependent?: boolean } = {},
-): Promise<ItemInterpretation> {
+/** 解读层级中文标签（提取为常量，便于维护）。 */
+const INTERPRETATION_LAYER_LABELS: Record<string, string> = {
+  point_intrinsic: "星体自身功能",
+  point_in_sign: "星座表达方式",
+  point_in_house: "所在宫位领域",
+  motion: "运动状态",
+  natal_aspect: "相位互动",
+  house_cusp_ruler: "宫头与宫主链",
+  structure_indicator: "盘面结构",
+  classical_condition: "古典条件",
+};
+
+/** 根据 itemType 返回对应的 item_kinds 列表。 */
+function itemKindsForType(itemType: string, includeTimeDependent: boolean): string[] {
   const itemKinds = itemType === "point"
     ? ["point_intrinsic", "point_in_sign", "point_in_house", "motion"]
     : itemType === "house"
@@ -825,49 +926,33 @@ export async function getNatalItemInterpretation(
         : itemType === "structure"
           ? ["structure_indicator"]
           : ["classical_condition"];
-  const effectiveItemKinds = options.includeTimeDependent === false
+  return includeTimeDependent === false
     ? itemKinds.filter((itemKind) => itemKind !== "point_in_house" && itemKind !== "house_cusp_ruler")
     : itemKinds;
-  const response = await requestJson<{
-    interpretations: Array<{
-      item_kind: string;
-      status: "published" | "unavailable" | "not_applicable" | "blocked_by_input_quality";
-      fact: Record<string, unknown>;
-      meaning: { text?: string; statement_key?: string } | null;
-      unavailable_reason: string | null;
-      warnings: string[];
-      content_hash: string;
-      provenance: {
-        rule?: { id?: string; version?: string };
-        template?: { version?: string };
-        rule_pack?: { id?: string; version?: string; content_hash?: string };
-        sources?: Array<{ source_id?: string; title?: string }>;
-        maturity?: string;
-      };
-    }>;
-  }>(`/calculations/${encodeURIComponent(snapshotId)}/interpretations/contextual`, {
-    method: "POST",
-      body: JSON.stringify({
-      items: effectiveItemKinds.map((item_kind) => ({
-        item_kind,
-        result_path: resultPath,
-        locale: "zh-CN",
-      })),
-    }),
-  });
-  const layerLabels: Record<string, string> = {
-    point_intrinsic: "星体自身功能",
-    point_in_sign: "星座表达方式",
-    point_in_house: "所在宫位领域",
-    motion: "运动状态",
-    natal_aspect: "相位互动",
-    house_cusp_ruler: "宫头与宫主链",
-    structure_indicator: "盘面结构",
-    classical_condition: "古典条件",
+}
+
+type InterpretationWireItem = {
+  item_kind: string;
+  status: "published" | "unavailable" | "not_applicable" | "blocked_by_input_quality";
+  fact: Record<string, unknown>;
+  meaning: { text?: string; statement_key?: string } | null;
+  unavailable_reason: string | null;
+  warnings: string[];
+  content_hash: string;
+  provenance: {
+    rule?: { id?: string; version?: string };
+    template?: { version?: string };
+    rule_pack?: { id?: string; version?: string; content_hash?: string };
+    sources?: Array<{ source_id?: string; title?: string }>;
+    maturity?: string;
   };
-  const layers = response.interpretations.map((item) => ({
+};
+
+/** 将 wire 格式的 interpretation item 映射为前端 layer 格式。 */
+function mapInterpretationLayer(item: InterpretationWireItem) {
+  return {
     item_kind: item.item_kind,
-    label: layerLabels[item.item_kind] ?? item.item_kind,
+    label: INTERPRETATION_LAYER_LABELS[item.item_kind] ?? item.item_kind,
     status: item.status,
     fact: item.fact,
     meaning: item.meaning?.text,
@@ -878,7 +963,31 @@ export async function getNatalItemInterpretation(
     template_version: item.provenance.template?.version,
     maturity: item.provenance.maturity,
     source_refs: item.provenance.sources?.map((source) => source.title ?? source.source_id ?? "").filter(Boolean) ?? [],
-  }));
+  };
+}
+
+export async function getNatalItemInterpretation(
+  snapshotId: string,
+  itemType: string,
+  resultPath: string,
+  options: { includeTimeDependent?: boolean } = {},
+): Promise<ItemInterpretation> {
+  const effectiveItemKinds = itemKindsForType(itemType, options.includeTimeDependent ?? true);
+  const response = await requestJson<{ interpretations: InterpretationWireItem[] }>(
+    `/calculations/${encodeURIComponent(snapshotId)}/interpretations/contextual`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        items: effectiveItemKinds.map((item_kind) => ({
+          item_kind,
+          result_path: resultPath,
+          locale: "zh-CN",
+        })),
+      }),
+      timeoutMs: DEFAULT_TIMEOUT_MS,
+    },
+  );
+  const layers = response.interpretations.map(mapInterpretationLayer);
   const published = response.interpretations.filter((item) => item.status === "published" && item.meaning?.text);
   if (!published.length) {
     const blocked = response.interpretations.some((item) => item.status === "blocked_by_input_quality");
