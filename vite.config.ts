@@ -47,6 +47,29 @@ export default defineConfig(async () => {
     server: isCodexSeatbeltSandbox
       ? { watch: { useFsEvents: false, usePolling: true } }
       : undefined,
+    // 生产构建禁用 source map，减小部署包体积。
+    build: {
+      sourcemap: false,
+      rollupOptions: {
+        // 排除 @vercel/og 死重依赖（vinext 传递依赖，项目未使用 OG 功能）
+        external: [
+          "@vercel/og",
+          "satori",
+          "@resvg/resvg-wasm",
+          "yoga-layout",
+          "@shuding/opentype.js",
+        ],
+      },
+    },
+    optimizeDeps: {
+      exclude: [
+        "@vercel/og",
+        "satori",
+        "@resvg/resvg-wasm",
+        "yoga-layout",
+        "@shuding/opentype.js",
+      ],
+    },
     plugins: [
       vinext(),
       sites(),

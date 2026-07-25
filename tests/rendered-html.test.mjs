@@ -1,11 +1,22 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import test from "node:test";
 import { Miniflare } from "miniflare";
 
+async function readAppSource() {
+  const appDir = fileURLToPath(new URL("../app", import.meta.url));
+  const files = await readdir(appDir, { recursive: true });
+  const reads = files
+    .filter((p) => p.endsWith(".tsx") || p.endsWith(".ts"))
+    .map((p) => readFile(join(appDir, p), "utf8").catch(() => ""));
+  const contents = await Promise.all(reads);
+  return contents.join("\n");
+}
+
 async function render() {
-  const serverRoot = new URL("../dist/server", import.meta.url).pathname;
+  const serverRoot = fileURLToPath(new URL("../dist/server", import.meta.url));
   const workerPath = join(serverRoot, "index.js");
   const emittedModules = (await readdir(serverRoot, { recursive: true }))
     .filter((path) => path.endsWith(".js") || path.endsWith(".mjs"))
@@ -45,7 +56,8 @@ test("server-renders the natal-first Interstellar workspace", async () => {
   assert.match(html, /新建分析/);
   assert.match(html, /本命盘/);
   assert.match(html, /行运盘/);
-  assert.match(html, /13分盘/);
+  assert.match(html, /重置盘/);
+  assert.match(html, /更多盘型/);
   assert.match(html, /正在读取工作台/);
   assert.doesNotMatch(html, /技法排盘/);
   assert.doesNotMatch(html, /VIRTUAL FIXTURE|当前展示静态虚拟验收样例/);
@@ -56,12 +68,12 @@ test("renders site-specific social metadata", async () => {
   const response = await render();
   const html = await response.text();
   assert.match(html, /og:image/);
-  assert.match(html, /\/og\.png/);
+  assert.match(html, /\/og\.webp/);
   assert.match(html, /summary_large_image/);
 });
 
 test("defines real natal input, deterministic settings, item interpretations, and AI boundary", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const page = await readAppSource();
   const presets = await readFile(new URL("../app/lib/natal-presets.ts", import.meta.url), "utf8");
   assert.match(page, /保存为当前账户可复用的人物资料；此动作不会自动计算/);
   assert.match(page, /计算完整本命盘/);
@@ -118,7 +130,7 @@ test("defines real natal input, deterministic settings, item interpretations, an
 });
 
 test("separates subject creation, calculations, future methods, and theme choice", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const page = await readAppSource();
   assert.match(page, /保存人物/);
   assert.match(page, /此动作不会自动计算/);
   assert.match(page, /本命盘当前可运行；其他方法保留入口/);
@@ -157,7 +169,7 @@ test("keeps scroll ownership readable on desktop and mobile", async () => {
 });
 
 test("defines a layered professional natal wheel and compact alternate view", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const page = await readAppSource();
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   assert.match(page, /360/);
   assert.match(page, /point-band-ring/);
@@ -174,7 +186,7 @@ test("defines a layered professional natal wheel and compact alternate view", as
 });
 
 test("keeps user-facing analysis data portable and developer metadata out of the report", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const page = await readAppSource();
   const api = await readFile(new URL("../app/lib/interstellar-api.ts", import.meta.url), "utf8");
   assert.match(page, /本命盘分析数据/);
   assert.match(page, /可复制给占星师或外部模型继续分析/);
@@ -187,7 +199,7 @@ test("keeps user-facing analysis data portable and developer metadata out of the
 });
 
 test("uses one RenderSpec on screen without exposing wheel export controls", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const page = await readAppSource();
   const exporter = await readFile(new URL("../app/lib/render-export.ts", import.meta.url), "utf8");
   assert.match(page, /buildNatalRenderSpec/);
   assert.match(page, /renderSpec=\{natalRenderSpec\}/);
@@ -201,17 +213,18 @@ test("uses one RenderSpec on screen without exposing wheel export controls", asy
 });
 
 test("renders versioned item interpretation layers without generic fallback", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const page = await readAppSource();
+  const drawer = await readFile(new URL("../app/components/panels/interpretation-drawer.tsx", import.meta.url), "utf8");
   const api = await readFile(new URL("../app/lib/interstellar-api.ts", import.meta.url), "utf8");
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
-  assert.match(page, /计算事实/);
-  assert.match(page, /解读内容准备中/);
+  assert.match(drawer, /计算事实/);
+  assert.match(drawer, /解读内容准备中/);
   assert.match(page, /出生资料不足/);
-  assert.match(page, /此项不适用/);
-  assert.doesNotMatch(page, /组合阅读边界|只展示当前已发布且适用于这份出生资料的解释|尚无解读/);
+  assert.match(drawer, /此项不适用/);
+  assert.doesNotMatch(page + drawer, /组合阅读边界|只展示当前已发布且适用于这份出生资料的解释|尚无解读/);
   assert.doesNotMatch(api, /JSON\.stringify\(item\.fact/);
   assert.match(page, /Reference fixture/);
-  assert.doesNotMatch(page, /value\.status === ["']available["']/);
+  assert.doesNotMatch(page + drawer, /value\.status === ["']available["']/);
   assert.match(api, /blocked_by_input_quality/);
   assert.match(api, /point_in_house/);
   assert.match(api, /content_hash/);
@@ -220,17 +233,19 @@ test("renders versioned item interpretation layers without generic fallback", as
 });
 
 test("connects every released structure and classical result to an exact snapshot path", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  assert.match(page, /`\/result\/structure\/\$\{key\}`/);
-  assert.match(page, /`\/result\/structure\/angularity\/facts\/\$\{index\}`/);
-  assert.match(page, /`\/result\/structure\/stelliums\/facts\/\$\{index\}`/);
-  assert.match(page, /`\/result\/structure\/geometric_patterns\/facts\/\$\{index\}`/);
-  assert.match(page, /"\/result\/structure\/jones_shape"/);
-  assert.match(page, /"\/result\/classical\/sect"/);
-  assert.match(page, /`\/result\/dignities\/\$\{index\}`/);
-  assert.match(page, /`\/result\/classical\/solar_conditions\/\$\{index\}`/);
-  assert.match(page, /"\/result\/classical\/receptions"/);
-  assert.match(page, /`\/result\/lots\/\$\{index\}`/);
+  const structure = await readFile(new URL("../app/components/results/structure-results.tsx", import.meta.url), "utf8");
+  const classical = await readFile(new URL("../app/components/results/classical-results.tsx", import.meta.url), "utf8");
+  const combined = structure + classical;
+  assert.match(combined, /`\/result\/structure\/\$\{key\}`/);
+  assert.match(combined, /`\/result\/structure\/angularity\/facts\/\$\{index\}`/);
+  assert.match(combined, /`\/result\/structure\/stelliums\/facts\/\$\{index\}`/);
+  assert.match(combined, /`\/result\/structure\/geometric_patterns\/facts\/\$\{index\}`/);
+  assert.match(combined, /"\/result\/structure\/jones_shape"/);
+  assert.match(combined, /"\/result\/classical\/sect"/);
+  assert.match(combined, /`\/result\/dignities\/\$\{index\}`/);
+  assert.match(combined, /`\/result\/classical\/solar_conditions\/\$\{index\}`/);
+  assert.match(combined, /"\/result\/classical\/receptions"/);
+  assert.match(combined, /`\/result\/lots\/\$\{index\}`/);
 });
 
 test("defines a readable semantic type floor and unavailable-control state", async () => {
