@@ -144,6 +144,7 @@ export function SecondaryProgressionsWorkspace({
     try {
       const preview = await previewNatalAiPayload({
         snapshotId: latestNatalSnapshot.id,
+        snapshot: latestNatalSnapshot as Record<string, unknown>,
         providerId: "deepseek",
         modelId: "deepseek-chat",
         focus: "次限盘分析",
@@ -151,6 +152,7 @@ export function SecondaryProgressionsWorkspace({
       });
       const artifact = await submitNatalToAi({
         snapshotId: latestNatalSnapshot.id,
+        snapshot: latestNatalSnapshot as Record<string, unknown>,
         providerId: "deepseek",
         modelId: "deepseek-chat",
         focus: "次限盘分析",

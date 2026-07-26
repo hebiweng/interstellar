@@ -38,6 +38,7 @@ class StrictModel(BaseModel):
 
 class NatalAiPreviewRequest(StrictModel):
     snapshot_id: str = Field(min_length=1, max_length=160)
+    snapshot: dict[str, Any] | None = None
     provider_id: str = Field(min_length=1, max_length=64)
     model_id: str = Field(min_length=1, max_length=160)
     document_format: Literal["markdown", "plaintext", "json"] = "markdown"
@@ -195,9 +196,17 @@ def _provider(
     return provider, model
 
 
-def _snapshot(request: Request, snapshot_id: str) -> dict[str, Any]:
+def _snapshot(request: Request, payload: NatalAiPreviewRequest) -> dict[str, Any]:
+    """Resolve the snapshot for AI analysis.
+
+    If the client sent a full ``snapshot`` object, use it directly (avoids 404
+    after container restarts when the in-memory store is empty).  Otherwise
+    fall back to looking up ``snapshot_id`` in the workflow store.
+    """
+    if payload.snapshot is not None:
+        return payload.snapshot
     try:
-        return request.app.state.workflow_store.get_snapshot(snapshot_id)
+        return request.app.state.workflow_store.get_snapshot(payload.snapshot_id)
     except WorkflowRecordNotFound as exc:
         raise ProblemException(
             status=status.HTTP_404_NOT_FOUND,
@@ -229,7 +238,7 @@ def _payload_hash(payload: NatalAiPreviewRequest, document_hash: str) -> str:
 
 
 def _preview(payload: NatalAiPreviewRequest, request: Request) -> dict[str, Any]:
-    snapshot = _snapshot(request, payload.snapshot_id)
+    snapshot = _snapshot(request, payload)
     provider, model = _provider(request, payload.provider_id, payload.model_id)
     document_hash = natal_technical_document_content_hash(snapshot)
     document = _document(snapshot, payload.document_format)
@@ -384,7 +393,7 @@ async def create_natal_ai_analysis(
             code=ErrorCode.AI_PROVIDER_NOT_CONFIGURED,
             detail="The allow-listed provider has no isolated server-side executor.",
         )
-    snapshot = _snapshot(request, payload.snapshot_id)
+    snapshot = _snapshot(request, payload)
     document = _document(snapshot, payload.document_format)
     analytics_user = current_user(request)
     event_metadata = {

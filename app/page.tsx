@@ -617,6 +617,7 @@ export default function Home() {
     try {
       const preview = await previewNatalAiPayload({
         snapshotId: submittedSnapshotId,
+        snapshot: snapshot,
         providerId: "deepseek",
         modelId: deepseekModel.model_id,
         focus: "",
@@ -624,6 +625,7 @@ export default function Home() {
       });
       const artifact = await submitNatalToAi({
         snapshotId: submittedSnapshotId,
+        snapshot: snapshot,
         providerId: "deepseek",
         modelId: deepseekModel.model_id,
         focus: "",

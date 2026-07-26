@@ -876,6 +876,7 @@ export async function getAiProviders(): Promise<AiProvider[]> {
 
 export async function previewNatalAiPayload(input: {
   snapshotId: string;
+  snapshot?: Record<string, unknown>;
   providerId: AiProviderId;
   modelId: AiModelId;
   focus?: string;
@@ -885,6 +886,7 @@ export async function previewNatalAiPayload(input: {
     method: "POST",
     body: JSON.stringify({
       snapshot_id: input.snapshotId,
+      snapshot: input.snapshot ?? null,
       provider_id: input.providerId,
       model_id: input.modelId,
       document_format: "markdown",
@@ -897,6 +899,7 @@ export async function previewNatalAiPayload(input: {
 
 export async function submitNatalToAi(input: {
   snapshotId: string;
+  snapshot?: Record<string, unknown>;
   providerId: AiProviderId;
   modelId: AiModelId;
   focus?: string;
@@ -913,6 +916,7 @@ export async function submitNatalToAi(input: {
     method: "POST",
     body: JSON.stringify({
       snapshot_id: input.snapshotId,
+      snapshot: input.snapshot ?? null,
       provider_id: input.providerId,
       model_id: input.modelId,
       document_format: "markdown",
