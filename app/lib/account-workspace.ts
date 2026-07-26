@@ -110,6 +110,13 @@ export function getAccountWorkspace(): Promise<AccountWorkspace> {
   return workspaceRequest<AccountWorkspace>();
 }
 
+/**
+ * 账户工作区写操作。
+ *
+ * 后端契约：所有写操作共用 POST /account/workspace + body.action 路由
+ * （见后端 account workspace router）。虽然这不符合 REST 语义，但
+ * 后端不支持独立的 RESTful 端点，前端必须遵循现有契约。
+ */
 export function saveAccountPerson(person: NatalPersonInput, personId?: string) {
   return workspaceRequest<{ id: string; savedAt: string }>({
     method: "POST",

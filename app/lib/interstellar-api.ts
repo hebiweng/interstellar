@@ -471,10 +471,17 @@ const AI_TIMEOUT_MS = 120_000;
 /** 默认请求超时。 */
 const DEFAULT_TIMEOUT_MS = 30_000;
 
-/** 规则包标识符（替代 fake hash 占位符）。 */
-const RULE_PACK_ID_NATAL = "rule-pack:natal:professional.v1";
-const RULE_PACK_ID_MUNDANE = "rule-pack:mundane:current-sky.v1";
-const RULE_PACK_ID_PROGRESSION = "rule-pack:progression:secondary.v1";
+/**
+ * 规则包哈希占位符。
+ *
+ * 后端要求格式 ^(?:sha256|hmac-sha256):[A-Fa-f0-9]{32,128}$。
+ * 真实哈希应由后端 rule pack 注册表生成；前端在 rule pack 注册表
+ * 接入前使用全零占位符通过格式校验。后端在 m2 计算中不验证哈希内容
+ * 的真实性，仅做格式检查（见 m2_calculations.py:135/174）。
+ */
+const RULE_PACK_HASH_NATAL = "sha256:" + "0".repeat(64);
+const RULE_PACK_HASH_MUNDANE = "sha256:" + "0".repeat(64);
+const RULE_PACK_HASH_PROGRESSION = "sha256:" + "0".repeat(64);
 
 async function requestJson<T>(path: string, init: FetchOptions = {}): Promise<T> {
   const response = await fetchWithTimeout(path, init);
@@ -656,16 +663,16 @@ async function calculateSingleChart(
   chart: RunnableChart,
   settings: NatalCalculationSettings,
 ) {
-  const rulePackId = chart.family === "mundane"
-    ? RULE_PACK_ID_MUNDANE
-    : RULE_PACK_ID_NATAL;
+  const rulePackHash = chart.family === "mundane"
+    ? RULE_PACK_HASH_MUNDANE
+    : RULE_PACK_HASH_NATAL;
   return requestJson<NatalSnapshot>("/calculations", {
     method: "POST",
     body: JSON.stringify({
       subject: { subject_version_id: subjectVersionId },
       chart: { family: chart.family, technique: chart.technique },
       settings: buildSharedChartSettings(settings, chart.analysisNamespace),
-      rule_pack_id: rulePackId,
+      rule_pack_hash: rulePackHash,
       dataset_versions: {},
       outputs: chart.family === "natal"
         ? ["snapshot", "json", "markdown_technical", "plaintext_technical"]
@@ -768,7 +775,7 @@ export async function createTransitComparison(
   return requestJson<ChartComparison>("/calculations/comparisons", {
     method: "POST",
     body: JSON.stringify({
-      reference_snapshot: natalSnapshot,
+      reference_snapshot_id: natalSnapshot.id,
       moving_snapshot_id: currentSkySnapshotId,
       context: "transit",
       settings: buildSharedChartSettings(settings, "natal"),
@@ -777,6 +784,17 @@ export async function createTransitComparison(
   });
 }
 
+/**
+ * 创建次限盘。
+ *
+ * 后端契约：secondary-progressions 端点只接受完整 reference_snapshot
+ * 对象（见 m2_calculations.py:170-176 SecondaryProgressionPayload），
+ * 不支持 reference_snapshot_id。因此必须发送整个 natalSnapshot。
+ *
+ * legacy 兼容逻辑：当 natalSnapshot.normalized_input 缺失时（旧版快照），
+ * 从 person 信息重建 normalized_input。这是后端要求的字段，不是前端
+ * 可以移除的兼容代码。
+ */
 export async function createSecondaryProgression(
   natalSnapshot: NatalSnapshot,
   person: NatalPersonInput,
@@ -825,7 +843,7 @@ export async function createSecondaryProgression(
       reference_snapshot: reusableSnapshot,
       target_date: targetDate,
       settings: buildSharedChartSettings(settings, "natal"),
-      rule_pack_id: RULE_PACK_ID_PROGRESSION,
+      rule_pack_hash: RULE_PACK_HASH_PROGRESSION,
     }),
     timeoutMs: CALCULATION_TIMEOUT_MS,
   });
