@@ -772,10 +772,16 @@ export async function createTransitComparison(
   currentSkySnapshotId: string,
   settings: NatalCalculationSettings,
 ): Promise<ChartComparison> {
+  /**
+   * 后端契约：/calculations/comparisons 支持 reference_snapshot_id 和
+   * reference_snapshot 两种方式传本命快照。使用 ID 时后端从内存
+   * workflow_store 查找，但内存存储在容器重启后清空，导致 404。
+   * 直接传完整 reference_snapshot 对象更可靠。
+   */
   return requestJson<ChartComparison>("/calculations/comparisons", {
     method: "POST",
     body: JSON.stringify({
-      reference_snapshot_id: natalSnapshot.id,
+      reference_snapshot: natalSnapshot,
       moving_snapshot_id: currentSkySnapshotId,
       context: "transit",
       settings: buildSharedChartSettings(settings, "natal"),

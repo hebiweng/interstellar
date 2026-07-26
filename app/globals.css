@@ -1489,30 +1489,49 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   color: #07111b;
 }
 
-/* === Secondary progressions: compact card heights === */
+/* === Secondary progressions: responsive comfortable layout === */
+
+/* Grid: all three columns stretch to the same height */
 .secondary-progressions-workspace .workbench-grid {
   align-items: stretch;
 }
+
+/* Card: responsive height with comfortable margins.
+   Top bar ~126px + top pad 16px + bottom margin 48px = ~190px reserved.
+   On large screens cap at 720px so the wheel doesn't become huge. */
 .secondary-progressions-workspace .chart-workspace-card {
   position: relative;
   top: auto;
-  height: min(680px, calc(100vh - 142px));
-  min-height: 420px;
-  max-height: 760px;
+  height: min(720px, calc(100vh - 190px));
+  min-height: 400px;
+  max-height: none;
 }
-.secondary-progressions-workspace .settings-panel {
-  position: relative;
-  top: auto;
-  height: min(680px, calc(100vh - 142px));
-  min-height: 420px;
-  max-height: 760px;
-}
+
+/* Side panels: follow card height via align-items:stretch.
+   Override base sticky + full-viewport-height so they match the card. */
+.secondary-progressions-workspace .settings-panel,
 .secondary-progressions-workspace .ai-insight-panel {
   position: relative;
   top: auto;
-  height: min(680px, calc(100vh - 142px));
-  min-height: 420px;
-  max-height: 760px;
+  height: auto;
+  min-height: 400px;
+  max-height: none;
+}
+
+/* Wheel canvas: constrain all wheel types to fit the container.
+   Ensures single/double/aspect-grid all render at the same visual size. */
+.secondary-progressions-workspace .wheel-canvas-area--fit > .natal-wheel,
+.secondary-progressions-workspace .wheel-canvas-area--fit > .transit-wheel-stack,
+.secondary-progressions-workspace .wheel-canvas-area--fit > .aspect-grid {
+  width: auto;
+  max-width: 92%;
+  max-height: calc(100% - 10px);
+  margin: auto;
+}
+
+/* Inside transit-wheel-stack, inner natal-wheel fills its parent */
+.secondary-progressions-workspace .wheel-canvas-area--fit > .transit-wheel-stack > .natal-wheel {
+  width: 100%;
 }
 
 /* Non-natal interpretation section (below workbench) */

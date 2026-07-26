@@ -151,9 +151,8 @@ export function SecondaryProgressionsWorkspace({
     <div className="workbench-grid">
       <article className="wheel-panel chart-workspace-card">
         <div className="panel-heading">
-          <div className="panel-heading">
-            <div><small>SECONDARY PROGRESSIONS</small><h2>次限轮盘</h2></div>
-            <div className="panel-tools">
+          <div><small>SECONDARY PROGRESSIONS</small><h2>次限轮盘</h2></div>
+          <div className="panel-tools">
               {!showCalculationResults && <>
                 {chartView === "aspect_grid" ? <button className="view-toggle" onClick={() => setChartView("professional")} title="轮盘"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg></button> : <>
                   <button className="view-toggle" onClick={() => setChartView(chartView === "professional" ? "compact" : "professional")} title={chartView === "professional" ? "简洁" : "轮盘"}>{chartView === "professional" ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/></svg> : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>}</button>
@@ -164,7 +163,6 @@ export function SecondaryProgressionsWorkspace({
               {result && <button className="result-flip-button" onClick={() => setShowCalculationResults(!showCalculationResults)} title={showCalculationResults ? "返回轮盘" : "查看结果"}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="10" x2="9" y2="21"/></svg></button>}
               <button className="natal-guide-link" onClick={() => setGuideOpen(true)}>什么是次限盘？</button>
             </div>
-          </div>
         </div>
         {showCalculationResults ? (
           <SecondaryCalculationPanel result={result} resultTab={resultTab} setResultTab={setResultTab} onBack={() => setShowCalculationResults(false)} />
