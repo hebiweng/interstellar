@@ -1,9 +1,8 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import type { NatalCalculationSettings, NatalSnapshot, NatalPersonInput, SecondaryProgressionResult } from '../../lib/interstellar-api';
-import type { NatalPointGroups, NatalPresetId } from '../../lib/natal-presets';
-import type { ThemeMode, SecondaryResultTab } from '../lib/chart-types';
+import type { NatalPointGroups, NatalPresetId } from '../lib/chart-types';
 import type { WorkspacePerson } from '../../lib/account-workspace';
-import { createSecondaryProgression, InterstellarApiError } from '../../lib/interstellar-api';
+import { createSecondaryProgression, InterstellarApiError, previewNatalAiPayload, submitNatalToAi } from '../../lib/interstellar-api';
 import { classicalStarlightPairOrbs, cloneNatalSettings, cloneNatalPointGroups, timingCalculationPresets, identifyTimingPreset } from '../../lib/natal-presets';
 import { buildNatalRenderSpec } from '../../lib/render-export';
 import type { NatalRenderControls } from '../../lib/render-export';
@@ -52,7 +51,6 @@ export function SecondaryProgressionsWorkspace({
   const [chartView, setChartView] = useState<"professional" | "compact" | "aspect_grid">("professional");
   const [guideOpen, setGuideOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState(`选择目标日期后点击计算；系统会直接读取${person.displayName}上一次本命结果，只计算新的次限层。`);
   const secondaryAutoCalculated = useRef(false);
   useEffect(() => {
     if (secondaryAutoCalculated.current) return;
@@ -66,6 +64,11 @@ export function SecondaryProgressionsWorkspace({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [personMenuOpen, setPersonMenuOpen] = useState(false);
   const personMenuRef = useRef<HTMLDivElement>(null);
+
+  /* AI analysis state */
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiAnalysisText, setAiAnalysisText] = useState<string | null>(null);
+
   const presetId = useMemo(() => identifyTimingPreset(settings, groups), [settings, groups]);
   const visiblePointIds = useMemo(() => effectivePointIds(appliedSettings, appliedGroups), [appliedSettings, appliedGroups]);
   const controls = useMemo<NatalRenderControls>(() => ({ ...defaultWheelControls, visiblePointIds }), [visiblePointIds]);
@@ -102,7 +105,6 @@ export function SecondaryProgressionsWorkspace({
 
   async function calculate(computeTargetDate = targetDate) {
     if (person.timePrecision === "date" || person.timePrecision === "unknown") {
-      setNotice("次限盘需要可靠的出生时刻；当前人物只有日期，不能用午夜代替。");
       return;
     }
     const pointIds = effectivePointIds(settings, groups);
@@ -114,7 +116,6 @@ export function SecondaryProgressionsWorkspace({
         : settings.pointPairOrbs,
     });
     setBusy(true);
-    setNotice("正在换算次限日期、计算次限点位，并与上一次本命结果比较…");
     try {
       const calculated = await createSecondaryProgression(
         latestNatalSnapshot,
@@ -128,11 +129,43 @@ export function SecondaryProgressionsWorkspace({
       setAppliedGroups(cloneNatalPointGroups(groups));
       setWheelMode("double");
       setResultTab("overview");
-      setNotice("次限盘已更新。修改目标日期或参数后，需要再次点击计算才会生效。");
-    } catch (error) {
-      setNotice(error instanceof InterstellarApiError ? `${error.code}：${error.message}` : `次限盘计算失败：${error instanceof Error ? error.message : "未知错误"}`);
+    } catch (_error) {
+      /* silent — error displayed via busy state */
     } finally {
       setBusy(false);
+    }
+  }
+
+  /* AI analysis: click circle → directly call DeepSeek */
+  async function triggerAiAnalysis() {
+    if (aiBusy || !latestNatalSnapshot?.id) return;
+    setAiBusy(true);
+    setAiAnalysisText(null);
+    try {
+      const preview = await previewNatalAiPayload({
+        snapshotId: latestNatalSnapshot.id,
+        providerId: "deepseek",
+        modelId: "deepseek-chat",
+        focus: "次限盘分析",
+        storeResponse: false,
+      });
+      const artifact = await submitNatalToAi({
+        snapshotId: latestNatalSnapshot.id,
+        providerId: "deepseek",
+        modelId: "deepseek-chat",
+        focus: "次限盘分析",
+        consent: true,
+        payloadHash: preview.payload_hash,
+        authorityForSubjectData: true,
+        storeResponse: false,
+      });
+      const text = artifact.response?.text?.trim();
+      if (!text) throw new Error("AI 未返回分析文本");
+      setAiAnalysisText(text);
+    } catch (_error) {
+      setAiAnalysisText(null);
+    } finally {
+      setAiBusy(false);
     }
   }
 
@@ -147,7 +180,6 @@ export function SecondaryProgressionsWorkspace({
     .slice(0, 5) ?? [];
 
   return <section className="main-workspace secondary-progressions-workspace">
-    {notice && <div className="app-toast" role="status"><p>{notice}</p><button onClick={() => setNotice("")} aria-label="关闭提示">×</button></div>}
     <div className="workbench-grid">
       <article className="wheel-panel chart-workspace-card">
         <div className="panel-heading">
@@ -168,12 +200,12 @@ export function SecondaryProgressionsWorkspace({
           <SecondaryCalculationPanel result={result} resultTab={resultTab} setResultTab={setResultTab} onBack={() => setShowCalculationResults(false)} />
         ) : (
           <>
-            <div className="wheel-canvas-area wheel-canvas-area--fit">
+            <div className="wheel-canvas-area">
               {progressedSnapshot && comparison ? (
                 chartView === "aspect_grid" ? (
                   <AspectGrid snapshot={progressedSnapshot} onOpen={() => undefined} />
                 ) : wheelMode === "double" ? (
-                  <ComparisonWheel natalSnapshot={latestNatalSnapshot} movingSnapshot={progressedSnapshot} comparison={comparison} renderSpec={natalRenderSpec} controls={controls} chartLabel="次限盘" movingLabel="次限外层" />
+                  <ComparisonWheel natalSnapshot={latestNatalSnapshot} movingSnapshot={progressedSnapshot} comparison={comparison} renderSpec={natalRenderSpec} controls={controls} chartLabel="次限盘" movingLabel="次限外层" hideLegend />
                 ) : progressedRenderSpec ? (
                   <NatalWheel snapshot={progressedSnapshot} renderSpec={progressedRenderSpec} controls={controls} />
                 ) : null
@@ -227,8 +259,14 @@ export function SecondaryProgressionsWorkspace({
       </aside></div>}
 
       <aside className="ai-insight-panel">
-        <header><div><small>PROGRESSION INSIGHT · LOCAL</small><h2>这一阶段怎么看</h2></div></header>
-        {secondaryInsight ? <article className="instant-insight">
+        <header><div><small>PROGRESSION INSIGHT · LOCAL</small><h2>这一阶段怎么看</h2></div>
+          <button className="ai-circle-button" onClick={triggerAiAnalysis} disabled={aiBusy} title="AI 分析" aria-label="AI 分析">
+            {aiBusy ? <span className="analysis-spinner">✦</span> : "AI"}
+          </button>
+        </header>
+        {aiAnalysisText ? (
+          <article className="ai-analysis-copy" dangerouslySetInnerHTML={{ __html: aiAnalysisText.replace(/\n/g, "<br/>") }} />
+        ) : secondaryInsight ? <article className="instant-insight">
           <section className="instant-theme"><span>阶段重点</span><h3>{secondaryInsight.title}</h3><p>{secondaryInsight.summary}</p></section>
           <section className="insight-dimensions">{secondaryInsight.dimensions.map((dimension) => <div key={dimension.id}><header><b>{dimension.label}</b><strong>{dimension.score}</strong></header><i><span style={{ width: `${dimension.score}%` }} /></i><small>{dimension.note}</small></div>)}</section>
           <section className="aspect-balance"><header><b>顺势的地方与容易卡住的地方</b></header><div><span className="supportive" style={{ flex: secondaryInsight.aspectBalance.supportive || 0.25 }} /><span className="tension" style={{ flex: secondaryInsight.aspectBalance.tension || 0.25 }} /><span className="neutral" style={{ flex: secondaryInsight.aspectBalance.neutral || 0.25 }} /></div><footer><span>容易配合 {secondaryInsight.aspectBalance.supportive}</span><span>需要协调 {secondaryInsight.aspectBalance.tension}</span><span>彼此相连 {secondaryInsight.aspectBalance.neutral}</span></footer><p>{secondaryInsight.aspectBalance.meaning}</p></section>
@@ -236,7 +274,7 @@ export function SecondaryProgressionsWorkspace({
           <section className="insight-advice"><div><b>变化落在生活哪里</b>{houseHighlights.map((item) => <p key={item.moving_point_id}>• 次限{pointNames[item.moving_point_id] ?? item.moving_point_id}落入本命第{item.reference_house}宫：这一阶段更容易围绕&ldquo;{houseDomains[item.reference_house - 1]}&rdquo;发生内在调整。</p>)}</div><div><b>怎么使用</b><p>{secondaryInsight.strengths.map((item) => <p key={item}>• {item}</p>)}</p><p>{secondaryInsight.reminders.map((item) => <p key={item}>• {item}</p>)}</p></div></section>
           <section className="insight-closing"><b>最后提醒</b><p>{secondaryInsight.closing}</p></section>
         </article> : <div className="ai-waiting"><b>等待计算</b><p>计算完成后会立即用大白话说明次限月亮、次限太阳、次限月相和最明显的成长主题，不调用大模型。</p></div>}
-        <footer><span>本地即时解读</span><small>只有点击计算才会更新；修改日期或参数不会自动提交。</small></footer>
+        <footer><span>本地即时解读</span><small>点击 AI 按钮调用 DeepSeek 深度分析。</small></footer>
       </aside>
     </div>
 

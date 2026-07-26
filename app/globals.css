@@ -1489,48 +1489,85 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   color: #07111b;
 }
 
-/* === Secondary progressions: responsive comfortable layout === */
+/* === Secondary progressions: full-height layout matching natal chart === */
 
 /* Grid: all three columns stretch to the same height */
 .secondary-progressions-workspace .workbench-grid {
   align-items: stretch;
 }
 
-/* Card: responsive height with comfortable margins.
-   Top bar ~126px + top pad 16px + bottom margin 48px = ~190px reserved.
-   On large screens cap at 720px so the wheel doesn't become huge. */
+/* Card: match natal chart full-viewport height */
 .secondary-progressions-workspace .chart-workspace-card {
-  position: relative;
-  top: auto;
-  height: min(720px, calc(100vh - 190px));
-  min-height: 400px;
-  max-height: none;
+  position: sticky;
+  top: 126px;
+  height: calc(100vh - 142px);
+  min-height: 420px;
+  max-height: calc(100vh - 142px);
 }
 
-/* Side panels: follow card height via align-items:stretch.
-   Override base sticky + full-viewport-height so they match the card. */
+/* Side panels: same height as card, overflow scrolls */
 .secondary-progressions-workspace .settings-panel,
 .secondary-progressions-workspace .ai-insight-panel {
-  position: relative;
-  top: auto;
-  height: auto;
-  min-height: 400px;
-  max-height: none;
+  position: sticky;
+  top: 126px;
+  height: calc(100vh - 142px);
+  min-height: 420px;
+  max-height: calc(100vh - 142px);
+  overflow-y: auto;
 }
 
-/* Wheel canvas: constrain all wheel types to fit the container.
-   Ensures single/double/aspect-grid all render at the same visual size. */
-.secondary-progressions-workspace .wheel-canvas-area--fit > .natal-wheel,
-.secondary-progressions-workspace .wheel-canvas-area--fit > .transit-wheel-stack,
-.secondary-progressions-workspace .wheel-canvas-area--fit > .aspect-grid {
-  width: auto;
-  max-width: 92%;
-  max-height: calc(100% - 10px);
+/* AI circle button in insight panel header */
+.ai-circle-button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(185, 168, 255, .42);
+  border-radius: 50%;
+  color: var(--violet);
+  background: rgba(185, 168, 255, .08);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.ai-circle-button:hover:not(:disabled) {
+  color: #fff;
+  background: var(--violet);
+  border-color: var(--violet);
+}
+.ai-circle-button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+/* AI analysis result area */
+.ai-analysis-copy {
+  flex: 1;
+  min-height: 0;
+  padding: 14px 16px;
+  overflow-y: auto;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+/* Wheel sizing: let SVG naturally fill the canvas area like natal chart */
+.secondary-progressions-workspace .wheel-canvas-area > .natal-wheel {
+  width: min(620px, 92%);
+  height: auto;
+  margin: 12px auto 5px;
+}
+.secondary-progressions-workspace .wheel-canvas-area > .transit-wheel-stack {
+  width: min(100%, 720px);
   margin: auto;
 }
-
-/* Inside transit-wheel-stack, inner natal-wheel fills its parent */
-.secondary-progressions-workspace .wheel-canvas-area--fit > .transit-wheel-stack > .natal-wheel {
+.secondary-progressions-workspace .wheel-canvas-area > .transit-wheel-stack > .natal-wheel {
+  width: 100%;
+}
+.secondary-progressions-workspace .wheel-canvas-area > .aspect-grid {
   width: 100%;
 }
 

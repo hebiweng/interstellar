@@ -11,6 +11,7 @@ export function ComparisonWheel({
   controls,
   chartLabel,
   movingLabel,
+  hideLegend = false,
 }: {
   natalSnapshot: NatalSnapshot;
   movingSnapshot: NatalSnapshot;
@@ -19,6 +20,7 @@ export function ComparisonWheel({
   controls: NatalRenderControls;
   chartLabel: string;
   movingLabel: string;
+  hideLegend?: boolean;
 }) {
   const asc = natalSnapshot.result.points.find((point) => point.point_id === "asc")?.position.ecliptic.longitude_deg
     ?? natalSnapshot.result.houses[0]?.cusp_longitude_deg ?? 0;
@@ -58,6 +60,6 @@ export function ComparisonWheel({
         return <g key={`transit-${point.point_id}`} className="transit-moving-point"><line x1={anchor.x} y1={anchor.y} x2={label.x} y2={label.y} /><circle cx={label.x} cy={label.y} r="10" /><text x={label.x} y={label.y + 1}>{wheelPointLabels[point.point_id] ?? pointNames[point.point_id]?.slice(0, 1) ?? "•"}</text>{point.retrograde && <text x={label.x + 9} y={label.y - 9} className="point-retrograde">R</text>}</g>;
       })}
     </svg>
-    <div className="transit-wheel-legend"><span><i className="natal-dot" />本命内层</span><span><i className="moving-dot" />{movingLabel}</span><span>{comparison.result.cross_aspects.length} 条跨盘相位</span></div>
+    {!hideLegend && <div className="transit-wheel-legend"><span><i className="natal-dot" />本命内层</span><span><i className="moving-dot" />{movingLabel}</span><span>{comparison.result.cross_aspects.length} 条跨盘相位</span></div>}
   </div>;
 }
