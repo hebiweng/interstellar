@@ -31,6 +31,8 @@ apps/**/.venv/
 # misc
 .DS_Store
 *.pem
+nul
+.temp/
 
 # debug
 npm-debug.log*
