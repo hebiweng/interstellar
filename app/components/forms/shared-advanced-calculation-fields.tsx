@@ -1,7 +1,9 @@
-import type { NatalCalculationSettings, NatalPointGroups } from '../../lib/interstellar-api';
+import type { NatalCalculationSettings } from '../../lib/interstellar-api';
+import type { NatalPointGroups } from '../../lib/natal-presets';
 import {
   pointGroups, pointGroupLabels, pointNames, unavailableVirtualPoints,
-  fixedStarOptions, allAspectIds, aspectNames, ayanamsaOptions, houseSystemOptions
+  fixedStarOptions, allAspectIds, aspectNames, ayanamsaOptions, houseSystemOptions,
+  majorAspectIds, orbPointClassOptions, orbPointOptions
 } from '../lib/chart-constants';
 
 export function SharedAdvancedCalculationFields({

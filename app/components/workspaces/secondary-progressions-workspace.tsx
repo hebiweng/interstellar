@@ -1,14 +1,13 @@
-import { useState, useEffect, useMemo } from 'react';
-import type { NatalCalculationSettings, NatalPointGroups, NatalSnapshot, NatalPersonInput, SecondaryProgressionResult } from '../../lib/interstellar-api';
-import type { ThemeMode } from '../lib/chart-types';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import type { NatalCalculationSettings, NatalSnapshot, NatalPersonInput, SecondaryProgressionResult } from '../../lib/interstellar-api';
+import type { NatalPointGroups, NatalPresetId } from '../../lib/natal-presets';
+import type { ThemeMode, SecondaryResultTab } from '../lib/chart-types';
 import type { WorkspacePerson } from '../../lib/account-workspace';
 import { createSecondaryProgression, InterstellarApiError } from '../../lib/interstellar-api';
-import { classicalStarlightPairOrbs } from '../../lib/natal-presets';
+import { classicalStarlightPairOrbs, cloneNatalSettings, cloneNatalPointGroups, timingCalculationPresets, identifyTimingPreset } from '../../lib/natal-presets';
 import { buildNatalRenderSpec } from '../../lib/render-export';
 import type { NatalRenderControls } from '../../lib/render-export';
-import {
-  cloneNatalSettings, cloneNatalPointGroups, timingCalculationPresets, identifyTimingPreset
-} from '../../lib/natal-presets';
+
 import {
   buildSecondaryProgressionConsumerInsight, buildSecondaryProgressionInterpretationSections
 } from '../../lib/consumer-insight';
@@ -17,7 +16,7 @@ import {
   houseSystemOptions,
   pointNames, houseDomains
 } from '../lib/chart-constants';
-import { effectivePointIds } from '../lib/chart-utils';
+import { effectivePointIds, asRecord } from '../lib/chart-utils';
 import { ComparisonWheel } from '../wheels/comparison-wheel';
 import { NatalWheel } from '../wheels/natal-wheel';
 import { AspectGrid } from '../wheels/aspect-grid';

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import type { NatalCalculationSettings, NatalPointGroups, NatalSnapshot, NatalPersonInput, CurrentSkyInput } from '../../lib/interstellar-api';
-import type { ThemeMode } from '../lib/chart-types';
+import type { NatalCalculationSettings, NatalSnapshot, NatalPersonInput, CurrentSkyInput } from '../../lib/interstellar-api';
+import type { NatalPointGroups, NatalPresetId } from '../../lib/natal-presets';
+import type { ThemeMode, ChartView } from '../lib/chart-types';
 import { createCurrentSkyCalculation, InterstellarApiError } from '../../lib/interstellar-api';
 import { classicalStarlightPairOrbs } from '../../lib/natal-presets';
 import { buildNatalRenderSpec } from '../../lib/render-export';
@@ -14,7 +15,7 @@ import {
 import {
   defaultSettings, defaultModernGroups, defaultWheelControls,
   houseSystemOptions, fallbackTimezoneOptions, currentSkyResultTabs,
-  pointNames, aspectNames, houseDomains
+  pointNames, aspectNames, houseDomains, pointGroups
 } from '../lib/chart-constants';
 import { lunarPhaseLabel } from '../lib/chart-labels';
 import { asRecord, effectivePointIds } from '../lib/chart-utils';

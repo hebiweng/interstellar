@@ -1,13 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
-import type { NatalCalculationSettings, NatalPointGroups, NatalSnapshot, NatalPersonInput, CurrentSkyInput, ChartComparison } from '../../lib/interstellar-api';
+import type { NatalCalculationSettings, NatalSnapshot, NatalPersonInput, CurrentSkyInput, ChartComparison } from '../../lib/interstellar-api';
+import type { NatalPointGroups, NatalPresetId } from '../../lib/natal-presets';
 import type { ThemeMode, TransitResultTab } from '../lib/chart-types';
 import { createCurrentSkyCalculation, createTransitComparison, InterstellarApiError } from '../../lib/interstellar-api';
-import { classicalStarlightPairOrbs } from '../../lib/natal-presets';
-import { buildNatalRenderSpec } from '../../lib/render-export';
-import type { NatalRenderControls } from '../../lib/render-export';
-import {
-  cloneNatalSettings, cloneNatalPointGroups, timingCalculationPresets, identifyTimingPreset
-} from '../../lib/natal-presets';
+import { classicalStarlightPairOrbs, cloneNatalSettings, cloneNatalPointGroups, timingCalculationPresets, identifyTimingPreset } from '../../lib/natal-presets';
 import {
   buildTransitConsumerInsight, buildTransitInterpretationSections
 } from '../../lib/consumer-insight';
@@ -17,6 +13,8 @@ import {
   pointNames, houseDomains
 } from '../lib/chart-constants';
 import { effectivePointIds } from '../lib/chart-utils';
+import { buildNatalRenderSpec } from '../../lib/render-export';
+import type { NatalRenderControls } from '../../lib/render-export';
 import { ComparisonWheel } from '../wheels/comparison-wheel';
 import { NatalWheel } from '../wheels/natal-wheel';
 import { SharedAdvancedCalculationFields } from '../forms/shared-advanced-calculation-fields';
