@@ -146,7 +146,7 @@ export function SecondaryProgressionsWorkspace({
         snapshotId: latestNatalSnapshot.id,
         snapshot: latestNatalSnapshot as Record<string, unknown>,
         providerId: "deepseek",
-        modelId: "deepseek-chat",
+        modelId: "deepseek-v4-flash",
         focus: "次限盘分析",
         storeResponse: false,
       });
@@ -154,7 +154,7 @@ export function SecondaryProgressionsWorkspace({
         snapshotId: latestNatalSnapshot.id,
         snapshot: latestNatalSnapshot as Record<string, unknown>,
         providerId: "deepseek",
-        modelId: "deepseek-chat",
+        modelId: "deepseek-v4-flash",
         focus: "次限盘分析",
         consent: true,
         payloadHash: preview.payload_hash,

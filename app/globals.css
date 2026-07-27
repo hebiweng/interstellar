@@ -1571,6 +1571,21 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   width: 100%;
 }
 
+/* Mobile: stack vertically, no sticky, no fixed height */
+@media (max-width: 900px) {
+  .secondary-progressions-workspace .chart-workspace-card,
+  .secondary-progressions-workspace .settings-panel,
+  .secondary-progressions-workspace .ai-insight-panel {
+    position: static;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+  }
+  .secondary-progressions-workspace .wheel-canvas-area {
+    min-height: 320px;
+  }
+}
+
 /* Non-natal interpretation section (below workbench) */
 .non-natal-interpretation { margin-top: 16px; }
 .non-natal-interpretation .interpretation-overview { display: grid; gap: 16px; }
