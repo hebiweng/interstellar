@@ -150,6 +150,14 @@ export function SecondaryProgressionsWorkspace({
         focus: "次限盘分析",
         storeResponse: false,
       });
+      if (!preview.provider_configured) {
+        setAiAnalysisText("⚠ AI 模型服务尚未配置\n\n管理员需要在后端配置 DeepSeek API Key 后才能使用 AI 分析功能。当前可使用下方本地即时解读。");
+        return;
+      }
+      if (preview.availability !== "available") {
+        setAiAnalysisText(`⚠ AI 分析暂不可用\n\n原因：${preview.blocking_reason ?? "未知"}\n请稍后再试，或使用下方本地即时解读。`);
+        return;
+      }
       const artifact = await submitNatalToAi({
         snapshotId: latestNatalSnapshot.id,
         snapshot: latestNatalSnapshot as Record<string, unknown>,
@@ -165,7 +173,12 @@ export function SecondaryProgressionsWorkspace({
       if (!text) throw new Error("AI 未返回分析文本");
       setAiAnalysisText(text);
     } catch (_error) {
-      setAiAnalysisText(null);
+      const msg = _error instanceof Error ? _error.message : "";
+      if (msg.includes("409") || msg.includes("conflict")) {
+        setAiAnalysisText("⚠ AI 服务配置有误\n\n后端返回 409 冲突，通常是因为 DeepSeek 服务未正确配置。请联系管理员检查后端 AI 提供商设置。");
+      } else {
+        setAiAnalysisText("⚠ AI 分析请求失败\n\n请检查网络连接或稍后再试。当前可使用下方本地即时解读。");
+      }
     } finally {
       setAiBusy(false);
     }
