@@ -28,11 +28,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /opt/interstellar
 
 RUN apt-get update \
-    && apt-get install --yes --no-install-recommends ca-certificates curl \
+    && apt-get install --yes --no-install-recommends build-essential ca-certificates curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY apps/api/requirements.lock /tmp/interstellar-api-requirements.lock
-RUN python -m pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r /tmp/interstellar-api-requirements.lock
+RUN python -m pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r /tmp/interstellar-api-requirements.lock \
+    && apt-get purge --yes --auto-remove build-essential
 
 COPY apps/api ./apps/api
 COPY apps/worker ./apps/worker

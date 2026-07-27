@@ -328,6 +328,12 @@ export const houseCorpus: Record<string, CorpusEntry> = {
 // ─── 十一、人生阶段过渡语料 ─────────────────────────────────
 
 export const stageTransitions: Record<string, CorpusEntry> = {
+  baseline: {
+    id: '11-baseline', keywords: '次限推进、长期阶段、基础状态',
+    summary: '次限盘正在展开当前长期阶段，重点不在单日事件，而在内在需求的慢速变化。',
+    detail: '当关键点资料尚不完整时，先以已计算出的月相、落宫和跨盘相位观察长期主题。',
+    advice: '先看阶段趋势，再看具体相位；不要把次限盘当作每日预测工具。',
+  },
   sprout: {
     id: '11-sprout', keywords: '主题萌芽、进入新星座、过渡',
     summary: '新方向开始萌芽但尚未清晰，旧模式和新感受交替出现。',
@@ -369,6 +375,12 @@ export const stageTransitions: Record<string, CorpusEntry> = {
     summary: '当前阶段没有特别密集的次限信号节点，内在节奏相对平稳。',
     detail: '主题围绕当前星座核心关键词展开，适合在当前方向上持续积累和微调，而不是等待"大事发生"。',
     advice: '次限盘的核心价值在于识别长期趋势，不是捕捉短期事件。',
+  },
+  methodBoundary: {
+    id: '11-methodBoundary', keywords: '方法边界、长期节奏、非事件预测',
+    summary: '次限盘描述内在变化节奏，不是事件预测。',
+    detail: '它更适合回答一个阶段正在成熟什么，而不是判断某一天一定发生什么。',
+    advice: '把它当作长期调整地图，结合现实选择、行运触发和个人处境一起看。',
   },
 };
 
@@ -436,6 +448,12 @@ export const natalLinkRules: Record<string, CorpusEntry> = {
     detail: '内在变化的强度和深度都比单一信号时更大。',
     advice: '适合认真对待这一调整方向，但不需要一次性完成所有改变——分阶段推进同样有效。',
   },
+  steady: {
+    id: '13-steady', keywords: '本命联动平稳、低密度、无强触发',
+    summary: '次限与本命互动相对平稳，当前没有强烈的强化或挑战信号。',
+    detail: '这通常表示内在变化以持续微调为主，不需要为了寻找转折而放大弱信号。',
+    advice: '把注意力放回次限月亮、月相和现实生活中已经反复出现的主题。',
+  },
 };
 
 // ─── 十、专业参数模板 ───────────────────────────────────────
@@ -490,4 +508,54 @@ export const professionalParams = {
       { planet: '天王/海王/冥王', speed: '<0.01°/年', note: '基本不移动，不产生有意义的次限变化' },
     ],
   },
+} as const;
+
+// ─── 右侧即时解读展示语料 ───────────────────────────────────
+// 固化 6-解读设计中 A-E 卡片的短文案槽位。
+// 组件只负责渲染；盘面变化时由计算事实选择这里的固定表达。
+
+export const rightPanelDisplayCorpus = {
+  currentStage: {
+    moonFallback: '当前两三年的情绪需求和安全感模式正在展开。',
+    sunFallback: '长期身份方向正在以更慢的速度推进。',
+    phaseFallback: '内在成长周期正在转换。',
+  },
+  turningPoint: {
+    exactAspect: '当前转折信号最强。',
+    noExactAspect: '转折信号以持续微调为主。',
+    applyingAspect: '主题正在靠近，适合观察它如何反复出现。',
+    separatingAspect: '主题正在收束，适合整理已经看见的变化。',
+    moonIngress: '新的情绪语气正在形成。',
+    moonEgress: '旧阶段正在收束，下一阶段的直觉开始出现。',
+    moonSteady: '当前没有换座信号，月亮主题以持续推进为主。',
+    phaseBoundary: '内在节奏正在转换。',
+  },
+  adviceSlots: {
+    emotion: { icon: '💭', title: '情绪关注' },
+    identity: { icon: '☀️', title: '长期方向' },
+    aspect: { icon: '⚖️', title: '当前相位' },
+  },
+  aspectTone: {
+    supportive: '当前最强相位带支持性，适合把已有资源接起来，主动推进一小步。',
+    tension: '当前最强相位带挑战性，调整节奏比硬推更有效。',
+    neutral: '当前最强相位更像聚焦器，先确认主题，再决定行动节奏。',
+    steady: '当前相位结构相对平稳，适合持续整合而不是急着定论。',
+  },
+  pointThemes: {
+    sun: '身份方向',
+    moon: '情绪需求',
+    mercury: '思维表达',
+    venus: '关系价值',
+    mars: '行动方式',
+    asc: '外在表现',
+    mc: '事业方向',
+  },
+  aspectThemes: {
+    conjunction: '正在集中到同一主题上，容易被明显感到。',
+    sextile: '存在可以主动使用的协调空间。',
+    trine: '形成较顺畅的支持，适合自然发挥。',
+    square: '出现摩擦和调整需求，旧方式需要更新。',
+    opposition: '形成两端拉力，需要在关系或现实情境中重新平衡。',
+  },
+  coreTurningPointIds: ['sun', 'moon', 'mercury', 'venus', 'mars', 'asc', 'mc'],
 } as const;

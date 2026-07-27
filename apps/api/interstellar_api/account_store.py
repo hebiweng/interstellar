@@ -1557,7 +1557,11 @@ class AccountStore:
         return self.get_platform_ai_prompt()
 
     def restore_platform_ai_prompt(self, *, actor_email: str) -> dict[str, Any]:
-        return self.set_platform_ai_prompt(DEFAULT_PLATFORM_AI_PROMPT, None, actor_email=actor_email)
+        return self.set_platform_ai_prompt(
+            DEFAULT_PLATFORM_AI_PROMPT,
+            None,
+            actor_email=actor_email,
+        )
 
     @staticmethod
     def _audit_in_connection(

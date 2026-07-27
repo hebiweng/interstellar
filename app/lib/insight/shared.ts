@@ -60,6 +60,13 @@ export const pointLabels: Record<string, string> = {
   sun: "太阳", moon: "月亮", mercury: "水星", venus: "金星", mars: "火星",
   jupiter: "木星", saturn: "土星", uranus: "天王星", neptune: "海王星", pluto: "冥王星",
   asc: "上升", mc: "天顶", true_north_node: "北交点", mean_north_node: "北交点",
+  dsc: "下降", ic: "天底", true_south_node: "南交点", mean_south_node: "南交点",
+  vertex: "宿命点", east_point: "东方点", fortune: "福点", spirit: "精神点",
+  chiron: "凯龙星", ceres: "谷神星", pallas: "智神星", juno: "婚神星", vesta: "灶神星",
+  pholus: "福勒斯", nessus: "涅索斯", chariklo: "查里克洛",
+  asteroid_eros: "爱神星", psyche: "灵神星", eris: "阋神星", sedna: "赛德娜",
+  haumea: "妊神星", makemake: "鸟神星", quaoar: "创神星", orcus: "亡神星",
+  ixion: "伊克西翁", varuna: "伐楼拿", astraea: "义神星", hygiea: "健神星",
 };
 
 export const aspectLabels: Record<string, string> = {

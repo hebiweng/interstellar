@@ -5,7 +5,7 @@
  * - 消除 5 个 API 模块中重复的 apiBase() 实现
  * - 统一超时控制（默认 30s，占星计算/AI 可覆盖）
  * - 统一 credentials（"include"，修复 interstellar-api 的缺失）
- * - 统一重试（仅 502/503/504，最多 2 次）
+ * - 统一重试（GET/HEAD 的 502/503/504，最多 2 次）
  * - 支持请求取消（AbortSignal）
  * - 提供通用 ApiError，但各业务模块仍可抛自己的 error 子类以保持 instanceof 兼容
  */
@@ -14,6 +14,7 @@ const DEFAULT_TIMEOUT_MS = 30_000;
 const MAX_RETRIES = 2;
 const RETRYABLE_STATUS = new Set([502, 503, 504]);
 const RETRY_DELAY_MS = 500;
+const IDEMPOTENT_RETRY_METHODS = new Set(["GET", "HEAD"]);
 
 /** 返回去尾斜杠的 API 基地址（统一替代 5 处重复的 apiBase）。 */
 export function apiBase(): string {
@@ -57,8 +58,10 @@ export type FetchOptions = {
   timeoutMs?: number;
   /** 外部传入的 AbortSignal，与内部超时 signal 合并。 */
   signal?: AbortSignal;
-  /** 是否禁用重试（默认 false，即启用）。 */
+  /** 是否禁用重试（默认 false；但默认只重试 GET/HEAD）。 */
   noRetry?: boolean;
+  /** 显式允许非 GET/HEAD 重试；仅限调用方能保证幂等时使用。 */
+  retryUnsafeMethods?: boolean;
   /** 是否发送 credentials，默认 "include"。 */
   credentials?: RequestCredentials;
   /** 自定义 Accept 头。 */
@@ -91,12 +94,22 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
   });
 }
 
+function normalizedMethod(method: string | undefined): string {
+  return (method ?? "GET").toUpperCase();
+}
+
+function canRetry(method: string, options: FetchOptions): boolean {
+  if (options.noRetry) return false;
+  return IDEMPOTENT_RETRY_METHODS.has(method) || options.retryUnsafeMethods === true;
+}
+
 /**
  * 带超时、重试、取消的 fetch 封装。
  *
  * 返回原始 Response，由调用方决定如何解析 body 和构造业务 error。
  * 超时抛 ApiTimeoutError，外部 abort 抛 ApiAbortError。
- * 502/503/504 自动重试（最多 MAX_RETRIES 次），除非 noRetry=true。
+ * GET/HEAD 遇到 502/503/504 或网络错误自动重试（最多 MAX_RETRIES 次）。
+ * 非幂等写操作默认不重试；只有调用方显式声明 retryUnsafeMethods 才允许。
  */
 export async function fetchWithTimeout(
   path: string,
@@ -106,6 +119,7 @@ export async function fetchWithTimeout(
   const url = `${apiBase()}${path}`;
   const credentials = options.credentials ?? "include";
   const hasBody = options.hasBody ?? Boolean(options.body);
+  const method = normalizedMethod(options.method);
 
   const headers: Record<string, string> = {
     Accept: options.accept ?? "application/json, application/problem+json",
@@ -114,7 +128,7 @@ export async function fetchWithTimeout(
   };
 
   let lastError: Error | undefined;
-  const maxAttempts = options.noRetry ? 1 : MAX_RETRIES + 1;
+  const maxAttempts = canRetry(method, options) ? MAX_RETRIES + 1 : 1;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const timeoutController = new AbortController();
@@ -123,7 +137,7 @@ export async function fetchWithTimeout(
 
     try {
       const response = await fetch(url, {
-        method: options.method,
+        method,
         body: options.body,
         headers,
         credentials,

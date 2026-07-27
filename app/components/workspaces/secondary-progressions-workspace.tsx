@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import type { NatalCalculationSettings, NatalSnapshot, NatalPersonInput, SecondaryProgressionResult } from '../../lib/interstellar-api';
-import type { NatalPointGroups, NatalPresetId } from '../lib/chart-types';
+import type { NatalPointGroups, NatalPresetId, SecondaryResultTab, ThemeMode } from '../lib/chart-types';
 import type { WorkspacePerson } from '../../lib/account-workspace';
-import { createSecondaryProgression, InterstellarApiError, previewNatalAiPayload, submitNatalToAi } from '../../lib/interstellar-api';
+import { createSecondaryProgression, previewNatalAiPayload, submitNatalToAi } from '../../lib/interstellar-api';
 import { classicalStarlightPairOrbs, cloneNatalSettings, cloneNatalPointGroups, timingCalculationPresets, identifyTimingPreset } from '../../lib/natal-presets';
 import { buildNatalRenderSpec } from '../../lib/render-export';
 import type { NatalRenderControls } from '../../lib/render-export';
@@ -14,9 +14,8 @@ import {
 import {
   defaultTimingSettings, defaultTimingGroups, defaultWheelControls,
   houseSystemOptions,
-  pointNames, houseDomains
 } from '../lib/chart-constants';
-import { effectivePointIds, asRecord } from '../lib/chart-utils';
+import { effectivePointIds } from '../lib/chart-utils';
 import { ComparisonWheel } from '../wheels/comparison-wheel';
 import { NatalWheel } from '../wheels/natal-wheel';
 import { AspectGrid } from '../wheels/aspect-grid';
@@ -24,6 +23,7 @@ import { SharedAdvancedCalculationFields } from '../forms/shared-advanced-calcul
 import { SecondaryCalculationPanel } from '../panels/secondary-calculation-panel';
 import { NonNatalInterpretationSection } from '../panels/non-natal-interpretation-section';
 import { TechniqueGuideDialog } from '../forms/technique-guide-dialog';
+import { SecondaryInstantInsight } from './secondary-instant-insight';
 import '../../styles/secondary.css';
 
 export function SecondaryProgressionsWorkspace({
@@ -54,13 +54,6 @@ export function SecondaryProgressionsWorkspace({
   const [guideOpen, setGuideOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const secondaryAutoCalculated = useRef(false);
-  useEffect(() => {
-    if (secondaryAutoCalculated.current) return;
-    secondaryAutoCalculated.current = true;
-    const today = new Date().toISOString().slice(0, 10);
-    setTargetDate(today);
-    queueMicrotask(() => void calculate(today));
-  }, []);
   const [resultTab, setResultTab] = useState<SecondaryResultTab>("overview");
   const [showCalculationResults, setShowCalculationResults] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -85,8 +78,8 @@ export function SecondaryProgressionsWorkspace({
     [progressedSnapshot, chartView, theme, controls],
   );
   const secondaryInsight = useMemo(
-    () => result ? buildSecondaryProgressionConsumerInsight(result, latestNatalSnapshot) : null,
-    [result, latestNatalSnapshot],
+    () => result ? buildSecondaryProgressionConsumerInsight(result) : null,
+    [result],
   );
   const rightPanel = useMemo(
     () => result ? buildSecondaryProgressionRightPanel(result, latestNatalSnapshot) : null,
@@ -109,7 +102,7 @@ export function SecondaryProgressionsWorkspace({
     setGroups(cloneNatalPointGroups(preset.groups));
   }
 
-  async function calculate(computeTargetDate = targetDate) {
+  const calculate = useCallback(async (computeTargetDate = targetDate) => {
     if (person.timePrecision === "date" || person.timePrecision === "unknown") {
       return;
     }
@@ -130,17 +123,25 @@ export function SecondaryProgressionsWorkspace({
         requestSettings,
       );
       setResult(calculated);
-      setAppliedTargetDate(targetDate);
+      setAppliedTargetDate(computeTargetDate);
       setAppliedSettings(cloneNatalSettings(requestSettings));
       setAppliedGroups(cloneNatalPointGroups(groups));
       setWheelMode("double");
       setResultTab("overview");
-    } catch (_error) {
+    } catch {
       /* silent — error displayed via busy state */
     } finally {
       setBusy(false);
     }
-  }
+  }, [groups, latestNatalSnapshot, person, settings, targetDate]);
+
+  useEffect(() => {
+    if (secondaryAutoCalculated.current) return;
+    secondaryAutoCalculated.current = true;
+    const today = new Date().toISOString().slice(0, 10);
+    setTargetDate(today);
+    queueMicrotask(() => void calculate(today));
+  }, [calculate]);
 
   /* AI analysis: click circle → directly call DeepSeek */
   async function triggerAiAnalysis() {
@@ -189,16 +190,6 @@ export function SecondaryProgressionsWorkspace({
       setAiBusy(false);
     }
   }
-
-  const strongest = comparison
-    ? [...comparison.result.cross_aspects].sort((left, right) => right.strength - left.strength || left.orb_deg - right.orb_deg).slice(0, 5)
-    : [];
-  const progressedMoon = progressedSnapshot?.result.points.find((point) => point.point_id === "moon");
-  const progressedSun = progressedSnapshot?.result.points.find((point) => point.point_id === "sun");
-  const lunarPhase = asRecord(asRecord(progressedSnapshot?.result.astronomical_context).lunar_phase);
-  const houseHighlights = comparison?.result.moving_points_in_reference_houses
-    .filter((item) => ["sun", "moon", "mercury", "venus", "mars"].includes(item.moving_point_id))
-    .slice(0, 5) ?? [];
 
   return <section className="main-workspace secondary-progressions-workspace">
     <div className="workbench-grid">
@@ -287,24 +278,7 @@ export function SecondaryProgressionsWorkspace({
         </header>
         {aiAnalysisText ? (
           <article className="ai-analysis-copy" dangerouslySetInnerHTML={{ __html: aiAnalysisText.replace(/\n/g, "<br/>") }} />
-        ) : rightPanel ? <article className="instant-insight">
-          {rightPanel.cards.map(card => (
-            <section key={card.id} className="insight-card-sp">
-              <header className="insight-card-sp-header">
-                <span className="insight-card-sp-icon">{card.icon}</span>
-                <div>
-                  <b>{card.title}</b>
-                  <p>{card.summary}</p>
-                </div>
-              </header>
-              {card.details.length > 0 && (
-                <ul className="insight-card-sp-details">
-                  {card.details.map((detail, i) => <li key={i}>{detail}</li>)}
-                </ul>
-              )}
-            </section>
-          ))}
-        </article> : <div className="ai-waiting"><b>等待计算</b><p>计算完成后会立即用大白话说明次限月亮、次限太阳、次限月相和最明显的成长主题，不调用大模型。</p></div>}
+        ) : rightPanel ? <SecondaryInstantInsight comparison={comparison} progressedSnapshot={progressedSnapshot} rightPanel={rightPanel} signPeriods={result?.progressed_sign_periods ?? []} /> : <div className="ai-waiting"><b>等待计算</b><p>计算完成后会先展示本地解读；需要更长分析时再点击 AI。</p></div>}
         <footer><span>本地即时解读</span><small>点击 AI 按钮调用 DeepSeek 深度分析。</small></footer>
       </aside>
     </div>

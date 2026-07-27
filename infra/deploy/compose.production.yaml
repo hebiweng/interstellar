@@ -49,6 +49,8 @@ services:
     build:
       context: ../..
       dockerfile: infra/deploy/Dockerfile.web
+      args:
+        NEXT_PUBLIC_INTERSTELLAR_API_URL: /api/v1
     environment:
       NODE_ENV: production
       PORT: "3000"

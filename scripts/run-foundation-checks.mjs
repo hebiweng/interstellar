@@ -4,6 +4,7 @@ const checks = [
   ["Catalog contracts", "npm", ["run", "docs:validate"]],
   ["OpenAPI and JSON Schema", "npm", ["run", "contracts:validate"]],
   ["Generated contract drift", "npm", ["run", "contracts:check"]],
+  ["Architecture guards", "npm", ["run", "architecture:check"]],
   ["Contract tests", "npm", ["run", "contracts:test"]],
   ["Python lint", "npm", ["run", "backend:lint"]],
   ["Backend and worker tests", "npm", ["run", "backend:test"]],

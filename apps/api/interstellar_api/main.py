@@ -18,10 +18,10 @@ from interstellar_api.middleware import install_request_context
 from interstellar_api.readiness import ProbeResult, ReadinessRegistry
 from interstellar_api.recipe_registry import load_repository_recipe_registry
 from interstellar_api.routers.accounts import router as accounts_router
-from interstellar_api.routers.feedback import router as feedback_router
 from interstellar_api.routers.admin import router as admin_router
 from interstellar_api.routers.analytics import router as analytics_router
 from interstellar_api.routers.datasets import router as datasets_router
+from interstellar_api.routers.feedback import router as feedback_router
 from interstellar_api.routers.health import router as health_router
 from interstellar_api.routers.locations import router as locations_router
 from interstellar_api.routers.m1_workflow import router as m1_workflow_router

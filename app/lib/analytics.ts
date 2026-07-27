@@ -28,7 +28,7 @@ function analyticsEndpoint(): string {
  * names, birth data, free text, and exported document content.
  *
  * 使用 navigator.sendBeacon 优先（页面卸载时也能发出），失败时回退到
- * fetchWithTimeout 的 noRetry 模式。所有错误静默吞掉，保持 void 语义。
+ * keepalive fetch。所有错误静默吞掉，保持 void 语义。
  */
 export function recordAnalyticsEvent(payload: AnalyticsPayload): void {
   if (typeof window === "undefined") return;

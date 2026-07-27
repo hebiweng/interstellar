@@ -266,6 +266,15 @@ export type SecondaryProgressionResult = {
   reference_snapshot_id: string;
   target_date: string;
   progressed_time: string;
+  progressed_sign_periods?: Array<{
+    point_id: "moon" | "sun" | string;
+    sign: string;
+    ingress_date: string | null;
+    egress_date: string | null;
+    ingress_status: "found" | "birth_or_before" | "not_found" | string;
+    egress_status: "found" | "not_found" | string;
+    boundary_resolution: "date" | string;
+  }>;
   progressed_snapshot: NatalSnapshot;
   comparison: ChartComparison;
 };

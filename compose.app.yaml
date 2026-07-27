@@ -31,6 +31,9 @@ services:
       - .env
     environment:
       INTERSTELLAR_API_HOST: 0.0.0.0
+      # The published host port is configurable, but the container contract
+      # and health check always use port 8018.
+      INTERSTELLAR_API_PORT: 8018
       INTERSTELLAR_ACCOUNT_DATABASE_PATH: /var/lib/interstellar/accounts.sqlite3
       # Use the fallback timezone resolver (smaller image; no full TBB archive).
       # GeoNames paths are auto-discovered from the container's vendor/geonames/
@@ -88,12 +91,12 @@ services:
       context: .
       dockerfile: infra/deploy/Dockerfile.web
       args:
-        NEXT_PUBLIC_INTERSTELLAR_API_URL: ${NEXT_PUBLIC_INTERSTELLAR_API_URL:-http://127.0.0.1:8018/api/v1}
+        NEXT_PUBLIC_INTERSTELLAR_API_URL: ${NEXT_PUBLIC_INTERSTELLAR_API_URL:-/api/v1}
     image: interstellar-web:local
     environment:
-      NEXT_PUBLIC_INTERSTELLAR_API_URL: ${NEXT_PUBLIC_INTERSTELLAR_API_URL:-http://127.0.0.1:8018/api/v1}
+      NEXT_PUBLIC_INTERSTELLAR_API_URL: ${NEXT_PUBLIC_INTERSTELLAR_API_URL:-/api/v1}
     ports:
-      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:${INTERSTELLAR_WEB_PORT:-3000}:3000"
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
       interval: 20s

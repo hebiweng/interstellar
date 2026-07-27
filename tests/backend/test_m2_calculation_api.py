@@ -322,6 +322,13 @@ def test_secondary_progression_reuses_natal_snapshot_and_returns_comparison() ->
     assert result["reference_snapshot_id"] == natal_snapshot["id"]
     assert result["target_date"] == "2026-07-23"
     assert result["progressed_time"].startswith("2000-01-28T")
+    sign_periods = {item["point_id"]: item for item in result["progressed_sign_periods"]}
+    assert set(sign_periods) == {"moon", "sun"}
+    assert sign_periods["moon"]["ingress_date"] <= result["target_date"]
+    assert sign_periods["moon"]["egress_date"] > result["target_date"]
+    assert sign_periods["sun"]["ingress_date"] <= result["target_date"]
+    assert sign_periods["sun"]["egress_date"] > result["target_date"]
+    assert sign_periods["moon"]["boundary_resolution"] == "date"
     progressed = result["progressed_snapshot"]
     assert progressed["result"]["charts"][0]["family"] == "progression"
     assert progressed["result"]["charts"][0]["technique"] == "progression.secondary"

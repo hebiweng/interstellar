@@ -392,6 +392,188 @@ def _progressed_subject_version(
     return progressed_subject, progressed_local
 
 
+def _secondary_snapshot_for_target(
+    *,
+    reference_snapshot: dict[str, Any],
+    target_date: date,
+    settings_document: dict[str, Any],
+    rule_pack_hash: str,
+    engine_version: str,
+    adapter: SwissEphemerisAdapter,
+) -> dict[str, Any]:
+    progressed_subject, _progressed_local = _progressed_subject_version(
+        reference_snapshot,
+        target_date,
+    )
+    return create_astronomical_snapshot(
+        snapshot_id=f"calculation-{uuid4()}",
+        request_payload={
+            "subject": {"subject_version_id": progressed_subject["id"]},
+            "chart": {"family": "progression", "technique": "progression.secondary"},
+            "settings": settings_document,
+            "rule_pack_hash": rule_pack_hash,
+            "dataset_versions": {},
+            "outputs": ["snapshot", "json"],
+        },
+        subject_version=progressed_subject,
+        now=datetime.now(UTC),
+        engine_version=engine_version,
+        adapter=adapter,
+    )
+
+
+def _snapshot_point_sign(snapshot: dict[str, Any], point_id: str) -> str | None:
+    result = snapshot.get("result")
+    points = result.get("points") if isinstance(result, dict) else None
+    if not isinstance(points, list):
+        return None
+    for point in points:
+        if isinstance(point, dict) and point.get("point_id") == point_id:
+            sign = point.get("sign")
+            return sign if isinstance(sign, str) else None
+    return None
+
+
+def _natal_birth_date(reference_snapshot: dict[str, Any]) -> date:
+    normalized = reference_snapshot.get("normalized_input")
+    natal_subject = normalized.get("subject_version") if isinstance(normalized, dict) else None
+    time_spec = natal_subject.get("time_spec") if isinstance(natal_subject, dict) else None
+    local_value = time_spec.get("local_value") if isinstance(time_spec, dict) else None
+    if not isinstance(local_value, str):
+        raise AstronomicalSnapshotInputError(
+            "the natal snapshot does not contain a reusable local birth date"
+        )
+    return datetime.fromisoformat(local_value).date()
+
+
+def _find_secondary_sign_boundary(
+    *,
+    reference_snapshot: dict[str, Any],
+    target_date: date,
+    settings_document: dict[str, Any],
+    rule_pack_hash: str,
+    engine_version: str,
+    adapter: SwissEphemerisAdapter,
+    point_id: str,
+    current_sign: str,
+    direction: Literal["ingress", "egress"],
+    step_days: int,
+    max_years: int,
+) -> tuple[date | None, str]:
+    birth_date = _natal_birth_date(reference_snapshot)
+
+    def sign_at(day: date) -> str | None:
+        if day < birth_date:
+            return None
+        snapshot = _secondary_snapshot_for_target(
+            reference_snapshot=reference_snapshot,
+            target_date=day,
+            settings_document=settings_document,
+            rule_pack_hash=rule_pack_hash,
+            engine_version=engine_version,
+            adapter=adapter,
+        )
+        return _snapshot_point_sign(snapshot, point_id)
+
+    if direction == "ingress":
+        inside = target_date
+        outside = target_date
+        for _ in range(max_years * 366 // step_days + 2):
+            candidate = max(birth_date, outside - timedelta(days=step_days))
+            if candidate == outside:
+                return birth_date, "birth_or_before"
+            if sign_at(candidate) != current_sign:
+                outside = candidate
+                break
+            outside = candidate
+            inside = candidate
+        else:
+            return None, "not_found"
+        low = outside
+        high = inside
+        while (high - low).days > 1:
+            mid = low + timedelta(days=(high - low).days // 2)
+            if sign_at(mid) == current_sign:
+                high = mid
+            else:
+                low = mid
+        return high, "found"
+
+    inside = target_date
+    outside = target_date
+    for _ in range(max_years * 366 // step_days + 2):
+        candidate = outside + timedelta(days=step_days)
+        if sign_at(candidate) != current_sign:
+            outside = candidate
+            break
+        outside = candidate
+        inside = candidate
+    else:
+        return None, "not_found"
+    low = inside
+    high = outside
+    while (high - low).days > 1:
+        mid = low + timedelta(days=(high - low).days // 2)
+        if sign_at(mid) == current_sign:
+            low = mid
+        else:
+            high = mid
+    return high, "found"
+
+
+def _secondary_sign_periods(
+    *,
+    reference_snapshot: dict[str, Any],
+    target_date: date,
+    progressed_snapshot: dict[str, Any],
+    settings_document: dict[str, Any],
+    rule_pack_hash: str,
+    engine_version: str,
+    adapter: SwissEphemerisAdapter,
+) -> list[dict[str, Any]]:
+    periods: list[dict[str, Any]] = []
+    for point_id, step_days, max_years in (("moon", 45, 5), ("sun", 366, 40)):
+        sign = _snapshot_point_sign(progressed_snapshot, point_id)
+        if sign is None:
+            continue
+        ingress, ingress_status = _find_secondary_sign_boundary(
+            reference_snapshot=reference_snapshot,
+            target_date=target_date,
+            settings_document=settings_document,
+            rule_pack_hash=rule_pack_hash,
+            engine_version=engine_version,
+            adapter=adapter,
+            point_id=point_id,
+            current_sign=sign,
+            direction="ingress",
+            step_days=step_days,
+            max_years=max_years,
+        )
+        egress, egress_status = _find_secondary_sign_boundary(
+            reference_snapshot=reference_snapshot,
+            target_date=target_date,
+            settings_document=settings_document,
+            rule_pack_hash=rule_pack_hash,
+            engine_version=engine_version,
+            adapter=adapter,
+            point_id=point_id,
+            current_sign=sign,
+            direction="egress",
+            step_days=step_days,
+            max_years=max_years,
+        )
+        periods.append({
+            "point_id": point_id,
+            "sign": sign,
+            "ingress_date": ingress.isoformat() if ingress else None,
+            "egress_date": egress.isoformat() if egress else None,
+            "ingress_status": ingress_status,
+            "egress_status": egress_status,
+            "boundary_resolution": "date",
+        })
+    return periods
+
+
 @router.post("/calculations/comparisons", status_code=status.HTTP_201_CREATED)
 async def create_calculation_comparison(
     payload: ChartComparisonPayload,
@@ -474,6 +656,10 @@ async def create_secondary_progression(
             payload.target_date,
         )
         settings_document = payload.settings.model_dump(mode="json", exclude_none=True)
+        adapter = SwissEphemerisAdapter(
+            moshier_fallback="record",
+            ephemeris_path=request.app.state.settings.swiss_ephemeris_path,
+        )
         request_document = {
             "subject": {"subject_version_id": progressed_subject["id"]},
             "chart": {
@@ -491,10 +677,16 @@ async def create_secondary_progression(
             subject_version=progressed_subject,
             now=datetime.now(UTC),
             engine_version=request.app.state.settings.service_version,
-            adapter=SwissEphemerisAdapter(
-                moshier_fallback="record",
-                ephemeris_path=request.app.state.settings.swiss_ephemeris_path,
-            ),
+            adapter=adapter,
+        )
+        progressed_sign_periods = _secondary_sign_periods(
+            reference_snapshot=payload.reference_snapshot,
+            target_date=payload.target_date,
+            progressed_snapshot=progressed_snapshot,
+            settings_document=settings_document,
+            rule_pack_hash=payload.rule_pack_hash,
+            engine_version=request.app.state.settings.service_version,
+            adapter=adapter,
         )
         comparison_result = create_cross_chart_comparison(
             reference_snapshot=payload.reference_snapshot,
@@ -523,6 +715,7 @@ async def create_secondary_progression(
             second=0, microsecond=0
         ).isoformat(timespec="minutes"),
         "progressed_snapshot": progressed_snapshot,
+        "progressed_sign_periods": progressed_sign_periods,
         "comparison": comparison,
     }
 
