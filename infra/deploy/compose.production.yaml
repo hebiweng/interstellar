@@ -88,9 +88,9 @@ services:
       # Small-memory production profile: search uses a deterministic CN subset
       # derived from the locked official GeoNames release. Timezone selection
       # uses the GeoNames IANA hint and remains user-confirmed.
-      INTERSTELLAR_GEONAMES_PATH: /opt/interstellar/vendor/geonames/cities500-CN-2026-07-19.zip
-      INTERSTELLAR_GEONAMES_ADMIN1_PATH: /opt/interstellar/vendor/geonames/admin1CodesASCII-CN-2026-07-19.txt
-      INTERSTELLAR_GEONAMES_ADMIN2_PATH: /opt/interstellar/vendor/geonames/admin2Codes-CN-2026-07-19.txt
+      INTERSTELLAR_GEONAMES_PATH: /opt/interstellar/vendor/geonames/cities500-2026-07-19.zip
+      INTERSTELLAR_GEONAMES_ADMIN1_PATH: /opt/interstellar/vendor/geonames/admin1CodesASCII-2026-07-19.txt
+      INTERSTELLAR_GEONAMES_ADMIN2_PATH: /opt/interstellar/vendor/geonames/admin2Codes-2026-07-19.txt
       INTERSTELLAR_GEONAMES_DATASET_VERSION: cities500-CN-2026-07-19
       INTERSTELLAR_TIMEZONE_BOUNDARIES_PATH: ${INTERSTELLAR_TIMEZONE_BOUNDARIES_PATH:-/opt/interstellar/deploy-data/timezone-boundaries-geonames-fallback.geojson}
       INTERSTELLAR_TIMEZONE_BOUNDARIES_DATASET_VERSION: ${INTERSTELLAR_TIMEZONE_BOUNDARIES_DATASET_VERSION:-geonames-hint-only-v1}
