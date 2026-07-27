@@ -8,8 +8,9 @@ import { buildNatalRenderSpec } from '../../lib/render-export';
 import type { NatalRenderControls } from '../../lib/render-export';
 
 import {
-  buildSecondaryProgressionConsumerInsight, buildSecondaryProgressionInterpretationSections
-} from '../../lib/consumer-insight';
+  buildSecondaryProgressionConsumerInsight, buildSecondaryProgressionInterpretationSections,
+  buildSecondaryProgressionRightPanel,
+} from '../../lib/insight/secondary';
 import {
   defaultTimingSettings, defaultTimingGroups, defaultWheelControls,
   houseSystemOptions,
@@ -23,6 +24,7 @@ import { SharedAdvancedCalculationFields } from '../forms/shared-advanced-calcul
 import { SecondaryCalculationPanel } from '../panels/secondary-calculation-panel';
 import { NonNatalInterpretationSection } from '../panels/non-natal-interpretation-section';
 import { TechniqueGuideDialog } from '../forms/technique-guide-dialog';
+import '../../styles/secondary.css';
 
 export function SecondaryProgressionsWorkspace({
   theme,
@@ -84,6 +86,10 @@ export function SecondaryProgressionsWorkspace({
   );
   const secondaryInsight = useMemo(
     () => result ? buildSecondaryProgressionConsumerInsight(result, latestNatalSnapshot) : null,
+    [result, latestNatalSnapshot],
+  );
+  const rightPanel = useMemo(
+    () => result ? buildSecondaryProgressionRightPanel(result, latestNatalSnapshot) : null,
     [result, latestNatalSnapshot],
   );
 
@@ -281,13 +287,23 @@ export function SecondaryProgressionsWorkspace({
         </header>
         {aiAnalysisText ? (
           <article className="ai-analysis-copy" dangerouslySetInnerHTML={{ __html: aiAnalysisText.replace(/\n/g, "<br/>") }} />
-        ) : secondaryInsight ? <article className="instant-insight">
-          <section className="instant-theme"><span>阶段重点</span><h3>{secondaryInsight.title}</h3><p>{secondaryInsight.summary}</p></section>
-          <section className="insight-dimensions">{secondaryInsight.dimensions.map((dimension) => <div key={dimension.id}><header><b>{dimension.label}</b><strong>{dimension.score}</strong></header><i><span style={{ width: `${dimension.score}%` }} /></i><small>{dimension.note}</small></div>)}</section>
-          <section className="aspect-balance"><header><b>顺势的地方与容易卡住的地方</b></header><div><span className="supportive" style={{ flex: secondaryInsight.aspectBalance.supportive || 0.25 }} /><span className="tension" style={{ flex: secondaryInsight.aspectBalance.tension || 0.25 }} /><span className="neutral" style={{ flex: secondaryInsight.aspectBalance.neutral || 0.25 }} /></div><footer><span>容易配合 {secondaryInsight.aspectBalance.supportive}</span><span>需要协调 {secondaryInsight.aspectBalance.tension}</span><span>彼此相连 {secondaryInsight.aspectBalance.neutral}</span></footer><p>{secondaryInsight.aspectBalance.meaning}</p></section>
-          <section className="top-signals"><header><b>最明显的变化信号</b><small>越靠前，当前关系越紧密</small></header>{secondaryInsight.signals.map((signal) => <div key={signal.id}><span>{signal.strength}</span><p><b>{signal.title}</b><small>{signal.detail}</small><em>{signal.meaning}</em></p></div>)}</section>
-          <section className="insight-advice"><div><b>变化落在生活哪里</b>{houseHighlights.map((item) => <p key={item.moving_point_id}>• 次限{pointNames[item.moving_point_id] ?? item.moving_point_id}落入本命第{item.reference_house}宫：这一阶段更容易围绕&ldquo;{houseDomains[item.reference_house - 1]}&rdquo;发生内在调整。</p>)}</div><div><b>怎么使用</b><p>{secondaryInsight.strengths.map((item) => <p key={item}>• {item}</p>)}</p><p>{secondaryInsight.reminders.map((item) => <p key={item}>• {item}</p>)}</p></div></section>
-          <section className="insight-closing"><b>最后提醒</b><p>{secondaryInsight.closing}</p></section>
+        ) : rightPanel ? <article className="instant-insight">
+          {rightPanel.cards.map(card => (
+            <section key={card.id} className="insight-card-sp">
+              <header className="insight-card-sp-header">
+                <span className="insight-card-sp-icon">{card.icon}</span>
+                <div>
+                  <b>{card.title}</b>
+                  <p>{card.summary}</p>
+                </div>
+              </header>
+              {card.details.length > 0 && (
+                <ul className="insight-card-sp-details">
+                  {card.details.map((detail, i) => <li key={i}>{detail}</li>)}
+                </ul>
+              )}
+            </section>
+          ))}
         </article> : <div className="ai-waiting"><b>等待计算</b><p>计算完成后会立即用大白话说明次限月亮、次限太阳、次限月相和最明显的成长主题，不调用大模型。</p></div>}
         <footer><span>本地即时解读</span><small>点击 AI 按钮调用 DeepSeek 深度分析。</small></footer>
       </aside>

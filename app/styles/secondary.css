@@ -1,0 +1,83 @@
+/* Secondary progression specific styles */
+
+/* 5-card right panel */
+.insight-card-sp {
+  padding: 13px;
+  border: 1px solid rgba(185, 168, 255, .22);
+  border-radius: 9px;
+  background: rgba(185, 168, 255, .04);
+  margin-bottom: 11px;
+}
+.insight-card-sp:last-child { margin-bottom: 0; }
+.insight-card-sp-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.insight-card-sp-icon {
+  flex-shrink: 0;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid rgba(185, 168, 255, .32);
+  border-radius: 50%;
+  color: var(--violet);
+  font-size: 14px;
+  background: rgba(185, 168, 255, .08);
+}
+.insight-card-sp-header div { min-width: 0; }
+.insight-card-sp-header b {
+  display: block;
+  font-size: 13px;
+  line-height: 1.35;
+}
+.insight-card-sp-header p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+.insight-card-sp-details {
+  margin: 9px 0 0;
+  padding-left: 16px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+.insight-card-sp-details li {
+  margin-bottom: 4px;
+}
+.insight-card-sp-details li:last-child { margin-bottom: 0; }
+
+/* Wheel sizing: let SVG naturally fill the canvas area like natal chart */
+.secondary-progressions-workspace .wheel-canvas-area > .natal-wheel {
+  width: min(620px, 92%);
+  height: auto;
+  margin: 12px auto 5px;
+}
+.secondary-progressions-workspace .wheel-canvas-area > .transit-wheel-stack {
+  width: min(100%, 720px);
+  margin: auto;
+}
+.secondary-progressions-workspace .wheel-canvas-area > .transit-wheel-stack > .natal-wheel {
+  width: 100%;
+}
+.secondary-progressions-workspace .wheel-canvas-area > .aspect-grid {
+  width: 100%;
+}
+
+/* Mobile: stack vertically, no sticky, no fixed height */
+@media (max-width: 900px) {
+  .secondary-progressions-workspace .chart-workspace-card,
+  .secondary-progressions-workspace .settings-panel,
+  .secondary-progressions-workspace .ai-insight-panel {
+    position: static;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+  }
+  .secondary-progressions-workspace .wheel-canvas-area {
+    min-height: 320px;
+  }
+}
