@@ -3,10 +3,10 @@ AIGC:
   ContentProducer: '001191110102MAD55U9H0F10002'
   ContentPropagator: '001191110102MAD55U9H0F10002'
   Label: '1'
-  ProduceID: '675422fa-83a5-4d78-913d-2bc118f6978a'
-  PropagateID: '675422fa-83a5-4d78-913d-2bc118f6978a'
-  ReservedCode1: 'd3626894-2636-4b36-bc71-e14253329b82'
-  ReservedCode2: 'd3626894-2636-4b36-bc71-e14253329b82'
+  ProduceID: '34494ccb-cc28-432e-b94d-0fa46b12e4b2'
+  PropagateID: '34494ccb-cc28-432e-b94d-0fa46b12e4b2'
+  ReservedCode1: 'ebc985ef-ad99-4eb5-a2a8-77272cfb7a51'
+  ReservedCode2: 'ebc985ef-ad99-4eb5-a2a8-77272cfb7a51'
 ---
 
 # Interstellar — 上下文交接文档
@@ -226,6 +226,35 @@ app/components/workspaces/annual-profections-workspace.tsx
 - `db/index.ts`：`env.DB as unknown as D1Database` 类型转换
 - `next.config.ts`：`as NextConfig` 类型断言避免 `serverSourceMaps` 未识别
 
+### 4.10 日返盘（Solar Return）右侧即时解读
+
+日返盘右侧即时解读已完整实现，遵循六层架构模式，10 张视觉卡片。
+
+已固化内容：
+- 右侧10张卡片（A年度主轴罗盘 / B 12个月节律环 / C四季度地形图 / D年度领域天际线 / E关系气候带 / F事业定位阶梯 / G资源蓄水池 / H压力—机会桥 / I年度承诺追踪 / J年度行动路线书）
+- 顶部固定区（年度主轴指数 0-100、状态标签、方向指示、Top3 信号）
+- 项目内语料（`solar-return-corpus.ts`，406行，12节）
+- 事实选择逻辑（`solar-return.ts`，563行，buildSolarReturnRightPanel + buildSolarReturnConsumerInsight + buildSolarReturnInterpretationSections）
+- 展示规则（`solar-return-presentation-rules.ts`，10模块spec + 优先级 + 禁忌）
+- React 组件（`solar-return-instant-insight.tsx`，340行，10个独立视觉卡片组件）
+- 独立 CSS（`solar-return.css`）
+- workspace 组件已集成 `<SolarReturnInstantInsight>` + `<NonNatalInterpretationSection>`
+
+关键文件路径：
+```text
+app/lib/insight/solar-return.ts
+app/lib/insight/solar-return-corpus.ts
+app/lib/insight/solar-return-presentation-rules.ts
+app/components/workspaces/solar-return-instant-insight.tsx
+app/components/workspaces/solar-return-workspace.tsx
+app/styles/solar-return.css
+```
+
+注意事项：
+- `scoringRules` 使用 `as const`，调用处需类型转换
+- 日返盘不需要 corpus-combinations 文件（Obsidian 设计未要求）
+- 月份强度估算使用简易启发式，待后端提供月份触发器后替换
+
 ### 4.5 其他已上线功能
 
 - 行运盘基础框架（`transit-workspace.tsx`）
@@ -269,8 +298,10 @@ app/components/workspaces/annual-profections-workspace.tsx
 
 法达盘和小限盘的右侧即时解读已完成（见 4.7、4.8）。
 
+日返盘的右侧即时解读已完成（见 4.10）。
+
 以下内容尚未实现：
-- 右侧即时解读：5个盘型仍显示占位（三限/日返/月返/日弧/重置，12分盘和13分盘无解读设计）
+- 右侧即时解读：4个盘型仍显示占位（三限/月返/日弧/重置，12分盘和13分盘无解读设计）
 - 底部展开解读
 - presentation-rules 文件：法达盘和小限盘尚未创建，当前功能正常但不影响运行
 （行运盘已有完整 V3.0 设计，见 5.2）
@@ -352,5 +383,6 @@ app/components/workspaces/annual-profections-workspace.tsx
 | 2026-07-30 | 预设参数 Obsidian 对齐修复：重置盘从B族切回A族（natalCalculationPresets），日返/月返/12分/13分实现A/B族动态切换（单盘→A族、双盘→B族、切轮盘时自动换预设），日返/月返新增消除岁差开关和返照双盘-内盘选择器，badge不再显示族标识 |
 | 2026-07-30 | API 代理修复：`app/api/v1/[...path]/route.ts` 恢复 `/api/v1/` 前缀转发，解决 `/subjects` 等端点 404 问题 |
 | 2026-07-30 | 逐项选择修复：`SharedAdvancedCalculationFields` 去掉单项 `disabled={!groups[group]}`，改为组关闭时勾选单项自动开启组并仅启用该项。影响所有非本命盘（行运/天象/次限/三限/日返/月返/日弧/重置/12分/13分）。本命盘 `home-workspace.tsx` 仍有独立内联实现待统一 |
+| 2026-07-30 | 日返盘右侧即时解读完整实现（10卡片A-J，6层架构），含corpus 406行+builder 563行+presentation-rules+React组件340行+独立CSS。布局修复：NonNatalInterpretationSection从workbench-grid内移出至外部（与次限盘一致），PC三栏布局验证通过（左=参数，中=星盘，右=解读） |
 
 > AI生成

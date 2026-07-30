@@ -1,0 +1,466 @@
+/**
+ * 日返盘即时解读样式
+ * 对应 Obsidian 6-解读设计.md V2.0 的10张卡片视觉
+ */
+
+/* ─── 顶部指数区 ──────────────────────────────────────── */
+.sr-top-index {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  border-left: 3px solid #3b82f6;
+  border-radius: 6px;
+  background: var(--card-bg, #1e293b);
+  margin-bottom: 12px;
+}
+.sr-top-index-score {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.sr-top-index-number {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+}
+.sr-top-index-label {
+  font-size: 12px;
+  opacity: 0.7;
+}
+.sr-top-index-direction {
+  flex: 1 0 100%;
+  font-size: 14px;
+}
+.sr-top-index-direction b { margin-right: 8px; }
+.sr-top-index-signals {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+/* ─── 共用卡片摘要 ────────────────────────────────────── */
+.sr-card-summary {
+  font-size: 13px;
+  margin: 8px 0 0;
+  opacity: 0.85;
+  line-height: 1.5;
+}
+
+/* ─── Badge样式 ─────────────────────────────────────── */
+.sr-index-badge {
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 8px;
+}
+.sr-peak-badge, .sr-ladder-badge, .sr-pool-badge {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-left: 8px;
+}
+
+/* ─── Card A: 年度主轴罗盘 ─────────────────────────────── */
+.sr-card-compass .sr-compass-visual {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 8px auto;
+}
+.sr-compass-ring {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid var(--border, #334155);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sr-compass-center {
+  text-align: center;
+}
+.sr-compass-score {
+  font-size: 32px;
+  font-weight: 700;
+  display: block;
+  line-height: 1;
+}
+.sr-compass-label {
+  font-size: 10px;
+  opacity: 0.6;
+}
+.sr-compass-n, .sr-compass-s, .sr-compass-e, .sr-compass-w {
+  position: absolute;
+  font-size: 11px;
+  font-weight: 500;
+}
+.sr-compass-n { top: 4px; left: 50%; transform: translateX(-50%); }
+.sr-compass-s { bottom: 4px; left: 50%; transform: translateX(-50%); }
+.sr-compass-e { right: 4px; top: 50%; transform: translateY(-50%); }
+.sr-compass-w { left: 4px; top: 50%; transform: translateY(-50%); }
+.sr-compass-sub {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  opacity: 0.7;
+  margin: 4px 0;
+}
+.sr-compass-signals {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 11px;
+}
+.sr-signal-tag {
+  background: var(--tag-bg, #334155);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+/* ─── Card B: 12个月节律环 ─────────────────────────────── */
+.sr-card-rhythm .sr-rhythm-ring {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  margin: 8px auto;
+  border-radius: 50%;
+  border: 1px solid var(--border, #334155);
+}
+.sr-rhythm-inner {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+.sr-rhythm-center-label { font-size: 12px; opacity: 0.6; }
+.sr-rhythm-month {
+  position: absolute;
+  top: 0; left: 50%;
+  width: 0; height: 50%;
+  transform-origin: 0 100%;
+  font-size: 9px;
+  transform: translateX(-50%) rotate(var(--r));
+}
+.sr-rhythm-month span {
+  display: inline-block;
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.sr-rhythm-details {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.sr-rhythm-item {
+  font-size: 11px;
+  opacity: 0.8;
+  background: var(--tag-bg, #334155);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ─── Card C: 四季度地形图 ─────────────────────────────── */
+.sr-card-terrain .sr-terrain-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 120px;
+  padding: 8px 0;
+  position: relative;
+}
+.sr-terrain-bar {
+  flex: 1;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(to top, #3b82f6, #60a5fa);
+  position: relative;
+  min-height: 10px;
+  transition: height 0.3s;
+}
+.sr-terrain-bar:nth-child(3) { background: linear-gradient(to top, #f59e0b, #fbbf24); }
+.sr-terrain-value {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  opacity: 0.7;
+}
+.sr-terrain-labels {
+  display: flex;
+  gap: 8px;
+  text-align: center;
+  font-size: 10px;
+  opacity: 0.7;
+}
+.sr-terrain-labels span {
+  flex: 1;
+}
+
+/* ─── Card D: 年度领域天际线 ─────────────────────────────── */
+.sr-card-skyline .sr-skyline-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 100px;
+  padding: 8px 0;
+}
+.sr-skyline-building {
+  flex: 1;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(to top, #475569, #64748b);
+  position: relative;
+  min-height: 15px;
+  transition: height 0.3s;
+}
+.sr-skyline-building:nth-child(1) { background: linear-gradient(to top, #f87171, #fb923c); }
+.sr-skyline-building:nth-child(2) { background: linear-gradient(to top, #818cf8, #a78bfa); }
+.sr-skyline-building:nth-child(3) { background: linear-gradient(to top, #f59e0b, #fbbf24); }
+.sr-skyline-label {
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  white-space: nowrap;
+  opacity: 0.7;
+}
+
+/* ─── Card E: 关系气候带 ─────────────────────────────── */
+.sr-card-climate .sr-climate-band {
+  height: 60px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+.sr-climate-gradient {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #60a5fa 0%, #818cf8 25%, #fbbf24 50%, #f87171 75%, #4ade80 100%);
+  border-radius: 6px;
+}
+.sr-climate-details {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.sr-climate-item {
+  font-size: 11px;
+  opacity: 0.8;
+  background: var(--tag-bg, #334155);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ─── Card F: 事业定位阶梯 ─────────────────────────────── */
+.sr-card-ladder .sr-ladder-visual {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0;
+  padding-left: 8px;
+}
+.sr-ladder-step {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  opacity: 0.4;
+  background: var(--tag-bg, #334155);
+  margin-left: 0;
+  transition: all 0.2s;
+}
+.sr-ladder-step.active {
+  opacity: 1;
+  background: var(--active-bg, #3b82f6);
+  color: #fff;
+}
+.sr-ladder-step:nth-child(4).active { margin-left: 24px; }
+.sr-ladder-step:nth-child(3).active { margin-left: 18px; }
+.sr-ladder-step:nth-child(2).active { margin-left: 12px; }
+.sr-ladder-step:nth-child(1).active { margin-left: 6px; }
+.sr-ladder-details {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+/* ─── Card G: 资源蓄水池 ─────────────────────────────── */
+.sr-card-pool .sr-pool-visual {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+.sr-pool-input, .sr-pool-output {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 10px;
+  opacity: 0.7;
+}
+.sr-pool-input { text-align: right; }
+.sr-pool-output { text-align: left; }
+.sr-pool-tank {
+  flex: 1;
+  height: 80px;
+  border: 2px solid var(--border, #334155);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.sr-pool-water {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, #3b82f6, #60a5fa);
+  border-radius: 0 0 4px 4px;
+  transition: height 0.5s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sr-pool-water span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* ─── Card H: 压力—机会桥 ─────────────────────────────── */
+.sr-card-bridge .sr-bridge-visual {
+  display: flex;
+  gap: 4px;
+  align-items: stretch;
+  margin: 8px 0;
+  min-height: 80px;
+}
+.sr-bridge-left, .sr-bridge-right {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sr-bridge-left {
+  background: rgba(248, 113, 113, 0.15);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+.sr-bridge-right {
+  background: rgba(74, 222, 128, 0.15);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+}
+.sr-bridge-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px;
+  font-size: 10px;
+  opacity: 0.7;
+  min-width: 60px;
+}
+.sr-bridge-center span {
+  background: var(--tag-bg, #334155);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ─── Card I: 年度承诺追踪 ─────────────────────────────── */
+.sr-card-commitment .sr-commitment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0;
+}
+.sr-commitment-item {
+  font-size: 12px;
+}
+.sr-commitment-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+.sr-commitment-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--tag-bg, #334155);
+  overflow: hidden;
+}
+.sr-commitment-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  transition: width 0.3s;
+}
+.sr-commitment-item small {
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+/* ─── Card J: 年度行动路线书 ─────────────────────────────── */
+.sr-card-route .sr-route-visual {
+  margin: 8px 0;
+  padding-left: 16px;
+}
+.sr-route-line {
+  border-left: 2px solid var(--border, #475569);
+  padding-left: 16px;
+  position: relative;
+}
+.sr-route-node {
+  position: relative;
+  padding: 8px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.sr-route-dot {
+  position: absolute;
+  left: -23px;
+  top: 12px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3b82f6;
+}
+.sr-route-node div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sr-route-node b {
+  font-size: 12px;
+}
+.sr-route-node span {
+  font-size: 11px;
+  opacity: 0.8;
+}
+.sr-route-warning {
+  font-size: 11px;
+  opacity: 0.7;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(251, 191, 36, 0.15);
+  margin: 4px 0;
+}
+
+/* ─── 日返盘专用instant-insight容器 ──────────────────────── */
+.sr-instant-insight {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: calc(100vh - 140px);
+  padding-right: 4px;
+}

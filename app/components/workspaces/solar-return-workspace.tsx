@@ -17,7 +17,11 @@ import { NatalWheel } from '../wheels/natal-wheel';
 import { AspectGrid } from '../wheels/aspect-grid';
 import { SharedAdvancedCalculationFields } from '../forms/shared-advanced-calculation-fields';
 import { TechniqueGuideDialog } from '../forms/technique-guide-dialog';
+import { NonNatalInterpretationSection } from '../panels/non-natal-interpretation-section';
+import { buildSolarReturnRightPanel, buildSolarReturnConsumerInsight, buildSolarReturnInterpretationSections } from '../../lib/insight/solar-return';
+import { SolarReturnInstantInsight } from './solar-return-instant-insight';
 import '../../styles/secondary.css';
+import '../../styles/solar-return.css';
 
 export function SolarReturnWorkspace({
   theme,
@@ -236,12 +240,23 @@ export function SolarReturnWorkspace({
         <footer className="drawer-footer"><button className="settings-calculate" disabled={busy} onClick={() => { void calculate(); setDrawerOpen(false); }}>{busy ? "正在计算…" : "应用并计算"}</button></footer>
       </aside></div>}
 
-      <aside className="ai-insight-panel">
-        <header><div><small>SOLAR RETURN INSIGHT · LOCAL</small><h2>这一年的主题</h2></div></header>
-        <div className="ai-waiting"><b>解读开发中</b><p>日返盘的本地即时解读和 AI 分析功能正在开发中。计算接口就绪后将首先提供本地解读。</p></div>
-        <footer><span>本地即时解读</span><small>开发中</small></footer>
-      </aside>
+      {result && <aside className="ai-insight-panel">
+            <header><div><small>SOLAR RETURN INSIGHT · LOCAL</small><h2>这一年的主题</h2></div></header>
+            <SolarReturnInstantInsight
+              comparison={result.comparison}
+              returnSnapshot={result.return_snapshot}
+              rightPanel={buildSolarReturnRightPanel(result, latestNatalSnapshot)}
+            />
+            <footer><span>本地即时解读</span><small>10卡片</small></footer>
+          </aside>}
+          {!result && <aside className="ai-insight-panel">
+            <header><div><small>SOLAR RETURN INSIGHT · LOCAL</small><h2>这一年的主题</h2></div></header>
+            <div className="ai-waiting"><b>等待计算</b><p>计算日返盘后将自动生成本地即时解读。</p></div>
+            <footer><span>本地即时解读</span><small>等待</small></footer>
+          </aside>}
     </div>
+
+    {result && <NonNatalInterpretationSection insight={buildSolarReturnConsumerInsight(result)} sections={buildSolarReturnInterpretationSections(result)} />}
 
     <TechniqueGuideDialog open={guideOpen} title="什么是日返盘？" path="/solar-return-guide.md" onClose={() => setGuideOpen(false)} />
   </section>;
