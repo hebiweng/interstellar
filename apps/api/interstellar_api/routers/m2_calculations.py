@@ -14,6 +14,7 @@ from interstellar_core.application.astronomical_snapshot import (
     AstronomicalSnapshotInputError,
     create_astronomical_snapshot,
     create_date_level_astronomical_snapshot,
+    resolve_aspect_profiles,
 )
 from interstellar_core.application.chart_comparison import (
     create_cross_chart_comparison,
@@ -28,8 +29,13 @@ from interstellar_core.application.snapshot_tables import (
     build_snapshot_table,
     table_json_bytes,
 )
-from interstellar_core.astrology.aspects import AspectContext
+from interstellar_core.astrology.aspects import (
+    AspectContext,
+    AspectPoint,
+    find_major_aspects,
+)
 from interstellar_core.astronomy.adapters import AYANAMSA_MODES, SwissEphemerisAdapter
+from interstellar_core.astronomy.adapters.swiss_ephemeris import SIGN_IDS
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from interstellar_api.errors import ErrorCode, ProblemException
@@ -170,6 +176,70 @@ class ChartComparisonPayload(StrictModel):
 class SecondaryProgressionPayload(StrictModel):
     reference_snapshot: dict[str, Any]
     target_date: date
+    settings: ChartSettingsPayload
+    rule_pack_hash: str = Field(
+        pattern=r"^(?:sha256|hmac-sha256):[A-Fa-f0-9]{32,128}$"
+    )
+
+
+class TertiaryProgressionPayload(StrictModel):
+    reference_snapshot: dict[str, Any]
+    target_date: date
+    settings: ChartSettingsPayload
+    rule_pack_hash: str = Field(
+        pattern=r"^(?:sha256|hmac-sha256):[A-Fa-f0-9]{32,128}$"
+    )
+
+
+class SolarReturnPayload(StrictModel):
+    reference_snapshot: dict[str, Any]
+    target_year: int = Field(ge=1800, le=2200)
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+    residence_name: str | None = Field(default=None, max_length=200)
+    timezone_id: str | None = Field(default=None, max_length=80)
+    settings: ChartSettingsPayload
+    rule_pack_hash: str = Field(
+        pattern=r"^(?:sha256|hmac-sha256):[A-Fa-f0-9]{32,128}$"
+    )
+
+
+class LunarReturnPayload(StrictModel):
+    reference_snapshot: dict[str, Any]
+    reference_date: date | None = None
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+    residence_name: str | None = Field(default=None, max_length=200)
+    timezone_id: str | None = Field(default=None, max_length=80)
+    settings: ChartSettingsPayload
+    rule_pack_hash: str = Field(
+        pattern=r"^(?:sha256|hmac-sha256):[A-Fa-f0-9]{32,128}$"
+    )
+
+
+class SolarArcPayload(StrictModel):
+    reference_snapshot: dict[str, Any]
+    target_date: date
+    settings: ChartSettingsPayload
+    rule_pack_hash: str = Field(
+        pattern=r"^(?:sha256|hmac-sha256):[A-Fa-f0-9]{32,128}$"
+    )
+
+
+class RelocationPayload(StrictModel):
+    reference_snapshot: dict[str, Any]
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+    residence_name: str | None = Field(default=None, max_length=200)
+    timezone_id: str | None = Field(default=None, max_length=80)
+    settings: ChartSettingsPayload
+    rule_pack_hash: str = Field(
+        pattern=r"^(?:sha256|hmac-sha256):[A-Fa-f0-9]{32,128}$"
+    )
+
+
+class HarmonicChartPayload(StrictModel):
+    reference_snapshot: dict[str, Any]
     settings: ChartSettingsPayload
     rule_pack_hash: str = Field(
         pattern=r"^(?:sha256|hmac-sha256):[A-Fa-f0-9]{32,128}$"
@@ -718,6 +788,950 @@ async def create_secondary_progression(
         "progressed_sign_periods": progressed_sign_periods,
         "comparison": comparison,
     }
+
+
+# ---------------------------------------------------------------------------
+# Shared helpers for the additional timing/derived chart endpoints.
+# ---------------------------------------------------------------------------
+
+
+def _natal_subject_context(
+    reference_snapshot: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], datetime, ZoneInfo]:
+    """Extract the natal subject, time spec, location and local birth moment."""
+    normalized = reference_snapshot.get("normalized_input")
+    if not isinstance(normalized, dict):
+        raise AstronomicalSnapshotInputError(
+            "the natal snapshot does not contain its normalized birth input"
+        )
+    natal_subject = normalized.get("subject_version")
+    if not isinstance(natal_subject, dict):
+        raise AstronomicalSnapshotInputError(
+            "the natal snapshot does not contain a reusable subject version"
+        )
+    time_spec = natal_subject.get("time_spec")
+    location = natal_subject.get("location")
+    if not isinstance(time_spec, dict) or not isinstance(location, dict):
+        raise AstronomicalSnapshotInputError(
+            "the natal snapshot lacks reusable time and location"
+        )
+    if time_spec.get("precision") not in {"minute", "hour"}:
+        raise AstronomicalSnapshotInputError(
+            "this technique requires a known birth time"
+        )
+    local_value = time_spec.get("local_value")
+    timezone_id = time_spec.get("timezone_id") or location.get("timezone_id")
+    if not isinstance(local_value, str) or not isinstance(timezone_id, str):
+        raise AstronomicalSnapshotInputError(
+            "this technique requires local birth time and IANA timezone"
+        )
+    try:
+        birth_local = datetime.fromisoformat(local_value)
+        zone = ZoneInfo(timezone_id)
+    except (ValueError, ZoneInfoNotFoundError) as exc:
+        raise AstronomicalSnapshotInputError(
+            "the natal local time or timezone cannot be resolved"
+        ) from exc
+    if birth_local.tzinfo is not None:
+        birth_local = birth_local.astimezone(zone).replace(tzinfo=None)
+    return natal_subject, time_spec, location, birth_local, zone
+
+
+def _event_subject_version(
+    *,
+    natal_subject: dict[str, Any],
+    time_spec: dict[str, Any],
+    location: dict[str, Any],
+    utc_instant: datetime,
+    chart_role: str,
+    technique_description: str,
+    display_label: str,
+    extra_attributes: dict[str, Any],
+) -> dict[str, Any]:
+    """Build a derived event subject around an already-known UTC instant.
+
+    The snapshot pipeline trusts ``selected_utc`` as the authoritative moment;
+    ``local_value`` is derived from the location timezone for display only.
+    """
+    timezone_id = (
+        time_spec.get("timezone_id") or location.get("timezone_id") or "UTC"
+    )
+    try:
+        zone = ZoneInfo(str(timezone_id))
+    except ZoneInfoNotFoundError as exc:
+        raise AstronomicalSnapshotInputError(
+            f"the timezone {timezone_id!r} cannot be resolved"
+        ) from exc
+    local_dt = utc_instant.astimezone(zone)
+    utc_text = (
+        utc_instant.astimezone(UTC)
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z")
+    )
+    subject = deepcopy(natal_subject)
+    subject.update({
+        "id": f"{chart_role}-subject-{uuid4()}",
+        "kind": "event",
+        "display_name": (
+            f"{natal_subject.get('display_name') or 'Natal subject'} {display_label}"
+        ),
+    })
+    subject["time_spec"] = {
+        **deepcopy(time_spec),
+        "timezone_id": str(timezone_id),
+        "local_value": local_dt.replace(second=0, microsecond=0).isoformat(
+            timespec="minutes"
+        ),
+        "precision": "minute",
+        "selected_utc": utc_text,
+        "utc_candidates": [utc_text],
+        "confidence": time_spec.get("confidence") or "unknown",
+        "source": {"kind": "derived", "description": technique_description},
+        "warnings": [],
+    }
+    subject["location"] = deepcopy(location)
+    subject["attributes"] = {
+        **deepcopy(natal_subject.get("attributes") or {}),
+        "chart_role": chart_role,
+        **extra_attributes,
+    }
+    return subject
+
+
+def _snapshot_point_longitude(snapshot: dict[str, Any], point_id: str) -> float:
+    result = snapshot.get("result")
+    points = result.get("points") if isinstance(result, dict) else None
+    if isinstance(points, list):
+        for point in points:
+            if not isinstance(point, dict) or point.get("point_id") != point_id:
+                continue
+            position = point.get("position")
+            ecliptic = position.get("ecliptic") if isinstance(position, dict) else None
+            longitude = ecliptic.get("longitude_deg") if isinstance(ecliptic, dict) else None
+            if isinstance(longitude, (int, float)):
+                return float(longitude) % 360
+    raise AstronomicalSnapshotInputError(
+        f"the natal snapshot has no {point_id} longitude"
+    )
+
+
+def _reference_zodiac(reference_snapshot: dict[str, Any]) -> tuple[str, str | None]:
+    """Return the zodiac/ayanamsa the natal snapshot longitudes were computed in."""
+    request_payload = reference_snapshot.get("request")
+    settings = (
+        request_payload.get("settings") if isinstance(request_payload, dict) else None
+    )
+    if not isinstance(settings, dict):
+        return "tropical", None
+    zodiac = settings.get("zodiac")
+    ayanamsa = settings.get("ayanamsa")
+    return (
+        str(zodiac) if zodiac in {"tropical", "sidereal"} else "tropical",
+        str(ayanamsa) if isinstance(ayanamsa, str) else None,
+    )
+
+
+def _angular_delta(longitude: float, target: float) -> float:
+    """Signed shortest angular distance from target to longitude, in [-180, 180)."""
+    return (longitude - target + 540.0) % 360.0 - 180.0
+
+
+def _find_return_instant(
+    *,
+    adapter: SwissEphemerisAdapter,
+    natal_longitude: float,
+    point_id: Literal["sun", "moon"],
+    estimate_utc: datetime,
+    window_back_days: float,
+    window_forward_days: float,
+    zodiac: str,
+    ayanamsa: str | None,
+    nearest: bool,
+) -> datetime:
+    """Locate the UTC instant the point returns to its natal longitude.
+
+    A coarse 6-hour scan brackets sign changes of the angular delta, then a
+    bisection refines the crossing to about one minute of time.
+    """
+    zodiac_mode: Literal["tropical", "sidereal"] = (
+        "sidereal" if zodiac == "sidereal" else "tropical"
+    )
+
+    def longitude_at(moment: datetime) -> float:
+        result = adapter.calculate(
+            utc_instant=moment,
+            point_ids=[point_id],
+            zodiac=zodiac_mode,
+            ayanamsa=ayanamsa,
+        )
+        point = result.points[0]
+        return float(point["position"]["ecliptic"]["longitude_deg"]) % 360
+
+    step = timedelta(hours=6)
+    start = estimate_utc - timedelta(days=window_back_days)
+    end = estimate_utc + timedelta(days=window_forward_days)
+    crossings: list[tuple[datetime, datetime]] = []
+    previous_moment = start
+    previous_delta = _angular_delta(longitude_at(start), natal_longitude)
+    current = start + step
+    while current <= end:
+        current_delta = _angular_delta(longitude_at(current), natal_longitude)
+        if previous_delta < 0 <= current_delta and (current_delta - previous_delta) < 180:
+            crossings.append((previous_moment, current))
+        previous_moment = current
+        previous_delta = current_delta
+        current += step
+    if not crossings:
+        raise AstronomicalSnapshotInputError(
+            f"no {point_id} return to the natal longitude was found in the search window"
+        )
+    if nearest:
+        low, high = min(
+            crossings,
+            key=lambda pair: min(
+                abs((pair[0] - estimate_utc).total_seconds()),
+                abs((pair[1] - estimate_utc).total_seconds()),
+            ),
+        )
+    else:
+        low, high = crossings[0]
+    while (high - low) > timedelta(seconds=60):
+        mid = low + (high - low) / 2
+        if _angular_delta(longitude_at(mid), natal_longitude) < 0:
+            low = mid
+        else:
+            high = mid
+    return high
+
+
+def _self_aspects(
+    points: list[Any],
+    settings_document: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Recompute mutual aspects for a mathematically derived chart."""
+    aspect_profile, orb_profile, orb_overrides = resolve_aspect_profiles(
+        settings_document
+    )
+    aspect_points: list[AspectPoint] = []
+    for point in points:
+        if not isinstance(point, dict):
+            continue
+        point_id = point.get("point_id")
+        position = point.get("position")
+        ecliptic = position.get("ecliptic") if isinstance(position, dict) else None
+        longitude = ecliptic.get("longitude_deg") if isinstance(ecliptic, dict) else None
+        if isinstance(point_id, str) and isinstance(longitude, (int, float)):
+            aspect_points.append(
+                AspectPoint(
+                    id=point_id,
+                    longitude_deg=float(longitude),
+                    longitude_speed_deg_per_day=0.0,
+                )
+            )
+    found: list[dict[str, Any]] = []
+    for index, left in enumerate(aspect_points):
+        for right in aspect_points[index + 1 :]:
+            for aspect in find_major_aspects(
+                left,
+                right,
+                context=AspectContext.PROGRESSION,
+                major_profile=aspect_profile,
+                orb_profile=orb_profile,
+                orb_overrides=orb_overrides,
+            ):
+                fact = aspect.to_dict()
+                fact.update({
+                    "aspect_id": f"derived.{left.id}.{right.id}.{aspect.type}",
+                    "point_a": left.id,
+                    "point_b": right.id,
+                })
+                found.append(fact)
+    found.sort(
+        key=lambda item: (
+            float(item["orb_deg"]),
+            str(item["point_a"]),
+            str(item["point_b"]),
+        )
+    )
+    return found
+
+
+_DERIVED_ONLY_RESULT_KEYS = (
+    "structure",
+    "patterns",
+    "classical",
+    "dignities",
+    "receptions",
+    "dispositors",
+    "midpoints",
+    "mirror_points",
+    "special_degrees",
+    "profections",
+    "firdaria",
+    "zodiacal_releasing",
+    "lots",
+    "fixed_star_contacts",
+    "distributions",
+)
+
+
+def _shifted_snapshot(
+    *,
+    reference_snapshot: dict[str, Any],
+    transform_description: str,
+    transform: Any,
+    family: str,
+    technique: str,
+    shift_houses: bool,
+    recompute_aspects: bool,
+    settings_document: dict[str, Any],
+) -> dict[str, Any]:
+    """Derive a chart by transforming every natal longitude mathematically.
+
+    Solar arc directions shift all longitudes by one arc; harmonic charts
+    multiply them. Point-in-house assignments intentionally keep the natal
+    values: with shifted houses the relative placement is unchanged, and for
+    harmonic charts the natal house is the interpretively meaningful fact.
+    """
+    derived = deepcopy(reference_snapshot)
+    derived["id"] = f"calculation-{uuid4()}"
+    derived["status"] = "complete"
+    derived["maturity"] = "implemented"
+    result = derived.get("result")
+    if not isinstance(result, dict):
+        raise AstronomicalSnapshotInputError("the natal snapshot has no result payload")
+    points = result.get("points")
+    if not isinstance(points, list):
+        raise AstronomicalSnapshotInputError("the natal snapshot has no points")
+    for point in points:
+        if not isinstance(point, dict):
+            continue
+        position = point.get("position")
+        ecliptic = position.get("ecliptic") if isinstance(position, dict) else None
+        longitude = ecliptic.get("longitude_deg") if isinstance(ecliptic, dict) else None
+        if not isinstance(longitude, (int, float)):
+            continue
+        shifted = float(transform(float(longitude))) % 360
+        sign_index = min(int(shifted // 30), 11)
+        ecliptic["longitude_deg"] = shifted
+        point["sign"] = SIGN_IDS[sign_index]
+        point["degree_in_sign"] = shifted - sign_index * 30
+    if shift_houses:
+        houses = result.get("houses")
+        if isinstance(houses, list):
+            for house in houses:
+                if not isinstance(house, dict):
+                    continue
+                cusp = house.get("cusp_longitude_deg")
+                if not isinstance(cusp, (int, float)):
+                    continue
+                shifted = float(transform(float(cusp))) % 360
+                sign_index = min(int(shifted // 30), 11)
+                house["cusp_longitude_deg"] = shifted
+                house["sign"] = SIGN_IDS[sign_index]
+                house["degree_in_sign"] = shifted - sign_index * 30
+    charts = result.get("charts")
+    if isinstance(charts, list) and charts and isinstance(charts[0], dict):
+        charts[0]["family"] = family
+        charts[0]["technique"] = technique
+    request_payload = derived.get("request")
+    if isinstance(request_payload, dict):
+        request_payload["chart"] = {"family": family, "technique": technique}
+        request_payload["settings"] = deepcopy(settings_document)
+    if recompute_aspects:
+        result["aspects"] = _self_aspects(points, settings_document)
+    for key in _DERIVED_ONLY_RESULT_KEYS:
+        result.pop(key, None)
+    warnings = derived.get("warnings")
+    if isinstance(warnings, list):
+        warnings.append({
+            "code": "DERIVED_CHART_TRANSFORM",
+            "message": transform_description,
+        })
+    return derived
+
+
+def _store_comparison(
+    *,
+    request: Request,
+    reference_snapshot: dict[str, Any],
+    moving_snapshot: dict[str, Any],
+    settings_document: dict[str, Any],
+) -> dict[str, Any]:
+    comparison_result = create_cross_chart_comparison(
+        reference_snapshot=reference_snapshot,
+        moving_snapshot=moving_snapshot,
+        settings=settings_document,
+        context=AspectContext.PROGRESSION,
+    )
+    comparison = {
+        "id": f"comparison-{uuid4()}",
+        "status": "complete",
+        "maturity": "implemented",
+        "result": comparison_result,
+        "warnings": [],
+    }
+    request.app.state.workflow_store.put_snapshot(moving_snapshot)
+    request.app.state.workflow_store.put_snapshot(comparison)
+    return comparison
+
+
+@router.post("/calculations/tertiary-progressions", status_code=status.HTTP_201_CREATED)
+async def create_tertiary_progression(
+    payload: TertiaryProgressionPayload,
+    request: Request,
+) -> dict[str, Any]:
+    """Tertiary progression: one month of life equals one ephemeris day."""
+    if _snapshot_technique(payload.reference_snapshot) != "natal.standard_chart":
+        raise _unsupported({
+            "reference_snapshot": (
+                "tertiary progressions require the active person's last natal snapshot"
+            )
+        })
+    try:
+        natal_subject, time_spec, location, birth_local, zone = (
+            _natal_subject_context(payload.reference_snapshot)
+        )
+        elapsed_days = (payload.target_date - birth_local.date()).days
+        if elapsed_days < 0:
+            raise AstronomicalSnapshotInputError(
+                "the tertiary-progression target date cannot precede birth"
+            )
+        elapsed_months = elapsed_days / (365.24219893 / 12.0)
+        progressed_local = birth_local + timedelta(days=elapsed_months)
+        progressed_utc = progressed_local.replace(tzinfo=zone).astimezone(UTC)
+        progressed_subject = _event_subject_version(
+            natal_subject=natal_subject,
+            time_spec=time_spec,
+            location=location,
+            utc_instant=progressed_utc,
+            chart_role="tertiary_progression",
+            technique_description=(
+                "Tertiary progression: one mean month of life equals "
+                "one ephemeris day after birth"
+            ),
+            display_label=f"tertiary progression {payload.target_date.isoformat()}",
+            extra_attributes={
+                "reference_snapshot_id": payload.reference_snapshot.get("id"),
+                "target_date": payload.target_date.isoformat(),
+                "progression_key": "1_mean_month_to_1_day",
+            },
+        )
+        settings_document = payload.settings.model_dump(mode="json", exclude_none=True)
+        adapter = SwissEphemerisAdapter(
+            moshier_fallback="record",
+            ephemeris_path=request.app.state.settings.swiss_ephemeris_path,
+        )
+        progressed_snapshot = create_astronomical_snapshot(
+            snapshot_id=f"calculation-{uuid4()}",
+            request_payload={
+                "subject": {"subject_version_id": progressed_subject["id"]},
+                "chart": {"family": "progression", "technique": "progression.tertiary"},
+                "settings": settings_document,
+                "rule_pack_hash": payload.rule_pack_hash,
+                "dataset_versions": {},
+                "outputs": ["snapshot", "json"],
+            },
+            subject_version=progressed_subject,
+            now=datetime.now(UTC),
+            engine_version=request.app.state.settings.service_version,
+            adapter=adapter,
+        )
+        comparison = _store_comparison(
+            request=request,
+            reference_snapshot=payload.reference_snapshot,
+            moving_snapshot=progressed_snapshot,
+            settings_document=settings_document,
+        )
+    except AstronomicalSnapshotInputError as exc:
+        raise _unsupported({"tertiary_progression": str(exc)}) from exc
+    return {
+        "id": f"tertiary-progression-{uuid4()}",
+        "status": "complete",
+        "reference_snapshot_id": payload.reference_snapshot.get("id"),
+        "target_date": payload.target_date.isoformat(),
+        "progressed_time": progressed_local.replace(
+            second=0, microsecond=0
+        ).isoformat(timespec="minutes"),
+        "progressed_snapshot": progressed_snapshot,
+        "comparison": comparison,
+    }
+
+
+def _residence_location(
+    *,
+    natal_location: dict[str, Any],
+    latitude: float,
+    longitude: float,
+    residence_name: str | None,
+    timezone_id: str | None,
+) -> dict[str, Any]:
+    location = deepcopy(natal_location)
+    location.update({
+        "name": residence_name or natal_location.get("name"),
+        "latitude": latitude,
+        "longitude": longitude,
+        "timezone_id": timezone_id or natal_location.get("timezone_id"),
+        "source": "user_input",
+        "warnings": [],
+    })
+    return location
+
+
+def _create_return_chart(
+    *,
+    payload: SolarReturnPayload | LunarReturnPayload,
+    request: Request,
+    point_id: Literal["sun", "moon"],
+    chart_role: str,
+    family: str,
+    technique: str,
+    display_label: str,
+    estimate_utc: datetime,
+    window_back_days: float,
+    window_forward_days: float,
+    extra_attributes: dict[str, Any],
+) -> dict[str, Any]:
+    natal_subject, time_spec, _natal_location, _birth_local, _zone = (
+        _natal_subject_context(payload.reference_snapshot)
+    )
+    residence = _residence_location(
+        natal_location=_natal_location,
+        latitude=payload.latitude,
+        longitude=payload.longitude,
+        residence_name=payload.residence_name,
+        timezone_id=payload.timezone_id,
+    )
+    zodiac, ayanamsa = _reference_zodiac(payload.reference_snapshot)
+    natal_longitude = _snapshot_point_longitude(payload.reference_snapshot, point_id)
+    adapter = SwissEphemerisAdapter(
+        moshier_fallback="record",
+        ephemeris_path=request.app.state.settings.swiss_ephemeris_path,
+    )
+    return_utc = _find_return_instant(
+        adapter=adapter,
+        natal_longitude=natal_longitude,
+        point_id=point_id,
+        estimate_utc=estimate_utc,
+        window_back_days=window_back_days,
+        window_forward_days=window_forward_days,
+        zodiac=zodiac,
+        ayanamsa=ayanamsa,
+        nearest=True,
+    )
+    return_subject = _event_subject_version(
+        natal_subject=natal_subject,
+        time_spec={
+            **time_spec,
+            "timezone_id": residence.get("timezone_id")
+            or time_spec.get("timezone_id"),
+        },
+        location=residence,
+        utc_instant=return_utc,
+        chart_role=chart_role,
+        technique_description=(
+            f"{display_label}: exact {point_id} return to the natal longitude"
+        ),
+        display_label=display_label,
+        extra_attributes={
+            "reference_snapshot_id": payload.reference_snapshot.get("id"),
+            **extra_attributes,
+        },
+    )
+    settings_document = payload.settings.model_dump(mode="json", exclude_none=True)
+    return_snapshot = create_astronomical_snapshot(
+        snapshot_id=f"calculation-{uuid4()}",
+        request_payload={
+            "subject": {"subject_version_id": return_subject["id"]},
+            "chart": {"family": family, "technique": technique},
+            "settings": settings_document,
+            "rule_pack_hash": payload.rule_pack_hash,
+            "dataset_versions": {},
+            "outputs": ["snapshot", "json"],
+        },
+        subject_version=return_subject,
+        now=datetime.now(UTC),
+        engine_version=request.app.state.settings.service_version,
+        adapter=adapter,
+    )
+    comparison = _store_comparison(
+        request=request,
+        reference_snapshot=payload.reference_snapshot,
+        moving_snapshot=return_snapshot,
+        settings_document=settings_document,
+    )
+    return {
+        "return_snapshot": return_snapshot,
+        "comparison": comparison,
+        "return_time_utc": (
+            return_utc.astimezone(UTC)
+            .replace(microsecond=0)
+            .isoformat()
+            .replace("+00:00", "Z")
+        ),
+    }
+
+
+@router.post("/calculations/solar-return", status_code=status.HTTP_201_CREATED)
+async def create_solar_return(
+    payload: SolarReturnPayload,
+    request: Request,
+) -> dict[str, Any]:
+    """Solar return: the moment the Sun returns to its natal longitude."""
+    if _snapshot_technique(payload.reference_snapshot) != "natal.standard_chart":
+        raise _unsupported({
+            "reference_snapshot": (
+                "solar returns require the active person's last natal snapshot"
+            )
+        })
+    try:
+        _subject, _ts, _loc, birth_local, zone = _natal_subject_context(
+            payload.reference_snapshot
+        )
+        try:
+            estimate_local = birth_local.replace(year=payload.target_year)
+        except ValueError:
+            estimate_local = birth_local.replace(
+                year=payload.target_year, day=28
+            )
+        estimate_utc = estimate_local.replace(tzinfo=zone).astimezone(UTC)
+        outcome = _create_return_chart(
+            payload=payload,
+            request=request,
+            point_id="sun",
+            chart_role="solar_return",
+            family="return",
+            technique="return.solar",
+            display_label=f"solar return {payload.target_year}",
+            estimate_utc=estimate_utc,
+            window_back_days=4.0,
+            window_forward_days=4.0,
+            extra_attributes={"target_year": payload.target_year},
+        )
+    except AstronomicalSnapshotInputError as exc:
+        raise _unsupported({"solar_return": str(exc)}) from exc
+    return {
+        "id": f"solar-return-{uuid4()}",
+        "status": "complete",
+        "reference_snapshot_id": payload.reference_snapshot.get("id"),
+        "target_year": payload.target_year,
+        **outcome,
+    }
+
+
+@router.post("/calculations/lunar-return", status_code=status.HTTP_201_CREATED)
+async def create_lunar_return(
+    payload: LunarReturnPayload,
+    request: Request,
+) -> dict[str, Any]:
+    """Lunar return: the moment the Moon returns to its natal longitude."""
+    if _snapshot_technique(payload.reference_snapshot) != "natal.standard_chart":
+        raise _unsupported({
+            "reference_snapshot": (
+                "lunar returns require the active person's last natal snapshot"
+            )
+        })
+    reference_date = payload.reference_date or datetime.now(UTC).date()
+    estimate_utc = datetime(
+        reference_date.year,
+        reference_date.month,
+        reference_date.day,
+        12,
+        tzinfo=UTC,
+    )
+    try:
+        outcome = _create_return_chart(
+            payload=payload,
+            request=request,
+            point_id="moon",
+            chart_role="lunar_return",
+            family="return",
+            technique="return.lunar",
+            display_label=f"lunar return near {reference_date.isoformat()}",
+            estimate_utc=estimate_utc,
+            window_back_days=28.0,
+            window_forward_days=28.0,
+            extra_attributes={"reference_date": reference_date.isoformat()},
+        )
+    except AstronomicalSnapshotInputError as exc:
+        raise _unsupported({"lunar_return": str(exc)}) from exc
+    return {
+        "id": f"lunar-return-{uuid4()}",
+        "status": "complete",
+        "reference_snapshot_id": payload.reference_snapshot.get("id"),
+        "reference_date": reference_date.isoformat(),
+        **outcome,
+    }
+
+
+@router.post("/calculations/solar-arc", status_code=status.HTTP_201_CREATED)
+async def create_solar_arc(
+    payload: SolarArcPayload,
+    request: Request,
+) -> dict[str, Any]:
+    """Solar arc direction: every natal longitude shifted by the Sun's
+    secondary-progression arc."""
+    if _snapshot_technique(payload.reference_snapshot) != "natal.standard_chart":
+        raise _unsupported({
+            "reference_snapshot": (
+                "solar arc directions require the active person's last natal snapshot"
+            )
+        })
+    try:
+        progressed_subject, progressed_local = _progressed_subject_version(
+            payload.reference_snapshot,
+            payload.target_date,
+        )
+        progressed_utc_text = str(
+            progressed_subject["time_spec"]["selected_utc"]
+        ).replace("Z", "+00:00")
+        progressed_utc = datetime.fromisoformat(progressed_utc_text)
+        zodiac, ayanamsa = _reference_zodiac(payload.reference_snapshot)
+        natal_sun = _snapshot_point_longitude(payload.reference_snapshot, "sun")
+        adapter = SwissEphemerisAdapter(
+            moshier_fallback="record",
+            ephemeris_path=request.app.state.settings.swiss_ephemeris_path,
+        )
+        progressed_ephemeris = adapter.calculate(
+            utc_instant=progressed_utc,
+            point_ids=["sun"],
+            zodiac="sidereal" if zodiac == "sidereal" else "tropical",
+            ayanamsa=ayanamsa,
+        )
+        progressed_sun = (
+            float(
+                progressed_ephemeris.points[0]["position"]["ecliptic"][
+                    "longitude_deg"
+                ]
+            )
+            % 360
+        )
+        arc_deg = (progressed_sun - natal_sun) % 360
+        settings_document = payload.settings.model_dump(mode="json", exclude_none=True)
+        directed_snapshot = _shifted_snapshot(
+            reference_snapshot=payload.reference_snapshot,
+            transform_description=(
+                f"Solar arc direction: all natal longitudes shifted by "
+                f"{arc_deg:.4f} degrees (Sun's secondary-progression arc)"
+            ),
+            transform=lambda longitude: longitude + arc_deg,
+            family="direction",
+            technique="direction.solar_arc",
+            shift_houses=True,
+            recompute_aspects=False,
+            settings_document=settings_document,
+        )
+        comparison = _store_comparison(
+            request=request,
+            reference_snapshot=payload.reference_snapshot,
+            moving_snapshot=directed_snapshot,
+            settings_document=settings_document,
+        )
+    except AstronomicalSnapshotInputError as exc:
+        raise _unsupported({"solar_arc": str(exc)}) from exc
+    return {
+        "id": f"solar-arc-{uuid4()}",
+        "status": "complete",
+        "reference_snapshot_id": payload.reference_snapshot.get("id"),
+        "target_date": payload.target_date.isoformat(),
+        "arc_deg": arc_deg,
+        "progressed_time": progressed_local.replace(
+            second=0, microsecond=0
+        ).isoformat(timespec="minutes"),
+        "directed_snapshot": directed_snapshot,
+        "comparison": comparison,
+    }
+
+
+@router.post("/calculations/relocation", status_code=status.HTTP_201_CREATED)
+async def create_relocation(
+    payload: RelocationPayload,
+    request: Request,
+) -> dict[str, Any]:
+    """Relocation chart: same birth instant, new place; houses/angles recalculated."""
+    if _snapshot_technique(payload.reference_snapshot) != "natal.standard_chart":
+        raise _unsupported({
+            "reference_snapshot": (
+                "relocation charts require the active person's last natal snapshot"
+            )
+        })
+    try:
+        natal_subject, time_spec, natal_location, birth_local, zone = (
+            _natal_subject_context(payload.reference_snapshot)
+        )
+        natal_utc_text = time_spec.get("selected_utc")
+        if not isinstance(natal_utc_text, str):
+            natal_utc = birth_local.replace(tzinfo=zone).astimezone(UTC)
+        else:
+            natal_utc = datetime.fromisoformat(
+                natal_utc_text.replace("Z", "+00:00")
+            ).astimezone(UTC)
+        relocated_location = _residence_location(
+            natal_location=natal_location,
+            latitude=payload.latitude,
+            longitude=payload.longitude,
+            residence_name=payload.residence_name,
+            timezone_id=payload.timezone_id,
+        )
+        relocated_timezone = str(
+            relocated_location.get("timezone_id")
+            or time_spec.get("timezone_id")
+            or "UTC"
+        )
+        try:
+            relocated_zone = ZoneInfo(relocated_timezone)
+        except ZoneInfoNotFoundError as exc:
+            raise AstronomicalSnapshotInputError(
+                f"the timezone {relocated_timezone!r} cannot be resolved"
+            ) from exc
+        relocated_local = natal_utc.astimezone(relocated_zone)
+        natal_utc_normalized = (
+            natal_utc.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+        )
+        relocated_subject = deepcopy(natal_subject)
+        relocated_subject.update({
+            "id": f"relocation-subject-{uuid4()}",
+            "kind": "person",
+            "display_name": (
+                f"{natal_subject.get('display_name') or 'Natal subject'} "
+                f"relocation {payload.residence_name or 'new location'}"
+            ),
+        })
+        relocated_subject["time_spec"] = {
+            **deepcopy(time_spec),
+            "timezone_id": relocated_timezone,
+            "local_value": relocated_local.replace(
+                second=0, microsecond=0
+            ).isoformat(timespec="minutes"),
+            "precision": "minute",
+            "selected_utc": natal_utc_normalized,
+            "utc_candidates": [natal_utc_normalized],
+            "confidence": time_spec.get("confidence") or "unknown",
+            "source": {
+                "kind": "derived",
+                "description": (
+                    "Relocation: identical birth instant recalculated "
+                    "for a new location"
+                ),
+            },
+            "warnings": [],
+        }
+        relocated_subject["location"] = relocated_location
+        relocated_subject["attributes"] = {
+            **deepcopy(natal_subject.get("attributes") or {}),
+            "chart_role": "relocation",
+            "reference_snapshot_id": payload.reference_snapshot.get("id"),
+        }
+        settings_document = payload.settings.model_dump(mode="json", exclude_none=True)
+        adapter = SwissEphemerisAdapter(
+            moshier_fallback="record",
+            ephemeris_path=request.app.state.settings.swiss_ephemeris_path,
+        )
+        relocated_snapshot = create_astronomical_snapshot(
+            snapshot_id=f"calculation-{uuid4()}",
+            request_payload={
+                "subject": {"subject_version_id": relocated_subject["id"]},
+                "chart": {"family": "relocation", "technique": "relocation.chart"},
+                "settings": settings_document,
+                "rule_pack_hash": payload.rule_pack_hash,
+                "dataset_versions": {},
+                "outputs": ["snapshot", "json"],
+            },
+            subject_version=relocated_subject,
+            now=datetime.now(UTC),
+            engine_version=request.app.state.settings.service_version,
+            adapter=adapter,
+        )
+        request.app.state.workflow_store.put_snapshot(relocated_snapshot)
+    except AstronomicalSnapshotInputError as exc:
+        raise _unsupported({"relocation": str(exc)}) from exc
+    return {
+        "id": f"relocation-{uuid4()}",
+        "status": "complete",
+        "reference_snapshot_id": payload.reference_snapshot.get("id"),
+        "residence": {
+            "name": relocated_location.get("name"),
+            "latitude": payload.latitude,
+            "longitude": payload.longitude,
+            "timezone_id": relocated_timezone,
+        },
+        "relocated_snapshot": relocated_snapshot,
+    }
+
+
+def _create_harmonic_chart(
+    *,
+    payload: HarmonicChartPayload,
+    request: Request,
+    harmonic: int,
+    technique: str,
+) -> dict[str, Any]:
+    if _snapshot_technique(payload.reference_snapshot) != "natal.standard_chart":
+        raise _unsupported({
+            "reference_snapshot": (
+                "harmonic charts require the active person's last natal snapshot"
+            )
+        })
+    try:
+        settings_document = payload.settings.model_dump(mode="json", exclude_none=True)
+        harmonic_snapshot = _shifted_snapshot(
+            reference_snapshot=payload.reference_snapshot,
+            transform_description=(
+                f"Harmonic {harmonic}: every natal longitude multiplied by "
+                f"{harmonic} modulo 360 degrees"
+            ),
+            transform=lambda longitude: longitude * harmonic,
+            family="harmonic",
+            technique=technique,
+            shift_houses=False,
+            recompute_aspects=True,
+            settings_document=settings_document,
+        )
+        comparison = _store_comparison(
+            request=request,
+            reference_snapshot=payload.reference_snapshot,
+            moving_snapshot=harmonic_snapshot,
+            settings_document=settings_document,
+        )
+    except AstronomicalSnapshotInputError as exc:
+        raise _unsupported({technique: str(exc)}) from exc
+    return {
+        "id": f"harmonic-{harmonic}-{uuid4()}",
+        "status": "complete",
+        "reference_snapshot_id": payload.reference_snapshot.get("id"),
+        "harmonic": harmonic,
+        "harmonic_snapshot": harmonic_snapshot,
+        "comparison": comparison,
+    }
+
+
+@router.post("/calculations/dodecatemoria", status_code=status.HTTP_201_CREATED)
+async def create_dodecatemoria(
+    payload: HarmonicChartPayload,
+    request: Request,
+) -> dict[str, Any]:
+    """Dodecatemoria (12th harmonic): each natal longitude times 12 mod 360."""
+    return _create_harmonic_chart(
+        payload=payload,
+        request=request,
+        harmonic=12,
+        technique="harmonic.dodecatemoria",
+    )
+
+
+@router.post("/calculations/tridecatemoria", status_code=status.HTTP_201_CREATED)
+async def create_tridecatemoria(
+    payload: HarmonicChartPayload,
+    request: Request,
+) -> dict[str, Any]:
+    """Tridecatemoria (13th harmonic): each natal longitude times 13 mod 360."""
+    return _create_harmonic_chart(
+        payload=payload,
+        request=request,
+        harmonic=13,
+        technique="harmonic.tridecatemoria",
+    )
 
 
 @router.get("/calculations/{snapshot_id}/tables/{table_id}")

@@ -1,4 +1,5 @@
 import type { NatalCalculationSettings } from "./interstellar-api";
+export type { NatalCalculationSettings } from "./interstellar-api";
 
 export type NatalPresetId = "modern" | "classical" | "special" | "custom";
 export type NatalPointGroupId = "core" | "angles" | "lunar" | "asteroids" | "lots" | "hamburg";
@@ -160,7 +161,7 @@ export const natalCalculationPresets: readonly NatalCalculationPreset[] = [
 export const timingCalculationPresets: readonly NatalCalculationPreset[] =
   natalCalculationPresets.map((preset) => ({
     ...preset,
-    badge: `${preset.badge} · B族`,
+    badge: preset.badge,
     description: preset.id === "modern"
       ? "十大行星、上升、中天与真北交点；合相 2°，其余主要相位 1°。"
       : `${preset.description} 合相 2°，其余主要相位 1°。`,

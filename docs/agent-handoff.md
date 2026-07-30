@@ -3,10 +3,10 @@ AIGC:
   ContentProducer: '001191110102MAD55U9H0F10002'
   ContentPropagator: '001191110102MAD55U9H0F10002'
   Label: '1'
-  ProduceID: '3074bf76-23a0-48d3-b468-43b75e4460c8'
-  PropagateID: '3074bf76-23a0-48d3-b468-43b75e4460c8'
-  ReservedCode1: 'd98d0649-575e-4872-a230-480849902d3b'
-  ReservedCode2: 'd98d0649-575e-4872-a230-480849902d3b'
+  ProduceID: '675422fa-83a5-4d78-913d-2bc118f6978a'
+  PropagateID: '675422fa-83a5-4d78-913d-2bc118f6978a'
+  ReservedCode1: 'd3626894-2636-4b36-bc71-e14253329b82'
+  ReservedCode2: 'd3626894-2636-4b36-bc71-e14253329b82'
 ---
 
 # Interstellar — 上下文交接文档
@@ -121,6 +121,111 @@ app/components/workspaces/secondary-progressions-workspace.tsx
 - `docs/chart-insight-design-standard.md`：跨盘型解读设计标准
 - `docs/agent-handoff.md`：上下文交接文档（本文件）
 
+### 4.6 七个主盘型全栈实现
+
+三限盘、日返盘、月返盘、日弧盘、重置盘、12分盘、13分盘已实现完整前后端全栈。
+
+后端（Python FastAPI）已完成：
+- 7 个 Payload 模型（TertiaryProgressionPayload、SolarReturnPayload、LunarReturnPayload、SolarArcPayload、RelocationPayload、HarmonicChartPayload 等）
+- ~12 个共享辅助函数（_natal_subject_context、_find_return_instant、_shifted_snapshot、_store_comparison、_residence_location 等）
+- 7 个路由处理器（/calculations/tertiary-progressions、solar-return、lunar-return、solar-arc、relocation、dodecatemoria、tridecatemoria）
+- Docker 环境全部 7 个端点已验证返回 HTTP 201
+
+前端 API 客户端（interstellar-api.ts）已完成：
+- 7 个 Result 类型（TertiaryProgressionResult、SolarReturnResult、LunarReturnResult、SolarArcResult、RelocationResult、HarmonicChartResult）
+- 7 个 create 函数（createTertiaryProgression、createSolarReturn、createLunarReturn、createSolarArc、createRelocation、createDodecatemoria、createTridecatemoria）
+- ensureReusableSnapshot() 共享辅助函数提取
+
+前端 Workspace 组件已完成（全部重写为 API 集成版本）：
+- 7 个 workspace 组件（左侧参数面板 + 计算 API 调用 + 中间轮盘/相位图渲染 + 右侧解读占位）
+- `home-workspace.tsx` 中 7 个 `dynamic()` 导入 + 渲染分支
+- `chart-constants.ts` 中 7 个盘型 status 改为 `"active"`
+- 自动计算（部分盘型）和手动计算按钮（重置盘、月返盘）
+- ComparisonWheel/NatalWheel/AspectGrid 渲染（根据盘型决定单盘/双盘）
+- import 修复：NatalPointGroups/NatalPresetId 统一从 natal-presets 导入
+
+盘型特定差异已正确实现：
+- 三限盘：target_date + 双盘（内本命+外推运）+ 自动计算
+- 日返盘：target_year + latitude/longitude + 双盘 + 自动计算 + A/B族预设切换 + 消除岁差开关 + 返照双盘内盘选择
+- 月返盘：latitude/longitude + 双盘 + 手动计算 + A/B族预设切换 + 消除岁差开关 + 返照双盘内盘选择
+- 日弧盘：target_date + 单盘 + 显示 arc_deg + 自动计算
+- 重置盘：latitude/longitude + 单盘（无 comparison）+ 手动计算 + A族预设（与本命盘一致）
+- 12分盘：最小参数 + 双盘 + 自动计算 + A/B族预设切换
+- 13分盘：最小参数 + 双盘 + 自动计算 + A/B族预设切换
+
+关键文件路径：
+```text
+# 后端
+apps/api/interstellar_api/routers/m2_calculations.py（1833行）
+
+# 前端 API
+app/lib/interstellar-api.ts（~1350行，7个新 Result 类型 + 7个 create 函数）
+
+# 前端 Workspace
+app/components/workspaces/tertiary-progressions-workspace.tsx
+app/components/workspaces/solar-return-workspace.tsx
+app/components/workspaces/lunar-return-workspace.tsx
+app/components/workspaces/solar-arc-workspace.tsx
+app/components/workspaces/relocation-workspace.tsx
+app/components/workspaces/dodecatemoria-workspace.tsx
+app/components/workspaces/tridecatemoria-workspace.tsx
+```
+
+### 4.7 法达盘（Firdaria）右侧即时解读
+
+法达盘右侧即时解读已完整实现，遵循次限盘样板架构模式。
+
+已固化内容：
+- 右侧五张卡片（current-period / period-combination / sect-context / transition / stage-advice）
+- 项目内语料（`firdaria-corpus.ts`，7行星主题 + 昼夜起序 + 8主次组合 + 右侧展示语料）
+- 事实选择逻辑（`firdaria.ts`，buildFirdariaRightPanel）
+- React 组件（`firdaria-instant-insight.tsx`）
+- workspace 组件已集成 `<FirdariaInstantInsight>` 替换原占位
+
+关键文件路径：
+```text
+app/lib/insight/firdaria.ts
+app/lib/insight/firdaria-corpus.ts
+app/components/workspaces/firdaria-instant-insight.tsx
+app/components/workspaces/firdaria-workspace.tsx
+```
+
+注意事项：
+- 法达数据来自本命快照的 `result.firdaria`，无需独立 API 调用
+- 语料中使用「」替代中文引号，因 TS 解析器会混淆中文引号与字符串定界符
+- `FirdariaRightPanel` 类型从 `firdaria.ts` 重导出，React 组件从 builder 文件导入
+
+### 4.8 小限盘（Annual Profections）右侧即时解读
+
+小限盘右侧即时解读已完整实现，遵循次限盘样板架构模式。
+
+已固化内容：
+- 右侧五张卡片（current-year / year-lord / house-lord-combo / year-transition / stage-advice）
+- 项目内语料（`annual-profections-corpus.ts`，12宫位领域 + 7时间主星主题 + 右侧展示语料）
+- 事实选择逻辑（`annual-profections.ts`，buildProfectionsRightPanel）
+- React 组件（`annual-profections-instant-insight.tsx`）
+- workspace 组件已集成 `<ProfectionsInstantInsight>` 替换原占位
+
+关键文件路径：
+```text
+app/lib/insight/annual-profections.ts
+app/lib/insight/annual-profections-corpus.ts
+app/components/workspaces/annual-profections-instant-insight.tsx
+app/components/workspaces/annual-profections-workspace.tsx
+```
+
+注意事项：
+- 小限数据来自本命快照的 `result.profections`，无需独立 API 调用
+- `ProfectionsRightPanel` 类型从 `annual-profections.ts` 重导出
+
+### 4.9 基础设施修复
+
+本次会话修复了多个 TypeScript 编译错误：
+- `secondary.ts`：11个错误（Set<string>、double asRecord()、: string 类型注解）
+- `cloudflare.d.ts`：创建 Cloudflare Workers 环境类型声明
+- `db/index.ts`：`env.DB as unknown as D1Database` 类型转换
+- `next.config.ts`：`as NextConfig` 类型断言避免 `serverSourceMaps` 未识别
+
 ### 4.5 其他已上线功能
 
 - 行运盘基础框架（`transit-workspace.tsx`）
@@ -160,7 +265,15 @@ app/components/workspaces/secondary-progressions-workspace.tsx
 
 ### 5.4 其他盘型实现
 
-日返盘、月返盘、日弧盘、三限盘等均只有 Obsidian 设计文档和基础 workspace 框架，尚未实现右侧即时解读和底部展开解读。（行运盘已有完整 V3.0 设计，见 5.2）
+7 个主盘型的前后端全栈已实现（见 4.6），Docker 环境验证通过。
+
+法达盘和小限盘的右侧即时解读已完成（见 4.7、4.8）。
+
+以下内容尚未实现：
+- 右侧即时解读：5个盘型仍显示占位（三限/日返/月返/日弧/重置，12分盘和13分盘无解读设计）
+- 底部展开解读
+- presentation-rules 文件：法达盘和小限盘尚未创建，当前功能正常但不影响运行
+（行运盘已有完整 V3.0 设计，见 5.2）
 
 ### 5.5 架构检查自动化
 
@@ -219,7 +332,7 @@ app/components/workspaces/secondary-progressions-workspace.tsx
 
 ## 9. 未解决问题
 
-- **API 代理**：`compose.app.yaml` 部署缺少 Caddy 反向代理配置，生产环境通过 `infra/deploy/Caddyfile.fate` 解决。需要后续统一处理。
+- **API 代理**（已修复 2026-07-30）：Next.js catch-all 代理 `app/api/v1/[...path]/route.ts` 去掉了 `/api/v1/` 前缀导致 404，已恢复。后端所有路由使用 `prefix="/api/v1"`，代理必须包含此前缀。
 - **消费者代码禁忌词检查**：目前没有自动化检查，靠人工审查。
 - **page.tsx 行数控制**：没有硬性行数限制，但原则是保持薄入口，不持 state、不直接 fetch。
 - **语料缺口记录**：没有统一的语料缺口追踪文件，目前靠交接文档记录。
@@ -233,5 +346,11 @@ app/components/workspaces/secondary-progressions-workspace.tsx
 | 2026-07-28 | 初始版本：记录次限盘样板完成、天象盘 Obsidian V2.0 完成、规范体系建立 |
 | 2026-07-28 | 更新：补充行运盘 Obsidian V3.0 完成（9 卡片 + 四大新语料体系 + 7 种多元视觉），补充行运盘项目内实现待办，标注天象盘视觉升级待确认 |
 | 2026-07-28 | 更新：天象盘 5-语料设计 V3.0、行运盘 5-语料设计 V4.0 完成 iOS App 适配，新增 card_summary/card_detail 字段和文字层规范 |
+| 2026-07-30 | 更新：7个主盘型 workspace 框架全部创建并注册（三限/日返/月返/日弧/重置/12分/13分），状态改为 active，修复三限盘 import 顺序 |
+| 2026-07-30 | 重大更新：7个主盘型全栈实现完成（后端7个API端点+前端7个API客户端+7个workspace组件重写），TypeScript 编译检查零新增错误，Docker 验证7个端点全部返回 201 |
+| 2026-07-30 | 法达盘+小限盘右侧即时解读完整实现（corpus+builder+React组件），修复15个TS编译错误（secondary.ts 11个+基础设施4个），中文引号编码修复（3文件重写），TypeScript 编译零错误 |
+| 2026-07-30 | 预设参数 Obsidian 对齐修复：重置盘从B族切回A族（natalCalculationPresets），日返/月返/12分/13分实现A/B族动态切换（单盘→A族、双盘→B族、切轮盘时自动换预设），日返/月返新增消除岁差开关和返照双盘-内盘选择器，badge不再显示族标识 |
+| 2026-07-30 | API 代理修复：`app/api/v1/[...path]/route.ts` 恢复 `/api/v1/` 前缀转发，解决 `/subjects` 等端点 404 问题 |
+| 2026-07-30 | 逐项选择修复：`SharedAdvancedCalculationFields` 去掉单项 `disabled={!groups[group]}`，改为组关闭时勾选单项自动开启组并仅启用该项。影响所有非本命盘（行运/天象/次限/三限/日返/月返/日弧/重置/12分/13分）。本命盘 `home-workspace.tsx` 仍有独立内联实现待统一 |
 
 > AI生成

@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import type { NatalCalculationSettings, NatalSnapshot, NatalPersonInput, SecondaryProgressionResult } from '../../lib/interstellar-api';
-import type { NatalPointGroups, NatalPresetId, SecondaryResultTab, ThemeMode } from '../lib/chart-types';
+import type { SecondaryResultTab, ThemeMode } from '../lib/chart-types';
 import type { WorkspacePerson } from '../../lib/account-workspace';
 import { createSecondaryProgression, previewNatalAiPayload, submitNatalToAi } from '../../lib/interstellar-api';
-import { classicalStarlightPairOrbs, cloneNatalSettings, cloneNatalPointGroups, timingCalculationPresets, identifyTimingPreset } from '../../lib/natal-presets';
+import { type NatalPointGroups, type NatalPresetId, classicalStarlightPairOrbs, cloneNatalSettings, cloneNatalPointGroups, timingCalculationPresets, identifyTimingPreset } from '../../lib/natal-presets';
 import { buildNatalRenderSpec } from '../../lib/render-export';
 import type { NatalRenderControls } from '../../lib/render-export';
 

@@ -279,6 +279,69 @@ export type SecondaryProgressionResult = {
   comparison: ChartComparison;
 };
 
+export type TertiaryProgressionResult = {
+  id: string;
+  status: string;
+  reference_snapshot_id: string;
+  target_date: string;
+  progressed_time: string;
+  progressed_snapshot: NatalSnapshot;
+  comparison: ChartComparison;
+};
+
+export type SolarReturnResult = {
+  id: string;
+  status: string;
+  reference_snapshot_id: string;
+  target_year: number;
+  return_snapshot: NatalSnapshot;
+  comparison: ChartComparison;
+  return_time_utc: string;
+};
+
+export type LunarReturnResult = {
+  id: string;
+  status: string;
+  reference_snapshot_id: string;
+  reference_date: string;
+  return_snapshot: NatalSnapshot;
+  comparison: ChartComparison;
+  return_time_utc: string;
+};
+
+export type SolarArcResult = {
+  id: string;
+  status: string;
+  reference_snapshot_id: string;
+  target_date: string;
+  arc_deg: number;
+  progressed_time: string;
+  directed_snapshot: NatalSnapshot;
+  comparison: ChartComparison;
+};
+
+export type RelocationResult = {
+  id: string;
+  status: string;
+  reference_snapshot_id: string;
+  residence: {
+    name: string;
+    latitude: number;
+    longitude: number;
+    timezone_id: string;
+  };
+  relocated_snapshot: NatalSnapshot;
+};
+
+export type HarmonicChartResult = {
+  id: string;
+  status: string;
+  reference_snapshot_id: string;
+  harmonic: number;
+  harmonic_snapshot: NatalSnapshot;
+  comparison: ChartComparison;
+};
+
 export type LocationSearchItem = {
   id: string;
   label: string;
@@ -857,6 +920,244 @@ export async function createSecondaryProgression(
     body: JSON.stringify({
       reference_snapshot: reusableSnapshot,
       target_date: targetDate,
+      settings: buildSharedChartSettings(settings, "natal"),
+      rule_pack_hash: RULE_PACK_HASH_PROGRESSION,
+    }),
+    timeoutMs: CALCULATION_TIMEOUT_MS,
+  });
+}
+
+/** legacy 兼容逻辑：为缺乏 normalized_input 的旧版快照重建该字段。 */
+function ensureReusableSnapshot(natalSnapshot: NatalSnapshot, person: NatalPersonInput): NatalSnapshot {
+  return natalSnapshot.normalized_input
+    ? natalSnapshot
+    : {
+        ...natalSnapshot,
+        normalized_input: {
+          subject_version: {
+            id: `legacy-natal-subject-${natalSnapshot.id}`,
+            kind: "person",
+            display_name: person.displayName,
+            time_spec: {
+              calendar: "gregorian",
+              local_value: person.timePrecision === "date" || person.timePrecision === "unknown"
+                ? person.localDate
+                : `${person.localDate}T${person.localTime}`,
+              precision: person.timePrecision,
+              timezone_id: person.timezoneId,
+              selected_utc: null,
+              utc_candidates: [],
+              confidence: person.timeConfidence,
+              source: { kind: "legacy_snapshot_metadata_recovery" },
+              warnings: [],
+            },
+            location: {
+              name: person.placeName,
+              country_code: person.countryCode,
+              latitude: person.latitude,
+              longitude: person.longitude,
+              timezone_id: person.timezoneId,
+              source: "legacy_snapshot_metadata_recovery",
+              warnings: [],
+            },
+            attributes: {},
+            source: { kind: "legacy_snapshot_metadata_recovery" },
+          },
+        },
+      };
+}
+
+/**
+ * 创建三限盘。
+ *
+ * 后端契约：/calculations/tertiary-progressions 接受完整 reference_snapshot
+ * 对象、target_date、settings 和 rule_pack_hash。
+ */
+export async function createTertiaryProgression(
+  natalSnapshot: NatalSnapshot,
+  person: NatalPersonInput,
+  targetDate: string,
+  settings: NatalCalculationSettings,
+): Promise<TertiaryProgressionResult> {
+  const reusableSnapshot = ensureReusableSnapshot(natalSnapshot, person);
+  return requestJson<TertiaryProgressionResult>("/calculations/tertiary-progressions", {
+    method: "POST",
+    body: JSON.stringify({
+      reference_snapshot: reusableSnapshot,
+      target_date: targetDate,
+      settings: buildSharedChartSettings(settings, "natal"),
+      rule_pack_hash: RULE_PACK_HASH_PROGRESSION,
+    }),
+    timeoutMs: CALCULATION_TIMEOUT_MS,
+  });
+}
+
+/**
+ * 创建日返盘。
+ *
+ * 后端契约：/calculations/solar-return 接受 reference_snapshot、
+ * target_year、latitude、longitude、可选 residence_name 和 timezone_id、
+ * settings 和 rule_pack_hash。
+ */
+export async function createSolarReturn(
+  natalSnapshot: NatalSnapshot,
+  person: NatalPersonInput,
+  targetYear: number,
+  latitude: number,
+  longitude: number,
+  residenceName: string | null,
+  timezoneId: string | null,
+  settings: NatalCalculationSettings,
+): Promise<SolarReturnResult> {
+  const reusableSnapshot = ensureReusableSnapshot(natalSnapshot, person);
+  return requestJson<SolarReturnResult>("/calculations/solar-return", {
+    method: "POST",
+    body: JSON.stringify({
+      reference_snapshot: reusableSnapshot,
+      target_year: targetYear,
+      latitude,
+      longitude,
+      residence_name: residenceName,
+      timezone_id: timezoneId,
+      settings: buildSharedChartSettings(settings, "natal"),
+      rule_pack_hash: RULE_PACK_HASH_PROGRESSION,
+    }),
+    timeoutMs: CALCULATION_TIMEOUT_MS,
+  });
+}
+
+/**
+ * 创建月返盘。
+ *
+ * 后端契约：/calculations/lunar-return 接受 reference_snapshot、
+ * 可选 reference_date、latitude、longitude、可选 residence_name 和
+ * timezone_id、settings 和 rule_pack_hash。
+ */
+export async function createLunarReturn(
+  natalSnapshot: NatalSnapshot,
+  person: NatalPersonInput,
+  latitude: number,
+  longitude: number,
+  residenceName: string | null,
+  timezoneId: string | null,
+  settings: NatalCalculationSettings,
+  referenceDate?: string,
+): Promise<LunarReturnResult> {
+  const reusableSnapshot = ensureReusableSnapshot(natalSnapshot, person);
+  const body: Record<string, unknown> = {
+    reference_snapshot: reusableSnapshot,
+    latitude,
+    longitude,
+    residence_name: residenceName,
+    timezone_id: timezoneId,
+    settings: buildSharedChartSettings(settings, "natal"),
+    rule_pack_hash: RULE_PACK_HASH_PROGRESSION,
+  };
+  if (referenceDate) body.reference_date = referenceDate;
+  return requestJson<LunarReturnResult>("/calculations/lunar-return", {
+    method: "POST",
+    body: JSON.stringify(body),
+    timeoutMs: CALCULATION_TIMEOUT_MS,
+  });
+}
+
+/**
+ * 创建日弧盘。
+ *
+ * 后端契约：/calculations/solar-arc 接受 reference_snapshot、
+ * target_date、settings 和 rule_pack_hash。日弧盘永远为单盘，
+ * 但后端仍返回 comparison（推进盘 vs 本命跨盘相位）。
+ */
+export async function createSolarArc(
+  natalSnapshot: NatalSnapshot,
+  person: NatalPersonInput,
+  targetDate: string,
+  settings: NatalCalculationSettings,
+): Promise<SolarArcResult> {
+  const reusableSnapshot = ensureReusableSnapshot(natalSnapshot, person);
+  return requestJson<SolarArcResult>("/calculations/solar-arc", {
+    method: "POST",
+    body: JSON.stringify({
+      reference_snapshot: reusableSnapshot,
+      target_date: targetDate,
+      settings: buildSharedChartSettings(settings, "natal"),
+      rule_pack_hash: RULE_PACK_HASH_PROGRESSION,
+    }),
+    timeoutMs: CALCULATION_TIMEOUT_MS,
+  });
+}
+
+/**
+ * 创建重置盘。
+ *
+ * 后端契约：/calculations/relocation 接受 reference_snapshot、
+ * latitude、longitude、可选 residence_name 和 timezone_id、
+ * settings 和 rule_pack_hash。重置盘永远为单盘。
+ */
+export async function createRelocation(
+  natalSnapshot: NatalSnapshot,
+  person: NatalPersonInput,
+  latitude: number,
+  longitude: number,
+  residenceName: string | null,
+  timezoneId: string | null,
+  settings: NatalCalculationSettings,
+): Promise<RelocationResult> {
+  const reusableSnapshot = ensureReusableSnapshot(natalSnapshot, person);
+  return requestJson<RelocationResult>("/calculations/relocation", {
+    method: "POST",
+    body: JSON.stringify({
+      reference_snapshot: reusableSnapshot,
+      latitude,
+      longitude,
+      residence_name: residenceName,
+      timezone_id: timezoneId,
+      settings: buildSharedChartSettings(settings, "natal"),
+      rule_pack_hash: RULE_PACK_HASH_PROGRESSION,
+    }),
+    timeoutMs: CALCULATION_TIMEOUT_MS,
+  });
+}
+
+/**
+ * 创建12分盘。
+ *
+ * 后端契约：/calculations/dodecatemoria 接受 reference_snapshot、
+ * settings 和 rule_pack_hash。无需额外参数。
+ */
+export async function createDodecatemoria(
+  natalSnapshot: NatalSnapshot,
+  person: NatalPersonInput,
+  settings: NatalCalculationSettings,
+): Promise<HarmonicChartResult> {
+  const reusableSnapshot = ensureReusableSnapshot(natalSnapshot, person);
+  return requestJson<HarmonicChartResult>("/calculations/dodecatemoria", {
+    method: "POST",
+    body: JSON.stringify({
+      reference_snapshot: reusableSnapshot,
+      settings: buildSharedChartSettings(settings, "natal"),
+      rule_pack_hash: RULE_PACK_HASH_PROGRESSION,
+    }),
+    timeoutMs: CALCULATION_TIMEOUT_MS,
+  });
+}
+
+/**
+ * 创建13分盘。
+ *
+ * 后端契约：/calculations/tridecatemoria 接受 reference_snapshot、
+ * settings 和 rule_pack_hash。无需额外参数。
+ */
+export async function createTridecatemoria(
+  natalSnapshot: NatalSnapshot,
+  person: NatalPersonInput,
+  settings: NatalCalculationSettings,
+): Promise<HarmonicChartResult> {
+  const reusableSnapshot = ensureReusableSnapshot(natalSnapshot, person);
+  return requestJson<HarmonicChartResult>("/calculations/tridecatemoria", {
+    method: "POST",
+    body: JSON.stringify({
+      reference_snapshot: reusableSnapshot,
       settings: buildSharedChartSettings(settings, "natal"),
       rule_pack_hash: RULE_PACK_HASH_PROGRESSION,
     }),

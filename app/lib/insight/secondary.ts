@@ -62,7 +62,7 @@ function combinationFor(movingPointId: string, referencePointId: string) {
   return moonNatalCombinations[key] ?? planetNatalCombinations[key] ?? outerPlanetCombinations[key];
 }
 
-const rightPanelPrimaryPointIds = new Set(rightPanelDisplayCorpus.coreTurningPointIds);
+const rightPanelPrimaryPointIds = new Set<string>(rightPanelDisplayCorpus.coreTurningPointIds);
 const slowPointIds = new Set(["jupiter", "saturn", "uranus", "neptune", "pluto"]);
 
 function rightPanelAspectWeight(aspect: { moving_point_id: string; reference_point_id: string; strength: number; orb_deg: number; applying_state: string }): number {
@@ -338,7 +338,9 @@ export function buildSecondaryProgressionRightPanel(
     const comb = combinationFor(aspect.moving_point_id, aspect.reference_point_id);
     cardCDetails.push(`次限${moving}精确${aspectLabel(aspect.type)}本命${ref}：${corpusSentence(comb?.aspects?.[aspect.type] ?? comb?.meaning, "当前转折信号最强")}`);
   }
-  const lpAngle = Number(asRecord(progressed.result.astronomical_context).lunar_phase?.angle ?? asRecord(progressed.result.astronomical_context).lunar_phase?.elongation_deg ?? 0);
+  const lpCtx = asRecord(progressed.result.astronomical_context);
+  const lpRaw = asRecord(lpCtx.lunar_phase);
+  const lpAngle = Number(lpRaw.angle ?? lpRaw.elongation_deg ?? 0);
   if (lpAngle < 5 || Math.abs(lpAngle - 90) < 5 || Math.abs(lpAngle - 180) < 5 || Math.abs(lpAngle - 270) < 5) {
     const phaseCross = stageTransitions.phaseCross;
     cardCDetails.push(phaseCross ? phaseCross.summary : `次限月相正处于${phaseInfo.phase}的起始阶段，内在节奏正在转换。`);
@@ -360,9 +362,9 @@ export function buildSecondaryProgressionRightPanel(
 
   // ── Card D: 阶段建议 ──
   const cardDDetails: string[] = [];
-  let moonAdvice = rightPanelDisplayCorpus.currentStage.moonFallback;
-  let sunAdvice = rightPanelDisplayCorpus.currentStage.sunFallback;
-  let aspectAdvice = rightPanelDisplayCorpus.aspectTone.steady;
+  let moonAdvice: string = rightPanelDisplayCorpus.currentStage.moonFallback;
+  let sunAdvice: string = rightPanelDisplayCorpus.currentStage.sunFallback;
+  let aspectAdvice: string = rightPanelDisplayCorpus.aspectTone.steady;
   if (pMoon) {
     const moonCorpus = moonSignPhases[moonSign];
     const moonHouse = pMoon.house;

@@ -127,9 +127,45 @@ const SecondaryProgressionsWorkspace = dynamic(() => import("./secondary-progres
   loading: () => <section className="main-workspace empty-workspace"><div><span>◌</span><h1>正在加载次限工作台</h1><p>正在准备组件资源。</p></div></section>,
   ssr: false,
 });
+const TertiaryProgressionsWorkspace = dynamic(() => import("./tertiary-progressions-workspace").then((m) => m.TertiaryProgressionsWorkspace), {
+  loading: () => <section className="main-workspace empty-workspace"><div><span>◌</span><h1>正在加载三限工作台</h1><p>正在准备组件资源。</p></div></section>,
+  ssr: false,
+});
+const SolarReturnWorkspace = dynamic(() => import("./solar-return-workspace").then((m) => m.SolarReturnWorkspace), {
+  loading: () => <section className="main-workspace empty-workspace"><div><span>◌</span><h1>正在加载日返工作台</h1><p>正在准备组件资源。</p></div></section>,
+  ssr: false,
+});
+const LunarReturnWorkspace = dynamic(() => import("./lunar-return-workspace").then((m) => m.LunarReturnWorkspace), {
+  loading: () => <section className="main-workspace empty-workspace"><div><span>◌</span><h1>正在加载月返工作台</h1><p>正在准备组件资源。</p></div></section>,
+  ssr: false,
+});
+const SolarArcWorkspace = dynamic(() => import("./solar-arc-workspace").then((m) => m.SolarArcWorkspace), {
+  loading: () => <section className="main-workspace empty-workspace"><div><span>◌</span><h1>正在加载日弧工作台</h1><p>正在准备组件资源。</p></div></section>,
+  ssr: false,
+});
+const RelocationWorkspace = dynamic(() => import("./relocation-workspace").then((m) => m.RelocationWorkspace), {
+  loading: () => <section className="main-workspace empty-workspace"><div><span>◌</span><h1>正在加载重置工作台</h1><p>正在准备组件资源。</p></div></section>,
+  ssr: false,
+});
+const DodecatemoriaWorkspace = dynamic(() => import("./dodecatemoria-workspace").then((m) => m.DodecatemoriaWorkspace), {
+  loading: () => <section className="main-workspace empty-workspace"><div><span>◌</span><h1>正在加载12分工作台</h1><p>正在准备组件资源。</p></div></section>,
+  ssr: false,
+});
+const TridecatemoriaWorkspace = dynamic(() => import("./tridecatemoria-workspace").then((m) => m.TridecatemoriaWorkspace), {
+  loading: () => <section className="main-workspace empty-workspace"><div><span>◌</span><h1>正在加载13分工作台</h1><p>正在准备组件资源。</p></div></section>,
+  ssr: false,
+});
+const FirdariaWorkspace = dynamic(() => import("./firdaria-workspace").then((m) => m.FirdariaWorkspace), {
+  loading: () => <section className="main-workspace empty-workspace"><div><span>◌</span><h1>正在加载法达工作台</h1><p>正在准备组件资源。</p></div></section>,
+  ssr: false,
+});
+const AnnualProfectionsWorkspace = dynamic(() => import("./annual-profections-workspace").then((m) => m.AnnualProfectionsWorkspace), {
+  loading: () => <section className="main-workspace empty-workspace"><div><span>◌</span><h1>正在加载小限工作台</h1><p>正在准备组件资源。</p></div></section>,
+  ssr: false,
+});
 
 export function HomeWorkspace() {
-  const [activeTechnique, setActiveTechnique] = useState<"natal" | "current_sky" | "transits" | "secondary_progressions">("natal");
+  const [activeTechnique, setActiveTechnique] = useState<"natal" | "current_sky" | "transits" | "secondary_progressions" | "tertiary_progressions" | "solar_return" | "lunar_return" | "solar_arc" | "firdaria" | "annual_profections" | "relocation" | "dodecatemoria" | "tridecatemoria">("natal");
   const [snapshot, setSnapshot] = useState<NatalSnapshot>(sampleSnapshot);
   const [subjectName, setSubjectName] = useState("阿特拉斯");
   const [tab, setTab] = useState<ResultTab>("basic");
@@ -698,7 +734,7 @@ export function HomeWorkspace() {
         </div>
       </header>
 
-      <nav className="technique-strip" aria-label="盘型切换">{chartTechniques.slice(0, 11).map((technique) => <button key={technique.id} className={technique.id === activeTechnique ? "active" : technique.status === "active" ? "" : "planned"} onClick={() => { if (technique.id === "natal" || technique.id === "current_sky" || technique.id === "transits" || technique.id === "secondary_progressions") { setActiveTechnique(technique.id); setShowCalculationResults(false); window.scrollTo({ top: 0, behavior: "smooth" }); } else setCapabilityTarget(technique); }}><b>{technique.label}</b><small>{technique.id === activeTechnique ? "当前" : technique.status === "active" ? "可用" : "规划中"}</small></button>)}<div className="technique-more" ref={moreTechniquesRef}><button className={`technique-more-trigger${moreTechniquesOpen ? " active" : ""}`} onClick={() => {
+      <nav className="technique-strip" aria-label="盘型切换">{chartTechniques.slice(0, 13).map((technique) => <button key={technique.id} className={technique.id === activeTechnique ? "active" : technique.status === "active" ? "" : "planned"} onClick={() => { if (technique.status === "active") { setActiveTechnique(technique.id as typeof activeTechnique); setShowCalculationResults(false); window.scrollTo({ top: 0, behavior: "smooth" }); } else setCapabilityTarget(technique); }}><b>{technique.label}</b><small>{technique.id === activeTechnique ? "当前" : technique.status === "active" ? "可用" : "规划中"}</small></button>)}<div className="technique-more" ref={moreTechniquesRef}><button className={`technique-more-trigger${moreTechniquesOpen ? " active" : ""}`} onClick={() => {
                 if (moreTechniquesOpen) { setMoreTechniquesOpen(false); }
                 else {
                   const btn = moreTechniquesRef.current?.querySelector(".technique-more-trigger");
@@ -708,10 +744,10 @@ export function HomeWorkspace() {
                   }
                   setMoreTechniquesOpen(true);
                 }
-              }} aria-label="更多盘型"><b>☰</b><small>更多</small></button>{moreTechniquesOpen && createPortal(<div className="technique-more-menu" style={moreTechniquesStyle} role="menu">{chartTechniques.slice(11).map((technique) => <button key={technique.id} role="menuitem" className={technique.id === activeTechnique ? "active" : "planned"} onClick={() => { setMoreTechniquesOpen(false); setCapabilityTarget(technique); }}><b>{technique.label}</b><small>{technique.status === "active" ? "可用" : "规划中"}</small></button>)}</div>, document.body)}</div></nav>
+              }} aria-label="更多盘型"><b>☰</b><small>更多</small></button>{moreTechniquesOpen && createPortal(<div className="technique-more-menu" style={moreTechniquesStyle} role="menu">{chartTechniques.slice(13).map((technique) => <button key={technique.id} role="menuitem" className={technique.id === activeTechnique ? "active" : "planned"} onClick={() => { setMoreTechniquesOpen(false); if (technique.status === "active") { setActiveTechnique(technique.id as typeof activeTechnique); setShowCalculationResults(false); window.scrollTo({ top: 0, behavior: "smooth" }); } else { setCapabilityTarget(technique); } }}><b>{technique.label}</b><small>{technique.status === "active" ? "可用" : "规划中"}</small></button>)}</div>, document.body)}</div></nav>
 
       <div className="natal-layout">
-        {activeTechnique === "current_sky" ? <CurrentSkyWorkspace theme={theme} /> : !workspaceResolved ? <section className="main-workspace empty-workspace"><div><span>◌</span><h1>正在读取工作台</h1><p>正在确认默认人物、示例人物和最近添加人物。</p></div></section> : !hasActiveSnapshot ? <section className="main-workspace empty-workspace"><div><span>✦</span><h1>{hasActiveSubject ? `${subjectName}尚未计算本命盘` : "开始第一次本命分析"}</h1><p>{hasActiveSubject ? `${activeTechnique === "natal" ? "本命盘" : "这个盘型"}需要先有一份本命计算结果。点击下方按钮确认参数并生成本命盘。` : "当前没有默认人物、示例人物或已保存人物。新建分析后即可继续。"}</p><button className="primary-action" onClick={() => openNewCalculation("technique", hasActiveSubject ? person : undefined)}>＋ 新建分析</button></div></section> : activeTechnique === "transits" ? <TransitWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} /> : activeTechnique === "secondary_progressions" ? <SecondaryProgressionsWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} savedPeople={savedPeople} selectedPersonId={selectedPersonId} onSelectPerson={selectWorkspacePerson} /> : <section className="main-workspace">
+        {activeTechnique === "current_sky" ? <CurrentSkyWorkspace theme={theme} /> : !workspaceResolved ? <section className="main-workspace empty-workspace"><div><span>◌</span><h1>正在读取工作台</h1><p>正在确认默认人物、示例人物和最近添加人物。</p></div></section> : !hasActiveSnapshot ? <section className="main-workspace empty-workspace"><div><span>✦</span><h1>{hasActiveSubject ? `${subjectName}尚未计算本命盘` : "开始第一次本命分析"}</h1><p>{hasActiveSubject ? `${activeTechnique === "natal" ? "本命盘" : "这个盘型"}需要先有一份本命计算结果。点击下方按钮确认参数并生成本命盘。` : "当前没有默认人物、示例人物或已保存人物。新建分析后即可继续。"}</p><button className="primary-action" onClick={() => openNewCalculation("technique", hasActiveSubject ? person : undefined)}>＋ 新建分析</button></div></section> : activeTechnique === "transits" ? <TransitWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} /> : activeTechnique === "secondary_progressions" ? <SecondaryProgressionsWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} savedPeople={savedPeople} selectedPersonId={selectedPersonId} onSelectPerson={selectWorkspacePerson} /> : activeTechnique === "tertiary_progressions" ? <TertiaryProgressionsWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} savedPeople={savedPeople} selectedPersonId={selectedPersonId} onSelectPerson={selectWorkspacePerson} /> : activeTechnique === "solar_return" ? <SolarReturnWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} savedPeople={savedPeople} selectedPersonId={selectedPersonId} onSelectPerson={selectWorkspacePerson} /> : activeTechnique === "lunar_return" ? <LunarReturnWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} savedPeople={savedPeople} selectedPersonId={selectedPersonId} onSelectPerson={selectWorkspacePerson} /> : activeTechnique === "solar_arc" ? <SolarArcWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} savedPeople={savedPeople} selectedPersonId={selectedPersonId} onSelectPerson={selectWorkspacePerson} /> : activeTechnique === "relocation" ? <RelocationWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} savedPeople={savedPeople} selectedPersonId={selectedPersonId} onSelectPerson={selectWorkspacePerson} /> : activeTechnique === "firdaria" ? <FirdariaWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} savedPeople={savedPeople} selectedPersonId={selectedPersonId} onSelectPerson={selectWorkspacePerson} /> : activeTechnique === "annual_profections" ? <AnnualProfectionsWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} savedPeople={savedPeople} selectedPersonId={selectedPersonId} onSelectPerson={selectWorkspacePerson} /> : activeTechnique === "dodecatemoria" ? <DodecatemoriaWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} savedPeople={savedPeople} selectedPersonId={selectedPersonId} onSelectPerson={selectWorkspacePerson} /> : activeTechnique === "tridecatemoria" ? <TridecatemoriaWorkspace theme={theme} person={person} latestNatalSnapshot={snapshot} savedPeople={savedPeople} selectedPersonId={selectedPersonId} onSelectPerson={selectWorkspacePerson} /> : <section className="main-workspace">
           {notice && <div className="app-toast" role="status"><p>{notice}</p><button onClick={() => setNotice("")} aria-label="关闭提示">×</button></div>}
 
           <div className="workbench-grid">

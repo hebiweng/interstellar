@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import type { NatalCalculationSettings, NatalSnapshot, NatalPersonInput, CurrentSkyInput } from '../../lib/interstellar-api';
 import type { NatalPointGroups, NatalPresetId } from '../../lib/natal-presets';
-import type { ThemeMode, ChartView } from '../lib/chart-types';
+import type { ThemeMode, ChartView, CurrentSkyResultTab } from '../lib/chart-types';
 import { createCurrentSkyCalculation, InterstellarApiError } from '../../lib/interstellar-api';
 import { classicalStarlightPairOrbs } from '../../lib/natal-presets';
 import { buildNatalRenderSpec } from '../../lib/render-export';

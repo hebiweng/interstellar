@@ -1,4 +1,5 @@
-import type { InterpretationTarget, ItemInterpretation, NatalSnapshot } from "../../lib/interstellar-api";
+import type { ItemInterpretation, NatalSnapshot } from "../../lib/interstellar-api";
+import type { InterpretationTarget } from "./chart-types";
 import {
   houseDomains,
   patternNames,

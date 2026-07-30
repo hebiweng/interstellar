@@ -95,6 +95,11 @@ services:
     image: interstellar-web:local
     environment:
       NEXT_PUBLIC_INTERSTELLAR_API_URL: ${NEXT_PUBLIC_INTERSTELLAR_API_URL:-/api/v1}
+      # Server-side proxy target for the Next.js API route catch-all.
+      # In standalone mode (no Vite), the catch-all route at
+      # app/api/v1/[...path]/route.ts reads this to forward requests
+      # to the FastAPI backend.
+      INTERSTELLAR_API_PROXY_TARGET: http://api:8018
     ports:
       - "127.0.0.1:${INTERSTELLAR_WEB_PORT:-3000}:3000"
     healthcheck:
