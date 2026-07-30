@@ -130,6 +130,115 @@ app/components/workspaces/secondary-progressions-workspace.tsx
 - AI 分析错误处理和友好提示
 - 生产部署配置
 
+### 4.6 iOS V1（`ios` 分支工作区）
+
+iOS 首版已完成可构建的纵向实现，尚未提交或推送：
+
+- SwiftUI 四栏：Today / Charts / Ask / Profile；
+- 本命、天象、行运、次限四盘；
+- Modern / Classical 两个消费者预设；旧 Special 仅保留持久化数据解码兼容；
+- 单轮、双轮、单盘三角相位矩阵、跨盘交叉相位矩阵和固定解析卡片；
+- Today 本地自然日事件扫描、本周 7 天行运信号密度，以及今日事件到精确事件时刻盘面的跳转；
+- 英文默认、设置中切换简体中文；
+- MapKit 地点搜索、手动经纬度和用户主动定位；
+- 本地 Swiss Ephemeris 计算，不依赖 HTTP API；
+- 私有中英文解析包通过 Git ignore 和泄漏脚本隔离；
+- 新 App 图标、许可全文与内容版权声明。
+
+验证证据：
+
+- AstroCore 8 项测试通过，其中代表性星盘覆盖 8 个跨地区/年代实例；
+- 通用 iPhoneOS 构建通过；
+- 移除私有内容包后的临时公开工程仍可构建；
+- `npm run architecture:check` 通过；
+- `npm run lint -- --quiet` 通过；
+- `scripts/check-private-content.sh` 通过。
+
+当前剩余：飞行模式、小屏/无障碍、冷启动性能、英文完整翻译和发布前许可复核。
+
+2026-07-29 消费者评审确认纵向骨架不能视为视觉完成，新增以下最高优先级返工：
+
+- Today 不显示参数和四盘摘要，改为“今日主线 + 日内波形 + 感情/事业/财富/状态四领域雷达 + 信号驱动的接下来节奏”；四盘仅作为内部计算依据；
+- 消费者文案不得把 Obsidian 的编写说明、图表解释或边界声明改写成正文；运行时从项目内私有 corpus/rules 选择通俗成品文案；
+- 当前临时 28 条中文约 100 字内容未经人工审核，不能标记为 approved，需废弃或重做；
+- 各盘卡片按 Obsidian 视觉示意逐张实现，不能继续以通用进度条、列表或雷达代替；
+- `Aspects` 改为单盘三角矩阵、双盘交叉矩阵；
+- 轮盘增加刻度、宫位编号、四轴、星体度数和状态层级，但保持 iPhone 12 mini 可读。
+
+2026-07-29 消费者视觉首轮代码实现：
+
+- Today 已改为今日主线、真实事件聚合的日内波形、四生活领域雷达、可切换领域摘要、信号驱动的接下来节奏和底部七天综合进展；四盘依据区已删除；
+- Today 雷达与主线使用真实行运/次限跨盘相位强度及本命宫位映射，波形使用本地 `DailySignal` 的事件时间与强度；当前映射仍需补齐书面公式和黄金夹具；
+- 轮盘已增加 1°/5°/10° 刻度、十二宫编号、ASC/DSC/MC/IC、星体度数、逆行标记和拥挤点引线；
+- `Aspects` 节点网络已替换：本命/天象为下三角矩阵，行运/次限为移动点 × 本命点交叉矩阵；
+- Today 正式标题和摘要通过私有内容键读取；公开 Swift 只保留最小事实降级句；
+- Today 的领域映射、行运/次限权重、强度归一化和方向阈值采用公开 Schema + `PrivateRules-Today.json` 私有规则包；公共源码只保留可运行样例规则；
+- 新增 Today 中英文示例均标记为 `sample`，旧的 28 条临时中文内容全部标记为 `draft`，`ContentProvider` 不加载 draft；
+- 上述改动已通过通用 iPhone Debug 构建、AstroCore 8 项测试、架构检查、lint、JSON 校验和私有内容泄漏检查；
+- 仍未完成 iPhone 12 mini 真机视觉、Dynamic Type、VoiceOver 和中英文逐屏验收，因此不能把消费者视觉标记为最终完成。
+
+2026-07-29 四盘解析卡片专项实现：
+
+- 新增 `docs/ios-card-implementation-matrix.md`，固定本命 5、天象 8、行运日指数 + 9、次限 5 张卡的顺序、ID、视觉与必显内容；
+- `InsightVisual` 和 `InsightCards.swift` 已由通用模板改为 25 种专用视觉：三点人格结构、主题排行、优势环、盲点、成长路径、月相三周期、相位结构、八领域条形、演进叙事、半圆指数、节奏波形、甘特条、三段环、十二领域雷达、行动分区、三段弧线、双圈触发、本周 7 天热力格、长期阶段与本命对照等；
+- 天象行星表和行运行星表不再截取前 6 个点，展示完整点集，并包含星座度数、顺逆行、速度；行运表另含本命宫位与最强触发；
+- 所有卡片始终含摘要、展开详情和消费者可读空状态；私有内容包缺失时不显示内部加载说明；
+- 新增 Debug 运行时卡片契约和 `scripts/check-ios-card-contract.sh`，检查 28 个固定卡片 ID、顺序、最低卡内事实数、8 个天象领域、12 个生活领域、完整星体表与本周 7 天；
+- 通用 iPhone Debug 构建与卡片契约检查已通过；尚未做 iPhone 12 mini 真机视觉、长英文、中文、Dynamic Type、VoiceOver 和正式语料逐卡审核。
+
+2026-07-29 iOS 独立语料系统与主题专项：
+
+- 新增独立 Swift Package `ios/Packages/ContentKit`，包含稳定语义 ID、事实信号、corpus selector、优先级、去重组、composition binding、摘要/详情模板、长度约束和缺失内容失败策略；
+- 新增 `InterpretationContextFactory.swift`，把本命、天象、行运、次限的真实点位、落座、落宫、相位、入相/精确/出相、逆行、月相、活跃宫位和行运日历统一为可审计查询上下文；
+- 四盘 28 张卡片已全部改为 `AstroCore facts → InterpretationContext → ContentKit → PrivateCorpus`，`InsightFactory` 中旧的卡片级固定摘要和重复详情已删除；缺少必需语料时整盘解读明确不可用，不再伪装为成品文案；
+- 本机私有区已按 natal / current-sky / transit / secondary 拆分 corpus 与 composition rules，并建立 Today / Week / Ask 独立消费者内容；运行时只读取编译后的聚合包，不读取 Obsidian；
+- `scripts/build-ios-content-pack.mjs` 会验证重复 ID、语言边界、28 卡规则、binding、模板引用、禁用内部话术、必需语料候选和中英 ID 漂移，并输出同 ID 英文缺口清单；
+- 私有 corpus、composition rules、运行时内容包和翻译导出均在 Git ignore 与 `scripts/check-private-content.sh` 保护范围内；
+- App 新增持久化的 System / Light / Dark 外观设置，默认跟随系统；主题、卡片、轮盘和相位图使用动态浅深色；
+- ContentKit 3 项测试、内容包双语覆盖验证、卡片契约、私有边界、架构检查、lint 和完整 iPhoneOS 构建通过；
+- 已在连接的 iPhone 12 mini（设备名 `HUAWEI PURA 70`）完成签名、安装、启动，并确认进程持续运行；
+- 尚未完成中文 297 条逐条人工内容审核、英文完整同 ID 翻译、iPhone 12 mini 逐屏视觉截图、Dynamic Type、VoiceOver、飞行模式和冷启动性能验收。
+
+2026-07-29 iOS Today、人物与消费者语料收口：
+
+- Today 保留今日主线、日内波形、四生活领域和信号驱动的接下来节奏，删除“四张星盘/今日解读的依据”，只在页面最底部增加七天综合进展；
+- 七天视图由 `WeeklySignalProviding` 注册表接收标准化信号，当前已注册本命、天象、行运、次限；未来盘型只新增 provider，不修改 Today 页面；
+- 七天逐日卡只展示当日重点、最忙节点在前/当前/已过和下一重点，全部正文来自 `PrivateContent-<locale>.json`；
+- Today 四领域与接下来节奏改为必需内容键，删除 Swift 解释文案降级路径；私有包缺项会明确失败；
+- 行运与次限分别使用自己的 Modern / Classical 预设重算移动盘和本命参照，本命页预设只影响本命页；
+- Profile 已支持多人物、与本人关系、本人和其他人物头像、地图自动定位/搜索/点选、反向地理编码、自动时区及可编辑经纬度；
+- 行运强度日历由 30 天改为本周 7 天；详情整行具有至少 44pt 点击区域；
+- 轮盘改用星座和星体文字并扩大拥挤点间距；专业精度仍保留在轮盘/相位矩阵，解读事实改用消费者语言；
+- 内容包构建会把技术占位符映射为消费者占位符，运行时中文包正文不再出现容许度、入相、出相、精确相位、行运、次限、逆行、宫位等术语；
+- `scripts/export-ios-translation-worklist.mjs` 已生成 339 条翻译工作项：Today/周内容 42 条、四盘 corpus 297 条，含稳定 ID、优先级、占位符和长度/语气要求；
+- 真机 UI 自动回归曾通过 2 项测试（0 失败）；依用户后续要求，不再重复做亮/暗污染检查，视觉问题按用户反馈专项处理；
+- 最新通用 iPhoneOS 构建、AstroCore 8 项测试、ContentKit 3 项测试、卡片契约和私有内容边界检查均通过。
+
+2026-07-30 iOS Ask、可读性与反馈：
+
+- 第三栏由 Synastry 改为 `Ask / 问事`，实现会发生吗、选哪个、什么时候做最好三种流程；选择题默认 2 项、最多 5 项并禁止重复领域，择时支持日/周/月与范围上限、进度和取消；
+- 新增独立 Horary/Election 计算：Regiomontanus、传统七曜与守护关系、传统相位/力量/接纳、逆行、燃烧、Cazimi、月亮下一相位和空亡；不修改四盘 `ChartKind`；
+- 会发生吗显示可追溯的可能性，选择题归一化为 100% 并提供结果接近提示，择时显示独立适合度、第一推荐和两个备选；
+- 问事轮盘复用基础单盘渲染并增加相关宫位、代表星和关键相位覆盖层；专业页含相位矩阵、宫主星、力量、接纳、月亮状态与评分拆解；
+- 设置增加 Small / Standard / Large / Extra Large 四档字体；消费者正文完成语义字号清理，大屏轮盘文字随宽度放大，9pt 仅保留轮盘宫位短标记；
+- 设置增加 Report，分类为 Bug / Feature / Other；只在用户主动提交时联网，不附带出生资料、星盘或私有语料，失败可复制反馈文字；
+- ContentKit 与内容构建器增加同一主题、连续重复句、英文冠词、重复占位符和未解析变量检查，修复 `A and A` 与 `an closeness` 类组合；
+- AstroCore 12 项、ContentKit 4 项、卡片契约、私有内容边界、架构、lint 和签名 iPhoneOS 构建已通过；
+- Ask、字体设置和 Report 的真机 UI 回归已在 iPhone 12 mini 执行通过（1 项，0 失败），覆盖 Today、Charts、Ask 三入口、Profile、字体设置和 Bug / Feature / Other；
+- 已在连接的 iPhone 12 mini（设备名 `HUAWEI PURA 70`）覆盖安装最终签名构建并重新启动 `com.xiaoguiwk.interstellar`，随后通过 CoreDevice 进程列表确认 App 进程持续运行（PID 1615）。
+
+2026-07-30 iOS 内容收敛与消费者流程修正：
+
+- Ask 的问题、选项、行动说明和经纬度输入加入明确的 Done / 完成与 Edit / 编辑状态；完成后锁定字段并收起键盘，键盘工具栏也可完成当前输入；
+- 四盘消费者预设只显示 Modern / Classical；Classical 是与 Modern 对应的产品标签，Traditional 继续用于内部算法说明；旧 Special 仅做持久化解码迁移；
+- 私有 corpus 与 composition rules 按 natal / current-sky / transit / secondary 拆分；Today / Week / Ask 也使用独立 source pack，再由脚本生成 Xcode 运行时聚合包；
+- 候选本命中文文件 78 条中只接入 21 条可由现有 `InterpretationContext` 真实命中的内容，未生成的 dominant / repeated / chart-ruler / underused 等标签不伪造；
+- 中英文四盘包、Today / Week / Ask 包均构建为 approved；天象盘不再因 Release 排除 sample 而显示“内容不完整”；
+- Today 的 `What comes next` 不再直接罗列重复星体主题，改为从真实 `DailySignal` 去重生成整体氛围、个人节奏、长期变化三类视觉节点，标题与详情全部来自私有内容键；
+- 通用 iPhoneOS Debug 构建已在 Swift 6 warnings-as-errors 下通过；最终签名版已覆盖安装并启动到 iPhone 12 mini，CoreDevice 首次确认进程 PID 1690；
+- 同一签名产物已封装为被 Git 忽略的 `ios/Artifacts/Interstellar-ios-dev.ipa`；这是开发签名包，只能安装到当前 provisioning profile 已登记且信任开发者的设备；
+- 真机自动 UI 冒烟测试因 Codex 外部授权额度限制未能启动，本轮证据为编译、签名、安装、启动与进程确认；Git 推送状态以本次任务最终交付为准。
+
 ---
 
 ## 5. 未完成能力
@@ -164,12 +273,7 @@ app/components/workspaces/secondary-progressions-workspace.tsx
 
 ### 5.5 架构检查自动化
 
-`scripts/check-architecture.mjs` 尚未创建。计划检查项：
-- 规范文件存在检查（AGENTS.md / docs/ 下两个文件）
-- 运行时代码不依赖 Obsidian
-- 消费者代码禁忌词检查
-- 次限盘样板不退化
-- page.tsx 保持薄入口
+`scripts/check-architecture.mjs` 已存在，当前检查 route、retry、corpus、CSS 和生产 API guard。iOS 私有内容另由 `scripts/check-private-content.sh` 检查；两者目前均通过。
 
 ### 5.6 Obsidian 目录重组
 
@@ -233,5 +337,11 @@ app/components/workspaces/secondary-progressions-workspace.tsx
 | 2026-07-28 | 初始版本：记录次限盘样板完成、天象盘 Obsidian V2.0 完成、规范体系建立 |
 | 2026-07-28 | 更新：补充行运盘 Obsidian V3.0 完成（9 卡片 + 四大新语料体系 + 7 种多元视觉），补充行运盘项目内实现待办，标注天象盘视觉升级待确认 |
 | 2026-07-28 | 更新：天象盘 5-语料设计 V3.0、行运盘 5-语料设计 V4.0 完成 iOS App 适配，新增 card_summary/card_detail 字段和文字层规范 |
+| 2026-07-29 | 更新：iOS V1 四盘、Today、本地计算、私有内容边界、双语和通用真机构建完成；记录真机回归与许可复核剩余项 |
+| 2026-07-29 | 更新：消费者 Today、轮盘和相位矩阵完成首轮代码实现；产品红线和固定验收流程写入 AGENTS；记录真机视觉验收仍未完成 |
+| 2026-07-29 | 更新：四盘 28 张解析卡完成专用视觉与卡内要素实现，加入逐卡矩阵、完整点集和自动契约检查；正式内容与真机视觉仍待审核 |
+| 2026-07-29 | 更新：建立独立 ContentKit 和私有 corpus/rules 编译流程，四盘 28 卡移除固定降级文案并接入事实驱动语料；加入 System/Light/Dark；完成 iPhone 12 mini 签名安装启动 |
+| 2026-07-29 | 更新：Today 七天综合信号、未来盘型 provider、比较盘预设一致性、多人物/关系/头像/Apple 地图、消费者术语转换与 339 条翻译工作表完成；记录最终构建和测试证据 |
+| 2026-07-30 | 更新：Ask 三流程与传统问事/择时引擎、概率和专业分析完成；加入字体大小、Report、全局可读性与语料组合去重，记录测试与真机安装状态 |
 
 > AI生成

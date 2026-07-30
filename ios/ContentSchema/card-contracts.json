@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "cards": {
+    "natal": [
+      "core-structure",
+      "strongest-themes",
+      "core-strengths",
+      "blind-spot",
+      "growth-direction"
+    ],
+    "current-sky": [
+      "sky-overview",
+      "core-themes",
+      "key-events",
+      "structure-tension",
+      "collective-domains",
+      "observation-focus",
+      "sky-evolution",
+      "planet-overview"
+    ],
+    "transit": [
+      "daily-activity",
+      "transit-overview",
+      "trigger-themes",
+      "key-events",
+      "support-pressure",
+      "life-domains",
+      "action-guidance",
+      "transit-timeline",
+      "planet-overview",
+      "intensity-calendar"
+    ],
+    "secondary": [
+      "current-stage",
+      "change-themes",
+      "turning-points",
+      "stage-advice",
+      "natal-link"
+    ]
+  }
+}
