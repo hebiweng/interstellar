@@ -1,41 +1,59 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "cards": {
     "natal": [
-      "core-structure",
-      "strongest-themes",
-      "core-strengths",
-      "blind-spot",
-      "growth-direction"
+      "natal-interpretation",
+      "career-direction",
+      "strengths-growth",
+      "element-balance",
+      "house-emphasis",
+      "chart-signature",
+      "planet-placements",
+      "key-aspects"
     ],
     "current-sky": [
       "sky-overview",
-      "core-themes",
-      "key-events",
-      "structure-tension",
-      "collective-domains",
-      "observation-focus",
-      "sky-evolution",
-      "planet-overview"
+      "moon-now",
+      "aspect-pattern",
+      "planetary-motion",
+      "sign-changes",
+      "element-climate",
+      "upcoming-7-days"
     ],
     "transit": [
-      "daily-activity",
-      "transit-overview",
-      "trigger-themes",
-      "key-events",
-      "support-pressure",
-      "life-domains",
-      "action-guidance",
+      "current-story",
+      "current-cycles",
       "transit-timeline",
-      "planet-overview",
-      "intensity-calendar"
+      "planet-paths",
+      "life-areas",
+      "active-transits"
     ],
     "secondary": [
-      "current-stage",
-      "change-themes",
+      "developmental-chapter",
+      "progressed-moon",
+      "identity-development",
       "turning-points",
-      "stage-advice",
-      "natal-link"
+      "areas-maturing",
+      "timeline"
+    ],
+    "solar-return": [
+      "year-theme",
+      "year-anchors",
+      "priority-areas",
+      "year-dynamics",
+      "year-timeline",
+      "natal-overlay",
+      "year-aspects"
+    ],
+    "synastry": [
+      "relationship-overview",
+      "perspectives",
+      "emotional-connection",
+      "communication",
+      "chemistry",
+      "commitment",
+      "house-overlays",
+      "key-inter-aspects"
     ]
   }
 }

@@ -3,6 +3,7 @@ import SwiftUI
 
 struct ChartsView: View {
     @EnvironmentObject private var model: AppModel
+    @State private var showAIConsent = false
 
     var body: some View {
         NavigationStack {
@@ -35,7 +36,13 @@ struct ChartsView: View {
                                 .padding(.top, 2)
 
                             ForEach(insightState.cards) { card in
-                                InsightCardView(card: card, language: model.language)
+                                let ai = model.aiCardDetail(for: model.selectedChart, cardID: card.id)
+                                InsightCardView(
+                                    card: card,
+                                    language: model.language,
+                                    aiDetail: ai.detail,
+                                    aiStatus: ai.status
+                                )
                             }
                         } else if let message = insightState.errorMessage,
                                   model.snapshot(for: model.selectedChart) != nil
@@ -56,6 +63,29 @@ struct ChartsView: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
+            .task(id: model.selectedChart) {
+                if !model.aiConsentGranted, model.isOnline, model.snapshot(for: model.selectedChart) != nil {
+                    showAIConsent = true
+                } else {
+                    model.ensureAIGeneration(for: model.selectedChart)
+                }
+            }
+            .alert(
+                localized("Allow network generation?", "允许联网生成解读？", language: model.language),
+                isPresented: $showAIConsent
+            ) {
+                Button(localized("Allow", "允许", language: model.language)) {
+                    model.grantAIConsent()
+                    model.ensureAIGeneration(for: model.selectedChart)
+                }
+                Button(localized("Not now", "暂不", language: model.language), role: .cancel) {}
+            } message: {
+                Text(localized(
+                    "Generating interpretations and reports sends this chart's calculated facts to the configured server. Results are cached on this device.",
+                    "生成解读与报告会把本盘的计算事实发送至配置的服务器。结果会保存在本机。",
+                    language: model.language
+                ))
+            }
         }
     }
 
@@ -69,6 +99,10 @@ struct ChartsView: View {
             return localized("Current sky compared with the natal chart", "当前天空与本命盘的比较", language: model.language)
         case .secondary:
             return localized("Day-for-a-year secondary progressions", "一日一年法次限推运", language: model.language)
+        case .solarReturn:
+            return localized("The year that begins at your next solar return", "下一个日返时刻开启的年度盘", language: model.language)
+        case .synastry:
+            return localized("How two natal charts meet", "两张本命盘如何相遇", language: model.language)
         }
     }
 

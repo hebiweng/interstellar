@@ -69,15 +69,24 @@ public struct ChartCalculationConfiguration: Sendable, Equatable {
     public let pointIDs: [CelestialBody]
     public let houseSystemCode: Character
     public let aspectOrbDegrees: Double
+    /// Optional per-aspect-kind orb profile (e.g. solar-return A/B families).
+    public let orbsByKind: [AspectKind: Double]?
+    /// Optional per-body starlight orbs (classical technique); the smaller of
+    /// the two bodies' orbs becomes the effective orb.
+    public let orbsByBody: [CelestialBody: Double]?
 
     public init(
         pointIDs: [CelestialBody],
         houseSystemCode: Character,
-        aspectOrbDegrees: Double
+        aspectOrbDegrees: Double,
+        orbsByKind: [AspectKind: Double]? = nil,
+        orbsByBody: [CelestialBody: Double]? = nil
     ) {
         self.pointIDs = pointIDs
         self.houseSystemCode = houseSystemCode
         self.aspectOrbDegrees = aspectOrbDegrees
+        self.orbsByKind = orbsByKind
+        self.orbsByBody = orbsByBody
     }
 
     public static let horary = ChartCalculationConfiguration(
@@ -314,9 +323,9 @@ public enum AstroCoreError: Error, Sendable, Equatable, LocalizedError {
 
 /// Serializes access to Swiss Ephemeris, whose configuration is process-global.
 public actor SwissEphemerisCalculator {
-    private static let swissFlags = Int32(SEFLG_SWIEPH | SEFLG_SPEED)
-    private static let processLock = NSLock()
-    private let ephemerisPath: String
+    static let swissFlags = Int32(SEFLG_SWIEPH | SEFLG_SPEED)
+    static let processLock = NSLock()
+    let ephemerisPath: String
 
     public init(ephemerisDirectory: URL) throws {
         let path = ephemerisDirectory.standardizedFileURL.path
@@ -369,10 +378,13 @@ public actor SwissEphemerisCalculator {
                 AspectPoint(
                     id: $0.id,
                     longitude: $0.longitudeDegrees,
-                    speed: $0.position.longitudeSpeedDegreesPerDay
+                    speed: $0.position.longitudeSpeedDegreesPerDay,
+                    body: $0.body
                 )
             },
-            orbDegrees: configuration.aspectOrbDegrees
+            orbDegrees: configuration.aspectOrbDegrees,
+            orbsByKind: configuration.orbsByKind,
+            orbsByBody: configuration.orbsByBody
         )
         return ChartSnapshot(
             utcDate: input.utcDate,
@@ -407,7 +419,9 @@ public actor SwissEphemerisCalculator {
     public nonisolated static func compare(
         moving: ChartSnapshot,
         reference: ChartSnapshot,
-        orbDegrees: Double = 3
+        orbDegrees: Double = 3,
+        orbsByKind: [AspectKind: Double]? = nil,
+        orbsByBody: [CelestialBody: Double]? = nil
     ) -> [ChartAspect] {
         var results: [ChartAspect] = []
         for movingPoint in moving.points {
@@ -416,14 +430,18 @@ public actor SwissEphemerisCalculator {
                     first: AspectPoint(
                         id: movingPoint.id,
                         longitude: movingPoint.longitudeDegrees,
-                        speed: movingPoint.position.longitudeSpeedDegreesPerDay
+                        speed: movingPoint.position.longitudeSpeedDegreesPerDay,
+                        body: movingPoint.body
                     ),
                     second: AspectPoint(
                         id: referencePoint.id,
                         longitude: referencePoint.longitudeDegrees,
-                        speed: 0
+                        speed: 0,
+                        body: referencePoint.body
                     ),
-                    orbDegrees: orbDegrees
+                    orbDegrees: orbDegrees,
+                    orbsByKind: orbsByKind,
+                    orbsByBody: orbsByBody
                 ) {
                     results.append(aspect)
                 }
@@ -513,16 +531,24 @@ public actor SwissEphemerisCalculator {
         let id: String
         let longitude: Double
         let speed: Double
+        let body: CelestialBody?
     }
 
-    private nonisolated static func aspects(_ points: [AspectPoint], orbDegrees: Double) -> [ChartAspect] {
+    private nonisolated static func aspects(
+        _ points: [AspectPoint],
+        orbDegrees: Double,
+        orbsByKind: [AspectKind: Double]? = nil,
+        orbsByBody: [CelestialBody: Double]? = nil
+    ) -> [ChartAspect] {
         var results: [ChartAspect] = []
         for firstIndex in points.indices {
             for secondIndex in points.indices where secondIndex > firstIndex {
                 if let aspect = closestAspect(
                     first: points[firstIndex],
                     second: points[secondIndex],
-                    orbDegrees: orbDegrees
+                    orbDegrees: orbDegrees,
+                    orbsByKind: orbsByKind,
+                    orbsByBody: orbsByBody
                 ) {
                     results.append(aspect)
                 }
@@ -531,14 +557,46 @@ public actor SwissEphemerisCalculator {
         return results.sorted { $0.strength > $1.strength }
     }
 
+    private nonisolated static func effectiveOrb(
+        kind: AspectKind,
+        firstBody: CelestialBody?,
+        secondBody: CelestialBody?,
+        orbDegrees: Double,
+        orbsByKind: [AspectKind: Double]?,
+        orbsByBody: [CelestialBody: Double]?
+    ) -> Double {
+        if let orbsByBody {
+            let firstOrb = firstBody.flatMap { orbsByBody[$0] } ?? orbDegrees
+            let secondOrb = secondBody.flatMap { orbsByBody[$0] } ?? orbDegrees
+            return min(firstOrb, secondOrb)
+        }
+        if let orbsByKind, let configured = orbsByKind[kind] {
+            return configured
+        }
+        return orbDegrees
+    }
+
     private nonisolated static func closestAspect(
         first: AspectPoint,
         second: AspectPoint,
-        orbDegrees: Double
+        orbDegrees: Double,
+        orbsByKind: [AspectKind: Double]? = nil,
+        orbsByBody: [CelestialBody: Double]? = nil
     ) -> ChartAspect? {
         let separation = shortestSeparation(first.longitude, second.longitude)
         let candidates = AspectKind.allCases.map { ($0, abs(separation - $0.angleDegrees)) }
-        guard let match = candidates.min(by: { $0.1 < $1.1 }), match.1 <= orbDegrees else {
+        guard let match = candidates.min(by: { $0.1 < $1.1 }) else {
+            return nil
+        }
+        let effective = effectiveOrb(
+            kind: match.0,
+            firstBody: first.body,
+            secondBody: second.body,
+            orbDegrees: orbDegrees,
+            orbsByKind: orbsByKind,
+            orbsByBody: orbsByBody
+        )
+        guard match.1 <= effective else {
             return nil
         }
         let futureFirst = normalize(first.longitude + first.speed / 24)
@@ -556,7 +614,7 @@ public actor SwissEphemerisCalculator {
             kind: match.0,
             orbDegrees: match.1,
             phase: phase,
-            strength: max(0, 1 - match.1 / max(orbDegrees, 0.001)),
+            strength: max(0, 1 - match.1 / max(effective, 0.001)),
             firstLongitude: first.longitude,
             secondLongitude: second.longitude
         )

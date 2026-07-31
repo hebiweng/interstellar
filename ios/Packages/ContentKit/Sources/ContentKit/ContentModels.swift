@@ -5,6 +5,8 @@ public enum InterpretationTechnique: String, Codable, CaseIterable, Sendable {
     case currentSky = "current-sky"
     case transit
     case secondary
+    case solarReturn = "solar-return"
+    case synastry
 }
 
 public enum InterpretationLayer: String, Codable, CaseIterable, Sendable {
@@ -72,6 +74,7 @@ public struct InterpretationContext: Codable, Equatable, Sendable {
     public let technique: InterpretationTechnique
     public let cardID: String
     public let locale: String
+    public let preset: String?
     public let signals: [InterpretationSignal]
     public let values: [String: String]
 
@@ -80,11 +83,13 @@ public struct InterpretationContext: Codable, Equatable, Sendable {
         cardID: String,
         locale: String,
         signals: [InterpretationSignal],
+        preset: String? = nil,
         values: [String: String] = [:]
     ) {
         self.technique = technique
         self.cardID = cardID
         self.locale = locale
+        self.preset = preset
         self.signals = signals.sorted {
             $0.rank == $1.rank ? $0.strength > $1.strength : $0.rank < $1.rank
         }
@@ -102,6 +107,7 @@ public struct CorpusSelector: Codable, Equatable, Sendable {
     public var aspectIDs: Set<String>?
     public var phaseIDs: Set<String>?
     public var tones: Set<InterpretationTone>?
+    public var presets: Set<String>?
     public var requiredTags: Set<String>?
 
     public init(
@@ -114,6 +120,7 @@ public struct CorpusSelector: Codable, Equatable, Sendable {
         aspectIDs: Set<String>? = nil,
         phaseIDs: Set<String>? = nil,
         tones: Set<InterpretationTone>? = nil,
+        presets: Set<String>? = nil,
         requiredTags: Set<String>? = nil
     ) {
         self.techniques = techniques
@@ -125,6 +132,7 @@ public struct CorpusSelector: Codable, Equatable, Sendable {
         self.aspectIDs = aspectIDs
         self.phaseIDs = phaseIDs
         self.tones = tones
+        self.presets = presets
         self.requiredTags = requiredTags
     }
 }

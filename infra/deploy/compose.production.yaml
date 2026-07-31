@@ -115,11 +115,34 @@ services:
     cap_drop:
       - ALL
 
+  interstellar-relay:
+    image: interstellar-relay:${INTERSTELLAR_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      RELAY_ADDR: ":8080"
+      RELAY_DB_PATH: /data/relay.db
+      RELAY_SECRET: ${RELAY_SECRET:?set RELAY_SECRET in .env}
+      RELAY_ADMIN_USER: ${RELAY_ADMIN_USER:-admin}
+      RELAY_ADMIN_PASS: ${RELAY_ADMIN_PASS:?set RELAY_ADMIN_PASS in .env}
+      RELAY_SEED_PROMPTS: "1"
+      RELAY_HEALTH_URL: http://127.0.0.1:8080/v1/health
+    volumes:
+      - relay-data:/data
+    healthcheck:
+      test: ["CMD", "/app/relay", "health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+
 networks:
   interstellar-internal:
     name: interstellar-internal
     driver: bridge
     attachable: true
+
+
 
 volumes:
   interstellar-caddy-data:

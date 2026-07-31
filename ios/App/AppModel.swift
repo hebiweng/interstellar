@@ -1,6 +1,8 @@
 import AstroCore
 import Combine
+import CommonCrypto
 import Foundation
+import Network
 
 @MainActor
 final class AppModel: ObservableObject {
@@ -33,6 +35,9 @@ final class AppModel: ObservableObject {
     @Published private(set) var currentSky: ChartSnapshot?
     @Published private(set) var transit: ChartSnapshot?
     @Published private(set) var progressed: ChartSnapshot?
+    @Published private(set) var solarReturn: ChartSnapshot?
+    @Published private(set) var solarReturnAspects: [ChartAspect] = []
+    @Published private(set) var synastry: SynastryComparison?
     @Published private(set) var transitAspects: [ChartAspect] = []
     @Published private(set) var progressedAspects: [ChartAspect] = []
     @Published private(set) var todaySignals: [DailySignal] = []
@@ -41,6 +46,11 @@ final class AppModel: ObservableObject {
     @Published private(set) var transitCalendar: [Int] = []
     @Published private(set) var weeklyForecast: WeeklyForecastModel = .empty
     @Published private(set) var isCalculating = false
+    @Published private(set) var isOnline = true
+    @Published private(set) var aiConsentGranted: Bool
+    @Published private(set) var aiContent: [ChartKind: AIChartContent] = [:]
+    @Published private(set) var availableReports: [AvailableReport] = []
+    @Published private(set) var savedReports: [SavedReport] = []
     @Published private(set) var focusedChart: ChartKind?
     @Published private(set) var focusedChartDate: Date?
     @Published private(set) var isCalculatingFocus = false
@@ -52,9 +62,16 @@ final class AppModel: ObservableObject {
     private var refreshRequested = false
     private let defaults: UserDefaults
     private var corpusProviders: [AppLanguage: Result<CorpusContentProvider, Error>] = [:]
+    private let aiClient = AIGenerationClient()
+    private let aiCache = AIGenerationCache()
+    private let reportStore = ReportStore()
+    private var generatingCharts: Set<ChartKind> = []
+    private var generatingPeriods: Set<ReportScope> = []
+    private var networkMonitor: NWPathMonitor?
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+        aiConsentGranted = defaults.bool(forKey: "ai.network.consent.v1")
         let testEnvironment = ProcessInfo.processInfo.environment
         if let data = defaults.data(forKey: "profile.v1"),
            let decoded = try? JSONDecoder().decode(UserProfile.self, from: data)
@@ -91,6 +108,7 @@ final class AppModel: ObservableObject {
             }
         }
         presets = restored
+        startNetworkMonitoring()
     }
 
     func preset(for chart: ChartKind) -> CalculationPreset {
@@ -174,12 +192,36 @@ final class AppModel: ObservableObject {
                 aspectOrbDegrees: 3
             )
 
+            let solarReturnSnapshot = try await calculator.calculateSolarReturn(
+                birthDate: profile.birthDateUTC,
+                after: now,
+                location: profile.location,
+                preset: preset(for: .solarReturn)
+            )
+            let solarReturnCross = SwissEphemerisCalculator.solarReturnNatalAspects(
+                solarReturn: solarReturnSnapshot,
+                natal: natalSnapshot
+            )
+            let synastryComparison: SynastryComparison?
+            if let partner = savedPeople.first?.profile {
+                synastryComparison = try await calculator.calculateSynastry(
+                    first: natalInput,
+                    second: NatalInput(utcDate: partner.birthDateUTC, location: partner.location),
+                    preset: preset(for: .synastry)
+                )
+            } else {
+                synastryComparison = nil
+            }
+
             natal = natalSnapshot
             transitReference = transitReferenceSnapshot
             progressedReference = progressedReferenceSnapshot
             currentSky = skySnapshot
             transit = transitMovingSnapshot
             progressed = progressedSnapshot
+            solarReturn = solarReturnSnapshot
+            solarReturnAspects = solarReturnCross
+            synastry = synastryComparison
             transitAspects = SwissEphemerisCalculator.compare(
                 moving: transitMovingSnapshot,
                 reference: transitReferenceSnapshot,
@@ -275,6 +317,8 @@ final class AppModel: ObservableObject {
         case .currentSky: currentSky
         case .transit: transit
         case .secondary: progressed
+        case .solarReturn: solarReturn
+        case .synastry: synastry?.first
         }
     }
 
@@ -285,6 +329,8 @@ final class AppModel: ObservableObject {
         return switch chart {
         case .transit: transitAspects
         case .secondary: progressedAspects
+        case .solarReturn: solarReturnAspects
+        case .synastry: synastry?.crossAspects ?? []
         case .natal, .currentSky: snapshot(for: chart)?.aspects ?? []
         }
     }
@@ -293,6 +339,8 @@ final class AppModel: ObservableObject {
         switch chart {
         case .transit: transitReference
         case .secondary: progressedReference
+        case .solarReturn: natal
+        case .synastry: synastry?.second
         case .natal, .currentSky: nil
         }
     }
@@ -315,7 +363,8 @@ final class AppModel: ObservableObject {
                 aspects: comparisonAspects(for: chart),
                 content: provider,
                 language: language,
-                transitCalendar: transitCalendar
+                transitCalendar: transitCalendar,
+                preset: preset(for: chart).rawValue
             )
             return .loaded(cards)
         } catch {
@@ -632,16 +681,373 @@ final class AppModel: ObservableObject {
         }
         return values
     }
-}
+    // MARK: - AI generation (LLM interpretation + reports)
 
+    func grantAIConsent() {
+        aiConsentGranted = true
+        defaults.set(true, forKey: "ai.network.consent.v1")
+    }
+
+    func aiCardDetail(for chart: ChartKind, cardID: String) -> (detail: String?, status: AIDetailStatus) {
+        guard aiConsentGranted, isOnline else {
+            return (nil, .hidden)
+        }
+        let content = aiContent[chart] ?? .empty
+        if let detail = content.cardDetails[cardID] {
+            return (detail, .ready)
+        }
+        return (nil, content.status(for: cardID))
+    }
+
+    func aiReport(for chart: ChartKind) -> AIReport? {
+        aiContent[chart]?.report
+    }
+
+    func ensureAIGeneration(for chart: ChartKind) {
+        guard aiConsentGranted, isOnline else { return }
+        guard snapshot(for: chart) != nil else { return }
+        guard !generatingCharts.contains(chart) else { return }
+
+        let cardIDs = Self.expectedCardIDs(for: chart)
+        let params = aiParams(for: chart)
+        let key = aiCacheKey(chart: chart, cardIDs: cardIDs, params: params)
+        if let cached = aiCache.load(key: key) {
+            applyAIResponse(cached, chart: chart, key: key, cardIDs: cardIDs)
+            return
+        }
+        if let existing = aiContent[chart], existing.cacheKey == key {
+            return
+        }
+
+        generatingCharts.insert(chart)
+        var content = aiContent[chart] ?? .empty
+        content.cacheKey = key
+        for id in cardIDs {
+            content.statusByCard[id] = .generating
+        }
+        aiContent[chart] = content
+
+        Task {
+            await performAIGeneration(chart: chart, key: key, cardIDs: cardIDs, params: params)
+        }
+    }
+
+    private func performAIGeneration(chart: ChartKind, key: String, cardIDs: [String], params: [String: String]) async {
+        defer { generatingCharts.remove(chart) }
+        do {
+            let facts = try buildAIFacts(chart: chart, params: params, cardIDs: cardIDs)
+            let body: [String: Any] = [
+                "mode": "chart",
+                "chartKind": chart.contentPrefix,
+                "periodType": NSNull(),
+                "preset": preset(for: chart).rawValue,
+                "profileHash": profileHashValue,
+                "params": params,
+                "facts": facts,
+                "cardIDs": cardIDs,
+                "locale": language.rawValue,
+                "clientVersion": "ios-v2",
+            ]
+            let bodyData = try JSONSerialization.data(withJSONObject: body, options: [])
+            let request = AIGenerateRequest(bodyData: bodyData)
+            let response = try await aiClient.generate(request)
+            aiCache.save(key: key, scope: chart.contentPrefix, response: response, ttl: AIGenerationCache.ttl(for: chart))
+            applyAIResponse(response, chart: chart, key: key, cardIDs: cardIDs)
+        } catch {
+            var content = aiContent[chart] ?? .empty
+            for id in cardIDs {
+                content.statusByCard[id] = .hidden
+            }
+            aiContent[chart] = content
+        }
+    }
+
+    private func applyAIResponse(_ response: AIGenerateResponse, chart: ChartKind, key: String, cardIDs: [String]) {
+        var content = aiContent[chart] ?? .empty
+        content.cacheKey = key
+        content.report = AIReport(title: response.report.title, subtitle: response.report.subtitle, sections: response.report.sections)
+        saveChartReport(chart: chart, response: response)
+        for id in cardIDs {
+            if let detail = response.cards[id]?.detail, !detail.isEmpty {
+                content.cardDetails[id] = detail
+                content.statusByCard[id] = .ready
+            } else {
+                content.statusByCard[id] = .hidden
+            }
+        }
+        aiContent[chart] = content
+    }
+
+    private func buildAIFacts(chart: ChartKind, params: [String: String], cardIDs: [String]) throws -> [String: Any] {
+        guard let snapshot = snapshot(for: chart) else {
+            throw AppModelError.missingSnapshot
+        }
+        let reference = referenceSnapshot(for: chart)
+        let comparison = comparisonAspects(for: chart)
+        let partner: (name: String, chart: ChartSnapshot)?
+        if chart == .synastry {
+            if let partnerSnapshot = synastry?.second {
+                partner = (savedPeople.first?.profile.name ?? "Partner", partnerSnapshot)
+            } else {
+                partner = nil
+            }
+        } else {
+            partner = nil
+        }
+        return AIFactsBuilder.document(
+            chart: chart,
+            snapshot: snapshot,
+            reference: reference,
+            comparisonAspects: comparison,
+            preset: preset(for: chart),
+            personName: profile.name,
+            partnerName: partner?.name,
+            partnerChart: partner?.chart,
+            params: params,
+            locale: language.rawValue,
+            cardIDs: cardIDs
+        )
+    }
+
+    private var profileHashValue: String {
+        let raw = [
+            profile.name, profile.placeName, profile.timezoneID,
+            String(profile.birthDateUTC.timeIntervalSince1970),
+            String(profile.latitude), String(profile.longitude),
+        ].joined(separator: "|")
+        return SHA256Digest.hash(Data(raw.utf8)).hex
+    }
+
+    private func aiParams(for chart: ChartKind) -> [String: String] {
+        let now = Date()
+        let formatter = ISO8601DateFormatter()
+        switch chart {
+        case .natal, .currentSky, .solarReturn:
+            return ["anchor": formatter.string(from: now)]
+        case .transit:
+            return ["anchor": formatter.string(from: now), "rangeDays": "7"]
+        case .secondary:
+            let progressedDate = SwissEphemerisCalculator.secondaryProgressedDate(birthDate: profile.birthDateUTC, targetDate: now)
+            return ["anchor": formatter.string(from: now), "progressedDate": formatter.string(from: progressedDate)]
+        case .synastry:
+            return ["anchor": formatter.string(from: now), "partner": savedPeople.first?.profile.name ?? ""]
+        }
+    }
+
+    private func aiCacheKey(chart: ChartKind, cardIDs: [String], params: [String: String]) -> String {
+        let raw = [
+            chart.contentPrefix,
+            preset(for: chart).rawValue,
+            profileHashValue,
+            params.keys.sorted().map { "\($0)=\(params[$0] ?? "")" }.joined(separator: ","),
+            language.rawValue,
+            cardIDs.joined(separator: ","),
+        ].joined(separator: "|")
+        return SHA256Digest.hash(Data(raw.utf8)).hex
+    }
+
+    private static func expectedCardIDs(for chart: ChartKind) -> [String] {
+        switch chart {
+        case .natal: ["natal-interpretation", "career-direction", "strengths-growth", "element-balance", "house-emphasis", "chart-signature", "planet-placements", "key-aspects"]
+        case .currentSky: ["sky-overview", "moon-now", "aspect-pattern", "planetary-motion", "sign-changes", "element-climate", "upcoming-7-days"]
+        case .transit: ["current-story", "current-cycles", "transit-timeline", "planet-paths", "life-areas", "active-transits"]
+        case .secondary: ["developmental-chapter", "progressed-moon", "identity-development", "turning-points", "areas-maturing", "timeline"]
+        case .solarReturn: ["year-theme", "year-anchors", "priority-areas", "year-dynamics", "year-timeline", "natal-overlay", "year-aspects"]
+        case .synastry: ["relationship-overview", "perspectives", "emotional-connection", "communication", "chemistry", "commitment", "house-overlays", "key-inter-aspects"]
+        }
+    }
+
+    // MARK: - Report library
+
+    func refreshAvailableReports() async {
+        let timeZone = TimeZone(identifier: profile.timezoneID) ?? .current
+        let now = Date()
+        var reports: [AvailableReport] = []
+        reports.append(
+            AvailableReport(
+                scope: .daily,
+                unlockedAt: ReportUnlock.nextLocalMidnight(after: now, timeZone: timeZone)
+            )
+        )
+        reports.append(
+            AvailableReport(
+                scope: .monthly,
+                unlockedAt: ReportUnlock.nextMonthStart(after: now, timeZone: timeZone)
+            )
+        )
+        do {
+            let calculator = try calculatorInstance()
+            let moment = try await ReportUnlock.nextSolarReturn(birthDate: profile.birthDateUTC, after: now, calculator: calculator)
+            reports.append(AvailableReport(scope: .solarReturn, unlockedAt: moment))
+        } catch {
+            reports.append(AvailableReport(scope: .solarReturn, unlockedAt: nil))
+        }
+        availableReports = reports
+        savedReports = reportStore.load()
+    }
+
+    func generatePeriodReport(_ scope: ReportScope) async {
+        guard aiConsentGranted, isOnline else { return }
+        guard !generatingPeriods.contains(scope) else { return }
+        generatingPeriods.insert(scope)
+        defer { generatingPeriods.remove(scope) }
+
+        do {
+            let formatter = ISO8601DateFormatter()
+            let now = Date()
+            let params: [String: String] = ["anchor": formatter.string(from: now)]
+            let facts: [String: Any]
+            switch scope {
+            case .daily:
+                facts = AIFactsBuilder.periodDocument(
+                    periodType: "daily",
+                    personName: profile.name,
+                    locale: language.rawValue,
+                    events: todaySignalEvents(),
+                    params: params
+                )
+            case .monthly:
+                facts = AIFactsBuilder.periodDocument(
+                    periodType: "monthly",
+                    personName: profile.name,
+                    locale: language.rawValue,
+                    events: transitEventSummaries(),
+                    params: params
+                )
+            case .solarReturn:
+                facts = AIFactsBuilder.periodDocument(
+                    periodType: "solar-return",
+                    personName: profile.name,
+                    locale: language.rawValue,
+                    events: [],
+                    params: params
+                )
+            }
+            let body: [String: Any] = [
+                "mode": "period",
+                "periodType": scope.rawValue,
+                "preset": NSNull(),
+                "profileHash": profileHashValue,
+                "params": params,
+                "facts": facts,
+                "cardIDs": [String](),
+                "locale": language.rawValue,
+                "clientVersion": "ios-v2",
+            ]
+            let bodyData = try JSONSerialization.data(withJSONObject: body, options: [])
+            let response = try await aiClient.generate(AIGenerateRequest(bodyData: bodyData))
+            let periodScope = "period.\(scope.rawValue)"
+            let key = aiPeriodCacheKey(scope: scope, params: params)
+            aiCache.save(key: key, scope: periodScope, response: response, ttl: AIGenerationCache.ttl(for: .secondary))
+            let saved = SavedReport(
+                id: key,
+                scope: periodScope,
+                title: response.report.title,
+                subtitle: response.report.subtitle,
+                generatedAt: Date(),
+                report: AIReport(title: response.report.title, subtitle: response.report.subtitle, sections: response.report.sections)
+            )
+            reportStore.save(saved)
+            savedReports = reportStore.load()
+        } catch {
+            // Silent failure: the library keeps its current state; retry on next tap.
+        }
+    }
+
+    private func saveChartReport(chart: ChartKind, response: AIGenerateResponse) {
+        let scope = "chart.\(chart.contentPrefix)"
+        let existing = savedReports.contains { $0.scope == scope }
+        if existing { return }
+        let saved = SavedReport(
+            id: scope,
+            scope: scope,
+            title: response.report.title,
+            subtitle: response.report.subtitle,
+            generatedAt: Date(),
+            report: AIReport(title: response.report.title, subtitle: response.report.subtitle, sections: response.report.sections)
+        )
+        reportStore.save(saved)
+        savedReports = reportStore.load()
+    }
+
+    private func todaySignalEvents() -> [[String: Any]] {
+        todaySignals.prefix(5).map { signal in
+            [
+                "id": signal.id,
+                "category": signal.category.rawValue,
+                "source": signal.source.rawValue,
+                "title": signal.title,
+                "detail": signal.subtitle,
+                "strength": signal.strength,
+                "time": signal.eventDate.map { ISO8601DateFormatter().string(from: $0) } ?? "",
+            ]
+        }
+    }
+
+    private func transitEventSummaries() -> [[String: Any]] {
+        transitAspects.prefix(12).map { aspect in
+            [
+                "first": aspect.firstID,
+                "second": aspect.secondID,
+                "kind": aspect.kind.rawValue,
+                "phase": aspect.phase.rawValue,
+                "orb": String(format: "%.2f", aspect.orbDegrees),
+                "strength": String(format: "%.2f", aspect.strength),
+            ]
+        }
+    }
+
+    private func aiPeriodCacheKey(scope: ReportScope, params: [String: String]) -> String {
+        let raw = [
+            "period", scope.rawValue, profileHashValue,
+            params.keys.sorted().map { "\($0)=\(params[$0] ?? "")" }.joined(separator: ","),
+            language.rawValue,
+        ].joined(separator: "|")
+        return SHA256Digest.hash(Data(raw.utf8)).hex
+    }
+
+    private func startNetworkMonitoring() {
+        let monitor = NWPathMonitor()
+        monitor.pathUpdateHandler = { [weak self] path in
+            DispatchQueue.main.async {
+                self?.isOnline = path.status == .satisfied
+            }
+        }
+        monitor.start(queue: DispatchQueue(label: "ai-network-monitor"))
+        networkMonitor = monitor
+    }
+
+
+}
 enum AppModelError: LocalizedError {
     case missingEphemeris
+    case missingSnapshot
 
     var errorDescription: String? {
-        "The bundled Swiss Ephemeris data could not be found."
+        switch self {
+        case .missingEphemeris:
+            "The bundled Swiss Ephemeris data could not be found."
+        case .missingSnapshot:
+            "The chart has not been calculated yet."
+        }
     }
 }
 
+enum SHA256Digest {
+    static func hash(_ data: Data) -> Data {
+        var digest = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
+        data.withUnsafeBytes { buffer in
+            _ = CC_SHA256(buffer.baseAddress, CC_LONG(data.count), &digest)
+        }
+        return Data(digest)
+    }
+}
+
+extension Data {
+    var hex: String {
+        map { String(format: "%02x", $0) }.joined()
+    }
+}
 func aspectTitle(
     _ aspect: ChartAspect,
     prefix: String = "",

@@ -15,7 +15,9 @@ enum InterpretationContextFactory {
         natal: ChartSnapshot?,
         aspects: [ChartAspect],
         language: AppLanguage,
-        transitCalendar: [Int]
+        transitCalendar: [Int],
+        preset: String? = nil,
+        aspectsAreCross: Bool = false
     ) -> InterpretationContext {
         let normalizedAspects = aspects.sorted(by: aspectOrder)
         let aspectSignals = makeAspectSignals(
@@ -23,7 +25,8 @@ enum InterpretationContextFactory {
             snapshot: snapshot,
             natal: natal,
             aspects: normalizedAspects,
-            language: language
+            language: language,
+            aspectsAreCross: aspectsAreCross
         )
         let pointSignals = makePointSignals(
             chart: chart,
@@ -53,27 +56,34 @@ enum InterpretationContextFactory {
         let peakDay = strongestCalendarDay(transitCalendar)
         let quietDay = weakestCalendarDay(transitCalendar)
 
+        let allSignals = aspectSignals
+            + pointSignals
+            + houseSignals
+            + [phaseSignal]
+            + calendarSignals
+        let contextValues: [String: String] = [
+            "chartID": chart.rawValue,
+            "supportiveCount": String(supportive),
+            "challengingCount": String(challenging),
+            "neutralCount": String(neutral),
+            "aspectCount": String(normalizedAspects.count),
+            "activityScore": String(activity),
+            "activityLabel": activityLabel(activity, language: language),
+            "retrogradeCount": String(retrogradeCount),
+            "lunarPhaseAngle": formatNumber(lunarPhaseAngle(snapshot)),
+            "lunarPhaseName": lunarPhaseName(lunarPhaseAngle(snapshot), language: language),
+            "topHouse": topHouse.map(String.init) ?? "",
+            "topHouseName": topHouse.map { houseName($0, language: language) } ?? "",
+            "calendarPeakDay": peakDay.map(String.init) ?? "",
+            "calendarQuietDay": quietDay.map(String.init) ?? "",
+        ]
         return InterpretationContext(
             technique: technique(for: chart),
             cardID: cardID,
             locale: language.rawValue,
-            signals: aspectSignals + pointSignals + houseSignals + [phaseSignal] + calendarSignals,
-            values: [
-                "chartID": chart.rawValue,
-                "supportiveCount": String(supportive),
-                "challengingCount": String(challenging),
-                "neutralCount": String(neutral),
-                "aspectCount": String(normalizedAspects.count),
-                "activityScore": String(activity),
-                "activityLabel": activityLabel(activity, language: language),
-                "retrogradeCount": String(retrogradeCount),
-                "lunarPhaseAngle": formatNumber(lunarPhaseAngle(snapshot)),
-                "lunarPhaseName": lunarPhaseName(lunarPhaseAngle(snapshot), language: language),
-                "topHouse": topHouse.map(String.init) ?? "",
-                "topHouseName": topHouse.map { houseName($0, language: language) } ?? "",
-                "calendarPeakDay": peakDay.map(String.init) ?? "",
-                "calendarQuietDay": quietDay.map(String.init) ?? "",
-            ]
+            signals: allSignals,
+            preset: preset,
+            values: contextValues
         )
     }
 
@@ -82,12 +92,13 @@ enum InterpretationContextFactory {
         snapshot: ChartSnapshot,
         natal: ChartSnapshot?,
         aspects: [ChartAspect],
-        language: AppLanguage
+        language: AppLanguage,
+        aspectsAreCross: Bool
     ) -> [InterpretationSignal] {
         aspects.enumerated().map { index, aspect in
             let point = body(for: aspect.firstID)
             let reference = body(for: aspect.secondID)
-            let movingHouse = chart.isComparison
+            let movingHouse = aspectsAreCross
                 ? natal?.house(containing: aspect.firstLongitude)
                 : snapshot.house(containing: aspect.firstLongitude)
             let pointName = point.map { bodyName($0, language: language) } ?? aspect.firstID
@@ -99,9 +110,15 @@ enum InterpretationContextFactory {
                 aspect.phase.rawValue,
                 tone.rawValue,
             ]
-            if chart.isComparison {
+            if aspectsAreCross {
                 tags.insert("cross-chart")
-                tags.insert(chart == .transit ? "moving-transit" : "moving-progressed")
+                switch chart {
+                case .transit: tags.insert("moving-transit")
+                case .secondary: tags.insert("moving-progressed")
+                case .solarReturn: tags.insert("solar-return-overlay")
+                case .synastry: tags.insert("synastry-cross")
+                case .natal, .currentSky: break
+                }
             } else {
                 tags.insert("single-chart")
             }
@@ -326,6 +343,8 @@ enum InterpretationContextFactory {
         case .currentSky: .currentSky
         case .transit: .transit
         case .secondary: .secondary
+        case .solarReturn: .solarReturn
+        case .synastry: .synastry
         }
     }
 

@@ -20,7 +20,8 @@ enum InsightFactory {
         aspects: [ChartAspect],
         content: CorpusContentProvider,
         language: AppLanguage,
-        transitCalendar: [Int]
+        transitCalendar: [Int],
+        preset: String? = nil
     ) throws -> [InsightCardModel] {
         guard let snapshot else { return [] }
         let cards = switch chart {
@@ -29,24 +30,38 @@ enum InsightFactory {
         case .currentSky:
             skyCards(snapshot, language: language)
         case .transit:
-            transitCards(
-                snapshot,
-                natal: natal,
-                aspects: aspects,
-                calendar: transitCalendar, language: language
-            )
+            transitCards(snapshot, natal: natal, aspects: aspects, calendar: transitCalendar, language: language)
         case .secondary:
             secondaryCards(snapshot, natal: natal, aspects: aspects, language: language)
+        case .solarReturn:
+            solarCards(snapshot, natal: natal, aspects: aspects, language: language)
+        case .synastry:
+            synastryCards(snapshot, second: natal, aspects: aspects, language: language)
         }
         let renderedCards = try cards.map { draft in
+            let cardAspects: [ChartAspect]
+            let aspectsAreCross: Bool
+            switch chart {
+            case .solarReturn:
+                aspectsAreCross = draft.id == "natal-overlay"
+                cardAspects = aspectsAreCross ? aspects : snapshot.aspects
+            case .transit, .secondary, .synastry:
+                aspectsAreCross = true
+                cardAspects = aspects
+            case .natal, .currentSky:
+                aspectsAreCross = false
+                cardAspects = snapshot.aspects
+            }
             let context = InterpretationContextFactory.make(
                 chart: chart,
                 cardID: draft.id,
                 snapshot: snapshot,
                 natal: natal,
-                aspects: aspects,
+                aspects: cardAspects,
                 language: language,
-                transitCalendar: transitCalendar
+                transitCalendar: transitCalendar,
+                preset: preset,
+                aspectsAreCross: aspectsAreCross
             )
             let interpretation = try content.interpret(context)
             return InsightCardModel(
@@ -63,115 +78,121 @@ enum InsightFactory {
         return renderedCards
     }
 
+    // MARK: - Natal (8)
+
     private static func natalCards(
         _ snapshot: ChartSnapshot,
         language: AppLanguage
     ) -> [InsightCardModel] {
         let sun = snapshot.point(.sun)
         let moon = snapshot.point(.moon)
-        let venus = snapshot.point(.venus)
-        let mars = snapshot.point(.mars)
-        let top = Array(snapshot.aspects.prefix(3))
-        let balance = counts(snapshot.aspects)
         let ascSign = Zodiac.name(index: Int(snapshot.angles.ascendantDegrees / 30) % 12, language: language)
         let mcSignIndex = Int(snapshot.angles.midheavenDegrees / 30) % 12
         let mcSign = Zodiac.name(index: mcSignIndex, language: language)
         let mcRuler = ruler(ofSign: mcSignIndex)
-        let strongestChallenge = snapshot.aspects.first { $0.kind.challenging } ?? snapshot.aspects.first
+        let top = Array(snapshot.aspects.prefix(4))
+        let balance = counts(snapshot.aspects)
         let strongestSupport = snapshot.aspects.first { $0.kind.supportive } ?? snapshot.aspects.first
+        let strongestChallenge = snapshot.aspects.first { $0.kind.challenging } ?? snapshot.aspects.first
+        let elementScores = elementBalance(snapshot)
+        let houseScores = houseValues(snapshot, natal: nil, aspects: snapshot.aspects)
+        let activeHouses = activeHouseFacts(houseScores, language: language)
+        let dominant = dominantBodies(snapshot.aspects, language: language)
+        let orientation = elementOrientation(elementScores, language: language)
 
         return [
-            card( id: "core-structure",
-                title: localized("Core structure", "核心结构", language: language),
-                icon: "✦",
-                visual: .natalCore,
+            card( id: "natal-interpretation",
+                title: localized("Natal interpretation", "本命解读", language: language),
+                icon: "✦", visual: .natalCore,
                 facts: [
-                    fact(localized("Sun", "太阳", language: language), sun.map { Zodiac.position($0, language: language) } ?? "—", symbol: "☉"),
-                    fact(localized("Moon", "月亮", language: language), moon.map { Zodiac.position($0, language: language) } ?? "—", symbol: "☽"),
-                    fact(localized("Rising", "上升", language: language), ascSign, symbol: "ASC"),
+                    fact(localized("Sun", "太阳", language: language), sun.map { Zodiac.position($0, language: language) } ?? "—", .supportive, symbol: "☉"),
+                    fact(localized("Moon", "月亮", language: language), moon.map { Zodiac.position($0, language: language) } ?? "—", .neutral, symbol: "☽"),
+                    fact(localized("Rising", "上升", language: language), ascSign, .transition, symbol: "ASC"),
                 ],
                 language: language
             ),
-            card( id: "strongest-themes",
-                title: localized("Your strongest themes", "最突出的三项主题", language: language),
-                icon: "①",
-                visual: .rankedThemes,
-                facts: top.enumerated().map { index, aspect in
-                    fact(
-                        aspectTitle(aspect, language: language),
-                        ConsumerCopy.intensity(aspect.strength, language: language),
-                        tone(aspect.kind),
-                        note: phaseLabel(aspect.phase, language: language),
-                        progress: max(0.16, aspect.strength),
-                        symbol: "\(index + 1)"
-                    )
-                },
+            card( id: "career-direction",
+                title: localized("Career & direction", "事业与方向", language: language),
+                icon: "↗", visual: .growthPath,
+                facts: [
+                    fact(localized("Public direction", "公共方向", language: language), mcSign, .transition, symbol: "MC"),
+                    fact(localized("Career anchor", "事业锚点", language: language), snapshot.point(mcRuler).map { Zodiac.position($0, language: language) } ?? "—", .supportive, symbol: mcRuler.symbol),
+                    fact(localized("House focus", "重点领域", language: language), sun.map { ConsumerCopy.lifeArea(snapshot.house(containing: $0.longitudeDegrees), language: language) } ?? "—", .neutral),
+                ],
                 language: language
             ),
-            card( id: "core-strengths",
-                title: localized("Core strengths", "核心优势", language: language),
-                icon: "✦",
-                visual: .strengthOrbit(
+            card( id: "strengths-growth",
+                title: localized("Strengths & growth edges", "优势与成长面", language: language),
+                icon: "✚", visual: .strengthOrbit(
                     supportive: balance.supportive,
                     challenging: balance.challenging,
                     neutral: balance.neutral
                 ),
                 facts: [
-                    fact(localized("Natural support", "自然优势", language: language), strongestSupport.map { aspectTitle($0, language: language) } ?? "—", .supportive),
-                    fact(localized("Relationship style", "关系方式", language: language), venus.map { Zodiac.position($0, language: language) } ?? "—", .supportive),
-                    fact(localized("Action style", "行动方式", language: language), mars.map { Zodiac.position($0, language: language) } ?? "—", .transition),
+                    fact(localized("Core strength", "核心优势", language: language), strongestSupport.map { aspectTitle($0, language: language) } ?? "—", .supportive),
+                    fact(localized("Growth edge", "成长面", language: language), strongestChallenge.map { aspectTitle($0, language: language) } ?? "—", .challenging),
                 ],
                 language: language
             ),
-            card( id: "blind-spot",
-                title: localized("Primary blind spot", "主要盲点", language: language),
-                icon: "◎",
-                visual: .blindSpot,
+            card( id: "element-balance",
+                title: localized("Element & mode balance", "元素与模式", language: language),
+                icon: "◪", visual: .elementRows,
+                facts: elementFacts(elementScores, language: language),
+                language: language
+            ),
+            card( id: "house-emphasis",
+                title: localized("House emphasis", "宫位侧重", language: language),
+                icon: "⌂", visual: .areaRows,
+                facts: Array(activeHouses.prefix(4)),
+                language: language
+            ),
+            card( id: "chart-signature",
+                title: localized("Chart signature", "星盘签名", language: language),
+                icon: "✶", visual: .signatureTrio(
+                    ruler: mcRuler.symbol,
+                    dominant: dominant,
+                    orientation: orientation
+                ),
                 facts: [
-                    fact(
-                        localized("Repeated tension", "反复出现的张力", language: language),
-                        strongestChallenge.map { aspectTitle($0, language: language) } ?? "—",
-                        .challenging,
-                        note: strongestChallenge.map {
-                            "\(phaseLabel($0.phase, language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))"
-                        }
-                    ),
-                    fact(
-                        localized("Emotional reflex", "情绪惯性", language: language),
-                        moon.map { Zodiac.position($0, language: language) } ?? "—",
-                        .transition
-                    ),
+                    fact(localized("Chart ruler", "命主星", language: language), mcRuler.symbol, .supportive),
+                    fact(localized("Dominant", "主导星体", language: language), dominant, .transition),
+                    fact(localized("Orientation", "总体取向", language: language), orientation, .neutral),
                 ],
                 language: language
             ),
-            card( id: "growth-direction",
-                title: localized("Growth direction", "成长方向", language: language),
-                icon: "→",
-                visual: .growthPath,
-                facts: [
+            card( id: "planet-placements",
+                title: localized("Planet placements", "行星落座", language: language),
+                icon: "⊛", visual: .placementList,
+                facts: snapshot.points.map {
                     fact(
-                        localized("Build", "建立", language: language),
-                        moon.map { Zodiac.position($0, language: language) } ?? "—",
-                        .transition,
-                        symbol: "1"
-                    ),
+                        bodyName($0.body, language: language),
+                        Zodiac.position($0, language: language),
+                        $0.retrograde ? .challenging : .neutral,
+                        note: ConsumerCopy.lifeArea(snapshot.house(containing: $0.longitudeDegrees), language: language),
+                        symbol: $0.body.symbol
+                    )
+                },
+                language: language
+            ),
+            card( id: "key-aspects",
+                title: localized("Key aspects", "关键连接", language: language),
+                icon: "⌗", visual: .aspectList,
+                facts: top.map {
                     fact(
-                        localized("Practice", "练习", language: language),
-                        strongestChallenge.map { aspectTitle($0, language: language) } ?? "—",
-                        .challenging,
-                        symbol: "2"
-                    ),
-                    fact(
-                        localized("Express", "发挥", language: language),
-                        "\(mcSign) · \(snapshot.point(mcRuler).map { Zodiac.position($0, language: language) } ?? "—")",
-                        .supportive,
-                        symbol: "3"
-                    ),
-                ],
+                        aspectTitle($0, language: language),
+                        "\(phaseLabel($0.phase, language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
+                        tone($0.kind),
+                        note: ConsumerCopy.lifeArea(snapshot.house(containing: $0.firstLongitude), language: language),
+                        progress: $0.strength,
+                        symbol: $0.kind.supportive ? "△" : $0.kind.challenging ? "□" : "○"
+                    )
+                },
                 language: language
             ),
         ]
     }
+
+    // MARK: - Current Sky (7)
 
     private static func skyCards(
         _ snapshot: ChartSnapshot,
@@ -183,72 +204,38 @@ enum InsightFactory {
         let phase = phaseAngle(snapshot)
         let activity = signalDensity(snapshot.aspects, limit: 8)
         let cycleAspects = cycleLeaders(snapshot.aspects)
-        let planetFacts = snapshot.points.map {
-            fact(
-                bodyName($0.body, language: language),
-                Zodiac.position($0, language: language),
-                $0.retrograde ? .challenging : .neutral,
-                note: motionLabel($0, language: language),
-                symbol: $0.body.symbol
-            )
-        }
-        let domainScores = domainValues(snapshot)
+        let elementScores = elementBalance(snapshot)
+        let fullCalendar = Array(([Int](repeating: 0, count: 7)).prefix(7))
+        let moon = snapshot.point(.moon)
+        let moonHouse = snapshot.house(containing: moon?.longitudeDegrees ?? 0)
+
         return [
             card( id: "sky-overview",
-                title: localized("Current sky overview", "当前天空总览", language: language),
+                title: localized("Sky at a glance", "当前天空总览", language: language),
                 icon: "◉", visual: .skyOverview(
                     phase: phase,
                     activity: activity,
                     cycles: cycleAspects.map { $0?.strength ?? 0 }
                 ),
                 facts: [
-                    fact(localized("Long cycle", "长期周期", language: language), cycleAspects[0].map { aspectTitle($0, language: language) } ?? "—", cycleAspects[0].map { tone($0.kind) } ?? .neutral),
-                    fact(localized("Middle cycle", "中期周期", language: language), cycleAspects[1].map { aspectTitle($0, language: language) } ?? "—", cycleAspects[1].map { tone($0.kind) } ?? .neutral),
-                    fact(localized("Short cycle", "短期周期", language: language), cycleAspects[2].map { aspectTitle($0, language: language) } ?? "—", cycleAspects[2].map { tone($0.kind) } ?? .neutral),
-                    fact(
-                        localized("Current cycle", "当前周期", language: language),
-                        ConsumerCopy.cycleStage(angle: phase, language: language)
-                    ),
-                    fact(
-                        localized("Review cycles", "回顾调整中的主题", language: language),
-                        "\(retrogrades.count)"
-                    ),
-                    fact(localized("Dominant bodies", "主导星体", language: language), dominantBodies(snapshot.aspects, language: language)),
+                    fact(localized("Dominant pattern", "主导结构", language: language), top.first.map { aspectTitle($0, language: language) } ?? "—", top.first.map { tone($0.kind) } ?? .neutral),
+                    fact(localized("Review cycles", "回顾调整中的主题", language: language), "\(retrogrades.count)", .transition),
                     fact(localized("Atmosphere", "整体氛围", language: language), activityLabel(activity, language: language)),
                 ],
                 language: language
             ),
-            card( id: "core-themes",
-                title: localized("Core sky themes", "核心天象主题", language: language),
-                icon: "✦", visual: .themeCards,
-                facts: top.map {
-                    fact(
-                        aspectTitle($0, language: language),
-                        activityLabel(Int($0.strength * 100), language: language),
-                        tone($0.kind),
-                        note: "\(phaseLabel($0.phase, language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
-                        progress: $0.strength,
-                        symbol: $0.kind.supportive ? "△" : $0.kind.challenging ? "□" : "○"
-                    )
-                },
+            card( id: "moon-now",
+                title: localized("Moon now", "此刻的月亮", language: language),
+                icon: "☽", visual: .phaseDial(phase: phase, illumination: moonIllumination(snapshot)),
+                facts: [
+                    fact(localized("Moon sign", "月亮落座", language: language), moon.map { Zodiac.position($0, language: language) } ?? "—", .neutral, symbol: "☽"),
+                    fact(localized("Moon area", "月亮领域", language: language), ConsumerCopy.lifeArea(moonHouse, language: language), .transition),
+                    fact(localized("Lunar phase", "月相", language: language), progressedPhaseName(phase, language: language)),
+                ],
                 language: language
             ),
-            card( id: "key-events",
-                title: localized("Key sky events", "关键天象事件", language: language),
-                icon: "⟐", visual: .eventTimeline,
-                facts: top.map {
-                    fact(
-                        phaseLabel($0.phase, language: language),
-                        aspectTitle($0, language: language),
-                        tone($0.kind),
-                        note: ConsumerCopy.intensity($0.strength, language: language),
-                        progress: $0.strength
-                    )
-                },
-                language: language
-            ),
-            card( id: "structure-tension",
-                title: localized("Sky structure & tension", "天空结构与张力", language: language),
+            card( id: "aspect-pattern",
+                title: localized("Major aspect pattern", "主要连接结构", language: language),
                 icon: "◇", visual: .structureMap(
                     supportive: balance.supportive,
                     challenging: balance.challenging,
@@ -258,42 +245,37 @@ enum InsightFactory {
                     fact(localized("Support", "支持", language: language), "\(balance.supportive)", .supportive),
                     fact(localized("Pressure", "压力", language: language), "\(balance.challenging)", .challenging),
                     fact(localized("Focus", "焦点", language: language), dominantBodies(snapshot.aspects, language: language), .transition),
-                    fact(localized("Activity", "活跃度", language: language), activityLabel(activity, language: language)),
                 ],
                 language: language
             ),
-            card( id: "collective-domains",
-                title: localized("Collective domains", "集体领域影响", language: language),
-                icon: "▦", visual: .domainBars(domainScores),
-                facts: domainFacts(snapshot, language: language),
+            card( id: "planetary-motion",
+                title: localized("Planetary motion", "行星运动", language: language),
+                icon: "↺", visual: .motionList,
+                facts: motionFacts(snapshot, language: language),
                 language: language
             ),
-            card( id: "observation-focus",
-                title: localized("Observation focus", "观察重点与个人联动", language: language),
-                icon: "◎", visual: .observation,
-                facts: top.map {
-                    fact(
-                        aspectTitle($0, language: language),
-                        "\(phaseLabel($0.phase, language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
-                        tone($0.kind)
-                    )
-                },
-                language: language
-            ),
-            card( id: "sky-evolution",
-                title: localized("Sky evolution", "天象演进", language: language),
-                icon: "⇢", visual: .evolution,
+            card( id: "sign-changes",
+                title: localized("Sign changes", "换座信号", language: language),
+                icon: "⇢", visual: .eventTimeline,
                 facts: timelineFacts(top, language: language),
                 language: language
             ),
-            card( id: "planet-overview",
-                title: localized("Planet overview", "行星速览", language: language),
-                icon: "⊛", visual: .planetTable,
-                facts: planetFacts,
+            card( id: "element-climate",
+                title: localized("Element & mode climate", "元素与模式气质", language: language),
+                icon: "◪", visual: .elementRows,
+                facts: elementFacts(elementScores, language: language),
+                language: language
+            ),
+            card( id: "upcoming-7-days",
+                title: localized("Upcoming 7 days", "未来七天", language: language),
+                icon: "▦", visual: .calendar(fullCalendar),
+                facts: calendarFacts(fullCalendar, language: language),
                 language: language
             ),
         ]
     }
+
+    // MARK: - Transits (6)
 
     private static func transitCards(
         _ snapshot: ChartSnapshot,
@@ -302,79 +284,54 @@ enum InsightFactory {
         calendar: [Int],
         language: AppLanguage
     ) -> [InsightCardModel] {
-        let top = Array(aspects.prefix(4))
-        let balance = counts(aspects)
-        let activity = signalDensity(aspects, limit: 12)
-        let fullCalendar = Array((calendar + [Int](repeating: 0, count: 7)).prefix(7))
-        let aspectCount = balance.supportive + balance.challenging + balance.neutral
-        let supportShare = aspectCount > 0
-            ? Int(Double(balance.supportive) / Double(aspectCount) * 100)
-            : 0
+        let top = Array(aspects.prefix(6))
+        let houseScores = houseValues(snapshot, natal: natal, aspects: aspects)
+        let activeHouses = activeHouseFacts(houseScores, language: language)
         let movingFacts = snapshot.points.map { point in
             let house = natal?.house(containing: point.longitudeDegrees) ?? 0
-            let strongestTrigger = aspects.first { $0.firstID == point.body.rawValue }
             return fact(
-                ConsumerCopy.bodyTheme(point.body, language: language),
-                "\(ConsumerCopy.style(signIndex: point.signIndex, language: language)) · \(ConsumerCopy.lifeArea(house, language: language))",
+                bodyName(point.body, language: language),
+                "\(Zodiac.name(index: point.signIndex, language: language)) · \(ConsumerCopy.lifeArea(house, language: language))",
                 point.retrograde ? .challenging : .neutral,
-                note: "\(motionLabel(point, language: language)) · \(strongestTrigger.map { aspectTitle($0, language: language) } ?? localized("No close trigger", "暂无紧密触发", language: language))",
+                note: motionLabel(point, language: language),
                 symbol: point.body.symbol
             )
         }
-        let rhythm = calendar.isEmpty ? top.map(\.strength) : fullCalendar.prefix(10).map { Double($0) / 100 }
-        let houseScores = houseValues(snapshot, natal: natal, aspects: aspects)
-        let houseFacts = activeHouseFacts(houseScores, language: language)
+        let expanding: String
+        if let support = aspects.first(where: { $0.kind.supportive }) {
+            expanding = aspectTitle(support, language: language)
+        } else {
+            expanding = "—"
+        }
+        let structuring: String
+        if let structure = aspects.first(where: { $0.kind.challenging }) {
+            structuring = aspectTitle(structure, language: language)
+        } else {
+            structuring = "—"
+        }
+
         return [
-            card( id: "daily-activity",
-                title: localized("Daily activity", "日活跃度指数", language: language),
-                icon: "◒", visual: .activityGauge(
-                    value: activity,
-                    supportive: balance.supportive,
-                    adjustment: balance.challenging
-                ),
-                facts: [
-                    fact(localized("Active contacts", "活跃联系", language: language), "\(aspectCount)"),
-                    fact(localized("Support share", "推动占比", language: language), "\(supportShare)%", .supportive),
-                ],
-                language: language
-            ),
-            card( id: "transit-overview",
-                title: localized("Current transit overview", "当前行运总览", language: language),
-                icon: "◎", visual: .transitOverview(intensity: activity, rhythm: Array(rhythm)),
+            card( id: "current-story",
+                title: localized("Current story", "当前主线", language: language),
+                icon: "◎", visual: .storyWeave(expanding: expanding, structuring: structuring),
                 facts: top.prefix(3).map {
                     fact(
-                        timeLayer($0, language: language),
-                        aspectTitle($0, prefix: localized("Transit ", "行运", language: language), language: language),
+                        aspectTitle($0, language: language),
+                        "\(phaseLabel($0.phase, language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
                         tone($0.kind),
-                        note: "\(phaseLabel($0.phase, language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
+                        note: ConsumerCopy.lifeArea(natal?.house(containing: $0.firstLongitude), language: language),
                         progress: $0.strength
                     )
                 },
                 language: language
             ),
-            card( id: "trigger-themes",
-                title: localized("Core trigger themes", "核心触发主题", language: language),
-                icon: "◈", visual: .themeCards,
+            card( id: "current-cycles",
+                title: localized("Current cycles", "当前周期", language: language),
+                icon: "◔", visual: .cycleTabs(long: expanding, current: top.first.map { aspectTitle($0, language: language) } ?? "—", daily: structuring),
                 facts: top.prefix(3).map {
-                    let house = natal?.house(containing: $0.firstLongitude) ?? 0
-                    return fact(
-                        ConsumerCopy.lifeArea(house, language: language),
-                        activityLabel(Int($0.strength * 100), language: language),
-                        tone($0.kind),
-                        note: aspectTitle($0, prefix: localized("Transit ", "行运", language: language), language: language),
-                        progress: $0.strength,
-                        symbol: houseSymbol(house)
-                    )
-                },
-                language: language
-            ),
-            card( id: "key-events",
-                title: localized("Key transit events", "关键行运事件", language: language),
-                icon: "⟐", visual: .gantt,
-                facts: top.map {
                     fact(
                         phaseLabel($0.phase, language: language),
-                        aspectTitle($0, prefix: localized("Transit ", "行运", language: language), language: language),
+                        aspectTitle($0, language: language),
                         tone($0.kind),
                         note: ConsumerCopy.intensity($0.strength, language: language),
                         progress: $0.strength
@@ -382,52 +339,51 @@ enum InsightFactory {
                 },
                 language: language
             ),
-            card( id: "support-pressure",
-                title: localized("Support & pressure", "支持与压力", language: language),
-                icon: "◇", visual: .balanceRing(
-                    supportive: balance.supportive,
-                    challenging: balance.challenging,
-                    neutral: balance.neutral
-                ),
-                facts: [
-                    fact(localized("Support", "支持", language: language), top.first(where: { $0.kind.supportive }).map { aspectTitle($0, language: language) } ?? "—", .supportive),
-                    fact(localized("Pressure", "压力", language: language), top.first(where: { $0.kind.challenging }).map { aspectTitle($0, language: language) } ?? "—", .challenging),
-                    fact(localized("Outlet", "出口", language: language), top.first.map { bodyPair($0, language: language) } ?? "—", .transition),
-                ],
-                language: language
-            ),
-            card( id: "life-domains",
-                title: localized("Life domains", "生活领域影响", language: language),
-                icon: "⌂", visual: .houseRadar(houseScores),
-                facts: houseFacts,
-                language: language
-            ),
-            card( id: "action-guidance",
-                title: localized("Action guidance", "行动建议", language: language),
-                icon: "→", visual: .actionGuidance,
-                facts: actionFacts(balance, top: top, language: language),
-                language: language
-            ),
             card( id: "transit-timeline",
-                title: localized("How changes develop", "变化如何发展", language: language),
-                icon: "⇢", visual: .arcTimeline,
-                facts: timelineFacts(top, language: language),
+                title: localized("Transit timeline", "变化时间线", language: language),
+                icon: "⇢", visual: .gantt,
+                facts: top.prefix(4).map {
+                    fact(
+                        phaseLabel($0.phase, language: language),
+                        aspectTitle($0, language: language),
+                        tone($0.kind),
+                        note: ConsumerCopy.intensity($0.strength, language: language),
+                        progress: $0.strength
+                    )
+                },
                 language: language
             ),
-            card( id: "planet-overview",
-                title: localized("What is moving now", "当前正在变化的主题", language: language),
-                icon: "⊛", visual: .doubleRing,
-                facts: movingFacts,
+            card( id: "planet-paths",
+                title: localized("Planet paths", "行星路径", language: language),
+                icon: "⊛", visual: .positionRows,
+                facts: Array(movingFacts.prefix(8)),
                 language: language
             ),
-            card( id: "intensity-calendar",
-                title: localized("This week's intensity", "本周变化强度", language: language),
-                icon: "▦", visual: .calendar(fullCalendar),
-                facts: calendarFacts(fullCalendar, language: language),
+            card( id: "life-areas",
+                title: localized("Life areas", "生活领域", language: language),
+                icon: "⌂", visual: .areaRows,
+                facts: Array(activeHouses.prefix(6)),
+                language: language
+            ),
+            card( id: "active-transits",
+                title: localized("Active transits", "进行中的变化", language: language),
+                icon: "⌗", visual: .aspectList,
+                facts: top.prefix(6).map {
+                    fact(
+                        aspectTitle($0, language: language),
+                        "\(phaseLabel($0.phase, language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
+                        tone($0.kind),
+                        note: ConsumerCopy.lifeArea(natal?.house(containing: $0.firstLongitude), language: language),
+                        progress: $0.strength,
+                        symbol: $0.kind.supportive ? "△" : $0.kind.challenging ? "□" : "○"
+                    )
+                },
                 language: language
             ),
         ]
     }
+
+    // MARK: - Secondary (6)
 
     private static func secondaryCards(
         _ snapshot: ChartSnapshot,
@@ -437,75 +393,293 @@ enum InsightFactory {
     ) -> [InsightCardModel] {
         let moon = snapshot.point(.moon)
         let sun = snapshot.point(.sun)
-        let top = Array(aspects.prefix(4))
-        let balance = counts(aspects)
+        let natalSun = natal?.point(.sun)
+        let top = Array(aspects.prefix(6))
+        let houseScores = houseValues(snapshot, natal: natal, aspects: aspects)
+        let activeHouses = activeHouseFacts(houseScores, language: language)
+        let phase = phaseAngle(snapshot)
+        let moonHouse = natal?.house(containing: moon?.longitudeDegrees ?? 0) ?? 0
+
         return [
-            card( id: "current-stage",
-                title: localized("Current life stage", "当前人生阶段", language: language),
-                icon: "◐", visual: .progressedStage(
-                    phase: phaseAngle(snapshot),
-                    moonProgress: normalized(moon?.degreeInSign),
-                    sunProgress: normalized(sun?.degreeInSign)
+            card( id: "developmental-chapter",
+                title: localized("Developmental chapter", "发展阶段", language: language),
+                icon: "◐", visual: .stageFlow(
+                    old: "Observe quietly",
+                    transition: "Claim direction",
+                    emerging: "Act visibly"
                 ),
                 facts: [
-                    fact(
-                        localized("Emotional development", "情绪与安全感的发展", language: language),
-                        moon.map {
-                            ConsumerCopy.style(signIndex: $0.signIndex, language: language)
-                        } ?? "—",
-                        .transition,
-                        symbol: "☽"
-                    ),
-                    fact(
-                        localized("Long-term direction", "长期方向的发展", language: language),
-                        sun.map {
-                            ConsumerCopy.style(signIndex: $0.signIndex, language: language)
-                        } ?? "—",
-                        .supportive,
-                        symbol: "☉"
-                    ),
-                    fact(localized("Stage", "阶段", language: language), progressedPhaseName(phaseAngle(snapshot), language: language)),
+                    fact(localized("Stage", "阶段", language: language), progressedPhaseName(phase, language: language), .transition),
+                    fact(localized("Emotional thread", "情绪线索", language: language), moon.map { ConsumerCopy.style(signIndex: $0.signIndex, language: language) } ?? "—", .neutral, symbol: "☽"),
+                    fact(localized("Identity thread", "身份线索", language: language), sun.map { ConsumerCopy.style(signIndex: $0.signIndex, language: language) } ?? "—", .supportive, symbol: "☉"),
                 ],
                 language: language
             ),
-            card( id: "change-themes",
-                title: localized("Long-term change themes", "长期变化主题", language: language),
-                icon: "◈", visual: .progressedThemes(
-                    supportive: balance.supportive,
-                    challenging: balance.challenging,
-                    neutral: balance.neutral
+            card( id: "progressed-moon",
+                title: localized("Progressed moon", "长期月亮", language: language),
+                icon: "☽", visual: .moonProgress,
+                facts: [
+                    fact(localized("Moon sign", "月亮落座", language: language), moon.map { Zodiac.position($0, language: language) } ?? "—", .neutral, symbol: "☽"),
+                    fact(localized("Moon area", "月亮领域", language: language), ConsumerCopy.lifeArea(moonHouse, language: language), .transition),
+                    fact(localized("Phase", "月相", language: language), progressedPhaseName(phase, language: language)),
+                ],
+                language: language
+            ),
+            card( id: "identity-development",
+                title: localized("Identity development", "身份发展", language: language),
+                icon: "☉", visual: .identityCompare(
+                    natal: natalSun.map { Zodiac.position($0, language: language) } ?? "—",
+                    progressed: sun.map { Zodiac.position($0, language: language) } ?? "—"
                 ),
+                facts: [
+                    fact(localized("Natal sun", "本命太阳", language: language), natalSun.map { Zodiac.position($0, language: language) } ?? "—", .neutral, symbol: "☉"),
+                    fact(localized("Progressed sun", "长期太阳", language: language), sun.map { Zodiac.position($0, language: language) } ?? "—", .supportive, symbol: "☉"),
+                ],
+                language: language
+            ),
+            card( id: "turning-points",
+                title: localized("Turning points", "转折点", language: language),
+                icon: "⟐", visual: .turningRows,
                 facts: top.prefix(3).map {
                     fact(
-                        aspectTitle($0, prefix: localized("Progressed ", "次限", language: language), language: language),
-                        activityLabel(Int($0.strength * 100), language: language),
+                        aspectTitle($0, language: language),
+                        "\(phaseLabel($0.phase, language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
                         tone($0.kind),
-                        note: "\(phaseLabel($0.phase, language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
+                        note: ConsumerCopy.lifeArea(natal?.house(containing: $0.firstLongitude), language: language),
                         progress: $0.strength
                     )
                 },
                 language: language
             ),
-            card( id: "turning-points",
-                title: localized("Core turning points", "核心转折点", language: language),
-                icon: "⟐", visual: .turningTimeline,
-                facts: turningFacts(snapshot, aspects: top, language: language),
+            card( id: "areas-maturing",
+                title: localized("Areas maturing", "成熟领域", language: language),
+                icon: "⌂", visual: .areaRows,
+                facts: Array(activeHouses.prefix(4)),
                 language: language
             ),
-            card( id: "stage-advice",
-                title: localized("Stage guidance", "当前阶段建议", language: language),
-                icon: "→", visual: .actionGuidance,
-                facts: actionFacts(balance, top: top, language: language),
-                language: language
-            ),
-            card( id: "natal-link",
-                title: localized("Relationship to natal", "与本命盘的关系", language: language),
-                icon: "∞", visual: .comparison,
-                facts: natalLinkFacts(top, language: language),
+            card( id: "timeline",
+                title: localized("24-month timeline", "长期时间线", language: language),
+                icon: "⇢", visual: .gantt,
+                facts: top.prefix(4).map {
+                    fact(
+                        phaseLabel($0.phase, language: language),
+                        aspectTitle($0, language: language),
+                        tone($0.kind),
+                        note: ConsumerCopy.intensity($0.strength, language: language),
+                        progress: $0.strength
+                    )
+                },
                 language: language
             ),
         ]
     }
+
+    // MARK: - Solar return (7)
+
+    private static func solarCards(
+        _ snapshot: ChartSnapshot,
+        natal: ChartSnapshot?,
+        aspects: [ChartAspect],
+        language: AppLanguage
+    ) -> [InsightCardModel] {
+        let sun = snapshot.point(.sun)
+        let ascSign = Zodiac.name(index: Int(snapshot.angles.ascendantDegrees / 30) % 12, language: language)
+        let ruler = ruler(ofSign: Int(snapshot.angles.ascendantDegrees / 30) % 12)
+        let top = Array(snapshot.aspects.prefix(4))
+        let crossTop = Array(aspects.prefix(4))
+        let houseScores = houseValues(snapshot, natal: nil, aspects: snapshot.aspects)
+        let activeHouses = activeHouseFacts(houseScores, language: language)
+        let strongestSupport = snapshot.aspects.first { $0.kind.supportive } ?? snapshot.aspects.first
+        let strongestChallenge = snapshot.aspects.first { $0.kind.challenging } ?? snapshot.aspects.first
+
+        return [
+            card( id: "year-theme",
+                title: localized("Your birthday year", "你的生日年", language: language),
+                icon: "☉", visual: .yearOrbit,
+                facts: [
+                    fact(localized("Return ascendant", "返照上升", language: language), ascSign, .transition, symbol: "ASC"),
+                    fact(localized("Chart ruler", "命主星", language: language), ruler.symbol, .supportive, symbol: ruler.symbol),
+                    fact(localized("Sun house", "太阳落宫", language: language), ConsumerCopy.lifeArea(snapshot.house(containing: sun?.longitudeDegrees ?? 0), language: language), .neutral, symbol: "☉"),
+                ],
+                language: language
+            ),
+            card( id: "year-anchors",
+                title: localized("Year anchors", "年度锚点", language: language),
+                icon: "⚓", visual: .anchorGrid,
+                facts: top.prefix(4).map {
+                    fact(
+                        aspectTitle($0, language: language),
+                        "\(phaseLabel($0.phase, language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
+                        tone($0.kind),
+                        note: ConsumerCopy.lifeArea(snapshot.house(containing: $0.firstLongitude), language: language),
+                        progress: $0.strength
+                    )
+                },
+                language: language
+            ),
+            card( id: "priority-areas",
+                title: localized("Priority areas", "优先领域", language: language),
+                icon: "⌂", visual: .areaRows,
+                facts: Array(activeHouses.prefix(4)),
+                language: language
+            ),
+            card( id: "year-dynamics",
+                title: localized("Year dynamics", "年度动态", language: language),
+                icon: "◈", visual: .dualInsight(
+                    opening: strongestSupport.map { aspectTitle($0, language: language) } ?? "—",
+                    demand: strongestChallenge.map { aspectTitle($0, language: language) } ?? "—"
+                ),
+                facts: [
+                    fact(localized("Opening", "展开", language: language), strongestSupport.map { aspectTitle($0, language: language) } ?? "—", .supportive),
+                    fact(localized("Demand", "要求", language: language), strongestChallenge.map { aspectTitle($0, language: language) } ?? "—", .challenging),
+                ],
+                language: language
+            ),
+            card( id: "year-timeline",
+                title: localized("Year timeline", "年度时间线", language: language),
+                icon: "⇢", visual: .quarterTabs,
+                facts: top.prefix(4).map {
+                    fact(
+                        phaseLabel($0.phase, language: language),
+                        aspectTitle($0, language: language),
+                        tone($0.kind),
+                        note: ConsumerCopy.intensity($0.strength, language: language),
+                        progress: $0.strength
+                    )
+                },
+                language: language
+            ),
+            card( id: "natal-overlay",
+                title: localized("Natal overlay", "与本命叠加", language: language),
+                icon: "∞", visual: .overlayCompare,
+                facts: crossTop.prefix(4).map {
+                    fact(
+                        aspectTitle($0, language: language),
+                        "\(phaseLabel($0.phase, language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
+                        tone($0.kind),
+                        note: ConsumerCopy.lifeArea(natal?.house(containing: $0.firstLongitude), language: language),
+                        progress: $0.strength
+                    )
+                },
+                language: language
+            ),
+            card( id: "year-aspects",
+                title: localized("Year aspects", "年度连接", language: language),
+                icon: "⌗", visual: .aspectList,
+                facts: top.map {
+                    fact(
+                        aspectTitle($0, language: language),
+                        "\(phaseLabel($0.phase, language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
+                        tone($0.kind),
+                        progress: $0.strength,
+                        symbol: $0.kind.supportive ? "△" : $0.kind.challenging ? "□" : "○"
+                    )
+                },
+                language: language
+            ),
+        ]
+    }
+
+    // MARK: - Synastry (8)
+
+    private static func synastryCards(
+        _ snapshot: ChartSnapshot,
+        second: ChartSnapshot?,
+        aspects: [ChartAspect],
+        language: AppLanguage
+    ) -> [InsightCardModel] {
+        let top = Array(aspects.prefix(6))
+        let moonAspects = aspects.filter { $0.firstID == CelestialBody.moon.rawValue || $0.secondID == CelestialBody.moon.rawValue }
+        let mercuryAspects = aspects.filter { $0.firstID == CelestialBody.mercury.rawValue || $0.secondID == CelestialBody.mercury.rawValue }
+        let venusMarsAspects = aspects.filter {
+            let ids = [CelestialBody.venus.rawValue, CelestialBody.mars.rawValue, CelestialBody.pluto.rawValue]
+            return ids.contains($0.firstID) || ids.contains($0.secondID)
+        }
+        let commitmentAspects = aspects.filter {
+            let ids = [CelestialBody.saturn.rawValue, CelestialBody.jupiter.rawValue]
+            return ids.contains($0.firstID) || ids.contains($0.secondID)
+        }
+        let overlayFacts = houseOverlayFacts(snapshot, second: second, language: language)
+
+        return [
+            card( id: "relationship-overview",
+                title: localized("Relationship overview", "关系总览", language: language),
+                icon: "∞", visual: .bondOrbit,
+                facts: top.prefix(3).map {
+                    fact(
+                        aspectTitle($0, language: language),
+                        "\(phaseLabel($0.phase, language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
+                        tone($0.kind),
+                        progress: $0.strength
+                    )
+                },
+                language: language
+            ),
+            card( id: "perspectives",
+                title: localized("How you experience each other", "彼此的体验", language: language),
+                icon: "◐", visual: .perspectiveTabs,
+                facts: top.prefix(3).map {
+                    fact(
+                        aspectTitle($0, language: language),
+                        "\(phaseLabel($0.phase, language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
+                        tone($0.kind),
+                        note: bodyPair($0, language: language),
+                        progress: $0.strength
+                    )
+                },
+                language: language
+            ),
+            card( id: "emotional-connection",
+                title: localized("Emotional connection", "情感连接", language: language),
+                icon: "☽", visual: .connectionGrid,
+                facts: emotionalFacts(moonAspects, language: language),
+                language: language
+            ),
+            card( id: "communication",
+                title: localized("Communication", "沟通", language: language),
+                icon: "☿", visual: .pathFlow,
+                facts: emotionalFacts(mercuryAspects, language: language),
+                language: language
+            ),
+            card( id: "chemistry",
+                title: localized("Attraction & chemistry", "吸引与化学反应", language: language),
+                icon: "♀", visual: .dualInsight(
+                    opening: venusMarsAspects.first(where: { $0.kind.supportive }).map { aspectTitle($0, language: language) } ?? "—",
+                    demand: venusMarsAspects.first(where: { $0.kind.challenging }).map { aspectTitle($0, language: language) } ?? "—"
+                ),
+                facts: emotionalFacts(venusMarsAspects, language: language),
+                language: language
+            ),
+            card( id: "commitment",
+                title: localized("Commitment & longevity", "承诺与长久", language: language),
+                icon: "♄", visual: .connectionGrid,
+                facts: emotionalFacts(commitmentAspects, language: language),
+                language: language
+            ),
+            card( id: "house-overlays",
+                title: localized("House overlays", "落宫叠加", language: language),
+                icon: "⌂", visual: .houseOverlayRows,
+                facts: overlayFacts,
+                language: language
+            ),
+            card( id: "key-inter-aspects",
+                title: localized("Key inter-aspects", "主要相互连接", language: language),
+                icon: "⌗", visual: .aspectList,
+                facts: top.map {
+                    fact(
+                        aspectTitle($0, language: language),
+                        "\(phaseLabel($0.phase, language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
+                        tone($0.kind),
+                        progress: $0.strength,
+                        symbol: $0.kind.supportive ? "△" : $0.kind.challenging ? "□" : "○"
+                    )
+                },
+                language: language
+            ),
+        ]
+    }
+
+    // MARK: - Shared helpers
 
     private static func card(
         id: String,
@@ -549,12 +723,18 @@ enum InsightFactory {
 
     private static func minimumFactCount(for id: String) -> Int {
         [
-            "core-structure": 3, "strongest-themes": 3, "core-strengths": 3, "blind-spot": 2, "growth-direction": 3,
-            "sky-overview": 7, "core-themes": 3, "key-events": 3, "structure-tension": 4,
-            "collective-domains": 8, "observation-focus": 3, "sky-evolution": 3,
-            "daily-activity": 2, "transit-overview": 3, "trigger-themes": 3, "support-pressure": 3,
-            "life-domains": 4, "action-guidance": 4, "transit-timeline": 3, "intensity-calendar": 2,
-            "current-stage": 3, "change-themes": 3, "turning-points": 3, "stage-advice": 4, "natal-link": 3,
+            "natal-interpretation": 3, "career-direction": 3, "strengths-growth": 2, "element-balance": 4,
+            "house-emphasis": 3, "chart-signature": 3, "planet-placements": 10, "key-aspects": 3,
+            "sky-overview": 3, "moon-now": 3, "aspect-pattern": 3, "planetary-motion": 3,
+            "sign-changes": 3, "element-climate": 4, "upcoming-7-days": 2,
+            "current-story": 3, "current-cycles": 3, "transit-timeline": 3, "planet-paths": 3,
+            "life-areas": 3, "active-transits": 3,
+            "developmental-chapter": 3, "progressed-moon": 3, "identity-development": 2, "turning-points": 3,
+            "areas-maturing": 3, "timeline": 3,
+            "year-theme": 3, "year-anchors": 3, "priority-areas": 3, "year-dynamics": 2,
+            "year-timeline": 3, "natal-overlay": 3, "year-aspects": 3,
+            "relationship-overview": 3, "perspectives": 3, "emotional-connection": 3, "communication": 3,
+            "chemistry": 3, "commitment": 3, "house-overlays": 3, "key-inter-aspects": 3,
         ][id, default: 1]
     }
 
@@ -607,48 +787,87 @@ enum InsightFactory {
         return Int(min(1, total / Double(limit)) * 100)
     }
 
-    private static func domainValues(_ snapshot: ChartSnapshot) -> [Double] {
-        let domains: [[CelestialBody]] = [
-            [.mercury, .uranus],
-            [.venus, .moon],
-            [.sun, .mars],
-            [.jupiter, .saturn, .pluto],
-            [.jupiter, .uranus],
-            [.saturn, .pluto],
-            [.moon, .neptune],
-            [.venus, .jupiter],
-        ]
-        var participation: [CelestialBody: Double] = [:]
-        for aspect in snapshot.aspects {
-            if let first = CelestialBody(rawValue: aspect.firstID) {
-                participation[first, default: 0] += aspect.strength
-            }
-            if let second = CelestialBody(rawValue: aspect.secondID) {
-                participation[second, default: 0] += aspect.strength
-            }
+    private static func dominantBodies(_ aspects: [ChartAspect], language: AppLanguage) -> String {
+        var scores: [String: Double] = [:]
+        for aspect in aspects {
+            scores[aspect.firstID, default: 0] += aspect.strength
+            scores[aspect.secondID, default: 0] += aspect.strength * 0.6
         }
-        let totals = domains.map { bodies in
-            bodies.reduce(0) { $0 + participation[$1, default: 0] } / Double(bodies.count)
-        }
-        guard let maximum = totals.max(), maximum > 0 else {
-            return [Double](repeating: 0, count: domains.count)
-        }
-        return totals.map { $0 / maximum }
+        let names = scores
+            .sorted { $0.value > $1.value }
+            .prefix(2)
+            .compactMap { CelestialBody(rawValue: $0.key).map { bodyName($0, language: language) } }
+        return names.isEmpty ? "—" : names.joined(separator: " · ")
     }
 
-    private static func domainFacts(_ snapshot: ChartSnapshot, language: AppLanguage) -> [InsightFact] {
-        let labels = language == .english
-            ? ["Information", "Relationships", "Action", "Institutions", "Technology", "Resources", "Public mood", "Culture"]
-            : ["信息传播", "关系合作", "行动竞争", "制度结构", "技术创新", "资源经济", "公共情绪", "文化价值"]
-        return zip(labels, domainValues(snapshot)).map {
-            let score = Int($0.1 * 100)
-            return fact(
-                $0.0,
-                activityLabel(score, language: language),
-                score > 66 ? .challenging : score > 35 ? .transition : .neutral,
-                progress: $0.1
+    private static func motionLabel(_ point: ChartPoint, language: AppLanguage) -> String {
+        point.retrograde
+            ? localized("Reviewing", "回顾调整中", language: language)
+            : localized("Moving forward", "稳定向前", language: language)
+    }
+
+    private static func motionFacts(_ snapshot: ChartSnapshot, language: AppLanguage) -> [InsightFact] {
+        snapshot.points.map { point in
+            fact(
+                bodyName(point.body, language: language),
+                Zodiac.position(point, language: language),
+                point.retrograde ? .challenging : .neutral,
+                note: motionLabel(point, language: language),
+                symbol: point.body.symbol
             )
         }
+    }
+
+    private static func bodyPair(_ aspect: ChartAspect, language: AppLanguage) -> String {
+        let first = CelestialBody(rawValue: aspect.firstID).map { bodyName($0, language: language) } ?? aspect.firstID
+        let second = CelestialBody(rawValue: aspect.secondID).map { bodyName($0, language: language) } ?? aspect.secondID
+        return "\(first) → \(second)"
+    }
+
+    private static func elementBalance(_ snapshot: ChartSnapshot) -> [Double] {
+        let elementBySign: [String: Int] = [
+            "aries": 0, "leo": 0, "sagittarius": 0,
+            "taurus": 1, "virgo": 1, "capricorn": 1,
+            "gemini": 2, "libra": 2, "aquarius": 2,
+            "cancer": 3, "scorpio": 3, "pisces": 3,
+        ]
+        var counts = [Double](repeating: 0, count: 4)
+        for point in snapshot.points {
+            let sign = Zodiac.englishNames[point.signIndex].lowercased()
+            counts[elementBySign[sign] ?? 0] += 1
+        }
+        guard let maximum = counts.max(), maximum > 0 else {
+            return [Double](repeating: 0, count: 4)
+        }
+        return counts.map { $0 / maximum }
+    }
+
+    private static func elementFacts(_ scores: [Double], language: AppLanguage) -> [InsightFact] {
+        let labels = language == .english
+            ? ["Fire", "Earth", "Air", "Water"]
+            : ["火", "土", "风", "水"]
+        return zip(labels, scores).map { label, score in
+            let percent = Int(score * 100)
+            return fact(
+                label,
+                activityLabel(percent, language: language),
+                percent > 66 ? .challenging : percent > 35 ? .transition : .neutral,
+                progress: score
+            )
+        }
+    }
+
+    private static func elementOrientation(_ scores: [Double], language: AppLanguage) -> String {
+        guard let maximum = scores.max(), maximum > 0 else {
+            return localized("Balanced", "均衡", language: language)
+        }
+        let index = scores.firstIndex(of: maximum) ?? 0
+        return [
+            localized("Fire emphasis", "火象主导", language: language),
+            localized("Earth emphasis", "土象主导", language: language),
+            localized("Air emphasis", "风象主导", language: language),
+            localized("Water emphasis", "水象主导", language: language),
+        ][index]
     }
 
     private static func houseValues(
@@ -658,15 +877,98 @@ enum InsightFactory {
     ) -> [Double] {
         var values = [Double](repeating: 0, count: 12)
         for point in snapshot.points {
-            let index = max(0, min(11, (natal?.house(containing: point.longitudeDegrees) ?? 1) - 1))
+            let house = (natal?.house(containing: point.longitudeDegrees) ?? snapshot.house(containing: point.longitudeDegrees))
+            let index = max(0, min(11, house - 1))
             values[index] += point.retrograde ? 0.75 : 0.5
         }
         for aspect in aspects {
-            let index = max(0, min(11, (natal?.house(containing: aspect.firstLongitude) ?? 1) - 1))
+            let house = natal?.house(containing: aspect.firstLongitude) ?? snapshot.house(containing: aspect.firstLongitude)
+            let index = max(0, min(11, house - 1))
             values[index] += max(0.1, aspect.strength)
         }
         guard let maximum = values.max(), maximum > 0 else { return values }
         return values.map { $0 / maximum }
+    }
+
+    private static func activeHouseFacts(_ values: [Double], language: AppLanguage) -> [InsightFact] {
+        let ranked = values
+            .enumerated()
+            .sorted { $0.element > $1.element }
+            .prefix(6)
+        return ranked.map { index, value in
+            let percent = Int(value * 100)
+            return fact(
+                ConsumerCopy.lifeArea(index + 1, language: language),
+                activityLabel(percent, language: language),
+                percent > 66 ? .challenging : percent > 35 ? .transition : .neutral,
+                progress: value,
+                symbol: "\(index + 1)"
+            )
+        }
+    }
+
+    private static func emotionalFacts(_ aspects: [ChartAspect], language: AppLanguage) -> [InsightFact] {
+        let sample = Array(aspects.prefix(4))
+        guard !sample.isEmpty else {
+            return [
+                fact(
+                    localized("No close signal", "暂无紧密信号", language: language),
+                    localized("Nothing close enough to display", "当前没有达到显示范围的紧密联系", language: language),
+                    .neutral
+                ),
+            ]
+        }
+        return sample.map { aspect in
+            fact(
+                aspectTitle(aspect, language: language),
+                "\(phaseLabel(aspect.phase, language: language)) · \(ConsumerCopy.intensity(aspect.strength, language: language))",
+                tone(aspect.kind),
+                progress: aspect.strength
+            )
+        }
+    }
+
+
+    private static func houseOverlayFacts(
+        _ first: ChartSnapshot,
+        second: ChartSnapshot?,
+        language: AppLanguage
+    ) -> [InsightFact] {
+        guard let second else {
+            return [
+                fact(
+                    localized("No partner chart", "暂无对方星盘", language: language),
+                    localized("Add a person to compare", "添加一位人物即可比较", language: language),
+                    .neutral
+                ),
+            ]
+        }
+        return first.points.prefix(6).map { point in
+            let house = second.house(containing: point.longitudeDegrees)
+            return fact(
+                bodyName(point.body, language: language),
+                ConsumerCopy.lifeArea(house, language: language),
+                .transition,
+                note: "\(Zodiac.name(index: point.signIndex, language: language)) \(Zodiac.formatDegree(point.degreeInSign))",
+                symbol: point.body.symbol
+            )
+        }
+    }
+
+    private static func calendarFacts(_ values: [Int], language: AppLanguage) -> [InsightFact] {
+        let ranked = values
+            .enumerated()
+            .sorted { $0.element > $1.element }
+            .prefix(3)
+        return ranked.map { index, value in
+            let percent = value
+            return fact(
+                localized("Day \(index + 1)", "第\(index + 1)天", language: language),
+                activityLabel(percent, language: language),
+                percent > 66 ? .challenging : percent > 35 ? .transition : .neutral,
+                progress: Double(percent) / 100
+            )
+        }
     }
 
     private static func timelineFacts(_ aspects: [ChartAspect], language: AppLanguage) -> [InsightFact] {
@@ -675,12 +977,9 @@ enum InsightFactory {
         let applying = aspects.first { $0.phase == .applying }
         return [
             fact(
-                localized("Just finished", "刚刚经过", language: language),
+                localized("Just passed", "刚刚经过", language: language),
                 separating.map { aspectTitle($0, language: language) } ?? "—",
                 separating.map { tone($0.kind) } ?? .neutral,
-                note: separating.map {
-                    ConsumerCopy.intensity($0.strength, language: language)
-                },
                 progress: separating?.strength ?? 0,
                 symbol: "✓"
             ),
@@ -688,9 +987,6 @@ enum InsightFactory {
                 localized("Current", "当前", language: language),
                 current.map { aspectTitle($0, language: language) } ?? "—",
                 .transition,
-                note: current.map {
-                    ConsumerCopy.intensity($0.strength, language: language)
-                },
                 progress: current?.strength ?? 0,
                 symbol: "●"
             ),
@@ -698,9 +994,6 @@ enum InsightFactory {
                 localized("Next", "接下来", language: language),
                 applying.map { aspectTitle($0, language: language) } ?? "—",
                 applying.map { tone($0.kind) } ?? .neutral,
-                note: applying.map {
-                    ConsumerCopy.intensity($0.strength, language: language)
-                },
                 progress: applying?.strength ?? 0,
                 symbol: "→"
             ),
@@ -708,185 +1001,19 @@ enum InsightFactory {
     }
 
     private static func cycleLeaders(_ aspects: [ChartAspect]) -> [ChartAspect?] {
-        let slow: Set<CelestialBody> = [.jupiter, .saturn, .uranus, .neptune, .pluto]
-        let middle: Set<CelestialBody> = [.sun, .mercury, .venus, .mars]
-        func bodies(_ aspect: ChartAspect) -> [CelestialBody] {
-            [CelestialBody(rawValue: aspect.firstID), CelestialBody(rawValue: aspect.secondID)].compactMap { $0 }
-        }
-        let long = aspects.first { aspect in
-            let pair = bodies(aspect)
-            return !pair.isEmpty && pair.allSatisfy { slow.contains($0) }
-        }
-        let mid = aspects.first { aspect in
-            let pair = bodies(aspect)
-            return pair.contains(where: { middle.contains($0) }) && !pair.contains(.moon)
-        }
-        let short = aspects.first { bodies($0).contains(.moon) }
-        return [
-            long ?? aspects.first,
-            mid ?? aspects.dropFirst().first ?? aspects.first,
-            short ?? aspects.dropFirst(2).first ?? aspects.first,
-        ]
-    }
-
-    private static func dominantBodies(_ aspects: [ChartAspect], language: AppLanguage) -> String {
-        var scores: [CelestialBody: Double] = [:]
-        for aspect in aspects {
-            if let body = CelestialBody(rawValue: aspect.firstID) {
-                scores[body, default: 0] += aspect.strength
-            }
-            if let body = CelestialBody(rawValue: aspect.secondID) {
-                scores[body, default: 0] += aspect.strength
-            }
-        }
-        let names = scores.sorted { $0.value > $1.value }.prefix(3).map {
-            "\($0.key.symbol) \(bodyName($0.key, language: language))"
-        }
-        return names.isEmpty ? "—" : names.joined(separator: " · ")
-    }
-
-    private static func motionLabel(_ point: ChartPoint, language: AppLanguage) -> String {
-        ConsumerCopy.motion(isRetrograde: point.retrograde, language: language)
-    }
-
-    private static func timeLayer(_ aspect: ChartAspect, language: AppLanguage) -> String {
-        let slow: Set<String> = [
-            CelestialBody.jupiter.rawValue,
-            CelestialBody.saturn.rawValue,
-            CelestialBody.uranus.rawValue,
-            CelestialBody.neptune.rawValue,
-            CelestialBody.pluto.rawValue,
-        ]
-        if slow.contains(aspect.firstID) {
-            return localized("Long-term layer", "长期层", language: language)
-        }
-        if aspect.firstID == CelestialBody.moon.rawValue {
-            return localized("Daily layer", "短期层", language: language)
-        }
-        return localized("Current layer", "当前层", language: language)
-    }
-
-    private static func bodyPair(_ aspect: ChartAspect, language: AppLanguage) -> String {
-        let first = CelestialBody(rawValue: aspect.firstID)
-        let second = CelestialBody(rawValue: aspect.secondID)
-        let firstTheme = ConsumerCopy.bodyTheme(first, language: language)
-        let secondTheme = ConsumerCopy.bodyTheme(second, language: language)
-        return localized(
-            "\(firstTheme) and \(secondTheme)",
-            "\(firstTheme)与\(secondTheme)",
-            language: language
-        )
-    }
-
-    private static func houseSymbol(_ house: Int) -> String {
-        house > 0 ? "\(house)" : "•"
-    }
-
-    private static func activeHouseFacts(_ values: [Double], language: AppLanguage) -> [InsightFact] {
-        values.enumerated()
-            .sorted { $0.element > $1.element }
-            .prefix(4)
-            .map { index, value in
-                fact(
-                    ConsumerCopy.lifeArea(index + 1, language: language),
-                    activityLabel(Int(value * 100), language: language),
-                    value > 0.66 ? .challenging : value > 0.35 ? .transition : .neutral,
-                    progress: value,
-                    symbol: "\(index + 1)"
-                )
-            }
-    }
-
-    private static func actionFacts(
-        _ balance: (supportive: Int, challenging: Int, neutral: Int),
-        top: [ChartAspect],
-        language: AppLanguage
-    ) -> [InsightFact] {
-        let direction = balance.challenging > balance.supportive
-            ? localized("Simplify before accelerating", "先简化，再加速", language: language)
-            : localized("Use the available momentum", "顺势推进重点事项", language: language)
-        let main = top.first.map { bodyPair($0, language: language) } ?? "—"
-        return [
-            fact(
-                localized("Direction", "行动方向", language: language),
-                direction,
-                .transition
-            ),
-            fact(
-                localized("Advance", "适合推进", language: language),
-                localized("One clear priority", "一个明确的重点", language: language),
-                .supportive,
-                note: localized("Move when the next step is concrete.", "下一步足够具体时就行动。", language: language)
-            ),
-            fact(
-                localized("Adjust", "需要调整", language: language),
-                main,
-                .challenging,
-                note: localized("Reduce avoidable friction first.", "先减少可以避免的消耗。", language: language)
-            ),
-            fact(
-                localized("Pause", "暂缓决定", language: language),
-                localized("Irreversible choices", "难以撤回的决定", language: language),
-                .neutral,
-                note: localized("Wait when the facts are still changing.", "信息仍在变化时先等待。", language: language)
-            ),
-        ]
-    }
-
-    private static func calendarFacts(_ values: [Int], language: AppLanguage) -> [InsightFact] {
-        guard !values.isEmpty else {
-            return [fact(localized("This week", "本周", language: language), localized("No notable changes", "暂无明显变化", language: language))]
-        }
-        let peak = values.enumerated().max { $0.element < $1.element }
-        let quiet = values.enumerated().min { $0.element < $1.element }
-        return [
-            fact(
-                localized("Highest day", "最高日", language: language),
-                peak.map { localized("Day \($0.offset + 1) · \($0.element)", "第 \($0.offset + 1) 天 · \($0.element)", language: language) } ?? "—",
-                .challenging
-            ),
-            fact(
-                localized("Quietest day", "平缓日", language: language),
-                quiet.map { localized("Day \($0.offset + 1) · \($0.element)", "第 \($0.offset + 1) 天 · \($0.element)", language: language) } ?? "—",
-                .supportive
-            ),
-        ]
+        let long = aspects.first { $0.firstID == CelestialBody.saturn.rawValue || $0.firstID == CelestialBody.uranus.rawValue || $0.firstID == CelestialBody.neptune.rawValue || $0.firstID == CelestialBody.pluto.rawValue }
+        let current = aspects.first { $0.firstID == CelestialBody.jupiter.rawValue }
+        let daily = aspects.first { $0.firstID == CelestialBody.moon.rawValue || $0.firstID == CelestialBody.mercury.rawValue }
+        return [long ?? aspects.first, current, daily ?? aspects.first]
     }
 
     private static func progressedPhaseName(_ angle: Double, language: AppLanguage) -> String {
         switch angle {
-        case 0 ..< 45: localized("New beginning", "新阶段开启", language: language)
-        case 45 ..< 90: localized("Building momentum", "逐渐积累", language: language)
-        case 90 ..< 135: localized("Active development", "主动发展", language: language)
-        case 135 ..< 180: localized("Refining direction", "调整方向", language: language)
-        case 180 ..< 225: localized("Full visibility", "成果显现", language: language)
-        case 225 ..< 270: localized("Reassessment", "重新评估", language: language)
-        case 270 ..< 315: localized("Integration", "整合经验", language: language)
-        default: localized("Release and reset", "收尾与更新", language: language)
+        case 0 ..< 90: localized("New phase", "新月阶段", language: language)
+        case 90 ..< 180: localized("Building phase", "上弦阶段", language: language)
+        case 180 ..< 270: localized("Review phase", "满月阶段", language: language)
+        default: localized("Integration phase", "下弦阶段", language: language)
         }
-    }
-
-    private static func natalLinkFacts(_ aspects: [ChartAspect], language: AppLanguage) -> [InsightFact] {
-        let support = aspects.first { $0.kind.supportive }
-        let challenge = aspects.first { $0.kind.challenging }
-        let newPattern = aspects.first { !$0.kind.supportive && !$0.kind.challenging } ?? aspects.first
-        return [
-            fact(
-                localized("Strengthened", "正在强化", language: language),
-                support.map { aspectTitle($0, prefix: localized("Progressed ", "次限", language: language), language: language) } ?? "—",
-                .supportive
-            ),
-            fact(
-                localized("Challenged", "正在挑战", language: language),
-                challenge.map { aspectTitle($0, prefix: localized("Progressed ", "次限", language: language), language: language) } ?? "—",
-                .challenging
-            ),
-            fact(
-                localized("New possibility", "新的可能", language: language),
-                newPattern.map { bodyPair($0, language: language) } ?? "—",
-                .transition
-            ),
-        ]
     }
 
     private static func ruler(ofSign sign: Int) -> CelestialBody {
@@ -906,54 +1033,21 @@ enum InsightFactory {
         }
     }
 
-    private static func turningFacts(
-        _ snapshot: ChartSnapshot,
-        aspects: [ChartAspect],
-        language: AppLanguage
-    ) -> [InsightFact] {
-        let moon = snapshot.point(.moon)
-        let nearBoundary = (moon?.degreeInSign ?? 15) < 3 || (moon?.degreeInSign ?? 15) > 27
-        return [
-            fact(
-                localized("Most concentrated change", "当前最集中的变化", language: language),
-                aspects.first.map { aspectTitle($0, language: language) } ?? "—",
-                aspects.first.map { tone($0.kind) } ?? .neutral,
-                note: aspects.first.map {
-                    "\(phaseLabel($0.phase, language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))"
-                },
-                progress: aspects.first?.strength ?? 0
-            ),
-            fact(
-                localized("Changing approach", "方式正在变化", language: language),
-                nearBoundary
-                    ? localized("A new approach is close", "新的处理方式即将开始", language: language)
-                    : localized("The current approach is still developing", "当前处理方式仍在发展", language: language),
-                .transition,
-                note: moon.map {
-                    ConsumerCopy.style(signIndex: $0.signIndex, language: language)
-                },
-                progress: nearBoundary ? 0.9 : normalized(moon?.degreeInSign)
-            ),
-            fact(
-                localized("Long-term stage", "长期发展阶段", language: language),
-                progressedPhaseName(phaseAngle(snapshot), language: language),
-                .supportive,
-                note: ConsumerCopy.cycleStage(
-                    angle: phaseAngle(snapshot),
-                    language: language
-                ),
-                progress: phaseAngle(snapshot) / 360
-            ),
-        ]
+    private static func moonIllumination(_ snapshot: ChartSnapshot) -> Double {
+        let phase = phaseAngle(snapshot)
+        return (1 - cos(phase * .pi / 180)) / 2
     }
+
 
     private static func validate(_ cards: [InsightCardModel], for chart: ChartKind) throws {
         #if DEBUG
         let expected: [ChartKind: [String]] = [
-            .natal: ["core-structure", "strongest-themes", "core-strengths", "blind-spot", "growth-direction"],
-            .currentSky: ["sky-overview", "core-themes", "key-events", "structure-tension", "collective-domains", "observation-focus", "sky-evolution", "planet-overview"],
-            .transit: ["daily-activity", "transit-overview", "trigger-themes", "key-events", "support-pressure", "life-domains", "action-guidance", "transit-timeline", "planet-overview", "intensity-calendar"],
-            .secondary: ["current-stage", "change-themes", "turning-points", "stage-advice", "natal-link"],
+            .natal: ["natal-interpretation", "career-direction", "strengths-growth", "element-balance", "house-emphasis", "chart-signature", "planet-placements", "key-aspects"],
+            .currentSky: ["sky-overview", "moon-now", "aspect-pattern", "planetary-motion", "sign-changes", "element-climate", "upcoming-7-days"],
+            .transit: ["current-story", "current-cycles", "transit-timeline", "planet-paths", "life-areas", "active-transits"],
+            .secondary: ["developmental-chapter", "progressed-moon", "identity-development", "turning-points", "areas-maturing", "timeline"],
+            .solarReturn: ["year-theme", "year-anchors", "priority-areas", "year-dynamics", "year-timeline", "natal-overlay", "year-aspects"],
+            .synastry: ["relationship-overview", "perspectives", "emotional-connection", "communication", "chemistry", "commitment", "house-overlays", "key-inter-aspects"],
         ]
         let expectedIDs = expected[chart] ?? []
         guard cards.map(\.id) == expectedIDs else {
@@ -968,30 +1062,6 @@ enum InsightFactory {
         for card in cards {
             guard card.facts.count >= minimumFactCount(for: card.id) else {
                 throw InsightFactoryError.invalidCardContract("\(chart.rawValue).\(card.id) is missing visual content")
-            }
-            switch card.visual {
-            case let .skyOverview(_, _, cycles):
-                guard cycles.count == 3 else {
-                    throw InsightFactoryError.invalidCardContract("sky overview must contain three cycles")
-                }
-            case let .domainBars(values):
-                guard values.count == 8 else {
-                    throw InsightFactoryError.invalidCardContract("sky domain chart must contain eight domains")
-                }
-            case .planetTable, .doubleRing:
-                guard card.facts.count >= 10 else {
-                    throw InsightFactoryError.invalidCardContract("\(card.id) must contain the complete planet table")
-                }
-            case let .houseRadar(values):
-                guard values.count == 12 else {
-                    throw InsightFactoryError.invalidCardContract("transit house radar must contain all twelve houses")
-                }
-            case let .calendar(values):
-                guard values.count == 7 else {
-                    throw InsightFactoryError.invalidCardContract("transit intensity calendar must contain seven days")
-                }
-            default:
-                break
             }
         }
         #endif

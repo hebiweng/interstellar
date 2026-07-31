@@ -83,3 +83,8 @@ apps/**/dist/
 # official URL, size and SHA-256 remain locked in data-manifests; bootstrap with
 # scripts/fetch_jpl_validation_kernels.py after cloning.
 /vendor/jpl-naif/kernels/spk/*.bsp
+
+# Codex execution progress (local only)
+/ios-v2-progress.md
+/relay/relay
+/relay/relay.exe

@@ -218,7 +218,7 @@ function readPrivateFragments(
   collectionKey,
   fragmentLocale = locale
 ) {
-  const techniques = ["natal", "current-sky", "transit", "secondary"];
+  const techniques = ["natal", "current-sky", "transit", "secondary", "solar-return", "synastry"];
   const fragmentPaths = techniques.map((technique) =>
     path.join(baseDirectory, technique, `${filePrefix}-${fragmentLocale}.json`)
   );
@@ -356,6 +356,7 @@ function validateRuleCorpusCoverage(rules, entries) {
       ["aspect", "single-chart", "challenging", "square", "applying", "personal"],
       ["aspect", "single-chart", "challenging", "opposition", "separating", "personal"],
       ["aspect", "single-chart", "neutral", "conjunction", "exact", "personal"],
+      ["house", "active-domain", "leading-domain"],
     ],
     "current-sky": [
       ["point", "luminary", "personal", "direct"],
@@ -364,6 +365,8 @@ function validateRuleCorpusCoverage(rules, entries) {
       ["aspect", "single-chart", "challenging", "square", "exact", "social"],
       ["aspect", "single-chart", "neutral", "conjunction", "separating", "personal"],
       ["lunar-phase", "phase", "full-moon"],
+      ["calendar", "calendar-peak"],
+      ["calendar", "calendar-active"],
     ],
     transit: [
       ["point", "moving-point", "personal", "direct"],
@@ -381,6 +384,27 @@ function validateRuleCorpusCoverage(rules, entries) {
       ["aspect", "cross-chart", "moving-progressed", "neutral", "conjunction", "separating"],
       ["house", "active-domain", "leading-domain"],
       ["lunar-phase", "phase", "first-quarter"],
+    ],
+    "solar-return": [
+      ["point", "single-chart", "personal", "direct"],
+      ["point", "single-chart", "outer", "retrograde"],
+      ["aspect", "single-chart", "supportive", "trine", "applying", "personal"],
+      ["aspect", "single-chart", "challenging", "square", "exact", "personal"],
+      ["aspect", "single-chart", "neutral", "conjunction", "separating", "personal"],
+      ["aspect", "cross-chart", "supportive", "trine", "applying", "personal"],
+      ["aspect", "cross-chart", "challenging", "square", "exact", "personal"],
+      ["aspect", "cross-chart", "neutral", "conjunction", "separating", "personal"],
+      ["house", "active-domain", "leading-domain"],
+      ["calendar", "calendar-peak"],
+    ],
+    synastry: [
+      ["point", "cross-chart", "personal", "direct"],
+      ["point", "cross-chart", "outer", "retrograde"],
+      ["aspect", "cross-chart", "supportive", "trine", "applying", "personal"],
+      ["aspect", "cross-chart", "challenging", "square", "exact", "personal"],
+      ["aspect", "cross-chart", "neutral", "conjunction", "separating", "personal"],
+      ["house", "active-domain", "leading-domain"],
+      ["lunar-phase", "phase", "full-moon"],
     ],
   };
 

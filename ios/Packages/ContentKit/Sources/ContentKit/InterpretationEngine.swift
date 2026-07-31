@@ -88,6 +88,7 @@ public struct InterpretationEngine: Sendable {
         var replacements = context.values.reduce(into: [String: String]()) {
             $0["context.\($1.key)"] = $1.value
         }
+        replacements["context.preset"] = context.preset ?? ""
         var evidenceIDs: [String] = []
         var usedEntryIDs = Set<String>()
         var usedGroups = Set<String>()
@@ -232,7 +233,8 @@ public struct InterpretationEngine: Sendable {
               matches(selector.houses, signal.house, specificity: &specificity),
               matches(selector.aspectIDs, signal.aspectID, specificity: &specificity),
               matches(selector.phaseIDs, signal.phaseID, specificity: &specificity),
-              matches(selector.tones, signal.tone, specificity: &specificity)
+              matches(selector.tones, signal.tone, specificity: &specificity),
+              matches(selector.presets, context.preset, specificity: &specificity)
         else {
             return nil
         }

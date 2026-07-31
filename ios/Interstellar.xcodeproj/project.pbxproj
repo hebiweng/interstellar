@@ -17,6 +17,7 @@
 		17DA24AF7292AB4828A37395 /* InsightContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B2767ACABFDDAEEBA88C4E /* InsightContent.swift */; };
 		33AF4A0526E3FCBA484AE56F /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E20C395BDFD8BD0B24388C /* AppModel.swift */; };
 		388FE3F37754814E0A699FE6 /* agpl-3.0.txt in Resources */ = {isa = PBXBuildFile; fileRef = 304F386EC1EE838F3AD709A9 /* agpl-3.0.txt */; };
+		3FF959A490BE10D499C12683 /* ReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E55B957F3B40BB06BDBB4DE /* ReportsView.swift */; };
 		464458B2F8E2AF6F04173689 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2A9B7F6653E3B21A74DFFF2 /* Models.swift */; };
 		4C985AF7B6AFDBAB6785A004 /* TodayEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8B5EDCA7BBB5A87878D3A6E /* TodayEngine.swift */; };
 		4E2C9AE9DCCE3BFD47E957F3 /* PrivateCorpus-en.json in Resources */ = {isa = PBXBuildFile; fileRef = 35AF946924FFE0C5C53C364D /* PrivateCorpus-en.json */; };
@@ -25,8 +26,11 @@
 		5EA16EAEC323BA7C8DD81A9A /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A6D85449819D6C4E404066 /* Theme.swift */; };
 		61351E9509F520477D1797F6 /* InterstellarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 055D71348E930EDB7CEA9D25 /* InterstellarApp.swift */; };
 		6799FC7090A83402FE95795E /* InsightFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10109DF1D818133D4F69FB22 /* InsightFactory.swift */; };
+		7054C08BB4A305C2CE8328DA /* AskHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1C2A46A3725C8A3CDBFC8B /* AskHistory.swift */; };
+		7146C73C4FBB984FB0E84E57 /* Reports.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3989AA7077B4B8CF57C56610 /* Reports.swift */; };
 		7195DECE9971A2CC7BF9F222 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F53A273536232B2755B411 /* RootView.swift */; };
 		7B00116445E815363BD4B368 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 12B96210B8B65212F06462C7 /* InfoPlist.strings */; };
+		7B37214AECB62744C27DD168 /* AIGeneration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2114D2FD8739C6BB62FD26EF /* AIGeneration.swift */; };
 		82A5A08E61A2A43E19EC5007 /* LocationPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1C4311E86E866790B89BEA /* LocationPicker.swift */; };
 		83E776DFD24F77B62FDFF78B /* WeeklyForecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D7BD1EE6C166DE149FA32C4 /* WeeklyForecast.swift */; };
 		89A77CE8E88720666E5ECE90 /* SynastryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499908CB866531E9C208DDCF /* SynastryView.swift */; };
@@ -59,11 +63,14 @@
 		0CA4E3ABEDF5DDF5FAB1AC76 /* ephe */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ephe; path = ../vendor/swisseph/ephe; sourceTree = SOURCE_ROOT; };
 		0D7BD1EE6C166DE149FA32C4 /* WeeklyForecast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyForecast.swift; sourceTree = "<group>"; };
 		10109DF1D818133D4F69FB22 /* InsightFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightFactory.swift; sourceTree = "<group>"; };
+		2114D2FD8739C6BB62FD26EF /* AIGeneration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIGeneration.swift; sourceTree = "<group>"; };
 		2A4FBE0CC517EF4C1D54C807 /* InterstellarUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = InterstellarUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		304F386EC1EE838F3AD709A9 /* agpl-3.0.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "agpl-3.0.txt"; sourceTree = "<group>"; };
 		33F53A273536232B2755B411 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		35AF946924FFE0C5C53C364D /* PrivateCorpus-en.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "PrivateCorpus-en.json"; sourceTree = "<group>"; };
+		3989AA7077B4B8CF57C56610 /* Reports.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reports.swift; sourceTree = "<group>"; };
 		3B958CF1AD3B3C7FE6219102 /* ChartRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartRenderer.swift; sourceTree = "<group>"; };
+		3E1C2A46A3725C8A3CDBFC8B /* AskHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskHistory.swift; sourceTree = "<group>"; };
 		40093D315097B7945D211895 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		45FCBC91108D8B597D89E39C /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		499908CB866531E9C208DDCF /* SynastryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynastryView.swift; sourceTree = "<group>"; };
@@ -71,6 +78,7 @@
 		501ADE1C8B476ED84F14B948 /* VisualRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualRegressionTests.swift; sourceTree = "<group>"; };
 		5A1C4311E86E866790B89BEA /* LocationPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPicker.swift; sourceTree = "<group>"; };
 		5CCCA84B397C2C9CC92887D6 /* ContentKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ContentKit; path = Packages/ContentKit; sourceTree = SOURCE_ROOT; };
+		5E55B957F3B40BB06BDBB4DE /* ReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsView.swift; sourceTree = "<group>"; };
 		661AA6692BBDB981B3874B3C /* Interstellar.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Interstellar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6CEE7F82FD5619F1FB01932D /* PrivateCorpus-zh-Hans.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "PrivateCorpus-zh-Hans.json"; sourceTree = "<group>"; };
 		97EEE681F90CAE569A4F0B3A /* TodayDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayDashboard.swift; sourceTree = "<group>"; };
@@ -152,7 +160,9 @@
 		773A4979A3B42DC40BD4E1DB /* App */ = {
 			isa = PBXGroup;
 			children = (
+				2114D2FD8739C6BB62FD26EF /* AIGeneration.swift */,
 				02E20C395BDFD8BD0B24388C /* AppModel.swift */,
+				3E1C2A46A3725C8A3CDBFC8B /* AskHistory.swift */,
 				4E6DA38605D25A9654FE7E62 /* Assets.xcassets */,
 				3B958CF1AD3B3C7FE6219102 /* ChartRenderer.swift */,
 				E5C939878A4D22398ADB7CBE /* ChartsView.swift */,
@@ -165,6 +175,8 @@
 				5A1C4311E86E866790B89BEA /* LocationPicker.swift */,
 				A2A9B7F6653E3B21A74DFFF2 /* Models.swift */,
 				45FCBC91108D8B597D89E39C /* ProfileView.swift */,
+				3989AA7077B4B8CF57C56610 /* Reports.swift */,
+				5E55B957F3B40BB06BDBB4DE /* ReportsView.swift */,
 				33F53A273536232B2755B411 /* RootView.swift */,
 				499908CB866531E9C208DDCF /* SynastryView.swift */,
 				D6A6D85449819D6C4E404066 /* Theme.swift */,
@@ -351,7 +363,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7B37214AECB62744C27DD168 /* AIGeneration.swift in Sources */,
 				33AF4A0526E3FCBA484AE56F /* AppModel.swift in Sources */,
+				7054C08BB4A305C2CE8328DA /* AskHistory.swift in Sources */,
 				C09B0F0F7FF22C4AC54D285B /* ChartRenderer.swift in Sources */,
 				0DADEB896547684C5A4056A8 /* ChartsView.swift in Sources */,
 				B6111E2F452E307366314E7C /* ConsumerCopy.swift in Sources */,
@@ -363,6 +377,8 @@
 				82A5A08E61A2A43E19EC5007 /* LocationPicker.swift in Sources */,
 				464458B2F8E2AF6F04173689 /* Models.swift in Sources */,
 				CD7C5811C4C499E2E242E0D1 /* ProfileView.swift in Sources */,
+				7146C73C4FBB984FB0E84E57 /* Reports.swift in Sources */,
+				3FF959A490BE10D499C12683 /* ReportsView.swift in Sources */,
 				7195DECE9971A2CC7BF9F222 /* RootView.swift in Sources */,
 				89A77CE8E88720666E5ECE90 /* SynastryView.swift in Sources */,
 				5EA16EAEC323BA7C8DD81A9A /* Theme.swift in Sources */,

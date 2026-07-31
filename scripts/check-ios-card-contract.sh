@@ -6,10 +6,12 @@ models="ios/App/Models.swift"
 views="ios/App/InsightCards.swift"
 
 expected_ids=(
-  core-structure strongest-themes core-strengths blind-spot growth-direction
-  sky-overview core-themes key-events structure-tension collective-domains observation-focus sky-evolution planet-overview
-  daily-activity transit-overview trigger-themes support-pressure life-domains action-guidance transit-timeline intensity-calendar
-  current-stage change-themes turning-points stage-advice natal-link
+  natal-interpretation career-direction strengths-growth element-balance house-emphasis chart-signature planet-placements key-aspects
+  sky-overview moon-now aspect-pattern planetary-motion sign-changes element-climate upcoming-7-days
+  current-story current-cycles transit-timeline planet-paths life-areas active-transits
+  developmental-chapter progressed-moon identity-development turning-points areas-maturing timeline
+  year-theme year-anchors priority-areas year-dynamics year-timeline natal-overlay year-aspects
+  relationship-overview perspectives emotional-connection communication chemistry commitment house-overlays key-inter-aspects
 )
 
 for id in "${expected_ids[@]}"; do
@@ -20,10 +22,12 @@ for id in "${expected_ids[@]}"; do
 done
 
 required_manifests=(
-  '.natal: ["core-structure", "strongest-themes", "core-strengths", "blind-spot", "growth-direction"]'
-  '.currentSky: ["sky-overview", "core-themes", "key-events", "structure-tension", "collective-domains", "observation-focus", "sky-evolution", "planet-overview"]'
-  '.transit: ["daily-activity", "transit-overview", "trigger-themes", "key-events", "support-pressure", "life-domains", "action-guidance", "transit-timeline", "planet-overview", "intensity-calendar"]'
-  '.secondary: ["current-stage", "change-themes", "turning-points", "stage-advice", "natal-link"]'
+  '.natal: ["natal-interpretation", "career-direction", "strengths-growth", "element-balance", "house-emphasis", "chart-signature", "planet-placements", "key-aspects"]'
+  '.currentSky: ["sky-overview", "moon-now", "aspect-pattern", "planetary-motion", "sign-changes", "element-climate", "upcoming-7-days"]'
+  '.transit: ["current-story", "current-cycles", "transit-timeline", "planet-paths", "life-areas", "active-transits"]'
+  '.secondary: ["developmental-chapter", "progressed-moon", "identity-development", "turning-points", "areas-maturing", "timeline"]'
+  '.solarReturn: ["year-theme", "year-anchors", "priority-areas", "year-dynamics", "year-timeline", "natal-overlay", "year-aspects"]'
+  '.synastry: ["relationship-overview", "perspectives", "emotional-connection", "communication", "chemistry", "commitment", "house-overlays", "key-inter-aspects"]'
 )
 
 for manifest in "${required_manifests[@]}"; do
@@ -38,6 +42,9 @@ required_visuals=(
   skyOverview themeCards eventTimeline structureMap domainBars observation evolution planetTable
   activityGauge transitOverview gantt balanceRing houseRadar actionGuidance arcTimeline doubleRing calendar
   progressedStage progressedThemes turningTimeline comparison
+  signatureTrio placementList aspectList storyWeave cycleTabs positionRows areaRows phaseDial motionList elementRows
+  stageFlow moonProgress identityCompare turningRows yearOrbit anchorGrid dualInsight quarterTabs overlayCompare
+  bondOrbit perspectiveTabs connectionGrid pathFlow houseOverlayRows
 )
 
 for visual in "${required_visuals[@]}"; do
@@ -47,17 +54,13 @@ for visual in "${required_visuals[@]}"; do
   fi
 done
 
-for removed in identity-expression emotional-needs aspect-balance career-direction; do
+for removed in core-structure strongest-themes core-strengths blind-spot growth-direction daily-activity current-stage change-themes stage-advice natal-link; do
   if rg -q "id: \"$removed\"" "$factory"; then
-    echo "Obsolete natal card still present: $removed" >&2
+    echo "Obsolete card still present: $removed" >&2
     exit 1
   fi
 done
 
-rg -q 'values.count == 8' "$factory"
-rg -q 'values.count == 12' "$factory"
-rg -q 'values.count == 7' "$factory"
-rg -q 'card.facts.count >= 10' "$factory"
 rg -q '!\$0.summary.isEmpty && !\$0.detail.isEmpty' "$factory"
 
 for phrase in \

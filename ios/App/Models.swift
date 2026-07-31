@@ -81,6 +81,8 @@ enum ChartKind: String, CaseIterable, Identifiable, Codable {
     case currentSky
     case transit
     case secondary
+    case solarReturn
+    case synastry
 
     var id: String { rawValue }
 
@@ -90,6 +92,8 @@ enum ChartKind: String, CaseIterable, Identifiable, Codable {
         case .currentSky: localized("Current Sky", "天象", language: language)
         case .transit: localized("Transits", "行运", language: language)
         case .secondary: localized("Progressed", "次限", language: language)
+        case .solarReturn: localized("Solar Return", "日返盘", language: language)
+        case .synastry: localized("Synastry", "合盘", language: language)
         }
     }
 
@@ -99,10 +103,12 @@ enum ChartKind: String, CaseIterable, Identifiable, Codable {
         case .currentSky: localized("SKY NOW", "当前天象", language: language)
         case .transit: localized("NATAL + CURRENT SKY", "本命与当前天空", language: language)
         case .secondary: localized("SECONDARY PROGRESSIONS", "次限推运", language: language)
+        case .solarReturn: localized("SOLAR RETURN", "日返盘", language: language)
+        case .synastry: localized("SYNASTRY", "合盘", language: language)
         }
     }
 
-    var isComparison: Bool { self == .transit || self == .secondary }
+    var isComparison: Bool { self == .transit || self == .secondary || self == .synastry }
 
     var contentPrefix: String {
         switch self {
@@ -110,6 +116,8 @@ enum ChartKind: String, CaseIterable, Identifiable, Codable {
         case .currentSky: "current-sky"
         case .transit: "transit"
         case .secondary: "secondary"
+        case .solarReturn: "solar-return"
+        case .synastry: "synastry"
         }
     }
 }
@@ -257,6 +265,31 @@ enum InsightVisual: Equatable {
     case progressedThemes(supportive: Int, challenging: Int, neutral: Int)
     case turningTimeline
     case comparison
+    // V2 prototype visuals (six-chart redesign)
+    case signatureTrio(ruler: String, dominant: String, orientation: String)
+    case placementList
+    case aspectList
+    case storyWeave(expanding: String, structuring: String)
+    case cycleTabs(long: String, current: String, daily: String)
+    case positionRows
+    case areaRows
+    case phaseDial(phase: Double, illumination: Double)
+    case motionList
+    case elementRows
+    case stageFlow(old: String, transition: String, emerging: String)
+    case moonProgress
+    case identityCompare(natal: String, progressed: String)
+    case turningRows
+    case yearOrbit
+    case anchorGrid
+    case dualInsight(opening: String, demand: String)
+    case quarterTabs
+    case overlayCompare
+    case bondOrbit
+    case perspectiveTabs
+    case connectionGrid
+    case pathFlow
+    case houseOverlayRows
 }
 
 struct InsightCardModel: Identifiable, Equatable {
@@ -304,6 +337,31 @@ struct HorarySession: Equatable {
     let analysis: HoraryAnalysis?
     let choices: [HoraryChoiceResult]
     let timingCandidates: [ElectionTimingCandidate]
+    let significators: [HorarySignificatorAssessment]
+
+    init(
+        mode: HoraryQuestionMode,
+        question: String,
+        createdAt: Date,
+        locationName: String,
+        timezoneID: String,
+        snapshot: ChartSnapshot,
+        analysis: HoraryAnalysis?,
+        choices: [HoraryChoiceResult],
+        timingCandidates: [ElectionTimingCandidate],
+        significators: [HorarySignificatorAssessment] = []
+    ) {
+        self.mode = mode
+        self.question = question
+        self.createdAt = createdAt
+        self.locationName = locationName
+        self.timezoneID = timezoneID
+        self.snapshot = snapshot
+        self.analysis = analysis
+        self.choices = choices
+        self.timingCandidates = timingCandidates
+        self.significators = significators
+    }
 }
 
 struct DailySignal: Identifiable, Equatable {

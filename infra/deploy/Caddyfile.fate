@@ -6,6 +6,18 @@ fate.xiaoguiwk.top {
     reverse_proxy interstellar-api:8018
   }
 
+  @relay path /relay/*
+  handle @relay {
+    uri strip_prefix /relay
+    reverse_proxy interstellar-relay:8080
+  }
+
+  @relayadmin path /xiaoguiwk-api/*
+  handle @relayadmin {
+    uri strip_prefix /xiaoguiwk-api
+    reverse_proxy interstellar-relay:8080
+  }
+
   handle {
     reverse_proxy interstellar-web:3000
   }

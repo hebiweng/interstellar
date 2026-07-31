@@ -791,3 +791,78 @@ public struct ElectionTimingEngine: Sendable {
         }
     }
 }
+
+// MARK: - Significators (assigning named elements of a question to houses)
+
+/// A named element of the question bound to the house that represents it.
+/// Example: "我" → house 1, "吃饭" → house 5, "家" → house 4, "单位" → house 6.
+public struct HorarySignificator: Sendable, Equatable {
+    public let label: String
+    public let house: Int
+
+    public init(label: String, house: Int) {
+        self.label = label
+        self.house = house
+    }
+}
+
+/// Per-element assessment: the house ruler, its condition, and how it relates
+/// to the querent's ruler at the question moment.
+public struct HorarySignificatorAssessment: Sendable, Equatable, Identifiable {
+    public let label: String
+    public let house: Int
+    public let ruler: CelestialBody
+    public let planet: HoraryPlanetAssessment
+    public let relationship: ChartAspect?
+    public let score: Double
+
+    public var id: String { "\(label)-\(house)" }
+
+    public init(
+        label: String,
+        house: Int,
+        ruler: CelestialBody,
+        planet: HoraryPlanetAssessment,
+        relationship: ChartAspect?,
+        score: Double
+    ) {
+        self.label = label
+        self.house = house
+        self.ruler = ruler
+        self.planet = planet
+        self.relationship = relationship
+        self.score = score
+    }
+}
+
+extension HoraryEngine {
+    /// Assesses each named element of the question. The querent's house
+    /// defaults to the first house, matching the fixed significator of "me".
+    public static func assessSignificators(
+        _ significators: [HorarySignificator],
+        snapshot: ChartSnapshot,
+        querentHouse: Int = 1
+    ) -> [HorarySignificatorAssessment] {
+        let querentRuler = ruler(ofHouse: querentHouse, in: snapshot)
+        return significators.map { element in
+            let ruler = ruler(ofHouse: element.house, in: snapshot)
+            let planet = assess(ruler, in: snapshot)
+            let relationship = snapshot.aspects.first { aspect in
+                Set([aspect.firstID, aspect.secondID]) == Set([querentRuler.id, ruler.id])
+            }
+            var score = planet.score
+            if let relationship {
+                score += relationship.kind.supportive ? 6 : relationship.kind.challenging ? -6 : 0
+                score += relationship.strength * 4
+            }
+            return HorarySignificatorAssessment(
+                label: element.label,
+                house: element.house,
+                ruler: ruler,
+                planet: planet,
+                relationship: relationship,
+                score: score
+            )
+        }
+    }
+}
