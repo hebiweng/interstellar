@@ -614,12 +614,12 @@ struct TodayEngine {
 
     private func connectionVariables(_ aspect: ChartAspect) -> [String: String] {
         [
-            "first": ConsumerCopy.bodyTheme(
-                CelestialBody(rawValue: aspect.firstID),
+            "first": bodyName(
+                CelestialBody(rawValue: aspect.firstID) ?? .sun,
                 language: language
             ),
-            "second": ConsumerCopy.bodyTheme(
-                CelestialBody(rawValue: aspect.secondID),
+            "second": bodyName(
+                CelestialBody(rawValue: aspect.secondID) ?? .moon,
                 language: language
             ),
         ]

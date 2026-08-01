@@ -18,6 +18,8 @@ struct ChartsView: View {
                             subtitle: chartSubtitle
                         )
 
+                        profileStrip
+
                         if model.focusedChart == model.selectedChart,
                            let date = model.focusedChartDate
                         {
@@ -35,14 +37,30 @@ struct ChartsView: View {
                                 .foregroundStyle(AppTheme.text)
                                 .padding(.top, 2)
 
-                            ForEach(insightState.cards) { card in
-                                let ai = model.aiCardDetail(for: model.selectedChart, cardID: card.id)
-                                InsightCardView(
-                                    card: card,
-                                    language: model.language,
-                                    aiDetail: ai.detail,
-                                    aiStatus: ai.status
-                                )
+                            if model.selectedChart == .natal {
+                                let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
+                                LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
+                                    ForEach(insightState.cards) { card in
+                                        let ai = model.aiCardDetail(for: model.selectedChart, cardID: card.id)
+                                        InsightCardView(
+                                            card: card,
+                                            language: model.language,
+                                            aiDetail: ai.detail,
+                                            aiStatus: ai.status
+                                        )
+                                        .gridCellColumns(card.id == "emotional-needs" || card.id == "love-connection" ? 1 : 2)
+                                    }
+                                }
+                            } else {
+                                ForEach(insightState.cards) { card in
+                                    let ai = model.aiCardDetail(for: model.selectedChart, cardID: card.id)
+                                    InsightCardView(
+                                        card: card,
+                                        language: model.language,
+                                        aiDetail: ai.detail,
+                                        aiStatus: ai.status
+                                    )
+                                }
                             }
                         } else if let message = insightState.errorMessage,
                                   model.snapshot(for: model.selectedChart) != nil
@@ -87,6 +105,42 @@ struct ChartsView: View {
                 ))
             }
         }
+    }
+
+    private var profileStrip: some View {
+        HStack(spacing: 12) {
+            Text(String(model.profile.name.prefix(1)).uppercased())
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(AppTheme.violet)
+                .frame(width: 38, height: 38)
+                .background(AppTheme.violet.opacity(0.12), in: Circle())
+                .overlay(Circle().stroke(AppTheme.violet.opacity(0.25), lineWidth: 1))
+            VStack(alignment: .leading, spacing: 3) {
+                Text(model.profile.name)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(AppTheme.text)
+                Text(birthInfo)
+                    .font(.system(size: 10))
+                    .foregroundStyle(AppTheme.muted)
+            }
+            Spacer()
+            TagChip(
+                text: model.preset(for: model.selectedChart).title(language: model.language),
+                tone: .neutral
+            )
+        }
+        .padding(15)
+        .cardSurface()
+    }
+
+    private var birthInfo: String {
+        let timeZone = TimeZone(identifier: model.profile.timezoneID) ?? .current
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: model.language.rawValue)
+        formatter.timeZone = timeZone
+        formatter.dateFormat = "MMM d, yyyy · HH:mm"
+        let date = formatter.string(from: model.profile.birthDateUTC)
+        return "\(date) · \(model.profile.placeName)"
     }
 
     private var chartSubtitle: String {

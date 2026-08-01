@@ -14,11 +14,16 @@ struct AskHistoryEntry: Codable, Identifiable, Equatable {
 }
 
 final class AskHistoryStore: @unchecked Sendable {
+    static let shared = AskHistoryStore()
     private let url: URL
 
     init(url: URL? = nil) {
         let base = url ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         self.url = base.appendingPathComponent("AskHistory.json")
+    }
+
+    func removeAll() {
+        try? FileManager.default.removeItem(at: url)
     }
 
     func load() -> [AskHistoryEntry] {

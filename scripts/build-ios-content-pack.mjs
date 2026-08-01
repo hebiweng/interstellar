@@ -173,10 +173,16 @@ function consumerizeTemplate(value) {
         ["orb", "closeness"],
         ["Orb", "Closeness"],
       ];
-  return languageReplacements.reduce(
-    (result, [source, target]) => result.split(source).join(target),
-    withConsumerVariables,
-  );
+  return replaceWordBoundary(withConsumerVariables, languageReplacements);
+}
+
+function replaceWordBoundary(text, pairs) {
+  let result = text;
+  for (const [source, target] of pairs) {
+    const escaped = source.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    result = result.replace(new RegExp(`\\b${escaped}\\b`, "g"), target);
+  }
+  return result;
 }
 
 function parseArguments(values) {

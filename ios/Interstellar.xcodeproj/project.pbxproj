@@ -15,6 +15,7 @@
 		1385C846098AD427DA218E0C /* VisualRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501ADE1C8B476ED84F14B948 /* VisualRegressionTests.swift */; };
 		15A53D4BD43601EE6426BA5A /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA31C8B1C13F10113F10E112 /* TodayView.swift */; };
 		17DA24AF7292AB4828A37395 /* InsightContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B2767ACABFDDAEEBA88C4E /* InsightContent.swift */; };
+		32C6273431F7D00AA5AB4212 /* ChartEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20705CF706CDEC9899909381 /* ChartEvents.swift */; };
 		33AF4A0526E3FCBA484AE56F /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E20C395BDFD8BD0B24388C /* AppModel.swift */; };
 		388FE3F37754814E0A699FE6 /* agpl-3.0.txt in Resources */ = {isa = PBXBuildFile; fileRef = 304F386EC1EE838F3AD709A9 /* agpl-3.0.txt */; };
 		3FF959A490BE10D499C12683 /* ReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E55B957F3B40BB06BDBB4DE /* ReportsView.swift */; };
@@ -26,6 +27,7 @@
 		5EA16EAEC323BA7C8DD81A9A /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A6D85449819D6C4E404066 /* Theme.swift */; };
 		61351E9509F520477D1797F6 /* InterstellarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 055D71348E930EDB7CEA9D25 /* InterstellarApp.swift */; };
 		6799FC7090A83402FE95795E /* InsightFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10109DF1D818133D4F69FB22 /* InsightFactory.swift */; };
+		78DCEC1D11C53FAA84E1D481 /* YearAnchorCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE84E2AD834FC018A0BDDE91 /* YearAnchorCopy.swift */; };
 		7054C08BB4A305C2CE8328DA /* AskHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1C2A46A3725C8A3CDBFC8B /* AskHistory.swift */; };
 		7146C73C4FBB984FB0E84E57 /* Reports.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3989AA7077B4B8CF57C56610 /* Reports.swift */; };
 		7195DECE9971A2CC7BF9F222 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F53A273536232B2755B411 /* RootView.swift */; };
@@ -57,9 +59,11 @@
 
 /* Begin PBXFileReference section */
 		02E20C395BDFD8BD0B24388C /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		FE84E2AD834FC018A0BDDE91 /* YearAnchorCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YearAnchorCopy.swift; sourceTree = "<group>"; };
 		03268C1EAB77BCD4B05BCC74 /* InterpretationContextFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterpretationContextFactory.swift; sourceTree = "<group>"; };
 		055D71348E930EDB7CEA9D25 /* InterstellarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterstellarApp.swift; sourceTree = "<group>"; };
 		082CC325E9CEC17F0EDE722A /* InsightCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightCards.swift; sourceTree = "<group>"; };
+		20705CF706CDEC9899909381 /* ChartEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartEvents.swift; sourceTree = "<group>"; };
 		0CA4E3ABEDF5DDF5FAB1AC76 /* ephe */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ephe; path = ../vendor/swisseph/ephe; sourceTree = SOURCE_ROOT; };
 		0D7BD1EE6C166DE149FA32C4 /* WeeklyForecast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyForecast.swift; sourceTree = "<group>"; };
 		10109DF1D818133D4F69FB22 /* InsightFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightFactory.swift; sourceTree = "<group>"; };
@@ -169,6 +173,7 @@
 				C28BE23BBAEDB4F998B852E4 /* ConsumerCopy.swift */,
 				082CC325E9CEC17F0EDE722A /* InsightCards.swift */,
 				C7B2767ACABFDDAEEBA88C4E /* InsightContent.swift */,
+				20705CF706CDEC9899909381 /* ChartEvents.swift */,
 				10109DF1D818133D4F69FB22 /* InsightFactory.swift */,
 				03268C1EAB77BCD4B05BCC74 /* InterpretationContextFactory.swift */,
 				055D71348E930EDB7CEA9D25 /* InterstellarApp.swift */,
@@ -182,6 +187,7 @@
 				D6A6D85449819D6C4E404066 /* Theme.swift */,
 				97EEE681F90CAE569A4F0B3A /* TodayDashboard.swift */,
 				D8B5EDCA7BBB5A87878D3A6E /* TodayEngine.swift */,
+				FE84E2AD834FC018A0BDDE91 /* YearAnchorCopy.swift */,
 				BA31C8B1C13F10113F10E112 /* TodayView.swift */,
 				0D7BD1EE6C166DE149FA32C4 /* WeeklyForecast.swift */,
 				12B96210B8B65212F06462C7 /* InfoPlist.strings */,
@@ -371,6 +377,7 @@
 				B6111E2F452E307366314E7C /* ConsumerCopy.swift in Sources */,
 				F549DCAA0B906EC4BB3FEFF2 /* InsightCards.swift in Sources */,
 				17DA24AF7292AB4828A37395 /* InsightContent.swift in Sources */,
+				32C6273431F7D00AA5AB4212 /* ChartEvents.swift in Sources */,
 				6799FC7090A83402FE95795E /* InsightFactory.swift in Sources */,
 				B47D63ACE732AFE79F71740D /* InterpretationContextFactory.swift in Sources */,
 				61351E9509F520477D1797F6 /* InterstellarApp.swift in Sources */,
@@ -385,6 +392,7 @@
 				0FAC513A2875B976CAB37574 /* TodayDashboard.swift in Sources */,
 				4C985AF7B6AFDBAB6785A004 /* TodayEngine.swift in Sources */,
 				15A53D4BD43601EE6426BA5A /* TodayView.swift in Sources */,
+				78DCEC1D11C53FAA84E1D481 /* YearAnchorCopy.swift in Sources */,
 				83E776DFD24F77B62FDFF78B /* WeeklyForecast.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

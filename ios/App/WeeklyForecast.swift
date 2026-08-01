@@ -17,6 +17,7 @@ struct WeeklySignalContribution {
     let domain: TodayLifeDomain
     let tone: InsightTone
     let strength: Double
+    let sourceID: String
 }
 
 /// A chart technique participates in Today by translating its calculation
@@ -33,6 +34,7 @@ struct AspectWeeklySignalProvider: WeeklySignalProviding {
     let rules: TodayDashboardRules
 
     func contributions(for context: WeeklyDayContext) -> [WeeklySignalContribution] {
+        let source = sourceID
         guard let frame = context.frames[sourceID] else { return [] }
         return frame.aspects.prefix(12).flatMap { aspect in
             let house = (frame.reference ?? context.natal)
@@ -45,7 +47,8 @@ struct AspectWeeklySignalProvider: WeeklySignalProviding {
                 WeeklySignalContribution(
                     domain: $0,
                     tone: tone(aspect.kind),
-                    strength: max(0.04, aspect.strength * weight)
+                    strength: max(0.04, aspect.strength * weight),
+                    sourceID: source
                 )
             }
         }
@@ -75,6 +78,7 @@ struct WeeklyDayOverview: Identifiable {
     let peakStatus: String
     let peakIcon: String
     let nextFocusIcon: String
+    let hasPersonalActivation: Bool
 
     var id: Date { date }
 }
@@ -100,6 +104,7 @@ enum WeeklyForecastFactory {
         let intensity: Double
         let tone: InsightTone
         let domain: TodayLifeDomain
+        let hasPersonalActivation: Bool
     }
 
     static func make(
@@ -123,7 +128,8 @@ enum WeeklyForecastFactory {
                     ? 0.48
                     : 0.24 + 0.70 * ((item.intensity - minimum) / spread),
                 tone: item.tone,
-                domain: item.domain
+                domain: item.domain,
+                hasPersonalActivation: item.hasPersonalActivation
             )
         }
         let peakIndex = drafts.enumerated()
@@ -149,7 +155,8 @@ enum WeeklyForecastFactory {
                 next: nextCopy.detail,
                 peakStatus: peakCopy.summary,
                 peakIcon: peakIcon(for: index, peakIndex: peakIndex),
-                nextFocusIcon: nextFocusDomain(after: index, drafts: drafts).icon
+                nextFocusIcon: nextFocusDomain(after: index, drafts: drafts).icon,
+                hasPersonalActivation: item.hasPersonalActivation
             )
         }
 
@@ -184,7 +191,8 @@ enum WeeklyForecastFactory {
             date: date,
             intensity: total,
             tone: dominantTone(contributions),
-            domain: domain
+            domain: domain,
+            hasPersonalActivation: contributions.contains { ["transit", "secondary"].contains($0.sourceID) }
         )
     }
 

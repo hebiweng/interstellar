@@ -78,11 +78,11 @@ extension String {
 
 enum ChartKind: String, CaseIterable, Identifiable, Codable {
     case natal
-    case currentSky
     case transit
     case secondary
     case solarReturn
     case synastry
+    case currentSky
 
     var id: String { rawValue }
 
@@ -229,6 +229,8 @@ struct InsightFact: Identifiable, Equatable {
     var note: String? = nil
     var progress: Double? = nil
     var symbol: String? = nil
+    var category: String? = nil
+    var markers: [Double]? = nil
 }
 
 enum InsightTone: String, Equatable {
@@ -246,7 +248,9 @@ enum InsightVisual: Equatable {
     case growthPath
     case skyOverview(phase: Double, activity: Int, cycles: [Double])
     case themeCards
+    case needsCard
     case eventTimeline
+    case dateEvents
     case structureMap(supportive: Int, challenging: Int, neutral: Int)
     case domainBars([Double])
     case observation
@@ -255,6 +259,7 @@ enum InsightVisual: Equatable {
     case activityGauge(value: Int, supportive: Int, adjustment: Int)
     case transitOverview(intensity: Int, rhythm: [Double])
     case gantt
+    case transitTimeline([ChartEventData.TransitWindow])
     case balanceRing(supportive: Int, challenging: Int, neutral: Int)
     case houseRadar([Double])
     case actionGuidance
@@ -269,22 +274,24 @@ enum InsightVisual: Equatable {
     case signatureTrio(ruler: String, dominant: String, orientation: String)
     case placementList
     case aspectList
-    case storyWeave(expanding: String, structuring: String)
-    case cycleTabs(long: String, current: String, daily: String)
+    case storyWeave(expanding: String, structuring: String, result: String)
+    case cycleTabs(long: String, longMeta: String, current: String, currentMeta: String, daily: String, dailyMeta: String)
     case positionRows
     case areaRows
     case phaseDial(phase: Double, illumination: Double)
     case motionList
     case elementRows
     case stageFlow(old: String, transition: String, emerging: String)
-    case moonProgress
+    case moonProgress(progress: Double)
     case identityCompare(natal: String, progressed: String)
     case turningRows
     case yearOrbit
     case anchorGrid
-    case dualInsight(opening: String, demand: String)
+    case dualInsight(opening: String, demand: String, openingLabel: String, demandLabel: String)
+    case edgeDual(opening: String, demand: String)
     case quarterTabs
     case overlayCompare
+    case natalOverlay(firstLabel: String, firstValue: String, secondLabel: String, secondValue: String)
     case bondOrbit
     case perspectiveTabs
     case connectionGrid

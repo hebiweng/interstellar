@@ -149,3 +149,5 @@ volumes:
     name: interstellar-caddy-data
   interstellar-caddy-config:
     name: interstellar-caddy-config
+  relay-data:
+    name: interstellar-relay-data

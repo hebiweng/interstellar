@@ -475,6 +475,44 @@ struct AstroCoreTests {
         #expect(assessments[0].ruler == HoraryEngine.ruler(ofHouse: 1, in: snapshot))
     }
 
+    @Test("Event search finds the next Moon sign ingress and exact aspect")
+    func eventSearchIngressAndExact() async throws {
+        let calculator = try SwissEphemerisCalculator(ephemerisDirectory: ephemerisDirectory)
+        let anchor = Date(timeIntervalSince1970: 1_775_000_000)
+        let ingress = try await calculator.nextSignIngress(for: .moon, after: anchor)
+        #expect(ingress > anchor)
+        let atIngress = try await calculator.calculateSnapshot(
+            NatalInput(utcDate: ingress, location: GeographicLocation(latitudeDegrees: 0, longitudeDegrees: 0)),
+            preset: .modern
+        )
+        guard let moon = atIngress.point(.moon) else { return }
+        // The Moon sits on a sign boundary at the ingress moment.
+        #expect(abs(moon.longitudeDegrees.truncatingRemainder(dividingBy: 30)) < 0.01)
+
+        let exact = try await calculator.nextSkyExactDate(moving: .moon, reference: .sun, kind: .conjunction, after: anchor)
+        #expect(exact > anchor)
+        let sky = try await calculator.calculateSnapshot(
+            NatalInput(utcDate: exact, location: GeographicLocation(latitudeDegrees: 0, longitudeDegrees: 0)),
+            preset: .modern
+        )
+        guard let moon2 = sky.point(.moon), let sun = sky.point(.sun) else { return }
+        let sep = abs(moon2.longitudeDegrees - sun.longitudeDegrees).truncatingRemainder(dividingBy: 360)
+        let diff = min(sep, 360 - sep)
+        #expect(diff < 0.02)
+    }
+
+    @Test("Progressed Moon reports an ingress date within a few years")
+    func progressedMoonWindow() async throws {
+        let calculator = try SwissEphemerisCalculator(ephemerisDirectory: ephemerisDirectory)
+        let birth = Date(timeIntervalSince1970: 824_259_600)
+        let target = Date()
+        let progressedDate = SwissEphemerisCalculator.secondaryProgressedDate(birthDate: birth, targetDate: target)
+        let window = try await calculator.progressionWindow(moving: .moon, at: progressedDate, signLabel: "")
+        #expect(window.ingressDate > progressedDate)
+        #expect(window.daysInSign > 0)
+        #expect(window.daysInSign < 365 * 4)
+    }
+
     private var ephemerisDirectory: URL {
         var url = URL(fileURLWithPath: #filePath)
         for _ in 0 ..< 6 {

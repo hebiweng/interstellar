@@ -153,7 +153,9 @@ enum InterpretationContextFactory {
                 tags: tags,
                 values: [
                     "pointName": pointName,
+                    "bodyLabel": bodyName(point ?? .sun, language: language),
                     "referencePointName": referenceName,
+                    "referenceBodyLabel": bodyName(reference ?? .moon, language: language),
                     "aspectName": aspectKindName(aspect.kind, language: language),
                     "phaseName": phaseName(aspect.phase, language: language),
                     "orb": formatOrb(aspect.orbDegrees),
@@ -219,7 +221,9 @@ enum InterpretationContextFactory {
                 tags: tags,
                 values: [
                     "pointName": name,
+                    "bodyLabel": bodyName(point.body, language: language),
                     "signName": Zodiac.name(index: point.signIndex, language: language),
+                    "signLabel": Zodiac.name(index: point.signIndex, language: language),
                     "position": Zodiac.position(point, language: language),
                     "consumerTheme": ConsumerCopy.bodyTheme(point.body, language: language),
                     "consumerArea": ConsumerCopy.lifeArea(house, language: language),

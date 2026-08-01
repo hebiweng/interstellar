@@ -39,8 +39,8 @@ struct ReportsView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 18)
-                .padding(.top, 18)
+                .padding(.horizontal, 17)
+                .padding(.top, 8)
                 .padding(.bottom, 30)
             }
         }
@@ -200,65 +200,105 @@ struct ReportReaderView: View {
     let language: AppLanguage
     @Environment(\.dismiss) private var dismiss
     @State private var sectionIndex = 0
+    @State private var scrollID: Int? = 0
+
+    private var readProgress: Double {
+        let count = max(1, report.report.sections.count)
+        if let scrollID, scrollID >= 0 {
+            return min(1, Double(scrollID + 1) / Double(count))
+        }
+        return 0
+    }
 
     var body: some View {
         NavigationStack {
             ZStack {
                 ScreenBackground()
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 16) {
-                        // Cover
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(savedReportScopeTitle(report.scope, language: language).uppercased())
-                                .font(.caption.weight(.bold))
-                                .tracking(1.4)
-                                .foregroundStyle(AppTheme.violet)
-                            Text(report.report.title)
-                                .font(.largeTitle.weight(.bold))
-                                .foregroundStyle(AppTheme.text)
-                            Text(report.report.subtitle)
-                                .font(.subheadline)
-                                .foregroundStyle(AppTheme.muted)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(20)
-                        .cardSurface()
-
-                        // Contents
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text(localized("Contents", "目录", language: language))
-                                .font(.headline)
-                                .foregroundStyle(AppTheme.text)
-                            ForEach(Array(report.report.sections.enumerated()), id: \.offset) { index, section in
-                                Button {
-                                    sectionIndex = index
-                                } label: {
-                                    HStack {
-                                        Text("\(index + 1) · \(section.title)")
-                                            .font(.footnote.weight(.medium))
-                                            .foregroundStyle(index == sectionIndex ? AppTheme.violet : AppTheme.text)
-                                        Spacer()
-                                        Image(systemName: index == sectionIndex ? "arrow.down.circle.fill" : "circle")
-                                            .font(.caption)
-                                            .foregroundStyle(index == sectionIndex ? AppTheme.violet : AppTheme.muted)
+                    ScrollViewReader { proxy in
+                        LazyVStack(alignment: .leading, spacing: 16) {
+                            // Cover
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(savedReportScopeTitle(report.scope, language: language).uppercased())
+                                    .font(.caption.weight(.bold))
+                                    .tracking(1.4)
+                                    .foregroundStyle(AppTheme.violet)
+                                Text(report.report.title)
+                                    .font(.largeTitle.weight(.bold))
+                                    .foregroundStyle(AppTheme.text)
+                                Text(report.report.subtitle)
+                                    .font(.subheadline)
+                                    .foregroundStyle(AppTheme.muted)
+                                // Reading progress (RR-01): width equals actual reading position
+                                GeometryReader { proxy in
+                                    ZStack(alignment: .leading) {
+                                        Capsule().fill(AppTheme.line.opacity(0.6)).frame(height: 5)
+                                        Capsule()
+                                            .fill(LinearGradient(colors: [AppTheme.blue, AppTheme.violet], startPoint: .leading, endPoint: .trailing))
+                                            .frame(width: proxy.size.width * readProgress, height: 5)
                                     }
-                                    .contentShape(Rectangle())
                                 }
-                                .buttonStyle(.plain)
+                                .frame(height: 5)
+                                .padding(.top, 10)
+                                HStack {
+                                    Text("\(savedReportScopeTitle(report.scope, language: language)) · \(report.generatedAt.shortEventDate(language: language))")
+                                        .font(.caption)
+                                        .foregroundStyle(AppTheme.muted)
+                                    Spacer()
+                                    Text("\(Int(readProgress * 100))% read")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(AppTheme.violet)
+                                }
+                                .padding(.top, 6)
+                            }
+                            .id(-1)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(20)
+                            .cardSurface()
+
+                            // Contents (RR-02): numbered rows with estimated reading time, tap jumps to section
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text(localized("Contents", "目录", language: language))
+                                    .font(.headline)
+                                    .foregroundStyle(AppTheme.text)
+                                ForEach(Array(report.report.sections.enumerated()), id: \.offset) { index, section in
+                                    Button {
+                                        sectionIndex = index
+                                        withAnimation(.easeInOut(duration: 0.25)) {
+                                            proxy.scrollTo(index, anchor: .top)
+                                        }
+                                    } label: {
+                                        HStack {
+                                            Text("\(index + 1) · \(section.title)")
+                                                .font(.footnote.weight(.medium))
+                                                .foregroundStyle(index == sectionIndex ? AppTheme.violet : AppTheme.text)
+                                            Spacer()
+                                            Text(readingTime(section.body))
+                                                .font(.caption2)
+                                                .foregroundStyle(AppTheme.muted)
+                                        }
+                                        .contentShape(Rectangle())
+                                        .padding(.vertical, 2)
+                                    }
+                                    .buttonStyle(.plain)
+                                    Divider().overlay(AppTheme.line.opacity(0.5))
+                                }
+                            }
+                            .padding(16)
+                            .cardSurface()
+
+                            // Sections
+                            ForEach(Array(report.report.sections.enumerated()), id: \.offset) { index, section in
+                                sectionCard(index: index, section: section)
+                                    .id(index)
                             }
                         }
-                        .padding(16)
-                        .cardSurface()
-
-                        // Sections
-                        ForEach(Array(report.report.sections.enumerated()), id: \.offset) { index, section in
-                            sectionCard(index: index, section: section)
-                        }
+                        .padding(.horizontal, 18)
+                        .padding(.top, 18)
+                        .padding(.bottom, 30)
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.top, 18)
-                    .padding(.bottom, 30)
                 }
+                .scrollPosition(id: $scrollID)
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -272,6 +312,12 @@ struct ReportReaderView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
         }
+    }
+
+    private func readingTime(_ body: String) -> String {
+        let words = max(1, body.split(whereSeparator: { $0.isWhitespace }).count)
+        let minutes = max(1, Int((Double(words) / 200.0).rounded()))
+        return localized("\(minutes) min read", "约\(minutes)分钟", language: language)
     }
 
     private func sectionCard(index: Int, section: AIReportSection) -> some View {

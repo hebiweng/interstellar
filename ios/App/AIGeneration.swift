@@ -246,6 +246,11 @@ final class AIGenerationCache: @unchecked Sendable {
         return entry.response
     }
 
+    func clearAll() {
+        try? fileManager.removeItem(at: directory)
+        try? fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
+    }
+
     func save(key: String, scope: String, response: AIGenerateResponse, ttl: TimeInterval) {
         let entry = Entry(
             cacheKey: key,

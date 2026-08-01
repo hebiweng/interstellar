@@ -6,7 +6,7 @@ models="ios/App/Models.swift"
 views="ios/App/InsightCards.swift"
 
 expected_ids=(
-  natal-interpretation career-direction strengths-growth element-balance house-emphasis chart-signature planet-placements key-aspects
+  natal-interpretation love-connection emotional-needs career-direction strengths-growth element-balance house-emphasis chart-signature planet-placements key-aspects
   sky-overview moon-now aspect-pattern planetary-motion sign-changes element-climate upcoming-7-days
   current-story current-cycles transit-timeline planet-paths life-areas active-transits
   developmental-chapter progressed-moon identity-development turning-points areas-maturing timeline
@@ -22,7 +22,7 @@ for id in "${expected_ids[@]}"; do
 done
 
 required_manifests=(
-  '.natal: ["natal-interpretation", "career-direction", "strengths-growth", "element-balance", "house-emphasis", "chart-signature", "planet-placements", "key-aspects"]'
+  '.natal: ["natal-interpretation", "love-connection", "emotional-needs", "career-direction", "strengths-growth", "element-balance", "house-emphasis", "chart-signature", "planet-placements", "key-aspects"]'
   '.currentSky: ["sky-overview", "moon-now", "aspect-pattern", "planetary-motion", "sign-changes", "element-climate", "upcoming-7-days"]'
   '.transit: ["current-story", "current-cycles", "transit-timeline", "planet-paths", "life-areas", "active-transits"]'
   '.secondary: ["developmental-chapter", "progressed-moon", "identity-development", "turning-points", "areas-maturing", "timeline"]'

@@ -1,5 +1,7 @@
 import SwiftUI
 
+// MARK: - Card container (prototype .card surface)
+
 struct InsightCardView: View {
     let card: InsightCardModel
     let language: AppLanguage
@@ -8,27 +10,39 @@ struct InsightCardView: View {
     @State private var expanded = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 15) {
-            HStack(spacing: 11) {
-                Text(card.icon)
-                    .font(.title3.weight(.semibold))
+        VStack(alignment: .leading, spacing: 12) {
+            if let kicker = cardKicker(card.id, language: language), !kicker.isEmpty {
+                Text(kicker.uppercased())
+                    .font(.system(size: 9, weight: .bold))
+                    .tracking(1.2)
                     .foregroundStyle(AppTheme.violet)
-                    .frame(width: 34, height: 34)
-                    .background(AppTheme.violet.opacity(0.12), in: RoundedRectangle(cornerRadius: 11))
-                Text(card.title)
-                    .font(.headline)
-                    .foregroundStyle(AppTheme.text)
-                Spacer()
+            }
+            Text(card.title.isEmpty ? card.summary : card.title)
+                .font(.system(size: 18, weight: .bold))
+                .kerning(-0.3)
+                .foregroundStyle(AppTheme.text)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if !card.summary.isEmpty && card.summary != card.title {
+                Text(card.summary)
+                    .font(.system(size: 12.5, weight: .medium))
+                    .foregroundStyle(AppTheme.text.opacity(0.95))
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             InsightVisualView(visual: card.visual, facts: card.facts, language: language)
 
-            Divider().overlay(AppTheme.line)
+            if !card.detail.isEmpty {
+                Text(card.detail)
+                    .font(.system(size: 11.5))
+                    .foregroundStyle(AppTheme.muted)
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 2)
+            }
 
-            Text(card.summary)
-                .font(.subheadline)
-                .foregroundStyle(AppTheme.text.opacity(0.94))
-                .fixedSize(horizontal: false, vertical: true)
+            Divider().overlay(AppTheme.line)
 
             if let detail = aiDetail, !detail.isEmpty {
                 Button {
@@ -45,18 +59,18 @@ struct InsightCardView: View {
                     }
                     .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                     .contentShape(Rectangle())
-                    .font(.caption.weight(.semibold))
+                    .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(AppTheme.violet)
                 }
                 .buttonStyle(.plain)
 
                 if expanded {
                     Text(detail)
-                        .font(.footnote)
+                        .font(.system(size: 12))
                         .foregroundStyle(AppTheme.muted)
                         .lineSpacing(4)
                         .fixedSize(horizontal: false, vertical: true)
-                        .padding(12)
+                        .padding(13)
                         .background(AppTheme.background.opacity(0.42), in: RoundedRectangle(cornerRadius: 14))
                         .transition(.opacity.combined(with: .move(edge: .top)))
                 }
@@ -64,25 +78,180 @@ struct InsightCardView: View {
                 HStack(spacing: 8) {
                     ProgressView().controlSize(.small).tint(AppTheme.violet)
                     Text(localized("Generating…", "正在生成…", language: language))
-                        .font(.caption)
+                        .font(.system(size: 11))
                         .foregroundStyle(AppTheme.muted)
                 }
-                .frame(maxWidth: .infinity, minHeight: 32, alignment: .leading)
+                .frame(maxWidth: .infinity, minHeight: 34, alignment: .leading)
             }
         }
-        .cardSurface()
+        .padding(16)
+        .background(
+            LinearGradient(colors: [AppTheme.panelRaised, AppTheme.panel], startPoint: .topLeading, endPoint: .bottomTrailing),
+            in: RoundedRectangle(cornerRadius: 22, style: .continuous)
+        )
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(AppTheme.line, lineWidth: 1))
     }
 }
+
+func cardKicker(_ id: String, language: AppLanguage) -> String? {
+    switch id {
+    case "sky-overview": return localized("SKY NOW", "当前天空", language: language)
+    case "moon-now": return localized("MOON NOW", "此刻月亮", language: language)
+    case "aspect-pattern": return localized("ASPECT PATTERN", "连接结构", language: language)
+    case "planetary-motion": return localized("PLANETARY MOTION", "行星运动", language: language)
+    case "sign-changes": return localized("SIGN CHANGES", "换座", language: language)
+    case "element-climate": return localized("ELEMENT CLIMATE", "元素气候", language: language)
+    case "upcoming-7-days": return localized("UPCOMING 7 DAYS", "未来七天", language: language)
+    case "natal-interpretation": return localized("CORE PERSONALITY", "核心性格", language: language)
+    case "love-connection": return localized("LOVE & CONNECTION", "爱与连接", language: language)
+    case "career-direction": return localized("PUBLIC DIRECTION", "公共方向", language: language)
+    case "strengths-growth": return localized("YOUR EDGES", "你的优势与成长面", language: language)
+    case "element-balance": return localized("TEMPERAMENT", "气质", language: language)
+    case "house-emphasis": return localized("CONCENTRATION", "侧重", language: language)
+    case "chart-signature": return localized("SIGNATURE", "签名", language: language)
+    case "planet-placements": return localized("PLACEMENTS", "落座", language: language)
+    case "key-aspects": return localized("KEY ASPECTS", "关键连接", language: language)
+    case "current-story": return localized("THE BIG PICTURE", "大局", language: language)
+    case "current-cycles": return localized("CYCLES", "周期", language: language)
+    case "transit-timeline": return localized("TIMELINE", "时间线", language: language)
+    case "planet-paths": return localized("PLANET PATHS", "行星路径", language: language)
+    case "life-areas": return localized("LIFE AREAS", "生活领域", language: language)
+    case "active-transits": return localized("ACTIVE TRANSITS", "进行中的变化", language: language)
+    case "developmental-chapter": return localized("CURRENT DEVELOPMENT", "当前发展", language: language)
+    case "progressed-moon": return localized("PROGRESSED MOON", "长期月亮", language: language)
+    case "identity-development": return localized("IDENTITY", "身份", language: language)
+    case "turning-points": return localized("TURNING POINTS", "转折点", language: language)
+    case "areas-maturing": return localized("MATURING", "成熟领域", language: language)
+    case "timeline": return localized("24-MONTH TIMELINE", "长期时间线", language: language)
+    case "year-theme": return localized("YEAR THEME", "年度主题", language: language)
+    case "year-anchors": return localized("YEAR ANCHORS", "年度锚点", language: language)
+    case "priority-areas": return localized("PRIORITY AREAS", "优先领域", language: language)
+    case "year-dynamics": return localized("YEAR DYNAMICS", "年度动态", language: language)
+    case "year-timeline": return localized("YEAR TIMELINE", "年度时间线", language: language)
+    case "natal-overlay": return localized("NATAL OVERLAY", "与本命叠加", language: language)
+    case "year-aspects": return localized("YEAR ASPECTS", "年度连接", language: language)
+    case "relationship-overview": return localized("THE BOND", "这段关系", language: language)
+    case "perspectives": return localized("PERSPECTIVES", "彼此的体验", language: language)
+    case "emotional-connection": return localized("EMOTIONAL CONNECTION", "情感连接", language: language)
+    case "communication": return localized("COMMUNICATION", "沟通", language: language)
+    case "chemistry": return localized("CHEMISTRY", "化学反应", language: language)
+    case "commitment": return localized("COMMITMENT", "承诺", language: language)
+    case "house-overlays": return localized("HOUSE OVERLAYS", "落宫叠加", language: language)
+    case "key-inter-aspects": return localized("KEY INTER-ASPECTS", "主要相互连接", language: language)
+    default: return nil
+    }
+}
+
+// MARK: - Shared prototype primitives
+
+private struct Kicker: View {
+    let text: String
+    var body: some View {
+        Text(text)
+            .font(.system(size: 11, weight: .bold))
+            .tracking(1.6)
+            .foregroundStyle(AppTheme.violet)
+    }
+}
+
+enum InsightBadgeTone {
+    case purple
+    case warm
+    case good
+}
+
+struct InsightBadge: View {
+    let text: String
+    var tone: InsightBadgeTone = .purple
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: 10, weight: .semibold))
+            .foregroundStyle(foreground)
+            .padding(.horizontal, 9)
+            .padding(.vertical, 5)
+            .background(background, in: Capsule())
+            .overlay(Capsule().stroke(border, lineWidth: 1))
+    }
+
+    private var foreground: Color {
+        switch tone {
+        case .purple: Color(red: 0.85, green: 0.82, blue: 1.0)
+        case .warm: AppTheme.amber
+        case .good: AppTheme.mint
+        }
+    }
+
+    private var background: Color {
+        switch tone {
+        case .purple: AppTheme.violet.opacity(0.13)
+        case .warm: AppTheme.amber.opacity(0.11)
+        case .good: AppTheme.mint.opacity(0.11)
+        }
+    }
+
+    private var border: Color {
+        switch tone {
+        case .purple: AppTheme.violet.opacity(0.22)
+        case .warm: AppTheme.amber.opacity(0.18)
+        case .good: AppTheme.mint.opacity(0.18)
+        }
+    }
+}
+
+struct TagChip: View {
+    let text: String
+    var tone: InsightTone = .neutral
+    var body: some View {
+        Text(text)
+            .font(.system(size: 10, weight: .medium))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(AppTheme.tone(tone).opacity(0.1), in: Capsule())
+            .overlay(Capsule().stroke(AppTheme.tone(tone).opacity(0.25), lineWidth: 1))
+            .foregroundStyle(AppTheme.tone(tone).mix(with: AppTheme.text, by: 0.35))
+    }
+}
+
+private extension Color {
+    func mix(with other: Color, by amount: Double) -> Color {
+        let lhs = UIColor(self)
+        let rhs = UIColor(other)
+        var lr: CGFloat = 0, lg: CGFloat = 0, lb: CGFloat = 0, la: CGFloat = 0
+        var rr: CGFloat = 0, rg: CGFloat = 0, rb: CGFloat = 0, ra: CGFloat = 0
+        lhs.getRed(&lr, green: &lg, blue: &lb, alpha: &la)
+        rhs.getRed(&rr, green: &rg, blue: &rb, alpha: &ra)
+        return Color(
+            red: Double(lr * (1 - amount) + rr * amount),
+            green: Double(lg * (1 - amount) + rg * amount),
+            blue: Double(lb * (1 - amount) + rb * amount),
+            opacity: Double(la * (1 - amount) + ra * amount)
+        )
+    }
+}
+
+private struct SectionSub: View {
+    let text: String
+    var body: some View {
+        Text(text)
+            .font(.system(size: 11))
+            .foregroundStyle(AppTheme.muted)
+    }
+}
+
+// MARK: - Visual renderer
 
 private struct InsightVisualView: View {
     let visual: InsightVisual
     let facts: [InsightFact]
     let language: AppLanguage
+    @State private var showAllAreas = false
+    @State private var transitFilter: String? = nil
 
     var body: some View {
         Group {
             switch visual {
-            case .natalCore: factGrid(columns: 3)
+            case .natalCore: orbitCircle
             case .rankedThemes: rankedThemes
             case let .strengthOrbit(supportive, challenging, neutral):
                 ringMetric(supportive: supportive, challenging: challenging, neutral: neutral)
@@ -90,7 +259,9 @@ private struct InsightVisualView: View {
             case .growthPath: pathFlow(title: localized("Growth path", "成长路径", language: language))
             case let .skyOverview(phase, activity, cycles): skyOverview(phase: phase, activity: activity, cycles: cycles)
             case .themeCards: themeCards
-            case .eventTimeline: verticalTimeline
+            case .needsCard: needsCard
+            case .eventTimeline: eventList
+            case .dateEvents: dateEventList
             case let .structureMap(supportive, challenging, neutral):
                 ringMetric(supportive: supportive, challenging: challenging, neutral: neutral)
             case let .domainBars(values): domainBars(values)
@@ -102,12 +273,13 @@ private struct InsightVisualView: View {
             case let .transitOverview(intensity, rhythm):
                 transitOverview(intensity: intensity, rhythm: rhythm)
             case .gantt: gantt
+            case let .transitTimeline(windows): TransitTimelineView(windows: windows, language: language)
             case let .balanceRing(supportive, challenging, neutral):
                 ringMetric(supportive: supportive, challenging: challenging, neutral: neutral)
             case let .houseRadar(values): houseRadar(values)
             case .actionGuidance: factRows
             case .arcTimeline: factRows
-            case .doubleRing: doubleRing
+            case .doubleRing: placementRows
             case let .calendar(values): calendar(values)
             case let .progressedStage(phase, moonProgress, sunProgress):
                 progressedStage(phase: phase, moonProgress: moonProgress, sunProgress: sunProgress)
@@ -117,36 +289,74 @@ private struct InsightVisualView: View {
             case .comparison: factRows
             case let .signatureTrio(ruler, dominant, orientation):
                 metricTrio(ruler: ruler, dominant: dominant, orientation: orientation)
-            case .placementList: positionList
-            case .aspectList: aspectList
-            case let .storyWeave(expanding, structuring): storyWeave(expanding: expanding, structuring: structuring)
-            case let .cycleTabs(long, current, daily): cycleTabs(long: long, current: current, daily: daily)
-            case .positionRows: positionList
+            case .placementList: placementRows
+            case .aspectList: aspectRows
+            case let .storyWeave(expanding, structuring, result): storyWeave(expanding: expanding, structuring: structuring, result: result)
+            case let .cycleTabs(long, longMeta, current, currentMeta, daily, dailyMeta): cycleTabs(long: long, longMeta: longMeta, current: current, currentMeta: currentMeta, daily: daily, dailyMeta: dailyMeta)
+            case .positionRows: positionRows
             case .areaRows: areaRows
             case let .phaseDial(phase, illumination): phaseDial(phase: phase, illumination: illumination)
-            case .motionList: positionList
-            case .elementRows: areaRows
+            case .motionList: positionRows
+            case .elementRows: elementRows
             case let .stageFlow(old, transition, emerging):
                 stageFlow(old: old, transition: transition, emerging: emerging)
-            case .moonProgress: moonProgress
+            case let .moonProgress(progress): moonProgressRing(progress: progress)
             case let .identityCompare(natal, progressed):
                 compareStrip(natal: natal, progressed: progressed)
             case .turningRows: factRows
             case .yearOrbit: yearOrbit
             case .anchorGrid: factGrid(columns: 2)
-            case let .dualInsight(opening, demand): dualInsight(opening: opening, demand: demand)
-            case .quarterTabs: factRows
+            case let .dualInsight(opening, demand, openingLabel, demandLabel): dualInsight(opening: opening, demand: demand, openingLabel: openingLabel, demandLabel: demandLabel)
+            case let .edgeDual(opening, demand): edgeDual(opening: opening, demand: demand)
+            case .quarterTabs: quarterTabs
             case .overlayCompare: compareStrip(natal: localized("Natal", "本命", language: language), progressed: localized("This year", "今年", language: language))
+            case let .natalOverlay(firstLabel, firstValue, secondLabel, secondValue):
+                natalOverlay(firstLabel: firstLabel, firstValue: firstValue, secondLabel: secondLabel, secondValue: secondValue)
             case .bondOrbit: bondOrbit
-            case .perspectiveTabs: factRows
-            case .connectionGrid: factGrid(columns: 2)
+            case .perspectiveTabs: perspectiveTabs
+            case .connectionGrid: connectionGrid
             case .pathFlow: pathFlow(title: localized("How it flows", "流动方式", language: language))
-            case .houseOverlayRows: positionList
+            case .houseOverlayRows: houseOverlayRows
             }
         }
     }
 
-    // MARK: - Shared building blocks
+    private var orbitCircle: some View {
+        let items = facts.prefix(3)
+        let symbols = ["☉", "☽", "↑"]
+        return HStack(spacing: 14) {
+            ZStack {
+                Circle().stroke(AppTheme.violet.opacity(0.3), lineWidth: 1).frame(width: 96, height: 96)
+                ForEach(Array(items.enumerated()), id: \.offset) { index, _ in
+                    let angle = Double(index) / 3 * 2 * Double.pi - Double.pi / 2
+                    let radius = 44.0
+                    Text(symbols[min(index, 2)])
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(AppTheme.tone(items[index].emphasis))
+                        .offset(x: cos(angle) * radius, y: sin(angle) * radius)
+                }
+                Circle().fill(AppTheme.violet.opacity(0.12)).frame(width: 34, height: 34)
+                Text("✶").font(.system(size: 13, weight: .bold)).foregroundStyle(AppTheme.text)
+            }
+            .frame(width: 100, height: 100)
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(Array(items.enumerated()), id: \.offset) { index, fact in
+                    HStack(spacing: 6) {
+                        Text(fact.label)
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundStyle(AppTheme.muted)
+                            .frame(width: 40, alignment: .leading)
+                        Text(fact.value)
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(AppTheme.text)
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: - Hero-like structures
 
     private func factGrid(columns: Int) -> some View {
         let grid = Array(repeating: GridItem(.flexible(), spacing: 10), count: max(1, columns))
@@ -155,18 +365,18 @@ private struct InsightVisualView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 5) {
                         if let symbol = fact.symbol {
-                            Text(symbol).font(.caption.bold()).foregroundStyle(AppTheme.tone(fact.emphasis))
+                            Text(symbol).font(.system(size: 12, weight: .bold)).foregroundStyle(AppTheme.tone(fact.emphasis))
                         }
                         Text(fact.label)
-                            .font(.caption.weight(.semibold))
+                            .font(.system(size: 10, weight: .semibold))
                             .foregroundStyle(AppTheme.muted)
                     }
                     Text(fact.value)
-                        .font(.footnote.weight(.medium))
+                        .font(.system(size: 12.5, weight: .semibold))
                         .foregroundStyle(AppTheme.text)
                         .fixedSize(horizontal: false, vertical: true)
                     if let note = fact.note {
-                        Text(note).font(.caption2).foregroundStyle(AppTheme.muted)
+                        Text(note).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     if let progress = fact.progress {
@@ -176,7 +386,7 @@ private struct InsightVisualView: View {
                 }
                 .padding(11)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(AppTheme.background.opacity(0.45), in: RoundedRectangle(cornerRadius: 13))
+                .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 13))
             }
         }
     }
@@ -187,27 +397,27 @@ private struct InsightVisualView: View {
                 HStack(alignment: .top, spacing: 10) {
                     if let symbol = fact.symbol {
                         Text(symbol)
-                            .font(.subheadline.weight(.semibold))
+                            .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(AppTheme.tone(fact.emphasis))
-                            .frame(width: 24, height: 24)
-                            .background(AppTheme.tone(fact.emphasis).opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+                            .frame(width: 26, height: 26)
+                            .background(AppTheme.tone(fact.emphasis).opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
                     }
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(fact.label).font(.caption.weight(.semibold)).foregroundStyle(AppTheme.muted)
-                        Text(fact.value).font(.footnote.weight(.medium)).foregroundStyle(AppTheme.text)
+                        Text(fact.label).font(.system(size: 10, weight: .semibold)).foregroundStyle(AppTheme.muted)
+                        Text(fact.value).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
                         if let note = fact.note {
-                            Text(note).font(.caption2).foregroundStyle(AppTheme.muted)
+                            Text(note).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
                         }
                     }
                     Spacer()
                     if let progress = fact.progress {
                         Text("\(Int(progress * 100))%")
-                            .font(.caption2.monospacedDigit())
+                            .font(.system(size: 10, weight: .semibold).monospacedDigit())
                             .foregroundStyle(AppTheme.muted)
                     }
                 }
-                .padding(10)
-                .background(AppTheme.background.opacity(0.42), in: RoundedRectangle(cornerRadius: 12))
+                .padding(11)
+                .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
             }
         }
     }
@@ -218,18 +428,18 @@ private struct InsightVisualView: View {
                 VStack(alignment: .leading, spacing: 5) {
                     HStack {
                         Text(fact.symbol ?? "\(index + 1)")
-                            .font(.caption.bold())
+                            .font(.system(size: 11, weight: .bold))
                             .foregroundStyle(AppTheme.violet)
-                        Text(fact.label).font(.footnote.weight(.semibold)).foregroundStyle(AppTheme.text)
+                        Text(fact.label).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
                         Spacer()
-                        Text(fact.value).font(.caption2).foregroundStyle(AppTheme.muted)
+                        Text(fact.value).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
                     }
                     if let progress = fact.progress {
                         ProgressView(value: max(0, min(1, progress)))
                             .tint(AppTheme.tone(fact.emphasis))
                     }
                     if let note = fact.note {
-                        Text(note).font(.caption2).foregroundStyle(AppTheme.muted)
+                        Text(note).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
                     }
                 }
             }
@@ -250,8 +460,8 @@ private struct InsightVisualView: View {
                     .stroke(AppTheme.coral, style: StrokeStyle(lineWidth: 12, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                 VStack(spacing: 0) {
-                    Text("\(total)").font(.title3.bold().monospacedDigit()).foregroundStyle(AppTheme.text)
-                    Text(localized("contacts", "连接", language: language)).font(.footnote).foregroundStyle(AppTheme.muted)
+                    Text("\(total)").font(.system(size: 20, weight: .bold).monospacedDigit()).foregroundStyle(AppTheme.text)
+                    Text(localized("contacts", "连接", language: language)).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
                 }
             }
             .frame(width: 92, height: 92)
@@ -266,8 +476,8 @@ private struct InsightVisualView: View {
 
     private func metric(_ value: String, _ title: String, _ tone: InsightTone) -> some View {
         HStack {
-            Text(value).font(.headline.monospacedDigit()).foregroundStyle(AppTheme.tone(tone))
-            Text(title).font(.footnote).foregroundStyle(AppTheme.muted)
+            Text(value).font(.system(size: 15, weight: .bold).monospacedDigit()).foregroundStyle(AppTheme.tone(tone))
+            Text(title).font(.system(size: 11)).foregroundStyle(AppTheme.muted)
             Spacer()
         }
         .padding(.horizontal, 10)
@@ -276,26 +486,28 @@ private struct InsightVisualView: View {
     }
 
     private func skyOverview(phase: Double, activity: Int, cycles: [Double]) -> some View {
-        VStack(spacing: 12) {
-            HStack(spacing: 14) {
-                ZStack {
-                    Circle().fill(AppTheme.panel).overlay(Circle().stroke(AppTheme.line))
-                    Circle().trim(from: 0, to: max(0.01, phase / 360))
-                        .stroke(AppTheme.violet, style: StrokeStyle(lineWidth: 7, lineCap: .round))
-                        .rotationEffect(.degrees(-90))
-                    VStack(spacing: 0) {
-                        Text("\(Int(phase))°").font(.caption.bold()).foregroundStyle(AppTheme.text)
-                        Text(localized("phase", "月相", language: language)).font(AppTypography.supporting).foregroundStyle(AppTheme.muted)
-                    }
+        HStack(spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(AppTheme.violet.opacity(0.10 + Double(activity) / 400))
+                    .frame(width: 74, height: 74)
+                    .overlay(Circle().stroke(AppTheme.violet.opacity(0.25), lineWidth: 1))
+                Circle().fill(AppTheme.panel).overlay(Circle().stroke(AppTheme.line))
+                Circle().trim(from: 0, to: max(0.01, phase / 360))
+                    .stroke(AppTheme.violet, style: StrokeStyle(lineWidth: 7, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                VStack(spacing: 0) {
+                    Text("\(Int(phase))°").font(.system(size: 12, weight: .bold)).foregroundStyle(AppTheme.text)
+                    Text(localized("phase", "月相", language: language)).font(.system(size: 9)).foregroundStyle(AppTheme.muted)
                 }
-                .frame(width: 84, height: 84)
-                VStack(alignment: .leading, spacing: 8) {
-                    metric("\(activity)%", localized("Activity", "活跃度", language: language), .transition)
-                    metric("\(Int((cycles.first ?? 0) * 100))%", localized("Long cycle", "长期周期", language: language), .supportive)
-                    metric("\(Int((cycles.last ?? 0) * 100))%", localized("Short cycle", "短期周期", language: language), .neutral)
-                }
-                .frame(maxWidth: .infinity)
             }
+            .frame(width: 84, height: 84)
+            VStack(alignment: .leading, spacing: 8) {
+                metric("\(activity)%", localized("Activity", "活跃度", language: language), .transition)
+                metric("\(Int((cycles.first ?? 0) * 100))%", localized("Long cycle", "长期周期", language: language), .supportive)
+                metric("\(Int((cycles.last ?? 0) * 100))%", localized("Short cycle", "短期周期", language: language), .neutral)
+            }
+            .frame(maxWidth: .infinity)
         }
     }
 
@@ -305,50 +517,111 @@ private struct InsightVisualView: View {
                 VStack(alignment: .leading, spacing: 5) {
                     HStack {
                         Text(fact.symbol ?? "✦").foregroundStyle(AppTheme.tone(fact.emphasis))
-                        Text(fact.label).font(.footnote.weight(.semibold)).foregroundStyle(AppTheme.text)
+                        Text(fact.label).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
                         Spacer()
-                        Text(fact.value).font(.caption2).foregroundStyle(AppTheme.muted)
+                        Text(fact.value).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
                     }
                     if let progress = fact.progress {
                         ProgressView(value: max(0, min(1, progress)))
                             .tint(AppTheme.tone(fact.emphasis))
                     }
                     if let note = fact.note {
-                        Text(note).font(.caption2).foregroundStyle(AppTheme.muted)
+                        Text(note).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
                     }
                 }
-                .padding(11)
-                .background(AppTheme.background.opacity(0.45), in: RoundedRectangle(cornerRadius: 13))
+                .padding(12)
+                .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 13))
             }
         }
     }
 
-    private var verticalTimeline: some View {
-        VStack(spacing: 0) {
+    // MARK: - Timeline / event list (prototype .time-event + rail + now-line)
+
+    private var eventList: some View {
+        VStack(alignment: .leading, spacing: 0) {
             ForEach(Array(facts.prefix(4).enumerated()), id: \.offset) { index, fact in
                 HStack(alignment: .top, spacing: 12) {
+                    Text(fact.label)
+                        .font(.system(size: 11, weight: .semibold).monospacedDigit())
+                        .foregroundStyle(AppTheme.muted)
+                        .frame(width: 42, alignment: .leading)
                     VStack(spacing: 0) {
                         Circle()
                             .fill(AppTheme.tone(fact.emphasis))
-                            .frame(width: 9, height: 9)
+                            .frame(width: 8, height: 8)
                         if index < min(4, facts.count) - 1 {
-                            Rectangle().fill(AppTheme.line).frame(width: 1.5, height: 26)
+                            Rectangle().fill(AppTheme.line).frame(width: 1.5, height: 24)
                         }
                     }
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(fact.label).font(.footnote.weight(.semibold)).foregroundStyle(AppTheme.text)
+                        Text(fact.value).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
                         if let note = fact.note {
-                            Text(note).font(.caption2).foregroundStyle(AppTheme.muted)
+                            Text(note).font(.system(size: 10.5)).foregroundStyle(AppTheme.muted)
                         }
                     }
                     Spacer()
-                    if let progress = fact.progress {
-                        Text("\(Int(progress * 100))%").font(.caption2.monospacedDigit()).foregroundStyle(AppTheme.muted)
-                    }
                 }
+                .padding(.bottom, 4)
             }
         }
     }
+
+    private var dateEventList: some View {
+        VStack(spacing: 9) {
+            ForEach(Array(facts.prefix(3).enumerated()), id: \.offset) { _, fact in
+                HStack(spacing: 12) {
+                    let parts = dateParts(fact.label)
+                    VStack(spacing: 1) {
+                        Text(parts.0)
+                            .font(.system(size: 9, weight: .bold))
+                            .tracking(0.8)
+                            .foregroundStyle(AppTheme.muted)
+                        Text(parts.1)
+                            .font(.system(size: 16, weight: .bold).monospacedDigit())
+                            .foregroundStyle(AppTheme.text)
+                    }
+                    .frame(width: 54)
+                    .padding(.vertical, 8)
+                    .background(AppTheme.background.opacity(0.6), in: RoundedRectangle(cornerRadius: 14))
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(AppTheme.line, lineWidth: 1))
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(fact.value)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(AppTheme.text)
+                            .fixedSize(horizontal: false, vertical: true)
+                        if let note = fact.note {
+                            Text(note)
+                                .font(.system(size: 10))
+                                .foregroundStyle(AppTheme.muted)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    Spacer(minLength: 0)
+                    Circle()
+                        .fill(AppTheme.violet)
+                        .frame(width: 10, height: 10)
+                        .overlay(Circle().stroke(AppTheme.violet.opacity(0.25), lineWidth: 4))
+                }
+                .padding(14)
+                .cardSurface()
+            }
+        }
+    }
+
+    private func dateParts(_ label: String) -> (String, String) {
+        let parts = label.split(separator: " ")
+        if parts.count == 2 {
+            return (String(parts[0]).uppercased(), String(parts[1]))
+        }
+        if let monthEnd = label.range(of: "月"), let dayStart = label.range(of: "日") {
+            let month = String(label[..<monthEnd.upperBound])
+            let day = String(label[monthEnd.upperBound..<dayStart.lowerBound])
+            return (month, day + "日")
+        }
+        return (label, "")
+    }
+
+    // MARK: - Domain bars
 
     private func domainBars(_ values: [Double]) -> some View {
         let labels = language == .english
@@ -357,7 +630,7 @@ private struct InsightVisualView: View {
         return VStack(spacing: 8) {
             ForEach(Array(zip(labels, values).enumerated()), id: \.offset) { index, item in
                 HStack(spacing: 9) {
-                    Text(item.0).font(.caption).foregroundStyle(AppTheme.muted).frame(width: 76, alignment: .leading)
+                    Text(item.0).font(.system(size: 10.5)).foregroundStyle(AppTheme.muted).frame(width: 76, alignment: .leading)
                     GeometryReader { proxy in
                         ZStack(alignment: .leading) {
                             Capsule().fill(AppTheme.line.opacity(0.6))
@@ -366,7 +639,7 @@ private struct InsightVisualView: View {
                         }
                     }
                     .frame(height: 7)
-                    Text("\(Int(item.1 * 100))%").font(.caption2.monospacedDigit()).foregroundStyle(AppTheme.muted)
+                    Text("\(Int(item.1 * 100))%").font(.system(size: 10).monospacedDigit()).foregroundStyle(AppTheme.muted)
                         .frame(width: 34, alignment: .trailing)
                 }
             }
@@ -382,14 +655,14 @@ private struct InsightVisualView: View {
             ForEach(Array(facts.prefix(10).enumerated()), id: \.offset) { _, fact in
                 HStack(spacing: 9) {
                     Text(fact.symbol ?? "✦")
-                        .font(.subheadline.weight(.semibold))
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(AppTheme.tone(fact.emphasis))
                         .frame(width: 24)
-                    Text(fact.label).font(.footnote.weight(.semibold)).foregroundStyle(AppTheme.text)
+                    Text(fact.label).font(.system(size: 12, weight: .semibold)).foregroundStyle(AppTheme.text)
                     Spacer()
-                    Text(fact.value).font(.caption).foregroundStyle(AppTheme.muted)
+                    Text(fact.value).font(.system(size: 10.5)).foregroundStyle(AppTheme.muted)
                     if let note = fact.note {
-                        Text(note).font(.caption2).foregroundStyle(AppTheme.muted.opacity(0.8))
+                        Text(note).font(.system(size: 9.5)).foregroundStyle(AppTheme.muted.opacity(0.8))
                             .frame(width: 84, alignment: .trailing)
                     }
                 }
@@ -412,8 +685,8 @@ private struct InsightVisualView: View {
                 .stroke(AppTheme.violet, style: StrokeStyle(lineWidth: 12, lineCap: .round))
                 .rotationEffect(.degrees(180), anchor: .center)
                 VStack(spacing: 2) {
-                    Text("\(value)").font(.title2.bold().monospacedDigit()).foregroundStyle(AppTheme.text)
-                    Text(localized("activity", "活跃度", language: language)).font(.caption).foregroundStyle(AppTheme.muted)
+                    Text("\(value)").font(.system(size: 22, weight: .bold).monospacedDigit()).foregroundStyle(AppTheme.text)
+                    Text(localized("activity", "活跃度", language: language)).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
                 }
                 .offset(y: 8)
             }
@@ -446,23 +719,44 @@ private struct InsightVisualView: View {
         .frame(height: 54)
     }
 
+    // MARK: - Gantt (prototype .gantt-row: head + track with bar/marker)
+
     private var gantt: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 12) {
             ForEach(Array(facts.prefix(4).enumerated()), id: \.offset) { _, fact in
-                HStack(spacing: 10) {
-                    Text(fact.label).font(.footnote.weight(.semibold)).foregroundStyle(AppTheme.text)
-                        .frame(width: 84, alignment: .leading)
-                    GeometryReader { proxy in
-                        ZStack(alignment: .leading) {
-                            Capsule().fill(AppTheme.tone(fact.emphasis).opacity(0.18))
-                            Capsule().fill(AppTheme.tone(fact.emphasis))
-                                .frame(width: proxy.size.width * max(0.08, min(0.92, fact.progress ?? 0.5)))
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text(fact.label).font(.system(size: 12, weight: .semibold)).foregroundStyle(AppTheme.text)
+                        Spacer()
+                        if let note = fact.note {
+                            Text(note).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
                         }
                     }
-                    .frame(height: 8)
-                    if let note = fact.note {
-                        Text(note).font(.caption2).foregroundStyle(AppTheme.muted).frame(width: 64, alignment: .trailing)
+                    GeometryReader { proxy in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(AppTheme.line.opacity(0.6)).frame(height: 6)
+                            Capsule()
+                                .fill(LinearGradient(colors: [AppTheme.blue.opacity(0.8), AppTheme.violet], startPoint: .leading, endPoint: .trailing))
+                                .frame(width: proxy.size.width * max(0.12, min(0.88, fact.progress ?? 0.5)), height: 6)
+                            // Main exact point (white + violet ring)
+                            Circle()
+                                .fill(Color.white)
+                                .overlay(Circle().stroke(AppTheme.violet, lineWidth: 2.5))
+                                .frame(width: 9, height: 9)
+                                .offset(x: proxy.size.width * max(0.12, min(0.88, fact.progress ?? 0.5)) - 4.5)
+                            // Repeating exact points (dark + violet ring)
+                            ForEach(Array((fact.markers ?? []).enumerated()), id: \.offset) { _, marker in
+                                if marker != (fact.progress ?? 0.5) {
+                                    Circle()
+                                        .fill(AppTheme.panel)
+                                        .overlay(Circle().stroke(AppTheme.violet, lineWidth: 2))
+                                        .frame(width: 7, height: 7)
+                                        .offset(x: proxy.size.width * max(0.12, min(0.88, marker)) - 3.5)
+                                }
+                            }
+                        }
                     }
+                    .frame(height: 10)
                 }
             }
         }
@@ -490,9 +784,9 @@ private struct InsightVisualView: View {
         .frame(height: 150)
         .overlay(alignment: .bottom) {
             HStack {
-                ForEach(Array(values.enumerated()), id: \.offset) { index, value in
+                ForEach(Array(values.enumerated()), id: \.offset) { index, _ in
                     Text("\(index + 1)")
-                        .font(.caption2.monospacedDigit())
+                        .font(.system(size: 9).monospacedDigit())
                         .foregroundStyle(AppTheme.muted)
                         .frame(maxWidth: .infinity)
                 }
@@ -500,18 +794,20 @@ private struct InsightVisualView: View {
         }
     }
 
+    // MARK: - 7-day calendar (prototype heat grid)
+
     private func calendar(_ values: [Int]) -> some View {
         VStack(spacing: 9) {
             HStack(spacing: 6) {
                 ForEach(Array(values.enumerated()), id: \.offset) { index, value in
                     VStack(spacing: 3) {
-                        Text(shortDay(index + 1)).font(.caption2).foregroundStyle(AppTheme.muted)
+                        Text(shortDay(index + 1)).font(.system(size: 9.5)).foregroundStyle(AppTheme.muted)
                         RoundedRectangle(cornerRadius: 6)
                             .fill(AppTheme.tone(value > 66 ? .challenging : value > 35 ? .transition : .neutral).opacity(0.16 + Double(value) / 100 * 0.7))
-                            .frame(height: 44)
+                            .frame(height: 46)
                             .overlay(
                                 Text("\(value)")
-                                    .font(.caption2.bold().monospacedDigit())
+                                    .font(.system(size: 10, weight: .bold).monospacedDigit())
                                     .foregroundStyle(AppTheme.text)
                             )
                     }
@@ -519,7 +815,7 @@ private struct InsightVisualView: View {
                 }
             }
             Text(localized("This week's intensity", "本周变化强度", language: language))
-                .font(.caption2)
+                .font(.system(size: 9.5))
                 .foregroundStyle(AppTheme.muted)
         }
     }
@@ -537,8 +833,8 @@ private struct InsightVisualView: View {
                     .stroke(AppTheme.violet, style: StrokeStyle(lineWidth: 8, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                 VStack(spacing: 0) {
-                    Text(progressedPhaseName(phase)).font(.caption.bold()).foregroundStyle(AppTheme.text)
-                    Text("\(Int(phase))°").font(.caption2).foregroundStyle(AppTheme.muted)
+                    Text(progressedPhaseName(phase)).font(.system(size: 12, weight: .bold)).foregroundStyle(AppTheme.text)
+                    Text("\(Int(phase))°").font(.system(size: 10)).foregroundStyle(AppTheme.muted)
                 }
             }
             .frame(width: 108, height: 108)
@@ -549,9 +845,9 @@ private struct InsightVisualView: View {
 
     private func progressTrack(label: String, value: Double, tone: InsightTone) -> some View {
         HStack(spacing: 9) {
-            Text(label).font(.caption.weight(.semibold)).foregroundStyle(AppTheme.muted).frame(width: 44, alignment: .leading)
+            Text(label).font(.system(size: 11, weight: .semibold)).foregroundStyle(AppTheme.muted).frame(width: 44, alignment: .leading)
             ProgressView(value: max(0, min(1, value))).tint(AppTheme.tone(tone))
-            Text("\(Int(value * 30))°/30").font(.caption2.monospacedDigit()).foregroundStyle(AppTheme.muted).frame(width: 52, alignment: .trailing)
+            Text("\(Int(value * 30))°/30").font(.system(size: 10).monospacedDigit()).foregroundStyle(AppTheme.muted).frame(width: 52, alignment: .trailing)
         }
     }
 
@@ -564,29 +860,7 @@ private struct InsightVisualView: View {
         }
     }
 
-    private func pathFlow(title: String) -> some View {
-        VStack(alignment: .leading, spacing: 9) {
-            Text(title).font(.caption.weight(.semibold)).foregroundStyle(AppTheme.muted)
-            HStack(spacing: 6) {
-                ForEach(Array(facts.prefix(3).enumerated()), id: \.offset) { index, fact in
-                    VStack(spacing: 4) {
-                        Text(fact.symbol ?? "\(index + 1)")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(AppTheme.tone(fact.emphasis))
-                            .frame(width: 30, height: 30)
-                            .background(AppTheme.tone(fact.emphasis).opacity(0.12), in: Circle())
-                        Text(fact.label).font(.caption2.weight(.medium)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
-                    }
-                    .frame(maxWidth: .infinity)
-                    if index < min(3, facts.count) - 1 {
-                        Image(systemName: "arrow.right").font(.caption).foregroundStyle(AppTheme.muted)
-                    }
-                }
-            }
-        }
-        .padding(11)
-        .background(AppTheme.background.opacity(0.45), in: RoundedRectangle(cornerRadius: 13))
-    }
+    // MARK: - Signature trio / placements / aspects
 
     private func metricTrio(ruler: String, dominant: String, orientation: String) -> some View {
         HStack(spacing: 9) {
@@ -598,32 +872,40 @@ private struct InsightVisualView: View {
 
     private func trioCell(label: String, value: String) -> some View {
         VStack(spacing: 4) {
-            Text(label).font(.caption2).foregroundStyle(AppTheme.muted).multilineTextAlignment(.center)
-            Text(value).font(.footnote.weight(.semibold)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
+            Text(label).font(.system(size: 9)).foregroundStyle(AppTheme.muted).multilineTextAlignment(.center)
+            Text(value).font(.system(size: 12, weight: .semibold)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
                 .lineLimit(2)
         }
         .frame(maxWidth: .infinity)
         .padding(10)
-        .background(AppTheme.background.opacity(0.45), in: RoundedRectangle(cornerRadius: 12))
+        .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
     }
 
-    private var positionList: some View {
+    // prototype .position-row: glyph + title + desc + state chip
+    private var placementRows: some View {
         VStack(spacing: 0) {
             ForEach(Array(facts.prefix(8).enumerated()), id: \.offset) { _, fact in
                 HStack(spacing: 10) {
                     Text(fact.symbol ?? "✦")
-                        .font(.subheadline.weight(.semibold))
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(AppTheme.tone(fact.emphasis))
-                        .frame(width: 26, height: 26)
+                        .frame(width: 28, height: 28)
                         .background(AppTheme.tone(fact.emphasis).opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(fact.label).font(.footnote.weight(.semibold)).foregroundStyle(AppTheme.text)
+                        Text(fact.label).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
                         if let note = fact.note {
-                            Text(note).font(.caption2).foregroundStyle(AppTheme.muted)
+                            Text(note).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
                         }
                     }
-                    Spacer()
-                    Text(fact.value).font(.caption).foregroundStyle(AppTheme.muted)
+                    if let category = fact.category {
+                        Text(category)
+                            .font(.system(size: 8.5, weight: .semibold))
+                            .foregroundStyle(AppTheme.violet)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 3)
+                            .background(AppTheme.violet.opacity(0.1), in: Capsule())
+                    }
+                    Text(fact.value).font(.system(size: 10.5)).foregroundStyle(AppTheme.muted)
                 }
                 .padding(.vertical, 8)
                 Divider().overlay(AppTheme.line.opacity(0.6))
@@ -631,45 +913,110 @@ private struct InsightVisualView: View {
         }
     }
 
-    private var aspectList: some View {
+    private var positionRows: some View {
         VStack(spacing: 9) {
             ForEach(Array(facts.prefix(6).enumerated()), id: \.offset) { _, fact in
                 HStack(spacing: 10) {
-                    Text(fact.symbol ?? "⌗")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(AppTheme.tone(fact.emphasis))
-                        .frame(width: 26, height: 26)
-                        .background(AppTheme.tone(fact.emphasis).opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+                    Text(fact.symbol ?? "✦")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(AppTheme.violet)
+                        .frame(width: 34, height: 34)
+                        .background(AppTheme.violet.opacity(0.1), in: RoundedRectangle(cornerRadius: 11))
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(fact.label).font(.footnote.weight(.semibold)).foregroundStyle(AppTheme.text)
+                        Text(fact.label).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
                         if let note = fact.note {
-                            Text(note).font(.caption2).foregroundStyle(AppTheme.muted)
+                            Text(note).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
                         }
                     }
                     Spacer()
-                    Text(fact.value).font(.caption2).foregroundStyle(AppTheme.muted)
-                        .multilineTextAlignment(.trailing)
+                    VStack(alignment: .trailing, spacing: 1) {
+                        Text(fact.value).font(.system(size: 10.5, weight: .semibold)).foregroundStyle(AppTheme.text)
+                        if let note = fact.note, !note.isEmpty {
+                            Text(note).font(.system(size: 9)).foregroundStyle(AppTheme.muted)
+                        }
+                    }
                 }
-                .padding(10)
-                .background(AppTheme.background.opacity(0.42), in: RoundedRectangle(cornerRadius: 12))
+                .padding(11)
+                .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
             }
         }
     }
 
+    private func aspectFilterChip(_ category: String?, _ label: String) -> some View {
+        let selected = transitFilter == category
+        return Button {
+            withAnimation(.easeInOut(duration: 0.18)) {
+                transitFilter = category
+            }
+        } label: {
+            Text(label)
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(selected ? Color.white : AppTheme.muted)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(selected ? AppTheme.violet : AppTheme.background.opacity(0.4), in: Capsule())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var aspectRows: some View {
+        let hasCategories = facts.contains { $0.category != nil }
+        let filtered = transitFilter == nil ? facts : facts.filter { $0.category == transitFilter }
+        return VStack(spacing: 9) {
+            if hasCategories {
+                HStack(spacing: 6) {
+                    aspectFilterChip(nil, localized("All", "全部", language: language))
+                    aspectFilterChip("long-term", localized("Long-term", "长期", language: language))
+                    aspectFilterChip("current", localized("Current", "当前", language: language))
+                    aspectFilterChip("daily", localized("Daily", "每日", language: language))
+                    Spacer()
+                }
+            }
+            ForEach(Array(filtered.prefix(6).enumerated()), id: \.offset) { _, fact in
+                HStack(spacing: 10) {
+                    Text(fact.symbol ?? "⌗")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(AppTheme.tone(fact.emphasis))
+                        .frame(width: 26, height: 26)
+                        .background(AppTheme.tone(fact.emphasis).opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(fact.label).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
+                        if let note = fact.note {
+                            Text(note).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
+                        }
+                    }
+                    Spacer()
+                    Text(technicalTag(fact.emphasis)).font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(AppTheme.muted)
+                        .multilineTextAlignment(.trailing)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 4)
+                        .background(AppTheme.background.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
+                }
+                .padding(11)
+                .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
+            }
+        }
+    }
+
+    // MARK: - Area / element rows (prototype .area-row with % bar)
+
     private var areaRows: some View {
-        VStack(spacing: 9) {
-            ForEach(Array(facts.prefix(6).enumerated()), id: \.offset) { _, fact in
+        let shown = showAllAreas ? Array(facts.prefix(12)) : Array(facts.prefix(4))
+        return VStack(spacing: 11) {
+            ForEach(Array(shown.enumerated()), id: \.offset) { _, fact in
                 VStack(alignment: .leading, spacing: 5) {
                     HStack {
-                        Text(fact.label).font(.footnote.weight(.semibold)).foregroundStyle(AppTheme.text)
+                        Text(fact.label).font(.system(size: 12, weight: .semibold)).foregroundStyle(AppTheme.text)
                         Spacer()
-                        Text(fact.value).font(.caption2).foregroundStyle(AppTheme.muted)
+                        Text(fact.value).font(.system(size: 10, weight: .semibold)).foregroundStyle(AppTheme.muted)
                     }
                     if let progress = fact.progress {
                         GeometryReader { proxy in
                             ZStack(alignment: .leading) {
                                 Capsule().fill(AppTheme.line.opacity(0.6))
-                                Capsule().fill(AppTheme.tone(fact.emphasis))
+                                Capsule()
+                                    .fill(LinearGradient(colors: [AppTheme.blue.opacity(0.85), AppTheme.violet], startPoint: .leading, endPoint: .trailing))
                                     .frame(width: proxy.size.width * max(0.02, min(1, progress)))
                             }
                         }
@@ -677,8 +1024,64 @@ private struct InsightVisualView: View {
                     }
                 }
             }
+            if facts.count > 4 {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showAllAreas.toggle()
+                    }
+                } label: {
+                    Text(showAllAreas
+                         ? localized("Show fewer areas", "收起领域", language: language)
+                         : localized("View all \(facts.count) areas", "查看全部\(facts.count)个领域", language: language))
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(AppTheme.violet)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top, 2)
+                }
+                .buttonStyle(.plain)
+            }
+            Text(localized("Activity reflects the current signals, not a fortune score.", "这里反映当前的活跃程度，不是运势分数。", language: language))
+                .font(.system(size: 9.5))
+                .foregroundStyle(AppTheme.muted)
+                .padding(.top, 2)
         }
     }
+
+    private var elementRows: some View {
+        VStack(spacing: 11) {
+            ForEach(Array(facts.prefix(4).enumerated()), id: \.offset) { _, fact in
+                HStack(spacing: 9) {
+                    Text(fact.label).font(.system(size: 12, weight: .semibold)).foregroundStyle(AppTheme.text).frame(width: 44, alignment: .leading)
+                    GeometryReader { proxy in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(AppTheme.line.opacity(0.6))
+                            Capsule()
+                                .fill(LinearGradient(colors: [AppTheme.blue.opacity(0.85), AppTheme.violet], startPoint: .leading, endPoint: .trailing))
+                                .frame(width: proxy.size.width * max(0.02, min(1, fact.progress ?? 0)))
+                        }
+                    }
+                    .frame(height: 6)
+                    Text(fact.value).font(.system(size: 10)).foregroundStyle(AppTheme.muted).frame(width: 44, alignment: .trailing)
+                }
+            }
+            if facts.count > 4 {
+                HStack(spacing: 6) {
+                    ForEach(Array(facts.dropFirst(4).prefix(3).enumerated()), id: \.offset) { _, fact in
+                        Text("\(fact.label)：\(fact.value)")
+                            .font(.system(size: 9.5, weight: .medium))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(AppTheme.violet.opacity(0.1), in: Capsule())
+                            .overlay(Capsule().stroke(AppTheme.violet.opacity(0.25), lineWidth: 1))
+                            .foregroundStyle(AppTheme.text.opacity(0.9))
+                    }
+                    Spacer()
+                }
+            }
+        }
+    }
+
+    // MARK: - Moon dial (prototype .progress-moon)
 
     private func phaseDial(phase: Double, illumination: Double) -> some View {
         HStack(spacing: 14) {
@@ -687,7 +1090,7 @@ private struct InsightVisualView: View {
                 Circle().trim(from: 0, to: max(0.01, illumination))
                     .stroke(AppTheme.violet, style: StrokeStyle(lineWidth: 9, lineCap: .round))
                     .rotationEffect(.degrees(-90))
-                Text("☽").font(.title3).foregroundStyle(AppTheme.text)
+                Text("☽").font(.system(size: 22)).foregroundStyle(AppTheme.text)
             }
             .frame(width: 92, height: 92)
             VStack(alignment: .leading, spacing: 8) {
@@ -698,23 +1101,36 @@ private struct InsightVisualView: View {
         }
     }
 
-    private var moonProgress: some View {
-        factGrid(columns: 3)
+    private func moonProgressRing(progress: Double) -> some View {
+        VStack(spacing: 12) {
+            ZStack {
+                Circle().stroke(AppTheme.line.opacity(0.7), lineWidth: 2)
+                Circle()
+                    .trim(from: 0, to: max(0.02, min(1, progress)))
+                    .stroke(AppTheme.violet, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                Text("☽").font(.system(size: 24, weight: .semibold)).foregroundStyle(AppTheme.text)
+            }
+            .frame(width: 88, height: 88)
+            factGrid(columns: 3)
+        }
     }
+
+    // MARK: - Compare strip (prototype .compare-strip)
 
     private func compareStrip(natal: String, progressed: String) -> some View {
         HStack(spacing: 8) {
             VStack(spacing: 4) {
-                Text(localized("Natal", "本命", language: language)).font(.caption2).foregroundStyle(AppTheme.muted)
-                Text(natal).font(.footnote.weight(.semibold)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
+                Text(localized("Natal", "本命", language: language)).font(.system(size: 9, weight: .bold)).foregroundStyle(AppTheme.muted)
+                Text(natal).font(.system(size: 11.5, weight: .semibold)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
             .padding(10)
-            .background(AppTheme.background.opacity(0.45), in: RoundedRectangle(cornerRadius: 12))
-            Image(systemName: "arrow.right").font(.caption).foregroundStyle(AppTheme.muted)
+            .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
+            Image(systemName: "arrow.right").font(.system(size: 11)).foregroundStyle(AppTheme.muted)
             VStack(spacing: 4) {
-                Text(localized("Now", "现在", language: language)).font(.caption2).foregroundStyle(AppTheme.muted)
-                Text(progressed).font(.footnote.weight(.semibold)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
+                Text(localized("Now", "现在", language: language)).font(.system(size: 9, weight: .bold)).foregroundStyle(AppTheme.muted)
+                Text(progressed).font(.system(size: 11.5, weight: .semibold)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
             .padding(10)
@@ -722,57 +1138,88 @@ private struct InsightVisualView: View {
         }
     }
 
-    private func storyWeave(expanding: String, structuring: String) -> some View {
-        VStack(spacing: 10) {
+    // MARK: - Story weave (prototype .story-weave)
+
+    private func storyWeave(expanding: String, structuring: String, result: String) -> some View {
+        VStack(spacing: 8) {
             storyThread(label: localized("EXPANDING", "展开", language: language), value: expanding, tone: .supportive)
-            Image(systemName: "plus").font(.caption).foregroundStyle(AppTheme.muted)
+            Image(systemName: "plus").font(.system(size: 11, weight: .bold)).foregroundStyle(AppTheme.muted)
             storyThread(label: localized("STRUCTURING", "定型", language: language), value: structuring, tone: .challenging)
+            Text(result)
+                .font(.system(size: 10.5))
+                .lineSpacing(3)
+                .foregroundStyle(AppTheme.text.opacity(0.95))
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(AppTheme.violet.opacity(0.1), in: RoundedRectangle(cornerRadius: 13))
         }
     }
 
     private func storyThread(label: String, value: String, tone: InsightTone) -> some View {
         HStack(alignment: .top, spacing: 10) {
-            Text(label).font(.caption2.bold()).foregroundStyle(AppTheme.tone(tone))
-            Text(value).font(.footnote.weight(.medium)).foregroundStyle(AppTheme.text)
+            Text(label).font(.system(size: 9, weight: .bold)).foregroundStyle(AppTheme.tone(tone))
+            Text(value).font(.system(size: 11.5, weight: .medium)).foregroundStyle(AppTheme.text)
             Spacer()
+        }
+        .padding(12)
+        .background(AppTheme.tone(tone).opacity(0.08), in: RoundedRectangle(cornerRadius: 13))
+    }
+
+    // MARK: - Cycle tabs (prototype .cycle-tabs)
+
+    private func cycleTabs(long: String, longMeta: String, current: String, currentMeta: String, daily: String, dailyMeta: String) -> some View {
+        VStack(spacing: 10) {
+            HStack(spacing: 4) {
+                cycleTabChip(localized("Long-term", "长期", language: language), active: true)
+                cycleTabChip(localized("Current", "当前", language: language), active: false)
+                cycleTabChip(localized("Daily", "每日", language: language), active: false)
+            }
+            cycleRow(label: localized("Long-term", "长期", language: language), value: long, tone: .supportive, meta: longMeta)
+            cycleRow(label: localized("Current", "当前", language: language), value: current, tone: .transition, meta: currentMeta)
+            cycleRow(label: localized("Daily", "每日", language: language), value: daily, tone: .neutral, meta: dailyMeta)
+        }
+    }
+
+    private func cycleTabChip(_ label: String, active: Bool) -> some View {
+        Text(label)
+            .font(.system(size: 11, weight: .semibold))
+            .foregroundStyle(active ? Color.white : AppTheme.muted)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(active ? AppTheme.violet : AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 10))
+    }
+
+    private func cycleRow(label: String, value: String, tone: InsightTone, meta: String = "") -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 10) {
+                Text(label).font(.system(size: 10, weight: .bold)).foregroundStyle(AppTheme.tone(tone))
+                Text(value).font(.system(size: 11.5, weight: .medium)).foregroundStyle(AppTheme.text)
+                Spacer()
+            }
+            if !meta.isEmpty {
+                Text(meta).font(.system(size: 9.5)).foregroundStyle(AppTheme.muted)
+            }
         }
         .padding(11)
-        .background(AppTheme.tone(tone).opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
+        .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
     }
 
-    private func cycleTabs(long: String, current: String, daily: String) -> some View {
-        VStack(spacing: 10) {
-            cycleRow(label: localized("Long-term", "长期", language: language), value: long, tone: .supportive)
-            cycleRow(label: localized("Current", "当前", language: language), value: current, tone: .transition)
-            cycleRow(label: localized("Daily", "每日", language: language), value: daily, tone: .neutral)
-        }
-    }
-
-    private func cycleRow(label: String, value: String, tone: InsightTone) -> some View {
-        HStack(spacing: 10) {
-            Text(label).font(.caption2.bold()).foregroundStyle(AppTheme.tone(tone))
-                .frame(width: 60, alignment: .leading)
-            Text(value).font(.footnote.weight(.medium)).foregroundStyle(AppTheme.text)
-            Spacer()
-        }
-        .padding(10)
-        .background(AppTheme.background.opacity(0.42), in: RoundedRectangle(cornerRadius: 12))
-    }
+    // MARK: - Stage flow (prototype .stage-flow)
 
     private func stageFlow(old: String, transition: String, emerging: String) -> some View {
         HStack(spacing: 6) {
             stageNode(label: localized("OLD", "过去", language: language), value: old, active: false)
-            Image(systemName: "arrow.right").font(.caption).foregroundStyle(AppTheme.muted)
+            Image(systemName: "arrow.right").font(.system(size: 10)).foregroundStyle(AppTheme.muted)
             stageNode(label: localized("TRANSITION", "转变", language: language), value: transition, active: true)
-            Image(systemName: "arrow.right").font(.caption).foregroundStyle(AppTheme.muted)
+            Image(systemName: "arrow.right").font(.system(size: 10)).foregroundStyle(AppTheme.muted)
             stageNode(label: localized("EMERGING", "浮现", language: language), value: emerging, active: false)
         }
     }
 
     private func stageNode(label: String, value: String, active: Bool) -> some View {
         VStack(spacing: 4) {
-            Text(label).font(.caption2.bold()).foregroundStyle(active ? AppTheme.violet : AppTheme.muted)
-            Text(value).font(.caption2.weight(.medium)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
+            Text(label).font(.system(size: 8.5, weight: .bold)).foregroundStyle(active ? AppTheme.violet : AppTheme.muted)
+            Text(value).font(.system(size: 10, weight: .medium)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
                 .lineLimit(3)
         }
         .frame(maxWidth: .infinity)
@@ -780,37 +1227,45 @@ private struct InsightVisualView: View {
         .background(active ? AppTheme.violet.opacity(0.12) : AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
     }
 
+    // MARK: - Solar return orbit with lines (prototype .year-orbit)
+
     private var yearOrbit: some View {
-        HStack(spacing: 12) {
+        VStack(spacing: 12) {
             ZStack {
-                Circle().fill(AppTheme.violet.opacity(0.12)).frame(width: 86, height: 86)
-                Circle().stroke(AppTheme.violet.opacity(0.35), lineWidth: 1).frame(width: 66, height: 66)
-                Text("☉").font(.title2).foregroundStyle(AppTheme.text)
+                Circle().stroke(AppTheme.violet.opacity(0.35), lineWidth: 1).frame(width: 118, height: 118)
+                Circle().stroke(AppTheme.line, style: StrokeStyle(lineWidth: 1, dash: [4, 4])).frame(width: 88, height: 88)
+                Circle().fill(AppTheme.violet.opacity(0.12)).frame(width: 40, height: 40)
+                Text("☉").font(.system(size: 18, weight: .bold)).foregroundStyle(AppTheme.text)
+                Text("↑").font(.system(size: 13, weight: .bold)).foregroundStyle(AppTheme.mint)
+                    .offset(x: 0, y: -64)
+                Text("♄").font(.system(size: 12, weight: .semibold)).foregroundStyle(AppTheme.amber)
+                    .offset(x: 55, y: 26)
+                Text("♃").font(.system(size: 12, weight: .semibold)).foregroundStyle(AppTheme.blue)
+                    .offset(x: -52, y: 34)
             }
-            VStack(alignment: .leading, spacing: 7) {
+            .frame(width: 128, height: 128)
+            HStack(spacing: 9) {
                 ForEach(Array(facts.prefix(3).enumerated()), id: \.offset) { _, fact in
-                    HStack(spacing: 8) {
-                        Text(fact.label).font(.caption).foregroundStyle(AppTheme.muted)
-                        Text(fact.value).font(.footnote.weight(.semibold)).foregroundStyle(AppTheme.text)
-                    }
+                    trioCell(label: fact.label, value: fact.value)
                 }
             }
-            Spacer()
         }
     }
 
-    private func dualInsight(opening: String, demand: String) -> some View {
+    // MARK: - Dual insight (prototype .dual-insight)
+
+    private func dualInsight(opening: String, demand: String, openingLabel: String, demandLabel: String) -> some View {
         HStack(spacing: 9) {
             VStack(spacing: 5) {
-                Text(localized("OPENING", "展开", language: language)).font(.caption2.bold()).foregroundStyle(AppTheme.mint)
-                Text(opening).font(.footnote.weight(.medium)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
+                Text(openingLabel).font(.system(size: 8, weight: .bold)).foregroundStyle(AppTheme.mint)
+                Text(opening).font(.system(size: 10, weight: .semibold)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
             .padding(11)
             .background(AppTheme.mint.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
             VStack(spacing: 5) {
-                Text(localized("DEMAND", "要求", language: language)).font(.caption2.bold()).foregroundStyle(AppTheme.coral)
-                Text(demand).font(.footnote.weight(.medium)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
+                Text(demandLabel).font(.system(size: 8, weight: .bold)).foregroundStyle(AppTheme.coral)
+                Text(demand).font(.system(size: 10, weight: .semibold)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
             .padding(11)
@@ -818,25 +1273,391 @@ private struct InsightVisualView: View {
         }
     }
 
-    private var bondOrbit: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                Circle().fill(AppTheme.violet.opacity(0.14)).frame(width: 78, height: 78)
-                Circle().fill(AppTheme.blue.opacity(0.14)).frame(width: 78, height: 78).offset(x: 26)
-                Text("∞").font(.title3.bold()).foregroundStyle(AppTheme.violet)
-            }
-            .frame(width: 96, height: 88)
-            VStack(alignment: .leading, spacing: 7) {
-                ForEach(Array(facts.prefix(3).enumerated()), id: \.offset) { _, fact in
-                    Text(fact.label).font(.footnote.weight(.semibold)).foregroundStyle(AppTheme.text)
+    private func edgeDual(opening: String, demand: String) -> some View {
+        VStack(spacing: 10) {
+            dualInsight(opening: opening, demand: demand, openingLabel: localized("CORE STRENGTH", "核心优势", language: language), demandLabel: localized("GROWTH EDGE", "成长面", language: language))
+            ForEach(Array(facts.prefix(2).enumerated()), id: \.offset) { _, fact in
+                HStack(spacing: 10) {
+                    Text(indexMark(fact.emphasis)).font(.system(size: 13, weight: .bold)).foregroundStyle(AppTheme.tone(fact.emphasis))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(fact.label).font(.system(size: 10.5, weight: .semibold)).foregroundStyle(AppTheme.text)
+                        Text(fact.value).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
+                    }
+                    Spacer()
                 }
+                .padding(10)
+                .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 11))
             }
-            Spacer()
         }
     }
 
-    private var doubleRing: some View {
-        positionList
+    private func indexMark(_ tone: InsightTone) -> String {
+        tone == .supportive ? "+" : "↗"
+    }
+
+    // MARK: - Quarter tabs (prototype .quarter-tabs)
+
+    private var quarterTabs: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 6) {
+                ForEach(Array(facts.prefix(4).enumerated()), id: \.offset) { index, fact in
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(fact.label)
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(index == 0 ? AppTheme.violet : AppTheme.muted)
+                        Text(fact.value)
+                            .font(.system(size: 10))
+                            .foregroundStyle(AppTheme.muted)
+                            .lineLimit(2)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(9)
+                    .background(index == 0 ? AppTheme.violet.opacity(0.12) : AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 11))
+                }
+            }
+            if let opening = facts.first, !opening.value.isEmpty {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(opening.value)
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(AppTheme.text)
+                    if let note = opening.note {
+                        Text(note)
+                            .font(.system(size: 11))
+                            .foregroundStyle(AppTheme.muted)
+                            .lineSpacing(3)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 13))
+            }
+        }
+    }
+
+    private func natalOverlay(firstLabel: String, firstValue: String, secondLabel: String, secondValue: String) -> some View {
+        HStack(spacing: 8) {
+            compareNode(label: firstLabel, value: firstValue, tone: .supportive)
+            Text("↔").font(.system(size: 15, weight: .bold)).foregroundStyle(AppTheme.muted)
+            compareNode(label: secondLabel, value: secondValue, tone: .challenging)
+        }
+    }
+
+    private func compareNode(label: String, value: String, tone: InsightTone) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(.system(size: 8.5, weight: .bold))
+                .tracking(1.1)
+                .foregroundStyle(AppTheme.tone(tone))
+            Text(value)
+                .font(.system(size: 11.5, weight: .semibold))
+                .foregroundStyle(AppTheme.text)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(AppTheme.tone(tone).opacity(0.08), in: RoundedRectangle(cornerRadius: 13))
+    }
+
+    private var needsCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("☽")
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(AppTheme.violet)
+                .frame(width: 40, height: 40)
+                .background(AppTheme.violet.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
+            ForEach(Array(facts.prefix(2).enumerated()), id: \.offset) { _, fact in
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(fact.label)
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundStyle(AppTheme.muted)
+                    Text(fact.value)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(AppTheme.text)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: - Transit timeline (prototype TR-03: range + timeline/calendar)
+
+    private struct TransitTimelineView: View {
+        let windows: [ChartEventData.TransitWindow]
+        let language: AppLanguage
+        @State private var selectedDays: Int = 30
+        @State private var showCalendar = false
+        @State private var timeZone = TimeZone.current
+
+        private var axisStart: Date { Date() }
+        private var axisEnd: Date { Date().addingTimeInterval(Double(selectedDays) * 86_400) }
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: 11) {
+                HStack(spacing: 6) {
+                    rangeButton(7, localized("7 days", "7 天", language: language))
+                    rangeButton(30, localized("30 days", "30 天", language: language))
+                    rangeButton(365, localized("12 months", "12 个月", language: language))
+                    Spacer()
+                }
+                HStack(spacing: 6) {
+                    viewButton(false, localized("Timeline", "时间线", language: language))
+                    viewButton(true, localized("Calendar", "日历", language: language))
+                    Spacer()
+                }
+                if showCalendar {
+                    calendarGrid
+                } else {
+                    timelineRows
+                }
+            }
+        }
+
+        private func rangeButton(_ days: Int, _ label: String) -> some View {
+            Button {
+                withAnimation(.easeInOut(duration: 0.18)) { selectedDays = days }
+            } label: {
+                Text(label)
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(selectedDays == days ? Color.white : AppTheme.muted)
+                    .padding(.horizontal, 11)
+                    .padding(.vertical, 6)
+                    .background(selectedDays == days ? AppTheme.violet : AppTheme.background.opacity(0.4), in: Capsule())
+            }
+            .buttonStyle(.plain)
+        }
+
+        private func viewButton(_ calendar: Bool, _ label: String) -> some View {
+            Button {
+                withAnimation(.easeInOut(duration: 0.18)) { showCalendar = calendar }
+            } label: {
+                Text(label)
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(showCalendar == calendar ? AppTheme.violet : AppTheme.muted)
+                    .padding(.horizontal, 11)
+                    .padding(.vertical, 6)
+                    .background(AppTheme.background.opacity(0.4), in: Capsule())
+                    .overlay(Capsule().stroke(showCalendar == calendar ? AppTheme.violet.opacity(0.5) : AppTheme.line, lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+        }
+
+        private var timelineRows: some View {
+            let visible = windows.filter {
+                $0.end.timeIntervalSince(axisStart) >= 0 && $0.start.timeIntervalSince(axisEnd) <= 0
+            }
+            if visible.isEmpty {
+                return AnyView(
+                    Text(localized("No transits enter this window.", "这个时间范围内没有新的行运进入。", language: language))
+                        .font(.system(size: 11))
+                        .foregroundStyle(AppTheme.muted)
+                        .padding(.vertical, 8)
+                )
+            }
+            return AnyView(
+                VStack(spacing: 11) {
+                    ForEach(Array(visible.prefix(5).enumerated()), id: \.offset) { _, window in
+                        let title = "\(bodyName(window.first, language: language)) \(window.kind.symbol) \(bodyName(window.second, language: language))"
+                        let start = max(window.start, axisStart)
+                        let end = min(window.end, axisEnd)
+                        let total = max(1, axisEnd.timeIntervalSince(axisStart))
+                        let barStart = max(0, start.timeIntervalSince(axisStart) / total)
+                        let barEnd = max(0, end.timeIntervalSince(axisStart) / total)
+                        let nowRatio = min(1, max(0, Date().timeIntervalSince(axisStart) / total))
+                        VStack(alignment: .leading, spacing: 5) {
+                            HStack {
+                                Text(title)
+                                    .font(.system(size: 11.5, weight: .semibold))
+                                    .foregroundStyle(AppTheme.text)
+                                Spacer()
+                                Text(window.start.shortEventRange(to: window.end, language: language, timeZone: timeZone))
+                                    .font(.system(size: 9.5))
+                                    .foregroundStyle(AppTheme.muted)
+                            }
+                            GeometryReader { proxy in
+                                ZStack(alignment: .leading) {
+                                    Capsule().fill(AppTheme.line.opacity(0.6)).frame(height: 6)
+                                    Capsule()
+                                        .fill(LinearGradient(colors: [AppTheme.blue.opacity(0.8), AppTheme.violet], startPoint: .leading, endPoint: .trailing))
+                                        .frame(
+                                            width: proxy.size.width * max(0.03, min(1, barEnd - barStart)),
+                                            height: 6
+                                        )
+                                        .offset(x: proxy.size.width * max(0, min(1, barStart)))
+                                    Circle()
+                                        .fill(Color.white)
+                                        .overlay(Circle().stroke(AppTheme.violet, lineWidth: 2.5))
+                                        .frame(width: 9, height: 9)
+                                        .offset(x: proxy.size.width * nowRatio - 4.5)
+                                }
+                            }
+                            .frame(height: 10)
+                        }
+                    }
+                }
+            )
+        }
+
+        private var calendarGrid: some View {
+            let eventDates = Set(windows.flatMap { [$0.start, $0.exact, $0.end].map { Calendar.current.startOfDay(for: $0) } })
+            let calendar = Calendar.current
+            let today = calendar.startOfDay(for: Date())
+            let first = calendar.date(from: calendar.dateComponents([.year, .month], from: today)) ?? today
+            let firstWeekday = calendar.component(.weekday, from: first)
+            let daysInMonth = calendar.range(of: .day, in: .month, for: first)?.count ?? 30
+            let leading = (firstWeekday + 5) % 7
+            let weekdayLabels = language == .english ? ["M", "T", "W", "T", "F", "S", "S"] : ["一", "二", "三", "四", "五", "六", "日"]
+            let columns = Array(repeating: GridItem(.flexible(), spacing: 5), count: 7)
+            return VStack(spacing: 6) {
+                HStack(spacing: 5) {
+                    ForEach(weekdayLabels, id: \.self) { label in
+                        Text(label).font(.system(size: 9)).foregroundStyle(AppTheme.muted).frame(maxWidth: .infinity)
+                    }
+                }
+                LazyVGrid(columns: columns, spacing: 5) {
+                    ForEach(0 ..< leading, id: \.self) { _ in
+                        Color.clear.frame(height: 30)
+                    }
+                    ForEach(1 ... daysInMonth, id: \.self) { day in
+                        let date = calendar.date(byAdding: .day, value: day - 1, to: first) ?? today
+                        let hasEvent = eventDates.contains(date)
+                        Text("\(day)")
+                            .font(.system(size: 10, weight: hasEvent ? .bold : .medium))
+                            .foregroundStyle(hasEvent ? AppTheme.violet : AppTheme.muted)
+                            .frame(maxWidth: .infinity, minHeight: 30)
+                            .background(
+                                hasEvent ? AppTheme.violet.opacity(0.16) : AppTheme.background.opacity(0.4),
+                                in: RoundedRectangle(cornerRadius: 7)
+                            )
+                    }
+                }
+                Text(localized("Highlighted days carry an exact transit contact.", "高亮的日期带有精确行运触发。", language: language))
+                    .font(.system(size: 9.5))
+                    .foregroundStyle(AppTheme.muted)
+            }
+        }
+    }
+
+    // MARK: - Bond orbit (prototype .bond-orbit)
+
+    private var bondOrbit: some View {
+        VStack(spacing: 10) {
+            ZStack {
+                Circle().stroke(AppTheme.violet.opacity(0.4), lineWidth: 1).frame(width: 104, height: 104)
+                Circle().fill(AppTheme.violet.opacity(0.16)).frame(width: 52, height: 52)
+                    .offset(x: -24)
+                Circle().fill(AppTheme.blue.opacity(0.16)).frame(width: 52, height: 52)
+                    .offset(x: 24)
+                Text("∞").font(.system(size: 18, weight: .bold)).foregroundStyle(AppTheme.violet)
+            }
+            .frame(width: 112, height: 96)
+            HStack(spacing: 6) {
+                ForEach(Array(facts.prefix(3).enumerated()), id: \.offset) { _, fact in
+                    TagChip(text: fact.label, tone: fact.emphasis)
+                }
+            }
+        }
+    }
+
+    // MARK: - Perspective tabs (prototype .perspective-tabs)
+
+    private var perspectiveTabs: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 6) {
+                ForEach(Array(facts.prefix(2).enumerated()), id: \.offset) { index, fact in
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(fact.label)
+                            .font(.system(size: 10.5, weight: .bold))
+                            .foregroundStyle(index == 0 ? AppTheme.violet : AppTheme.muted)
+                        Text(fact.value)
+                            .font(.system(size: 10.5))
+                            .foregroundStyle(AppTheme.text)
+                            .lineLimit(2)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(10)
+                    .background(index == 0 ? AppTheme.violet.opacity(0.12) : AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 11))
+                }
+            }
+        }
+    }
+
+    // MARK: - Connection grid (prototype .connection-grid)
+
+    private var connectionGrid: some View {
+        LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+            ForEach(Array(facts.prefix(4).enumerated()), id: \.offset) { _, fact in
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(fact.label).font(.system(size: 9, weight: .bold)).foregroundStyle(AppTheme.muted)
+                    Text(fact.value).font(.system(size: 12, weight: .semibold)).foregroundStyle(AppTheme.text)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if let note = fact.note {
+                        Text(note).font(.system(size: 9.5)).foregroundStyle(AppTheme.muted)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .padding(11)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
+            }
+        }
+    }
+
+    private func pathFlow(title: String) -> some View {
+        VStack(alignment: .leading, spacing: 9) {
+            Text(title).font(.system(size: 10, weight: .semibold)).foregroundStyle(AppTheme.muted)
+            HStack(spacing: 6) {
+                ForEach(Array(facts.prefix(3).enumerated()), id: \.offset) { index, fact in
+                    VStack(spacing: 4) {
+                        Text(fact.symbol ?? "\(index + 1)")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(AppTheme.tone(fact.emphasis))
+                            .frame(width: 30, height: 30)
+                            .background(AppTheme.tone(fact.emphasis).opacity(0.12), in: Circle())
+                        Text(fact.label).font(.system(size: 9.5, weight: .medium)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    if index < min(3, facts.count) - 1 {
+                        Image(systemName: "arrow.right").font(.system(size: 10)).foregroundStyle(AppTheme.muted)
+                    }
+                }
+            }
+        }
+        .padding(12)
+        .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 13))
+    }
+
+    private var houseOverlayRows: some View {
+        VStack(spacing: 9) {
+            ForEach(Array(facts.prefix(6).enumerated()), id: \.offset) { _, fact in
+                HStack(spacing: 10) {
+                    Text(fact.symbol ?? "✦")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(AppTheme.violet)
+                        .frame(width: 28, height: 28)
+                        .background(AppTheme.violet.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(fact.label).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
+                        if let note = fact.note {
+                            Text(note).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
+                        }
+                    }
+                    Spacer()
+                    Text(fact.value).font(.system(size: 10.5)).foregroundStyle(AppTheme.muted)
+                }
+                .padding(10)
+                .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 11))
+            }
+        }
+    }
+
+    private func technicalTag(_ tone: InsightTone) -> String {
+        switch tone {
+        case .supportive: localized("Supportive pattern", "支持性结构", language: language)
+        case .challenging: localized("Core tension", "核心张力", language: language)
+        case .transition, .neutral: localized("Relational pattern", "关系结构", language: language)
+        }
     }
 
     private func polygon(center: CGPoint, radius: Double, count: Int) -> Path {

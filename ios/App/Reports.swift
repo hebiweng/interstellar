@@ -116,6 +116,11 @@ final class ReportStore: @unchecked Sendable {
         }
     }
 
+    func removeAll() {
+        try? FileManager.default.removeItem(at: indexURL)
+        try? FileManager.default.removeItem(at: directory)
+    }
+
     func remove(id: String) {
         var reports = load()
         reports.removeAll { $0.id == id }

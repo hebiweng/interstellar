@@ -38,12 +38,19 @@ final class AppModel: ObservableObject {
     @Published private(set) var solarReturn: ChartSnapshot?
     @Published private(set) var solarReturnAspects: [ChartAspect] = []
     @Published private(set) var synastry: SynastryComparison?
+    @Published var synastryPartnerID: String? {
+        didSet {
+            defaults.set(synastryPartnerID, forKey: "synastry.partner.v1")
+            Task { await refresh() }
+        }
+    }
     @Published private(set) var transitAspects: [ChartAspect] = []
     @Published private(set) var progressedAspects: [ChartAspect] = []
     @Published private(set) var todaySignals: [DailySignal] = []
     @Published private(set) var todayContributions: [WeeklySignalContribution] = []
     @Published private(set) var todayDashboardModel: TodayDashboardModel?
     @Published private(set) var transitCalendar: [Int] = []
+    @Published private(set) var chartEvents = ChartEventData.empty
     @Published private(set) var weeklyForecast: WeeklyForecastModel = .empty
     @Published private(set) var isCalculating = false
     @Published private(set) var isOnline = true
@@ -72,6 +79,7 @@ final class AppModel: ObservableObject {
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         aiConsentGranted = defaults.bool(forKey: "ai.network.consent.v1")
+        synastryPartnerID = defaults.string(forKey: "synastry.partner.v1")
         let testEnvironment = ProcessInfo.processInfo.environment
         if let data = defaults.data(forKey: "profile.v1"),
            let decoded = try? JSONDecoder().decode(UserProfile.self, from: data)
@@ -133,6 +141,20 @@ final class AppModel: ObservableObject {
             $0.profile.name.localizedCaseInsensitiveCompare($1.profile.name) == .orderedAscending
         }
         persistPeople()
+    }
+
+    func clearReports() {
+        reportStore.removeAll()
+        savedReports = []
+        Task { await refreshAvailableReports() }
+    }
+
+    func clearAskHistory() {
+        AskHistoryStore.shared.removeAll()
+    }
+
+    func clearAICache() {
+        aiCache.clearAll()
     }
 
     func deletePeople(at offsets: IndexSet) {
@@ -203,7 +225,9 @@ final class AppModel: ObservableObject {
                 natal: natalSnapshot
             )
             let synastryComparison: SynastryComparison?
-            if let partner = savedPeople.first?.profile {
+            if let partnerID = synastryPartnerID,
+               let partner = savedPeople.first(where: { $0.id.uuidString == partnerID })?.profile
+            {
                 synastryComparison = try await calculator.calculateSynastry(
                     first: natalInput,
                     second: NatalInput(utcDate: partner.birthDateUTC, location: partner.location),
@@ -273,6 +297,19 @@ final class AppModel: ObservableObject {
                 progressedReference: progressedReferenceSnapshot,
                 startingAt: now
             )
+            chartEvents = (try? await ChartEventBuilder.build(
+                calculator: calculator,
+                now: now,
+                birthDate: profile.birthDateUTC,
+                location: profile.location,
+                skySnapshot: skySnapshot,
+                skyPreset: preset(for: .currentSky),
+                transitMoving: transitMovingSnapshot,
+                transitAspects: transitAspects,
+                progressedSnapshot: progressedSnapshot,
+                progressedAspects: progressedAspects,
+                solarReturnMoment: solarReturnSnapshot.utcDate
+            )) ?? .empty
             let activeSignals = buildActiveSignals(
                 sky: skySnapshot,
                 transits: transitAspects,
@@ -364,10 +401,18 @@ final class AppModel: ObservableObject {
                 content: provider,
                 language: language,
                 transitCalendar: transitCalendar,
-                preset: preset(for: chart).rawValue
+                preset: preset(for: chart).rawValue,
+                events: focusedChart == chart ? .empty : chartEvents,
+                timeZone: TimeZone(identifier: profile.timezoneID) ?? .current
             )
             return .loaded(cards)
         } catch {
+            #if DEBUG
+            print("INSIGHT_ERROR \(chart.rawValue): \(error)")
+            #endif
+            #if DEBUG
+            return .unavailable(String(describing: error))
+            #else
             return .unavailable(
                 localized(
                     "Interpretation content is incomplete for this chart.",
@@ -375,6 +420,7 @@ final class AppModel: ObservableObject {
                     language: language
                 )
             )
+            #endif
         }
     }
 
@@ -787,7 +833,10 @@ final class AppModel: ObservableObject {
         let partner: (name: String, chart: ChartSnapshot)?
         if chart == .synastry {
             if let partnerSnapshot = synastry?.second {
-                partner = (savedPeople.first?.profile.name ?? "Partner", partnerSnapshot)
+                let name = synastryPartnerID.flatMap { id in
+                    savedPeople.first { $0.id.uuidString == id }?.profile.name
+                } ?? "Partner"
+                partner = (name, partnerSnapshot)
             } else {
                 partner = nil
             }
@@ -830,7 +879,10 @@ final class AppModel: ObservableObject {
             let progressedDate = SwissEphemerisCalculator.secondaryProgressedDate(birthDate: profile.birthDateUTC, targetDate: now)
             return ["anchor": formatter.string(from: now), "progressedDate": formatter.string(from: progressedDate)]
         case .synastry:
-            return ["anchor": formatter.string(from: now), "partner": savedPeople.first?.profile.name ?? ""]
+            let name = synastryPartnerID.flatMap { id in
+                savedPeople.first { $0.id.uuidString == id }?.profile.name
+            } ?? ""
+            return ["anchor": formatter.string(from: now), "partner": name]
         }
     }
 
@@ -848,7 +900,7 @@ final class AppModel: ObservableObject {
 
     private static func expectedCardIDs(for chart: ChartKind) -> [String] {
         switch chart {
-        case .natal: ["natal-interpretation", "career-direction", "strengths-growth", "element-balance", "house-emphasis", "chart-signature", "planet-placements", "key-aspects"]
+        case .natal: ["natal-interpretation", "love-connection", "career-direction", "strengths-growth", "element-balance", "house-emphasis", "chart-signature", "planet-placements", "key-aspects"]
         case .currentSky: ["sky-overview", "moon-now", "aspect-pattern", "planetary-motion", "sign-changes", "element-climate", "upcoming-7-days"]
         case .transit: ["current-story", "current-cycles", "transit-timeline", "planet-paths", "life-areas", "active-transits"]
         case .secondary: ["developmental-chapter", "progressed-moon", "identity-development", "turning-points", "areas-maturing", "timeline"]

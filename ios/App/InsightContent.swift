@@ -124,6 +124,7 @@ struct CorpusContentProvider {
     private static let requiredCards: [InterpretationTechnique: Set<String>] = [
         .natal: [
             "natal-interpretation",
+            "love-connection",
             "career-direction",
             "strengths-growth",
             "element-balance",

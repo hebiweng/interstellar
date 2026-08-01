@@ -37,8 +37,8 @@ enum ConsumerCopy {
     }
 
     static func connectionTitle(_ aspect: ChartAspect, language: AppLanguage) -> String {
-        let first = bodyTheme(CelestialBody(rawValue: aspect.firstID), language: language)
-        let second = bodyTheme(CelestialBody(rawValue: aspect.secondID), language: language)
+        let first = bodyName(CelestialBody(rawValue: aspect.firstID) ?? .sun, language: language)
+        let second = bodyName(CelestialBody(rawValue: aspect.secondID) ?? .moon, language: language)
         if aspect.kind.supportive {
             return localized(
                 "\(first) and \(second) work well together",

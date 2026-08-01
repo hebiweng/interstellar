@@ -302,6 +302,7 @@ public enum AstroCoreError: Error, Sendable, Equatable, LocalizedError {
     case calculationFailed(body: String, message: String)
     case swissEphemerisFallback(body: String, flags: Int32)
     case housesFailed
+    case eventNotFound(String)
 
     public var errorDescription: String? {
         switch self {
@@ -317,6 +318,8 @@ public enum AstroCoreError: Error, Sendable, Equatable, LocalizedError {
             "\(body) did not use the bundled Swiss ephemeris files (flags: \(flags))."
         case .housesFailed:
             "Swiss Ephemeris could not calculate the requested houses."
+        case let .eventNotFound(detail):
+            "No upcoming astronomical event was found: \(detail)"
         }
     }
 }

@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "00-调研待办与缺口清单.md",
+                "file": "1-主盘型/04-行运盘/6-解读设计.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "00-调研待办与缺口清单"
+              "title": "6-解读设计"
             }
           }
         ]
@@ -41,7 +41,9 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": false
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-folder-closed",
               "title": "文件列表"
@@ -185,11 +187,11 @@
   },
   "active": "9de794c38e9d7a13",
   "lastOpenFiles": [
+    "00-调研待办与缺口清单.md",
     "1-主盘型/05-天象盘/6-解读设计.md",
     "1-主盘型/05-天象盘/5-语料设计.md",
     "1-主盘型/04-行运盘/6-解读设计.md",
     "1-主盘型/04-行运盘/5-语料设计.md",
-    "00-调研待办与缺口清单.md",
     "06-报告与档案.md",
     "07-Vuex实测-设置参数全量对比.md",
     "05-解析与相位.md",

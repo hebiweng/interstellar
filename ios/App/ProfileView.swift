@@ -1,4 +1,5 @@
 import PhotosUI
+import AstroCore
 import SwiftUI
 import UIKit
 
@@ -56,6 +57,9 @@ struct ProfileView: View {
             .sheet(isPresented: $showsSettings) {
                 SettingsView()
                     .environmentObject(model)
+                    .presentationDetents([.fraction(0.82)])
+                    .presentationDragIndicator(.visible)
+                    .presentationBackgroundInteraction(.disabled)
             }
             .sheet(isPresented: $showsEditor) {
                 ProfileEditorView(profile: model.profile, language: model.language) { profile in
@@ -421,9 +425,35 @@ private struct SavedPersonEditorView: View {
     }
 }
 
+private enum LocalDataClear: Identifiable {
+    case reports
+    case askHistory
+    case aiCache
+
+    var id: String {
+        switch self {
+        case .reports: "reports"
+        case .askHistory: "askHistory"
+        case .aiCache: "aiCache"
+        }
+    }
+
+    func message(language: AppLanguage) -> String {
+        switch self {
+        case .reports:
+            localized("This removes all saved chart reports from this device.", "这会删除本机保存的全部星盘报告。", language: language)
+        case .askHistory:
+            localized("This removes your saved horary questions.", "这会删除你保存的问事记录。", language: language)
+        case .aiCache:
+            localized("Generated interpretations will be regenerated next time you open them.", "下次打开时，生成内容会重新请求。", language: language)
+        }
+    }
+}
+
 private struct SettingsView: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.dismiss) private var dismiss
+    @State private var pendingClear: LocalDataClear?
 
     var body: some View {
         NavigationStack {
@@ -448,6 +478,32 @@ private struct SettingsView: View {
                         }
                     }
                     .pickerStyle(.navigationLink)
+                }
+
+                Section(localized("Interpretation defaults", "解读预设", language: model.language)) {
+                    let presetCases = CalculationPreset.consumerCases
+                    ForEach(ChartKind.allCases) { chart in
+                        Picker(
+                            chart.title(language: model.language),
+                            selection: Binding(
+                                get: { model.preset(for: chart) },
+                                set: { model.setPreset($0, for: chart) }
+                            )
+                        ) {
+                            ForEach(presetCases) { preset in
+                                Text(preset.title(language: model.language)).tag(preset)
+                            }
+                        }
+                    }
+                    Text(
+                        localized(
+                            "Modern and Traditional change how each chart is calculated.",
+                            "现代与古典会改变每张盘的计算方式。",
+                            language: model.language
+                        )
+                    )
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
                 }
 
                 Section(localized("Language", "语言", language: model.language)) {
@@ -476,6 +532,55 @@ private struct SettingsView: View {
                     )
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+                }
+
+                Section(localized("Local data", "本地数据", language: model.language)) {
+                    Button {
+                        pendingClear = .reports
+                    } label: {
+                        Label(localized("Clear saved reports", "清除已保存报告", language: model.language), systemImage: "doc.text")
+                    }
+                    Button {
+                        pendingClear = .askHistory
+                    } label: {
+                        Label(localized("Clear ask history", "清除问事历史", language: model.language), systemImage: "questionmark.circle")
+                    }
+                    Button {
+                        pendingClear = .aiCache
+                    } label: {
+                        Label(localized("Clear generated content cache", "清除生成内容缓存", language: model.language), systemImage: "sparkles")
+                    }
+                    Text(
+                        localized(
+                            "Clearing removes data stored on this device only.",
+                            "清除只会删除保存在本机的数据。",
+                            language: model.language
+                        )
+                    )
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                }
+                .confirmationDialog(
+                    localized("Clear data?", "确认清除？", language: model.language),
+                    isPresented: Binding(
+                        get: { pendingClear != nil },
+                        set: { if !$0 { pendingClear = nil } }
+                    ),
+                    presenting: pendingClear
+                ) { item in
+                    Button(localized("Clear", "清除", language: model.language), role: .destructive) {
+                        switch item {
+                        case .reports: model.clearReports()
+                        case .askHistory: model.clearAskHistory()
+                        case .aiCache: model.clearAICache()
+                        }
+                        pendingClear = nil
+                    }
+                    Button(localized("Cancel", "取消", language: model.language), role: .cancel) {
+                        pendingClear = nil
+                    }
+                } message: { item in
+                    Text(item.message(language: model.language))
                 }
 
                 Section(localized("Support", "支持", language: model.language)) {
