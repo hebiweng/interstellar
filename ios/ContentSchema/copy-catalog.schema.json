@@ -108,7 +108,7 @@
       "properties": {
         "name": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]*$" },
         "type": {
-          "enum": ["body", "sign", "house", "aspect", "phase", "intensity", "percentage", "count", "date", "time", "duration"]
+          "enum": ["body", "sign", "house", "houseList", "aspect", "phase", "intensity", "percentage", "count", "date", "time", "duration"]
         }
       }
     },

@@ -21,25 +21,57 @@ enum InsightFactory {
         content: CorpusContentProvider?,
         copyCatalog: CopyCatalogProvider?,
         language: AppLanguage,
-        transitCalendar: [Int],
+        transitCalendar: [TransitCalendarDay],
+        transitRangeDays: Int = 7,
+        transitContentPlan: TransitContentPlan? = nil,
         preset: String? = nil,
         events: ChartEventData = .empty,
         timeZone: TimeZone = .current
     ) throws -> [InsightCardModel] {
         guard let snapshot else { return [] }
-        let cards = switch chart {
-        case .natal:
-            natalCards(snapshot, language: language)
-        case .currentSky:
-            skyCards(snapshot, events: events, language: language, timeZone: timeZone)
-        case .transit:
-            transitCards(snapshot, natal: natal, aspects: aspects, calendar: transitCalendar, events: events, language: language, timeZone: timeZone)
-        case .secondary:
-            secondaryCards(snapshot, natal: natal, aspects: aspects, events: events, language: language, timeZone: timeZone)
-        case .solarReturn:
-            solarCards(snapshot, natal: natal, aspects: aspects, events: events, language: language, timeZone: timeZone)
-        case .synastry:
-            synastryCards(snapshot, second: natal, aspects: aspects, language: language)
+        let usesModernTransitPlan = chart == .transit && preset == CalculationPreset.modern.rawValue
+        let transitPlan: TransitContentPlan?
+        let cards: [InsightCardModel]
+        if usesModernTransitPlan {
+            let plan = transitContentPlan ?? TransitContentPlanner.plan(
+                TransitFactBundleBuilder.build(
+                    snapshot: snapshot,
+                    natal: natal,
+                    crossAspects: aspects,
+                    transitWindows: events.transitWindows,
+                    planetEvents: events.transitPlanetEvents,
+                    transitCalendar: transitCalendar,
+                    rangeDays: transitRangeDays,
+                    preset: preset ?? CalculationPreset.modern.rawValue,
+                    timeZone: timeZone
+                )
+            )
+            transitPlan = plan
+            cards = transitCards(plan: plan, language: language)
+        } else {
+            transitPlan = nil
+            cards = switch chart {
+            case .natal:
+                natalCards(snapshot, language: language)
+            case .currentSky:
+                skyCards(snapshot, events: events, language: language, timeZone: timeZone)
+            case .transit:
+                legacyTransitCards(
+                    snapshot,
+                    natal: natal,
+                    aspects: aspects,
+                    calendar: transitCalendar.map(\.score),
+                    events: events,
+                    language: language,
+                    timeZone: timeZone
+                )
+            case .secondary:
+                secondaryCards(snapshot, natal: natal, aspects: aspects, events: events, language: language, timeZone: timeZone)
+            case .solarReturn:
+                solarCards(snapshot, natal: natal, aspects: aspects, events: events, language: language, timeZone: timeZone)
+            case .synastry:
+                synastryCards(snapshot, second: natal, aspects: aspects, language: language)
+            }
         }
         let renderedCards = try cards.map { draft in
             let cardAspects: [ChartAspect]
@@ -62,21 +94,29 @@ enum InsightFactory {
                 natal: natal,
                 aspects: cardAspects,
                 language: language,
-                transitCalendar: transitCalendar,
+                transitCalendar: transitCalendar.map(\.score),
                 preset: preset,
                 aspectsAreCross: aspectsAreCross,
                 events: events
             )
             let interpretation = try? content?.interpret(context)
-            let cardText = copyCatalog?.cardText(
-               chart: chart,
-               cardID: draft.id,
-               snapshot: snapshot,
-               natal: natal,
-                aspects: cardAspects,
-                preset: preset
-            )
-            if copyCatalog != nil, cardText == nil,
+            let cardText: CardTextModel?
+            if let plan = transitPlan?.card(draft.id) {
+                cardText = plan.evidence.isEmpty || plan.copySlot == nil
+                    ? nil
+                    : try copyCatalog?.transitCardText(plan: plan)
+            } else {
+                cardText = copyCatalog?.cardText(
+                    chart: chart,
+                    cardID: draft.id,
+                    snapshot: snapshot,
+                    natal: natal,
+                    aspects: cardAspects,
+                    preset: preset
+                )
+            }
+            let plannedEvidenceAvailable = transitPlan?.card(draft.id).map { !$0.evidence.isEmpty } ?? true
+            if copyCatalog != nil, cardText == nil, plannedEvidenceAvailable,
                copyCatalog?.copyRequired(chart: chart, cardID: draft.id) == true {
                 throw InsightFactoryError.invalidCardContract(
                     "\(chart.rawValue).\(draft.id) has no valid approved copy selection"
@@ -112,8 +152,12 @@ enum InsightFactory {
                 },
                 conclusionKey: "\(chart.contentPrefix).\(draft.id)",
                 conclusion: conclusion,
-                text: cardText
+                text: cardText,
+                scopeID: transitPlan?.scopeID
             )
+        }
+        if let transitPlan {
+            try validateTransitEvidence(cards: renderedCards, plan: transitPlan)
         }
         try validate(renderedCards, for: chart)
         return renderedCards
@@ -357,6 +401,154 @@ enum InsightFactory {
     // MARK: - Transits (6)
 
     private static func transitCards(
+        plan: TransitContentPlan,
+        language: AppLanguage
+    ) -> [InsightCardModel] {
+        let timeZone = TimeZone(identifier: plan.timeZoneIdentifier) ?? .current
+        let storyPlan = plan.card("current-story")!
+        let cyclePlan = plan.card("current-cycles")!
+        let timelinePlan = plan.card("transit-timeline")!
+        let pathPlan = plan.card("planet-paths")!
+        let areaPlan = plan.card("life-areas")!
+        let activePlan = plan.card("active-transits")!
+
+        let storyAspects = storyPlan.evidence.compactMap { evidence -> TransitAspectFact? in
+            guard case let .aspect(fact) = evidence.fact else { return nil }
+            return fact
+        }
+        let expanding = storyAspects.first(where: { $0.kind.supportive })
+            .map { transitAspectTitle($0, language: language) } ?? ""
+        let structuring = storyAspects.first(where: { $0.kind.challenging })
+            .map { transitAspectTitle($0, language: language) } ?? ""
+
+        let longCycle = cycleDisplay(
+            cyclePlan.evidence.first { $0.role == .longCycle },
+            language: language,
+            timeZone: timeZone
+        )
+        let currentCycle = cycleDisplay(
+            cyclePlan.evidence.first { $0.role == .currentCycle },
+            language: language,
+            timeZone: timeZone
+        )
+        let dailyCycle = cycleDisplay(
+            cyclePlan.evidence.first { $0.role == .dailyCycle },
+            language: language,
+            timeZone: timeZone
+        )
+        let timelineWindows = timelinePlan.evidence.compactMap { evidence -> TransitWindowFact? in
+            guard case let .window(fact) = evidence.fact else { return nil }
+            return fact
+        }
+
+        return [
+            card(
+                id: "current-story",
+                title: localized("Current story", "当前主线", language: language),
+                icon: "◎",
+                visual: .storyWeave(
+                    expanding: expanding,
+                    structuring: structuring,
+                    result: localized(
+                        "\(storyAspects.count) planned cross-chart aspects",
+                        "\(storyAspects.count) 个已规划的跨盘相位",
+                        language: language
+                    )
+                ),
+                facts: plannedAspectFacts(storyPlan, language: language, timeZone: timeZone),
+                language: language
+            ),
+            card(
+                id: "current-cycles",
+                title: localized("Current cycles", "当前周期", language: language),
+                icon: "◔",
+                visual: .cycleTabs(
+                    long: longCycle.title,
+                    longMeta: longCycle.meta,
+                    current: currentCycle.title,
+                    currentMeta: currentCycle.meta,
+                    daily: dailyCycle.title,
+                    dailyMeta: dailyCycle.meta
+                ),
+                facts: cyclePlan.evidence
+                    .filter { $0.role != .cycleCalendar }
+                    .compactMap {
+                        transitInsightFact(
+                            $0,
+                            anchorDate: plan.anchorDate,
+                            language: language,
+                            timeZone: timeZone
+                        )
+                    },
+                language: language
+            ),
+            card(
+                id: "transit-timeline",
+                title: localized("Transit timeline", "变化时间线", language: language),
+                icon: "⇢",
+                visual: .transitTimeline(
+                    windows: timelineWindows.compactMap(\.eventWindow),
+                    anchorDate: plan.anchorDate,
+                    rangeDays: plan.rangeDays,
+                    timeZoneIdentifier: plan.timeZoneIdentifier
+                ),
+                facts: timelinePlan.evidence.compactMap {
+                    transitInsightFact(
+                        $0,
+                        anchorDate: plan.anchorDate,
+                        language: language,
+                        timeZone: timeZone
+                    )
+                },
+                language: language
+            ),
+            card(
+                id: "planet-paths",
+                title: localized("Planet paths", "行星路径", language: language),
+                icon: "⊛",
+                visual: .positionRows,
+                facts: pathPlan.evidence.compactMap {
+                    transitInsightFact(
+                        $0,
+                        anchorDate: plan.anchorDate,
+                        language: language,
+                        timeZone: timeZone
+                    )
+                },
+                language: language
+            ),
+            card(
+                id: "life-areas",
+                title: localized("Life areas", "生活领域", language: language),
+                icon: "⌂",
+                visual: .areaRows,
+                facts: areaPlan.evidence.compactMap {
+                    transitInsightFact(
+                        $0,
+                        anchorDate: plan.anchorDate,
+                        language: language,
+                        timeZone: timeZone
+                    )
+                },
+                language: language
+            ),
+            card(
+                id: "active-transits",
+                title: localized("Active transits", "进行中的变化", language: language),
+                icon: "⌗",
+                visual: .aspectList,
+                facts: plannedActiveFacts(
+                    activePlan,
+                    anchorDate: plan.anchorDate,
+                    language: language,
+                    timeZone: timeZone
+                ),
+                language: language
+            ),
+        ]
+    }
+
+    private static func legacyTransitCards(
         _ snapshot: ChartSnapshot,
         natal: ChartSnapshot?,
         aspects: [ChartAspect],
@@ -450,7 +642,13 @@ enum InsightFactory {
             ),
             card( id: "transit-timeline",
                 title: localized("Transit timeline", "变化时间线", language: language),
-                icon: "⇢", visual: .transitTimeline(events.transitWindows),
+                icon: "⇢",
+                visual: .transitTimeline(
+                    windows: events.transitWindows,
+                    anchorDate: snapshot.utcDate,
+                    rangeDays: 30,
+                    timeZoneIdentifier: timeZone.identifier
+                ),
                 facts: transitWindowFacts(events, fallback: top, language: language, timeZone: timeZone),
                 language: language
             ),
@@ -483,6 +681,215 @@ enum InsightFactory {
                 language: language
             ),
         ]
+    }
+
+    private static func transitInsightFact(
+        _ evidence: TransitPlannedEvidence,
+        anchorDate: Date,
+        language: AppLanguage,
+        timeZone: TimeZone
+    ) -> InsightFact? {
+        switch evidence.fact {
+        case let .aspect(aspect):
+            return fact(
+                transitAspectTitle(aspect, language: language),
+                "\(phaseLabel(aspect.phase, language: language)) · \(ConsumerCopy.intensity(aspect.strength, language: language))",
+                tone(aspect.kind),
+                stableID: aspect.factID,
+                sourceFactIDs: evidence.fact.sourceFactIDs,
+                note: ConsumerCopy.lifeArea(aspect.natalHouse, language: language),
+                progress: aspect.strength,
+                symbol: aspect.kind.symbol,
+                category: cycleCategory(aspect.cycleBand)
+            )
+        case let .window(window):
+            let total = max(1, window.end.timeIntervalSince(window.start))
+            let progress = min(1, max(0, anchorDate.timeIntervalSince(window.start) / total))
+            let exactDates = window.exactDates.map {
+                $0.shortEventDate(language: language, timeZone: timeZone)
+            }
+            return fact(
+                transitWindowTitle(window, language: language),
+                exactDates.joined(separator: " · "),
+                tone(window.kind),
+                stableID: window.factID,
+                sourceFactIDs: evidence.fact.sourceFactIDs,
+                note: window.start.shortEventRange(to: window.end, language: language, timeZone: timeZone),
+                progress: progress,
+                symbol: window.kind.symbol,
+                category: cycleCategory(window.cycleBand)
+            )
+        case let .planetEvent(event):
+            return fact(
+                bodyName(event.body, language: language),
+                planetEventValue(event, language: language),
+                event.kind == .stationRetrograde ? .challenging : .transition,
+                stableID: event.factID,
+                sourceFactIDs: evidence.fact.sourceFactIDs,
+                note: event.timestamp.shortEventDate(language: language, timeZone: timeZone),
+                symbol: event.body.symbol,
+                category: evidence.role.rawValue
+            )
+        case let .placement(placement):
+            let position = [
+                "\(Zodiac.name(index: placement.signIndex, language: language)) \(Zodiac.formatDegree(placement.degreeInSign))",
+                (1 ... 12).contains(placement.natalHouse)
+                    ? ConsumerCopy.lifeArea(placement.natalHouse, language: language)
+                    : nil,
+            ].compactMap { $0 }.joined(separator: " · ")
+            return fact(
+                bodyName(placement.body, language: language),
+                position,
+                placement.retrograde ? .challenging : .neutral,
+                stableID: placement.factID,
+                sourceFactIDs: evidence.fact.sourceFactIDs,
+                note: "\(motionLabel(retrograde: placement.retrograde, language: language)) · \(String(format: "%+.4f°/d", placement.longitudeSpeedDegreesPerDay))",
+                symbol: placement.body.symbol
+            )
+        case let .lifeArea(area):
+            let percent = Int((area.normalizedScore * 100).rounded())
+            return fact(
+                ConsumerCopy.lifeArea(area.house, language: language),
+                activityLabel(percent, language: language),
+                percent > 66 ? .challenging : percent > 35 ? .transition : .neutral,
+                stableID: area.factID,
+                sourceFactIDs: evidence.fact.sourceFactIDs,
+                progress: area.normalizedScore,
+                symbol: "\(area.house)"
+            )
+        case .calendar:
+            return nil
+        }
+    }
+
+    private static func plannedActiveFacts(
+        _ plan: CardEvidencePlan,
+        anchorDate: Date,
+        language: AppLanguage,
+        timeZone: TimeZone
+    ) -> [InsightFact] {
+        let aspectFacts = plannedAspectFacts(plan, language: language, timeZone: timeZone)
+        let eventFacts = plan.evidence.compactMap { evidence -> InsightFact? in
+            guard case .planetEvent = evidence.fact else { return nil }
+            return transitInsightFact(
+                evidence,
+                anchorDate: anchorDate,
+                language: language,
+                timeZone: timeZone
+            )
+        }
+        return aspectFacts + eventFacts
+    }
+
+    private static func planetEventValue(
+        _ event: TransitPlanetEventFact,
+        language: AppLanguage
+    ) -> String {
+        switch event.kind {
+        case .signIngress:
+            guard let from = event.fromIndex, let to = event.toIndex else { return event.kind.rawValue }
+            return "\(Zodiac.name(index: from, language: language)) → \(Zodiac.name(index: to, language: language))"
+        case .houseIngress:
+            guard let to = event.toIndex else { return event.kind.rawValue }
+            return ConsumerCopy.lifeArea(to, language: language)
+        case .stationRetrograde:
+            return motionLabel(retrograde: true, language: language)
+        case .stationDirect:
+            return motionLabel(retrograde: false, language: language)
+        }
+    }
+
+    private static func plannedAspectFacts(
+        _ plan: CardEvidencePlan,
+        language: AppLanguage,
+        timeZone: TimeZone
+    ) -> [InsightFact] {
+        let windows = plan.evidence.compactMap { evidence -> TransitWindowFact? in
+            guard case let .window(window) = evidence.fact else { return nil }
+            return window
+        }
+        return plan.evidence.compactMap { evidence -> InsightFact? in
+            guard case let .aspect(aspect) = evidence.fact else { return nil }
+            let linkedWindows = windows.filter { $0.sourceAspectFactID == aspect.factID }
+            let sourceFactIDs = Array(Set(
+                evidence.fact.sourceFactIDs + linkedWindows.flatMap {
+                    [$0.factID] + [$0.sourceAspectFactID].compactMap { $0 }
+                }
+            )).sorted()
+            let exactDates = linkedWindows
+                .flatMap(\.exactDates)
+                .sorted()
+                .map { $0.shortEventDate(language: language, timeZone: timeZone) }
+            let notes = [
+                (1 ... 12).contains(aspect.natalHouse)
+                    ? ConsumerCopy.lifeArea(aspect.natalHouse, language: language)
+                    : nil,
+                exactDates.isEmpty ? nil : exactDates.joined(separator: " · "),
+            ].compactMap { $0 }
+            return fact(
+                transitAspectTitle(aspect, language: language),
+                "\(phaseLabel(aspect.phase, language: language)) · \(ConsumerCopy.intensity(aspect.strength, language: language))",
+                tone(aspect.kind),
+                stableID: aspect.factID,
+                sourceFactIDs: sourceFactIDs,
+                note: notes.isEmpty ? nil : notes.joined(separator: " · "),
+                progress: aspect.strength,
+                symbol: aspect.kind.symbol,
+                category: cycleCategory(aspect.cycleBand)
+            )
+        }
+    }
+
+    private static func transitAspectTitle(
+        _ aspect: TransitAspectFact,
+        language: AppLanguage
+    ) -> String {
+        let moving = CelestialBody(rawValue: aspect.movingID)
+            .map { bodyName($0, language: language) } ?? aspect.movingID
+        let reference = CelestialBody(rawValue: aspect.referenceID)
+            .map { bodyName($0, language: language) } ?? aspect.referenceID
+        return "\(moving) \(aspect.kind.symbol) \(reference)"
+    }
+
+    private static func transitWindowTitle(
+        _ window: TransitWindowFact,
+        language: AppLanguage
+    ) -> String {
+        let moving = CelestialBody(rawValue: window.movingID)
+            .map { bodyName($0, language: language) } ?? window.movingID
+        let reference = CelestialBody(rawValue: window.referenceID)
+            .map { bodyName($0, language: language) } ?? window.referenceID
+        return "\(moving) \(window.kind.symbol) \(reference)"
+    }
+
+    private static func cycleDisplay(
+        _ evidence: TransitPlannedEvidence?,
+        language: AppLanguage,
+        timeZone: TimeZone
+    ) -> (title: String, meta: String) {
+        guard let evidence else { return ("", "") }
+        switch evidence.fact {
+        case let .window(window):
+            return (
+                transitWindowTitle(window, language: language),
+                window.start.shortEventRange(to: window.end, language: language, timeZone: timeZone)
+            )
+        case let .aspect(aspect):
+            return (
+                transitAspectTitle(aspect, language: language),
+                "\(phaseLabel(aspect.phase, language: language)) · \(ConsumerCopy.intensity(aspect.strength, language: language))"
+            )
+        default:
+            return ("", "")
+        }
+    }
+
+    private static func cycleCategory(_ band: TransitCycleBand) -> String {
+        switch band {
+        case .longTerm: "long-term"
+        case .current: "current"
+        case .daily: "daily"
+        }
     }
 
     // MARK: - Secondary (6)
@@ -873,7 +1280,11 @@ enum InsightFactory {
     }
 
     private static func motionLabel(_ point: ChartPoint, language: AppLanguage) -> String {
-        point.retrograde
+        motionLabel(retrograde: point.retrograde, language: language)
+    }
+
+    private static func motionLabel(retrograde: Bool, language: AppLanguage) -> String {
+        retrograde
             ? localized("insight.reviewing.status", default: "Reviewing", chinese: "回顾调整中", language: language)
             : localized("Moving forward", "稳定向前", language: language)
     }
@@ -1719,6 +2130,76 @@ enum InsightFactory {
                 season.index == 0 ? .transition : .neutral,
                 note: nil
             )
+        }
+    }
+
+    private static func validateTransitEvidence(
+        cards: [InsightCardModel],
+        plan: TransitContentPlan
+    ) throws {
+        guard plan.cards.map(\.cardID) == TransitContentPlan.cardIDs else {
+            throw InsightFactoryError.invalidCardContract("transit content plan card set is incomplete")
+        }
+        var fullClaims: [String: Int] = [:]
+        for cardPlan in plan.cards {
+            for evidence in cardPlan.evidence where evidence.claimMode == .full {
+                fullClaims[evidence.fact.factID, default: 0] += 1
+            }
+        }
+        guard fullClaims.values.allSatisfy({ $0 == 1 }) else {
+            throw InsightFactoryError.invalidCardContract("a transit fact has multiple full claims")
+        }
+
+        for card in cards {
+            guard let cardPlan = plan.card(card.id) else {
+                throw InsightFactoryError.invalidCardContract("transit card \(card.id) has no evidence plan")
+            }
+            guard card.scopeID == plan.scopeID,
+                  card.text == nil || card.text?.scopeID == plan.scopeID
+            else {
+                throw InsightFactoryError.invalidCardContract("transit card \(card.id) scope does not match its content plan")
+            }
+            let plannedIDs = Set(cardPlan.sourceFactIDs)
+            let uiIDs = Set(card.facts.flatMap(\.sourceFactIDs))
+            guard uiIDs.isSubset(of: plannedIDs) else {
+                throw InsightFactoryError.invalidCardContract("transit card \(card.id) UI bypassed its evidence plan")
+            }
+            let copyIDs = Set(card.text?.sourceFactIDs ?? [])
+            guard copyIDs.isSubset(of: plannedIDs) else {
+                throw InsightFactoryError.invalidCardContract("transit card \(card.id) copy bypassed its evidence plan")
+            }
+        }
+
+        let timelineFacts = plan.card("transit-timeline")?.evidence.map(\.fact) ?? []
+        guard timelineFacts.allSatisfy({ if case .window = $0 { true } else { false } }) else {
+            throw InsightFactoryError.invalidCardContract("transit timeline contains non-window evidence")
+        }
+        let pathFacts = plan.card("planet-paths")?.evidence.map(\.fact) ?? []
+        guard pathFacts.allSatisfy({ if case .placement = $0 { true } else { false } }) else {
+            throw InsightFactoryError.invalidCardContract("planet paths contains non-placement evidence")
+        }
+        let areaFacts = plan.card("life-areas")?.evidence.map(\.fact) ?? []
+        guard areaFacts.allSatisfy({ if case .lifeArea = $0 { true } else { false } }) else {
+            throw InsightFactoryError.invalidCardContract("life areas contains non-aggregate evidence")
+        }
+        guard areaFacts.count == 12 else {
+            throw InsightFactoryError.invalidCardContract("life areas must preserve all twelve houses")
+        }
+        let story = plan.card("current-story")
+        guard story?.copySlot == .integratedStory,
+              story?.signalRoles.allSatisfy({ !$0.movingID.isEmpty && !$0.lifeAreas.isEmpty }) == true,
+              story?.integratedThemeID != nil || story?.evidence.isEmpty == true
+        else {
+            throw InsightFactoryError.invalidCardContract("current story is missing its integrated signal contract")
+        }
+        let activeFacts = plan.card("active-transits")?.evidence.map(\.fact) ?? []
+        guard activeFacts.allSatisfy({ fact in
+            switch fact {
+            case .aspect, .window, .planetEvent: true
+            default: false
+            }
+        }) else {
+            throw InsightFactoryError.invalidCardContract("active transits contains unsupported evidence")
         }
     }
 

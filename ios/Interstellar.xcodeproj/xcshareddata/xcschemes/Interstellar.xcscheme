@@ -45,6 +45,17 @@
             parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "DDD73701B185F9C466FB341C"
+               BuildableName = "InterstellarTests.xctest"
+               BlueprintName = "InterstellarTests"
+               ReferencedContainer = "container:Interstellar.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "C7D3DFB1A1D5EC9E657E67FB"
                BuildableName = "InterstellarUITests.xctest"
                BlueprintName = "InterstellarUITests"

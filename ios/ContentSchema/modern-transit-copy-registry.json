@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "chartID": "modern.transit",
+  "cardIDs": [
+    "current-story",
+    "current-cycles",
+    "transit-timeline",
+    "planet-paths",
+    "life-areas",
+    "active-transits"
+  ],
+  "copySlots": [
+    "integratedStory",
+    "signalRole",
+    "cycleChapter",
+    "planetPathShort",
+    "lifeAreaShort",
+    "activeTransitShort"
+  ],
+  "integratedThemeIDs": [
+    "expansion-structure",
+    "focused-expansion",
+    "durable-structure",
+    "steady-realignment"
+  ],
+  "storySignalRoleIDs": [
+    "expanding",
+    "structuring",
+    "disrupting",
+    "stabilizing",
+    "supporting"
+  ],
+  "storySignalRoleVariables": [
+    { "name": "transitPlanet", "type": "body" },
+    { "name": "lifeAreas", "type": "houseList" }
+  ],
+  "cycleRoleIDs": [
+    "longCycle",
+    "currentCycle",
+    "dailyCycle"
+  ],
+  "activeRoleIDs": [
+    "active",
+    "activeSignIngress",
+    "activeHouseIngress",
+    "activeStationRetrograde",
+    "activeStationDirect"
+  ],
+  "themeIDs": [
+    "career.restructuring",
+    "career.visibility",
+    "commitment.deepening",
+    "communication.friction",
+    "communication.opening",
+    "confidence.expansion",
+    "direction.alignment",
+    "direction.reorientation",
+    "direction.turning-point",
+    "emotional.disruption",
+    "emotional.sensitivity",
+    "emotional.stability",
+    "emotional.weight",
+    "healing.integration",
+    "home.adjustment",
+    "identity.reconstruction",
+    "identity.reinvention",
+    "imagination.opening",
+    "independence.growth",
+    "learning.expansion",
+    "mental.clarity",
+    "mental.review",
+    "momentum.blocked",
+    "momentum.rising",
+    "money.review",
+    "relationship.boundaries",
+    "relationship.freedom",
+    "relationship.intensity",
+    "relationship.opening",
+    "responsibility.pressure",
+    "routine.disruption",
+    "social.boundaries",
+    "social.expansion",
+    "structure.building",
+    "transformation.release",
+    "trust.deepening",
+    "uncertainty.fog",
+    "values.reassessment"
+  ],
+  "houseThemeFallbacks": {
+    "1": { "supportive": "confidence.expansion", "challenging": "identity.reinvention", "neutral": "identity.reconstruction" },
+    "2": { "supportive": "structure.building", "challenging": "money.review", "neutral": "values.reassessment" },
+    "3": { "supportive": "communication.opening", "challenging": "communication.friction", "neutral": "mental.review" },
+    "4": { "supportive": "emotional.stability", "challenging": "home.adjustment", "neutral": "emotional.disruption" },
+    "5": { "supportive": "confidence.expansion", "challenging": "relationship.intensity", "neutral": "imagination.opening" },
+    "6": { "supportive": "structure.building", "challenging": "routine.disruption", "neutral": "healing.integration" },
+    "7": { "supportive": "relationship.opening", "challenging": "relationship.boundaries", "neutral": "commitment.deepening" },
+    "8": { "supportive": "trust.deepening", "challenging": "relationship.intensity", "neutral": "transformation.release" },
+    "9": { "supportive": "learning.expansion", "challenging": "uncertainty.fog", "neutral": "mental.review" },
+    "10": { "supportive": "career.visibility", "challenging": "career.restructuring", "neutral": "responsibility.pressure" },
+    "11": { "supportive": "social.expansion", "challenging": "social.boundaries", "neutral": "independence.growth" },
+    "12": { "supportive": "healing.integration", "challenging": "uncertainty.fog", "neutral": "emotional.sensitivity" }
+  },
+  "motionStatesByBody": {
+    "sun": ["direct"],
+    "moon": ["direct"],
+    "mercury": ["direct", "retrograde"],
+    "venus": ["direct", "retrograde"],
+    "mars": ["direct", "retrograde"],
+    "jupiter": ["direct", "retrograde"],
+    "saturn": ["direct", "retrograde"],
+    "uranus": ["direct", "retrograde"],
+    "neptune": ["direct", "retrograde"],
+    "pluto": ["direct", "retrograde"],
+    "trueNode": ["direct", "retrograde"]
+  }
+}

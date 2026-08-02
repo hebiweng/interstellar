@@ -81,7 +81,22 @@ targets:
     scheme:
       gatherCoverageData: true
       testTargets:
+        - InterstellarTests
         - InterstellarUITests
+  InterstellarTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests
+    dependencies:
+      - target: Interstellar
+      - package: AstroCore
+    settings:
+      base:
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: M2A7RHP7MT
+        PRODUCT_BUNDLE_IDENTIFIER: com.xiaoguiwk.interstellar.tests
+        GENERATE_INFOPLIST_FILE: YES
   InterstellarUITests:
     type: bundle.ui-testing
     platform: iOS

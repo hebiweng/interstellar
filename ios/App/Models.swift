@@ -351,6 +351,12 @@ struct InsightFact: Identifiable, Equatable {
     var note: String? { interpretation }
 }
 
+struct TransitCalendarDay: Codable, Equatable, Sendable {
+    let date: Date
+    let score: Int
+    let sourceFactIDs: [String]
+}
+
 enum InsightTone: String, Equatable {
     case supportive
     case challenging
@@ -377,7 +383,12 @@ enum InsightVisual: Equatable {
     case activityGauge(value: Int, supportive: Int, adjustment: Int)
     case transitOverview(intensity: Int, rhythm: [Double])
     case gantt
-    case transitTimeline([ChartEventData.TransitWindow])
+    case transitTimeline(
+        windows: [ChartEventData.TransitWindow],
+        anchorDate: Date,
+        rangeDays: Int,
+        timeZoneIdentifier: String
+    )
     case balanceRing(supportive: Int, challenging: Int, neutral: Int)
     case houseRadar([Double])
     case actionGuidance
@@ -427,6 +438,7 @@ struct InsightCardModel: Identifiable, Equatable {
     let conclusionKey: String?
     let conclusion: String
     let text: CardTextModel?
+    let scopeID: String?
 
     init(
         id: String,
@@ -436,7 +448,8 @@ struct InsightCardModel: Identifiable, Equatable {
         facts: [InsightFact],
         conclusionKey: String? = nil,
         conclusion: String,
-        text: CardTextModel? = nil
+        text: CardTextModel? = nil,
+        scopeID: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -446,6 +459,7 @@ struct InsightCardModel: Identifiable, Equatable {
         self.conclusionKey = conclusionKey
         self.conclusion = conclusion
         self.text = text
+        self.scopeID = scopeID
     }
 
     // Compatibility for views still referring to the former summary field.
@@ -466,8 +480,9 @@ struct CardTextModel: Codable, Equatable, Sendable {
     let startLabel: String?
     let endLabel: String?
     let themeID: String?
-    let sourceSignalIDs: [String]
+    let sourceFactIDs: [String]
     let copyPackID: String?
+    let scopeID: String?
 }
 
 struct InsightCardLoadState {

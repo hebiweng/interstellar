@@ -496,5 +496,19 @@ iOS 首版已完成可构建的纵向实现，尚未提交或推送：
 - 验证通过：`npm run ios:copy:validate`、`npm run architecture:check`、`npm run lint -- --quiet`。
 - 注意：沙箱无法写入 `.git/index`，旧文件已从工作区删除，但未自动 staging。提交前需要手动运行 `git add -u` 或 `git rm --cached` 处理这些删除。
 
+### 2026-08-02 更新：现代行运六卡 Copy 决策链路
+
+- 现代行运已改为唯一链路：`TransitFactBundle → TransitContentPlanner → TransitContentPlan → UI / Copy / GeneratedChartArtifact`。六张卡 ID、顺序、UI 外壳和现有语料 JSON 未改；Classical 与其他盘型未迁移。
+- `TransitFactBundle` 完整承接 scoped 交叉相位、相位窗口关联、重复精确触发、行星位置、十二宫聚合、7/30/90 天日历、换座/换宫/转逆/转顺事件、完整时间戳、时区和权威 `sourceFactIDs`。
+- `TransitContentPlanner` 一次生成六个 `CardEvidencePlan`；每条 evidence 独立保存 `claimMode` 和 `role`。Current Story 支持主信号与辅助信号，并输出 `signalRole`、行运行星、生活领域、`integratedThemeID` 和统一来源；Timeline 只接收窗口并仅使用技术格式化内容；Planet Paths 保留完整位置列表；Life Areas 保留全部十二宫；Active Transits 同时接收相位、关联窗口与四类行星事件。
+- UI、Copy 和 AI 证据文档均消费同一 scope 的计划；聚焦行运盘不再混入主计划的窗口或日历；缓存恢复、行运地点覆盖、聚焦计算和 AI 使用相同的行运时区与地点。旧的 `StandardCopySignals.primaryAspect` 和忽略 `cardID` 的伪 Evidence Planner 已删除。
+- 行运窗口的 repeated pass 只在同一真实 orb 窗口内认领；`passIndex` 计入窗口内历史精确次数，`passCount` 计入历史、当前与后续精确次数，避免把下一轮普通周期误标为 returning。
+- `ios/ContentSchema/modern-transit-copy-registry.json` 冻结 6 个 Copy 槽、4 个综合主题、5 个 Story 角色和 38 个有限主题 ID。`signalRole` 使用 `transitPlanet: body` 与 `lifeAreas: houseList` 两个强类型变量；`transit-timeline` 不占用 Copy 槽。
+- `scripts/export-modern-transit-copy-keys.mjs` 穷举所有合法请求并与英文运行时 Catalog 对比。当前共 219 条结构需求，缺失 175 条，全部位于 `integratedStory`、`signalRole`、`cycleChapter` 和 `activeTransitShort`；Timeline 无文案需求，Planet Paths 与 Life Areas 所需共享键已存在。
+- 导出文件位于被 Git 忽略的 `ios/TranslationExports/modern-transit-copy-requirements.json` 与 `ios/TranslationExports/modern-transit-missing-copy.json`。每项只含 key、cardID、copySlot、theme/integratedTheme/role、强类型变量、使用条件、`requiredBy` 和 Catalog 状态，不含消费者正文。
+- 10 组固定 fixture 覆盖混合、纯支持、纯挑战、中性、全空、仅窗口、仅事件、重复触发、完整路径/十二宫和范围过滤。iPhone 12 mini 模拟器执行 11 项 Planner 门禁测试，0 失败。
+- 已通过 `ios:copy:validate`、`ios:localization:validate`、卡片合同、私有内容边界、`architecture:check` 和 `lint -- --quiet`。英文缺失 key 尚未编写正文；正式文案生成前，四个新专属槽命中时按合同返回 `missing-copy`，禁止回退其他卡片或盘型正文。
+- 剩余性能风险：行星事件为保证换宫精度采用 6 小时采样；7 天后台刷新已正常运行，90 天范围尚未完成真机耗时基准，后续只能优化计算扫描，不能减少计划事实合同。
+
 
 > AI生成

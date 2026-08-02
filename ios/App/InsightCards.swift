@@ -303,7 +303,14 @@ private struct InsightVisualView: View {
             case let .transitOverview(intensity, rhythm):
                 transitOverview(intensity: intensity, rhythm: rhythm)
             case .gantt: gantt
-            case let .transitTimeline(windows): TransitTimelineView(windows: windows, language: language)
+            case let .transitTimeline(windows, anchorDate, rangeDays, timeZoneIdentifier):
+                TransitTimelineView(
+                    windows: windows,
+                    anchorDate: anchorDate,
+                    rangeDays: rangeDays,
+                    timeZoneIdentifier: timeZoneIdentifier,
+                    language: language
+                )
             case let .balanceRing(supportive, challenging, neutral):
                 ringMetric(supportive: supportive, challenging: challenging, neutral: neutral)
             case let .houseRadar(values): houseRadar(values)
@@ -1432,20 +1439,43 @@ private struct InsightVisualView: View {
 
     private struct TransitTimelineView: View {
         let windows: [ChartEventData.TransitWindow]
+        let anchorDate: Date
+        let rangeDays: Int
+        let timeZoneIdentifier: String
         let language: AppLanguage
-        @State private var selectedDays: Int = 30
+        @State private var selectedDays: Int
         @State private var showCalendar = false
-        @State private var timeZone = TimeZone.current
+        private var timeZone: TimeZone { TimeZone(identifier: timeZoneIdentifier) ?? .current }
 
-        private var axisStart: Date { Date() }
-        private var axisEnd: Date { Date().addingTimeInterval(Double(selectedDays) * 86_400) }
+        init(
+            windows: [ChartEventData.TransitWindow],
+            anchorDate: Date,
+            rangeDays: Int,
+            timeZoneIdentifier: String,
+            language: AppLanguage
+        ) {
+            self.windows = windows
+            self.anchorDate = anchorDate
+            self.rangeDays = rangeDays
+            self.timeZoneIdentifier = timeZoneIdentifier
+            self.language = language
+            _selectedDays = State(initialValue: rangeDays)
+        }
+
+        private var axisStart: Date { anchorDate }
+        private var axisEnd: Date {
+            var calendar = Calendar(identifier: .gregorian)
+            calendar.timeZone = timeZone
+            return calendar.date(byAdding: .day, value: selectedDays, to: anchorDate)
+                ?? anchorDate.addingTimeInterval(Double(selectedDays) * 86_400)
+        }
 
         var body: some View {
             VStack(alignment: .leading, spacing: 11) {
                 HStack(spacing: 6) {
                     rangeButton(7, localized("7 days", "7 天", language: language))
                     rangeButton(30, localized("30 days", "30 天", language: language))
-                    rangeButton(365, localized("12 months", "12 个月", language: language))
+                    rangeButton(90, localized("90 days", "90 天", language: language))
                     Spacer()
                 }
                 HStack(spacing: 6) {
@@ -1511,7 +1541,7 @@ private struct InsightVisualView: View {
                         let total = max(1, axisEnd.timeIntervalSince(axisStart))
                         let barStart = max(0, start.timeIntervalSince(axisStart) / total)
                         let barEnd = max(0, end.timeIntervalSince(axisStart) / total)
-                        let nowRatio = min(1, max(0, Date().timeIntervalSince(axisStart) / total))
+                        let anchorRatio = min(1, max(0, anchorDate.timeIntervalSince(axisStart) / total))
                         VStack(alignment: .leading, spacing: 5) {
                             HStack {
                                 Text(title)
@@ -1536,7 +1566,7 @@ private struct InsightVisualView: View {
                                         .fill(Color.white)
                                         .overlay(Circle().stroke(AppTheme.violet, lineWidth: 2.5))
                                         .frame(width: 9, height: 9)
-                                        .offset(x: proxy.size.width * nowRatio - 4.5)
+                                        .offset(x: proxy.size.width * anchorRatio - 4.5)
                                 }
                             }
                             .frame(height: 10)
@@ -1547,9 +1577,12 @@ private struct InsightVisualView: View {
         }
 
         private var calendarGrid: some View {
-            let eventDates = Set(windows.flatMap { [$0.start, $0.exact, $0.end].map { Calendar.current.startOfDay(for: $0) } })
-            let calendar = Calendar.current
-            let today = calendar.startOfDay(for: Date())
+            var calendar = Calendar(identifier: .gregorian)
+            calendar.timeZone = timeZone
+            let eventDates = Set(windows.flatMap {
+                [$0.start, $0.exact, $0.end] + [$0.repeatExact, $0.nextExact].compactMap { $0 }
+            }.map { calendar.startOfDay(for: $0) })
+            let today = calendar.startOfDay(for: anchorDate)
             let first = calendar.date(from: calendar.dateComponents([.year, .month], from: today)) ?? today
             let firstWeekday = calendar.component(.weekday, from: first)
             let daysInMonth = calendar.range(of: .day, in: .month, for: first)?.count ?? 30

@@ -18,23 +18,6 @@
         }
       }
     },
-    "12 months": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "12 months"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "12 个月"
-          }
-        }
-      }
-    },
     "24-month timeline": {
       "extractionState": "manual",
       "localizations": {

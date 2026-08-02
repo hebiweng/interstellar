@@ -69,7 +69,8 @@ final class AppModel: ObservableObject {
     @Published private(set) var todaySignals: [DailySignal] = []
     @Published private(set) var todayContributions: [WeeklySignalContribution] = []
     @Published private(set) var todayDashboardModel: TodayDashboardModel?
-    @Published private(set) var transitCalendar: [Int] = []
+    @Published private(set) var transitCalendar: [TransitCalendarDay] = []
+    @Published private(set) var transitContentPlan: TransitContentPlan?
     @Published private(set) var chartEvents = ChartEventData.empty
     @Published private(set) var weeklyForecast: WeeklyForecastModel = .empty
     @Published private(set) var isCalculating = false
@@ -489,10 +490,22 @@ final class AppModel: ObservableObject {
             isCalculating = false
             isEnriching = true
             do {
+                let transitTimeZone = TimeZone(identifier: transitLocation.timezoneID) ?? .current
+                let transitScopeID = TransitFactBundleBuilder.makeScopeID(
+                    snapshot: transitMovingSnapshot,
+                    natal: transitReferenceSnapshot,
+                    crossAspects: transitAspects,
+                    preset: preset(for: .transit).rawValue,
+                    timeZoneIdentifier: transitTimeZone.identifier,
+                    rangeDays: transitRangeDays
+                )
                 transitCalendar = try await buildTransitCalendar(
                     calculator: calculator,
                     natal: transitReferenceSnapshot,
-                    startingAt: now
+                    startingAt: transitDate,
+                    rangeDays: transitRangeDays,
+                    scopeID: transitScopeID,
+                    timeZone: transitTimeZone
                 )
                 logRefreshTiming("transit-calendar-ready", since: refreshStartedAt)
                 weeklyForecast = try await buildWeeklyForecast(
@@ -512,10 +525,21 @@ final class AppModel: ObservableObject {
                     location: subjectProfile.location,
                     skySnapshot: skySnapshot,
                     skyPreset: preset(for: .currentSky),
+                    transitNatal: transitReferenceSnapshot,
+                    transitPreset: preset(for: .transit),
+                    transitRangeDays: transitRangeDays,
+                    timeZone: transitTimeZone,
                     transitAspects: transitAspects,
                     progressedSnapshot: progressedSnapshot,
                     progressedAspects: progressedAspects,
                     solarReturnMoment: solarReturnSnapshot.utcDate
+                )
+                transitContentPlan = makeTransitContentPlan(
+                    snapshot: transitMovingSnapshot,
+                    natal: transitReferenceSnapshot,
+                    aspects: transitAspects,
+                    events: chartEvents,
+                    timeZone: transitTimeZone
                 )
                 saveSnapshotCache()
                 logRefreshTiming("chart-events-ready", since: refreshStartedAt)
@@ -587,6 +611,15 @@ final class AppModel: ObservableObject {
         progressedAspects = cached.progressedAspects
         transitCalendar = cached.transitCalendar
         chartEvents = cached.chartEvents
+        transitContentPlan = makeTransitContentPlan(
+            snapshot: cached.transit,
+            natal: cached.transitReference,
+            aspects: cached.transitAspects,
+            events: cached.chartEvents,
+            timeZone: TimeZone(
+                identifier: transitLocationOverride?.timezoneID ?? chartSubjectProfile.timezoneID
+            ) ?? .current
+        )
     }
 
     private func saveSnapshotCache() {
@@ -727,18 +760,43 @@ final class AppModel: ObservableObject {
                 catalogResult = Result { try CopyCatalogProvider(language: language) }
                 copyCatalogProviders[language] = catalogResult
             }
+            let cardSnapshot = snapshot(for: chart)
+            let cardNatal = chart.isComparison ? referenceSnapshot(for: chart) : natal
+            let cardAspects = comparisonAspects(for: chart)
+            let isFocusedTransit = focusedChart == .transit && chart == .transit
+            let cardEvents = focusedChart == chart ? .empty : chartEvents
+            let cardTimeZoneID = chart == .transit
+                ? transitLocationOverride?.timezoneID ?? chartSubjectProfile.timezoneID
+                : chartSubjectProfile.timezoneID
+            let cardTimeZone = TimeZone(identifier: cardTimeZoneID) ?? .current
+            let cardTransitCalendar = isFocusedTransit ? [] : transitCalendar
+            let plannedTransit = chart == .transit && preset(for: chart) == .modern
+                ? makeTransitContentPlan(
+                    snapshot: cardSnapshot,
+                    natal: cardNatal,
+                    aspects: cardAspects,
+                    events: cardEvents,
+                    timeZone: cardTimeZone,
+                    calendarDays: cardTransitCalendar
+                )
+                : nil
+            if chart == .transit {
+                transitContentPlan = plannedTransit
+            }
             let cards = try InsightFactory.make(
                 chart: chart,
-                snapshot: snapshot(for: chart),
-                natal: chart.isComparison ? referenceSnapshot(for: chart) : natal,
-                aspects: comparisonAspects(for: chart),
+                snapshot: cardSnapshot,
+                natal: cardNatal,
+                aspects: cardAspects,
                 content: provider,
                 copyCatalog: try catalogResult.get(),
                 language: language,
-                transitCalendar: transitCalendar,
+                transitCalendar: cardTransitCalendar,
+                transitRangeDays: transitRangeDays,
+                transitContentPlan: plannedTransit,
                 preset: preset(for: chart).rawValue,
-                events: focusedChart == chart ? .empty : chartEvents,
-                timeZone: TimeZone(identifier: chartSubjectProfile.timezoneID) ?? .current
+                events: cardEvents,
+                timeZone: cardTimeZone
             )
             return .loaded(cards)
         } catch {
@@ -977,8 +1035,11 @@ final class AppModel: ObservableObject {
             } else {
                 movingDate = date
             }
+            let movingLocation = chart == .transit
+                ? transitLocationOverride?.geographicLocation ?? subject.location
+                : subject.location
             let snapshot = try await calculator.calculateSnapshot(
-                NatalInput(utcDate: movingDate, location: subject.location),
+                NatalInput(utcDate: movingDate, location: movingLocation),
                 preset: preset(for: chart),
                 aspectOrbDegrees: chart == .secondary ? 3 : 6
             )
@@ -1171,23 +1232,24 @@ final class AppModel: ObservableObject {
     private func buildTransitCalendar(
         calculator: SwissEphemerisCalculator,
         natal: ChartSnapshot,
-        startingAt date: Date
-    ) async throws -> [Int] {
+        startingAt date: Date,
+        rangeDays: Int,
+        scopeID: String,
+        timeZone: TimeZone
+    ) async throws -> [TransitCalendarDay] {
         var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: profile.timezoneID) ?? .current
+        calendar.timeZone = timeZone
         let start = calendar.startOfDay(for: date)
-        var values: [Int] = []
-        values.reserveCapacity(7)
+        let location = transitLocationOverride?.geographicLocation ?? chartSubjectProfile.location
+        var values: [TransitCalendarDay] = []
+        values.reserveCapacity(rangeDays)
 
-        for offset in 0 ..< 7 {
+        for offset in 0 ..< rangeDays {
             guard let day = calendar.date(byAdding: .day, value: offset, to: start),
                   let localNoon = calendar.date(byAdding: .hour, value: 12, to: day)
-            else {
-                values.append(0)
-                continue
-            }
+            else { continue }
             let moving = try await calculator.calculateSnapshot(
-                NatalInput(utcDate: localNoon, location: profile.location),
+                NatalInput(utcDate: localNoon, location: location),
                 preset: preset(for: .transit)
             )
             let aspects = SwissEphemerisCalculator.compare(
@@ -1196,14 +1258,48 @@ final class AppModel: ObservableObject {
                 orbDegrees: 3
             )
             let strongest = Array(aspects.prefix(8))
-            guard !strongest.isEmpty else {
-                values.append(0)
-                continue
-            }
-            let density = strongest.reduce(0) { $0 + $1.strength } / 8
-            values.append(Int(min(1, density) * 100))
+            let density = strongest.isEmpty
+                ? 0
+                : strongest.reduce(0) { $0 + $1.strength } / 8
+            values.append(
+                TransitCalendarDay(
+                    date: day,
+                    score: Int(min(1, density) * 100),
+                    sourceFactIDs: strongest.map {
+                        TransitFactBundleBuilder.calendarSourceFactID(
+                            scopeID: scopeID,
+                            date: day,
+                            aspect: $0,
+                            timeZone: timeZone
+                        )
+                    }.sorted()
+                )
+            )
         }
         return values
+    }
+
+    private func makeTransitContentPlan(
+        snapshot: ChartSnapshot?,
+        natal: ChartSnapshot?,
+        aspects: [ChartAspect],
+        events: ChartEventData,
+        timeZone: TimeZone,
+        calendarDays: [TransitCalendarDay]? = nil
+    ) -> TransitContentPlan? {
+        guard let snapshot else { return nil }
+        let bundle = TransitFactBundleBuilder.build(
+            snapshot: snapshot,
+            natal: natal,
+            crossAspects: aspects,
+            transitWindows: events.transitWindows,
+            planetEvents: events.transitPlanetEvents,
+            transitCalendar: calendarDays ?? transitCalendar,
+            rangeDays: transitRangeDays,
+            preset: preset(for: .transit).rawValue,
+            timeZone: timeZone
+        )
+        return TransitContentPlanner.plan(bundle)
     }
     // MARK: - AI generation (LLM interpretation + reports)
 
@@ -1368,6 +1464,12 @@ final class AppModel: ObservableObject {
         evidenceIDs: [String]
     ) -> [String: [String]] {
         let available = Set(evidenceIDs)
+        if chart == .transit, let plan = transitContentPlan {
+            return Dictionary(uniqueKeysWithValues: cardIDs.map { cardID in
+                let sourceFactIDs = plan.card(cardID)?.sourceFactIDs.filter(available.contains) ?? []
+                return (cardID, sourceFactIDs)
+            })
+        }
         let pointIDs = evidenceIDs.filter { $0.hasPrefix("point.") }
         let aspectIDs = evidenceIDs.filter { $0.hasPrefix("aspect.") }
         let angleIDs = evidenceIDs.filter { $0.hasPrefix("angle.") }
@@ -1443,7 +1545,7 @@ final class AppModel: ObservableObject {
         } else {
             partner = nil
         }
-        return AIFactsBuilder.document(
+        var document = AIFactsBuilder.document(
             chart: chart,
             snapshot: snapshot,
             reference: reference,
@@ -1457,6 +1559,152 @@ final class AppModel: ObservableObject {
             locale: language.corpusLanguage.rawValue,
             cardIDs: cardIDs
         )
+        if chart == .transit {
+            let timeZone = TimeZone(
+                identifier: transitLocationOverride?.timezoneID ?? chartSubjectProfile.timezoneID
+            ) ?? .current
+            let isFocusedTransit = focusedChart == .transit
+            let plan = makeTransitContentPlan(
+                snapshot: snapshot,
+                natal: reference,
+                aspects: comparison,
+                events: isFocusedTransit ? .empty : chartEvents,
+                timeZone: timeZone,
+                calendarDays: isFocusedTransit ? [] : transitCalendar
+            )
+            transitContentPlan = plan
+            if let plan {
+                document["transitContentPlan"] = transitPlanDocument(plan)
+                document["evidenceFacts"] = transitEvidenceFacts(plan)
+            }
+        }
+        return document
+    }
+
+    private func transitPlanDocument(_ plan: TransitContentPlan) -> [String: Any] {
+        [
+            "scopeID": plan.scopeID,
+            "anchorDate": ISO8601DateFormatter().string(from: plan.anchorDate),
+            "timeZone": plan.timeZoneIdentifier,
+            "rangeDays": plan.rangeDays,
+            "preset": plan.preset,
+            "cards": plan.cards.map { card in
+                [
+                    "cardID": card.cardID,
+                    "copySlot": card.copySlot.map { $0.rawValue as Any } ?? NSNull(),
+                    "primaryFactID": card.primaryFactID.map { $0 as Any } ?? NSNull(),
+                    "integratedThemeID": card.integratedThemeID.map { $0.rawValue as Any } ?? NSNull(),
+                    "sourceFactIDs": card.sourceFactIDs,
+                    "evidence": card.evidence.map {
+                        [
+                            "factID": $0.fact.factID,
+                            "claimMode": $0.claimMode.rawValue,
+                            "roleID": $0.role.rawValue,
+                        ]
+                    },
+                    "signals": card.signalRoles.map {
+                        [
+                            "signalID": $0.signalID,
+                            "signalRole": $0.signalRole.rawValue,
+                            "transitPlanet": $0.movingID,
+                            "lifeAreas": $0.lifeAreas,
+                            "sourceFactIDs": $0.sourceFactIDs,
+                        ]
+                    },
+                ]
+            },
+        ]
+    }
+
+    private func transitEvidenceFacts(_ plan: TransitContentPlan) -> [[String: Any]] {
+        var factsByID: [String: [String: Any]] = [:]
+        for evidence in plan.cards.flatMap(\.evidence) {
+            let fact = evidence.fact
+            factsByID[fact.factID] = transitEvidenceDocument(fact)
+            for sourceFactID in fact.sourceFactIDs where factsByID[sourceFactID] == nil {
+                factsByID[sourceFactID] = [
+                    "id": sourceFactID,
+                    "kind": "source-reference",
+                ]
+            }
+        }
+        return factsByID.values.sorted {
+            ($0["id"] as? String ?? "") < ($1["id"] as? String ?? "")
+        }
+    }
+
+    private func transitEvidenceDocument(_ fact: TransitFact) -> [String: Any] {
+        switch fact {
+        case let .aspect(value):
+            return [
+                "id": value.factID,
+                "kind": "transit-aspect",
+                "movingID": value.movingID,
+                "referenceID": value.referenceID,
+                "aspect": value.kind.rawValue,
+                "orbDegrees": value.orbDegrees,
+                "phase": value.phase.rawValue,
+                "strength": value.strength,
+                "movingLongitude": value.movingLongitude,
+                "referenceLongitude": value.referenceLongitude,
+                "natalHouse": value.natalHouse,
+            ]
+        case let .window(value):
+            return [
+                "id": value.factID,
+                "kind": "transit-window",
+                "sourceAspectFactID": value.sourceAspectFactID.map { $0 as Any } ?? NSNull(),
+                "start": ISO8601DateFormatter().string(from: value.start),
+                "exact": ISO8601DateFormatter().string(from: value.exact),
+                "end": ISO8601DateFormatter().string(from: value.end),
+                "repeatExact": value.repeatExact.map { ISO8601DateFormatter().string(from: $0) } ?? NSNull(),
+                "nextExact": value.nextExact.map { ISO8601DateFormatter().string(from: $0) } ?? NSNull(),
+                "passIndex": value.passIndex,
+                "passCount": value.passCount,
+                "returning": value.returning,
+                "timeZone": value.timeZoneIdentifier,
+            ]
+        case let .planetEvent(value):
+            return [
+                "id": value.factID,
+                "kind": "transit-planet-event",
+                "body": value.body.rawValue,
+                "eventKind": value.kind.rawValue,
+                "timestamp": ISO8601DateFormatter().string(from: value.timestamp),
+                "timeZone": value.timeZoneIdentifier,
+                "fromIndex": value.fromIndex.map { $0 as Any } ?? NSNull(),
+                "toIndex": value.toIndex.map { $0 as Any } ?? NSNull(),
+            ]
+        case let .placement(value):
+            return [
+                "id": value.factID,
+                "kind": "transit-placement",
+                "body": value.body.rawValue,
+                "longitudeDegrees": value.longitudeDegrees,
+                "signIndex": value.signIndex,
+                "degreeInSign": value.degreeInSign,
+                "natalHouse": value.natalHouse,
+                "retrograde": value.retrograde,
+                "longitudeSpeedDegreesPerDay": value.longitudeSpeedDegreesPerDay,
+            ]
+        case let .lifeArea(value):
+            return [
+                "id": value.factID,
+                "kind": "transit-life-area",
+                "house": value.house,
+                "normalizedScore": value.normalizedScore,
+                "sourceFactIDs": value.contributingFactIDs,
+            ]
+        case let .calendar(value):
+            return [
+                "id": value.factID,
+                "kind": "transit-calendar-day",
+                "date": ISO8601DateFormatter().string(from: value.date),
+                "score": value.score,
+                "sourceFactIDs": value.sourceFactIDs,
+                "timeZone": value.timeZoneIdentifier,
+            ]
+        }
     }
 
     private var profileHashValue: String {
@@ -1728,7 +1976,7 @@ final class AppModel: ObservableObject {
 }
 
 private struct SnapshotCachePayload: Codable {
-    static let currentSchemaVersion = 1
+    static let currentSchemaVersion = 3
 
     let schemaVersion: Int
     let configurationFingerprint: String
@@ -1744,7 +1992,7 @@ private struct SnapshotCachePayload: Codable {
     let synastry: SynastryComparison?
     let transitAspects: [ChartAspect]
     let progressedAspects: [ChartAspect]
-    let transitCalendar: [Int]
+    let transitCalendar: [TransitCalendarDay]
     let chartEvents: ChartEventData
 }
 

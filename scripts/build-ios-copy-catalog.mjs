@@ -168,7 +168,8 @@ function declaredVariables(template) {
 
 function variableType(name) {
   const types = {
-    planet: "body", first: "body", second: "body", sign: "sign", houseLabel: "house",
+    planet: "body", transitPlanet: "body", first: "body", second: "body", sign: "sign",
+    houseLabel: "house", lifeAreas: "houseList",
     aspect: "aspect", phase: "phase", intensity: "intensity", orb: "intensity",
     percent: "percentage", count: "count", date: "date", day: "date", start: "date",
     end: "date", time: "time", duration: "duration",
