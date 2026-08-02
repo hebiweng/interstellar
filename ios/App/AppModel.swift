@@ -772,13 +772,23 @@ final class AppModel: ObservableObject {
             copyCatalogProviders[language] = result
         }
         guard let matcher = try? result.get() else { return nil }
-        return matcher.todayText(
-            cardID: cardID,
-            sky: sky,
-            transit: transit,
-            natal: natal,
-            transitAspects: todayTransitAspectsForContent.isEmpty ? transitAspects : todayTransitAspectsForContent
+       return matcher.todayText(
+           cardID: cardID,
+           sky: sky,
+           transit: transit,
+           natal: natal,
+            transitAspects: todayTransitAspectsForContent.isEmpty ? transitAspects : todayTransitAspectsForContent,
+            preset: todayCardPreset(cardID)
         )
+    }
+
+    private func todayCardPreset(_ cardID: String) -> String {
+        switch cardID {
+        case "current-chapter", "active-today", "coming-next":
+            return preset(for: .transit).rawValue
+        default:
+            return preset(for: .currentSky).rawValue
+        }
     }
 
     func selectChart(_ chart: ChartKind) {

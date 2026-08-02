@@ -85,13 +85,25 @@ private struct RuntimeThemeRule: Codable {
     let themeID: String
 }
 
+private struct RuntimeCopyContract: Codable {
+    let id: String
+    let technique: String
+    let cardID: String
+    let selector: String
+    let facts: [String]
+    let evidenceByPreset: [String: [String]]
+    let textFields: [String]
+    let copySourceByPreset: [String: [String]]
+}
+
 private struct RuntimeCopyCatalog: Codable {
     let schemaVersion: Int
     let contentVersion: String
     let locale: String
     let status: String
+    let contracts: [RuntimeCopyContract]
     let entries: [RuntimeCopyEntry]
-    let themeRules: [RuntimeThemeRule]
+    let themeRulesByPreset: [String: [RuntimeThemeRule]]
 }
 
 enum CopyCatalogError: LocalizedError {
@@ -173,14 +185,25 @@ private enum ThemeMapper {
     }
 }
 
+/// A resolved selection references one or two source paths. The runtime pack
+/// stores both flat leaf strings and grouped headline/body maps; `textModel`
+/// reads whichever is available.
+private struct CopySelection {
+    let basePath: String?
+    let secondaryPath: String?
+    let themeID: String?
+    let signalIDs: [String]
+}
+
 /// Runtime access to the normalized project catalog. Source attachments are
 /// converted by build-ios-copy-catalog.mjs and are never read by the App.
 struct CopyCatalogMatcher {
     private let pack: RuntimeCopyCatalog
     private let entriesByPath: [String: RuntimeCopyEntry]
+    private let contractsByID: [String: RuntimeCopyContract]
 
     init(language: AppLanguage, bundle: Bundle = .main) throws {
-        let locale = language.corpusLanguage.rawValue
+        let locale = language.rawValue
         let resourceName = "CopyCatalog-\(locale)"
         let urls = [
             bundle.url(forResource: resourceName, withExtension: "json"),
@@ -191,7 +214,7 @@ struct CopyCatalogMatcher {
         }
         do {
             let decoded = try JSONDecoder().decode(RuntimeCopyCatalog.self, from: Data(contentsOf: url))
-            guard decoded.schemaVersion == 1,
+            guard decoded.schemaVersion == 2,
                   decoded.locale == locale,
                   decoded.status == "approved"
             else {
@@ -207,6 +230,7 @@ struct CopyCatalogMatcher {
             }
             pack = decoded
             entriesByPath = Dictionary(uniqueKeysWithValues: pairs)
+            contractsByID = Dictionary(uniqueKeysWithValues: decoded.contracts.map { ($0.id, $0) })
         } catch let error as CopyCatalogError {
             throw error
         } catch {
@@ -234,14 +258,44 @@ struct CopyCatalogMatcher {
         return rendered
     }
 
+    private func valueIfPresent(at sourcePath: String, variables: [String: String] = [:]) -> String? {
+        try? value(at: sourcePath, variables: variables)
+    }
+
+    /// Returns true when the card's contract expects consumer-visible headline or body text.
+    /// Rows-only or technical-only cards may return nil without breaking the build.
+    func copyRequired(chart: ChartKind, cardID: String) -> Bool {
+        let technique: String
+        switch chart {
+        case .natal: technique = "natal"
+        case .currentSky: technique = "current-sky"
+        case .transit: technique = "transit"
+        case .secondary: technique = "secondary"
+        case .solarReturn: technique = "solar-return"
+        case .synastry: technique = "synastry"
+        }
+        guard let contract = contractsByID["\(technique).\(cardID)"] else { return true }
+        let fields = contract.textFields
+        return fields.contains("headline") || fields.contains("body") || fields.contains("allDisplayedFields") || fields.contains("secondary")
+    }
+
     func cardText(
         chart: ChartKind,
         cardID: String,
         snapshot: ChartSnapshot,
         natal: ChartSnapshot?,
-        aspects: [ChartAspect]
+        aspects: [ChartAspect],
+        preset: String? = nil
     ) -> CardTextModel? {
-        let selection = copySelection(chart: chart, cardID: cardID, snapshot: snapshot, natal: natal, aspects: aspects)
+        // Classical preset copy selection is not yet fully implemented; use modern paths as a safe fallback.
+        let _ = preset
+        let selection = copySelection(
+            chart: chart,
+            cardID: cardID,
+            snapshot: snapshot,
+            natal: natal,
+            aspects: aspects
+        )
         return textModel(from: selection, cardID: cardID)
     }
 
@@ -250,8 +304,11 @@ struct CopyCatalogMatcher {
         sky: ChartSnapshot,
         transit: ChartSnapshot,
         natal: ChartSnapshot,
-        transitAspects: [ChartAspect]
+        transitAspects: [ChartAspect],
+        preset: String? = nil
     ) -> CardTextModel? {
+        // Classical preset copy selection is not yet fully implemented; use modern paths as a safe fallback.
+        let _ = preset
         let selection: CopySelection?
         switch cardID {
         case "current-chapter":
@@ -264,8 +321,8 @@ struct CopyCatalogMatcher {
             selection = copySelection(chart: .currentSky, cardID: "moon-now", snapshot: sky, natal: natal, aspects: sky.aspects)
         case "today-timeline":
             let strongest = sky.aspects.max(by: { $0.strength < $1.strength })
-            selection = strongest.flatMap(aspectCopyPath).map {
-                CopySelection(headline: nil, body: $0, secondary: nil, themeID: nil, signalIDs: strongest.map { [$0.id] } ?? [])
+            selection = strongest.flatMap { aspectCopyPath($0) }.map {
+                CopySelection(basePath: $0, secondaryPath: nil, themeID: nil, signalIDs: strongest.map { [$0.id] } ?? [])
             }
         case "upcoming-sky-events":
             selection = copySelection(chart: .currentSky, cardID: "upcoming-7-days", snapshot: sky, natal: natal, aspects: sky.aspects)
@@ -279,16 +336,17 @@ struct CopyCatalogMatcher {
 
     private func textModel(from selection: CopySelection?, cardID: String) -> CardTextModel? {
         guard let selection else { return nil }
-        let headline = selection.headline.flatMap { try? value(at: $0) }
-        let body = selection.body.flatMap { try? value(at: $0) }
-        let secondary = selection.secondary.flatMap { try? value(at: $0) }
-        guard headline != nil || body != nil || secondary != nil else { return nil }
+        let resolved = selection.basePath.map { resolve(base: $0) }
+        let secondaryBody = selection.secondaryPath.flatMap { resolve(base: $0).body }
+        let headline = resolved?.headline
+        let body = resolved?.body
+        guard headline != nil || body != nil || secondaryBody != nil else { return nil }
         return CardTextModel(
             sectionLabel: nil,
             cardLabel: cardID,
             headline: headline,
             body: body,
-            secondaryBody: secondary,
+            secondaryBody: secondaryBody,
             areaLabel: nil,
             statusLabel: nil,
             technicalLabel: nil,
@@ -296,8 +354,15 @@ struct CopyCatalogMatcher {
             endLabel: nil,
             themeID: selection.themeID,
             sourceSignalIDs: selection.signalIDs,
-            copyPackID: "\(pack.contentVersion):\(selection.body ?? selection.headline ?? cardID)"
+            copyPackID: "\(pack.contentVersion):\(selection.basePath ?? selection.secondaryPath ?? cardID)"
         )
+    }
+
+    private func resolve(base: String) -> (headline: String?, body: String?, secondary: String?) {
+        let headline = valueIfPresent(at: "\(base).headline") ?? valueIfPresent(at: "\(base).label")
+        let body = valueIfPresent(at: "\(base).body") ?? valueIfPresent(at: base)
+        let secondary = valueIfPresent(at: "\(base).secondary")
+        return (headline, body, secondary)
     }
 
     private func copySelection(
@@ -314,7 +379,7 @@ struct CopyCatalogMatcher {
             .sorted { $0.strength > $1.strength }
             .first { aspect in
                 guard let path = aspectCopyPath(aspect) else { return false }
-                return entriesByPath[path] != nil
+                return hasEntry(under: path)
             }
         let aspectPath = copyableAspect.flatMap(aspectCopyPath)
         let aspectSignalIDs = copyableAspect.map { [$0.id] } ?? evidence.sourceFactIDs
@@ -323,88 +388,155 @@ struct CopyCatalogMatcher {
         let ascSign = signKey(signals.ascendantSignIndex)
         let leadingHouse = leadingHouse(in: snapshot, aspects: aspects)
         let atmosphere = skyAtmosphere(snapshot)
+        let themeRules = pack.themeRulesByPreset["modern"] ?? []
 
         switch chart {
         case .natal:
             let signature = temperament(snapshot)
             switch cardID {
-            case "natal-interpretation", "element-balance":
-                return pair("natal.bigThree.\(signature.element).\(signature.mode)", signalIDs: snapshot.points.prefix(3).map(\.id))
-            case "emotional-needs": return pair("natal.moonNeeds.\(moonSign)", signalIDs: ["moon.sign"])
+            case "natal-interpretation":
+                return pair("modern.natal.bigThree.\(signature.element).\(signature.mode)", signalIDs: snapshot.points.prefix(3).map(\.id))
+            case "element-balance":
+                return pair("modern.natal.bigThree.\(signature.element).\(signature.mode)", signalIDs: snapshot.points.prefix(3).map(\.id))
+            case "emotional-needs":
+                return pair("shared.natal.moonNeeds.\(moonSign)", signalIDs: ["moon.sign"])
             case "love-connection":
                 let venusSign = snapshot.point(.venus).map { signKey($0.signIndex) } ?? "aries"
-                let base = "natal.loveElementMatrix.\(element(for: venusSign)).\(element(for: moonSign))"
-                return CopySelection(headline: nil, body: base, secondary: "natal.venusGives.\(venusSign)", themeID: nil, signalIDs: ["venus.sign", "moon.sign"])
-            case "career-direction": return pair("natal.mcDirection.\(signKey(Int(snapshot.angles.midheavenDegrees / 30) % 12))", signalIDs: ["mc.sign"])
-            case "strengths-growth", "key-aspects": return aspectPath.map { CopySelection(headline: nil, body: $0, secondary: nil, themeID: nil, signalIDs: aspectSignalIDs) }
-            case "house-emphasis": return CopySelection(headline: nil, body: "shared.maturingArea.\(leadingHouse)", secondary: nil, themeID: nil, signalIDs: ["house.\(leadingHouse)"])
-            case "chart-signature": return CopySelection(headline: nil, body: "shared.chartRulerCopy.\(ruler(for: ascSign))", secondary: nil, themeID: nil, signalIDs: ["ascendant.sign"])
-            case "planet-placements": return CopySelection(headline: nil, body: "natal.placement.sun.\(sunSign)", secondary: nil, themeID: nil, signalIDs: ["sun.sign"])
-            default: return nil
+                let base = "shared.natal.loveElementMatrix.\(element(for: venusSign)).\(element(for: moonSign))"
+                return CopySelection(basePath: base, secondaryPath: "shared.natal.venusGives.\(venusSign)", themeID: nil, signalIDs: ["venus.sign", "moon.sign"])
+            case "career-direction":
+                return pair("shared.natal.mcDirection.\(signKey(Int(snapshot.angles.midheavenDegrees / 30) % 12))", signalIDs: ["mc.sign"])
+            case "strengths-growth", "key-aspects":
+                guard let aspectPath else { return nil }
+                return CopySelection(basePath: aspectPath, secondaryPath: nil, themeID: nil, signalIDs: aspectSignalIDs)
+            case "house-emphasis":
+                return pair("shared.lifeAreas.\(leadingHouse)", signalIDs: ["house.\(leadingHouse)"])
+            case "chart-signature":
+                return pair("modern.rulership.chartRulerCopy.\(ruler(for: ascSign))", signalIDs: ["ascendant.sign"])
+            case "planet-placements":
+                let sunPlacement = "modern.natal.placement.sun.\(sunSign)"
+                let moonPlacement = "modern.natal.placement.moon.\(moonSign)"
+                return CopySelection(basePath: sunPlacement, secondaryPath: moonPlacement, themeID: nil, signalIDs: ["sun.sign", "moon.sign"])
+            default:
+                return nil
             }
         case .currentSky:
             switch cardID {
-            case "moon-now": return pair("shared.lunarPhase.\(lunarPhaseKey(snapshot)).", trailingDot: true, signalIDs: ["moon.phase", "moon.sign"])
+            case "moon-now":
+                return pair("shared.lunarPhase.\(lunarPhaseKey(snapshot))", signalIDs: ["moon.phase", "moon.sign"])
             case "planetary-motion":
                 let point = snapshot.points.first(where: \.retrograde) ?? snapshot.points.first
                 guard let point else { return nil }
                 let state = point.retrograde ? "retrograde" : "direct"
-                return CopySelection(headline: nil, body: "shared.bodyMotion.\(point.body.rawValue).\(state)", secondary: nil, themeID: nil, signalIDs: [point.id])
+                return pair("shared.bodyMotion.\(point.body.rawValue).\(state)", signalIDs: [point.id])
             case "sign-changes":
-                return CopySelection(headline: nil, body: "shared.signStyle.\(moonSign)", secondary: nil, themeID: nil, signalIDs: ["moon.sign"])
+                return pair("shared.signStyle.\(moonSign)", signalIDs: ["moon.sign"])
             case "sky-overview", "aspect-pattern", "element-climate", "upcoming-7-days":
-                return pair("currentSky.skyAtmosphere.\(atmosphere)", signalIDs: snapshot.aspects.prefix(3).map(\.id))
-            default: return nil
+                return pair("shared.currentSky.skyAtmosphere.\(atmosphere)", signalIDs: snapshot.aspects.prefix(3).map(\.id))
+            default:
+                return nil
             }
         case .transit:
             let themeID = ThemeMapper.themeID(
                 for: primaryAspect,
                 house: leadingHouse,
-                rules: pack.themeRules,
-                houseFallback: { house, tone in try? value(at: "transit.houseFallback.\(house).\(tone)") }
+                rules: themeRules,
+                houseFallback: { house, tone in valueIfPresent(at: "shared.transit.houseFallback.\(house).\(tone)") }
             )
-            let slot = cardID == "active-transits" ? "active" : (cardID == "transit-timeline" ? "coming" : "chapter")
-            return pair("transit.themePacks.\(themeID).\(slot)", themeID: themeID, signalIDs: aspectSignalIDs)
+            switch cardID {
+            case "current-story", "current-cycles", "active-transits", "transit-timeline":
+                let slot = cardID == "current-story" ? "chapter" : (cardID == "transit-timeline" ? "coming" : "active")
+                return pair("shared.transit.themePacks.\(themeID).\(slot)", themeID: themeID, signalIDs: aspectSignalIDs)
+            case "planet-paths":
+                guard let body = prominentMovingBody(in: snapshot) else { return nil }
+                let state = body.retrograde ? "retrograde" : "direct"
+                return CopySelection(
+                    basePath: "shared.bodyMotion.\(body.id).\(state)",
+                    secondaryPath: "shared.lifeAreas.\(leadingHouse)",
+                    themeID: nil,
+                    signalIDs: [body.id]
+                )
+            case "life-areas":
+                return pair("shared.lifeAreas.\(leadingHouse)", signalIDs: ["house.\(leadingHouse)"])
+            default:
+                return nil
+            }
         case .secondary:
             switch cardID {
-            case "developmental-chapter", "timeline": return pair("secondary.progressedPhase.\(progressedPhaseKey(snapshot))", signalIDs: ["progressed.phase"])
-            case "progressed-moon": return pair("natal.moonNeeds.\(moonSign)", signalIDs: ["progressed.moon.sign"])
-            case "identity-development": return CopySelection(headline: nil, body: "secondary.progressedSun.\(sunSign)", secondary: nil, themeID: nil, signalIDs: ["progressed.sun.sign"])
-            case "areas-maturing": return CopySelection(headline: nil, body: "shared.maturingArea.\(leadingHouse)", secondary: nil, themeID: nil, signalIDs: ["house.\(leadingHouse)"])
-            case "turning-points": return aspectPath.map { CopySelection(headline: nil, body: $0, secondary: nil, themeID: nil, signalIDs: aspectSignalIDs) }
-            default: return nil
+            case "developmental-chapter":
+                return pair("shared.secondary.progressedPhase.\(progressedPhaseKey(snapshot))", signalIDs: ["progressed.phase"])
+            case "progressed-moon":
+                return pair("shared.natal.moonNeeds.\(moonSign)", signalIDs: ["progressed.moon.sign"])
+            case "identity-development":
+                return pair("modern.secondary.progressedSun.\(sunSign)", signalIDs: ["progressed.sun.sign"])
+            case "areas-maturing":
+                return pair("shared.maturingArea.\(leadingHouse)", signalIDs: ["house.\(leadingHouse)"])
+            case "turning-points":
+                guard let aspectPath else { return nil }
+                return CopySelection(basePath: aspectPath, secondaryPath: nil, themeID: nil, signalIDs: aspectSignalIDs)
+            case "timeline":
+                return pair("shared.secondary.progressedPhase.\(progressedPhaseKey(snapshot))", signalIDs: ["progressed.phase"])
+            default:
+                return nil
             }
         case .solarReturn:
+            let ascSign = signKey(Int(snapshot.angles.ascendantDegrees / 30) % 12)
             switch cardID {
-            case "year-theme", "year-anchors", "priority-areas", "natal-overlay": return pair("solarReturn.solarAsc.\(ascSign)", signalIDs: ["solar.ascendant.sign"])
-            case "year-timeline": return pair("solarReturn.solarQuarters.1", signalIDs: ["solar.quarter.1"])
-            case "year-dynamics", "year-aspects": return aspectPath.map { CopySelection(headline: nil, body: $0, secondary: nil, themeID: nil, signalIDs: aspectSignalIDs) }
-            default: return nil
+            case "year-theme":
+                return pair("shared.solarReturn.solarAsc.\(ascSign)", signalIDs: ["solar.ascendant.sign"])
+            case "year-dynamics", "year-aspects":
+                guard let aspectPath else { return nil }
+                return CopySelection(basePath: aspectPath, secondaryPath: nil, themeID: nil, signalIDs: aspectSignalIDs)
+            case "year-anchors", "year-timeline":
+                let quarter = currentQuarter(from: snapshot.utcDate)
+                return pair("shared.solarReturn.solarQuarters.\(quarter)", signalIDs: ["solar.quarter.\(quarter)"])
+            case "priority-areas":
+                return pair("shared.lifeAreas.\(leadingHouse)", signalIDs: ["house.\(leadingHouse)"])
+            case "natal-overlay":
+                let angle = closestNatalOverlayAngle(solar: snapshot, natal: natal)
+                return pair("shared.overlayAngles.\(angle)", signalIDs: ["natal.angle.\(angle)"])
+            default:
+                return nil
             }
         case .synastry:
             let overview = synastryOverview(aspects)
             switch cardID {
-            case "relationship-overview", "perspectives": return pair("synastry.overview.\(overview)", signalIDs: aspects.prefix(3).map(\.id))
-            case "house-overlays": return CopySelection(headline: nil, body: "synastry.houseOverlay.\(leadingHouse)", secondary: nil, themeID: nil, signalIDs: ["overlay.house.\(leadingHouse)"])
+            case "relationship-overview":
+                return pair("shared.synastry.overview.\(overview)", signalIDs: aspects.prefix(3).map(\.id))
+            case "perspectives":
+                return CopySelection(
+                    basePath: "shared.synastryRoles.sun",
+                    secondaryPath: "shared.synastryRoles.moon",
+                    themeID: nil,
+                    signalIDs: aspects.prefix(3).map(\.id)
+                )
             case "emotional-connection", "communication", "chemistry", "commitment", "key-inter-aspects":
-                return aspectPath.map { CopySelection(headline: nil, body: $0, secondary: nil, themeID: nil, signalIDs: aspectSignalIDs) }
-            default: return nil
+                guard let aspectPath else { return nil }
+                return CopySelection(basePath: aspectPath, secondaryPath: nil, themeID: nil, signalIDs: aspectSignalIDs)
+            case "house-overlays":
+                return pair("shared.synastry.houseOverlay.\(leadingHouse)", signalIDs: ["house.\(leadingHouse)"])
+            default:
+                return nil
             }
         }
     }
 
-    private func pair(_ base: String, trailingDot: Bool = false, themeID: String? = nil, signalIDs: [String]) -> CopySelection {
-        let normalized = trailingDot ? String(base.dropLast()) : base
-        return CopySelection(headline: "\(normalized).headline", body: "\(normalized).body", secondary: nil, themeID: themeID, signalIDs: signalIDs)
+    private func pair(_ base: String, themeID: String? = nil, signalIDs: [String]) -> CopySelection {
+        CopySelection(basePath: base, secondaryPath: nil, themeID: themeID, signalIDs: signalIDs)
     }
 
     private func aspectCopyPath(_ aspect: ChartAspect) -> String? {
-        let allowed = Set(CelestialBody.allCases.filter { $0 != .trueNode }.map(\.rawValue))
+        let modernOrder = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"]
+        let order = modernOrder
+        let allowed = Set(order)
         guard allowed.contains(aspect.firstID), allowed.contains(aspect.secondID) else { return nil }
-        let order = CelestialBody.allCases.map(\.rawValue)
         let pair = [aspect.firstID, aspect.secondID].sorted { (order.firstIndex(of: $0) ?? 99) < (order.firstIndex(of: $1) ?? 99) }
         let tone = aspect.kind.supportive ? "supportive" : (aspect.kind.challenging ? "challenging" : "neutral")
-        return "natal.aspectCopy.\(pair[0]).\(pair[1]).\(tone)"
+        return "modern.natal.aspectCopy.\(pair[0]).\(pair[1]).\(tone)"
+    }
+
+    private func hasEntry(under base: String) -> Bool {
+        entriesByPath[base] != nil || entriesByPath.keys.contains { $0.hasPrefix(base + ".") }
     }
 
     private func temperament(_ snapshot: ChartSnapshot) -> (element: String, mode: String) {
@@ -488,18 +620,48 @@ struct CopyCatalogMatcher {
     private func ruler(for sign: String) -> String {
         ["aries": "mars", "taurus": "venus", "gemini": "mercury", "cancer": "moon", "leo": "sun", "virgo": "mercury", "libra": "venus", "scorpio": "pluto", "sagittarius": "jupiter", "capricorn": "saturn", "aquarius": "uranus", "pisces": "neptune"][sign] ?? "sun"
     }
+    private func currentQuarter(from date: Date) -> String {
+        let month = Calendar.current.component(.month, from: date)
+        if month <= 3 { return "1" }
+        if month <= 6 { return "2" }
+        if month <= 9 { return "3" }
+        return "4"
+    }
+
+    private func normalizeDegrees(_ value: Double) -> Double {
+        var v = value.truncatingRemainder(dividingBy: 360)
+        if v < 0 { v += 360 }
+        return v
+    }
+
+    private func angularDistance(_ a: Double, _ b: Double) -> Double {
+        let diff = abs(normalizeDegrees(a) - normalizeDegrees(b))
+        return min(diff, 360 - diff)
+    }
+
+    private func closestNatalOverlayAngle(solar: ChartSnapshot, natal: ChartSnapshot?) -> String {
+        guard let natal = natal else { return "ASC" }
+        let solarLongitude = solar.point(.sun)?.longitudeDegrees ?? solar.angles.ascendantDegrees
+        let asc = natal.angles.ascendantDegrees
+        let mc = natal.angles.midheavenDegrees
+        let dsc = (asc + 180).truncatingRemainder(dividingBy: 360)
+        let ic = (mc + 180).truncatingRemainder(dividingBy: 360)
+        let candidates = [("ASC", asc), ("DSC", dsc), ("MC", mc), ("IC", ic)]
+        let closest = candidates.min { angularDistance(solarLongitude, $0.1) < angularDistance(solarLongitude, $1.1) }
+        return closest?.0 ?? "ASC"
+    }
+
+    private func prominentMovingBody(in snapshot: ChartSnapshot) -> ChartPoint? {
+        let moving: [CelestialBody] = [.mercury, .venus, .mars, .jupiter, .saturn, .uranus, .neptune, .pluto]
+        if let retro = snapshot.points.first(where: { moving.contains($0.body) && $0.retrograde }) { return retro }
+        if let direct = snapshot.points.first(where: { moving.contains($0.body) }) { return direct }
+        return snapshot.point(.sun) ?? snapshot.points.first
+    }
+
 }
 
 /// Compatibility name for call sites while the v6 content pipeline migrates.
 typealias CopyCatalogProvider = CopyCatalogMatcher
-
-private struct CopySelection {
-    let headline: String?
-    let body: String?
-    let secondary: String?
-    let themeID: String?
-    let signalIDs: [String]
-}
 
 enum ConsumerContentError: Error, LocalizedError {
     case missingEntry(String)

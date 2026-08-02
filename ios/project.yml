@@ -61,9 +61,12 @@ targets:
         script: |
           set -eu
           cd "$SRCROOT/.."
-          export PATH="$HOME/.local/bin:$PATH"
+          export PATH=~/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH
+          command -v node >/dev/null 2>&1 || { echo "node not found in PATH=$PATH" >&2; exit 1; }
           node scripts/build-ios-copy-catalog.mjs --validate-runtime ios/App/Resources/CopyCatalog-en.json
           node scripts/build-ios-copy-catalog.mjs --validate-runtime ios/App/Resources/CopyCatalog-zh-Hans.json
+          node scripts/build-ios-copy-catalog.mjs --validate-runtime ios/App/Resources/CopyCatalog-es.json
+          node scripts/build-ios-copy-catalog.mjs --validate-runtime ios/App/Resources/CopyCatalog-fr.json
           node scripts/build-ios-localization.mjs --validate
         inputFiles:
           - $(SRCROOT)/App/Resources/CopyCatalog-en.json

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://interstellar.xiaoguiwk.com/schema/copy-catalog.schema.json",
-  "title": "Interstellar reviewed consumer copy catalog",
+  "title": "Interstellar reviewed consumer copy catalog v2",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -11,12 +11,12 @@
     "status",
     "contracts",
     "entries",
-    "themeRules"
+    "themeRulesByPreset"
   ],
   "properties": {
-    "schemaVersion": { "const": 1 },
+    "schemaVersion": { "const": 2 },
     "contentVersion": { "type": "string", "minLength": 1 },
-    "locale": { "enum": ["en", "zh-Hans"] },
+    "locale": { "enum": ["en", "zh-Hans", "es", "fr"] },
     "status": { "enum": ["approved", "needs-fix"] },
     "contracts": {
       "type": "array",
@@ -29,16 +29,36 @@
       "minItems": 1,
       "items": { "$ref": "#/$defs/copyEntry" }
     },
-    "themeRules": {
-      "type": "array",
-      "items": { "$ref": "#/$defs/themeRule" }
+    "themeRulesByPreset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["modern", "classical"],
+      "properties": {
+        "modern": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/themeRule" }
+        },
+        "classical": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/themeRule" }
+        }
+      }
     }
   },
   "$defs": {
     "cardContract": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "technique", "cardID", "selector", "factRefs", "evidence", "textFields", "copySources"],
+      "required": [
+        "id",
+        "technique",
+        "cardID",
+        "selector",
+        "facts",
+        "evidenceByPreset",
+        "textFields",
+        "copySourceByPreset"
+      ],
       "properties": {
         "id": { "type": "string", "pattern": "^[a-z0-9.-]+$" },
         "technique": {
@@ -46,10 +66,39 @@
         },
         "cardID": { "type": "string", "pattern": "^[a-z0-9-]+$" },
         "selector": { "type": "string", "pattern": "^[a-z0-9-]+\\.[a-z0-9-]+\\.v[0-9]+$" },
-        "factRefs": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^[A-Za-z0-9.-]+$" }, "uniqueItems": true },
-        "evidence": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
-        "textFields": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
-        "copySources": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+        "facts": {
+          "type": "array",
+          "minItems": 0,
+          "items": { "type": "string", "pattern": "^[A-Za-z0-9.-]+$" },
+          "uniqueItems": true
+        },
+        "evidenceByPreset": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "pattern": "^[A-Za-z0-9.-]+$" },
+            "uniqueItems": true
+          },
+          "propertyNames": { "enum": ["modern", "classical"] },
+          "minProperties": 1
+        },
+        "textFields": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "copySourceByPreset": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "propertyNames": { "enum": ["modern", "classical"] },
+          "minProperties": 1
+        }
       }
     },
     "declaredVariable": {
@@ -75,7 +124,7 @@
       ],
       "properties": {
         "id": { "type": "string", "pattern": "^copy\\.[a-z0-9.-]+$" },
-        "locale": { "enum": ["en", "zh-Hans"] },
+        "locale": { "enum": ["en", "zh-Hans", "es", "fr"] },
         "status": { "enum": ["approved", "needs-fix"] },
         "kind": { "enum": ["consumer", "technical"] },
         "sourcePath": { "type": "string", "minLength": 1 },
@@ -97,10 +146,10 @@
           "type": "array",
           "minItems": 2,
           "maxItems": 2,
-          "items": { "type": "string", "pattern": "^[a-z-]+$" }
+          "items": { "type": "string", "pattern": "^[a-zA-Z0-9-]+$" }
         },
         "tone": { "enum": ["supportive", "challenging", "neutral"] },
-        "themeID": { "type": "string", "pattern": "^[a-z]+\\.[a-z]+$" }
+        "themeID": { "type": "string", "pattern": "^[a-zA-Z0-9-]+\\.[a-zA-Z0-9-]+$" }
       }
     }
   }

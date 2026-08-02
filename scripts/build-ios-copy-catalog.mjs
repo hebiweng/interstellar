@@ -9,6 +9,9 @@ import addFormats from "ajv-formats";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const args = parseArguments(process.argv.slice(2));
+
+const v2Locales = ["en", "zh-Hans", "es", "fr"];
+const sourceRoots = ["shared", "modern", "classical"];
 const expectedTechniques = {
   natal: ["natal-interpretation", "emotional-needs", "love-connection", "career-direction", "strengths-growth", "element-balance", "house-emphasis", "chart-signature", "planet-placements", "key-aspects"],
   "current-sky": ["sky-overview", "moon-now", "aspect-pattern", "planetary-motion", "sign-changes", "element-climate", "upcoming-7-days"],
@@ -18,6 +21,7 @@ const expectedTechniques = {
   synastry: ["relationship-overview", "perspectives", "emotional-connection", "communication", "chemistry", "commitment", "house-overlays", "key-inter-aspects"],
   today: ["current-chapter", "active-today", "coming-next", "moon-today", "today-timeline", "upcoming-sky-events", "retrogrades"],
 };
+
 if (args["validate-runtime"]) {
   const runtimePath = path.resolve(args["validate-runtime"]);
   const runtimePack = readJSON(runtimePath, "runtime copy catalog");
@@ -25,6 +29,7 @@ if (args["validate-runtime"]) {
   console.log(`Validated ${path.relative(repositoryRoot, runtimePath)} (${runtimePack.contracts.length} contracts, ${runtimePack.entries.length} entries)`);
   process.exit(0);
 }
+
 const inputPath = path.resolve(args.input ?? "");
 const outputPath = path.resolve(args.output ?? "");
 const trustApproved = Boolean(args["trust-approved"]);
@@ -32,32 +37,34 @@ const trustApproved = Boolean(args["trust-approved"]);
 if (!inputPath || !outputPath) fail("--input and --output are required");
 const source = readJSON(inputPath, "source copy catalog");
 validateSourceEnvelope(source, trustApproved);
-const contracts = normalizeContracts(source.contracts);
-const entries = flattenCopyEntries(source);
-const themeRules = normalizeThemeRules(source.transit?.themeRules ?? []);
-const runtimePack = {
-  schemaVersion: 1,
-  contentVersion: source.version,
-  locale: source.locale,
-  status: source.status === "approved" ? "approved" : "needs-fix",
-  contracts,
-  entries,
-  themeRules,
-};
+const runtimePack = buildRuntimePack(source);
 
 validateRuntimePack(runtimePack);
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 fs.writeFileSync(outputPath, `${JSON.stringify(runtimePack, null, 2)}\n`);
 console.log(`Built ${path.relative(repositoryRoot, outputPath)}`);
-console.log(`${contracts.length} contracts, ${entries.length} copy entries, ${themeRules.length} theme rules`);
+console.log(`${runtimePack.contracts.length} contracts, ${runtimePack.entries.length} copy entries, ${runtimePack.themeRulesByPreset.modern.length} modern theme rules, ${runtimePack.themeRulesByPreset.classical.length} classical theme rules`);
 
 function validateSourceEnvelope(value, bypassReview) {
   if (!value || typeof value !== "object" || Array.isArray(value)) fail("Catalog must be an object");
-  if (!value.version || !["en", "zh-Hans"].includes(value.locale)) fail("Catalog version or locale is invalid");
+  if (!value.version || !v2Locales.includes(value.locale)) fail("Catalog version or locale is invalid");
   if (!bypassReview && value.status !== "approved") fail(`Catalog ${value.locale} is not approved`);
-  for (const key of ["contracts", "shared", "natal", "currentSky", "transit", "secondary", "solarReturn", "synastry"]) {
+  for (const key of sourceRoots) {
     if (!value[key] || typeof value[key] !== "object") fail(`Catalog is missing ${key}`);
   }
+  if (!value.contracts || typeof value.contracts !== "object") fail("Catalog is missing contracts");
+}
+
+function buildRuntimePack(source) {
+  return {
+    schemaVersion: 2,
+    contentVersion: source.version,
+    locale: source.locale,
+    status: source.status === "approved" ? "approved" : "needs-fix",
+    contracts: normalizeContracts(source.contracts),
+    entries: flattenCopyEntries(source),
+    themeRulesByPreset: normalizeThemeRulesByPreset(source),
+  };
 }
 
 function normalizeContracts(sourceContracts) {
@@ -70,41 +77,65 @@ function normalizeContracts(sourceContracts) {
     for (const cardID of cardIDs) {
       const contract = techniqueContracts[cardID];
       if (!contract) fail(`Missing contract ${technique}.${cardID}`);
+      const evidenceByPreset = {};
+      const copySourceByPreset = {};
+      for (const preset of ["modern", "classical"]) {
+        if (contract.evidenceByPreset?.[preset]) {
+          evidenceByPreset[preset] = uniqueStrings(
+            [...(Array.isArray(contract.evidenceByPreset[preset]) ? contract.evidenceByPreset[preset] : [])],
+            `${technique}.${cardID}.evidenceByPreset.${preset}`,
+          );
+        }
+        if (contract.copySourceByPreset?.[preset]) {
+          copySourceByPreset[preset] = uniqueStrings(
+            String(contract.copySourceByPreset[preset]).split("+").filter(Boolean).map((s) => normalizeCopySource(s, technique)),
+            `${technique}.${cardID}.copySourceByPreset.${preset}`,
+          );
+        }
+      }
+      if (Object.keys(evidenceByPreset).length === 0) fail(`${technique}.${cardID} has no evidenceByPreset`);
+      if (Object.keys(copySourceByPreset).length === 0) fail(`${technique}.${cardID} has no copySourceByPreset`);
       contracts.push({
         id: `${technique}.${cardID}`,
         technique,
         cardID,
-        selector: `${technique}.${cardID}.v1`,
-        factRefs: uniqueStrings(
-          [...(Array.isArray(contract.facts) ? contract.facts : []), ...contract.evidence],
-          `${technique}.${cardID}.factRefs`,
+        selector: `${technique}.${cardID}.v2`,
+        facts: uniqueStringsAllowEmpty(
+          [...(Array.isArray(contract.facts) ? contract.facts : [])],
+          `${technique}.${cardID}.facts`,
         ),
-        evidence: uniqueStrings(contract.evidence, `${technique}.${cardID}.evidence`),
+        evidenceByPreset,
         textFields: uniqueStrings(contract.textFields, `${technique}.${cardID}.textFields`),
-        copySources: uniqueStrings(String(contract.copySource ?? "").split("+").filter(Boolean), `${technique}.${cardID}.copySource`),
+        copySourceByPreset,
       });
     }
   }
   return contracts;
 }
 
+function normalizeCopySource(sourceName, technique) {
+  if (sourceName === "themePacks" || sourceName.startsWith("themePacks.")) return "shared.transit.themePacks";
+  if (sourceName === "shared.transit.themePacks" || sourceName.startsWith("shared.transit.themePacks.")) return "shared.transit.themePacks";
+  return sourceName;
+}
+
 function flattenCopyEntries(sourceCatalog) {
-  const roots = ["shared", "natal", "currentSky", "transit", "secondary", "solarReturn", "synastry"];
   const result = [];
-  for (const root of roots) visit(sourceCatalog[root], [root], result, sourceCatalog.locale);
+  for (const root of sourceRoots) visit(sourceCatalog[root], [root], result, sourceCatalog.locale);
   const seen = new Set();
   for (const entry of result) {
-    if (seen.has(entry.id)) fail(`Duplicate copy ID ${entry.id}`);
-    seen.add(entry.id);
+    if (seen.has(entry.sourcePath)) fail(`Duplicate copy sourcePath ${entry.sourcePath}`);
+    seen.add(entry.sourcePath);
   }
   return result;
 }
 
 function visit(value, segments, output, locale) {
+  if (segments.at(-1) === "themeRules") return;
   if (typeof value === "string") {
     if (!value.trim() || segments.at(-1) === "status") return;
     const sourcePath = segments.join(".");
-    if (sourcePath.startsWith("transit.themeRules.")) return;
+    if (sourcePath.startsWith("shared.transit.themeRules.")) return;
     const kind = sourcePath.startsWith("shared.technical.templates.") ? "technical" : "consumer";
     const variables = declaredVariables(value);
     const maximum = kind === "technical" ? 3 : 2;
@@ -146,17 +177,22 @@ function variableType(name) {
   return types[name];
 }
 
-function normalizeThemeRules(rules) {
-  if (!Array.isArray(rules)) fail("transit.themeRules must be an array");
-  return rules.map((rule, index) => {
-    if (!Array.isArray(rule.pair) || rule.pair.length !== 2) fail(`Invalid theme rule at ${index}`);
-    return {
-      id: `theme-rule.${String(index + 1).padStart(3, "0")}`,
-      pair: rule.pair.map(String),
-      tone: rule.tone,
-      themeID: rule.themeID,
-    };
-  });
+function normalizeThemeRulesByPreset(sourceCatalog) {
+  const result = { modern: [], classical: [] };
+  for (const preset of ["modern", "classical"]) {
+    const rules = sourceCatalog[preset]?.transit?.themeRules;
+    if (!Array.isArray(rules)) fail(`${preset}.transit.themeRules must be an array`);
+    result[preset] = rules.map((rule, index) => {
+      if (!Array.isArray(rule.pair) || rule.pair.length !== 2) fail(`Invalid theme rule at ${preset}.${index}`);
+      return {
+        id: `theme-rule.${String(index + 1).padStart(3, "0")}`,
+        pair: rule.pair.map(String),
+        tone: rule.tone,
+        themeID: rule.themeID,
+      };
+    });
+  }
+  return result;
 }
 
 function validateRuntimePack(pack) {
@@ -179,14 +215,11 @@ function validateRuntimePack(pack) {
     fail("Catalog does not contain the exact 51 chart and Today contracts");
   }
   for (const contract of pack.contracts) {
-    if (contract.selector !== `${contract.technique}.${contract.cardID}.v1`) {
+    if (contract.selector !== `${contract.technique}.${contract.cardID}.v2`) {
       fail(`Illegal selector ${contract.selector}`);
     }
     if (contract.id !== `${contract.technique}.${contract.cardID}`) {
       fail(`Contract ID does not match technique/cardID: ${contract.id}`);
-    }
-    if (!contract.evidence.every((item) => contract.factRefs.includes(item))) {
-      fail(`Contract ${contract.id} has evidence missing from factRefs`);
     }
   }
   for (const entry of pack.entries) {
@@ -209,32 +242,21 @@ function validateRuntimePack(pack) {
   }
   const entryPaths = new Set(pack.entries.map((entry) => entry.sourcePath));
   for (const contract of pack.contracts) {
-    for (const sourceName of contract.copySources) {
-      const prefixes = sourcePrefixes(contract.technique, sourceName);
-      if (!prefixes.some((prefix) => [...entryPaths].some((entryPath) => entryPath.startsWith(prefix)))) {
-        fail(`Contract ${contract.id} references missing copy source ${sourceName}`);
+    for (const [preset, sources] of Object.entries(contract.copySourceByPreset)) {
+      for (const sourceName of sources) {
+        if (![...entryPaths].some((entryPath) => entryPath.startsWith(sourceName))) {
+          fail(`Contract ${contract.id} preset ${preset} references missing copy source ${sourceName}`);
+        }
       }
     }
   }
 }
 
-function sourcePrefixes(technique, sourceName) {
-  const roots = { "current-sky": "currentSky", "solar-return": "solarReturn", natal: "natal", transit: "transit", secondary: "secondary", synastry: "synastry", today: "transit" };
-  const explicit = {
-    aspectCopy: "natal.aspectCopy", bigThree: "natal.bigThree", houseOverlay: "synastry.houseOverlay",
-    loveElementMatrix: "natal.loveElementMatrix", mcDirection: "natal.mcDirection",
-    moonNeedShort: "natal.moonNeedShort", moonNeeds: "natal.moonNeeds", placement: "natal.placement",
-    progressedPhase: "secondary.progressedPhase", progressedSun: "secondary.progressedSun",
-    skyAtmosphere: "currentSky.skyAtmosphere", solarAsc: "solarReturn.solarAsc",
-    solarQuarters: "solarReturn.solarQuarters", synastryOverview: "synastry.overview",
-    venusGives: "natal.venusGives",
-  };
-  if (explicit[sourceName]) return [explicit[sourceName]];
-  if (sourceName === "technical") return ["shared.technical"];
-  if (["lifeAreas", "lunarPhase", "bodyMotion", "bodyTheme", "chartRulerCopy", "ingressSubject", "maturingArea", "overlayAngles", "signStyle", "synastryRoles"].includes(sourceName)) return [`shared.${sourceName}`];
-  if (sourceName === "ingress") return ["shared.ingressSubject", "shared.signStyle"];
-  if (sourceName.startsWith("themePacks")) return ["transit.themePacks"];
-  return [`${roots[technique]}.${sourceName}`];
+function uniqueStringsAllowEmpty(value, label) {
+  if (!Array.isArray(value) || value.some((item) => typeof item !== "string" || !item.trim())) fail(`${label} must be a string array`);
+  const unique = [...new Set(value)];
+  if (unique.length !== value.length) fail(`${label} contains duplicates`);
+  return unique;
 }
 
 function uniqueStrings(value, label) {

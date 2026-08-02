@@ -18,15 +18,8 @@ enum AppLanguage: String, CaseIterable, Identifiable, Codable {
         }
     }
 
-    /// The reviewed fixed corpus is currently available in English and
-    /// Simplified Chinese. New UI locales deliberately fall back to the
-    /// reviewed English corpus until their own reviewed packs are delivered.
-    var corpusLanguage: AppLanguage {
-        switch self {
-        case .simplifiedChinese: .simplifiedChinese
-        case .english, .spanish, .french: .english
-        }
-    }
+    /// The reviewed runtime corpus is now delivered for all four consumer locales.
+    var corpusLanguage: AppLanguage { self }
 }
 
 enum AppAppearance: String, CaseIterable, Identifiable, Codable {

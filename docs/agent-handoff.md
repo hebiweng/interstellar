@@ -483,4 +483,18 @@ iOS 首版已完成可构建的纵向实现，尚未提交或推送：
 | 2026-07-29 | 更新：Today 七天综合信号、未来盘型 provider、比较盘预设一致性、多人物/关系/头像/Apple 地图、消费者术语转换与 339 条翻译工作表完成；记录最终构建和测试证据 |
 | 2026-07-30 | 更新：Ask 三流程与传统问事/择时引擎、概率和专业分析完成；加入字体大小、Report、全局可读性与语料组合去重，记录测试与真机安装状态 |
 
+### 2026-08-02 更新：Copy Catalog 迁移至 v2（四语 + Modern/Classical）
+
+- 完成 `ios/App/Resources/CopyCatalog-{en,zh-Hans,es,fr}.json` 重新构建，schemaVersion 2，51 张卡片契约，1238 条文案，modern/classical 主题规则。
+- 修复 `ios/App/Models.swift` 中重复的 `corpusLanguage`：es/fr 现在直接加载各自语料，不再回退到英文。
+- 更新 `scripts/build-ios-copy-catalog.mjs` 为 v2 结构（shared/modern/classical、`evidenceByPreset`、`copySourceByPreset`）。
+- 更新 `package.json` 与 `ios/project.yml` 的四语构建、验证与 inputFiles。
+- 更新 `ios/ContentSchema/README.md` 与 `docs/agent-handoff.md` 描述 v2 工作流。
+- 重写 `scripts/export-ios-translation-worklist.mjs` 从 v2 源文件导出中英翻译工作表（`ios/TranslationExports/ios-v2-translation-worklist.*`）。
+- 删除旧 A 结构：所有 `ios/PrivateContent/**/Corpus-*.json`、`ios/PrivateContent/generate-zh-Hans-corpus.mjs`、空目录、旧 v1 翻译工作表与备份脚本。
+- Week 与 Ask 保持旧 `PrivateContent/week` 和 `PrivateCorpus-*.json` 结构，按策略暂不迁移。
+- 验证通过：`npm run ios:copy:validate`、`npm run architecture:check`、`npm run lint -- --quiet`。
+- 注意：沙箱无法写入 `.git/index`，旧文件已从工作区删除，但未自动 staging。提交前需要手动运行 `git add -u` 或 `git rm --cached` 处理这些删除。
+
+
 > AI生成

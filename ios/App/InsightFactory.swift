@@ -69,13 +69,15 @@ enum InsightFactory {
             )
             let interpretation = try? content?.interpret(context)
             let cardText = copyCatalog?.cardText(
-                chart: chart,
-                cardID: draft.id,
-                snapshot: snapshot,
-                natal: natal,
-                aspects: cardAspects
+               chart: chart,
+               cardID: draft.id,
+               snapshot: snapshot,
+               natal: natal,
+                aspects: cardAspects,
+                preset: preset
             )
-            if copyCatalog != nil, cardText == nil {
+            if copyCatalog != nil, cardText == nil,
+               copyCatalog?.copyRequired(chart: chart, cardID: draft.id) == true {
                 throw InsightFactoryError.invalidCardContract(
                     "\(chart.rawValue).\(draft.id) has no valid approved copy selection"
                 )
