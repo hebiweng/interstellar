@@ -3184,6 +3184,35 @@
         }
       }
     },
+    "DISRUPTING": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DISRUPTING"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打破"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RUPTURA"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RUPTURE"
+          }
+        }
+      }
+    },
     "Dominant": {
       "extractionState": "manual",
       "localizations": {
@@ -3595,6 +3624,18 @@
           "stringUnit": {
             "state": "translated",
             "value": "展开"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EXPANSIÓN"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EXPANSION"
           }
         }
       }
@@ -8428,6 +8469,35 @@
         }
       }
     },
+    "STABILIZING": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "STABILIZING"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "稳定"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ESTABILIZACIÓN"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "STABILISATION"
+          }
+        }
+      }
+    },
     "Stage": {
       "extractionState": "manual",
       "localizations": {
@@ -8612,6 +8682,18 @@
             "state": "translated",
             "value": "定型"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ESTRUCTURACIÓN"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "STRUCTURATION"
+          }
         }
       }
     },
@@ -8696,6 +8778,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "支持"
+          }
+        }
+      }
+    },
+    "SUPPORTING": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SUPPORTING"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "支持"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "APOYO"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SOUTIEN"
           }
         }
       }

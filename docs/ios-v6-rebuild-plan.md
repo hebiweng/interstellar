@@ -104,12 +104,14 @@ ChartSnapshot / Aspect / Event
 
 每个阶段真正完成后，通过用户指定的 Bark 地址发送“第几步 + 完成内容”通知。部分完成不得发送完成通知。
 
-## 7. 当前证据（2026-08-01）
+## 7. 当前证据（2026-08-02）
 
 - 阶段 1 已完成：DeepSeek 快照提交 `a42f1d6`，重构分支基线 `7d5b115`；
 - 阶段 2 已完成：新卡片事实模型、ChartContext、真实 ingress/精确相位/行运窗口/行星 station、GeneratedChartArtifact、人物清除、语义缓存和 AI 证据链已编译；
 - AstroCore 专项测试通过：月亮换座、天象精确相位、次限月亮窗口、行星转顺/转逆；
 - 六盘 44 卡和 Today 已接入英中正式 Catalog，iPhone 12 mini 英中六盘 UI 测试通过；
+- 现代行运六卡已通过 14 组固定 fixture、5 个真实星盘各 4 个日期和 4623 个系统探针：219 条 Registry requirements 中 216 条可达、3 条结构不可达，运行时 unknown 与 reachable missing 均为 0，Timeline 消费者正文请求为 0；172 条新增正文已进入英中私有源，西法 Catalog 显式使用英文回退，四语运行时 Catalog 均为 1529 条；
+- Charts 选择行运盘的渲染循环已修复：卡片构建不再在 SwiftUI `body` 求值期间写回 `@Published transitContentPlan`；最新 Debug 签名构建已覆盖安装并启动到连接的 iPhone 12 mini（`HUAWEI PURA 70`），CoreDevice 确认 `com.xiaoguiwk.interstellar` 进程 PID 4197；
 - Charts 轮盘上方只保留页面栏、盘型、Wheel/Aspects 与单一参数入口，人物/预设/时间/地点收进参数弹窗，展开参数不得把轮盘整体挤出初始视口；Ask 恢复简洁输入、键盘 Return 为“完成”并接通 History，两个专项 UI 测试通过；
 - 阶段 7 已完成：Relay 已通过本机构建的 `linux/amd64` 镜像部署到 `https://aaadmin.xiaoguiwk.top`；公开 Cloudflare 健康检查、管理页、随机管理员登录/退出撤销均通过。旧 Web/API 容器保持停止且未删除；
 - 阶段 6 已完成代码门禁：Relay 强制六盘 44 卡精确覆盖、事实引用和语言/长度校验；24 小时加密缓存、一次 JSON 修复、安装配额、App Attest 请求体断言、Provider/模型真实停用、bcrypt 管理员、可撤销安全会话和不记录正文的审计均已接通；

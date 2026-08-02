@@ -504,10 +504,14 @@ iOS 首版已完成可构建的纵向实现，尚未提交或推送：
 - UI、Copy 和 AI 证据文档均消费同一 scope 的计划；聚焦行运盘不再混入主计划的窗口或日历；缓存恢复、行运地点覆盖、聚焦计算和 AI 使用相同的行运时区与地点。旧的 `StandardCopySignals.primaryAspect` 和忽略 `cardID` 的伪 Evidence Planner 已删除。
 - 行运窗口的 repeated pass 只在同一真实 orb 窗口内认领；`passIndex` 计入窗口内历史精确次数，`passCount` 计入历史、当前与后续精确次数，避免把下一轮普通周期误标为 returning。
 - `ios/ContentSchema/modern-transit-copy-registry.json` 冻结 6 个 Copy 槽、4 个综合主题、5 个 Story 角色和 38 个有限主题 ID。`signalRole` 使用 `transitPlanet: body` 与 `lifeAreas: houseList` 两个强类型变量；`transit-timeline` 不占用 Copy 槽。
-- `scripts/export-modern-transit-copy-keys.mjs` 穷举所有合法请求并与英文运行时 Catalog 对比。当前共 219 条结构需求，缺失 175 条，全部位于 `integratedStory`、`signalRole`、`cycleChapter` 和 `activeTransitShort`；Timeline 无文案需求，Planet Paths 与 Life Areas 所需共享键已存在。
+- `scripts/export-modern-transit-copy-keys.mjs` 穷举所有合法请求并与英文运行时 Catalog 对比。当前共 219 条结构需求，其中 216 条运行时可达、3 条因周期行星约束不可达；172 条原始缺失已全部补齐，最终 reachable missing 为 0。Timeline 无文案需求，Planet Paths 与 Life Areas 所需共享键继续使用现有共享语料。
 - 导出文件位于被 Git 忽略的 `ios/TranslationExports/modern-transit-copy-requirements.json` 与 `ios/TranslationExports/modern-transit-missing-copy.json`。每项只含 key、cardID、copySlot、theme/integratedTheme/role、强类型变量、使用条件、`requiredBy` 和 Catalog 状态，不含消费者正文。
-- 10 组固定 fixture 覆盖混合、纯支持、纯挑战、中性、全空、仅窗口、仅事件、重复触发、完整路径/十二宫和范围过滤。iPhone 12 mini 模拟器执行 11 项 Planner 门禁测试，0 失败。
-- 已通过 `ios:copy:validate`、`ios:localization:validate`、卡片合同、私有内容边界、`architecture:check` 和 `lint -- --quiet`。英文缺失 key 尚未编写正文；正式文案生成前，四个新专属槽命中时按合同返回 `missing-copy`，禁止回退其他卡片或盘型正文。
+- 14 组固定 fixture 覆盖混合、纯支持、纯挑战、中性、全空、仅窗口、仅事件、重复触发、完整路径/十二宫和范围过滤。iPhone 12 mini 模拟器执行 14 项 Planner 门禁测试，0 失败；新增门禁确认 Current Story 的综合标题、正文、结论和角色短句均来自对应计划与 Copy key。
+- 172 条现代行运新增正文已通过外部双语包进入 Git 忽略的英文与简中 v2 私有源；西语和法语按当前语言合同显式承载同一批英文回退。四个运行时 Catalog 均为 1529 条，并通过 `ios:copy:validate`、`ios:localization:validate`、卡片合同、私有内容边界、`architecture:check` 和 `lint -- --quiet`。
+- 现代行运 Copy 可达性门禁现由 `TransitCopyRequest` 单一入口驱动。14 组固定 fixture、5 个真实计算星盘 × 4 个日期和 4623 个系统化 Planner 探针共观测 216 个合法请求身份；覆盖四种综合主题、五种信号角色、长/中/日常周期、十二宫换宫、换座、转逆/转顺、多次精确、无窗口、单一信号和同主题多信号。
+- `npm run ios:transit-copy:export` 会先运行 Xcode 可达性测试，再导出 `observed-copy-keys.json`、`unreachable-copy-keys.json`、`unknown-copy-keys.json`、完整 requirements 和最终 missing。当前 unknown 为 0，Timeline 文案请求为 0；219 条 requirements 中 216 条可达、3 条 `currentCycle` 主题因周期行星约束不可达，最终 reachable missing 为 0。
+- 修复 Charts 选择行运盘后卡死：`ChartsView.body` 调用 `insightCards(for:)` 时不再写回 `@Published transitContentPlan`，避免渲染期发布状态触发连续 SwiftUI 重绘；Planner 输出仍作为本次卡片构建的局部计划传给 UI 和 Copy，事实合同不变。
+- 最新 Debug 签名构建已覆盖安装并启动到连接的 iPhone 12 mini（设备名 `HUAWEI PURA 70`）；产物内四语 Catalog 均为 1529 条，CoreDevice 确认 `com.xiaoguiwk.interstellar` 进程 PID 4197。现有真机 UI 测试已覆盖 `Charts → Transits → Transit timeline`，但本轮自动复跑被 UI Test Runner 的旧 provisioning profile 与当前开发证书不匹配阻断，未进入测试用例。
 - 剩余性能风险：行星事件为保证换宫精度采用 6 小时采样；7 天后台刷新已正常运行，90 天范围尚未完成真机耗时基准，后续只能优化计算扫描，不能减少计划事实合同。
 
 

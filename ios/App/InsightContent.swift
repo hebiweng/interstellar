@@ -200,6 +200,21 @@ private struct CopySelection {
     let sourceFactIDs: [String]
 }
 
+struct TransitCopyRequest: Codable, Equatable, Sendable {
+    let key: String
+    let cardID: String
+    let copySlot: String
+    let themeID: String?
+    let integratedThemeID: String?
+    let roleID: String?
+    let variables: [String: String]
+    let sourceFactIDs: [String]
+
+    var identity: String {
+        [key, cardID, copySlot].joined(separator: "|")
+    }
+}
+
 /// Runtime access to the normalized project catalog. Source attachments are
 /// converted by build-ios-copy-catalog.mjs and are never read by the App.
 struct CopyCatalogMatcher {
@@ -305,17 +320,129 @@ struct CopyCatalogMatcher {
     }
 
     func transitCardText(plan: CardEvidencePlan) throws -> CardTextModel {
+        let requests = transitCopyRequests(plan: plan)
+        let roleTexts = try requests
+            .filter { $0.copySlot == TransitCopySlot.signalRole.rawValue }
+            .map { request in
+                CardRoleText(
+                    roleID: request.roleID ?? TransitStorySignalRoleID.supporting.rawValue,
+                    text: try value(
+                        at: request.key,
+                        variables: renderedTransitVariables(request.variables)
+                    ),
+                    sourceFactIDs: request.sourceFactIDs
+                )
+            }
         guard plan.copySlot != nil,
-              let selection = transitCopySelection(plan: plan),
+              let selection = transitCopySelection(plan: plan, requests: requests),
               let model = textModel(
                   from: selection,
                   cardID: plan.cardID,
-                  scopeID: plan.scopeID
+                  scopeID: plan.scopeID,
+                  roleTexts: roleTexts
               )
         else {
             throw CopyCatalogError.missingCopy("modern.transit.\(plan.copySlot?.rawValue ?? "technical")")
         }
         return model
+    }
+
+    func transitCopyRequests(plan: CardEvidencePlan) -> [TransitCopyRequest] {
+        guard !plan.evidence.isEmpty, plan.cardID != "transit-timeline" else { return [] }
+        switch plan.copySlot {
+        case .integratedStory:
+            var requests: [TransitCopyRequest] = []
+            if let integratedThemeID = plan.integratedThemeID {
+                requests.append(
+                    TransitCopyRequest(
+                        key: "modern.transit.integratedStory.\(integratedThemeID.rawValue)",
+                        cardID: plan.cardID,
+                        copySlot: TransitCopySlot.integratedStory.rawValue,
+                        themeID: nil,
+                        integratedThemeID: integratedThemeID.rawValue,
+                        roleID: nil,
+                        variables: [:],
+                        sourceFactIDs: plan.sourceFactIDs
+                    )
+                )
+            }
+            requests += plan.signalRoles.map { assignment in
+                TransitCopyRequest(
+                    key: "modern.transit.signalRole.\(assignment.signalRole.rawValue)",
+                    cardID: plan.cardID,
+                    copySlot: TransitCopySlot.signalRole.rawValue,
+                    themeID: nil,
+                    integratedThemeID: nil,
+                    roleID: assignment.signalRole.rawValue,
+                    variables: [
+                        "transitPlanet": assignment.movingID,
+                        "lifeAreas": assignment.lifeAreas.map(String.init).joined(separator: ","),
+                    ],
+                    sourceFactIDs: assignment.sourceFactIDs
+                )
+            }
+            return requests
+        case .cycleChapter:
+            return transitThemeRequest(plan: plan, slot: .cycleChapter).map { [$0] } ?? []
+        case .planetPathShort:
+            guard let evidence = plan.evidence.first(where: {
+                if case .placement = $0.fact { return true }
+                return false
+            }),
+            case let .placement(placement) = evidence.fact
+            else { return [] }
+            let state = placement.retrograde ? "retrograde" : "direct"
+            var requests = [
+                TransitCopyRequest(
+                    key: "shared.bodyMotion.\(placement.body.rawValue).\(state)",
+                    cardID: plan.cardID,
+                    copySlot: TransitCopySlot.planetPathShort.rawValue,
+                    themeID: nil,
+                    integratedThemeID: nil,
+                    roleID: "path",
+                    variables: [:],
+                    sourceFactIDs: evidence.fact.sourceFactIDs
+                ),
+            ]
+            if (1 ... 12).contains(placement.natalHouse) {
+                requests.append(
+                    TransitCopyRequest(
+                        key: "shared.lifeAreas.\(placement.natalHouse)",
+                        cardID: plan.cardID,
+                        copySlot: TransitCopySlot.planetPathShort.rawValue,
+                        themeID: nil,
+                        integratedThemeID: nil,
+                        roleID: "path",
+                        variables: [:],
+                        sourceFactIDs: evidence.fact.sourceFactIDs
+                    )
+                )
+            }
+            return requests
+        case .lifeAreaShort:
+            guard let evidence = plan.evidence.first(where: {
+                if case .lifeArea = $0.fact { return true }
+                return false
+            }),
+            case let .lifeArea(area) = evidence.fact
+            else { return [] }
+            return [
+                TransitCopyRequest(
+                    key: "shared.lifeAreas.\(area.house)",
+                    cardID: plan.cardID,
+                    copySlot: TransitCopySlot.lifeAreaShort.rawValue,
+                    themeID: nil,
+                    integratedThemeID: nil,
+                    roleID: "lifeArea",
+                    variables: [:],
+                    sourceFactIDs: evidence.fact.sourceFactIDs
+                ),
+            ]
+        case .activeTransitShort:
+            return transitThemeRequest(plan: plan, slot: .activeTransitShort).map { [$0] } ?? []
+        case .signalRole, nil:
+            return []
+        }
     }
 
     func todayText(
@@ -356,11 +483,13 @@ struct CopyCatalogMatcher {
     private func textModel(
         from selection: CopySelection?,
         cardID: String,
-        scopeID: String? = nil
+        scopeID: String? = nil,
+        roleTexts: [CardRoleText] = []
     ) -> CardTextModel? {
         guard let selection else { return nil }
         let resolved = selection.basePath.map { resolve(base: $0) }
-        let secondaryBody = selection.secondaryPath.flatMap { resolve(base: $0).body }
+        let secondaryBody = resolved?.secondary
+            ?? selection.secondaryPath.flatMap { resolve(base: $0).body }
         let headline = resolved?.headline
         let body = resolved?.body
         guard headline != nil || body != nil || secondaryBody != nil else { return nil }
@@ -378,69 +507,64 @@ struct CopyCatalogMatcher {
             themeID: selection.themeID,
             sourceFactIDs: selection.sourceFactIDs,
             copyPackID: "\(pack.contentVersion):\(selection.basePath ?? selection.secondaryPath ?? cardID)",
-            scopeID: scopeID
+            scopeID: scopeID,
+            roleTexts: roleTexts.isEmpty ? nil : roleTexts
         )
     }
 
     private func resolve(base: String) -> (headline: String?, body: String?, secondary: String?) {
         let headline = valueIfPresent(at: "\(base).headline") ?? valueIfPresent(at: "\(base).label")
         let body = valueIfPresent(at: "\(base).body") ?? valueIfPresent(at: base)
-        let secondary = valueIfPresent(at: "\(base).secondary")
+        let secondary = valueIfPresent(at: "\(base).guidance")
+            ?? valueIfPresent(at: "\(base).secondary")
         return (headline, body, secondary)
     }
 
-    private func transitCopySelection(plan: CardEvidencePlan) -> CopySelection? {
+    private func transitCopySelection(
+        plan: CardEvidencePlan,
+        requests: [TransitCopyRequest]
+    ) -> CopySelection? {
         guard let copySlot = plan.copySlot else { return nil }
         switch copySlot {
         case .integratedStory:
-            guard let integratedThemeID = plan.integratedThemeID else { return nil }
+            guard let request = requests.first(where: {
+                $0.copySlot == TransitCopySlot.integratedStory.rawValue
+            }) else { return nil }
             return CopySelection(
-                basePath: "modern.transit.integratedStory.\(integratedThemeID.rawValue)",
+                basePath: request.key,
                 secondaryPath: nil,
-                themeID: integratedThemeID.rawValue,
-                sourceFactIDs: plan.sourceFactIDs
+                themeID: request.integratedThemeID,
+                sourceFactIDs: request.sourceFactIDs
             )
         case .cycleChapter:
-            return transitThemeSelection(plan: plan, slot: .cycleChapter)
+            return requests.first.map {
+                CopySelection(basePath: $0.key, secondaryPath: nil, themeID: $0.themeID, sourceFactIDs: $0.sourceFactIDs)
+            }
         case .signalRole:
             return nil
         case .planetPathShort:
-            guard let evidence = plan.evidence.first(where: {
-                if case .placement = $0.fact { return true }
-                return false
-            }),
-            case let .placement(placement) = evidence.fact
-            else { return nil }
-            let state = placement.retrograde ? "retrograde" : "direct"
-            let secondaryPath = (1 ... 12).contains(placement.natalHouse)
-                ? "shared.lifeAreas.\(placement.natalHouse)"
-                : nil
+            guard let request = requests.first(where: { $0.key.hasPrefix("shared.bodyMotion.") }) else { return nil }
             return CopySelection(
-                basePath: "shared.bodyMotion.\(placement.body.rawValue).\(state)",
-                secondaryPath: secondaryPath,
+                basePath: request.key,
+                secondaryPath: requests.first(where: { $0.key.hasPrefix("shared.lifeAreas.") })?.key,
                 themeID: nil,
-                sourceFactIDs: evidence.fact.sourceFactIDs
+                sourceFactIDs: request.sourceFactIDs
             )
         case .lifeAreaShort:
-            guard let evidence = plan.evidence.first(where: {
-                if case .lifeArea = $0.fact { return true }
-                return false
-            }),
-            case let .lifeArea(area) = evidence.fact
-            else { return nil }
-            return pair(
-                "shared.lifeAreas.\(area.house)",
-                sourceFactIDs: evidence.fact.sourceFactIDs
-            )
+            return requests.first.map {
+                CopySelection(basePath: $0.key, secondaryPath: nil, themeID: nil, sourceFactIDs: $0.sourceFactIDs)
+            }
         case .activeTransitShort:
-            return transitThemeSelection(plan: plan, slot: .activeTransitShort)
+            return requests.first.map {
+                CopySelection(basePath: $0.key, secondaryPath: nil, themeID: $0.themeID, sourceFactIDs: $0.sourceFactIDs)
+            }
         }
     }
 
-    private func transitThemeSelection(
+    private func transitThemeRequest(
         plan: CardEvidencePlan,
         slot: TransitCopySlot
-    ) -> CopySelection? {
+    ) -> TransitCopyRequest? {
         guard let input = plan.themeInputs.first else { return nil }
         let mappedThemeID = ThemeMapper.themeID(
             for: input,
@@ -459,7 +583,33 @@ struct CopyCatalogMatcher {
         default:
             return nil
         }
-        return pair(basePath, themeID: themeID.rawValue, sourceFactIDs: input.sourceFactIDs)
+        return TransitCopyRequest(
+            key: basePath,
+            cardID: plan.cardID,
+            copySlot: slot.rawValue,
+            themeID: themeID.rawValue,
+            integratedThemeID: nil,
+            roleID: input.roleID,
+            variables: [:],
+            sourceFactIDs: input.sourceFactIDs
+        )
+    }
+
+    private func renderedTransitVariables(_ variables: [String: String]) -> [String: String] {
+        guard let language = AppLanguage(rawValue: pack.locale) else { return variables }
+        var rendered = variables
+        if let bodyID = variables["transitPlanet"] {
+            rendered["transitPlanet"] = AstroTerms.value("bodies", bodyID, language: language)
+        }
+        if let houseIDs = variables["lifeAreas"] {
+            let houses = houseIDs.split(separator: ",").compactMap { Int($0) }.map {
+                AstroTerms.house($0, language: language)
+            }
+            let formatter = ListFormatter()
+            formatter.locale = language.locale
+            rendered["lifeAreas"] = formatter.string(from: houses) ?? houses.joined(separator: ", ")
+        }
+        return rendered
     }
 
     private func copySelection(

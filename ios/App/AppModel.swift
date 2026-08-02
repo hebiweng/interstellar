@@ -780,9 +780,6 @@ final class AppModel: ObservableObject {
                     calendarDays: cardTransitCalendar
                 )
                 : nil
-            if chart == .transit {
-                transitContentPlan = plannedTransit
-            }
             let cards = try InsightFactory.make(
                 chart: chart,
                 snapshot: cardSnapshot,

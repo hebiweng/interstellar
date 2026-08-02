@@ -28,7 +28,7 @@ enum TransitEvidenceRole: String, Equatable, Hashable, Sendable {
     case activeStationDirect
 }
 
-enum TransitStorySignalRoleID: String, CaseIterable, Equatable, Sendable {
+enum TransitStorySignalRoleID: String, CaseIterable, Equatable, Hashable, Sendable {
     case expanding
     case structuring
     case disrupting
@@ -36,7 +36,7 @@ enum TransitStorySignalRoleID: String, CaseIterable, Equatable, Sendable {
     case supporting
 }
 
-enum TransitIntegratedThemeID: String, CaseIterable, Equatable, Sendable {
+enum TransitIntegratedThemeID: String, CaseIterable, Equatable, Hashable, Sendable {
     case expansionStructure = "expansion-structure"
     case focusedExpansion = "focused-expansion"
     case durableStructure = "durable-structure"

@@ -9,19 +9,34 @@ const catalogPath = path.resolve(
   process.argv[2] ?? path.join("ios", "App", "Resources", "CopyCatalog-en.json"),
 );
 const outputDirectory = path.join(repositoryRoot, "ios", "TranslationExports");
+const observationsPath = path.join(outputDirectory, "modern-transit-planner-observations.json");
 
 const registry = readJSON(registryPath);
 const catalog = readJSON(catalogPath);
+const plannerObservations = readJSON(observationsPath);
 validateRegistry(registry);
 validateCatalog(catalog, registry);
+validatePlannerObservations(plannerObservations);
 
 const requirements = buildRequirements(registry);
 const catalogPaths = new Set(catalog.entries.map((entry) => entry.sourcePath));
+const observedIdentities = new Set(plannerObservations.observations.map(requirementIdentity));
 const withStatus = requirements.map((requirement) => ({
   ...requirement,
+  reachabilityStatus: observedIdentities.has(requirementIdentity(requirement)) ? "reachable" : "unreachable",
   catalogStatus: hasResolvableCopy(requirement.key, catalogPaths) ? "present" : "missing-copy",
 }));
-const missing = withStatus.filter((item) => item.catalogStatus === "missing-copy");
+const requirementIdentities = new Set(withStatus.map(requirementIdentity));
+const unreachable = withStatus.filter((item) => item.reachabilityStatus === "unreachable");
+const unknown = plannerObservations.observations.filter(
+  (observation) => !requirementIdentities.has(requirementIdentity(observation)),
+);
+const missing = withStatus.filter(
+  (item) => item.reachabilityStatus === "reachable" && item.catalogStatus === "missing-copy",
+);
+const timelineRequests = plannerObservations.observations.filter(
+  (observation) => observation.cardID === "transit-timeline",
+);
 
 fs.mkdirSync(outputDirectory, { recursive: true });
 writeJSON(path.join(outputDirectory, "modern-transit-copy-requirements.json"), {
@@ -30,8 +45,38 @@ writeJSON(path.join(outputDirectory, "modern-transit-copy-requirements.json"), {
   catalog: path.relative(repositoryRoot, catalogPath),
   chartID: registry.chartID,
   requirementCount: withStatus.length,
+  reachableCount: withStatus.length - unreachable.length,
+  unreachableCount: unreachable.length,
   missingCount: missing.length,
   requirements: withStatus,
+});
+writeJSON(path.join(outputDirectory, "observed-copy-keys.json"), {
+  schemaVersion: 1,
+  generatedAt: new Date().toISOString(),
+  chartID: registry.chartID,
+  fixedFixtureCount: plannerObservations.fixedFixtureIDs.length,
+  fixedFixtureIDs: plannerObservations.fixedFixtureIDs,
+  realChartCount: new Set(plannerObservations.realRuns.map((item) => item.chartID)).size,
+  realRunCount: plannerObservations.realRuns.length,
+  realRuns: plannerObservations.realRuns,
+  exhaustiveProbeCount: plannerObservations.exhaustiveProbeCount,
+  coverage: plannerObservations.coverage,
+  observedCount: plannerObservations.observations.length,
+  observed: plannerObservations.observations,
+});
+writeJSON(path.join(outputDirectory, "unreachable-copy-keys.json"), {
+  schemaVersion: 1,
+  generatedAt: new Date().toISOString(),
+  chartID: registry.chartID,
+  unreachableCount: unreachable.length,
+  unreachable,
+});
+writeJSON(path.join(outputDirectory, "unknown-copy-keys.json"), {
+  schemaVersion: 1,
+  generatedAt: new Date().toISOString(),
+  chartID: registry.chartID,
+  unknownCount: unknown.length,
+  unknown,
 });
 writeJSON(path.join(outputDirectory, "modern-transit-missing-copy.json"), {
   schemaVersion: 1,
@@ -43,8 +88,17 @@ writeJSON(path.join(outputDirectory, "modern-transit-missing-copy.json"), {
 });
 
 console.log(`Modern transit copy requirements: ${withStatus.length}`);
+console.log(`Reachable copy requirements: ${withStatus.length - unreachable.length}`);
+console.log(`Unreachable copy requirements: ${unreachable.length}`);
+console.log(`Unknown runtime copy keys: ${unknown.length}`);
 console.log(`Missing copy keys: ${missing.length}`);
 console.log(path.relative(repositoryRoot, path.join(outputDirectory, "modern-transit-missing-copy.json")));
+if (timelineRequests.length > 0) {
+  throw new Error("Transit timeline requested consumer copy");
+}
+if (unknown.length > 0) {
+  throw new Error("Runtime requested modern transit copy outside the frozen registry");
+}
 
 function buildRequirements(value) {
   const requiredBy = (cardID) => [
@@ -214,6 +268,39 @@ function storySignalRoleCondition(roleID) {
 function hasResolvableCopy(basePath, paths) {
   return [basePath, `${basePath}.headline`, `${basePath}.label`, `${basePath}.body`]
     .some((candidate) => paths.has(candidate));
+}
+
+function requirementIdentity(value) {
+  return [value.key, value.cardID, value.copySlot].join("|");
+}
+
+function validatePlannerObservations(value) {
+  if (value.schemaVersion !== 1 || !Array.isArray(value.observations)) {
+    throw new Error("Unsupported modern transit Planner observations");
+  }
+  if (!Array.isArray(value.fixedFixtureIDs) || value.fixedFixtureIDs.length < 12) {
+    throw new Error("At least 12 fixed transit fixtures are required");
+  }
+  const runsByChart = new Map();
+  for (const run of value.realRuns ?? []) {
+    runsByChart.set(run.chartID, (runsByChart.get(run.chartID) ?? 0) + 1);
+  }
+  if (runsByChart.size !== 5 || [...runsByChart.values()].some((count) => count !== 4)) {
+    throw new Error("Exactly five real charts with four transit dates each are required");
+  }
+  const expectedCoverage = {
+    integratedStory: ["durable-structure", "expansion-structure", "focused-expansion", "steady-realignment"],
+    signalRole: ["disrupting", "expanding", "stabilizing", "structuring", "supporting"],
+    cycleRole: ["currentCycle", "dailyCycle", "longCycle"],
+    planetEvent: ["houseIngress", "signIngress", "stationDirect", "stationRetrograde"],
+    houseIngress: Array.from({ length: 12 }, (_, index) => String(index + 1)),
+  };
+  for (const [name, expected] of Object.entries(expectedCoverage)) {
+    const actual = [...(value.coverage?.[name] ?? [])].sort();
+    if (actual.join("|") !== [...expected].sort().join("|")) {
+      throw new Error(`Planner observations do not cover ${name}`);
+    }
+  }
 }
 
 function validateRegistry(value) {

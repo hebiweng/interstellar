@@ -483,6 +483,13 @@ struct CardTextModel: Codable, Equatable, Sendable {
     let sourceFactIDs: [String]
     let copyPackID: String?
     let scopeID: String?
+    let roleTexts: [CardRoleText]?
+}
+
+struct CardRoleText: Codable, Equatable, Sendable {
+    let roleID: String
+    let text: String
+    let sourceFactIDs: [String]
 }
 
 struct InsightCardLoadState {

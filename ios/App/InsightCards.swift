@@ -38,7 +38,10 @@ struct InsightCardView: View {
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                if let secondary = text.secondaryBody, !secondary.isEmpty {
+                if card.id != "current-story",
+                   let secondary = text.secondaryBody,
+                   !secondary.isEmpty
+                {
                     Text(secondary)
                         .font(.system(size: 11.5))
                         .foregroundStyle(AppTheme.muted)
@@ -53,7 +56,14 @@ struct InsightCardView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            InsightVisualView(visual: card.visual, facts: card.facts, language: language)
+            if card.id == "current-story",
+               let roleTexts = card.text?.roleTexts,
+               !roleTexts.isEmpty
+            {
+                storyRoleWeave(roleTexts, result: card.text?.secondaryBody)
+            } else {
+                InsightVisualView(visual: card.visual, facts: card.facts, language: language)
+            }
 
             Divider().overlay(AppTheme.line)
 
@@ -117,6 +127,68 @@ struct InsightCardView: View {
             in: RoundedRectangle(cornerRadius: 22, style: .continuous)
         )
         .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(AppTheme.line, lineWidth: 1))
+    }
+
+    private func storyRoleWeave(_ roleTexts: [CardRoleText], result: String?) -> some View {
+        VStack(spacing: 8) {
+            ForEach(Array(roleTexts.enumerated()), id: \.offset) { index, roleText in
+                if index > 0 {
+                    Image(systemName: "plus")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(AppTheme.muted)
+                }
+                HStack(alignment: .top, spacing: 10) {
+                    Text(storyRoleLabel(roleText.roleID))
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundStyle(AppTheme.tone(storyRoleTone(roleText.roleID)))
+                    Text(roleText.text)
+                        .font(.system(size: 11.5, weight: .medium))
+                        .foregroundStyle(AppTheme.text)
+                    Spacer()
+                }
+                .padding(12)
+                .background(
+                    AppTheme.tone(storyRoleTone(roleText.roleID)).opacity(0.08),
+                    in: RoundedRectangle(cornerRadius: 8)
+                )
+            }
+            if let result, !result.isEmpty {
+                Text(result)
+                    .font(.system(size: 10.5))
+                    .lineSpacing(3)
+                    .foregroundStyle(AppTheme.text.opacity(0.95))
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(AppTheme.violet.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+            }
+        }
+    }
+
+    private func storyRoleLabel(_ roleID: String) -> String {
+        switch roleID {
+        case TransitStorySignalRoleID.expanding.rawValue:
+            localized("EXPANDING", "展开", language: language)
+        case TransitStorySignalRoleID.structuring.rawValue:
+            localized("STRUCTURING", "定型", language: language)
+        case TransitStorySignalRoleID.disrupting.rawValue:
+            localized("DISRUPTING", "打破", language: language)
+        case TransitStorySignalRoleID.stabilizing.rawValue:
+            localized("STABILIZING", "稳定", language: language)
+        default:
+            localized("SUPPORTING", "支持", language: language)
+        }
+    }
+
+    private func storyRoleTone(_ roleID: String) -> InsightTone {
+        switch roleID {
+        case TransitStorySignalRoleID.disrupting.rawValue:
+            .challenging
+        case TransitStorySignalRoleID.structuring.rawValue,
+             TransitStorySignalRoleID.stabilizing.rawValue:
+            .transition
+        default:
+            .supportive
+        }
     }
 }
 
