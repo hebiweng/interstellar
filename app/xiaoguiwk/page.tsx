@@ -12,35 +12,40 @@ type Provider = {
   api_key_set: boolean;
   default_model: string;
   enabled: boolean;
+  is_default: boolean;
 };
 
 type Prompt = { scope: string; locale: string; system_prompt: string; version: number; updated_at: string };
 
-type UsageRow = { day: string; requests: number; prompt_tokens: number; completion_tokens: number };
+type UsageRow = { day: string; model: string; requests: number; successes: number; success_rate: number; prompt_tokens: number; completion_tokens: number };
 
 function promptKey(p: Prompt): string {
   return `${p.scope}|${p.locale}`;
 }
 
-function useToken() {
-  const [token, setToken] = useState<string>(() => {
-    if (typeof window !== "undefined") return sessionStorage.getItem("xiaoguiwk.token") ?? "";
-    return "";
-  });
-  const save = useCallback((value: string) => {
-    if (value) sessionStorage.setItem("xiaoguiwk.token", value);
-    else sessionStorage.removeItem("xiaoguiwk.token");
-    setToken(value);
-  }, []);
-  return [token, save] as const;
-}
-
 export default function XiaoguiwkAdminPage() {
-  const [token, setToken] = useToken();
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [tab, setTab] = useState<"config" | "prompts" | "usage">("config");
 
-  if (!token) {
-    return <LoginView onLogin={setToken} />;
+  useEffect(() => {
+    api<{ authenticated: boolean }>("/admin/session", "")
+      .then(() => setAuthenticated(true))
+      .catch(() => setAuthenticated(false));
+  }, []);
+
+  if (authenticated === null) {
+    return <div className={styles.shell} />;
+  }
+  if (!authenticated) {
+    return <LoginView onLogin={() => setAuthenticated(true)} />;
+  }
+
+  async function logout() {
+    try {
+      await api("/admin/logout", "", { method: "POST" });
+    } finally {
+      setAuthenticated(false);
+    }
   }
   return (
     <div className={styles.shell}>
@@ -49,7 +54,7 @@ export default function XiaoguiwkAdminPage() {
           <div className={styles.brand}>
             Interstellar <em>· 管理员后台</em>
           </div>
-          <button className={`${styles.btn} ${styles.danger}`} onClick={() => setToken("")}>
+          <button className={`${styles.btn} ${styles.danger}`} onClick={logout}>
             退出登录
           </button>
         </div>
@@ -70,9 +75,9 @@ export default function XiaoguiwkAdminPage() {
             </button>
           ))}
         </div>
-        {tab === "config" && <ConfigView token={token} />}
-        {tab === "prompts" && <PromptsView token={token} />}
-        {tab === "usage" && <UsageView token={token} />}
+        {tab === "config" && <ConfigView token="" />}
+        {tab === "prompts" && <PromptsView token="" />}
+        {tab === "usage" && <UsageView token="" />}
       </div>
     </div>
   );
@@ -83,7 +88,7 @@ async function api<T>(path: string, token: string, init: RequestInit = {}): Prom
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
-  const res = await fetch(`${API_BASE}${path}`, { ...init, headers });
+  const res = await fetch(`${API_BASE}${path}`, { ...init, headers, credentials: "same-origin" });
   if (!res.ok) {
     let message = `HTTP ${res.status}`;
     try {
@@ -97,7 +102,7 @@ async function api<T>(path: string, token: string, init: RequestInit = {}): Prom
   return (await res.json()) as T;
 }
 
-function LoginView({ onLogin }: { onLogin: (token: string) => void }) {
+function LoginView({ onLogin }: { onLogin: () => void }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -107,11 +112,11 @@ function LoginView({ onLogin }: { onLogin: (token: string) => void }) {
     setBusy(true);
     setError("");
     try {
-      const result = await api<{ token: string }>("/admin/login", "", {
+      await api<{ expiresAt: string }>("/admin/login", "", {
         method: "POST",
         body: JSON.stringify({ username, password }),
       });
-      onLogin(result.token);
+      onLogin();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -153,7 +158,7 @@ function ConfigView({ token }: { token: string }) {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [drafts, setDrafts] = useState<Record<string, { label: string; base_url: string; api_key: string; default_model: string; enabled: boolean }>>({});
+  const [drafts, setDrafts] = useState<Record<string, { label: string; base_url: string; api_key: string; default_model: string; enabled: boolean; is_default: boolean }>>({});
   const [models, setModels] = useState<Record<string, string[]>>({});
 
   const load = useCallback(async () => {
@@ -178,6 +183,7 @@ function ConfigView({ token }: { token: string }) {
         api_key: "",
         default_model: p.default_model,
         enabled: p.enabled,
+        is_default: p.is_default,
       }
     );
   }
@@ -189,7 +195,7 @@ function ConfigView({ token }: { token: string }) {
       const d = draftOf(p);
       await api("/admin/providers", token, {
         method: "PUT",
-        body: JSON.stringify({ id: p.id, label: d.label, base_url: d.base_url, api_key: d.api_key, default_model: d.default_model, enabled: d.enabled }),
+        body: JSON.stringify({ id: p.id, label: d.label, base_url: d.base_url, api_key: d.api_key, default_model: d.default_model, enabled: d.enabled, is_default: d.is_default }),
       });
       setDrafts((prev) => ({ ...prev, [p.id]: { ...d, api_key: "" } }));
       setMessage({ ok: true, text: `已保存 ${p.id}` });
@@ -231,8 +237,8 @@ function ConfigView({ token }: { token: string }) {
   async function addProvider() {
     const id = prompt("Provider ID（如 default / deepseek / openai / moonshot）");
     if (!id) return;
-    const p: Provider = { id, label: id, base_url: "https://api.deepseek.com", api_key_set: false, default_model: "", enabled: true };
-    setDrafts((prev) => ({ ...prev, [id]: { label: id, base_url: "https://api.deepseek.com", api_key: "", default_model: "", enabled: true } }));
+    const p: Provider = { id, label: id, base_url: "https://api.deepseek.com", api_key_set: false, default_model: "", enabled: true, is_default: false };
+    setDrafts((prev) => ({ ...prev, [id]: { label: id, base_url: "https://api.deepseek.com", api_key: "", default_model: "", enabled: true, is_default: false } }));
     setProviders((prev) => [...prev, p]);
   }
 
@@ -260,6 +266,7 @@ function ConfigView({ token }: { token: string }) {
               <strong>{p.id}</strong>
               <span className={styles.hint}>{p.api_key_set ? "已配置 Key" : "未配置 Key"}</span>
               <span className={styles.hint}>{p.enabled ? "启用" : "停用"}</span>
+              {p.is_default && <span className={styles.hint}>当前默认</span>}
             </div>
             <label className={styles.label}>名称</label>
             <input className={styles.input} value={d.label} onChange={(e) => setDrafts((prev) => ({ ...prev, [p.id]: { ...d, label: e.target.value } }))} />
@@ -289,6 +296,25 @@ function ConfigView({ token }: { token: string }) {
                 ))}
               </div>
             )}
+            <div className={styles.row} style={{ marginTop: 12 }}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={d.enabled}
+                  onChange={(e) => setDrafts((prev) => ({ ...prev, [p.id]: { ...d, enabled: e.target.checked } }))}
+                />{" "}
+                启用 Provider
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={d.is_default}
+                  disabled={!d.enabled}
+                  onChange={(e) => setDrafts((prev) => ({ ...prev, [p.id]: { ...d, is_default: e.target.checked } }))}
+                />{" "}
+                设为默认 Provider
+              </label>
+            </div>
             <div className={styles.row} style={{ marginTop: 14 }}>
               <button className={`${styles.btn} ${styles.primary}`} disabled={busyId === p.id} onClick={() => saveProvider(p)}>
                 {busyId === p.id ? "保存中…" : "保存"}
@@ -426,7 +452,9 @@ function UsageView({ token }: { token: string }) {
           <thead>
             <tr>
               <th>日期</th>
+              <th>模型</th>
               <th>请求数</th>
+              <th>成功率</th>
               <th>输入 tokens</th>
               <th>输出 tokens</th>
             </tr>
@@ -435,14 +463,16 @@ function UsageView({ token }: { token: string }) {
             {rows.map((row) => (
               <tr key={row.day}>
                 <td>{row.day}</td>
+                <td>{row.model}</td>
                 <td>{row.requests}</td>
+                <td>{Math.round(row.success_rate * 100)}%</td>
                 <td>{row.prompt_tokens}</td>
                 <td>{row.completion_tokens}</td>
               </tr>
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={4} style={{ color: "#9aa0b5" }}>
+                <td colSpan={6} style={{ color: "#9aa0b5" }}>
                   暂无数据
                 </td>
               </tr>
@@ -453,4 +483,3 @@ function UsageView({ token }: { token: string }) {
     </div>
   );
 }
-

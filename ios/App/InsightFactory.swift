@@ -18,7 +18,8 @@ enum InsightFactory {
         snapshot: ChartSnapshot?,
         natal: ChartSnapshot?,
         aspects: [ChartAspect],
-        content: CorpusContentProvider,
+        content: CorpusContentProvider?,
+        copyCatalog: CopyCatalogProvider?,
         language: AppLanguage,
         transitCalendar: [Int],
         preset: String? = nil,
@@ -63,17 +64,53 @@ enum InsightFactory {
                 language: language,
                 transitCalendar: transitCalendar,
                 preset: preset,
-                aspectsAreCross: aspectsAreCross
+                aspectsAreCross: aspectsAreCross,
+                events: events
             )
-            let interpretation = try content.interpret(context)
+            let interpretation = try? content?.interpret(context)
+            let cardText = copyCatalog?.cardText(
+                chart: chart,
+                cardID: draft.id,
+                snapshot: snapshot,
+                natal: natal,
+                aspects: cardAspects
+            )
+            if copyCatalog != nil, cardText == nil {
+                throw InsightFactoryError.invalidCardContract(
+                    "\(chart.rawValue).\(draft.id) has no valid approved copy selection"
+                )
+            }
+            let conclusion = cardText?.headline ?? cardText?.body ?? interpretation?.summary ?? localized(
+                "Reviewed interpretation unavailable",
+                "已审核解读暂不可用",
+                language: language
+            )
             return InsightCardModel(
                 id: draft.id,
                 title: draft.title,
                 icon: draft.icon,
                 visual: draft.visual,
-                facts: draft.facts,
-                summary: interpretation.summary,
-                detail: interpretation.detail
+                facts: draft.facts.map { fact in
+                    guard draft.id == "emotional-needs", fact.interpretation == nil else { return fact }
+                    return InsightFact(
+                        id: fact.id,
+                        metricLabel: fact.metricLabel,
+                        calculatedValue: fact.calculatedValue,
+                        interpretationKey: fact.interpretationKey,
+                        interpretationVariables: fact.interpretationVariables,
+                        sourceFactIDs: fact.sourceFactIDs,
+                        visualRole: fact.visualRole,
+                        interpretation: conclusion,
+                        emphasis: fact.emphasis,
+                        progress: fact.progress,
+                        symbol: fact.symbol,
+                        category: fact.category,
+                        markers: fact.markers
+                    )
+                },
+                conclusionKey: "\(chart.contentPrefix).\(draft.id)",
+                conclusion: conclusion,
+                text: cardText
             )
         }
         try validate(renderedCards, for: chart)
@@ -92,6 +129,8 @@ enum InsightFactory {
         let ascSign = Zodiac.name(index: Int(snapshot.angles.ascendantDegrees / 30) % 12, language: language)
         let mcSignIndex = Int(snapshot.angles.midheavenDegrees / 30) % 12
         let mcRuler = ruler(ofSign: mcSignIndex)
+        let mcRulerPoint = snapshot.point(mcRuler)
+        let mcRulerHouse = mcRulerPoint.map { snapshot.house(containing: $0.longitudeDegrees) }
         let top = Array(snapshot.aspects.prefix(4))
         let strongestSupport = snapshot.aspects.first { $0.kind.supportive } ?? snapshot.aspects.first
         let strongestChallenge = snapshot.aspects.first { $0.kind.challenging } ?? snapshot.aspects.first
@@ -100,30 +139,30 @@ enum InsightFactory {
         let activeHouses = activeHouseFacts(houseScores, language: language)
         let dominant = dominantBodies(snapshot.aspects, language: language)
         let orientation = elementOrientation(elementScores, language: language)
+        let coreFacts: [InsightFact] = [
+            sun.map { fact(localized("Sun", "太阳", language: language), Zodiac.position($0, language: language), .supportive, symbol: "☉") },
+            moon.map { fact(localized("Moon", "月亮", language: language), Zodiac.position($0, language: language), .neutral, symbol: "☽") },
+            fact(localized("Rising", "上升", language: language), ascSign, .transition, symbol: "ASC"),
+        ].compactMap { $0 }
+        let loveFacts: [InsightFact] = [
+            venus.map { fact(localized("You give", "你给予", language: language), Zodiac.position($0, language: language), .supportive, symbol: "♀") },
+            moon.map { fact(localized("You need", "你需要", language: language), Zodiac.position($0, language: language), .neutral, symbol: "☽") },
+        ].compactMap { $0 }
+        let edgeFacts: [InsightFact] = [
+            strongestSupport.map { fact(localized("Core strength", "核心优势", language: language), aspectTitle($0, language: language), .supportive) },
+            strongestChallenge.map { fact(localized("Growth edge", "成长面", language: language), aspectTitle($0, language: language), .challenging) },
+        ].compactMap { $0 }
+        let signatureFacts: [InsightFact] = [
+            fact(localized("Chart ruler", "命主星", language: language), bodyName(mcRuler, language: language), .supportive, symbol: mcRuler.symbol),
+            dominant.map { fact(localized("Dominant", "主导星体", language: language), $0, .transition) },
+            fact(localized("Orientation", "总体取向", language: language), orientation, .neutral),
+        ].compactMap { $0 }
 
         return [
             card( id: "natal-interpretation",
                 title: localized("Natal interpretation", "本命解读", language: language),
                 icon: "✦", visual: .natalCore,
-                facts: [
-                    fact(localized("Sun", "太阳", language: language), sun.map { Zodiac.position($0, language: language) } ?? localized("Not available", "暂无数据", language: language), .supportive, symbol: "☉"),
-                    fact(localized("Moon", "月亮", language: language), moon.map { Zodiac.position($0, language: language) } ?? localized("Not available", "暂无数据", language: language), .neutral, symbol: "☽"),
-                    fact(localized("Rising", "上升", language: language), ascSign, .transition, symbol: "ASC"),
-                ],
-                language: language
-            ),
-            card( id: "love-connection",
-                title: localized("Love & Connection", "爱与连接", language: language),
-                icon: "♡", visual: .dualInsight(
-                    opening: venus.map { ConsumerCopy.style(signIndex: $0.signIndex, language: language) } ?? localized("Warmth", "温暖", language: language),
-                    demand: moon.map { ConsumerCopy.style(signIndex: $0.signIndex, language: language) } ?? localized("Steadiness", "稳定", language: language),
-                    openingLabel: localized("YOU GIVE", "你给予", language: language),
-                    demandLabel: localized("YOU NEED", "你需要", language: language)
-                ),
-                facts: [
-                    fact(localized("You give", "你给予", language: language), venus.map { Zodiac.position($0, language: language) } ?? localized("Not available", "暂无数据", language: language), .supportive, symbol: "♀"),
-                    fact(localized("You need", "你需要", language: language), moon.map { Zodiac.position($0, language: language) } ?? localized("Not available", "暂无数据", language: language), .neutral, symbol: "☽"),
-                ],
+                facts: coreFacts,
                 language: language
             ),
             card( id: "emotional-needs",
@@ -132,26 +171,37 @@ enum InsightFactory {
                 facts: emotionalNeedsFacts(snapshot, language: language),
                 language: language
             ),
+            card( id: "love-connection",
+                title: localized("Love & Connection", "爱与连接", language: language),
+                icon: "♡", visual: .dualInsight(
+                    opening: venus.map { Zodiac.position($0, language: language) } ?? "",
+                    demand: moon.map { Zodiac.position($0, language: language) } ?? "",
+                    openingLabel: localized("YOU GIVE", "你给予", language: language),
+                    demandLabel: localized("YOU NEED", "你需要", language: language)
+                ),
+                facts: loveFacts,
+                language: language
+            ),
             card( id: "career-direction",
                 title: localized("Career & direction", "事业与方向", language: language),
                 icon: "↗", visual: .growthPath,
-                facts: [
-                    fact(localized("Observe", "观察", language: language), "1", .neutral, symbol: "1"),
-                    fact(localized("Connect", "连接", language: language), "2", .transition, symbol: "2"),
-                    fact(localized("Build", "构建", language: language), "3", .supportive, symbol: "3"),
-                ],
+                facts: careerDirectionFacts(
+                    snapshot: snapshot,
+                    mcSignIndex: mcSignIndex,
+                    ruler: mcRuler,
+                    rulerPoint: mcRulerPoint,
+                    rulerHouse: mcRulerHouse,
+                    language: language
+                ),
                 language: language
             ),
             card( id: "strengths-growth",
                 title: localized("Strengths & growth edges", "优势与成长面", language: language),
                 icon: "✚", visual: .edgeDual(
-                    opening: strongestSupport.map { aspectTitle($0, language: language) } ?? localized("Natural ease", "天然顺手", language: language),
-                    demand: strongestChallenge.map { aspectTitle($0, language: language) } ?? localized("Room to grow", "成长空间", language: language)
+                    opening: strongestSupport.map { aspectTitle($0, language: language) } ?? "",
+                    demand: strongestChallenge.map { aspectTitle($0, language: language) } ?? ""
                 ),
-                facts: [
-                    fact(localized("Core strength", "核心优势", language: language), strongestSupport.map { aspectTitle($0, language: language) } ?? localized("Not available", "暂无数据", language: language), .supportive),
-                    fact(localized("Growth edge", "成长面", language: language), strongestChallenge.map { aspectTitle($0, language: language) } ?? localized("Not available", "暂无数据", language: language), .challenging),
-                ],
+                facts: edgeFacts,
                 language: language
             ),
             card( id: "element-balance",
@@ -170,14 +220,10 @@ enum InsightFactory {
                 title: localized("Chart signature", "星盘签名", language: language),
                 icon: "✶", visual: .signatureTrio(
                     ruler: mcRuler.symbol,
-                    dominant: dominant,
+                    dominant: dominant ?? "",
                     orientation: orientation
                 ),
-                facts: [
-                    fact(localized("Chart ruler", "命主星", language: language), bodyName(mcRuler, language: language), .supportive, symbol: mcRuler.symbol),
-                    fact(localized("Dominant", "主导星体", language: language), dominant, .transition),
-                    fact(localized("Orientation", "总体取向", language: language), orientation, .neutral),
-                ],
+                facts: signatureFacts,
                 language: language
             ),
             card( id: "planet-placements",
@@ -186,7 +232,7 @@ enum InsightFactory {
                 facts: snapshot.points.map { point in
                     let house = snapshot.house(containing: point.longitudeDegrees)
                     let houseLabel = house > 0
-                        ? localized("House \(house)", "第\(house)宫", language: language)
+                        ? AstroTerms.house(house, language: language)
                         : ""
                     return fact(
                         bodyName(point.body, language: language),
@@ -236,6 +282,21 @@ enum InsightFactory {
         let elementScores = elementBalance(snapshot)
         let moon = snapshot.point(.moon)
         let moonHouse = snapshot.house(containing: moon?.longitudeDegrees ?? 0)
+        let overviewFacts: [InsightFact] = [
+            top.first.map { fact(localized("Dominant pattern", "主导结构", language: language), aspectTitle($0, language: language), tone($0.kind)) },
+            fact(localized("Review cycles", "回顾调整中的主题", language: language), "\(retrogrades.count)", .transition),
+            fact(localized("Atmosphere", "整体氛围", language: language), activityLabel(activity, language: language)),
+        ].compactMap { $0 }
+        let moonFacts: [InsightFact] = [
+            moon.map { fact(localized("Moon sign", "月亮落座", language: language), Zodiac.position($0, language: language), .neutral, symbol: "☽") },
+            moonHouse > 0 ? fact(localized("Moon area", "月亮领域", language: language), ConsumerCopy.lifeArea(moonHouse, language: language), .transition) : nil,
+            fact(localized("Lunar phase", "月相", language: language), progressedPhaseName(phase, language: language)),
+        ].compactMap { $0 }
+        let patternFacts: [InsightFact] = [
+            fact(localized("Support", "支持", language: language), "\(balance.supportive)", .supportive),
+            fact(localized("Pressure", "压力", language: language), "\(balance.challenging)", .challenging),
+            dominantBodies(snapshot.aspects, language: language).map { fact(localized("Focus", "焦点", language: language), $0, .transition) },
+        ].compactMap { $0 }
 
         return [
             card( id: "sky-overview",
@@ -245,21 +306,13 @@ enum InsightFactory {
                     activity: activity,
                     cycles: cycleAspects.map { $0?.strength ?? 0 }
                 ),
-                facts: [
-                    fact(localized("Dominant pattern", "主导结构", language: language), top.first.map { aspectTitle($0, language: language) } ?? localized("Not available", "暂无数据", language: language), top.first.map { tone($0.kind) } ?? .neutral),
-                    fact(localized("Review cycles", "回顾调整中的主题", language: language), "\(retrogrades.count)", .transition),
-                    fact(localized("Atmosphere", "整体氛围", language: language), activityLabel(activity, language: language)),
-                ],
+                facts: overviewFacts,
                 language: language
             ),
             card( id: "moon-now",
                 title: localized("Moon now", "此刻的月亮", language: language),
                 icon: "☽", visual: .phaseDial(phase: phase, illumination: moonIllumination(snapshot)),
-                facts: [
-                    fact(localized("Moon sign", "月亮落座", language: language), moon.map { Zodiac.position($0, language: language) } ?? localized("Not available", "暂无数据", language: language), .neutral, symbol: "☽"),
-                    fact(localized("Moon area", "月亮领域", language: language), ConsumerCopy.lifeArea(moonHouse, language: language), .transition),
-                    fact(localized("Lunar phase", "月相", language: language), progressedPhaseName(phase, language: language)),
-                ],
+                facts: moonFacts,
                 language: language
             ),
             card( id: "aspect-pattern",
@@ -269,11 +322,7 @@ enum InsightFactory {
                     challenging: balance.challenging,
                     neutral: balance.neutral
                 ),
-                facts: [
-                    fact(localized("Support", "支持", language: language), "\(balance.supportive)", .supportive),
-                    fact(localized("Pressure", "压力", language: language), "\(balance.challenging)", .challenging),
-                    fact(localized("Focus", "焦点", language: language), dominantBodies(snapshot.aspects, language: language), .transition),
-                ],
+                facts: patternFacts,
                 language: language
             ),
             card( id: "planetary-motion",
@@ -329,18 +378,8 @@ enum InsightFactory {
                 symbol: point.body.symbol
             )
         }
-        let expanding: String
-        if let support = aspects.first(where: { $0.kind.supportive }) {
-            expanding = aspectTitle(support, language: language)
-        } else {
-            expanding = localized("No strong signal", "暂无强信号", language: language)
-        }
-        let structuring: String
-        if let structure = aspects.first(where: { $0.kind.challenging }) {
-            structuring = aspectTitle(structure, language: language)
-        } else {
-            structuring = localized("No strong signal", "暂无强信号", language: language)
-        }
+        let expanding = aspects.first(where: { $0.kind.supportive }).map { aspectTitle($0, language: language) } ?? ""
+        let structuring = aspects.first(where: { $0.kind.challenging }).map { aspectTitle($0, language: language) } ?? ""
         let cycleLong = cycleEntry(
             in: events,
             bodies: [.saturn, .uranus, .neptune, .pluto],
@@ -351,7 +390,7 @@ enum InsightFactory {
         let cycleCurrent = cycleEntry(
             in: events,
             bodies: [.jupiter],
-            fallback: top.first.map { aspectTitle($0, language: language) } ?? localized("Not available", "暂无数据", language: language),
+            fallback: top.first.map { aspectTitle($0, language: language) } ?? "",
             language: language,
             timeZone: timeZone
         )
@@ -370,8 +409,8 @@ enum InsightFactory {
                     expanding: expanding,
                     structuring: structuring,
                     result: localized(
-                        "The art is balancing both threads rather than favoring one.",
-                        "关键是让两股力量互相配合，而不是只偏重一边。",
+                        "\(top.count) active cross-chart aspects",
+                        "\(top.count) 个进行中的跨盘相位",
                         language: language
                     )
                 ),
@@ -462,24 +501,30 @@ enum InsightFactory {
         let activeHouses = activeHouseFacts(houseScores, language: language)
         let phase = phaseAngle(snapshot)
         let moonHouse = natal?.house(containing: moon?.longitudeDegrees ?? 0) ?? 0
+        let phaseSequence = progressedPhaseSequence(phase, language: language)
+        let chapterFacts: [InsightFact] = [
+            fact(localized("Stage", "阶段", language: language), progressedPhaseName(phase, language: language), .transition),
+            moon.map { fact(localized("insight.progressed-moon.fact", default: "Progressed moon", chinese: "次限月亮", language: language), Zodiac.position($0, language: language), .neutral, symbol: "☽") },
+            sun.map { fact(localized("Progressed sun", "次限太阳", language: language), Zodiac.position($0, language: language), .supportive, symbol: "☉") },
+        ].compactMap { $0 }
+        let identityFacts: [InsightFact] = [
+            natalSun.map { fact(localized("Natal sun", "本命太阳", language: language), Zodiac.position($0, language: language), .neutral, symbol: "☉") },
+            sun.map { fact(localized("Progressed sun", "次限太阳", language: language), Zodiac.position($0, language: language), .supportive, symbol: "☉") },
+        ].compactMap { $0 }
 
         return [
             card( id: "developmental-chapter",
                 title: localized("Developmental chapter", "发展阶段", language: language),
                 icon: "◐", visual: .stageFlow(
-                    old: "Observe quietly",
-                    transition: "Claim direction",
-                    emerging: "Act visibly"
+                    old: phaseSequence.previous,
+                    transition: phaseSequence.current,
+                    emerging: phaseSequence.next
                 ),
-                facts: [
-                    fact(localized("Stage", "阶段", language: language), progressedPhaseName(phase, language: language), .transition),
-                    fact(localized("Emotional thread", "情绪线索", language: language), moon.map { ConsumerCopy.style(signIndex: $0.signIndex, language: language) } ?? localized("Not available", "暂无数据", language: language), .neutral, symbol: "☽"),
-                    fact(localized("Identity thread", "身份线索", language: language), sun.map { ConsumerCopy.style(signIndex: $0.signIndex, language: language) } ?? localized("Not available", "暂无数据", language: language), .supportive, symbol: "☉"),
-                ],
+                facts: chapterFacts,
                 language: language
             ),
             card( id: "progressed-moon",
-                title: localized("Progressed moon", "长期月亮", language: language),
+                title: localized("insight.progressed-moon.title", default: "Progressed moon", chinese: "长期月亮", language: language),
                 icon: "☽", visual: .moonProgress(progress: phase / 360),
                 facts: progressedMoonFacts(
                     events,
@@ -494,13 +539,10 @@ enum InsightFactory {
             card( id: "identity-development",
                 title: localized("Identity development", "身份发展", language: language),
                 icon: "☉", visual: .identityCompare(
-                    natal: natalSun.map { Zodiac.position($0, language: language) } ?? localized("Not available", "暂无数据", language: language),
-                    progressed: sun.map { Zodiac.position($0, language: language) } ?? localized("Not available", "暂无数据", language: language)
+                    natal: natalSun.map { Zodiac.position($0, language: language) } ?? "",
+                    progressed: sun.map { Zodiac.position($0, language: language) } ?? ""
                 ),
-                facts: [
-                    fact(localized("Natal sun", "本命太阳", language: language), natalSun.map { Zodiac.position($0, language: language) } ?? localized("Not available", "暂无数据", language: language), .neutral, symbol: "☉"),
-                    fact(localized("Progressed sun", "长期太阳", language: language), sun.map { Zodiac.position($0, language: language) } ?? localized("Not available", "暂无数据", language: language), .supportive, symbol: "☉"),
-                ],
+                facts: identityFacts,
                 language: language
             ),
             card( id: "turning-points",
@@ -543,16 +585,25 @@ enum InsightFactory {
         let strongestSupport = snapshot.aspects.first { $0.kind.supportive } ?? snapshot.aspects.first
         let strongestChallenge = snapshot.aspects.first { $0.kind.challenging } ?? snapshot.aspects.first
         let overlayAnchors = natalOverlayAnchors(snapshot: snapshot, natal: natal, language: language)
+        let yearThemeFacts: [InsightFact] = [
+            fact(localized("Return ascendant", "返照上升", language: language), ascSign, .transition, symbol: "ASC"),
+            fact(localized("Chart ruler", "命主星", language: language), bodyName(ruler, language: language), .supportive, symbol: ruler.symbol),
+            sunHouseLabel(sun, snapshot: snapshot, language: language).map {
+                fact(localized("Sun house", "太阳落宫", language: language), $0, .neutral, symbol: "☉")
+            },
+        ].compactMap { $0 }
+        let dynamicFacts: [InsightFact] = [
+            strongestSupport.map { fact(localized("Supportive aspect", "支持相位", language: language), aspectTitle($0, language: language), .supportive) },
+            strongestChallenge.map { fact(localized("Challenging aspect", "张力相位", language: language), aspectTitle($0, language: language), .challenging) },
+        ].compactMap { $0 }
+        let firstOverlay = overlayAnchors.first
+        let secondOverlay = overlayAnchors.dropFirst().first
 
         return [
             card( id: "year-theme",
                 title: localized("Your birthday year", "你的生日年", language: language),
                 icon: "☉", visual: .yearOrbit,
-                facts: [
-                    fact(localized("Return ascendant", "返照上升", language: language), ascSign, .transition, symbol: "ASC"),
-                    fact(localized("Chart ruler", "命主星", language: language), bodyName(ruler, language: language), .supportive, symbol: ruler.symbol),
-                    fact(localized("Sun house", "太阳落宫", language: language), sunHouseLabel(sun, snapshot: snapshot, language: language), .neutral, symbol: "☉"),
-                ],
+                facts: yearThemeFacts,
                 language: language
             ),
             card( id: "year-anchors",
@@ -570,15 +621,12 @@ enum InsightFactory {
             card( id: "year-dynamics",
                 title: localized("Year dynamics", "年度动态", language: language),
                 icon: "◈", visual: .dualInsight(
-                    opening: strongestSupport.map { aspectTitle($0, language: language) } ?? localized("Not available", "暂无数据", language: language),
-                    demand: strongestChallenge.map { aspectTitle($0, language: language) } ?? localized("Not available", "暂无数据", language: language),
+                    opening: strongestSupport.map { aspectTitle($0, language: language) } ?? "",
+                    demand: strongestChallenge.map { aspectTitle($0, language: language) } ?? "",
                     openingLabel: localized("OPENING", "展开", language: language),
                     demandLabel: localized("DEMAND", "要求", language: language)
                 ),
-                facts: [
-                    fact(localized("Opening", "展开", language: language), strongestSupport.map { aspectTitle($0, language: language) } ?? localized("Not available", "暂无数据", language: language), .supportive),
-                    fact(localized("Demand", "要求", language: language), strongestChallenge.map { aspectTitle($0, language: language) } ?? localized("Not available", "暂无数据", language: language), .challenging),
-                ],
+                facts: dynamicFacts,
                 language: language
             ),
             card( id: "year-timeline",
@@ -590,12 +638,12 @@ enum InsightFactory {
             card( id: "natal-overlay",
                 title: localized("Natal overlay", "与本命叠加", language: language),
                 icon: "∞", visual: .natalOverlay(
-                    firstLabel: overlayAnchors.first.label,
-                    firstValue: overlayAnchors.first.value,
-                    secondLabel: overlayAnchors.second.label,
-                    secondValue: overlayAnchors.second.value
+                    firstLabel: firstOverlay?.label ?? "",
+                    firstValue: firstOverlay?.value ?? "",
+                    secondLabel: secondOverlay?.label ?? "",
+                    secondValue: secondOverlay?.value ?? ""
                 ),
-                facts: [overlayAnchors.first, overlayAnchors.second],
+                facts: overlayAnchors,
                 language: language
             ),
             card( id: "year-aspects",
@@ -679,8 +727,8 @@ enum InsightFactory {
             card( id: "chemistry",
                 title: localized("Attraction & chemistry", "吸引与化学反应", language: language),
                 icon: "♀", visual: .dualInsight(
-                    opening: venusMarsAspects.first(where: { $0.kind.supportive }).map { aspectTitle($0, language: language) } ?? localized("Not available", "暂无数据", language: language),
-                    demand: venusMarsAspects.first(where: { $0.kind.challenging }).map { aspectTitle($0, language: language) } ?? localized("Not available", "暂无数据", language: language),
+                    opening: venusMarsAspects.first(where: { $0.kind.supportive }).map { aspectTitle($0, language: language) } ?? "",
+                    demand: venusMarsAspects.first(where: { $0.kind.challenging }).map { aspectTitle($0, language: language) } ?? "",
                     openingLabel: localized("ATTRACTION", "吸引", language: language),
                     demandLabel: localized("INTENSITY", "强度", language: language)
                 ),
@@ -726,70 +774,42 @@ enum InsightFactory {
         facts: [InsightFact],
         language: AppLanguage
     ) -> InsightCardModel {
-        let completedFacts = paddedFacts(
-            facts,
-            to: minimumFactCount(for: id),
-            language: language
-        )
         return InsightCardModel(
             id: id,
             title: title,
             icon: icon,
             visual: visual,
-            facts: completedFacts,
-            summary: "",
-            detail: ""
+            facts: facts,
+            conclusionKey: nil,
+            conclusion: ""
         )
-    }
-
-    private static func paddedFacts(
-        _ facts: [InsightFact],
-        to minimum: Int,
-        language: AppLanguage
-    ) -> [InsightFact] {
-        guard facts.count < minimum else { return facts }
-        let placeholders = (facts.count ..< minimum).map { _ in
-            fact(
-                localized("No close signal", "暂无紧密信号", language: language),
-                localized("Nothing close enough to display", "当前没有达到显示范围的紧密联系", language: language),
-                .neutral
-            )
-        }
-        return facts + placeholders
-    }
-
-    private static func minimumFactCount(for id: String) -> Int {
-        [
-            "natal-interpretation": 3, "love-connection": 2, "emotional-needs": 2, "career-direction": 3, "strengths-growth": 2, "element-balance": 4,
-            "house-emphasis": 3, "chart-signature": 3, "planet-placements": 10, "key-aspects": 3,
-            "sky-overview": 3, "moon-now": 3, "aspect-pattern": 3, "planetary-motion": 3,
-            "sign-changes": 3, "element-climate": 4, "upcoming-7-days": 2,
-            "current-story": 3, "current-cycles": 3, "transit-timeline": 3, "planet-paths": 3,
-            "life-areas": 3, "active-transits": 3,
-            "developmental-chapter": 3, "progressed-moon": 3, "identity-development": 2, "turning-points": 3,
-            "areas-maturing": 3, "timeline": 3,
-            "year-theme": 3, "year-anchors": 3, "priority-areas": 3, "year-dynamics": 2,
-            "year-timeline": 3, "natal-overlay": 3, "year-aspects": 3,
-            "relationship-overview": 3, "perspectives": 3, "emotional-connection": 3, "communication": 3,
-            "chemistry": 3, "commitment": 3, "house-overlays": 3, "key-inter-aspects": 3,
-        ][id, default: 1]
     }
 
     private static func fact(
         _ label: String,
         _ value: String,
         _ emphasis: InsightTone = .neutral,
+        stableID: String? = nil,
+        interpretationKey: String? = nil,
+        sourceFactIDs: [String] = [],
         note: String? = nil,
         progress: Double? = nil,
         symbol: String? = nil,
         category: String? = nil,
         markers: [Double]? = nil
     ) -> InsightFact {
-        InsightFact(
-            label: label,
-            value: value,
+        let rawID = [label, value, symbol ?? "", category ?? ""].joined(separator: "|")
+        let resolvedID = stableID ?? "fact." + String(SHA256Digest.hash(Data(rawID.utf8)).hex.prefix(20))
+        return InsightFact(
+            id: resolvedID,
+            metricLabel: label,
+            calculatedValue: value,
+            interpretationKey: interpretationKey ?? "insight.\(resolvedID)",
+            interpretationVariables: ["metric": label, "value": value],
+            sourceFactIDs: sourceFactIDs.isEmpty ? [resolvedID] : sourceFactIDs,
+            visualRole: category,
+            interpretation: note,
             emphasis: emphasis,
-            note: note,
             progress: progress,
             symbol: symbol,
             category: category,
@@ -837,7 +857,7 @@ enum InsightFactory {
         return Int(min(1, total / Double(limit)) * 100)
     }
 
-    private static func dominantBodies(_ aspects: [ChartAspect], language: AppLanguage) -> String {
+    private static func dominantBodies(_ aspects: [ChartAspect], language: AppLanguage) -> String? {
         var scores: [String: Double] = [:]
         for aspect in aspects {
             scores[aspect.firstID, default: 0] += aspect.strength
@@ -847,12 +867,12 @@ enum InsightFactory {
             .sorted { $0.value > $1.value }
             .prefix(2)
             .compactMap { CelestialBody(rawValue: $0.key).map { bodyName($0, language: language) } }
-        return names.isEmpty ? localized("Not available", "暂无数据", language: language) : names.joined(separator: " · ")
+        return names.isEmpty ? nil : names.joined(separator: " · ")
     }
 
     private static func motionLabel(_ point: ChartPoint, language: AppLanguage) -> String {
         point.retrograde
-            ? localized("Reviewing", "回顾调整中", language: language)
+            ? localized("insight.reviewing.status", default: "Reviewing", chinese: "回顾调整中", language: language)
             : localized("Moving forward", "稳定向前", language: language)
     }
 
@@ -973,15 +993,7 @@ enum InsightFactory {
 
     private static func emotionalFacts(_ aspects: [ChartAspect], language: AppLanguage) -> [InsightFact] {
         let sample = Array(aspects.prefix(4))
-        guard !sample.isEmpty else {
-            return [
-                fact(
-                    localized("No close signal", "暂无紧密信号", language: language),
-                    localized("Nothing close enough to display", "当前没有达到显示范围的紧密联系", language: language),
-                    .neutral
-                ),
-            ]
-        }
+        guard !sample.isEmpty else { return [] }
         return sample.map { aspect in
             fact(
                 aspectTitle(aspect, language: language),
@@ -998,15 +1010,7 @@ enum InsightFactory {
         second: ChartSnapshot?,
         language: AppLanguage
     ) -> [InsightFact] {
-        guard let second else {
-            return [
-                fact(
-                    localized("No partner chart", "暂无对方星盘", language: language),
-                    localized("Add a person to compare", "添加一位人物即可比较", language: language),
-                    .neutral
-                ),
-            ]
-        }
+        guard let second else { return [] }
         return first.points.prefix(6).map { point in
             let house = second.house(containing: point.longitudeDegrees)
             return fact(
@@ -1027,7 +1031,7 @@ enum InsightFactory {
         return ranked.map { index, value in
             let percent = value
             return fact(
-                localized("Day \(index + 1)", "第\(index + 1)天", language: language),
+                LocalizedFormatters.day(index + 1, language: language),
                 activityLabel(percent, language: language),
                 percent > 66 ? .challenging : percent > 35 ? .transition : .neutral,
                 progress: Double(percent) / 100
@@ -1040,28 +1044,28 @@ enum InsightFactory {
         let current = aspects.first { $0.phase == .exact } ?? aspects.first
         let applying = aspects.first { $0.phase == .applying }
         return [
-            fact(
+            separating.map { aspect in fact(
                 localized("Just passed", "刚刚经过", language: language),
-                separating.map { aspectTitle($0, language: language) } ?? localized("Not available", "暂无数据", language: language),
-                separating.map { tone($0.kind) } ?? .neutral,
-                progress: separating?.strength ?? 0,
+                aspectTitle(aspect, language: language),
+                tone(aspect.kind),
+                progress: aspect.strength,
                 symbol: "✓"
-            ),
-            fact(
+            ) },
+            current.map { aspect in fact(
                 localized("Current", "当前", language: language),
-                current.map { aspectTitle($0, language: language) } ?? localized("Not available", "暂无数据", language: language),
+                aspectTitle(aspect, language: language),
                 .transition,
-                progress: current?.strength ?? 0,
+                progress: aspect.strength,
                 symbol: "●"
-            ),
-            fact(
+            ) },
+            applying.map { aspect in fact(
                 localized("Next", "接下来", language: language),
-                applying.map { aspectTitle($0, language: language) } ?? localized("Not available", "暂无数据", language: language),
-                applying.map { tone($0.kind) } ?? .neutral,
-                progress: applying?.strength ?? 0,
+                aspectTitle(aspect, language: language),
+                tone(aspect.kind),
+                progress: aspect.strength,
                 symbol: "→"
-            ),
-        ]
+            ) },
+        ].compactMap { $0 }
     }
 
     private static func cycleLeaders(_ aspects: [ChartAspect]) -> [ChartAspect?] {
@@ -1078,6 +1082,25 @@ enum InsightFactory {
         case 180 ..< 270: localized("Review phase", "满月阶段", language: language)
         default: localized("Integration phase", "下弦阶段", language: language)
         }
+    }
+
+    private static func progressedPhaseSequence(
+        _ angle: Double,
+        language: AppLanguage
+    ) -> (previous: String, current: String, next: String) {
+        let labels = [
+            localized("New phase", "新月阶段", language: language),
+            localized("Building phase", "上弦阶段", language: language),
+            localized("Review phase", "满月阶段", language: language),
+            localized("Integration phase", "下弦阶段", language: language),
+        ]
+        let normalized = angle.truncatingRemainder(dividingBy: 360)
+        let index = min(3, max(0, Int(normalized / 90)))
+        return (
+            labels[(index + labels.count - 1) % labels.count],
+            labels[index],
+            labels[(index + 1) % labels.count]
+        )
     }
 
     private static func ruler(ofSign sign: Int) -> CelestialBody {
@@ -1097,11 +1120,11 @@ enum InsightFactory {
         }
     }
 
-    private static func sunHouseLabel(_ sun: ChartPoint?, snapshot: ChartSnapshot, language: AppLanguage) -> String {
-        guard let sun else { return localized("Not available", "暂无数据", language: language) }
+    private static func sunHouseLabel(_ sun: ChartPoint?, snapshot: ChartSnapshot, language: AppLanguage) -> String? {
+        guard let sun else { return nil }
         let house = snapshot.house(containing: sun.longitudeDegrees)
-        guard house > 0 else { return localized("Not available", "暂无数据", language: language) }
-        return "\(house)\(language == .english ? "th" : "宫")"
+        guard house > 0 else { return nil }
+        return language == .english ? ordinal(house) : "第\(house)宫"
     }
 
     private static func moonIllumination(_ snapshot: ChartSnapshot) -> Double {
@@ -1112,22 +1135,71 @@ enum InsightFactory {
 
 
     private static func emotionalNeedsFacts(_ snapshot: ChartSnapshot, language: AppLanguage) -> [InsightFact] {
-        let moon = snapshot.point(.moon)
-        let house = snapshot.house(containing: moon?.longitudeDegrees ?? 0)
+        guard let moon = snapshot.point(.moon) else { return [] }
+        let house = snapshot.house(containing: moon.longitudeDegrees)
+        guard house > 0 else { return [] }
+        let technical = localized(
+            "Moon in \(Zodiac.englishNames[moon.signIndex]) · House \(house) · \(ConsumerCopy.lifeArea(house, language: .english))",
+            "月亮在\(Zodiac.chineseNames[moon.signIndex]) · 第\(house)宫 · \(ConsumerCopy.lifeArea(house, language: .simplifiedChinese))",
+            language: language
+        )
         return [
             fact(
-                localized("Moon sign", "月亮落座", language: language),
-                moon.map { Zodiac.position($0, language: language) } ?? localized("Not available", "暂无数据", language: language),
+                localized("Calculated pattern", "计算结果", language: language),
+                technical,
                 .neutral,
+                stableID: "natal.emotional-needs.moon",
+                interpretationKey: "natal.emotional-needs.moon-sign-\(moon.signIndex).house-\(house)",
+                sourceFactIDs: ["point.moon"],
                 symbol: "☽"
             ),
+        ]
+    }
+
+    private static func careerDirectionFacts(
+        snapshot: ChartSnapshot,
+        mcSignIndex: Int,
+        ruler: CelestialBody,
+        rulerPoint: ChartPoint?,
+        rulerHouse: Int?,
+        language: AppLanguage
+    ) -> [InsightFact] {
+        var facts = [
             fact(
-                localized("Where it lives", "落在", language: language),
-                ConsumerCopy.lifeArea(house, language: language),
-                .transition,
-                note: house > 0 ? localized("House \(house)", "第\(house)宫", language: language) : nil
+                localized("Public style", "公众风格", language: language),
+                Zodiac.name(index: mcSignIndex, language: language),
+                .neutral,
+                stableID: "natal.career-direction.midheaven",
+                interpretationKey: "natal.career-direction.midheaven-sign-\(mcSignIndex)",
+                sourceFactIDs: ["angle.midheaven"],
+                symbol: "MC"
             ),
         ]
+        if let rulerPoint, let rulerHouse, rulerHouse > 0 {
+            facts.append(
+                fact(
+                    localized("Direction ruler", "方向主星", language: language),
+                    "\(bodyName(ruler, language: language)) · \(Zodiac.position(rulerPoint, language: language))",
+                    .transition,
+                    stableID: "natal.career-direction.ruler",
+                    interpretationKey: "natal.career-direction.ruler-\(ruler.rawValue).house-\(rulerHouse)",
+                    sourceFactIDs: ["point.\(ruler.rawValue)"],
+                    symbol: ruler.symbol
+                )
+            )
+            facts.append(
+                fact(
+                    localized("Contribution arena", "贡献领域", language: language),
+                    ConsumerCopy.lifeArea(rulerHouse, language: language),
+                    .supportive,
+                    stableID: "natal.career-direction.ruler-house",
+                    interpretationKey: "natal.career-direction.house-\(rulerHouse)",
+                    sourceFactIDs: ["point.\(ruler.rawValue)"],
+                    symbol: "\(rulerHouse)"
+                )
+            )
+        }
+        return facts
     }
 
     // MARK: - Solar return anchors (prototype .connection-grid / .compare-strip)
@@ -1144,72 +1216,64 @@ enum InsightFactory {
             "\(Zodiac.chineseNames[ascIndex])上升",
             language: language
         )
-        let rulerHouse = snapshot.house(containing: snapshot.point(ruler)?.longitudeDegrees ?? 0)
-        let rulerValue = localized(
-            "\(bodyName(ruler, language: .english)) in the \(ordinal(rulerHouse))",
-            "\(bodyName(ruler, language: .simplifiedChinese))在第\(rulerHouse)宫",
-            language: language
-        )
-        let sunHouse = snapshot.house(containing: sun?.longitudeDegrees ?? 0)
-        let sunValue = localized(
-            "Sun in the \(ordinal(sunHouse))",
-            "太阳在第\(sunHouse)宫",
-            language: language
-        )
-        let angular = angularPlanetInfo(snapshot)
-        let angularValue: String
-        let angularNote: String
-        if let angular {
-            let axisName = YearAnchorCopy.angularAxisName(angular.axis, language: language)
-            angularValue = localized(
-                "\(bodyName(angular.body, language: .english)) near \(axisName)",
-                "\(bodyName(angular.body, language: .simplifiedChinese))靠近\(axisName)",
-                language: language
-            )
-            angularNote = YearAnchorCopy.angularNote(axis: angular.axis, language: language)
-        } else {
-            angularValue = localized("No strong signal", "暂无强信号", language: language)
-            angularNote = ""
-        }
-        return [
+        let rulerPoint = snapshot.point(ruler)
+        let rulerHouse = rulerPoint.map { snapshot.house(containing: $0.longitudeDegrees) }
+        let sunHouse = sun.map { snapshot.house(containing: $0.longitudeDegrees) }
+        var facts: [InsightFact] = [
             fact(
                 localized("Return ascendant", "返照上升", language: language),
                 ascValue,
-                .transition,
-                note: YearAnchorCopy.ascendantNote(signIndex: ascIndex, language: language)
-            ),
-            fact(
-                localized("Chart ruler", "命主星", language: language),
-                rulerValue,
-                .supportive,
-                note: YearAnchorCopy.rulerNote(ruler, language: language)
-            ),
-            fact(
-                localized("Solar return sun", "返照太阳", language: language),
-                sunValue,
-                .neutral,
-                note: YearAnchorCopy.sunHouseNote(house: sunHouse, language: language)
-            ),
-            fact(
-                localized("Angular planet", "角宫行星", language: language),
-                angularValue,
-                .transition,
-                note: angularNote
+                .transition
             ),
         ]
+        if let rulerPoint, let rulerHouse, rulerHouse > 0 {
+            facts.append(
+                fact(
+                    localized("Chart ruler", "命主星", language: language),
+                    localized(
+                        "\(bodyName(ruler, language: .english)) · \(Zodiac.position(rulerPoint, language: .english)) · \(ordinal(rulerHouse)) house",
+                        "\(bodyName(ruler, language: .simplifiedChinese)) · \(Zodiac.position(rulerPoint, language: .simplifiedChinese)) · 第\(rulerHouse)宫",
+                        language: language
+                    ),
+                    .supportive
+                )
+            )
+        }
+        if let sun, let sunHouse, sunHouse > 0 {
+            facts.append(
+                fact(
+                    localized("Solar return sun", "返照太阳", language: language),
+                    localized(
+                        "\(Zodiac.position(sun, language: .english)) · \(ordinal(sunHouse)) house",
+                        "\(Zodiac.position(sun, language: .simplifiedChinese)) · 第\(sunHouse)宫",
+                        language: language
+                    ),
+                    .neutral
+                )
+            )
+        }
+        if let angular = angularPlanetInfo(snapshot), angular.distance <= 5 {
+            facts.append(
+                fact(
+                    localized("Angular planet", "角宫行星", language: language),
+                    localized(
+                        "\(bodyName(angular.body, language: .english)) · \(angular.axis) · \(Zodiac.formatDegree(angular.distance)) orb",
+                        "\(bodyName(angular.body, language: .simplifiedChinese)) · \(angular.axis) · 容许度 \(Zodiac.formatDegree(angular.distance))",
+                        language: language
+                    ),
+                    .transition
+                )
+            )
+        }
+        return facts
     }
 
     private static func natalOverlayAnchors(
         snapshot: ChartSnapshot,
         natal: ChartSnapshot?,
         language: AppLanguage
-    ) -> (first: InsightFact, second: InsightFact) {
-        let fallback = fact(
-            localized("Return pattern", "返照结构", language: language),
-            localized("Not available", "暂无数据", language: language),
-            .neutral
-        )
-        guard let natal else { return (fallback, fallback) }
+    ) -> [InsightFact] {
+        guard let natal else { return [] }
         let asc = natal.angles.ascendantDegrees
         let mc = natal.angles.midheavenDegrees
         let axes: [(axis: String, longitude: Double)] = [
@@ -1227,15 +1291,12 @@ enum InsightFactory {
         candidates.sort { $0.distance < $1.distance }
         var usedBodies = Set<String>()
         var chosen: [(body: CelestialBody, axis: String, distance: Double)] = []
-        for item in candidates where !usedBodies.contains(item.body.rawValue) {
+        for item in candidates where item.distance <= 5 && !usedBodies.contains(item.body.rawValue) {
             usedBodies.insert(item.body.rawValue)
             chosen.append(item)
             if chosen.count == 2 { break }
         }
-        guard chosen.count == 2 else { return (fallback, fallback) }
-        let first = overlayAnchorFact(chosen[0], language: language)
-        let second = overlayAnchorFact(chosen[1], language: language)
-        return (first, second)
+        return chosen.map { overlayAnchorFact($0, language: language) }
     }
 
     private static func overlayAnchorFact(
@@ -1243,43 +1304,26 @@ enum InsightFactory {
         language: AppLanguage
     ) -> InsightFact {
         let value: String
-        let note: String
         switch item.axis {
         case "MC":
             value = localized("Near natal MC", "靠近本命天顶", language: language)
-            note = localized(
-                "The year's public direction connects with your career and reputation.",
-                "这一年的公共方向，会与本命的事业与声望挂钩。",
-                language: language
-            )
         case "IC":
             value = localized("At natal IC", "落在本命天底", language: language)
-            note = localized(
-                "The year's private foundation connects with your home and inner life.",
-                "这一年的内在根基，会与家庭和内心生活相连。",
-                language: language
-            )
         case "ASC":
             value = localized("Near natal ASC", "靠近本命上升", language: language)
-            note = localized(
-                "The year's openings connect with your personal presence.",
-                "这一年的机会，会与你的个人形象直接相连。",
-                language: language
-            )
         default:
-            value = localized("Across natal 7th", "横跨本命第7宫", language: language)
-            note = localized(
-                "The year's growth moves through partnership and agreements.",
-                "这一年的成长，会经由关系与合作约定展开。",
-                language: language
-            )
+            value = localized("Near natal DSC", "靠近本命下降", language: language)
         }
         let label = localized(
             "Return \(bodyName(item.body, language: .english))",
             "返照\(bodyName(item.body, language: .simplifiedChinese))",
             language: language
         )
-        return fact(label, value, item.axis == "MC" || item.axis == "ASC" ? .supportive : .challenging, note: note)
+        return fact(
+            label,
+            "\(value) · \(Zodiac.formatDegree(item.distance))",
+            item.axis == "MC" || item.axis == "ASC" ? .supportive : .challenging
+        )
     }
 
     private static func angularPlanetInfo(_ snapshot: ChartSnapshot) -> (body: CelestialBody, axis: String, distance: Double)? {
@@ -1325,7 +1369,7 @@ enum InsightFactory {
 
     private static func semanticCategory(_ body: CelestialBody, language: AppLanguage) -> String {
         switch language {
-        case .english:
+        case .english, .spanish, .french:
             return switch body {
             case .sun, .moon: "Core/self"
             case .mercury: "Mind/voice"
@@ -1425,7 +1469,9 @@ enum InsightFactory {
         timeZone: TimeZone
     ) -> [InsightFact] {
         var rows: [(date: Date, title: String, note: String?)] = []
-        for ingress in events.skyIngresses where ingress.date.timeIntervalSinceNow <= 7 * 86_400 {
+        for ingress in events.skyIngresses {
+            let interval = ingress.date.timeIntervalSinceNow
+            guard interval >= 0, interval <= 7 * 86_400 else { continue }
             rows.append((
                 ingress.date,
                 localized(
@@ -1436,7 +1482,9 @@ enum InsightFactory {
                 nil
             ))
         }
-        for exact in events.skyExactEvents where exact.date.timeIntervalSinceNow <= 7 * 86_400 {
+        for exact in events.skyExactEvents {
+            let interval = exact.date.timeIntervalSinceNow
+            guard interval >= 0, interval <= 7 * 86_400 else { continue }
             rows.append((exact.date, skyExactEventTitle(exact, language: language), nil))
         }
         rows.sort { $0.date < $1.date }
@@ -1512,11 +1560,11 @@ enum InsightFactory {
         language: AppLanguage,
         timeZone: TimeZone
     ) -> [InsightFact] {
-        var facts = [
-            fact(localized("Moon sign", "月亮落座", language: language), moon.map { Zodiac.position($0, language: language) } ?? localized("Not available", "暂无数据", language: language), .neutral, symbol: "☽"),
-            fact(localized("Moon area", "月亮领域", language: language), ConsumerCopy.lifeArea(moonHouse, language: language), .transition),
+        var facts: [InsightFact] = [
+            moon.map { fact(localized("Moon sign", "月亮落座", language: language), Zodiac.position($0, language: language), .neutral, symbol: "☽") },
+            moonHouse > 0 ? fact(localized("Moon area", "月亮领域", language: language), ConsumerCopy.lifeArea(moonHouse, language: language), .transition) : nil,
             fact(localized("Phase", "月相", language: language), progressedPhaseName(phase, language: language)),
-        ]
+        ].compactMap { $0 }
         if let window = events.progressedMoon {
             let months = max(0, Int((Double(window.daysInSign) / 30.44).rounded()))
             facts.append(
@@ -1641,21 +1689,7 @@ enum InsightFactory {
                 )
             }
         }
-        // Keep the contract minimum of three rows by topping up with the
-        // strongest active progressed aspects.
-        var padded = rows
-        for aspect in fallback.prefix(4) where padded.count < 3 {
-            padded.append(
-                fact(
-                    phaseLabel(aspect.phase, language: language),
-                    aspectTitle(aspect, language: language),
-                    tone(aspect.kind),
-                    note: ConsumerCopy.intensity(aspect.strength, language: language),
-                    progress: aspect.strength
-                )
-            )
-        }
-        return padded
+        return rows
     }
 
     private static func solarSeasonFacts(
@@ -1676,41 +1710,12 @@ enum InsightFactory {
                 )
             }
         }
-        let themes = [
-            localized("Set the structure", "打好基础", language: language),
-            localized("Increase visibility", "走向台前", language: language),
-            localized("Renegotiate commitments", "重新商定承诺", language: language),
-            localized("Consolidate the year", "收束与总结", language: language),
-        ]
-        let notes = [
-            localized(
-                "The opening phase is strongest for clarifying routines, obligations and the practical base of the year.",
-                "开局阶段最适合把日常、责任和这一年的现实基础理顺。",
-                language: language
-            ),
-            localized(
-                "Career reach and public contribution become more active in this middle stretch.",
-                "中段里，事业推进和公共表达会明显活跃起来。",
-                language: language
-            ),
-            localized(
-                "Relationship, contract and financial terms need firmer boundaries and more explicit expectations.",
-                "关系、合约与财务条款需要更明确的边界和更清楚的预期。",
-                language: language
-            ),
-            localized(
-                "The final phase favors integration, review and deciding what should continue into the next year.",
-                "收尾阶段适合整合、复盘，并决定哪些要带进下一年。",
-                language: language
-            ),
-        ]
         return seasons.map { season in
-            let index = min(max(0, season.index), themes.count - 1)
             return fact(
+                LocalizedFormatters.quarter(season.index + 1, language: language),
                 season.start.shortEventRange(to: season.end, language: language, timeZone: timeZone),
-                themes[index],
                 season.index == 0 ? .transition : .neutral,
-                note: notes[index]
+                note: nil
             )
         }
     }
@@ -1718,7 +1723,7 @@ enum InsightFactory {
     private static func validate(_ cards: [InsightCardModel], for chart: ChartKind) throws {
         #if DEBUG
         let expected: [ChartKind: [String]] = [
-            .natal: ["natal-interpretation", "love-connection", "emotional-needs", "career-direction", "strengths-growth", "element-balance", "house-emphasis", "chart-signature", "planet-placements", "key-aspects"],
+            .natal: ["natal-interpretation", "emotional-needs", "love-connection", "career-direction", "strengths-growth", "element-balance", "house-emphasis", "chart-signature", "planet-placements", "key-aspects"],
             .currentSky: ["sky-overview", "moon-now", "aspect-pattern", "planetary-motion", "sign-changes", "element-climate", "upcoming-7-days"],
             .transit: ["current-story", "current-cycles", "transit-timeline", "planet-paths", "life-areas", "active-transits"],
             .secondary: ["developmental-chapter", "progressed-moon", "identity-development", "turning-points", "areas-maturing", "timeline"],
@@ -1729,16 +1734,8 @@ enum InsightFactory {
         guard cards.map(\.id) == expectedIDs else {
             throw InsightFactoryError.invalidCardContract("\(chart.rawValue) card set is incomplete")
         }
-        guard cards.allSatisfy({ !$0.title.isEmpty && !$0.summary.isEmpty && !$0.detail.isEmpty }) else {
+        guard cards.allSatisfy({ !$0.title.isEmpty && !$0.summary.isEmpty }) else {
             throw InsightFactoryError.invalidCardContract("\(chart.rawValue) contains empty card copy")
-        }
-        guard cards.allSatisfy({ !$0.facts.isEmpty }) else {
-            throw InsightFactoryError.invalidCardContract("\(chart.rawValue) contains an empty card visual")
-        }
-        for card in cards {
-            guard card.facts.count >= minimumFactCount(for: card.id) else {
-                throw InsightFactoryError.invalidCardContract("\(chart.rawValue).\(card.id) is missing visual content")
-            }
         }
         #endif
     }

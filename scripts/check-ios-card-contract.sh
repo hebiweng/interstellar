@@ -6,7 +6,7 @@ models="ios/App/Models.swift"
 views="ios/App/InsightCards.swift"
 
 expected_ids=(
-  natal-interpretation love-connection emotional-needs career-direction strengths-growth element-balance house-emphasis chart-signature planet-placements key-aspects
+  natal-interpretation emotional-needs love-connection career-direction strengths-growth element-balance house-emphasis chart-signature planet-placements key-aspects
   sky-overview moon-now aspect-pattern planetary-motion sign-changes element-climate upcoming-7-days
   current-story current-cycles transit-timeline planet-paths life-areas active-transits
   developmental-chapter progressed-moon identity-development turning-points areas-maturing timeline
@@ -22,7 +22,7 @@ for id in "${expected_ids[@]}"; do
 done
 
 required_manifests=(
-  '.natal: ["natal-interpretation", "love-connection", "emotional-needs", "career-direction", "strengths-growth", "element-balance", "house-emphasis", "chart-signature", "planet-placements", "key-aspects"]'
+  '.natal: ["natal-interpretation", "emotional-needs", "love-connection", "career-direction", "strengths-growth", "element-balance", "house-emphasis", "chart-signature", "planet-placements", "key-aspects"]'
   '.currentSky: ["sky-overview", "moon-now", "aspect-pattern", "planetary-motion", "sign-changes", "element-climate", "upcoming-7-days"]'
   '.transit: ["current-story", "current-cycles", "transit-timeline", "planet-paths", "life-areas", "active-transits"]'
   '.secondary: ["developmental-chapter", "progressed-moon", "identity-development", "turning-points", "areas-maturing", "timeline"]'
@@ -61,7 +61,20 @@ for removed in core-structure strongest-themes core-strengths blind-spot growth-
   fi
 done
 
-rg -q '!\$0.summary.isEmpty && !\$0.detail.isEmpty' "$factory"
+rg -q 'let calculatedValue: String' "$models"
+rg -q 'let interpretationKey: String?' "$models"
+rg -q 'let sourceFactIDs: \[String\]' "$models"
+rg -q 'let conclusionKey: String?' "$models"
+
+if rg -q 'paddedFacts|No close signal|Nothing close enough to display' "$factory"; then
+  echo "Placeholder or padded facts remain in the iOS card builder." >&2
+  exit 1
+fi
+
+if rg -qi 'composite' "$factory" "$models" ios/ContentSchema/card-contracts.json; then
+  echo "Composite must remain outside the v6 chart/card contract." >&2
+  exit 1
+fi
 
 for phrase in \
   "当前适合观察公共讨论与制度调整" \

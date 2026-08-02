@@ -18,6 +18,11 @@ fate.xiaoguiwk.top {
     reverse_proxy interstellar-relay:8080
   }
 
+  @relayadminui path /xiaoguiwk /xiaoguiwk/*
+  handle @relayadminui {
+    reverse_proxy interstellar-relay:8080
+  }
+
   handle {
     reverse_proxy interstellar-web:3000
   }
@@ -25,6 +30,19 @@ fate.xiaoguiwk.top {
   header {
     Strict-Transport-Security "max-age=31536000; includeSubDomains"
     Referrer-Policy "strict-origin-when-cross-origin"
+    X-Content-Type-Options "nosniff"
+    X-Frame-Options "DENY"
+    Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  }
+}
+
+aaadmin.xiaoguiwk.top {
+  encode zstd gzip
+  reverse_proxy interstellar-relay:8080
+
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Referrer-Policy "no-referrer"
     X-Content-Type-Options "nosniff"
     X-Frame-Options "DENY"
     Permissions-Policy "camera=(), microphone=(), geolocation=()"

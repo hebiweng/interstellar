@@ -214,7 +214,7 @@ struct LocationSearchView: View {
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 15))
 
                     if !service.query.isEmpty, !service.results.isEmpty {
-                        ScrollView {
+                        ScrollView(.vertical, showsIndicators: false) {
                             LazyVStack(spacing: 0) {
                                 ForEach(service.results.prefix(6), id: \.self) { result in
                                     Button {

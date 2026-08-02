@@ -13,18 +13,6 @@ private struct AskOptionDraft: Identifiable, Equatable {
     }
 }
 
-private struct AskSignificatorDraft: Identifiable, Equatable {
-    let id: UUID
-    var label: String
-    var house: Int?
-
-    init(id: UUID = UUID(), label: String = "", house: Int? = nil) {
-        self.id = id
-        self.label = label
-        self.house = house
-    }
-}
-
 private enum TimingRangeSelection: String, CaseIterable, Identifiable {
     case short
     case medium
@@ -47,7 +35,6 @@ struct AskView: View {
     @State private var question = ""
     @State private var targetHouse = 10
     @State private var options = [AskOptionDraft(), AskOptionDraft()]
-    @State private var significators: [AskSignificatorDraft] = []
     @State private var timingPrecision: TimingPrecision = .day
     @State private var timingRange: TimingRangeSelection = .medium
     @State private var startDate = Date()
@@ -60,7 +47,6 @@ struct AskView: View {
     @State private var progress = 0.0
     @State private var errorMessage: String?
     @State private var calculationTask: Task<Void, Never>?
-    @State private var lockedInputIDs = Set<String>()
     @State private var askHistory: [AskHistoryEntry] = []
     @State private var showAskHistory = false
     @FocusState private var focusedInputID: String?
@@ -70,7 +56,7 @@ struct AskView: View {
         NavigationStack {
             ZStack {
                 ScreenBackground()
-                ScrollView {
+                ScrollView(.vertical, showsIndicators: false) {
                     Group {
                         if let session {
                             resultView(session)
@@ -87,15 +73,6 @@ struct AskView: View {
                 .scrollDismissesKeyboard(.interactively)
             }
             .toolbar(.hidden, for: .navigationBar)
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button(localized("Done", "完成", language: model.language)) {
-                        commitFocusedInput()
-                    }
-                    .font(AppTypography.label)
-                }
-            }
             .sheet(isPresented: $showsLocationPicker) {
                 LocationSearchView(language: model.language) {
                     location = $0
@@ -105,6 +82,7 @@ struct AskView: View {
                 if location == nil {
                     location = profileLocation
                 }
+                askHistory = askHistoryStore.load()
             }
             .onChange(of: startDate) { _, _ in
                 customEndDate = min(max(customEndDate, startDate), maximumEndDate)
@@ -162,34 +140,47 @@ struct AskView: View {
                 )
             )
 
-            if !askHistory.isEmpty {
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack {
-                        Text(localized("Recent Questions", "最近的问题", language: model.language))
-                            .font(.title3.weight(.bold))
+            historySection
+        }
+    }
+
+    private var historySection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Button {
+                showAskHistory = true
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "clock.arrow.circlepath")
+                        .foregroundStyle(AppTheme.violet)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(localized("History", "历史", language: model.language))
+                            .font(.headline)
                             .foregroundStyle(AppTheme.text)
-                        Spacer()
-                        Button {
-                            showAskHistory = true
-                        } label: {
-                            Text(localized("View history", "查看历史", language: model.language))
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(AppTheme.violet)
-                        }
-                        .buttonStyle(.plain)
+                        Text(askHistory.isEmpty
+                             ? localized("No saved questions yet", "还没有保存的问题", language: model.language)
+                             : LocalizedFormatters.savedQuestions(askHistory.count, language: model.language))
+                            .font(.caption)
+                            .foregroundStyle(AppTheme.muted)
                     }
-                    ForEach(askHistory.prefix(5)) { entry in
-                        HStack {
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text(entry.question).font(.footnote.weight(.semibold)).foregroundStyle(AppTheme.text)
-                                Text(entry.answerTitle).font(.caption2).foregroundStyle(AppTheme.muted)
-                            }
-                            Spacer()
-                        }
-                        .padding(12)
-                        .cardSurface()
-                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(AppTheme.violet)
                 }
+                .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
+                .contentShape(Rectangle())
+                .cardSurface()
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(localized("History", "历史", language: model.language))
+
+            ForEach(askHistory.prefix(3)) { entry in
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(entry.question).font(.footnote.weight(.semibold)).foregroundStyle(AppTheme.text)
+                    Text(entry.answerTitle).font(.caption2).foregroundStyle(AppTheme.muted)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(12)
+                .cardSurface()
             }
         }
     }
@@ -230,50 +221,6 @@ struct AskView: View {
         .buttonStyle(.plain)
     }
 
-    private var significatorFields: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            fieldTitle(localized("Assign each element to a life area", "为问题里的每个要素指定生活领域", language: model.language))
-
-            ForEach($significators) { $element in
-                HStack(spacing: 9) {
-                    TextField(
-                        localized("Element (e.g. home, work)", "要素（例如：家、单位）", language: model.language),
-                        text: $element.label
-                    )
-                    .textFieldStyle(.plain)
-                    .padding(11)
-                    .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 12))
-                    housePicker(
-                        selection: Binding(
-                            get: { element.house ?? 0 },
-                            set: { element.house = $0 == 0 ? nil : $0 }
-                        ),
-                        excluding: Set(significators.filter { $0.id != element.id }.compactMap(\.house)),
-                        includesPrompt: true
-                    )
-                    .frame(width: 120)
-                }
-            }
-
-            if significators.count < 6 {
-                Button {
-                    significators.append(AskSignificatorDraft())
-                } label: {
-                    Label(
-                        localized("Add element", "增加要素", language: model.language),
-                        systemImage: "plus.circle.fill"
-                    )
-                    .font(AppTypography.label)
-                    .frame(maxWidth: .infinity, minHeight: 44)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(AppTheme.violet)
-            }
-        }
-        .cardSurface()
-    }
-
     private func configurationView(_ mode: HoraryQuestionMode) -> some View {
         VStack(alignment: .leading, spacing: 18) {
             backHeader(
@@ -289,8 +236,6 @@ struct AskView: View {
             case .timing:
                 timingFields
             }
-
-            significatorFields
 
             locationAndTime(mode)
 
@@ -355,18 +300,14 @@ struct AskView: View {
                     "例如：这次申请会顺利推进吗？",
                     language: model.language
                 ),
-                text: $question,
-                axis: .vertical
+                text: $question
             )
             .focused($focusedInputID, equals: "question")
-            .disabled(isInputLocked("question"))
             .submitLabel(.done)
-            .onSubmit { commitInput("question") }
-            .lineLimit(3 ... 6)
+            .onSubmit { focusedInputID = nil }
             .textFieldStyle(.plain)
             .padding(14)
             .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 15))
-            inputCommitControl(id: "question", canCommit: !question.trimmed.isEmpty)
 
             housePicker(selection: $targetHouse, excluding: [])
         }
@@ -405,16 +346,11 @@ struct AskView: View {
                         text: $option.label
                     )
                     .focused($focusedInputID, equals: option.id.uuidString)
-                    .disabled(isInputLocked(option.id.uuidString))
                     .submitLabel(.done)
-                    .onSubmit { commitInput(option.id.uuidString) }
+                    .onSubmit { focusedInputID = nil }
                     .textFieldStyle(.plain)
                     .padding(13)
                     .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 13))
-                    inputCommitControl(
-                        id: option.id.uuidString,
-                        canCommit: !option.label.trimmed.isEmpty
-                    )
 
                     housePicker(
                         selection: Binding(
@@ -456,13 +392,11 @@ struct AskView: View {
                 text: $question
             )
             .focused($focusedInputID, equals: "question")
-            .disabled(isInputLocked("question"))
             .submitLabel(.done)
-            .onSubmit { commitInput("question") }
+            .onSubmit { focusedInputID = nil }
             .textFieldStyle(.plain)
             .padding(13)
             .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 13))
-            inputCommitControl(id: "question", canCommit: true)
 
             housePicker(selection: $targetHouse, excluding: [])
 
@@ -579,10 +513,6 @@ struct AskView: View {
 
             resultHero(session)
 
-            if !session.significators.isEmpty {
-                significatorResultCard(session)
-            }
-
             ChartWheelView(
                 snapshot: session.snapshot,
                 reference: nil,
@@ -628,35 +558,6 @@ struct AskView: View {
             .foregroundStyle(AppTheme.muted)
             .fixedSize(horizontal: false, vertical: true)
         }
-    }
-
-    private func significatorResultCard(_ session: HorarySession) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(localized("Assigned elements", "要素指派", language: model.language))
-                .font(.headline)
-                .foregroundStyle(AppTheme.text)
-            ForEach(session.significators) { assessment in
-                HStack(spacing: 10) {
-                    Text(assessment.label)
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(AppTheme.text)
-                    Text(ConsumerCopy.lifeArea(assessment.house, language: model.language))
-                        .font(.caption)
-                        .foregroundStyle(AppTheme.muted)
-                    Spacer()
-                    Text(assessment.ruler.symbol)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(AppTheme.violet)
-                    Text(String(format: "%.0f", assessment.score))
-                        .font(.caption.monospacedDigit())
-                        .foregroundStyle(assessment.score >= 10 ? AppTheme.mint : assessment.score <= -10 ? AppTheme.coral : AppTheme.muted)
-                }
-                .padding(10)
-                .background(AppTheme.background.opacity(0.42), in: RoundedRectangle(cornerRadius: 11))
-            }
-        }
-        .padding(14)
-        .cardSurface()
     }
 
     private func resultHero(_ session: HorarySession) -> some View {
@@ -896,64 +797,13 @@ struct AskView: View {
                 format: .number.precision(.fractionLength(0 ... 6))
             )
             .focused($focusedInputID, equals: id)
-            .disabled(isInputLocked(id))
             .submitLabel(.done)
-            .onSubmit { commitInput(id) }
+            .onSubmit { focusedInputID = nil }
             .keyboardType(.numbersAndPunctuation)
             .font(AppTypography.label)
             .padding(10)
             .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 12))
-            inputCommitControl(id: id, canCommit: true)
         }
-    }
-
-    private func inputCommitControl(id: String, canCommit: Bool) -> some View {
-        HStack {
-            Spacer()
-            Button {
-                if isInputLocked(id) {
-                    lockedInputIDs.remove(id)
-                    focusedInputID = id
-                } else {
-                    commitInput(id)
-                }
-            } label: {
-                Label(
-                    isInputLocked(id)
-                        ? localized("Edit", "修改", language: model.language)
-                        : localized("Done", "完成", language: model.language),
-                    systemImage: isInputLocked(id) ? "pencil" : "checkmark.circle.fill"
-                )
-                .font(AppTypography.label)
-                .frame(minHeight: 44)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(isInputLocked(id) ? AppTheme.muted : AppTheme.violet)
-            .disabled(!canCommit)
-        }
-    }
-
-    private func commitInput(_ id: String) {
-        lockedInputIDs.insert(id)
-        focusedInputID = nil
-    }
-
-    private func commitFocusedInput() {
-        guard let focusedInputID else { return }
-        commitInput(focusedInputID)
-    }
-
-    private func isInputLocked(_ id: String) -> Bool {
-        lockedInputIDs.contains(id)
-    }
-
-    private func significatorAssessments(for snapshot: ChartSnapshot) -> [HorarySignificatorAssessment] {
-        let elements = significators.compactMap { element -> HorarySignificator? in
-            guard let house = element.house, (1 ... 12).contains(house) else { return nil }
-            return HorarySignificator(label: element.label.trimmed.isEmpty ? localized("Element", "要素", language: model.language) : element.label.trimmed, house: house)
-        }
-        return HoraryEngine.assessSignificators(elements, snapshot: snapshot)
     }
 
     private func generate(_ mode: HoraryQuestionMode) {
@@ -988,8 +838,7 @@ struct AskView: View {
                             targetHouse: targetHouse
                         ),
                         choices: [],
-                        timingCandidates: [],
-                        significators: significatorAssessments(for: snapshot)
+                        timingCandidates: []
                     )
                 case .choice:
                     let moment = chartDate
@@ -1017,8 +866,7 @@ struct AskView: View {
                             snapshot: snapshot,
                             candidates: candidates
                         ),
-                        timingCandidates: [],
-                        significators: significatorAssessments(for: snapshot)
+                        timingCandidates: []
                     )
                 case .timing:
                     guard let timeZone = TimeZone(identifier: location.timezoneID) else {
@@ -1050,8 +898,7 @@ struct AskView: View {
                         snapshot: first.snapshot,
                         analysis: first.analysis,
                         choices: [],
-                        timingCandidates: candidates,
-                        significators: significatorAssessments(for: first.snapshot)
+                        timingCandidates: candidates
                     )
                 }
                 try Task.checkCancellation()
@@ -1082,28 +929,12 @@ struct AskView: View {
 
     private func select(_ selectedMode: HoraryQuestionMode) {
         mode = selectedMode
-        lockedInputIDs.removeAll()
         focusedInputID = nil
         chartDate = Date()
         startDate = Date()
         customEndDate = defaultEndDate
         session = nil
         errorMessage = nil
-        significators = defaultSignificators(for: selectedMode)
-    }
-
-    private func defaultSignificators(for mode: HoraryQuestionMode) -> [AskSignificatorDraft] {
-        switch mode {
-        case .yesNo:
-            return [
-                AskSignificatorDraft(label: localized("Me", "我", language: model.language), house: 1),
-                AskSignificatorDraft(label: localized("The other person", "对方", language: model.language), house: 7),
-            ]
-        case .choice, .timing:
-            return [
-                AskSignificatorDraft(label: localized("Me", "我", language: model.language), house: 1),
-            ]
-        }
     }
 
     private func resetToModes() {
@@ -1111,12 +942,10 @@ struct AskView: View {
         calculationTask = nil
         mode = nil
         session = nil
-        lockedInputIDs.removeAll()
         focusedInputID = nil
         question = ""
         targetHouse = 10
         options = [AskOptionDraft(), AskOptionDraft()]
-        significators = []
         timingPrecision = .day
         timingRange = .medium
         startDate = Date()
@@ -1178,7 +1007,7 @@ struct AskView: View {
             answerText: text,
             createdAt: session.createdAt,
             locationName: session.locationName,
-            significators: session.significators.map { "\($0.label) · \(ConsumerCopy.lifeArea($0.house, language: model.language))" }
+            significators: []
         )
     }
 
@@ -1264,9 +1093,9 @@ struct AskView: View {
         let value = values[index]
         switch timingPrecision {
         case .day:
-            return localized("Next \(value) days", "未来\(value)天", language: model.language)
+            return LocalizedFormatters.nextDays(value, language: model.language)
         case .week, .month:
-            return localized("Next \(value) months", "未来\(value)个月", language: model.language)
+            return LocalizedFormatters.nextMonths(value, language: model.language)
         }
     }
 
@@ -1584,7 +1413,7 @@ private struct HoraryProfessionalView: View {
     let language: AppLanguage
 
     var body: some View {
-        ScrollView {
+        ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
                 ChartWheelView(
                     snapshot: session.snapshot,
@@ -1715,9 +1544,7 @@ private struct HoraryProfessionalView: View {
             .map { bodyName($0, language: language) } ?? aspect.secondID
         let hours = analysis.moon.hoursUntilNextAspect.map { Int($0.rounded()) }
         return "\(aspectKindName(aspect.kind, language: language)) \(target)"
-            + (hours.map {
-                localized(" · about \($0)h", " · 约\($0)小时", language: language)
-            } ?? "")
+            + (hours.map { LocalizedFormatters.hoursDuration($0, language: language) } ?? "")
     }
 
     private func componentLabel(_ id: String) -> String {
@@ -1760,7 +1587,7 @@ struct AskHistoryView: View {
     var body: some View {
         ZStack {
             ScreenBackground()
-            ScrollView {
+            ScrollView(.vertical, showsIndicators: false) {
                 LazyVStack(alignment: .leading, spacing: 12) {
                     ScreenTitle(
                         eyebrow: localized("ASK HISTORY", "问事历史", language: language),
@@ -1836,7 +1663,7 @@ struct AskHistoryDetailView: View {
         NavigationStack {
             ZStack {
                 ScreenBackground()
-                ScrollView {
+                ScrollView(.vertical, showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: 14) {
                         Text(entry.question)
                             .font(.title2.weight(.bold))
@@ -1848,20 +1675,6 @@ struct AskHistoryDetailView: View {
                             Text(entry.answerText)
                                 .font(.body)
                                 .foregroundStyle(AppTheme.text)
-                        }
-                        if !entry.significators.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(localized("Assigned elements", "要素指派", language: language))
-                                    .font(.headline)
-                                    .foregroundStyle(AppTheme.text)
-                                ForEach(entry.significators, id: \.self) { line in
-                                    Text("· " + line)
-                                        .font(.footnote)
-                                        .foregroundStyle(AppTheme.muted)
-                                }
-                            }
-                            .padding(14)
-                            .cardSurface()
                         }
                     }
                     .padding(18)

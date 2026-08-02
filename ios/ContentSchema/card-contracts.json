@@ -1,10 +1,10 @@
 {
-    "schemaVersion": 2,
+  "schemaVersion": 3,
     "cards": {
         "natal": [
-            "natal-interpretation",
-            "love-connection",
-            "emotional-needs",
+      "natal-interpretation",
+      "emotional-needs",
+      "love-connection",
             "career-direction",
             "strengths-growth",
             "element-balance",

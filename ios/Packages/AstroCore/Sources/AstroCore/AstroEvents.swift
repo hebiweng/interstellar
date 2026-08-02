@@ -15,7 +15,68 @@ public struct AstroEvent: Sendable, Equatable {
     }
 }
 
+public struct AstroStation: Sendable, Equatable {
+    public let body: CelestialBody
+    public let date: Date
+    public let retrogradeAfter: Bool
+
+    public init(body: CelestialBody, date: Date, retrogradeAfter: Bool) {
+        self.body = body
+        self.date = date
+        self.retrogradeAfter = retrogradeAfter
+    }
+}
+
 extension SwissEphemerisCalculator {
+
+    // MARK: - Stations
+
+    /// Finds the next true longitude-speed zero crossing. This is used for
+    /// retrograde/direct deadlines; callers must not estimate a station from a
+    /// fixed average speed.
+    public func nextStation(for body: CelestialBody, after date: Date) throws -> AstroStation {
+        let start = julianDay(for: date)
+        var lower = start
+        var lowerSpeed = try bodyPosition(body, julianDayUT: lower).speed
+        let step = 1.0
+        var upper = lower + step
+        let searchEnd = start + 365.25 * 2
+
+        while upper <= searchEnd {
+            let upperSpeed = try bodyPosition(body, julianDayUT: upper).speed
+            if lowerSpeed == 0 || upperSpeed == 0 || (lowerSpeed < 0) != (upperSpeed < 0) {
+                var lo = lower
+                var hi = upper
+                var loSpeed = lowerSpeed
+                for _ in 0 ..< 30 {
+                    let mid = (lo + hi) / 2
+                    let midSpeed = try bodyPosition(body, julianDayUT: mid).speed
+                    if midSpeed == 0 {
+                        lo = mid
+                        hi = mid
+                        break
+                    }
+                    if (loSpeed < 0) == (midSpeed < 0) {
+                        lo = mid
+                        loSpeed = midSpeed
+                    } else {
+                        hi = mid
+                    }
+                }
+                let stationJD = (lo + hi) / 2
+                let afterSpeed = try bodyPosition(body, julianDayUT: stationJD + 0.01).speed
+                return AstroStation(
+                    body: body,
+                    date: dateFromJulianDay(stationJD),
+                    retrogradeAfter: afterSpeed < 0
+                )
+            }
+            lower = upper
+            lowerSpeed = upperSpeed
+            upper += step
+        }
+        throw AstroCoreError.eventNotFound("No station for \(body.displayName) within two years.")
+    }
 
     // MARK: - Sign ingress
 
@@ -27,29 +88,31 @@ extension SwissEphemerisCalculator {
     ) throws -> Date {
         let start = julianDay(for: date)
         let position = try bodyPosition(body, julianDayUT: start)
-        let nextBoundary = Double((Int(position.longitude / 30) + 1) * 30)
-        var target = nextBoundary.truncatingRemainder(dividingBy: 360)
-        if target == 0 { target = 360 }
-        // The body may be retrograde; find the first crossing of the target.
-        let meanSpeed = position.speed
-        let step = abs(meanSpeed) < 0.000_000_1 ? 0.5 : 1.0
-        var guess = start + (target - position.longitude) / (meanSpeed == 0 ? 1 : meanSpeed)
-        if guess < start { guess += 365.25 }
-        // Bracket then bisect on the unwrapped error.
-        var lower = guess - 1.0
-        var upper = guess + 1.0
-        for _ in 0 ..< 12 {
-            let mid = (lower + upper) / 2
-            let midPos = try bodyPosition(body, julianDayUT: mid)
-            let err = signedDelta(target, midPos.longitude)
-            let lowerErr = try signedDelta(target, bodyPosition(body, julianDayUT: lower).longitude)
-            if (lowerErr >= 0) != (err >= 0) {
-                upper = mid
-            } else {
-                lower = mid
+        let startSign = Int(position.longitude / 30)
+        // Keep each sample below roughly five degrees so a fast Moon and a
+        // retrograde re-entry cannot jump across an entire sign unnoticed.
+        let step = min(5.0, max(0.02, 5.0 / max(abs(position.speed), 0.05)))
+        var lower = start
+        var upper = start + step
+        let searchEnd = start + 365.25 * 12
+        while upper <= searchEnd {
+            let upperSign = Int(try bodyPosition(body, julianDayUT: upper).longitude / 30)
+            if upperSign != startSign {
+                for _ in 0 ..< 28 {
+                    let mid = (lower + upper) / 2
+                    let midSign = Int(try bodyPosition(body, julianDayUT: mid).longitude / 30)
+                    if midSign == startSign {
+                        lower = mid
+                    } else {
+                        upper = mid
+                    }
+                }
+                return dateFromJulianDay(upper)
             }
+            lower = upper
+            upper += step
         }
-        return Date(timeIntervalSince1970: ((lower + upper) / 2 - 2_440_587.5) * 86_400)
+        throw AstroCoreError.eventNotFound("No sign ingress for \(body.displayName) within twelve years.")
     }
 
     // MARK: - Exact aspect
@@ -156,25 +219,29 @@ extension SwissEphemerisCalculator {
     ) throws -> Date {
         let start = julianDay(for: date)
         let position = try bodyPosition(body, julianDayUT: start)
-        let currentBoundary = Double(Int(position.longitude / 30) * 30)
-        var target = currentBoundary
-        if target == 0 { target = 360 }
-        let meanSpeed = position.speed
-        let guess = start - (position.longitude - target) / (meanSpeed == 0 ? 1 : meanSpeed)
-        var lower = min(start, guess) - 2.0
-        var upper = max(start, guess) + 2.0
-        for _ in 0 ..< 14 {
-            let mid = (lower + upper) / 2
-            let midPos = try bodyPosition(body, julianDayUT: mid)
-            let err = signedDelta(target, midPos.longitude)
-            let upperErr = try signedDelta(target, bodyPosition(body, julianDayUT: upper).longitude)
-            if (err >= 0) != (upperErr >= 0) {
-                lower = mid
-            } else {
-                upper = mid
+        let currentSign = Int(position.longitude / 30)
+        let step = min(5.0, max(0.02, 5.0 / max(abs(position.speed), 0.05)))
+        var upper = start
+        var lower = start - step
+        let searchEnd = start - 365.25 * 12
+        while lower >= searchEnd {
+            let lowerSign = Int(try bodyPosition(body, julianDayUT: lower).longitude / 30)
+            if lowerSign != currentSign {
+                for _ in 0 ..< 28 {
+                    let mid = (lower + upper) / 2
+                    let midSign = Int(try bodyPosition(body, julianDayUT: mid).longitude / 30)
+                    if midSign == currentSign {
+                        upper = mid
+                    } else {
+                        lower = mid
+                    }
+                }
+                return dateFromJulianDay(upper)
             }
+            upper = lower
+            lower -= step
         }
-        return Date(timeIntervalSince1970: ((lower + upper) / 2 - 2_440_587.5) * 86_400)
+        throw AstroCoreError.eventNotFound("No previous sign ingress for \(body.displayName) within twelve years.")
     }
 
     private func signedDelta(_ target: Double, _ value: Double) -> Double {
@@ -210,6 +277,10 @@ extension SwissEphemerisCalculator {
 
     private func julianDay(for date: Date) -> Double {
         date.timeIntervalSince1970 / 86_400 + 2_440_587.5
+    }
+
+    private func dateFromJulianDay(_ value: Double) -> Date {
+        Date(timeIntervalSince1970: (value - 2_440_587.5) * 86_400)
     }
 
     private func norm360(_ degrees: Double) -> Double {
@@ -281,6 +352,106 @@ extension SwissEphemerisCalculator {
         throw AstroCoreError.eventNotFound(
             "No exact \(kind.rawValue) from transiting \(moving.displayName) to the natal longitude within the search window."
         )
+    }
+
+    /// Previous exact contact for an already-separating transit. This mirrors
+    /// the forward search but walks backward through real ephemeris positions;
+    /// it never infers a date from the current speed.
+    public func previousTransitNatalExactDate(
+        moving: CelestialBody,
+        natalReferenceLongitude: Double,
+        kind: AspectKind,
+        before date: Date
+    ) throws -> Date {
+        let start = julianDay(for: date)
+        let targets = exactAspectTargets(kind)
+
+        func relativeAngle(at jd: Double) throws -> Double {
+            let longitude = try bodyPosition(moving, julianDayUT: jd).longitude
+            return norm360(longitude - natalReferenceLongitude)
+        }
+
+        let position = try bodyPosition(moving, julianDayUT: start)
+        let speed = max(abs(position.speed), 0.01)
+        let step = max(0.05, 1.0 / speed)
+        let searchEnd = start - 365.25 * 8
+        var upper = start
+        var upperAngle = try relativeAngle(at: upper)
+        var lower = upper - step
+        while lower > searchEnd {
+            let lowerAngle = try relativeAngle(at: lower)
+            for target in targets where crossesTarget(lowerAngle, upperAngle, target) {
+                var lo = lower
+                var hi = upper
+                var loAngle = lowerAngle
+                for _ in 0 ..< 28 {
+                    let mid = (lo + hi) / 2
+                    let midAngle = try relativeAngle(at: mid)
+                    if crossesTarget(loAngle, midAngle, target) {
+                        hi = mid
+                    } else {
+                        lo = mid
+                        loAngle = midAngle
+                    }
+                }
+                return dateFromJulianDay((lo + hi) / 2)
+            }
+            upper = lower
+            upperAngle = lowerAngle
+            lower -= step
+        }
+        throw AstroCoreError.eventNotFound(
+            "No previous exact \(kind.rawValue) from transiting \(moving.displayName) within the search window."
+        )
+    }
+
+    /// Exact in-orb boundaries around a known transit hit. Boundaries are
+    /// searched from ephemeris positions, not estimated from mean speed.
+    public func transitNatalAspectWindow(
+        moving: CelestialBody,
+        natalReferenceLongitude: Double,
+        kind: AspectKind,
+        exactDate: Date,
+        orbDegrees: Double
+    ) throws -> (start: Date, end: Date) {
+        let exactJD = julianDay(for: exactDate)
+        let targets = exactAspectTargets(kind)
+        let orb = max(0.05, orbDegrees)
+
+        func error(at jd: Double) throws -> Double {
+            let longitude = try bodyPosition(moving, julianDayUT: jd).longitude
+            let relative = norm360(longitude - natalReferenceLongitude)
+            return targets.map { abs(signedDelta($0, relative)) }.min() ?? 180
+        }
+
+        func boundary(direction: Double) throws -> Double {
+            var inside = exactJD
+            var outside = exactJD + direction * 0.25
+            let limit = exactJD + direction * 365.25 * 3
+            while (direction > 0 ? outside <= limit : outside >= limit), try error(at: outside) < orb {
+                inside = outside
+                outside += direction * 0.25
+            }
+            guard try error(at: outside) >= orb else {
+                throw AstroCoreError.eventNotFound("Transit orb boundary was not found.")
+            }
+            var lower = min(inside, outside)
+            var upper = max(inside, outside)
+            for _ in 0 ..< 28 {
+                let mid = (lower + upper) / 2
+                let midInside = try error(at: mid) < orb
+                if direction > 0 {
+                    if midInside { lower = mid } else { upper = mid }
+                } else {
+                    if midInside { upper = mid } else { lower = mid }
+                }
+            }
+            return (lower + upper) / 2
+        }
+
+        let start = try boundary(direction: -1)
+        let end = try boundary(direction: 1)
+        return (dateFromJulianDay(start), dateFromJulianDay(end))
     }
 
     /// Next exact aspect between a progressed body (birth date + N days) and a

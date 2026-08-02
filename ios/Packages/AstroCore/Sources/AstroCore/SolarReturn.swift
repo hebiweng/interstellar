@@ -3,7 +3,7 @@ import Foundation
 
 /// Result of a two-person (synastry) comparison: both natal snapshots plus the
 /// cross-chart aspects between them, all produced from one immutable pass.
-public struct SynastryComparison: Sendable, Equatable {
+public struct SynastryComparison: Sendable, Equatable, Codable {
     public let first: ChartSnapshot
     public let second: ChartSnapshot
     public let crossAspects: [ChartAspect]

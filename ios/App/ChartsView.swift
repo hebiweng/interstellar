@@ -4,21 +4,19 @@ import SwiftUI
 struct ChartsView: View {
     @EnvironmentObject private var model: AppModel
     @State private var showAIConsent = false
+    @State private var showLocationPicker = false
+    @State private var showReports = false
+    @State private var showParameters = false
 
     var body: some View {
         NavigationStack {
             ZStack {
                 ScreenBackground()
-                ScrollView {
+                ScrollView(.vertical, showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: 18) {
                         let insightState = model.insightCards(for: model.selectedChart)
-                        ScreenTitle(
-                            eyebrow: model.selectedChart.eyebrow(language: model.language),
-                            title: model.selectedChart.title(language: model.language),
-                            subtitle: chartSubtitle
-                        )
-
-                        profileStrip
+                        topBar
+                        chartSelector
 
                         if model.focusedChart == model.selectedChart,
                            let date = model.focusedChartDate
@@ -26,9 +24,7 @@ struct ChartsView: View {
                             eventTimeContext(date)
                         }
 
-                        chartSelector
-                        presetSelector
-                        viewSelector
+                        chartControlBar
                         chartContent
 
                         if !insightState.cards.isEmpty {
@@ -37,30 +33,14 @@ struct ChartsView: View {
                                 .foregroundStyle(AppTheme.text)
                                 .padding(.top, 2)
 
-                            if model.selectedChart == .natal {
-                                let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
-                                LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
-                                    ForEach(insightState.cards) { card in
-                                        let ai = model.aiCardDetail(for: model.selectedChart, cardID: card.id)
-                                        InsightCardView(
-                                            card: card,
-                                            language: model.language,
-                                            aiDetail: ai.detail,
-                                            aiStatus: ai.status
-                                        )
-                                        .gridCellColumns(card.id == "emotional-needs" || card.id == "love-connection" ? 1 : 2)
-                                    }
-                                }
-                            } else {
-                                ForEach(insightState.cards) { card in
-                                    let ai = model.aiCardDetail(for: model.selectedChart, cardID: card.id)
-                                    InsightCardView(
-                                        card: card,
-                                        language: model.language,
-                                        aiDetail: ai.detail,
-                                        aiStatus: ai.status
-                                    )
-                                }
+                            ForEach(insightState.cards) { card in
+                                let ai = model.aiCardDetail(for: model.selectedChart, cardID: card.id)
+                                InsightCardView(
+                                    card: card,
+                                    language: model.language,
+                                    aiDetail: ai.detail,
+                                    aiStatus: ai.status
+                                )
                             }
                         } else if let message = insightState.errorMessage,
                                   model.snapshot(for: model.selectedChart) != nil
@@ -81,6 +61,38 @@ struct ChartsView: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
+            .navigationDestination(isPresented: $showReports) {
+                ReportsView()
+            }
+            .sheet(isPresented: $showLocationPicker) {
+                LocationSearchView(language: model.language) { selection in
+                    model.setReferenceLocation(selection, for: model.selectedChart)
+                    showLocationPicker = false
+                }
+            }
+            .sheet(isPresented: $showParameters) {
+                NavigationStack {
+                    ScrollView(.vertical, showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 18) {
+                            chartParameters
+                            presetSelector
+                        }
+                        .padding(18)
+                    }
+                    .background(ScreenBackground())
+                    .navigationTitle(localized("charts.parameters.sheet-title", default: "Parameters", chinese: "参数设置", language: model.language))
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button(localized("Done", "完成", language: model.language)) {
+                                showParameters = false
+                            }
+                        }
+                    }
+                }
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+            }
             .task(id: model.selectedChart) {
                 if !model.aiConsentGranted, model.isOnline, model.snapshot(for: model.selectedChart) != nil {
                     showAIConsent = true
@@ -89,7 +101,7 @@ struct ChartsView: View {
                 }
             }
             .alert(
-                localized("Allow network generation?", "允许联网生成解读？", language: model.language),
+                localized("charts.ai.network-consent.title", default: "Allow network generation?", chinese: "允许联网生成解读？", language: model.language),
                 isPresented: $showAIConsent
             ) {
                 Button(localized("Allow", "允许", language: model.language)) {
@@ -99,11 +111,46 @@ struct ChartsView: View {
                 Button(localized("Not now", "暂不", language: model.language), role: .cancel) {}
             } message: {
                 Text(localized(
-                    "Generating interpretations and reports sends this chart's calculated facts to the configured server. Results are cached on this device.",
-                    "生成解读与报告会把本盘的计算事实发送至配置的服务器。结果会保存在本机。",
+                    "Interstellar sends only this chart's calculated facts and requested card IDs to the configured AI service. The relay may keep an encrypted idempotency result for up to 24 hours; your device keeps the long-term report until you delete it in Settings. You can revoke future network generation at any time.",
+                    "Interstellar 只会把本盘的计算事实和所需卡片 ID 发送给配置的 AI 服务。中继服务最多保留 24 小时的加密幂等结果；长期报告只保存在本机，直到你在设置中删除。你可以随时撤回后续联网生成授权。",
                     language: model.language
                 ))
             }
+        }
+    }
+
+    private var topBar: some View {
+        HStack {
+            Text(localized("Charts", "星盘", language: model.language))
+                .font(.system(size: 30, weight: .bold))
+                .kerning(-1)
+                .foregroundStyle(AppTheme.text)
+            Spacer()
+            Button { showReports = true } label: {
+                Label(localized("Reports", "报告", language: model.language), systemImage: "doc.text.fill")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(AppTheme.violet)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(AppTheme.violet.opacity(0.1), in: Capsule())
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var chartControlBar: some View {
+        HStack(spacing: 10) {
+            viewSelector
+            Button { showParameters = true } label: {
+                Label(localized("charts.parameters.button", default: "Parameters", chinese: "参数", language: model.language), systemImage: "slider.horizontal.3")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(AppTheme.violet)
+                    .padding(.horizontal, 12)
+                    .frame(minHeight: 42)
+                    .background(AppTheme.violet.opacity(0.1), in: RoundedRectangle(cornerRadius: 13))
+                    .overlay(RoundedRectangle(cornerRadius: 13).stroke(AppTheme.violet.opacity(0.22)))
+            }
+            .buttonStyle(.plain)
         }
     }
 
@@ -134,13 +181,14 @@ struct ChartsView: View {
     }
 
     private var birthInfo: String {
-        let timeZone = TimeZone(identifier: model.profile.timezoneID) ?? .current
+        let subject = model.chartSubjectProfile
+        let timeZone = TimeZone(identifier: subject.timezoneID) ?? .current
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: model.language.rawValue)
         formatter.timeZone = timeZone
         formatter.dateFormat = "MMM d, yyyy · HH:mm"
-        let date = formatter.string(from: model.profile.birthDateUTC)
-        return "\(date) · \(model.profile.placeName)"
+        let date = formatter.string(from: subject.birthDateUTC)
+        return "\(date) · \(subject.placeName)"
     }
 
     private var chartSubtitle: String {
@@ -190,6 +238,176 @@ struct ChartsView: View {
         }
     }
 
+    @ViewBuilder
+    private var chartParameters: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            if model.selectedChart != .currentSky {
+                Text(localized("Person", "人物", language: model.language))
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(AppTheme.muted)
+                Picker(localized("Person", "人物", language: model.language), selection: $model.chartSubjectID) {
+                    Text(model.profile.name).tag("self")
+                    ForEach(model.savedPeople) { person in
+                        Text(person.profile.name).tag(person.id.uuidString)
+                    }
+                }
+                .pickerStyle(.menu)
+            }
+        }
+
+        switch model.selectedChart {
+        case .natal:
+            parameterSummary(
+                title: localized("Birth data", "出生资料", language: model.language),
+                value: birthInfo,
+                systemImage: "person.text.rectangle"
+            )
+        case .currentSky:
+            VStack(alignment: .leading, spacing: 10) {
+                parameterHeader(resetTitle: localized("charts.parameters.back-to-now", default: "Back to now", chinese: "回到现在", language: model.language))
+                DatePicker(
+                    localized("Date & time", "日期与时间", language: model.language),
+                    selection: targetDateBinding(for: .currentSky)
+                )
+                .datePickerStyle(.compact)
+                locationButton(model.currentSkyLocationOverride?.placeName ?? model.chartSubjectProfile.placeName)
+            }
+            .cardSurface()
+        case .transit:
+            VStack(alignment: .leading, spacing: 10) {
+                parameterHeader(resetTitle: localized("Use current defaults", "恢复当前默认值", language: model.language))
+                DatePicker(
+                    localized("Target time", "目标时间", language: model.language),
+                    selection: targetDateBinding(for: .transit)
+                )
+                .datePickerStyle(.compact)
+                Picker(localized("Range", "范围", language: model.language), selection: transitRangeBinding) {
+                    Text(localized("7 days", "7 天", language: model.language)).tag(7)
+                    Text(localized("30 days", "30 天", language: model.language)).tag(30)
+                    Text(localized("90 days", "90 天", language: model.language)).tag(90)
+                }
+                .pickerStyle(.segmented)
+                locationButton(model.transitLocationOverride?.placeName ?? model.chartSubjectProfile.placeName)
+            }
+            .cardSurface()
+        case .secondary:
+            VStack(alignment: .leading, spacing: 10) {
+                parameterHeader(resetTitle: localized("Back to today", "回到今天", language: model.language))
+                DatePicker(
+                    localized("Target date", "目标日期", language: model.language),
+                    selection: targetDateBinding(for: .secondary),
+                    displayedComponents: .date
+                )
+                .datePickerStyle(.compact)
+                Text(localized(
+                    "Secondary progressions use the birth place and do not relocate in this version.",
+                    "本版次限盘沿用出生地点，不提供独立迁移地点。",
+                    language: model.language
+                ))
+                .font(.footnote)
+                .foregroundStyle(AppTheme.muted)
+            }
+            .cardSurface()
+        case .solarReturn:
+            VStack(alignment: .leading, spacing: 10) {
+                parameterHeader(resetTitle: localized("Current return year", "当前日返年度", language: model.language))
+                Stepper(value: solarYearBinding, in: 1900 ... 2200) {
+                    parameterSummary(
+                        title: localized("Return year", "日返年度", language: model.language),
+                        value: String(model.solarReturnYear),
+                        systemImage: "calendar"
+                    )
+                }
+                locationButton(model.solarReturnLocationOverride?.placeName ?? model.chartSubjectProfile.placeName)
+            }
+            .cardSurface()
+        case .synastry:
+            VStack(alignment: .leading, spacing: 10) {
+                Text(localized("Compare with", "另一位人物", language: model.language))
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(AppTheme.muted)
+                Picker(localized("Person", "人物", language: model.language), selection: $model.synastryPartnerID) {
+                    Text(localized("Choose a saved person", "选择已保存人物", language: model.language)).tag(String?.none)
+                    if model.chartSubjectID != "self" {
+                        Text(model.profile.name).tag(String?.some("self"))
+                    }
+                    ForEach(model.savedPeople) { person in
+                        if person.id.uuidString != model.chartSubjectID {
+                            Text(person.profile.name).tag(String?.some(person.id.uuidString))
+                        }
+                    }
+                }
+                .pickerStyle(.menu)
+            }
+            .cardSurface()
+        }
+    }
+
+    private func parameterHeader(resetTitle: String) -> some View {
+        HStack {
+            Text(localized("Chart parameters", "星盘参数", language: model.language))
+                .font(.caption.weight(.bold))
+                .foregroundStyle(AppTheme.muted)
+            Spacer()
+            Button(resetTitle) { model.resetTarget(for: model.selectedChart) }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(AppTheme.violet)
+        }
+    }
+
+    private func parameterSummary(title: String, value: String, systemImage: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: systemImage).foregroundStyle(AppTheme.violet)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.caption.weight(.semibold)).foregroundStyle(AppTheme.text)
+                Text(value).font(.footnote).foregroundStyle(AppTheme.muted).lineLimit(2)
+            }
+            Spacer()
+        }
+    }
+
+    private func locationButton(_ placeName: String) -> some View {
+        Button { showLocationPicker = true } label: {
+            parameterSummary(
+                title: localized("Reference location", "参考地点", language: model.language),
+                value: placeName,
+                systemImage: "mappin.and.ellipse"
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func targetDateBinding(for chart: ChartKind) -> Binding<Date> {
+        Binding(
+            get: {
+                switch chart {
+                case .currentSky: model.currentSkyUsesLiveDefault ? Date() : model.currentSkyTargetDate
+                case .transit: model.transitUsesLiveDefault ? Date() : model.transitTargetDate
+                case .secondary: model.secondaryUsesLiveDefault ? Date() : model.secondaryTargetDate
+                default: Date()
+                }
+            },
+            set: { model.setTargetDate($0, for: chart) }
+        )
+    }
+
+    private var transitRangeBinding: Binding<Int> {
+        Binding(get: { model.transitRangeDays }, set: { model.setTransitRangeDays($0) })
+    }
+
+    private var solarYearBinding: Binding<Int> {
+        Binding(
+            get: { model.solarReturnYear },
+            set: { year in
+                var components = DateComponents()
+                components.year = year
+                components.month = 1
+                components.day = 1
+                model.setTargetDate(Calendar.current.date(from: components) ?? Date(), for: .solarReturn)
+            }
+        )
+    }
+
     private var presetSelector: some View {
         VStack(alignment: .leading, spacing: 9) {
             Text(localized("Preset", "参数预设", language: model.language))
@@ -235,6 +453,7 @@ struct ChartsView: View {
         }
         .padding(4)
         .background(AppTheme.panel, in: RoundedRectangle(cornerRadius: 14))
+        .frame(maxWidth: .infinity)
     }
 
     private func modeButton(_ mode: ChartViewMode, icon: String) -> some View {
@@ -316,7 +535,7 @@ struct ChartsView: View {
                     .foregroundStyle(AppTheme.muted)
             }
             Spacer()
-            Button(localized("Back to now", "返回现在", language: model.language)) {
+            Button(localized("charts.event.back-to-now", default: "Back to now", chinese: "返回现在", language: model.language)) {
                 model.clearChartFocus()
             }
             .font(.caption.weight(.semibold))

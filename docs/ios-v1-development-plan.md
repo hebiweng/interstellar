@@ -1,5 +1,7 @@
 # Interstellar iOS V1 开发计划
 
+> 历史文档：自 2026-08-01 起，Today、盘型范围、卡片内容模型、AI 详情和 Obsidian 流程以 `docs/ios-v6-rebuild-plan.md` 与 `docs/ios-card-implementation-matrix.md` 为准。本文件只保留旧 V1 背景，不再作为当前实现合同。
+
 | 字段 | 值 |
 |---|---|
 | 文档版本 | 1.0.0 |

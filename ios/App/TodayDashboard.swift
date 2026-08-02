@@ -256,7 +256,7 @@ enum TodayDashboardFactory {
         }
         return switch tone {
         case .supportive: localized("Flowing", "顺畅", language: language)
-        case .challenging: localized("Tension", "有拉扯", language: language)
+        case .challenging: localized("today.tone.tension", default: "Tension", chinese: "有拉扯", language: language)
         case .transition: localized("Active", "活跃", language: language)
         case .neutral: localized("Steady", "平稳", language: language)
         }

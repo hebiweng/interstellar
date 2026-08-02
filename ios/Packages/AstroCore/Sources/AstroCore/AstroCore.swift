@@ -150,14 +150,14 @@ public enum CelestialBody: String, CaseIterable, Sendable, Codable, Identifiable
     }
 }
 
-public struct CelestialPosition: Sendable, Equatable {
+public struct CelestialPosition: Sendable, Equatable, Codable {
     public let longitudeDegrees: Double
     public let latitudeDegrees: Double
     public let distanceAU: Double
     public let longitudeSpeedDegreesPerDay: Double
 }
 
-public struct ChartPoint: Sendable, Equatable, Identifiable {
+public struct ChartPoint: Sendable, Equatable, Identifiable, Codable {
     public let body: CelestialBody
     public let position: CelestialPosition
 
@@ -168,12 +168,12 @@ public struct ChartPoint: Sendable, Equatable, Identifiable {
     public var retrograde: Bool { position.longitudeSpeedDegreesPerDay < 0 }
 }
 
-public struct NatalAngles: Sendable, Equatable {
+public struct NatalAngles: Sendable, Equatable, Codable {
     public let ascendantDegrees: Double
     public let midheavenDegrees: Double
 }
 
-public struct ChartHouse: Sendable, Equatable, Identifiable {
+public struct ChartHouse: Sendable, Equatable, Identifiable, Codable {
     public let number: Int
     public let cuspDegrees: Double
     public var id: Int { number }
@@ -246,7 +246,7 @@ public enum AspectEventInterpolation {
     }
 }
 
-public struct ChartAspect: Sendable, Equatable, Identifiable {
+public struct ChartAspect: Sendable, Equatable, Identifiable, Codable {
     public let firstID: String
     public let secondID: String
     public let kind: AspectKind
@@ -259,7 +259,7 @@ public struct ChartAspect: Sendable, Equatable, Identifiable {
     public var id: String { "\(firstID)-\(kind.rawValue)-\(secondID)" }
 }
 
-public struct ChartSnapshot: Sendable, Equatable {
+public struct ChartSnapshot: Sendable, Equatable, Codable {
     public let utcDate: Date
     public let location: GeographicLocation
     public let julianDayUT: Double

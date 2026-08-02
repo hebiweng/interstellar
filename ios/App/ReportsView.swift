@@ -9,7 +9,7 @@ struct ReportsView: View {
     var body: some View {
         ZStack {
             ScreenBackground()
-            ScrollView {
+            ScrollView(.vertical, showsIndicators: false) {
                 LazyVStack(alignment: .leading, spacing: 18) {
                     ScreenTitle(
                         eyebrow: localized("LIBRARY", "报告库", language: model.language),
@@ -57,15 +57,15 @@ struct ReportsView: View {
                 .accessibilityLabel(localized("Back", "返回", language: model.language))
             }
         }
-        .alert(localized("Allow network generation?", "允许联网生成？", language: model.language), isPresented: $showConsent) {
+        .alert(localized("ai.network-consent.title", default: "Allow network generation?", chinese: "允许联网生成？", language: model.language), isPresented: $showConsent) {
             Button(localized("Allow", "允许", language: model.language)) {
                 model.grantAIConsent()
             }
             Button(localized("Not now", "暂不", language: model.language), role: .cancel) {}
         } message: {
             Text(localized(
-                "Generating reports sends calculated chart data to the configured server. Results are cached on this device.",
-                "生成报告会把计算好的星盘数据发送至配置的服务器。结果保存在本机。",
+                "Interstellar sends only the selected chart's calculated facts and requested card IDs to the configured AI service. The relay may keep an encrypted idempotency result for up to 24 hours; your device keeps the long-term report until you delete it in Settings. You can revoke future network generation at any time.",
+                "Interstellar 只会把所选盘的计算事实和所需卡片 ID 发送给配置的 AI 服务。中继服务最多保留 24 小时的加密幂等结果；长期报告只保存在本机，直到你在设置中删除。你可以随时撤回后续联网生成授权。",
                 language: model.language
             ))
         }
@@ -214,7 +214,7 @@ struct ReportReaderView: View {
         NavigationStack {
             ZStack {
                 ScreenBackground()
-                ScrollView {
+                ScrollView(.vertical, showsIndicators: false) {
                     ScrollViewReader { proxy in
                         LazyVStack(alignment: .leading, spacing: 16) {
                             // Cover
@@ -317,7 +317,7 @@ struct ReportReaderView: View {
     private func readingTime(_ body: String) -> String {
         let words = max(1, body.split(whereSeparator: { $0.isWhitespace }).count)
         let minutes = max(1, Int((Double(words) / 200.0).rounded()))
-        return localized("\(minutes) min read", "约\(minutes)分钟", language: language)
+        return LocalizedFormatters.readingMinutes(minutes, language: language)
     }
 
     private func sectionCard(index: Int, section: AIReportSection) -> some View {

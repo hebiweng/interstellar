@@ -23,7 +23,29 @@ struct InsightCardView: View {
                 .foregroundStyle(AppTheme.text)
                 .fixedSize(horizontal: false, vertical: true)
 
-            if !card.summary.isEmpty && card.summary != card.title {
+            if let text = card.text {
+                if let headline = text.headline, !headline.isEmpty, headline != card.title {
+                    Text(headline)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(AppTheme.text)
+                        .lineSpacing(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if let body = text.body, !body.isEmpty, body != text.headline {
+                    Text(body)
+                        .font(.system(size: 12.5, weight: .medium))
+                        .foregroundStyle(AppTheme.text.opacity(0.95))
+                        .lineSpacing(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if let secondary = text.secondaryBody, !secondary.isEmpty {
+                    Text(secondary)
+                        .font(.system(size: 11.5))
+                        .foregroundStyle(AppTheme.muted)
+                        .lineSpacing(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            } else if !card.facts.isEmpty, !card.summary.isEmpty && card.summary != card.title {
                 Text(card.summary)
                     .font(.system(size: 12.5, weight: .medium))
                     .foregroundStyle(AppTheme.text.opacity(0.95))
@@ -32,15 +54,6 @@ struct InsightCardView: View {
             }
 
             InsightVisualView(visual: card.visual, facts: card.facts, language: language)
-
-            if !card.detail.isEmpty {
-                Text(card.detail)
-                    .font(.system(size: 11.5))
-                    .foregroundStyle(AppTheme.muted)
-                    .lineSpacing(3)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.top, 2)
-            }
 
             Divider().overlay(AppTheme.line)
 
@@ -82,6 +95,20 @@ struct InsightCardView: View {
                         .foregroundStyle(AppTheme.muted)
                 }
                 .frame(maxWidth: .infinity, minHeight: 34, alignment: .leading)
+            } else if case let .failed(message) = aiStatus {
+                VStack(alignment: .leading, spacing: 7) {
+                    Label(
+                        localized("Professional interpretation unavailable", "专业解读暂不可用", language: language),
+                        systemImage: "exclamationmark.circle"
+                    )
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(AppTheme.coral)
+                    Text(message)
+                        .font(.system(size: 10))
+                        .foregroundStyle(AppTheme.muted)
+                        .lineLimit(2)
+                }
+                .frame(maxWidth: .infinity, minHeight: 38, alignment: .leading)
             }
         }
         .padding(16)
@@ -95,7 +122,7 @@ struct InsightCardView: View {
 
 func cardKicker(_ id: String, language: AppLanguage) -> String? {
     switch id {
-    case "sky-overview": return localized("SKY NOW", "当前天空", language: language)
+    case "sky-overview": return localized("card.sky-overview.eyebrow", default: "SKY NOW", chinese: "当前天空", language: language)
     case "moon-now": return localized("MOON NOW", "此刻月亮", language: language)
     case "aspect-pattern": return localized("ASPECT PATTERN", "连接结构", language: language)
     case "planetary-motion": return localized("PLANETARY MOTION", "行星运动", language: language)
@@ -250,7 +277,10 @@ private struct InsightVisualView: View {
 
     var body: some View {
         Group {
-            switch visual {
+            if facts.isEmpty {
+                emptyState
+            } else {
+                switch visual {
             case .natalCore: orbitCircle
             case .rankedThemes: rankedThemes
             case let .strengthOrbit(supportive, challenging, neutral):
@@ -316,9 +346,26 @@ private struct InsightVisualView: View {
             case .perspectiveTabs: perspectiveTabs
             case .connectionGrid: connectionGrid
             case .pathFlow: pathFlow(title: localized("How it flows", "流动方式", language: language))
-            case .houseOverlayRows: houseOverlayRows
+                case .houseOverlayRows: houseOverlayRows
+                }
             }
         }
+    }
+
+    private var emptyState: some View {
+        Label(
+            localized(
+                "Not enough calculated facts for this card",
+                "当前计算事实不足，暂不展示这张卡片的内容",
+                language: language
+            ),
+            systemImage: "circle.dashed"
+        )
+        .font(.system(size: 11, weight: .medium))
+        .foregroundStyle(AppTheme.muted)
+        .frame(maxWidth: .infinity, minHeight: 72, alignment: .leading)
+        .padding(12)
+        .background(AppTheme.background.opacity(0.35), in: RoundedRectangle(cornerRadius: 14))
     }
 
     private var orbitCircle: some View {
@@ -1032,7 +1079,7 @@ private struct InsightVisualView: View {
                 } label: {
                     Text(showAllAreas
                          ? localized("Show fewer areas", "收起领域", language: language)
-                         : localized("View all \(facts.count) areas", "查看全部\(facts.count)个领域", language: language))
+                         : LocalizedFormatters.viewAllAreas(facts.count, language: language))
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(AppTheme.violet)
                         .frame(maxWidth: .infinity, alignment: .leading)

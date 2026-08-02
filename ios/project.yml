@@ -36,7 +36,8 @@ targets:
     settings:
       base:
         CODE_SIGN_STYLE: Automatic
-        DEVELOPMENT_TEAM: YD3FY9ZB52
+        CODE_SIGN_ENTITLEMENTS: App/Interstellar.entitlements
+        DEVELOPMENT_TEAM: M2A7RHP7MT
         PRODUCT_BUNDLE_IDENTIFIER: com.xiaoguiwk.interstellar
         PRODUCT_NAME: Interstellar
         MARKETING_VERSION: 0.1.0
@@ -50,6 +51,30 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         TARGETED_DEVICE_FAMILY: "1"
         SUPPORTS_MACCATALYST: NO
+      configs:
+        Debug:
+          APP_ATTEST_ENVIRONMENT: development
+        Release:
+          APP_ATTEST_ENVIRONMENT: production
+    postBuildScripts:
+      - name: Validate Content and Localization
+        script: |
+          set -eu
+          cd "$SRCROOT/.."
+          export PATH="$HOME/.local/bin:$PATH"
+          node scripts/build-ios-copy-catalog.mjs --validate-runtime ios/App/Resources/CopyCatalog-en.json
+          node scripts/build-ios-copy-catalog.mjs --validate-runtime ios/App/Resources/CopyCatalog-zh-Hans.json
+          node scripts/build-ios-localization.mjs --validate
+        inputFiles:
+          - $(SRCROOT)/App/Resources/CopyCatalog-en.json
+          - $(SRCROOT)/App/Resources/CopyCatalog-zh-Hans.json
+          - $(SRCROOT)/App/Localizable.xcstrings
+          - $(SRCROOT)/App/Resources/AstroTerms-en.json
+          - $(SRCROOT)/App/Resources/AstroTerms-zh-Hans.json
+          - $(SRCROOT)/App/Resources/AstroTerms-es.json
+          - $(SRCROOT)/App/Resources/AstroTerms-fr.json
+          - $(SRCROOT)/Localization/ui-translations.json
+          - $(SRCROOT)/ContentSchema/copy-catalog.schema.json
     scheme:
       gatherCoverageData: true
       testTargets:
@@ -64,7 +89,7 @@ targets:
     settings:
       base:
         CODE_SIGN_STYLE: Automatic
-        DEVELOPMENT_TEAM: YD3FY9ZB52
+        DEVELOPMENT_TEAM: M2A7RHP7MT
         PRODUCT_BUNDLE_IDENTIFIER: com.xiaoguiwk.interstellar.uitests
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: Interstellar

@@ -13,7 +13,7 @@ struct ProfileView: View {
         NavigationStack {
             ZStack {
                 ScreenBackground()
-                ScrollView {
+                ScrollView(.vertical, showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 18) {
                         ScreenTitle(
                             eyebrow: localized("YOUR PROFILE", "个人资料", language: model.language),
@@ -429,12 +429,18 @@ private enum LocalDataClear: Identifiable {
     case reports
     case askHistory
     case aiCache
+    case currentPersonArtifacts
+    case chartArtifacts(ChartKind)
+    case personArtifacts(SavedPerson)
 
     var id: String {
         switch self {
         case .reports: "reports"
         case .askHistory: "askHistory"
         case .aiCache: "aiCache"
+        case .currentPersonArtifacts: "currentPersonArtifacts"
+        case let .chartArtifacts(chart): "chartArtifacts.\(chart.rawValue)"
+        case let .personArtifacts(person): "personArtifacts.\(person.id.uuidString)"
         }
     }
 
@@ -446,6 +452,20 @@ private enum LocalDataClear: Identifiable {
             localized("This removes your saved horary questions.", "这会删除你保存的问事记录。", language: language)
         case .aiCache:
             localized("Generated interpretations will be regenerated next time you open them.", "下次打开时，生成内容会重新请求。", language: language)
+        case .currentPersonArtifacts:
+            localized("This removes locally generated chart reports linked to your current birth profile.", "这会删除与当前本人出生资料关联的本机生成报告。", language: language)
+        case let .chartArtifacts(chart):
+            localized(
+                "This removes locally generated reports for \(chart.title(language: .english)).",
+                "这会删除本机的\(chart.title(language: .simplifiedChinese))生成报告。",
+                language: language
+            )
+        case let .personArtifacts(person):
+            localized(
+                "This removes locally generated reports linked to \(person.profile.name).",
+                "这会删除与\(person.profile.name)关联的本机生成报告。",
+                language: language
+            )
         }
     }
 }
@@ -497,7 +517,7 @@ private struct SettingsView: View {
                     }
                     Text(
                         localized(
-                            "Modern and Traditional change how each chart is calculated.",
+                            "Modern and Classical change how each chart is calculated.",
                             "现代与古典会改变每张盘的计算方式。",
                             language: model.language
                         )
@@ -532,6 +552,22 @@ private struct SettingsView: View {
                     )
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+                    Toggle(
+                        localized("Allow new AI generation", "允许新的 AI 生成", language: model.language),
+                        isOn: Binding(
+                            get: { model.aiConsentGranted },
+                            set: { $0 ? model.grantAIConsent() : model.revokeAIConsent() }
+                        )
+                    )
+                    Text(
+                        localized(
+                            "Turning this off stops future network requests. Reports already stored on this device remain readable.",
+                            "关闭后不再发送新的联网请求；已经保存在本机的报告仍可阅读。",
+                            language: model.language
+                        )
+                    )
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
                 }
 
                 Section(localized("Local data", "本地数据", language: model.language)) {
@@ -549,6 +585,21 @@ private struct SettingsView: View {
                         pendingClear = .aiCache
                     } label: {
                         Label(localized("Clear generated content cache", "清除生成内容缓存", language: model.language), systemImage: "sparkles")
+                    }
+                    Menu {
+                        Button(model.profile.name) { pendingClear = .currentPersonArtifacts }
+                        ForEach(model.savedPeople) { person in
+                            Button(person.profile.name) { pendingClear = .personArtifacts(person) }
+                        }
+                    } label: {
+                        Label(localized("Clear by person", "按人物清除", language: model.language), systemImage: "person.crop.circle.badge.minus")
+                    }
+                    Menu {
+                        ForEach(ChartKind.allCases) { chart in
+                            Button(chart.title(language: model.language)) { pendingClear = .chartArtifacts(chart) }
+                        }
+                    } label: {
+                        Label(localized("Clear by chart type", "按盘型清除", language: model.language), systemImage: "square.stack.3d.up.slash")
                     }
                     Text(
                         localized(
@@ -573,6 +624,9 @@ private struct SettingsView: View {
                         case .reports: model.clearReports()
                         case .askHistory: model.clearAskHistory()
                         case .aiCache: model.clearAICache()
+                        case .currentPersonArtifacts: model.clearGeneratedArtifactsForCurrentPerson()
+                        case let .chartArtifacts(chart): model.clearGeneratedArtifacts(for: chart)
+                        case let .personArtifacts(person): model.clearGeneratedArtifacts(for: person)
                         }
                         pendingClear = nil
                     }
@@ -716,7 +770,7 @@ private struct FeedbackView: View {
                 .pickerStyle(.segmented)
             }
 
-            Section(localized("Details", "反馈内容", language: language)) {
+            Section(localized("feedback.details.section", default: "Details", chinese: "反馈内容", language: language)) {
                 TextField(
                     localized("Short title", "简短标题", language: language),
                     text: $subject
@@ -762,8 +816,8 @@ private struct FeedbackView: View {
             } footer: {
                 Text(
                     localized(
-                        "Feedback is the only part of this local-first app that uses the network. App version and device model are included; chart and birth data are never attached.",
-                        "反馈是这款本地优先应用中唯一需要联网的入口。提交内容会附带版本和设备型号，但不会附带星盘或出生资料。",
+                        "Feedback uses the network and includes the app version and device model, but never chart or birth data. AI interpretation uses the network only after separate consent in Settings.",
+                        "反馈会联网并附带应用版本和设备型号，但不会附带星盘或出生资料。AI 解读只有在你另行授权后才会联网。",
                         language: language
                     )
                 )
@@ -911,7 +965,7 @@ private struct LicenseTextView: View {
     let language: AppLanguage
 
     var body: some View {
-        ScrollView {
+        ScrollView(.vertical, showsIndicators: false) {
             Text(text)
                 .font(.caption.monospaced())
                 .frame(maxWidth: .infinity, alignment: .leading)

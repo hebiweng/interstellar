@@ -39,9 +39,9 @@ struct AvailableReport: Identifiable {
         let days = Int(interval / 86_400)
         let hours = Int((interval.truncatingRemainder(dividingBy: 86_400)) / 3_600)
         if days > 0 {
-            return localized("\(days)d left", "剩 \(days) 天", language: language)
+            return LocalizedFormatters.remainingDays(days, language: language)
         }
-        return localized("\(hours)h left", "剩 \(hours) 小时", language: language)
+        return LocalizedFormatters.remainingHours(hours, language: language)
     }
 }
 
@@ -53,7 +53,29 @@ struct SavedReport: Codable, Identifiable, Equatable {
     let generatedAt: Date
     let report: AIReport
 
+    init(id: String, scope: String, title: String, subtitle: String, generatedAt: Date, report: AIReport) {
+        self.id = id
+        self.scope = scope
+        self.title = title
+        self.subtitle = subtitle
+        self.generatedAt = generatedAt
+        self.report = report
+    }
+
     static func == (lhs: SavedReport, rhs: SavedReport) -> Bool { lhs.id == rhs.id }
+
+    init(artifact: GeneratedChartArtifact) {
+        id = artifact.semanticFingerprint
+        scope = "chart.\(artifact.chartKind)"
+        title = artifact.response.report.title
+        subtitle = artifact.response.report.subtitle
+        generatedAt = artifact.generatedAt
+        report = AIReport(
+            title: artifact.response.report.title,
+            subtitle: artifact.response.report.subtitle,
+            sections: artifact.response.report.sections
+        )
+    }
 }
 
 func savedReportScopeTitle(_ scope: String, language: AppLanguage) -> String {
@@ -83,50 +105,6 @@ func savedReportScopeSymbol(_ scope: String) -> String {
     case "period.monthly": "◐"
     case "period.solar-return": "☉"
     default: "◎"
-    }
-}
-
-final class ReportStore: @unchecked Sendable {
-    private let directory: URL
-    private let indexURL: URL
-
-    init(directory: URL? = nil) {
-        let base = directory ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        self.directory = base.appendingPathComponent("Reports", isDirectory: true)
-        self.indexURL = self.directory.appendingPathComponent("index.json")
-        try? FileManager.default.createDirectory(at: self.directory, withIntermediateDirectories: true)
-    }
-
-    func load() -> [SavedReport] {
-        guard let data = try? Data(contentsOf: indexURL),
-              let reports = try? JSONDecoder().decode([SavedReport].self, from: data)
-        else {
-            return []
-        }
-        return reports.sorted { $0.generatedAt > $1.generatedAt }
-    }
-
-    func save(_ report: SavedReport) {
-        var reports = load()
-        reports.removeAll { $0.id == report.id }
-        reports.append(report)
-        reports.sort { $0.generatedAt > $1.generatedAt }
-        if let data = try? JSONEncoder().encode(reports) {
-            try? data.write(to: indexURL, options: .atomic)
-        }
-    }
-
-    func removeAll() {
-        try? FileManager.default.removeItem(at: indexURL)
-        try? FileManager.default.removeItem(at: directory)
-    }
-
-    func remove(id: String) {
-        var reports = load()
-        reports.removeAll { $0.id == id }
-        if let data = try? JSONEncoder().encode(reports) {
-            try? data.write(to: indexURL, options: .atomic)
-        }
     }
 }
 

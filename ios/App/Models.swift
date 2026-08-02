@@ -5,12 +5,26 @@ import SwiftUI
 enum AppLanguage: String, CaseIterable, Identifiable, Codable {
     case english = "en"
     case simplifiedChinese = "zh-Hans"
+    case spanish = "es"
+    case french = "fr"
 
     var id: String { rawValue }
     var title: String {
         switch self {
         case .english: "English"
         case .simplifiedChinese: "简体中文"
+        case .spanish: "Español"
+        case .french: "Français"
+        }
+    }
+
+    /// The reviewed fixed corpus is currently available in English and
+    /// Simplified Chinese. New UI locales deliberately fall back to the
+    /// reviewed English corpus until their own reviewed packs are delivered.
+    var corpusLanguage: AppLanguage {
+        switch self {
+        case .simplifiedChinese: .simplifiedChinese
+        case .english, .spanish, .french: .english
         }
     }
 }
@@ -67,7 +81,43 @@ enum AppFontSize: String, CaseIterable, Identifiable, Codable {
 }
 
 func localized(_ english: String, _ chinese: String, language: AppLanguage) -> String {
-    language == .english ? english : chinese
+    let fallback = language == .simplifiedChinese ? chinese : english
+    guard let localizationPath = Bundle.main.path(forResource: language.rawValue, ofType: "lproj"),
+          let localizationBundle = Bundle(path: localizationPath)
+    else { return fallback }
+    return localizationBundle.localizedString(forKey: english, value: fallback, table: "Localizable")
+}
+
+func localized(
+    _ key: String,
+    default english: String,
+    chinese: String,
+    language: AppLanguage
+) -> String {
+    let fallback = language == .simplifiedChinese ? chinese : english
+    guard let localizationPath = Bundle.main.path(forResource: language.rawValue, ofType: "lproj"),
+          let localizationBundle = Bundle(path: localizationPath)
+    else { return fallback }
+    return localizationBundle.localizedString(forKey: key, value: fallback, table: "Localizable")
+}
+
+func localized(
+    _ english: String,
+    _ chinese: String,
+    spanish: String,
+    french: String,
+    language: AppLanguage
+) -> String {
+    let fallback = switch language {
+    case .english: english
+    case .simplifiedChinese: chinese
+    case .spanish: spanish
+    case .french: french
+    }
+    guard let localizationPath = Bundle.main.path(forResource: language.rawValue, ofType: "lproj"),
+          let localizationBundle = Bundle(path: localizationPath)
+    else { return fallback }
+    return localizationBundle.localizedString(forKey: english, value: fallback, table: "Localizable")
 }
 
 extension String {
@@ -89,7 +139,7 @@ enum ChartKind: String, CaseIterable, Identifiable, Codable {
     func title(language: AppLanguage) -> String {
         switch self {
         case .natal: localized("Natal", "本命", language: language)
-        case .currentSky: localized("Current Sky", "天象", language: language)
+        case .currentSky: localized("chart-kind.current-sky.short", default: "Current Sky", chinese: "天象", language: language)
         case .transit: localized("Transits", "行运", language: language)
         case .secondary: localized("Progressed", "次限", language: language)
         case .solarReturn: localized("Solar Return", "日返盘", language: language)
@@ -100,7 +150,7 @@ enum ChartKind: String, CaseIterable, Identifiable, Codable {
     func eyebrow(language: AppLanguage) -> String {
         switch self {
         case .natal: localized("BIRTH CHART", "本命盘", language: language)
-        case .currentSky: localized("SKY NOW", "当前天象", language: language)
+        case .currentSky: localized("chart-kind.current-sky.eyebrow", default: "SKY NOW", chinese: "当前天象", language: language)
         case .transit: localized("NATAL + CURRENT SKY", "本命与当前天空", language: language)
         case .secondary: localized("SECONDARY PROGRESSIONS", "次限推运", language: language)
         case .solarReturn: localized("SOLAR RETURN", "日返盘", language: language)
@@ -200,6 +250,38 @@ enum PersonRelationship: String, CaseIterable, Codable, Identifiable {
     }
 }
 
+/// A single, auditable calculation context.  Screens, insight builders and AI
+/// generation must all consume this value so a parameter change cannot update
+/// one layer while leaving another layer stale.
+struct ChartContext: Codable, Equatable, Sendable {
+    let chartKind: ChartKind
+    let primaryPersonID: String
+    let comparisonPersonID: String?
+    let preset: CalculationPreset
+    let locale: AppLanguage
+    let target: ChartTarget
+}
+
+struct ChartLocationSelection: Codable, Equatable, Sendable {
+    let placeName: String
+    let timezoneID: String
+    let latitude: Double
+    let longitude: Double
+
+    var geographicLocation: GeographicLocation {
+        GeographicLocation(latitudeDegrees: latitude, longitudeDegrees: longitude)
+    }
+}
+
+enum ChartTarget: Codable, Equatable, Sendable {
+    case natal
+    case currentSky(instant: Date, location: ChartLocationSelection, usesLiveDefault: Bool)
+    case transit(instant: Date, location: ChartLocationSelection, rangeDays: Int, usesLiveDefault: Bool)
+    case secondary(targetDate: Date, usesLiveDefault: Bool)
+    case solarReturn(year: Int, location: ChartLocationSelection)
+    case synastry
+}
+
 struct SavedPerson: Identifiable, Codable, Equatable {
     var id: UUID
     var profile: UserProfile
@@ -222,15 +304,58 @@ struct SavedPerson: Identifiable, Codable, Equatable {
 }
 
 struct InsightFact: Identifiable, Equatable {
-    let id = UUID()
-    let label: String
-    let value: String
+    /// Stable within a card and across launches. It is also the evidence ID sent
+    /// to the relay; UUIDs here would make otherwise identical reports miss the
+    /// local cache.
+    let id: String
+    let metricLabel: String
+    let calculatedValue: String
+    let interpretationKey: String?
+    let interpretationVariables: [String: String]
+    let sourceFactIDs: [String]
+    let visualRole: String?
+    let interpretation: String?
     var emphasis: InsightTone = .neutral
-    var note: String? = nil
     var progress: Double? = nil
     var symbol: String? = nil
     var category: String? = nil
     var markers: [Double]? = nil
+
+    init(
+        id: String,
+        metricLabel: String,
+        calculatedValue: String,
+        interpretationKey: String? = nil,
+        interpretationVariables: [String: String] = [:],
+        sourceFactIDs: [String] = [],
+        visualRole: String? = nil,
+        interpretation: String? = nil,
+        emphasis: InsightTone = .neutral,
+        progress: Double? = nil,
+        symbol: String? = nil,
+        category: String? = nil,
+        markers: [Double]? = nil
+    ) {
+        self.id = id
+        self.metricLabel = metricLabel
+        self.calculatedValue = calculatedValue
+        self.interpretationKey = interpretationKey
+        self.interpretationVariables = interpretationVariables
+        self.sourceFactIDs = sourceFactIDs.isEmpty ? [id] : sourceFactIDs
+        self.visualRole = visualRole
+        self.interpretation = interpretation
+        self.emphasis = emphasis
+        self.progress = progress
+        self.symbol = symbol
+        self.category = category
+        self.markers = markers
+    }
+
+    // Compatibility names used by the existing visual components while the
+    // product-facing model remains explicit.
+    var label: String { metricLabel }
+    var value: String { calculatedValue }
+    var note: String? { interpretation }
 }
 
 enum InsightTone: String, Equatable {
@@ -305,8 +430,51 @@ struct InsightCardModel: Identifiable, Equatable {
     let icon: String
     let visual: InsightVisual
     let facts: [InsightFact]
-    let summary: String
-    let detail: String
+    /// Optional card-level conclusion from the private content pack.
+    let conclusionKey: String?
+    let conclusion: String
+    let text: CardTextModel?
+
+    init(
+        id: String,
+        title: String,
+        icon: String,
+        visual: InsightVisual,
+        facts: [InsightFact],
+        conclusionKey: String? = nil,
+        conclusion: String,
+        text: CardTextModel? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.icon = icon
+        self.visual = visual
+        self.facts = facts
+        self.conclusionKey = conclusionKey
+        self.conclusion = conclusion
+        self.text = text
+    }
+
+    // Compatibility for views still referring to the former summary field.
+    var summary: String { conclusion }
+}
+
+/// Reviewed consumer copy selected from a normalized Copy Catalog. Technical
+/// labels remain separate so a fact template can never become interpretation.
+struct CardTextModel: Codable, Equatable, Sendable {
+    let sectionLabel: String?
+    let cardLabel: String
+    let headline: String?
+    let body: String?
+    let secondaryBody: String?
+    let areaLabel: String?
+    let statusLabel: String?
+    let technicalLabel: String?
+    let startLabel: String?
+    let endLabel: String?
+    let themeID: String?
+    let sourceSignalIDs: [String]
+    let copyPackID: String?
 }
 
 struct InsightCardLoadState {
@@ -405,10 +573,14 @@ enum Zodiac {
     ]
 
     static let names = englishNames
+    static let termKeys = [
+        "aries", "taurus", "gemini", "cancer", "leo", "virgo",
+        "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces",
+    ]
     static let symbols = ["♈︎", "♉︎", "♊︎", "♋︎", "♌︎", "♍︎", "♎︎", "♏︎", "♐︎", "♑︎", "♒︎", "♓︎"]
 
     static func name(index: Int, language: AppLanguage) -> String {
-        language == .english ? englishNames[index] : chineseNames[index]
+        AstroTerms.value("zodiac", termKeys[index], language: language)
     }
 
     static func position(_ point: ChartPoint, language: AppLanguage = .english) -> String {
@@ -423,31 +595,9 @@ enum Zodiac {
 }
 
 func bodyName(_ body: CelestialBody, language: AppLanguage) -> String {
-    guard language == .simplifiedChinese else { return body.displayName }
-    return switch body {
-    case .sun: "太阳"
-    case .moon: "月亮"
-    case .mercury: "水星"
-    case .venus: "金星"
-    case .mars: "火星"
-    case .jupiter: "木星"
-    case .saturn: "土星"
-    case .uranus: "天王星"
-    case .neptune: "海王星"
-    case .pluto: "冥王星"
-    case .trueNode: "北交点"
-    }
+    AstroTerms.value("bodies", body.rawValue, language: language)
 }
 
 func aspectKindName(_ kind: AspectKind, language: AppLanguage) -> String {
-    guard language == .simplifiedChinese else {
-        return kind.rawValue.prefix(1).uppercased() + kind.rawValue.dropFirst()
-    }
-    return switch kind {
-    case .conjunction: "合相"
-    case .sextile: "六合"
-    case .square: "刑相"
-    case .trine: "拱相"
-    case .opposition: "冲相"
-    }
+    AstroTerms.value("aspects", kind.rawValue, language: language)
 }

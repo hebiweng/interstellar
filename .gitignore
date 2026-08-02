@@ -45,6 +45,7 @@ DerivedData/
 /ios/PrivateContent/
 /ios/App/Resources/PrivateContent*.json
 /ios/App/Resources/PrivateCorpus*.json
+/ios/App/Resources/CopyCatalog*.json
 /ios/TranslationExports/
 /ios/PrivateRules/
 /ios/App/Resources/PrivateRules*.json
@@ -59,6 +60,7 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
+Interstellar-Relay-管理员凭据.txt
 
 # vercel
 .vercel

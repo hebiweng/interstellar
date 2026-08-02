@@ -53,6 +53,15 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci
 
+      - name: Validate private iOS copy catalogs
+        env:
+          INTERSTELLAR_COPY_CATALOG_EN_B64: ${{ secrets.INTERSTELLAR_COPY_CATALOG_EN_B64 }}
+          INTERSTELLAR_COPY_CATALOG_ZH_HANS_B64: ${{ secrets.INTERSTELLAR_COPY_CATALOG_ZH_HANS_B64 }}
+        run: npm run ios:copy:ci
+
+      - name: Validate iOS UI localization and astrology terminology
+        run: npm run ios:localization:validate
+
       - name: Validate Compose configuration
         env:
           INTERSTELLAR_POSTGRES_PASSWORD: ci-postgres-secret

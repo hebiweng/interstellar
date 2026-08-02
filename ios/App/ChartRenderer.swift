@@ -582,7 +582,7 @@ struct AspectChartView: View {
 
                 HStack(spacing: 12) {
                     legend(.supportive, label: localized("Flow", "顺畅", language: language))
-                    legend(.challenging, label: localized("Tension", "张力", language: language))
+                    legend(.challenging, label: localized("chart.tone.tension", default: "Tension", chinese: "张力", language: language))
                     legend(.transition, label: localized("Change", "转换", language: language))
                 }
             }

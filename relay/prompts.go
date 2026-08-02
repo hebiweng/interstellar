@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 const safetyBoundaryZH = `你是一名严谨、克制的专业占星解读助手。必须遵守以下不可修改的边界：
 1. 只依据请求中提供的确定性计算事实进行解读；绝不重新计算、绝不臆造行星位置、落座、落宫、相位、日期或事件。
@@ -25,14 +28,14 @@ const jsonSchemaZH = `输出必须是一个 JSON 对象，不要输出任何 JSO
     "title": "报告标题（一句话）",
     "subtitle": "副标题（一句话）",
     "sections": [
-      {"number": "01", "title": "分节标题", "body": "约120-200字正文", "callout": "一句强调（可省略）"}
+      {"number": "01", "title": "分节标题", "body": "约120-200字正文", "callout": "一句强调（可省略）", "evidenceFactIDs": ["请求中的事实ID"]}
     ]
   },
   "cards": {
-    "<卡片ID>": {"detail": "该卡片对应的约80-120字展开解读"}
+    "<卡片ID>": {"detail": "该卡片对应的约80-120字展开解读", "evidenceFactIDs": ["该卡允许引用的事实ID"]}
   }
 }
-report.sections 至少 4 节，最多 8 节；cards 必须为请求中列出的每个卡片 ID 提供 detail。`
+report.sections 至少 4 节，最多 8 节；cards 必须为请求中列出的每个卡片 ID 提供 detail。每一节和每张卡片都必须列出实际使用的 evidenceFactIDs；只能使用请求中存在、且卡片允许引用的事实 ID。`
 
 const jsonSchemaEN = `Output must be a single JSON object with no text outside the JSON. Structure:
 {
@@ -40,14 +43,14 @@ const jsonSchemaEN = `Output must be a single JSON object with no text outside t
     "title": "report title (one sentence)",
     "subtitle": "subtitle (one sentence)",
     "sections": [
-      {"number": "01", "title": "section title", "body": "120-200 word body", "callout": "one-line emphasis (optional)"}
+      {"number": "01", "title": "section title", "body": "120-200 word body", "callout": "one-line emphasis (optional)", "evidenceFactIDs": ["fact ID from the request"]}
     ]
   },
   "cards": {
-    "<cardID>": {"detail": "80-120 word expanded reading for this card"}
+    "<cardID>": {"detail": "80-120 word expanded reading for this card", "evidenceFactIDs": ["allowed fact ID"]}
   }
 }
-report.sections must contain at least 4 and at most 8 sections; cards must include a detail for every card ID listed in the request.`
+report.sections must contain at least 4 and at most 8 sections; cards must include a detail for every card ID listed in the request. Every section and card must list the evidenceFactIDs it actually used. Use only IDs present in the request and, for cards, only IDs allowed for that card.`
 
 // Tone guides per chart kind (consumer-facing voice).
 func toneGuideZH(kind string) string {
@@ -89,7 +92,7 @@ func toneGuideEN(kind string) string {
 }
 
 func defaultPrompt(scope, locale string) string {
-	kind := scope
+	kind := strings.TrimPrefix(scope, "chart.")
 	switch scope {
 	case "period.daily":
 		kind = "transit"
@@ -104,6 +107,22 @@ func defaultPrompt(scope, locale string) string {
 	}
 	return fmt.Sprintf("%s\n\n%s\n\n%s\n\n%s\n\n%s",
 		safetyBoundaryEN, toneGuideEN(kind), namesRuleEN, "Content scope: "+scopeTitleEN(scope), jsonSchemaEN)
+}
+
+// legacyDefaultPromptV1 identifies the first automatically seeded chart
+// templates. They accidentally used the generic voice for every chart scope.
+// Startup replaces only an exact legacy default, so an administrator's edited
+// prompt is never overwritten.
+func legacyDefaultPromptV1(scope, locale string) string {
+	if !strings.HasPrefix(scope, "chart.") {
+		return defaultPrompt(scope, locale)
+	}
+	if locale == "zh-Hans" {
+		return fmt.Sprintf("%s\n\n%s\n\n%s\n\n%s\n\n%s",
+			safetyBoundaryZH, toneGuideZH(scope), namesRuleZH, "内容范围："+scopeTitleZH(scope), jsonSchemaZH)
+	}
+	return fmt.Sprintf("%s\n\n%s\n\n%s\n\n%s\n\n%s",
+		safetyBoundaryEN, toneGuideEN(scope), namesRuleEN, "Content scope: "+scopeTitleEN(scope), jsonSchemaEN)
 }
 
 func scopeTitleZH(scope string) string {

@@ -501,6 +501,28 @@ struct AstroCoreTests {
         #expect(diff < 0.02)
     }
 
+    @Test("Station search finds a real longitude-speed sign change")
+    func stationSearch() async throws {
+        let calculator = try SwissEphemerisCalculator(ephemerisDirectory: ephemerisDirectory)
+        let anchor = Date(timeIntervalSince1970: 1_775_000_000)
+        let station = try await calculator.nextStation(for: .mercury, after: anchor)
+        #expect(station.date > anchor)
+
+        let location = GeographicLocation(latitudeDegrees: 0, longitudeDegrees: 0)
+        let before = try await calculator.calculateSnapshot(
+            NatalInput(utcDate: station.date.addingTimeInterval(-3_600), location: location),
+            preset: .modern
+        )
+        let after = try await calculator.calculateSnapshot(
+            NatalInput(utcDate: station.date.addingTimeInterval(3_600), location: location),
+            preset: .modern
+        )
+        let beforeSpeed = try #require(before.point(.mercury)?.position.longitudeSpeedDegreesPerDay)
+        let afterSpeed = try #require(after.point(.mercury)?.position.longitudeSpeedDegreesPerDay)
+        #expect((beforeSpeed < 0) != (afterSpeed < 0))
+        #expect(station.retrogradeAfter == (afterSpeed < 0))
+    }
+
     @Test("Progressed Moon reports an ingress date within a few years")
     func progressedMoonWindow() async throws {
         let calculator = try SwissEphemerisCalculator(ephemerisDirectory: ephemerisDirectory)

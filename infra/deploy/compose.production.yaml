@@ -102,7 +102,7 @@ services:
       INTERSTELLAR_ADMIN_MASTER_KEY: ${INTERSTELLAR_ADMIN_MASTER_KEY:-}
       INTERSTELLAR_DEEPSEEK_API_KEY: ${INTERSTELLAR_DEEPSEEK_API_KEY:-}
       INTERSTELLAR_DEEPSEEK_BASE_URL: ${INTERSTELLAR_DEEPSEEK_BASE_URL:-https://api.deepseek.com}
-      INTERSTELLAR_DEEPSEEK_MODEL: ${INTERSTELLAR_DEEPSEEK_MODEL:-deepseek-v4-pro}
+      INTERSTELLAR_DEEPSEEK_MODEL: ${INTERSTELLAR_DEEPSEEK_MODEL:-deepseek-v4-flash}
     expose:
       - "8018"
     mem_limit: 384m
@@ -116,18 +116,38 @@ services:
       - ALL
 
   interstellar-relay:
+    <<: *runtime-defaults
+    container_name: interstellar-relay
     image: interstellar-relay:${INTERSTELLAR_IMAGE_TAG:-latest}
-    restart: unless-stopped
     environment:
       RELAY_ADDR: ":8080"
       RELAY_DB_PATH: /data/relay.db
       RELAY_SECRET: ${RELAY_SECRET:?set RELAY_SECRET in .env}
-      RELAY_ADMIN_USER: ${RELAY_ADMIN_USER:-admin}
+      RELAY_ADMIN_USER: ${RELAY_ADMIN_USER:?set a random RELAY_ADMIN_USER in .env}
       RELAY_ADMIN_PASS: ${RELAY_ADMIN_PASS:?set RELAY_ADMIN_PASS in .env}
+      RELAY_PRUNE_OTHER_ADMINS: "1"
       RELAY_SEED_PROMPTS: "1"
+      RELAY_SEED_DEEPSEEK: "1"
+      RELAY_ALLOWED_ORIGIN: https://aaadmin.xiaoguiwk.top
+      RELAY_DAILY_GENERATION_QUOTA: ${RELAY_DAILY_GENERATION_QUOTA:-20}
+      # Temporary: App Attest is disabled while the Apple Developer Program is not purchased.
+      RELAY_ALLOW_DEV_BYPASS: "1"
+      RELAY_APP_ATTEST_APP_ID: YD3FY9ZB52.com.xiaoguiwk.interstellar
+      RELAY_APP_ATTEST_ENVIRONMENT: production
+      RELAY_APP_ATTEST_ALLOW_DEVELOPMENT: "1"
+      RELAY_APP_ATTEST_BUNDLE_VERSION: "1"
       RELAY_HEALTH_URL: http://127.0.0.1:8080/v1/health
+    expose:
+      - "8080"
     volumes:
       - relay-data:/data
+    mem_limit: 192m
+    pids_limit: 96
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop:
+      - ALL
     healthcheck:
       test: ["CMD", "/app/relay", "health"]
       interval: 30s

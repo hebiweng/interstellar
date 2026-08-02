@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -28,23 +29,30 @@ func readJSON(r *http.Request, v any) error {
 }
 
 type relayConfig struct {
-	store    *Store
-	sessions *SessionStore
-	client   *http.Client
-	seed     bool
+	store          *Store
+	sessions       *SessionStore
+	client         *http.Client
+	seed           bool
+	dailyQuota     int
+	allowDevBypass bool
+	appAttest      *appAttestConfig
 }
 
 type generateRequest struct {
-	Mode        string          `json:"mode"`                  // chart | period
-	ChartKind   string          `json:"chartKind"`             // natal | current-sky | transit | secondary | solar-return | synastry
-	PeriodType  string          `json:"periodType,omitempty"`  // daily | monthly | solar-return
-	Preset      string          `json:"preset,omitempty"`      // modern | classical
-	ProfileHash string          `json:"profileHash"`
-	Params      json.RawMessage `json:"params"`
-	Facts       json.RawMessage `json:"facts"`
-	CardIDs     []string        `json:"cardIDs"`
-	Locale      string          `json:"locale"`
-	ClientVer   string          `json:"clientVersion,omitempty"`
+	Mode                    string              `json:"mode"`                 // chart | period
+	ChartKind               string              `json:"chartKind"`            // natal | current-sky | transit | secondary | solar-return | synastry
+	PeriodType              string              `json:"periodType,omitempty"` // daily | monthly | solar-return
+	Preset                  string              `json:"preset,omitempty"`     // modern | classical
+	ProfileHash             string              `json:"profileHash"`
+	SemanticFingerprint     string              `json:"semanticFingerprint,omitempty"`
+	FactsHash               string              `json:"factsHash,omitempty"`
+	GenerationSchemaVersion int                 `json:"generationSchemaVersion,omitempty"`
+	Params                  json.RawMessage     `json:"params"`
+	Facts                   json.RawMessage     `json:"facts"`
+	CardIDs                 []string            `json:"cardIDs"`
+	AllowedEvidenceByCard   map[string][]string `json:"allowedEvidenceByCard,omitempty"`
+	Locale                  string              `json:"locale"`
+	ClientVer               string              `json:"clientVersion,omitempty"`
 }
 
 func (g *generateRequest) scope() (string, error) {
@@ -67,27 +75,45 @@ func (g *generateRequest) scope() (string, error) {
 }
 
 func cacheTTL(scope string) time.Duration {
-	switch scope {
-	case "chart.current-sky":
-		return 24 * time.Hour
-	case "chart.transit", "chart.solar-return":
-		return 7 * 24 * time.Hour
-	case "chart.secondary":
-		return 30 * 24 * time.Hour
-	case "chart.natal", "chart.synastry":
-		return 3650 * 24 * time.Hour // effectively permanent until profile/params change
-	case "period.daily", "period.monthly", "period.solar-return":
-		return 3650 * 24 * time.Hour // a closed period never changes
-	default:
-		return 7 * 24 * time.Hour
-	}
+	return 24 * time.Hour
+}
+
+func writeError(w http.ResponseWriter, status int, code, message string, retryable bool) {
+	writeJSON(w, status, map[string]any{"error": message, "code": code, "retryable": retryable})
 }
 
 func (c *relayConfig) handleGenerate(w http.ResponseWriter, r *http.Request) {
-	var req generateRequest
-	if err := readJSON(r, &req); err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid request: " + err.Error()})
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "POST required", false)
 		return
+	}
+	body, err := io.ReadAll(io.LimitReader(r.Body, 4<<20))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_request", "could not read request", false)
+		return
+	}
+	var req generateRequest
+	decoder := json.NewDecoder(bytes.NewReader(body))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_request", "invalid request: "+err.Error(), false)
+		return
+	}
+	installationID := strings.TrimSpace(r.Header.Get("X-Installation-ID"))
+	devBypass := c.allowDevBypass && r.Header.Get("X-App-Attest-Development-Bypass") == "1"
+	if installationID == "" {
+		writeError(w, http.StatusUnauthorized, "installation_required", "installation identity is required", false)
+		return
+	}
+	if !devBypass {
+		if c.appAttest == nil {
+			writeError(w, http.StatusServiceUnavailable, "app_attest_unavailable", "App Attest is not configured", true)
+			return
+		}
+		if err := c.appAttest.verifyGenerateRequest(r, body, installationID); err != nil {
+			writeError(w, http.StatusUnauthorized, "app_attest_invalid", err.Error(), false)
+			return
+		}
 	}
 	scope, err := req.scope()
 	if err != nil {
@@ -98,10 +124,18 @@ func (c *relayConfig) handleGenerate(w http.ResponseWriter, r *http.Request) {
 	if locale != "zh-Hans" && locale != "en" {
 		locale = "en"
 	}
+	req.Locale = locale
 
-	provider, err := c.store.GetProviderSecret("default")
+	evidenceIDs, err := validateGenerationRequest(req)
 	if err != nil {
-		writeJSON(w, http.StatusServiceUnavailable, map[string]any{"error": "no provider configured"})
+		writeError(w, http.StatusBadRequest, "invalid_generation_contract", err.Error(), false)
+		return
+	}
+
+	provider, err := c.store.GetGenerationProvider()
+	if err != nil {
+		_ = c.store.RecordUsage(scope, "unconfigured", 0, 0, false)
+		writeError(w, http.StatusServiceUnavailable, "provider_unavailable", err.Error(), true)
 		return
 	}
 	model := provider.DefaultModel
@@ -109,12 +143,21 @@ func (c *relayConfig) handleGenerate(w http.ResponseWriter, r *http.Request) {
 		model, _ = c.store.GetSetting("default_model")
 	}
 	if model == "" {
-		writeJSON(w, http.StatusServiceUnavailable, map[string]any{"error": "no default model configured"})
+		_ = c.store.RecordUsage(scope, "unconfigured", 0, 0, false)
+		writeError(w, http.StatusServiceUnavailable, "model_unavailable", "no default model configured", true)
+		return
+	}
+	if enabled, modelErr := c.store.IsProviderModelEnabled(provider.ID, model); modelErr != nil {
+		writeError(w, http.StatusInternalServerError, "model_state_unavailable", modelErr.Error(), true)
+		return
+	} else if !enabled {
+		writeError(w, http.StatusServiceUnavailable, "model_disabled", "the default model is disabled", false)
 		return
 	}
 
 	prompt, version, err := c.store.GetPrompt(scope, locale)
 	if err != nil {
+		_ = c.store.RecordUsage(scope, model, 0, 0, false)
 		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "prompt lookup failed"})
 		return
 	}
@@ -124,6 +167,7 @@ func (c *relayConfig) handleGenerate(w http.ResponseWriter, r *http.Request) {
 			_, _ = c.store.UpsertPrompt(scope, locale, prompt)
 			version = 1
 		} else {
+			_ = c.store.RecordUsage(scope, model, 0, 0, false)
 			writeJSON(w, http.StatusServiceUnavailable, map[string]any{"error": "prompt template missing for " + scope})
 			return
 		}
@@ -134,26 +178,45 @@ func (c *relayConfig) handleGenerate(w http.ResponseWriter, r *http.Request) {
 		var cached map[string]any
 		_ = json.Unmarshal([]byte(payload), &cached)
 		cached["cached"] = true
+		_ = c.store.RecordUsage(scope, model, 0, 0, true)
 		writeJSON(w, http.StatusOK, cached)
+		return
+	}
+
+	count, allowed, err := c.store.ConsumeInstallationQuota(installationID, c.dailyQuota)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "quota_unavailable", "could not verify daily quota", true)
+		return
+	}
+	w.Header().Set("X-Daily-Generation-Count", fmt.Sprintf("%d", count))
+	if !allowed {
+		writeError(w, http.StatusTooManyRequests, "daily_quota_exceeded", "daily generation quota exceeded", false)
 		return
 	}
 
 	userContent := buildUserContent(req, scope)
 	result, usedModel, promptTokens, completionTokens, err := Generate(
-		r.Context(), c.client, provider.BaseURL, provider.APIKey, model, prompt, userContent, req.CardIDs,
+		r.Context(), c.client, provider.BaseURL, provider.APIKey, model, prompt, userContent,
+		req.CardIDs, req.Locale, req.AllowedEvidenceByCard, evidenceIDs,
 	)
 	if err != nil {
 		_ = c.store.RecordUsage(scope, model, 0, 0, false)
-		writeJSON(w, http.StatusBadGateway, map[string]any{"error": "generation failed: " + err.Error()})
+		writeError(w, http.StatusBadGateway, "upstream_generation_failed", "generation failed: "+err.Error(), true)
 		return
 	}
 	_ = c.store.RecordUsage(scope, usedModel, promptTokens, completionTokens, true)
 
 	response := map[string]any{
-		"report": result.Report,
-		"cards":  result.Cards,
-		"model":  usedModel,
-		"cached": false,
+		"report":                  result.Report,
+		"cards":                   result.Cards,
+		"provider":                provider.ID,
+		"model":                   usedModel,
+		"cached":                  false,
+		"promptVersion":           version,
+		"generationSchemaVersion": req.GenerationSchemaVersion,
+		"generatedAt":             time.Now().UTC().Format(time.RFC3339),
+		"semanticFingerprint":     req.SemanticFingerprint,
+		"factsHash":               req.FactsHash,
 	}
 	payload := JSONMarshal(response)
 	_ = c.store.CachePut(cacheKey, scope, payload, cacheTTL(scope))
@@ -170,22 +233,132 @@ func cacheKeyFor(req generateRequest, scope, model, locale string, promptVersion
 		facts = "{}"
 	}
 	raw := strings.Join([]string{
-		scope, req.Preset, req.ProfileHash, params, facts, model, locale,
-		fmt.Sprintf("p%d", promptVersion), req.ClientVer,
+		scope, req.Preset, req.ProfileHash, req.SemanticFingerprint, req.FactsHash,
+		fmt.Sprintf("schema%d", req.GenerationSchemaVersion), params, facts, model, locale,
+		fmt.Sprintf("p%d", promptVersion), req.ClientVer, JSONMarshal(req.AllowedEvidenceByCard),
 	}, "|")
 	sum := sha256.Sum256([]byte(raw))
 	return hex.EncodeToString(sum[:])
 }
 
+func validateGenerationRequest(req generateRequest) (map[string]bool, error) {
+	if req.Mode != "period" {
+		if req.SemanticFingerprint == "" || req.FactsHash == "" || req.GenerationSchemaVersion <= 0 {
+			return nil, errors.New("semanticFingerprint, factsHash and generationSchemaVersion are required")
+		}
+		expected, ok := chartCardContract(req.ChartKind)
+		if !ok {
+			return nil, errors.New("unknown chart card contract")
+		}
+		if !sameStringSet(req.CardIDs, expected) {
+			return nil, fmt.Errorf("cardIDs must exactly cover the %s contract", req.ChartKind)
+		}
+	}
+	var facts struct {
+		EvidenceFacts []struct {
+			ID string `json:"id"`
+		} `json:"evidenceFacts"`
+	}
+	if err := json.Unmarshal(req.Facts, &facts); err != nil {
+		return nil, errors.New("facts must be a JSON object")
+	}
+	evidence := map[string]bool{}
+	for _, fact := range facts.EvidenceFacts {
+		if fact.ID == "" || evidence[fact.ID] {
+			return nil, errors.New("evidence fact IDs must be non-empty and unique")
+		}
+		evidence[fact.ID] = true
+	}
+	if req.Mode != "period" && len(evidence) == 0 {
+		return nil, errors.New("chart generation requires stable evidence facts")
+	}
+	seenCards := map[string]bool{}
+	for _, cardID := range req.CardIDs {
+		if cardID == "" || seenCards[cardID] {
+			return nil, errors.New("cardIDs must be non-empty and unique")
+		}
+		seenCards[cardID] = true
+		allowed, ok := req.AllowedEvidenceByCard[cardID]
+		if !ok || len(allowed) == 0 {
+			return nil, fmt.Errorf("missing allowed evidence for card %q", cardID)
+		}
+		seenAllowed := map[string]bool{}
+		for _, id := range allowed {
+			if seenAllowed[id] {
+				return nil, fmt.Errorf("card %q repeats allowed evidence %q", cardID, id)
+			}
+			seenAllowed[id] = true
+			if !evidence[id] {
+				return nil, fmt.Errorf("card %q allows unknown evidence %q", cardID, id)
+			}
+		}
+	}
+	for cardID := range req.AllowedEvidenceByCard {
+		if !seenCards[cardID] {
+			return nil, fmt.Errorf("allowed evidence contains unexpected card %q", cardID)
+		}
+	}
+	return evidence, nil
+}
+
+func chartCardContract(kind string) ([]string, bool) {
+	contracts := map[string][]string{
+		"natal":        {"natal-interpretation", "emotional-needs", "love-connection", "career-direction", "strengths-growth", "element-balance", "house-emphasis", "chart-signature", "planet-placements", "key-aspects"},
+		"current-sky":  {"sky-overview", "moon-now", "aspect-pattern", "planetary-motion", "sign-changes", "element-climate", "upcoming-7-days"},
+		"transit":      {"current-story", "current-cycles", "transit-timeline", "planet-paths", "life-areas", "active-transits"},
+		"secondary":    {"developmental-chapter", "progressed-moon", "identity-development", "turning-points", "areas-maturing", "timeline"},
+		"solar-return": {"year-theme", "year-anchors", "priority-areas", "year-dynamics", "year-timeline", "natal-overlay", "year-aspects"},
+		"synastry":     {"relationship-overview", "perspectives", "emotional-connection", "communication", "chemistry", "commitment", "house-overlays", "key-inter-aspects"},
+	}
+	value, ok := contracts[kind]
+	return value, ok
+}
+
+func sameStringSet(actual, expected []string) bool {
+	if len(actual) != len(expected) {
+		return false
+	}
+	want := make(map[string]bool, len(expected))
+	for _, value := range expected {
+		want[value] = true
+	}
+	seen := make(map[string]bool, len(actual))
+	for _, value := range actual {
+		if !want[value] || seen[value] {
+			return false
+		}
+		seen[value] = true
+	}
+	return true
+}
+
 func buildUserContent(req generateRequest, scope string) string {
 	var b strings.Builder
-	b.WriteString("计算事实（不可变，只能据此解读，不得补算或臆造）：\n")
+	if req.Locale == "zh-Hans" {
+		b.WriteString("计算事实（不可变，只能据此解读，不得补算或臆造）：\n")
+	} else {
+		b.WriteString("Calculated facts (immutable; interpret only these facts and never recompute or invent):\n")
+	}
 	b.WriteString(string(req.Facts))
-	b.WriteString("\n\n参数与范围：\n")
+	if req.Locale == "zh-Hans" {
+		b.WriteString("\n\n参数与范围：\n")
+	} else {
+		b.WriteString("\n\nParameters and scope:\n")
+	}
 	b.WriteString(string(req.Params))
 	if len(req.CardIDs) > 0 {
-		b.WriteString("\n\n需要提供展开解读的卡片 ID：\n")
+		if req.Locale == "zh-Hans" {
+			b.WriteString("\n\n需要提供展开解读的卡片 ID：\n")
+		} else {
+			b.WriteString("\n\nCard IDs requiring expanded interpretations:\n")
+		}
 		b.WriteString(strings.Join(req.CardIDs, ", "))
+		if req.Locale == "zh-Hans" {
+			b.WriteString("\n\n每张卡片允许引用的事实 ID：\n")
+		} else {
+			b.WriteString("\n\nEvidence fact IDs allowed for each card:\n")
+		}
+		b.WriteString(JSONMarshal(req.AllowedEvidenceByCard))
 	}
 	return b.String()
 }
@@ -198,6 +371,10 @@ type loginRequest struct {
 }
 
 func (c *relayConfig) handleLogin(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "POST required", false)
+		return
+	}
 	var req loginRequest
 	if err := readJSON(r, &req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid request"})
@@ -207,8 +384,34 @@ func (c *relayConfig) handleLogin(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "invalid credentials"})
 		return
 	}
-	token, expires := c.sessions.Create(req.Username)
-	writeJSON(w, http.StatusOK, map[string]any{"token": token, "expiresAt": expires.Format(time.RFC3339)})
+	token, expires, err := c.sessions.Create(req.Username)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "session_create_failed", "could not create session", true)
+		return
+	}
+	setAdminCookie(w, token, expires)
+	_ = c.store.RecordAudit(req.Username, "admin.login", req.Username, map[string]any{})
+	writeJSON(w, http.StatusOK, map[string]any{"expiresAt": expires.Format(time.RFC3339)})
+}
+
+func (c *relayConfig) handleLogout(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "POST required", false)
+		return
+	}
+	username := adminUsername(r)
+	c.sessions.Revoke(adminToken(r))
+	clearAdminCookie(w)
+	_ = c.store.RecordAudit(username, "admin.logout", username, map[string]any{})
+	writeJSON(w, http.StatusOK, map[string]any{"loggedOut": true})
+}
+
+func (c *relayConfig) handleSession(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "GET required", false)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"authenticated": true, "username": adminUsername(r)})
 }
 
 func (c *relayConfig) handleProviders(w http.ResponseWriter, r *http.Request) {
@@ -231,6 +434,7 @@ func (c *relayConfig) handleProviders(w http.ResponseWriter, r *http.Request) {
 			APIKey       string `json:"api_key"`
 			DefaultModel string `json:"default_model"`
 			Enabled      bool   `json:"enabled"`
+			IsDefault    bool   `json:"is_default"`
 		}
 		if err := json.Unmarshal(body, &raw); err != nil {
 			writeJSON(w, http.StatusBadRequest, map[string]any{"error": "invalid provider payload"})
@@ -250,11 +454,40 @@ func (c *relayConfig) handleProviders(w http.ResponseWriter, r *http.Request) {
 		if p.BaseURL == "" {
 			p.BaseURL = "https://api.deepseek.com"
 		}
+		if p.DefaultModel != "" {
+			enabled, modelErr := c.store.IsProviderModelEnabled(p.ID, p.DefaultModel)
+			if modelErr != nil {
+				writeError(w, http.StatusInternalServerError, "model_state_unavailable", modelErr.Error(), true)
+				return
+			}
+			if !enabled {
+				writeError(w, http.StatusBadRequest, "model_disabled", "a disabled model cannot be the default", false)
+				return
+			}
+		}
 		saved, err := c.store.UpsertProvider(p, raw.APIKey)
 		if err != nil {
 			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
 			return
 		}
+		if raw.IsDefault {
+			if !saved.Enabled {
+				writeError(w, http.StatusBadRequest, "provider_disabled", "a disabled provider cannot be the default", false)
+				return
+			}
+			if err := c.store.SetSetting("default_provider", saved.ID); err != nil {
+				writeError(w, http.StatusInternalServerError, "default_provider_failed", err.Error(), true)
+				return
+			}
+			saved.IsDefault = true
+		} else if currentDefault, _ := c.store.GetSetting("default_provider"); currentDefault == saved.ID {
+			// Saving unrelated fields must not silently change routing. Choosing
+			// another provider as default is the explicit way to replace it.
+			saved.IsDefault = true
+		}
+		_ = c.store.RecordAudit(adminUsername(r), "provider.upsert", saved.ID, map[string]any{
+			"enabled": saved.Enabled, "defaultModel": saved.DefaultModel, "apiKeyChanged": raw.APIKey != "",
+		})
 		writeJSON(w, http.StatusOK, map[string]any{"provider": saved})
 	default:
 		writeJSON(w, http.StatusMethodNotAllowed, map[string]any{"error": "method not allowed"})
@@ -271,10 +504,15 @@ func (c *relayConfig) handleProviderDelete(w http.ResponseWriter, r *http.Reques
 		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
 		return
 	}
+	_ = c.store.RecordAudit(adminUsername(r), "provider.delete", id, map[string]any{})
 	writeJSON(w, http.StatusOK, map[string]any{"deleted": id})
 }
 
 func (c *relayConfig) handleProviderModels(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "GET required", false)
+		return
+	}
 	id := strings.TrimPrefix(r.URL.Path, "/admin/providers/")
 	id = strings.TrimSuffix(id, "/models")
 	if id == "" || strings.Contains(id, "/") {
@@ -286,12 +524,58 @@ func (c *relayConfig) handleProviderModels(w http.ResponseWriter, r *http.Reques
 		writeJSON(w, http.StatusNotFound, map[string]any{"error": "provider not found"})
 		return
 	}
+	if !provider.Enabled {
+		writeError(w, http.StatusConflict, "provider_disabled", "provider is disabled", false)
+		return
+	}
 	models, err := fetchModels(r.Context(), c.client, provider.BaseURL, provider.APIKey)
 	if err != nil {
 		writeJSON(w, http.StatusBadGateway, map[string]any{"error": "fetch models failed: " + err.Error()})
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"models": models})
+	modelIDs := make([]string, 0, len(models))
+	for _, model := range models {
+		modelIDs = append(modelIDs, model["id"].(string))
+	}
+	if err := c.store.SyncProviderModels(provider.ID, modelIDs); err != nil {
+		writeError(w, http.StatusInternalServerError, "model_sync_failed", err.Error(), true)
+		return
+	}
+	stored, err := c.store.ListProviderModels(provider.ID, provider.DefaultModel)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "model_list_failed", err.Error(), true)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"models": stored})
+}
+
+func (c *relayConfig) handleModelState(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "PUT required", false)
+		return
+	}
+	var req struct {
+		ProviderID string `json:"provider_id"`
+		ModelID    string `json:"model_id"`
+		Enabled    bool   `json:"enabled"`
+	}
+	if err := readJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_model_payload", "invalid model payload", false)
+		return
+	}
+	provider, err := c.store.GetProvider(req.ProviderID)
+	if err != nil {
+		writeError(w, http.StatusNotFound, "provider_not_found", "provider not found", false)
+		return
+	}
+	if err := c.store.SetProviderModelEnabled(req.ProviderID, req.ModelID, req.Enabled); err != nil {
+		writeError(w, http.StatusInternalServerError, "model_update_failed", err.Error(), true)
+		return
+	}
+	_ = c.store.RecordAudit(adminUsername(r), "model.update", req.ProviderID+"/"+req.ModelID, map[string]any{
+		"enabled": req.Enabled, "isDefault": provider.DefaultModel == req.ModelID,
+	})
+	writeJSON(w, http.StatusOK, map[string]any{"provider_id": req.ProviderID, "model_id": req.ModelID, "enabled": req.Enabled})
 }
 
 func fetchModels(ctx context.Context, client *http.Client, baseURL, apiKey string) ([]map[string]any, error) {
@@ -327,11 +611,19 @@ func fetchModels(ctx context.Context, client *http.Client, baseURL, apiKey strin
 }
 
 func (c *relayConfig) handleProviderTest(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "POST required", false)
+		return
+	}
 	id := strings.TrimPrefix(r.URL.Path, "/admin/providers/")
 	id = strings.TrimSuffix(id, "/test")
 	provider, err := c.store.GetProviderSecret(id)
 	if err != nil {
 		writeJSON(w, http.StatusNotFound, map[string]any{"error": "provider not found"})
+		return
+	}
+	if !provider.Enabled {
+		writeError(w, http.StatusConflict, "provider_disabled", "provider is disabled", false)
 		return
 	}
 	model := provider.DefaultModel
@@ -342,14 +634,24 @@ func (c *relayConfig) handleProviderTest(w http.ResponseWriter, r *http.Request)
 		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "no default model set"})
 		return
 	}
+	if enabled, modelErr := c.store.IsProviderModelEnabled(provider.ID, model); modelErr != nil {
+		writeError(w, http.StatusInternalServerError, "model_state_unavailable", modelErr.Error(), true)
+		return
+	} else if !enabled {
+		writeError(w, http.StatusConflict, "model_disabled", "model is disabled", false)
+		return
+	}
 	ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
 	defer cancel()
 	_, usedModel, _, _, err := Generate(ctx, c.client, provider.BaseURL, provider.APIKey, model,
-		"You are a connectivity check. Reply with a JSON object: {\"ok\": true}", "{}", nil)
+		`You are a connectivity check. Return JSON only. Create a report object with a title, subtitle and exactly four non-empty sections. Each section has number, title, body and an empty evidenceFactIDs array. Also return an empty cards object.`,
+		`{"purpose":"provider connectivity test; do not interpret user data"}`, nil, "en", nil, nil)
 	if err != nil {
+		_ = c.store.RecordAudit(adminUsername(r), "provider.test", id, map[string]any{"ok": false, "model": model})
 		writeJSON(w, http.StatusBadGateway, map[string]any{"ok": false, "error": err.Error()})
 		return
 	}
+	_ = c.store.RecordAudit(adminUsername(r), "provider.test", id, map[string]any{"ok": true, "model": usedModel})
 	writeJSON(w, http.StatusOK, map[string]any{"ok": true, "model": usedModel})
 }
 
@@ -387,11 +689,17 @@ func (c *relayConfig) handlePrompts(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, http.StatusBadRequest, map[string]any{"error": "locale must be zh-Hans or en"})
 			return
 		}
+		req.SystemPrompt = strings.TrimSpace(req.SystemPrompt)
+		if req.SystemPrompt == "" {
+			writeJSON(w, http.StatusBadRequest, map[string]any{"error": "system_prompt must not be empty"})
+			return
+		}
 		version, err := c.store.UpsertPrompt(req.Scope, req.Locale, req.SystemPrompt)
 		if err != nil {
 			writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
 			return
 		}
+		_ = c.store.RecordAudit(adminUsername(r), "prompt.update", req.Scope+"/"+req.Locale, map[string]any{"version": version})
 		writeJSON(w, http.StatusOK, map[string]any{"scope": req.Scope, "locale": req.Locale, "version": version})
 	default:
 		writeJSON(w, http.StatusMethodNotAllowed, map[string]any{"error": "method not allowed"})
@@ -399,6 +707,10 @@ func (c *relayConfig) handlePrompts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *relayConfig) handlePromptRestore(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "POST required", false)
+		return
+	}
 	scope := strings.TrimPrefix(r.URL.Path, "/admin/prompts/")
 	scope = strings.TrimSuffix(scope, "/restore")
 	var locale string
@@ -413,15 +725,31 @@ func (c *relayConfig) handlePromptRestore(w http.ResponseWriter, r *http.Request
 		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "locale must be zh-Hans or en"})
 		return
 	}
+	valid := false
+	for _, candidate := range validScopes() {
+		if scope == candidate {
+			valid = true
+			break
+		}
+	}
+	if !valid {
+		writeError(w, http.StatusBadRequest, "invalid_scope", "unknown prompt scope", false)
+		return
+	}
 	version, err := c.store.UpsertPrompt(scope, locale, defaultPrompt(scope, locale))
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": err.Error()})
 		return
 	}
+	_ = c.store.RecordAudit(adminUsername(r), "prompt.restore", scope+"/"+locale, map[string]any{"version": version})
 	writeJSON(w, http.StatusOK, map[string]any{"scope": scope, "locale": locale, "version": version, "restored": true})
 }
 
 func (c *relayConfig) handleUsage(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "GET required", false)
+		return
+	}
 	days := 30
 	usage, err := c.store.UsageSummary(days)
 	if err != nil {

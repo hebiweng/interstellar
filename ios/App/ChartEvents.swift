@@ -3,9 +3,10 @@ import Foundation
 
 /// Upcoming astronomical events derived from the bundled ephemeris and used by
 /// timeline, gantt and season cards. Every date is calculated, never invented.
-struct ChartEventData: Equatable {
+struct ChartEventData: Equatable, Codable {
     var skyIngresses: [SkyIngress] = []
     var skyExactEvents: [SkyExactEvent] = []
+    var skyStations: [SkyStation] = []
     var transitWindows: [TransitWindow] = []
     var progressedMoon: ProgressedMoonWindow?
     var progressedTurningPoints: [ProgressedTurningPoint] = []
@@ -14,21 +15,27 @@ struct ChartEventData: Equatable {
 
     static let empty = ChartEventData()
 
-    struct SkyIngress: Equatable {
+    struct SkyIngress: Equatable, Codable {
         let body: CelestialBody
         let signIndex: Int
         let date: Date
         let nextDate: Date?
     }
 
-    struct SkyExactEvent: Equatable {
+    struct SkyExactEvent: Equatable, Codable {
         let first: CelestialBody
         let second: CelestialBody
         let kind: AspectKind
         let date: Date
     }
 
-    struct TransitWindow: Equatable {
+    struct SkyStation: Equatable, Codable {
+        let body: CelestialBody
+        let date: Date
+        let retrogradeAfter: Bool
+    }
+
+    struct TransitWindow: Equatable, Codable {
         let first: CelestialBody
         let second: CelestialBody
         let kind: AspectKind
@@ -39,13 +46,13 @@ struct ChartEventData: Equatable {
         let nextExact: Date?
     }
 
-    struct ProgressedMoonWindow: Equatable {
+    struct ProgressedMoonWindow: Equatable, Codable {
         let signIndex: Int
         let daysInSign: Int
         let nextIngress: Date
     }
 
-    struct ProgressedTurningPoint: Equatable {
+    struct ProgressedTurningPoint: Equatable, Codable {
         let first: CelestialBody
         let second: CelestialBody
         let kind: AspectKind
@@ -54,7 +61,7 @@ struct ChartEventData: Equatable {
         let phase: AspectPhase
     }
 
-    struct SolarSeason: Equatable {
+    struct SolarSeason: Equatable, Codable {
         let index: Int
         let start: Date
         let end: Date
@@ -66,12 +73,13 @@ struct ChartEventData: Equatable {
 enum ChartEventBuilder {
     static func build(
         calculator: SwissEphemerisCalculator,
-        now: Date,
+        skyAnchor: Date,
+        transitAnchor: Date,
+        secondaryTargetDate: Date,
         birthDate: Date,
         location: GeographicLocation,
         skySnapshot: ChartSnapshot,
         skyPreset: CalculationPreset,
-        transitMoving: ChartSnapshot,
         transitAspects: [ChartAspect],
         progressedSnapshot: ChartSnapshot,
         progressedAspects: [ChartAspect],
@@ -84,7 +92,7 @@ enum ChartEventBuilder {
         let ingressBodies: [CelestialBody] = [.moon, .mercury, .venus, .sun, .mars]
         var pending: [(body: CelestialBody, date: Date)] = []
         for body in ingressBodies {
-            if let date = try? await calculator.nextSignIngress(for: body, after: now) {
+            if let date = try? await calculator.nextSignIngress(for: body, after: skyAnchor) {
                 pending.append((body, date))
             }
         }
@@ -115,9 +123,9 @@ enum ChartEventBuilder {
                       moving: first,
                       reference: second,
                       kind: aspect.kind,
-                      after: now
+                      after: skyAnchor
                   ),
-                  date.timeIntervalSince(now) <= 7 * 86_400
+                  date.timeIntervalSince(skyAnchor) <= 7 * 86_400
             else { continue }
             exactEvents.append(
                 ChartEventData.SkyExactEvent(first: first, second: second, kind: aspect.kind, date: date)
@@ -126,35 +134,52 @@ enum ChartEventBuilder {
         exactEvents.sort { $0.date < $1.date }
         data.skyExactEvents = Array(exactEvents.prefix(3))
 
+        // 2b. True station dates for the bodies that can visibly station.
+        // These power both upcoming events and retrograde deadlines.
+        let stationBodies: [CelestialBody] = [.mercury, .venus, .mars, .jupiter, .saturn, .uranus, .neptune, .pluto]
+        var stations: [ChartEventData.SkyStation] = []
+        for body in stationBodies {
+            guard let station = try? await calculator.nextStation(for: body, after: skyAnchor) else { continue }
+            stations.append(.init(body: body, date: station.date, retrogradeAfter: station.retrogradeAfter))
+        }
+        data.skyStations = stations.sorted { $0.date < $1.date }
+
         // 3. Transit windows for the strongest active transits: the exact peak
         //    plus the in-orb start and end dates.
         for aspect in transitAspects.prefix(6) {
             guard let first = CelestialBody(rawValue: aspect.firstID),
                   let second = CelestialBody(rawValue: aspect.secondID)
             else { continue }
-            let speed = transitMoving.point(first)?.position.longitudeSpeedDegreesPerDay ?? 0
-            let absSpeed = max(abs(speed), 0.02)
-            let separation = aspect.orbDegrees
-            let effectiveOrb = aspect.strength >= 0.999
-                ? max(separation, 0.5)
-                : separation / max(1 - aspect.strength, 0.05)
             let exact: Date
             switch aspect.phase {
             case .applying:
-                exact = (try? await calculator.nextTransitNatalExactDate(
+                guard let calculated = try? await calculator.nextTransitNatalExactDate(
                     moving: first,
                     natalReferenceLongitude: aspect.secondLongitude,
                     kind: aspect.kind,
-                    after: now
-                )) ?? now.addingTimeInterval(separation / absSpeed * 86_400)
+                    after: transitAnchor
+                ) else { continue }
+                exact = calculated
             case .exact:
-                exact = now
+                exact = transitAnchor
             case .separating:
-                exact = now.addingTimeInterval(-(separation / absSpeed) * 86_400)
+                guard let calculated = try? await calculator.previousTransitNatalExactDate(
+                    moving: first,
+                    natalReferenceLongitude: aspect.secondLongitude,
+                    kind: aspect.kind,
+                    before: transitAnchor
+                ) else { continue }
+                exact = calculated
             }
-            let halfWindow = effectiveOrb / absSpeed * 86_400
+            guard let window = try? await calculator.transitNatalAspectWindow(
+                moving: first,
+                natalReferenceLongitude: aspect.secondLongitude,
+                kind: aspect.kind,
+                exactDate: exact,
+                orbDegrees: max(aspect.orbDegrees, 0.5)
+            ) else { continue }
             let nextExact: Date?
-            if exact.timeIntervalSince(now) >= 0 {
+            if exact.timeIntervalSince(transitAnchor) >= 0 {
                 nextExact = exact
             } else {
                 nextExact = try? await calculator.nextTransitNatalExactDate(
@@ -170,9 +195,9 @@ enum ChartEventBuilder {
                     second: second,
                     kind: aspect.kind,
                     firstLongitude: aspect.firstLongitude,
-                    start: exact.addingTimeInterval(-halfWindow),
+                    start: window.start,
                     exact: exact,
-                    end: exact.addingTimeInterval(halfWindow),
+                    end: window.end,
                     nextExact: nextExact
                 )
             )
@@ -207,11 +232,11 @@ enum ChartEventBuilder {
                     natalReferenceLongitude: aspect.secondLongitude,
                     kind: aspect.kind,
                     birthDate: birthDate,
-                    after: now,
+                    after: secondaryTargetDate,
                     maxYears: 8
                 )
             case .exact:
-                exactDate = now
+                exactDate = secondaryTargetDate
             case .separating:
                 exactDate = nil
             }
@@ -247,20 +272,12 @@ enum ChartEventBuilder {
 extension Date {
     /// Short event label such as "Aug 2" / "8月2日".
     func shortEventDate(language: AppLanguage, timeZone: TimeZone = .current) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = language == .english ? Locale(identifier: "en_US") : Locale(identifier: "zh_CN")
-        formatter.timeZone = timeZone
-        formatter.dateFormat = language == .english ? "MMM d" : "M月d日"
-        return formatter.string(from: self)
+        LocalizedFormatters.shortDate(self, language: language, timeZone: timeZone)
     }
 
     /// Month-year label such as "Sep 2026" / "2026年9月".
     func shortEventMonthYear(language: AppLanguage, timeZone: TimeZone = .current) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = language == .english ? Locale(identifier: "en_US") : Locale(identifier: "zh_CN")
-        formatter.timeZone = timeZone
-        formatter.dateFormat = language == .english ? "MMM yyyy" : "yyyy年M月"
-        return formatter.string(from: self)
+        LocalizedFormatters.monthYear(self, language: language, timeZone: timeZone)
     }
 
     /// Compact range such as "Jul 18–Nov 6" / "7月18日–11月6日".

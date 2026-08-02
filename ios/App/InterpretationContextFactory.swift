@@ -17,7 +17,8 @@ enum InterpretationContextFactory {
         language: AppLanguage,
         transitCalendar: [Int],
         preset: String? = nil,
-        aspectsAreCross: Bool = false
+        aspectsAreCross: Bool = false,
+        events: ChartEventData = .empty
     ) -> InterpretationContext {
         let normalizedAspects = aspects.sorted(by: aspectOrder)
         let aspectSignals = makeAspectSignals(
@@ -47,6 +48,11 @@ enum InterpretationContextFactory {
             calendar: transitCalendar,
             language: language
         )
+        let eventSignals = makeEventSignals(
+            chart: chart,
+            events: events,
+            language: language
+        )
         let supportive = normalizedAspects.filter(\.kind.supportive).count
         let challenging = normalizedAspects.filter(\.kind.challenging).count
         let neutral = max(0, normalizedAspects.count - supportive - challenging)
@@ -61,6 +67,7 @@ enum InterpretationContextFactory {
             + houseSignals
             + [phaseSignal]
             + calendarSignals
+            + eventSignals
         let contextValues: [String: String] = [
             "chartID": chart.rawValue,
             "supportiveCount": String(supportive),
@@ -85,6 +92,135 @@ enum InterpretationContextFactory {
             preset: preset,
             values: contextValues
         )
+    }
+
+    private static func makeEventSignals(
+        chart: ChartKind,
+        events: ChartEventData,
+        language: AppLanguage
+    ) -> [InterpretationSignal] {
+        var signals: [InterpretationSignal] = []
+        signals += events.skyIngresses.enumerated().map { index, event in
+            InterpretationSignal(
+                id: "event.ingress.\(event.body.rawValue).\(Int(event.date.timeIntervalSince1970))",
+                rank: index + 1,
+                strength: 1,
+                pointID: event.body.rawValue,
+                signID: signIDs[event.signIndex],
+                tone: .transition,
+                tags: ["event", "ingress", "sky-event"],
+                values: [
+                    "bodyLabel": bodyName(event.body, language: language),
+                    "signLabel": Zodiac.name(index: event.signIndex, language: language),
+                    "eventDate": event.date.ISO8601Format(),
+                ]
+            )
+        }
+        signals += events.skyExactEvents.enumerated().map { index, event in
+            InterpretationSignal(
+                id: "event.sky-exact.\(event.first.rawValue).\(event.second.rawValue).\(Int(event.date.timeIntervalSince1970))",
+                rank: index + 1,
+                strength: 1,
+                pointID: event.first.rawValue,
+                referencePointID: event.second.rawValue,
+                aspectID: event.kind.rawValue,
+                phaseID: "exact",
+                tone: interpretationTone(event.kind),
+                tags: ["event", "exact", "aspect", "sky-event"],
+                values: [
+                    "bodyLabel": bodyName(event.first, language: language),
+                    "referenceBodyLabel": bodyName(event.second, language: language),
+                    "consumerLink": ConsumerCopy.connectionLabel(event.kind, language: language),
+                    "aspectName": aspectKindName(event.kind, language: language),
+                    "eventDate": event.date.ISO8601Format(),
+                ]
+            )
+        }
+        signals += events.skyStations.enumerated().map { index, event in
+            InterpretationSignal(
+                id: "event.station.\(event.body.rawValue).\(Int(event.date.timeIntervalSince1970))",
+                rank: index + 1,
+                strength: 1,
+                pointID: event.body.rawValue,
+                tone: .transition,
+                tags: ["event", "station", "sky-event", event.retrogradeAfter ? "retrograde" : "direct"],
+                values: [
+                    "bodyLabel": bodyName(event.body, language: language),
+                    "consumerMotion": event.retrogradeAfter
+                        ? localized("stations retrograde", "开始逆行", language: language)
+                        : localized("stations direct", "恢复顺行", language: language),
+                    "eventDate": event.date.ISO8601Format(),
+                ]
+            )
+        }
+        signals += events.transitWindows.enumerated().map { index, event in
+            InterpretationSignal(
+                id: "event.transit-window.\(event.first.rawValue).\(event.second.rawValue).\(Int(event.exact.timeIntervalSince1970))",
+                rank: index + 1,
+                strength: 1,
+                pointID: event.first.rawValue,
+                referencePointID: event.second.rawValue,
+                aspectID: event.kind.rawValue,
+                tone: interpretationTone(event.kind),
+                tags: ["event", "transit-window", "cross-chart", "moving-transit"],
+                values: [
+                    "bodyLabel": bodyName(event.first, language: language),
+                    "referenceBodyLabel": bodyName(event.second, language: language),
+                    "consumerLink": ConsumerCopy.connectionLabel(event.kind, language: language),
+                    "eventDate": event.exact.ISO8601Format(),
+                ]
+            )
+        }
+        signals += events.progressedTurningPoints.enumerated().map { index, event in
+            InterpretationSignal(
+                id: "event.progressed-turning.\(event.first.rawValue).\(event.second.rawValue).\(index)",
+                rank: index + 1,
+                strength: 1,
+                pointID: event.first.rawValue,
+                referencePointID: event.second.rawValue,
+                aspectID: event.kind.rawValue,
+                tone: interpretationTone(event.kind),
+                tags: ["event", "turning-point", "cross-chart", "moving-progressed"],
+                values: [
+                    "bodyLabel": bodyName(event.first, language: language),
+                    "referenceBodyLabel": bodyName(event.second, language: language),
+                    "consumerLink": ConsumerCopy.connectionLabel(event.kind, language: language),
+                    "eventDate": event.exactDate?.ISO8601Format() ?? "",
+                ]
+            )
+        }
+        if let event = events.progressedMoon {
+            signals.append(
+                InterpretationSignal(
+                    id: "event.progressed-moon.\(event.signIndex)",
+                    rank: 1,
+                    strength: 1,
+                    pointID: CelestialBody.moon.rawValue,
+                    signID: signIDs[event.signIndex],
+                    tone: .transition,
+                    tags: ["event", "progressed-moon", "moving-progressed"],
+                    values: [
+                        "bodyLabel": bodyName(.moon, language: language),
+                        "signLabel": Zodiac.name(index: event.signIndex, language: language),
+                        "eventDate": event.nextIngress.ISO8601Format(),
+                    ]
+                )
+            )
+        }
+        signals += events.solarSeasons.map { event in
+            InterpretationSignal(
+                id: "event.solar-season.\(event.index)",
+                rank: event.index + 1,
+                strength: 1,
+                tone: .transition,
+                tags: ["event", "solar-season"],
+                values: [
+                    "seasonIndex": String(event.index + 1),
+                    "eventDate": event.start.ISO8601Format(),
+                ]
+            )
+        }
+        return signals
     }
 
     private static func makeAspectSignals(
@@ -334,7 +470,7 @@ enum InterpretationContextFactory {
                     tags: ["calendar", rank == 0 ? "calendar-peak" : "calendar-active"],
                     values: [
                         "day": String(day),
-                        "dayLabel": localized("Day \(day)", "\(day)日", language: language),
+                        "dayLabel": LocalizedFormatters.calendarDay(day, language: language),
                         "intensity": String(item.element),
                     ]
                 )
@@ -401,15 +537,11 @@ enum InterpretationContextFactory {
     }
 
     private static func phaseName(_ phase: AspectPhase, language: AppLanguage) -> String {
-        switch phase {
-        case .applying: localized("applying", "入相", language: language)
-        case .exact: localized("exact", "精确", language: language)
-        case .separating: localized("separating", "出相", language: language)
-        }
+        AstroTerms.value("aspectPhases", phase.rawValue, language: language)
     }
 
     private static func houseName(_ house: Int, language: AppLanguage) -> String {
-        localized("House \(house)", "第\(house)宫", language: language)
+        AstroTerms.house(house, language: language)
     }
 
     private static func formatOrb(_ value: Double) -> String {
@@ -455,16 +587,7 @@ enum InterpretationContextFactory {
     }
 
     private static func lunarPhaseName(_ angle: Double, language: AppLanguage) -> String {
-        switch lunarPhaseID(angle) {
-        case "new-moon": localized("New Moon", "新月阶段", language: language)
-        case "waxing-crescent": localized("Waxing Crescent", "蛾眉月阶段", language: language)
-        case "first-quarter": localized("First Quarter", "上弦月阶段", language: language)
-        case "waxing-gibbous": localized("Waxing Gibbous", "盈凸月阶段", language: language)
-        case "full-moon": localized("Full Moon", "满月阶段", language: language)
-        case "waning-gibbous": localized("Waning Gibbous", "亏凸月阶段", language: language)
-        case "last-quarter": localized("Last Quarter", "下弦月阶段", language: language)
-        default: localized("Waning Crescent", "残月阶段", language: language)
-        }
+        AstroTerms.value("moonPhases", lunarPhaseID(angle), language: language)
     }
 
     private static func lunarPhaseStrength(_ angle: Double) -> Double {

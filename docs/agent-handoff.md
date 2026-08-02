@@ -15,7 +15,146 @@ AIGC:
 
 ---
 
+## 0. iOS v6 当前权威状态（2026-08-01）
+
+本节覆盖本文档后续所有与旧 iOS V1、四盘、旧 Today、固定 corpus 详情或 Obsidian 默认流程冲突的历史记录。
+
+- 当前开发分支：`codex/ios-v6-rebuild`；DeepSeek 原始未提交工作已完整保存在 `codex/deepseek-v6-snapshot`（提交 `a42f1d6`），重构基线提交为 `7d5b115`；
+- 当前产品合同：`docs/ios-v6-rebuild-plan.md`；卡片合同：`docs/ios-card-implementation-matrix.md`；
+- 现阶段不默认读取 Obsidian。项目内 v6 文档、Schema、代码、测试和私有内容系统是权威；原型只参考层级、密度和视觉，不强制照搬字段；
+- 本轮六盘为本命 10、天象 7、行运 6、次限 6、日返 7、合盘 8；Composite 延期；
+- Today 改为 v6 的 `Current Chapter / Active Today / Coming Next / Moon Today / Timeline / Upcoming Sky / Retrogrades / Current Sky`；
+- 卡片首屏合同改为每个事实“计算结果 + 私有一句自然解读”。约 100 字卡片详情和整盘专业报告改为整盘 AI 首次生成、本机长期保存；旧固定 `summary + detail + note` 合同失效；
+- 已完成共享基础：`ChartContext`、真实日期/地点参数、稳定事实模型、真实换座/精确相位/行运窗口/行星转向、`GeneratedChartArtifact`、语义缓存、人物删除联动、按人物/盘型清除和 AI 证据 ID；
+- Relay 代码升级已完成：24 小时 AES-GCM 加密缓存、Provider/模型真实停用、bcrypt、持久且可撤销的 HttpOnly/SameSite 会话、同源限制、无正文审计、六盘精确卡片合同、结构/语言/长度/证据校验、非法输出一次修复、App Attest 安装令牌与请求体断言、设备限流及每日配额均已接通；
+- Ask 保留原有三流程与专业事实；DeepSeek 没有改写 Ask 主体，只增加历史清理接线。Profile 的人物、头像、地图、预设、主题、字体和本地数据设计继续保留，并已加入 AI 授权撤回与按范围清理；
+- iOS 当前编译通过；AstroCore 的换座、精确相位、次限月亮窗口和 station 专项测试通过；
+- 用户已重启生产服务器；旧 `interstellar-edge`、`interstellar-api`、`interstellar-web` 容器已停止但未删除，数据卷保留。Relay 使用本机或 CI 构建的 linux/amd64 镜像传输部署，服务器只加载镜像并切换 Compose，避免再次耗尽内存。权威域名为 `https://aaadmin.xiaoguiwk.top`。
+
+### 2026-08-01 v6 内容系统与 Relay 配置进展
+
+- 英文与简体中文附件已由 `scripts/build-ios-copy-catalog.mjs` 转换为被 Git 忽略的运行时包；每包包含 51 个六盘/Today 合同、905 条稳定 copy、29 条主题规则，不把源附件直接打包；
+- 正式 `copy-catalog.schema.json` 与校验器已覆盖精确合同集合、稳定 selector、factRefs/evidence、重复 ID/路径、引用完整性、占位符声明、强类型和变量上限；`approved` 不能绕过结构校验；
+- Xcode 构建前和 GitHub CI 都已加入强制校验。CI 通过受保护的 `INTERSTELLAR_COPY_CATALOG_EN_B64` 与 `INTERSTELLAR_COPY_CATALOG_ZH_HANS_B64` secrets 注入私有包；缺少私有包即失败；
+- App 已加入英语、简体中文、西班牙语、法语四种语言。英中读取各自审核包；西/法在正式翻译包交付前只让固定语料回退英文；
+- Relay 默认初始化 DeepSeek Provider，Base URL `https://api.deepseek.com`、模型 `deepseek-v4-flash`。六盘中英文系统提示词由 Relay 自动初始化，各盘采用独立的消费者口吻与内容范围，可在 `/xiaoguiwk` 查看、编辑和恢复默认；旧自动通用口吻只在内容与旧默认完全一致时迁移，管理员改写不会被覆盖。部署后用户只需填写 API Key。
+- Relay 内嵌独立管理页，`aaadmin.xiaoguiwk.top` 根路径和 `/xiaoguiwk` 均可访问；它不依赖暂停维护的 Next.js Web。管理页支持 DeepSeek 密钥、Provider/默认模型、模型列表与启停、连接测试、六盘中英文提示词、恢复默认和请求/成功/错误/Token 用量。
+- `POST /v1/generate` 现在只接受本命 10、天象 7、行运 6、次限 6、日返 7、合盘 8 的精确卡片集合，拒绝缺卡、额外卡、重复卡、越权/重复证据、语言混杂和不合格长度；Composite 不在合同内。
+- Relay 的 Go 测试、vet、Relay-only Compose 配置和本地 HTTP 冒烟均通过。Dockerfile 使用构建平台原生编译器交叉编译目标架构，并为 distroless nonroot 用户预置 `/data` 所有权；全新命名卷的 SQLite 创建与健康检查已验证。
+- Relay 已以 `interstellar-relay:v6-20260801-2119`（`linux/amd64`）部署到 `/opt/interstellar/releases/v6-relay-20260801-2119/infra/deploy`；服务器只执行镜像加载与 Compose 切换。`aaadmin.xiaoguiwk.top` 经公开 Cloudflare DNS 的 `/v1/health` 正常，管理页返回 200，随机管理员登录、DeepSeek 默认配置、18 份双语提示词及退出后 401 均验证通过。
+- 部署时服务器不存在旧 Relay 数据卷；旧 `.env` 已备份到 `/opt/interstellar/backups/env-before-relay-v6-20260801-2119`。旧 `interstellar-web` 与 `interstellar-api` 仍为 Exited 且未删除；Caddy 与 Relay healthy。管理员凭据仅在本机 Git 忽略、权限 600 的交付文件中，DeepSeek API Key 等待用户在后台填写。
+- v6 内容运行链路已落地为 `StandardSignalBuilder → CardEvidencePlanner → ThemeMapper → CopyCatalogMatcher → CardTextModel`。六盘 44 卡和 Today 七个内容模块均读取同一审核 Catalog；Today 不再为章节卡拼接旧 `theme + area` 解释句；
+- 动态 selector 对月交点等暂无消费者相位文案的事实采用“技术事实保留、文案层按强度选择首个有审核覆盖的主要星体相位”，不伪造或删除 Snapshot 事实；
+- iPhone 12 mini 模拟器的英文六盘 UI 测试和简体中文六盘 UI 测试均通过；Today 英中截图确认正式 Catalog 生效；章节卡和 Active Today 卡的右侧空列布局已修正，空时间胶囊已移除；
+- 快照缓存现保持旧内容立即可见、后台刷新，不再每次启动用全屏 `Calculating locally…` 覆盖已有页面；Charts 选中人物已贯穿计算、默认地点、AI 事实、语义指纹和本地 Artifact。
+- Charts 轮盘上方已压缩为页面栏、盘型、Wheel/Aspects 和单一 Parameters 入口；人物、Modern/Classical、时间、地点和范围统一收进参数弹窗，不能再用展开参数把轮盘整体挤出首屏。全局纵向滚动条已隐藏；
+- Ask 已按用户限定范围撤销 DeepSeek 新增的“逐要素分配生活领域”和输入锁定 Done/Edit 设计，保留原有三流程与专业计算；系统键盘 Return 使用 Done/完成并收起键盘，History 入口、空状态和本地持久记录均已接通；
+- iPhone 12 mini 的 Ask History/键盘 Done 与 Charts 紧凑顶部/参数弹窗专项 UI 测试均通过；测试要求轮盘进入初始视口，而不是机械要求轮盘排在必要控制之前；Canvas 轮盘以正式无障碍标签 `Astrology wheel / 星盘轮盘` 验收；
+- 多语言按三层推进：固定 UI 进入 `Localizable.xcstrings`，占星基础词进入四语 `AstroTerms`，消费者正文继续使用 Copy Catalog；日期、数量和动态句序使用 Locale-aware formatter。西/法正式语料交付前仅 Copy Catalog 正文回退英文，不能让整套 UI 回退英文。
+- `scripts/build-ios-localization.mjs` 已把 564 个固定/语义 UI 键收进 String Catalog，英中完整、无歧义旧键；西/法当前各 79 个核心 UI 键。四语 AstroTerms 采用完全一致的类别与键集合，构建器会校验版本、locale、类别、键和非空值；
+- `LocalizedFormatters` 已接管本地化日期/月年/时间、Ask 历史数量、未来日/月范围、小时、报告倒计时/阅读时长、领域数量、日/季度和逆行行星单复数。iPhone 12 mini 西语/法语核心 Tab、参数按钮和轮盘术语专项 UI 测试通过；
+- Xcode 构建前与 GitHub CI 都执行 `ios:localization:validate`；App Store 元数据明确独立于运行时资源，本轮不混入 Copy Catalog。
+
+---
+
 ## 1. 项目概况
+## 0.1 2026-08-01 当前任务状态（最终交接）
+
+本任务由用户授权：临时关闭 App Attest 以继续真机测试；部署新版 Relay；安装真机并继续剩余测试。用户已要求停止 DeepSeek 调试，先完成交接。
+
+已完成：
+1. 在 `infra/deploy/compose.production.yaml` 与 `infra/deploy/compose.relay-only.yaml` 中临时将 `RELAY_ALLOW_DEV_BYPASS` 设为 `"1"`，并添加临时注释。
+2. 在 `ios/App/AIGeneration.swift` 中让 Debug 构建（`#if DEBUG || targetEnvironment(simulator)`）跳过 App Attest，发送 `X-App-Attest-Development-Bypass: 1`。
+3. 在 `AGENTS.md` 增加 “App Attest 临时状态” 小节，告知后续 agent 必须重新启用。
+4. 构建并部署新版 Relay 镜像 `interstellar-relay:v6-20260801-2219` 到 `aaadmin.xiaoguiwk.top`；服务器 `/v1/health` 返回 HTTP 200（部署由前序 agent 完成，当前环境受网络沙盒限制无法直接复测）。
+5. 管理后台登录正常；DeepSeek provider `api_key_set=true`，连接测试成功（`POST /admin/providers/deepseek/test` 返回 `{"ok": true}`）。
+6. 已将项目 `DEVELOPMENT_TEAM` 从 `YD3FY9ZB52` 切换为免费个人账号 `M2A7RHP7MT`（`ios/project.yml` 与 `ios/Interstellar.xcodeproj/project.pbxproj`），并移除 `ios/App/Interstellar.entitlements` 中的 `com.apple.developer.devicecheck.appattest-environment` 以适配无付费证书环境。
+7. 修复 Xcode 中 `Validate Content and Localization` Build Phase 在 GUI 构建时找不到 `node` 的问题：在 `ios/Interstellar.xcodeproj/project.pbxproj` 的脚本里增加 `export PATH="$HOME/.local/bin:$PATH"`，并同步到 `ios/project.yml` 的 `postBuildScripts` 中，确保后续 `xcodegen` 不丢失。
+
+已验证：
+- iPhone 12 mini 模拟器 Debug 构建成功（`BUILD SUCCEEDED`），使用本地签名（Sign to Run Locally）。
+- 真机安装通过 Xcode GUI build/run 成功：用户确认已安装到手机 `HUAWEI PURA 70`（UDID `00008101-0001701A1180001E`）。注意命令行 `xcodebuild install` 与 `build` 在该 Xcode/设备组合下不能稳定安装；当前以 Xcode GUI 的 `Personal Team` + `build/run` 为准。
+
+未完成/待排查：
+- **DeepSeek 端到端报告生成失败**：App 中打开盘的 AI 详情/整盘报告后无法加载内容。可能原因包括：设备到 `aaadmin.xiaoguiwk.top` 的网络可达性、Relay 证书/HTTPS 握手、App 中生成请求 URL/认证头、DeepSeek API key 余额/网络、App 是否发送了 `X-App-Attest-Development-Bypass: 1` 等。需要后续 agent 在设备可用网络/调试环境下专项排查。
+
+注意：
+- 当前未购买 Apple Developer Program 并不影响真机测试本身，只影响 App Attest、自动签名持久化和发布上架。
+- 上线前必须重新购买 Apple Developer Program，恢复 `DEVELOPMENT_TEAM = YD3FY9ZB52`，在 `ios/App/Interstellar.entitlements` 中恢复 `com.apple.developer.devicecheck.appattest-environment`，并将 `RELAY_ALLOW_DEV_BYPASS` 改回 `"0"`。
+- 本次修改 `ios/project.yml` 的 `postBuildScripts` 与 `ios/Interstellar.xcodeproj/project.pbxproj` 的脚本以修复 Xcode GUI 中 `node` 路径问题；若切换构建环境（如 CI 中 node 路径不同），需要同步调整。
+
+当前工作区改动文件（共 66 个，含前序未提交改动与本任务新增）：
+
+```text
+ M .github/workflows/quality.yml
+ M .gitignore
+ M AGENTS.md
+ M app/xiaoguiwk/page.tsx
+ M docs/agent-handoff.md
+ M docs/ios-card-implementation-matrix.md
+ M docs/ios-v1-development-plan.md
+ M infra/deploy/Caddyfile.fate
+ M infra/deploy/compose.production.yaml
+ M infra/deploy/interstellar.env.example
+ M ios/App/AIGeneration.swift
+ M ios/App/AppModel.swift
+ M ios/App/ChartEvents.swift
+ M ios/App/ChartRenderer.swift
+ M ios/App/ChartsView.swift
+ M ios/App/InsightCards.swift
+ M ios/App/InsightContent.swift
+ M ios/App/InsightFactory.swift
+ M ios/App/InterpretationContextFactory.swift
+ M ios/App/LocationPicker.swift
+ M ios/App/Models.swift
+ M ios/App/ProfileView.swift
+ M ios/App/Reports.swift
+ M ios/App/ReportsView.swift
+ M ios/App/SynastryView.swift
+ M ios/App/TodayDashboard.swift
+ M ios/App/TodayView.swift
+ D ios/App/YearAnchorCopy.swift
+ M ios/ContentSchema/card-contracts.json
+ M ios/Interstellar.xcodeproj/project.pbxproj
+ M ios/Packages/AstroCore/Sources/AstroCore/AstroCore.swift
+ M ios/Packages/AstroCore/Sources/AstroCore/AstroEvents.swift
+ M ios/Packages/AstroCore/Sources/AstroCore/SolarReturn.swift
+ M ios/Packages/AstroCore/Tests/AstroCoreTests/AstroCoreTests.swift
+ M ios/UITests/VisualRegressionTests.swift
+ M ios/project.yml
+ M package-lock.json
+ M package.json
+ M relay/Dockerfile
+ M relay/README.md
+ M relay/auth.go
+ M relay/go.mod
+ M relay/go.sum
+ M relay/handlers.go
+ M relay/llm.go
+ M relay/main.go
+ M relay/prompts.go
+ M relay/store.go
+ M relay/store_test.go
+ M scripts/check-ios-card-contract.sh
+?? docs/ios-v6-rebuild-plan.md
+?? infra/deploy/compose.relay-only.yaml
+?? ios/App/AstroTerms.swift
+?? ios/App/Interstellar.entitlements
+?? ios/App/Localizable.xcstrings
+?? ios/App/LocalizedFormatters.swift
+?? ios/App/Resources/
+?? ios/ContentSchema/copy-catalog.schema.json
+?? ios/Localization/
+?? relay/admin.html
+?? relay/admin_ui.go
+?? relay/app_attest.go
+?? relay/app_attest_test.go
+?? scripts/build-ios-copy-catalog.mjs
+?? scripts/build-ios-localization.mjs
+?? scripts/validate-ios-copy-ci.mjs
+```
+
+注意：管理后台中存在一个多余的 provider `的`（无 key），是本次登录前已存在的噪声条目，未删除，不影响主链路。
 
 - **仓库**：`github.com/hebiweng/interstellar`
 - **定位**：专业占星计算、研究、可视化与解读平台

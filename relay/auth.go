@@ -1,70 +1,85 @@
 package main
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
+	"context"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 )
 
-// SessionStore is an in-memory admin session registry. Tokens expire after
-// 12 hours and are HMAC-signed so they cannot be forged without RELAY_SECRET.
+const adminCookieName = "interstellar_admin_session"
+
+type adminContextKey struct{}
+
+// SessionStore persists only hashes of random session tokens in SQLite. A
+// process restart no longer logs every administrator out, and logout can
+// revoke the server-side record immediately.
 type SessionStore struct {
-	mu     sync.Mutex
-	secret []byte
-	tokens map[string]time.Time
+	store *Store
 }
 
-func NewSessionStore(secret string) *SessionStore {
-	return &SessionStore{secret: []byte(secret), tokens: map[string]time.Time{}}
+func NewSessionStore(store *Store) *SessionStore {
+	return &SessionStore{store: store}
 }
 
-func (s *SessionStore) sign(username string, expires time.Time) string {
-	mac := hmac.New(sha256.New, s.secret)
-	mac.Write([]byte("session:" + username + ":" + expires.UTC().Format(time.RFC3339)))
-	return hex.EncodeToString(mac.Sum(nil))
+func (s *SessionStore) Create(username string) (string, time.Time, error) {
+	return s.store.CreateAdminSession(username, 12*time.Hour)
 }
 
-func (s *SessionStore) Create(username string) (string, time.Time) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	expires := time.Now().UTC().Add(12 * time.Hour)
-	token := s.sign(username, expires)
-	s.tokens[token] = expires
-	return token, expires
-}
-
-func (s *SessionStore) Valid(token string) bool {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	expires, ok := s.tokens[token]
-	if !ok {
-		return false
-	}
-	if time.Now().UTC().After(expires) {
-		delete(s.tokens, token)
-		return false
-	}
-	return true
+func (s *SessionStore) Valid(token string) (string, bool) {
+	return s.store.ValidateAdminSession(token)
 }
 
 func (s *SessionStore) Revoke(token string) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	delete(s.tokens, token)
+	s.store.RevokeAdminSession(token)
+}
+
+func adminToken(r *http.Request) string {
+	if cookie, err := r.Cookie(adminCookieName); err == nil && cookie.Value != "" {
+		return cookie.Value
+	}
+	auth := r.Header.Get("Authorization")
+	return strings.TrimPrefix(auth, "Bearer ")
+}
+
+func setAdminCookie(w http.ResponseWriter, token string, expires time.Time) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     adminCookieName,
+		Value:    token,
+		Path:     "/",
+		Expires:  expires,
+		MaxAge:   int(time.Until(expires).Seconds()),
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+	})
+}
+
+func clearAdminCookie(w http.ResponseWriter) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     adminCookieName,
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+	})
 }
 
 func requireAdmin(sessions *SessionStore, next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		auth := r.Header.Get("Authorization")
-		token := strings.TrimPrefix(auth, "Bearer ")
-		if token == "" || !sessions.Valid(token) {
-			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		username, ok := sessions.Valid(adminToken(r))
+		if !ok {
+			writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized", "code": "admin_unauthorized"})
 			return
 		}
-		next(w, r)
+		ctx := context.WithValue(r.Context(), adminContextKey{}, username)
+		next(w, r.WithContext(ctx))
 	}
+}
+
+func adminUsername(r *http.Request) string {
+	username, _ := r.Context().Value(adminContextKey{}).(string)
+	return username
 }
