@@ -9,7 +9,7 @@
 - 稳定 `cardID`、标题、独立 `visualKind`；
 - 一个或多个带稳定 ID 的真实事实；每个事实明确 `metricLabel / calculatedValue / interpretationKey / sourceFactIDs / visualRole`；
 - 首屏呈现“计算结果 + 一句自然解读”；短解读来自被 Git 忽略的私有、已审核内容包，Swift 不拼解释句；
-- 点击后展开本机 `GeneratedChartArtifact.cardDetails[cardID]`；详情由整盘 AI 请求一次生成，不为单卡另发请求；
+- 当前 Charts 卡片不展示 `GeneratedChartArtifact.cardDetails[cardID]` 的展开入口、状态区或箭头；本机产物仍由整盘 AI 请求一次生成并保留给报告等明确入口，不为单卡另发请求；
 - 生成中、失败、离线、本地命中和事实不足的明确状态；事实不足时隐藏无效子项，整卡无事实才显示空状态；
 - 中英文单语、浅色/深色/跟随系统、小屏和 Dynamic Type；
 - 所有视觉由真实事实映射，不得使用示例分数、默认进度、固定节点或估算日期。

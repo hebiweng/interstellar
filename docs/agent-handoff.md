@@ -514,5 +514,17 @@ iOS 首版已完成可构建的纵向实现，尚未提交或推送：
 - 最新 Debug 签名构建已覆盖安装并启动到连接的 iPhone 12 mini（设备名 `HUAWEI PURA 70`）；产物内四语 Catalog 均为 1529 条，CoreDevice 确认 `com.xiaoguiwk.interstellar` 进程 PID 4197。现有真机 UI 测试已覆盖 `Charts → Transits → Transit timeline`，但本轮自动复跑被 UI Test Runner 的旧 provisioning profile 与当前开发证书不匹配阻断，未进入测试用例。
 - 剩余性能风险：行星事件为保证换宫精度采用 6 小时采样；7 天后台刷新已正常运行，90 天范围尚未完成真机耗时基准，后续只能优化计算扫描，不能减少计划事实合同。
 
+### 2026-08-03 更新：现代行运原型还原与六盘共享卡片外壳
+
+- 现代行运 Current Cycles 现在严格选择当前生效窗口：Long-term 至少持续 60 天，Current 与 Daily 分别使用对应周期证据；Daily 标签显示峰值时间、结束时间和生活领域，所有标签由计划事实生成。
+- 行运窗口统一使用 3 度生效容许度，完整扫描交叉相位；重复精确搜索不再受当前 Timeline 视图范围截断。Timeline 支持 30 天、7 天和 12 个月，只显示窗口、行星事件与日历技术事实，不请求消费者正文。
+- Current Story 优先真实 Jupiter Expanding 与 Saturn Structuring 信号，并保留辅助信号；中文区分“回返中”“回返”和“再次精确”。Planet Paths 与 Active Transits 增加技术抽屉，Active 默认显示 5 个重点并支持 Long-term / Current / Daily 筛选。
+- Life Areas 仍由 Planner 读取完整十二宫聚合和来源 ID；第 1 宫消费者标题改为“Personal focus / 个人重心”，不再显示身份或第一印象措辞。周期元数据在 iPhone 12 mini 改为可换行标签，避免日期和领域被截断。
+- 六种盘型统一使用卡片外置标题和右侧小字，卡内不再重复标题；Charts 页移除“解读”，所有卡片移除 AI 详情展开区、状态区和箭头，并统一拉开标题、正文和次级正文的字号层级。GeneratedChartArtifact 仍保留给报告等明确入口。
+- 修复两处运行时合同错误：Timeline 技术卡允许空正文；非行运盘不再因可选 `transitPlan` 为 nil 而错误清空全部卡片正文。
+- 验证通过：现代行运 Planner 专项测试；14 组 fixture、20 个真实盘日期和 4623 个探针的 Copy 导出（observed 216、unreachable 3、unknown 0、missing 0）；英文 iPhone 12 mini 六盘 UI 流程；现代行运 Current Cycles、Timeline、Planet Paths 抽屉、Life Areas、Active 筛选与抽屉 UI 流程；Copy、Localization、卡片合同、架构、lint 和私有内容边界门禁。
+- 中文六盘 UI 流程在执行中被用户中断，尚未形成最终通过证据；提交后需要优先补跑。当前只完成 `modern.transit` Planner 垂直切片，Classical 行运和其他盘型尚未迁移，后续顺序冻结为 Classical Transit → Current Sky → Natal → Solar Return → Secondary Progressions → Synastry。
+- 在迁移 Classical Transit 前，先按盘型和职责拆分 `InsightFactory.swift`、`InsightCards.swift` 与行运规划文件；只做行为不变的文件移动。错误旧 Copy key 只允许通过构建期 alias / deprecated manifest 审计，不得成为运行时回退。
+
 
 > AI生成

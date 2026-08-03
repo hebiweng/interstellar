@@ -28,19 +28,16 @@ struct ChartsView: View {
                         chartContent
 
                         if !insightState.cards.isEmpty {
-                            Text(localized("Insights", "解读", language: model.language))
-                                .font(.title3.weight(.bold))
-                                .foregroundStyle(AppTheme.text)
-                                .padding(.top, 2)
-
                             ForEach(insightState.cards) { card in
-                                let ai = model.aiCardDetail(for: model.selectedChart, cardID: card.id)
-                                InsightCardView(
-                                    card: card,
-                                    language: model.language,
-                                    aiDetail: ai.detail,
-                                    aiStatus: ai.status
-                                )
+                                VStack(alignment: .leading, spacing: 10) {
+                                    cardSectionHeader(card)
+                                    InsightCardView(
+                                        card: card,
+                                        language: model.language,
+                                        prototypeTransitStyle: isModernTransitCard(card.id),
+                                        externalHeaderStyle: true
+                                    )
+                                }
                             }
                         } else if let message = insightState.errorMessage,
                                   model.snapshot(for: model.selectedChart) != nil
@@ -116,6 +113,64 @@ struct ChartsView: View {
                     language: model.language
                 ))
             }
+        }
+    }
+
+    private func cardSectionHeader(_ card: InsightCardModel) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Text(cardSectionTitle(card))
+                .font(.system(size: 18, weight: .bold))
+                .foregroundStyle(AppTheme.text)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 6)
+            Text(cardSectionSubtitle(card))
+                .font(.system(size: 11))
+                .foregroundStyle(AppTheme.muted)
+                .multilineTextAlignment(.trailing)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal, 2)
+        .padding(.top, 7)
+    }
+
+    private func isModernTransitCard(_ cardID: String) -> Bool {
+        model.selectedChart == .transit
+            && model.preset(for: .transit) == .modern
+            && TransitContentPlan.cardIDs.contains(cardID)
+    }
+
+    private func cardSectionTitle(_ card: InsightCardModel) -> String {
+        isModernTransitCard(card.id) ? transitSectionTitle(card.id) : card.title
+    }
+
+    private func cardSectionSubtitle(_ card: InsightCardModel) -> String {
+        if isModernTransitCard(card.id) {
+            return transitSectionSubtitle(card.id)
+        }
+        return cardKicker(card.id, language: model.language) ?? ""
+    }
+
+    private func transitSectionTitle(_ cardID: String) -> String {
+        switch cardID {
+        case "current-story": localized("Current Story", "当前主线", language: model.language)
+        case "current-cycles": localized("Current Cycles", "当前周期", language: model.language)
+        case "transit-timeline": localized("Transit Timeline", "行运时间线", language: model.language)
+        case "planet-paths": localized("Planet Paths", "行星路径", language: model.language)
+        case "life-areas": localized("Life Areas", "生活领域", language: model.language)
+        case "active-transits": localized("Active Transits", "进行中的行运", language: model.language)
+        default: cardID
+        }
+    }
+
+    private func transitSectionSubtitle(_ cardID: String) -> String {
+        switch cardID {
+        case "current-story": localized("How the strongest cycles combine", "最强周期如何共同作用", language: model.language)
+        case "current-cycles": localized("One theme per time scale", "每个时间尺度一个主题", language: model.language)
+        case "transit-timeline": localized("Start · Exact · Return · End", "开始 · 精确 · 回返 · 结束", language: model.language)
+        case "planet-paths": localized("Where the current planets are moving", "当前行星正在经过哪里", language: model.language)
+        case "life-areas": localized("Activity, not fortune", "活跃度，不是运气", language: model.language)
+        case "active-transits": localized("Complete filtered list", "完整筛选列表", language: model.language)
+        default: ""
         }
     }
 
@@ -282,9 +337,9 @@ struct ChartsView: View {
                 )
                 .datePickerStyle(.compact)
                 Picker(localized("Range", "范围", language: model.language), selection: transitRangeBinding) {
-                    Text(localized("7 days", "7 天", language: model.language)).tag(7)
                     Text(localized("30 days", "30 天", language: model.language)).tag(30)
-                    Text(localized("90 days", "90 天", language: model.language)).tag(90)
+                    Text(localized("7 days", "7 天", language: model.language)).tag(7)
+                    Text(localized("12 months", "12 个月", language: model.language)).tag(365)
                 }
                 .pickerStyle(.segmented)
                 locationButton(model.transitLocationOverride?.placeName ?? model.chartSubjectProfile.placeName)

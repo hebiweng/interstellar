@@ -59,7 +59,7 @@ final class TransitContentPlannerTests: XCTestCase {
 
     func testStoryIntegratedThemesAndSignalRolesAreStable() {
         let cases: [(String, [TransitAspectFact], TransitIntegratedThemeID, [TransitStorySignalRoleID])] = [
-            ("mixed", [saturnAspect(), jupiterAspect()], .expansionStructure, [.structuring, .expanding]),
+            ("mixed", [saturnAspect(), jupiterAspect()], .expansionStructure, [.expanding, .structuring]),
             ("supportive", [jupiterAspect()], .focusedExpansion, [.expanding]),
             ("challenging", [saturnAspect()], .durableStructure, [.structuring]),
             ("neutral", [mercuryAspect()], .steadyRealignment, [.supporting]),
@@ -127,11 +127,68 @@ final class TransitContentPlannerTests: XCTestCase {
         } == true)
     }
 
+    func testCurrentCyclesRequestAndRenderAllThreeTimeScales() throws {
+        let matcher = try CopyCatalogMatcher(language: .english)
+        let cycles = TransitContentPlanner.plan(makeBundle(windows: [])).card("current-cycles")!
+        let requests = matcher.transitCopyRequests(plan: cycles)
+        let text = try matcher.transitCardText(plan: cycles)
+
+        XCTAssertEqual(
+            Set(requests.compactMap(\.roleID)),
+            Set(["longCycle", "currentCycle", "dailyCycle"])
+        )
+        XCTAssertEqual(
+            Set(text.cycleTexts?.map(\.roleID) ?? []),
+            Set(["longCycle", "currentCycle", "dailyCycle"])
+        )
+        XCTAssertTrue(text.cycleTexts?.allSatisfy { !$0.headline.isEmpty && !$0.body.isEmpty } == true)
+    }
+
+    func testCurrentCyclesUseOnlyActiveMultiMonthLongWindow() {
+        let aspect = saturnAspect()
+        let ended = window(aspect: aspect, exactOffsetDays: -60, startOffsetDays: -120, endOffsetDays: -1)
+        let future = window(aspect: aspect, exactOffsetDays: 40, startOffsetDays: 20, endOffsetDays: 120)
+        let active = window(aspect: aspect, exactOffsetDays: 10, startOffsetDays: -90, endOffsetDays: 90)
+        let plan = TransitContentPlanner.plan(
+            makeBundle(scopeID: "active-long-window", aspects: [aspect], windows: [ended, future, active])
+        )
+        let longEvidence = plan.card("current-cycles")?.evidence.first {
+            $0.role == TransitEvidenceRole.longCycle
+        }
+
+        guard case let .window(selected)? = longEvidence?.fact else {
+            return XCTFail("Long-term cycle must use an active multi-month window")
+        }
+        XCTAssertEqual(selected.exact, active.exact)
+        XCTAssertLessThanOrEqual(selected.start, testAnchor)
+        XCTAssertGreaterThanOrEqual(selected.end, testAnchor)
+        XCTAssertGreaterThanOrEqual(
+            selected.end.timeIntervalSince(selected.start),
+            TransitCycleContract.minimumLongTermDuration
+        )
+    }
+
     func testEachCardOwnsOnlyItsContractedFactKinds() {
         let plan = TransitContentPlanner.plan(makeBundle())
 
-        XCTAssertTrue(plan.card("transit-timeline")!.evidence.allSatisfy { if case .window = $0.fact { true } else { false } })
-        XCTAssertTrue(plan.card("planet-paths")!.evidence.allSatisfy { if case .placement = $0.fact { true } else { false } })
+        XCTAssertTrue(plan.card("transit-timeline")!.evidence.allSatisfy { evidence in
+            switch evidence.fact {
+            case .window, .planetEvent, .calendar:
+                evidence.claimMode == .technical
+            default:
+                false
+            }
+        })
+        XCTAssertTrue(plan.card("planet-paths")!.evidence.allSatisfy { evidence in
+            switch evidence.fact {
+            case .placement:
+                evidence.claimMode == .technical && evidence.role == .path
+            case .planetEvent:
+                evidence.claimMode == .technical && evidence.role == .pathEvent
+            default:
+                false
+            }
+        })
         XCTAssertTrue(plan.card("life-areas")!.evidence.allSatisfy { if case .lifeArea = $0.fact { true } else { false } })
         XCTAssertTrue(plan.card("current-cycles")!.evidence.allSatisfy { $0.claimMode == .aggregate })
 
@@ -160,7 +217,14 @@ final class TransitContentPlannerTests: XCTestCase {
         )
         let outside = window(aspect: aspect, exactOffsetDays: 40)
         let plan = TransitContentPlanner.plan(
-            makeBundle(scopeID: "returning", aspects: [aspect], windows: [outside, returning], rangeDays: 30)
+            makeBundle(
+                scopeID: "returning",
+                aspects: [aspect],
+                windows: [outside, returning],
+                events: [],
+                calendar: [],
+                rangeDays: 30
+            )
         )
         let timeline = plan.card("transit-timeline")!
 
@@ -178,18 +242,84 @@ final class TransitContentPlannerTests: XCTestCase {
         XCTAssertEqual(value.timeZoneIdentifier, testTimeZone)
     }
 
+    func testTimelineProjectionPairsHouseIngressesWithoutInventingAnEnd() {
+        let first = planetEvent(kind: .houseIngress, offsetDays: 2, body: .mars, fromIndex: 2, toIndex: 3)
+        let second = planetEvent(kind: .houseIngress, offsetDays: 18, body: .mars, fromIndex: 3, toIndex: 4)
+        let plan = TransitContentPlanner.plan(
+            makeBundle(
+                scopeID: "house-residence",
+                aspects: [],
+                windows: [],
+                events: [second, first],
+                placements: [],
+                lifeAreas: [],
+                calendar: [],
+                rangeDays: 365
+            )
+        )
+        let entries = TransitTimelineProjection.entries(from: plan.card("transit-timeline")!.evidence)
+        let houseEntries = entries.filter {
+            if case .houseResidence = $0.kind { return true }
+            return false
+        }
+
+        XCTAssertEqual(houseEntries.count, 2)
+        XCTAssertEqual(houseEntries[0].start, testAnchor.addingTimeInterval(2 * day))
+        XCTAssertEqual(houseEntries[0].end, testAnchor.addingTimeInterval(18 * day))
+        XCTAssertEqual(houseEntries[0].sourceFactIDs.count, 2)
+        XCTAssertNil(houseEntries[1].end)
+        XCTAssertEqual(houseEntries[1].sourceFactIDs.count, 1)
+    }
+
+    func testTimelineOwnsCalendarScoresAndAuthoritativeSourceIDs() {
+        let calendar = makeCalendar()
+        let plan = TransitContentPlanner.plan(
+            makeBundle(
+                scopeID: "timeline-calendar",
+                aspects: [],
+                windows: [],
+                events: [],
+                placements: [],
+                lifeAreas: [],
+                calendar: calendar,
+                rangeDays: 365
+            )
+        )
+        let plannedCalendar = plan.card("transit-timeline")!.evidence.compactMap { evidence -> TransitCalendarFact? in
+            guard case let .calendar(fact) = evidence.fact else { return nil }
+            return fact
+        }
+
+        XCTAssertEqual(plannedCalendar.map(\.score), calendar.map(\.score))
+        XCTAssertTrue(plannedCalendar.allSatisfy { !$0.sourceFactIDs.isEmpty })
+        XCTAssertTrue(plan.card("transit-timeline")!.sourceFactIDs.allSatisfy {
+            $0.hasPrefix("transit.timeline-calendar.")
+        })
+    }
+
+    func testTimelineRangeContractIncludesSevenThirtyAndTwelveMonths() {
+        XCTAssertEqual(TransitTimelineContract.rangeDays, [30, 7, 365])
+        XCTAssertEqual(TransitTimelineContract.defaultRangeDays, 30)
+        XCTAssertEqual(TransitTimelineContract.maximumRangeDays, 365)
+    }
+
     func testPlanetPathsAndLifeAreasKeepCompleteCollections() {
         let plan = TransitContentPlanner.plan(makeBundle())
         let paths = plan.card("planet-paths")!
         let areas = plan.card("life-areas")!
 
-        XCTAssertEqual(paths.evidence.count, CelestialBody.allCases.count)
+        let placementEvidence = paths.evidence.filter { if case .placement = $0.fact { true } else { false } }
+        let pathEventEvidence = paths.evidence.filter { if case .planetEvent = $0.fact { true } else { false } }
+        XCTAssertEqual(placementEvidence.count, CelestialBody.allCases.count)
+        XCTAssertEqual(pathEventEvidence.count, makePlanetEvents().count)
         XCTAssertEqual(
-            Set(paths.factIDs),
+            Set(placementEvidence.map(\.fact.factID)),
             Set(makePlacements().map {
                 $0.factID.replacingOccurrences(of: "transit.template.", with: "transit.scope.")
             })
         )
+        XCTAssertTrue(pathEventEvidence.allSatisfy { $0.role == .pathEvent && $0.claimMode == .technical })
+        XCTAssertTrue(paths.themeInputs.allSatisfy { $0.roleID != TransitEvidenceRole.pathEvent.rawValue })
         XCTAssertEqual(areas.evidence.count, 12)
         XCTAssertEqual(Set(areas.evidence.compactMap { evidence -> Int? in
             guard case let .lifeArea(area) = evidence.fact else { return nil }
@@ -680,7 +810,7 @@ final class TransitContentPlannerTests: XCTestCase {
             Fixture(name: "returning-pass", bundle: makeBundle(scopeID: "repeat", aspects: [saturn], windows: [window(aspect: saturn, exactOffsetDays: 2, repeatOffsetDays: 12, nextOffsetDays: 24, passCount: 3)], rangeDays: 30)),
             Fixture(name: "complete-paths-areas", bundle: makeBundle(scopeID: "collections", aspects: [], windows: [], events: [], placements: makePlacements(), lifeAreas: makeLifeAreas())),
             Fixture(name: "range-filter", bundle: makeBundle(scopeID: "range", aspects: [saturn], windows: [window(aspect: saturn, exactOffsetDays: 40)], events: [planetEvent(kind: .signIngress, offsetDays: 40)], rangeDays: 7)),
-            Fixture(name: "stabilizing-signal", bundle: makeBundle(scopeID: "stabilizing", aspects: [supportiveSaturnAspect()], windows: [], events: [])),
+            Fixture(name: "stabilizing-signal", bundle: makeBundle(scopeID: "stabilizing", aspects: [stabilizingAspect()], windows: [], events: [])),
             Fixture(name: "disrupting-signal", bundle: makeBundle(scopeID: "disrupting", aspects: [uranusAspect()], windows: [], events: [])),
             Fixture(name: "no-window-signals", bundle: makeBundle(scopeID: "no-window", aspects: [saturn, jupiterAspect()], windows: [], events: [])),
             Fixture(name: "same-theme-multi-signal", bundle: makeBundle(scopeID: "same-theme", aspects: [jupiterSunAspect(), marsSunAspect()], windows: [], events: [])),
@@ -741,8 +871,8 @@ final class TransitContentPlannerTests: XCTestCase {
         aspect(movingID: "jupiter", referenceID: "moon", kind: .trine, phase: .separating, strength: 0.80, house: 2, band: .current)
     }
 
-    private func supportiveSaturnAspect() -> TransitAspectFact {
-        aspect(movingID: "saturn", referenceID: "venus", kind: .trine, phase: .applying, strength: 0.88, house: 7, band: .longTerm)
+    private func stabilizingAspect() -> TransitAspectFact {
+        aspect(movingID: "venus", referenceID: "moon", kind: .trine, phase: .applying, strength: 0.88, house: 4, band: .daily)
     }
 
     private func uranusAspect() -> TransitAspectFact {
@@ -792,6 +922,8 @@ final class TransitContentPlannerTests: XCTestCase {
     private func window(
         aspect: TransitAspectFact?,
         exactOffsetDays: Double,
+        startOffsetDays: Double? = nil,
+        endOffsetDays: Double? = nil,
         repeatOffsetDays: Double? = nil,
         nextOffsetDays: Double? = nil,
         passCount: Int = 1
@@ -808,9 +940,11 @@ final class TransitContentPlannerTests: XCTestCase {
             kind: kind,
             movingLongitude: aspect?.movingLongitude ?? 75,
             natalHouse: aspect?.natalHouse ?? 5,
-            start: exact.addingTimeInterval(-day),
+            start: startOffsetDays.map { testAnchor.addingTimeInterval($0 * day) }
+                ?? exact.addingTimeInterval(-day),
             exact: exact,
-            end: exact.addingTimeInterval(day),
+            end: endOffsetDays.map { testAnchor.addingTimeInterval($0 * day) }
+                ?? exact.addingTimeInterval(day),
             repeatExact: repeatOffsetDays.map { testAnchor.addingTimeInterval($0 * day) },
             nextExact: nextOffsetDays.map { testAnchor.addingTimeInterval($0 * day) },
             passIndex: 1,
@@ -830,16 +964,22 @@ final class TransitContentPlannerTests: XCTestCase {
         ]
     }
 
-    private func planetEvent(kind: TransitPlanetEventKind, offsetDays: Double) -> TransitPlanetEventFact {
+    private func planetEvent(
+        kind: TransitPlanetEventKind,
+        offsetDays: Double,
+        body: CelestialBody = .mercury,
+        fromIndex: Int? = nil,
+        toIndex: Int? = nil
+    ) -> TransitPlanetEventFact {
         let timestamp = testAnchor.addingTimeInterval(offsetDays * day)
         return TransitPlanetEventFact(
-            factID: "transit.template.planet-event.mercury.\(kind.rawValue).\(Int(timestamp.timeIntervalSince1970))",
-            body: .mercury,
+            factID: "transit.template.planet-event.\(body.rawValue).\(kind.rawValue).\(Int(timestamp.timeIntervalSince1970))",
+            body: body,
             kind: kind,
             timestamp: timestamp,
             timeZoneIdentifier: testTimeZone,
-            fromIndex: kind == .signIngress || kind == .houseIngress ? 2 : nil,
-            toIndex: kind == .signIngress || kind == .houseIngress ? 3 : nil
+            fromIndex: fromIndex ?? (kind == .signIngress || kind == .houseIngress ? 2 : nil),
+            toIndex: toIndex ?? (kind == .signIngress || kind == .houseIngress ? 3 : nil)
         )
     }
 

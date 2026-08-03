@@ -109,7 +109,7 @@
 		5F4FC24162F432CAB03EB271 /* TransitContentPlanning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitContentPlanning.swift; sourceTree = "<group>"; };
 		60593A20AA82B656CE29E02E /* CopyCatalog-en.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "CopyCatalog-en.json"; sourceTree = "<group>"; };
 		637B2FF5242CA3AC15B710C9 /* CopyCatalog-zh-Hans.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "CopyCatalog-zh-Hans.json"; sourceTree = "<group>"; };
-		661AA6692BBDB981B3874B3C /* Interstellar.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Interstellar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		661AA6692BBDB981B3874B3C /* Interstellar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Interstellar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6CEE7F82FD5619F1FB01932D /* PrivateCorpus-zh-Hans.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "PrivateCorpus-zh-Hans.json"; sourceTree = "<group>"; };
 		6FFE425FA91D67D5112FB3FE /* ChartEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartEvents.swift; sourceTree = "<group>"; };
 		97EEE681F90CAE569A4F0B3A /* TodayDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayDashboard.swift; sourceTree = "<group>"; };
@@ -121,7 +121,7 @@
 		AB744A28C654F60FA3B7A42F /* AstroTerms-es.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "AstroTerms-es.json"; sourceTree = "<group>"; };
 		AD2F2C2DC93A3770F96DC584 /* AstroTerms.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AstroTerms.swift; sourceTree = "<group>"; };
 		BA31C8B1C13F10113F10E112 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
-		BB5BCE81BEF6F479DD875A36 /* LICENSE */ = {isa = PBXFileReference; path = LICENSE; sourceTree = "<group>"; };
+		BB5BCE81BEF6F479DD875A36 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		BD387F6A83026B674CCD09BF /* InterstellarTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = InterstellarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDBF1C8DDAF72951EAEA6DCF /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		C28BE23BBAEDB4F998B852E4 /* ConsumerCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumerCopy.swift; sourceTree = "<group>"; };
@@ -386,7 +386,6 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					5BDCE77BA28C6994C9CDC92D = {
-						DevelopmentTeam = M2A7RHP7MT;
 						ProvisioningStyle = Automatic;
 					};
 					C7D3DFB1A1D5EC9E657E67FB = {
@@ -594,7 +593,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = M2A7RHP7MT;
+				DEVELOPMENT_TEAM = YD3FY9ZB52;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Interstellar;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";

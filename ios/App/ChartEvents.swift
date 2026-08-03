@@ -89,9 +89,16 @@ struct ChartEventData: Equatable, Codable {
     }
 }
 
+struct TransitEphemerisSample: Equatable, Sendable {
+    let date: Date
+    let snapshot: ChartSnapshot
+}
+
 /// Builds `ChartEventData` from the already-computed snapshots. This runs on the
 /// main refresh path so the cards are ready the moment the chart is shown.
 enum ChartEventBuilder {
+    static let transitAspectOrbDegrees = 3.0
+
     static func build(
         calculator: SwissEphemerisCalculator,
         skyAnchor: Date,
@@ -104,6 +111,7 @@ enum ChartEventBuilder {
         transitNatal: ChartSnapshot,
         transitPreset: CalculationPreset,
         transitRangeDays: Int,
+        transitSamples: [TransitEphemerisSample],
         timeZone: TimeZone,
         transitAspects: [ChartAspect],
         progressedSnapshot: ChartSnapshot,
@@ -177,7 +185,7 @@ enum ChartEventBuilder {
 
         // 3. Transit windows for the strongest active transits: the exact peak,
         //    repeated passes, and the in-orb start and end dates.
-        for aspect in transitAspects.prefix(6) {
+        for aspect in transitAspects {
             guard let first = CelestialBody(rawValue: aspect.firstID),
                   let second = CelestialBody(rawValue: aspect.secondID)
             else { continue }
@@ -207,7 +215,7 @@ enum ChartEventBuilder {
                 natalReferenceLongitude: aspect.secondLongitude,
                 kind: aspect.kind,
                 exactDate: exact,
-                orbDegrees: max(aspect.orbDegrees, 0.5)
+                orbDegrees: transitAspectOrbDegrees
             ) else { continue }
             var previousExactDates: [Date] = []
             var previousCursor = exact.addingTimeInterval(-0.1 * 86_400)
@@ -226,7 +234,7 @@ enum ChartEventBuilder {
 
             var repeatedExactDates: [Date] = []
             var searchCursor = exact.addingTimeInterval(0.1 * 86_400)
-            let repeatSearchEnd = min(window.end, transitRangeEnd)
+            let repeatSearchEnd = window.end
             while repeatedExactDates.count < 2,
                   let repeated = try? await calculator.nextTransitNatalExactDate(
                     moving: first,
@@ -268,6 +276,7 @@ enum ChartEventBuilder {
             location: location,
             preset: transitPreset,
             natal: transitNatal,
+            samples: transitSamples,
             timeZone: timeZone
         )
 
@@ -341,23 +350,17 @@ enum ChartEventBuilder {
         location: GeographicLocation,
         preset: CalculationPreset,
         natal: ChartSnapshot,
+        samples: [TransitEphemerisSample],
         timeZone: TimeZone
     ) async throws -> [ChartEventData.TransitPlanetEvent] {
-        guard anchor < rangeEnd else { return [] }
-        let sampleStep: TimeInterval = 6 * 3_600
+        guard anchor < rangeEnd, samples.count > 1 else { return [] }
         var events: [ChartEventData.TransitPlanetEvent] = []
-        var firstDate = anchor
-        var firstSnapshot = try await calculator.calculateSnapshot(
-            NatalInput(utcDate: firstDate, location: location),
-            preset: preset
-        )
-
-        while firstDate < rangeEnd {
-            let secondDate = min(rangeEnd, firstDate.addingTimeInterval(sampleStep))
-            let secondSnapshot = try await calculator.calculateSnapshot(
-                NatalInput(utcDate: secondDate, location: location),
-                preset: preset
-            )
+        for (firstSample, secondSample) in zip(samples, samples.dropFirst()) {
+            let firstDate = firstSample.date
+            let secondDate = secondSample.date
+            guard secondDate >= anchor, firstDate <= rangeEnd else { continue }
+            let firstSnapshot = firstSample.snapshot
+            let secondSnapshot = secondSample.snapshot
             for firstPoint in firstSnapshot.points {
                 guard let secondPoint = secondSnapshot.point(firstPoint.body) else { continue }
                 if firstPoint.signIndex != secondPoint.signIndex {
@@ -439,8 +442,6 @@ enum ChartEventBuilder {
                     )
                 }
             }
-            firstDate = secondDate
-            firstSnapshot = secondSnapshot
         }
 
         var seen = Set<String>()
@@ -449,6 +450,7 @@ enum ChartEventBuilder {
             if $0.body.rawValue != $1.body.rawValue { return $0.body.rawValue < $1.body.rawValue }
             return $0.kind.rawValue < $1.kind.rawValue
         }.filter { event in
+            guard event.date >= anchor, event.date <= rangeEnd else { return false }
             let key = [
                 event.body.rawValue,
                 event.kind.rawValue,

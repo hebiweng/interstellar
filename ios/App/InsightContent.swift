@@ -333,13 +333,26 @@ struct CopyCatalogMatcher {
                     sourceFactIDs: request.sourceFactIDs
                 )
             }
+        let cycleTexts = try requests
+            .filter { $0.copySlot == TransitCopySlot.cycleChapter.rawValue }
+            .map { request in
+                let headline = try value(at: "\(request.key).headline")
+                let body = try value(at: "\(request.key).body")
+                return TransitCycleText(
+                    roleID: request.roleID ?? "",
+                    headline: headline,
+                    body: body,
+                    sourceFactIDs: request.sourceFactIDs
+                )
+            }
         guard plan.copySlot != nil,
               let selection = transitCopySelection(plan: plan, requests: requests),
               let model = textModel(
                   from: selection,
                   cardID: plan.cardID,
                   scopeID: plan.scopeID,
-                  roleTexts: roleTexts
+                  roleTexts: roleTexts,
+                  cycleTexts: cycleTexts
               )
         else {
             throw CopyCatalogError.missingCopy("modern.transit.\(plan.copySlot?.rawValue ?? "technical")")
@@ -383,7 +396,13 @@ struct CopyCatalogMatcher {
             }
             return requests
         case .cycleChapter:
-            return transitThemeRequest(plan: plan, slot: .cycleChapter).map { [$0] } ?? []
+            return plan.themeInputs.compactMap { input in
+                transitThemeRequest(
+                    input: input,
+                    cardID: plan.cardID,
+                    slot: .cycleChapter
+                )
+            }
         case .planetPathShort:
             guard let evidence = plan.evidence.first(where: {
                 if case .placement = $0.fact { return true }
@@ -484,7 +503,8 @@ struct CopyCatalogMatcher {
         from selection: CopySelection?,
         cardID: String,
         scopeID: String? = nil,
-        roleTexts: [CardRoleText] = []
+        roleTexts: [CardRoleText] = [],
+        cycleTexts: [TransitCycleText] = []
     ) -> CardTextModel? {
         guard let selection else { return nil }
         let resolved = selection.basePath.map { resolve(base: $0) }
@@ -508,7 +528,8 @@ struct CopyCatalogMatcher {
             sourceFactIDs: selection.sourceFactIDs,
             copyPackID: "\(pack.contentVersion):\(selection.basePath ?? selection.secondaryPath ?? cardID)",
             scopeID: scopeID,
-            roleTexts: roleTexts.isEmpty ? nil : roleTexts
+            roleTexts: roleTexts.isEmpty ? nil : roleTexts,
+            cycleTexts: cycleTexts.isEmpty ? nil : cycleTexts
         )
     }
 
@@ -566,6 +587,14 @@ struct CopyCatalogMatcher {
         slot: TransitCopySlot
     ) -> TransitCopyRequest? {
         guard let input = plan.themeInputs.first else { return nil }
+        return transitThemeRequest(input: input, cardID: plan.cardID, slot: slot)
+    }
+
+    private func transitThemeRequest(
+        input: TransitThemeInput,
+        cardID: String,
+        slot: TransitCopySlot
+    ) -> TransitCopyRequest? {
         let mappedThemeID = ThemeMapper.themeID(
             for: input,
             rules: pack.themeRulesByPreset["modern"] ?? [],
@@ -585,7 +614,7 @@ struct CopyCatalogMatcher {
         }
         return TransitCopyRequest(
             key: basePath,
-            cardID: plan.cardID,
+            cardID: cardID,
             copySlot: slot.rawValue,
             themeID: themeID.rawValue,
             integratedThemeID: nil,

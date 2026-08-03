@@ -21,7 +21,7 @@ final class AppModel: ObservableObject {
     @Published private(set) var currentSkyLocationOverride: ChartLocationSelection?
     @Published private(set) var transitLocationOverride: ChartLocationSelection?
     @Published private(set) var solarReturnLocationOverride: ChartLocationSelection?
-    @Published private(set) var transitRangeDays = 7
+    @Published private(set) var transitRangeDays = TransitTimelineContract.defaultRangeDays
     @Published var language: AppLanguage {
         didSet {
             defaults.set(language.rawValue, forKey: "language.v1")
@@ -369,7 +369,7 @@ final class AppModel: ObservableObject {
             transitAspects = SwissEphemerisCalculator.compare(
                 moving: transitMovingSnapshot,
                 reference: transitReferenceSnapshot,
-                orbDegrees: 3
+                orbDegrees: ChartEventBuilder.transitAspectOrbDegrees
             )
             progressedAspects = SwissEphemerisCalculator.compare(
                 moving: progressedSnapshot,
@@ -427,7 +427,7 @@ final class AppModel: ObservableObject {
             let todayTransitAspects = SwissEphemerisCalculator.compare(
                 moving: todayTransitSnapshot,
                 reference: todayTransitReferenceSnapshot,
-                orbDegrees: 3
+                orbDegrees: ChartEventBuilder.transitAspectOrbDegrees
             )
             let todayProgressedAspects = SwissEphemerisCalculator.compare(
                 moving: todayProgressedSnapshot,
@@ -491,21 +491,28 @@ final class AppModel: ObservableObject {
             isEnriching = true
             do {
                 let transitTimeZone = TimeZone(identifier: transitLocation.timezoneID) ?? .current
+                let timelineRangeDays = TransitTimelineContract.maximumRangeDays
                 let transitScopeID = TransitFactBundleBuilder.makeScopeID(
                     snapshot: transitMovingSnapshot,
                     natal: transitReferenceSnapshot,
                     crossAspects: transitAspects,
                     preset: preset(for: .transit).rawValue,
                     timeZoneIdentifier: transitTimeZone.identifier,
-                    rangeDays: transitRangeDays
+                    rangeDays: timelineRangeDays
+                )
+                let transitSamples = try await buildTransitEphemerisSamples(
+                    calculator: calculator,
+                    startingAt: transitDate,
+                    rangeDays: timelineRangeDays,
+                    timeZone: transitTimeZone
                 )
                 transitCalendar = try await buildTransitCalendar(
-                    calculator: calculator,
                     natal: transitReferenceSnapshot,
                     startingAt: transitDate,
-                    rangeDays: transitRangeDays,
+                    rangeDays: timelineRangeDays,
                     scopeID: transitScopeID,
-                    timeZone: transitTimeZone
+                    timeZone: transitTimeZone,
+                    samples: transitSamples
                 )
                 logRefreshTiming("transit-calendar-ready", since: refreshStartedAt)
                 weeklyForecast = try await buildWeeklyForecast(
@@ -527,7 +534,8 @@ final class AppModel: ObservableObject {
                     skyPreset: preset(for: .currentSky),
                     transitNatal: transitReferenceSnapshot,
                     transitPreset: preset(for: .transit),
-                    transitRangeDays: transitRangeDays,
+                    transitRangeDays: timelineRangeDays,
+                    transitSamples: transitSamples,
                     timeZone: transitTimeZone,
                     transitAspects: transitAspects,
                     progressedSnapshot: progressedSnapshot,
@@ -932,7 +940,9 @@ final class AppModel: ObservableObject {
     }
 
     func setTransitRangeDays(_ days: Int) {
-        transitRangeDays = [7, 30, 90].contains(days) ? days : 7
+        transitRangeDays = TransitTimelineContract.rangeDays.contains(days)
+            ? days
+            : TransitTimelineContract.defaultRangeDays
         Task { await refresh() }
     }
 
@@ -946,7 +956,7 @@ final class AppModel: ObservableObject {
             transitUsesLiveDefault = true
             transitTargetDate = Date()
             transitLocationOverride = nil
-            transitRangeDays = 7
+            transitRangeDays = TransitTimelineContract.defaultRangeDays
         case .secondary:
             secondaryUsesLiveDefault = true
             secondaryTargetDate = Date()
@@ -1045,7 +1055,7 @@ final class AppModel: ObservableObject {
                 aspects = SwissEphemerisCalculator.compare(
                     moving: snapshot,
                     reference: natalSnapshot,
-                    orbDegrees: chart == .secondary ? 2 : 3
+                    orbDegrees: chart == .secondary ? 2 : ChartEventBuilder.transitAspectOrbDegrees
                 )
             } else {
                 aspects = snapshot.aspects
@@ -1226,29 +1236,58 @@ final class AppModel: ObservableObject {
         )
     }
 
-    private func buildTransitCalendar(
+    private func buildTransitEphemerisSamples(
         calculator: SwissEphemerisCalculator,
+        startingAt date: Date,
+        rangeDays: Int,
+        timeZone: TimeZone
+    ) async throws -> [TransitEphemerisSample] {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+        let start = calendar.startOfDay(for: date)
+        let end = calendar.date(byAdding: .day, value: rangeDays, to: start)
+            ?? start.addingTimeInterval(Double(rangeDays) * 86_400)
+        let location = transitLocationOverride?.geographicLocation ?? chartSubjectProfile.location
+        var values: [TransitEphemerisSample] = []
+        values.reserveCapacity(rangeDays * 2 + 1)
+        var sampleDate = start
+        while sampleDate <= end {
+            let snapshot = try await calculator.calculateSnapshot(
+                NatalInput(utcDate: sampleDate, location: location),
+                preset: preset(for: .transit)
+            )
+            values.append(TransitEphemerisSample(date: sampleDate, snapshot: snapshot))
+            guard let nextDate = calendar.date(byAdding: .hour, value: 12, to: sampleDate),
+                  nextDate > sampleDate
+            else { break }
+            sampleDate = nextDate
+        }
+        return values
+    }
+
+    private func buildTransitCalendar(
         natal: ChartSnapshot,
         startingAt date: Date,
         rangeDays: Int,
         scopeID: String,
-        timeZone: TimeZone
+        timeZone: TimeZone,
+        samples: [TransitEphemerisSample]
     ) async throws -> [TransitCalendarDay] {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone
         let start = calendar.startOfDay(for: date)
-        let location = transitLocationOverride?.geographicLocation ?? chartSubjectProfile.location
+        let samplesByDay = Dictionary(grouping: samples) { calendar.startOfDay(for: $0.date) }
         var values: [TransitCalendarDay] = []
         values.reserveCapacity(rangeDays)
 
         for offset in 0 ..< rangeDays {
             guard let day = calendar.date(byAdding: .day, value: offset, to: start),
-                  let localNoon = calendar.date(byAdding: .hour, value: 12, to: day)
+                  let daySamples = samplesByDay[day],
+                  let moving = daySamples.min(by: {
+                      abs(calendar.component(.hour, from: $0.date) - 12)
+                          < abs(calendar.component(.hour, from: $1.date) - 12)
+                  })?.snapshot
             else { continue }
-            let moving = try await calculator.calculateSnapshot(
-                NatalInput(utcDate: localNoon, location: location),
-                preset: preset(for: .transit)
-            )
             let aspects = SwissEphemerisCalculator.compare(
                 moving: moving,
                 reference: natal,
@@ -1292,7 +1331,7 @@ final class AppModel: ObservableObject {
             transitWindows: events.transitWindows,
             planetEvents: events.transitPlanetEvents,
             transitCalendar: calendarDays ?? transitCalendar,
-            rangeDays: transitRangeDays,
+            rangeDays: TransitTimelineContract.maximumRangeDays,
             preset: preset(for: .transit).rawValue,
             timeZone: timeZone
         )

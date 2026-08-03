@@ -77,6 +77,7 @@ final class VisualRegressionTests: XCTestCase {
         let chartsTab = app.tabBars.buttons["Charts"]
         XCTAssertTrue(chartsTab.waitForExistence(timeout: 20))
         chartsTab.tap()
+        XCTAssertTrue(app.staticTexts["Charts"].waitForExistence(timeout: 8))
         XCTAssertTrue(app.staticTexts["Charts"].waitForExistence(timeout: 8), "Charts screen did not become visible")
 
         // Dismiss the AI consent alert if the simulator is online.
@@ -85,11 +86,17 @@ final class VisualRegressionTests: XCTestCase {
             allow.tap()
         }
 
-        func select(_ label: String) {
+        func select(_ label: String, replacing previousCard: String? = nil) {
             scrollToTop(app)
             let button = app.buttons[label]
             XCTAssertTrue(button.waitForExistence(timeout: 10), "Missing chart selector button: \(label)")
             button.tap()
+            if let previousCard {
+                XCTAssertTrue(
+                    app.staticTexts[previousCard].waitForNonExistence(timeout: 40),
+                    "Previous chart did not finish switching from \(previousCard)"
+                )
+            }
         }
 
         func find(_ label: String) {
@@ -107,30 +114,113 @@ final class VisualRegressionTests: XCTestCase {
         }
 
         // Natal is the default chart; its cards must render without errors.
+        select("Natal", replacing: "Current Story")
         assertNoCardError(app)
         find("Natal interpretation")
+        find("CORE PERSONALITY")
 
-        select("Current Sky")
+        select("Current Sky", replacing: "Natal interpretation")
         assertNoCardError(app)
+        find("SKY NOW")
         find("Sign changes")
         find("Upcoming 7 days")
 
-        select("Transits")
+        select("Transits", replacing: "Sky overview")
         assertNoCardError(app)
-        find("Transit timeline")
+        find("How the strongest cycles combine")
+        find("Transit Timeline")
 
-        select("Progressed")
+        select("Progressed", replacing: "Current Story")
         assertNoCardError(app)
+        find("CURRENT DEVELOPMENT")
         find("Progressed moon")
         find("Turning points")
 
-        select("Solar Return")
+        select("Solar Return", replacing: "Developmental chapter")
         assertNoCardError(app)
+        find("YEAR THEME")
         find("Year timeline")
 
-        select("Synastry")
+        select("Synastry", replacing: "Year theme")
         assertNoCardError(app)
+        find("THE BOND")
         find("Relationship overview")
+    }
+
+    @MainActor
+    func testModernTransitPrototypeCards() throws {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchEnvironment["INTERSTELLAR_UI_TEST_LANGUAGE"] = "en"
+        app.launchEnvironment["INTERSTELLAR_UI_TEST_APPEARANCE"] = "dark"
+        app.launch()
+
+        let chartsTab = app.tabBars.buttons["Charts"]
+        XCTAssertTrue(chartsTab.waitForExistence(timeout: 20))
+        chartsTab.tap()
+
+        let allow = app.buttons["Allow"]
+        if allow.waitForExistence(timeout: 3) {
+            allow.tap()
+        }
+
+        scrollToTop(app)
+        let currentSky = app.buttons["Current Sky"]
+        XCTAssertTrue(currentSky.waitForExistence(timeout: 10))
+        currentSky.tap()
+        let transits = app.buttons["Transits"]
+        XCTAssertTrue(transits.waitForExistence(timeout: 10))
+        transits.tap()
+        XCTAssertTrue(app.staticTexts["Current Story"].waitForExistence(timeout: 30))
+        XCTAssertTrue(app.staticTexts["How the strongest cycles combine"].exists)
+
+        scrollToHittable(app.staticTexts["Current Cycles"], in: app)
+        XCTAssertTrue(app.staticTexts["One theme per time scale"].exists)
+        XCTAssertTrue(app.buttons["Long-term"].exists)
+        XCTAssertTrue(app.buttons["Current"].exists)
+        XCTAssertTrue(app.buttons["Daily"].exists)
+        attachScreenshot(named: "modern-transit-current-cycles")
+
+        scrollToHittable(app.staticTexts["Transit Timeline"], in: app)
+        XCTAssertTrue(app.staticTexts["Start · Exact · Return · End"].exists)
+        XCTAssertFalse(app.staticTexts.matching(
+            NSPredicate(format: "label CONTAINS[c] 'interpretation unavailable'")
+        ).firstMatch.exists)
+        attachScreenshot(named: "modern-transit-timeline")
+
+        scrollToHittable(app.staticTexts["Planet Paths"], in: app)
+        XCTAssertTrue(app.staticTexts["Where the current planets are moving"].exists)
+        let howItWorks = app.buttons["transit-planet-paths-how-it-works"]
+        XCTAssertTrue(howItWorks.waitForExistence(timeout: 5))
+        howItWorks.tap()
+        XCTAssertTrue(app.staticTexts["Why separate it"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Difference from Active Transits"].exists)
+        attachScreenshot(named: "modern-transit-planet-paths-drawer")
+        app.buttons["Done"].tap()
+
+        scrollToHittable(app.staticTexts["Life Areas"], in: app)
+        XCTAssertTrue(app.staticTexts["Activity, not fortune"].exists)
+        XCTAssertTrue(app.staticTexts.matching(
+            NSPredicate(format: "label BEGINSWITH 'Activity reflects transiting houses'")
+        ).firstMatch.exists)
+        attachScreenshot(named: "modern-transit-life-areas")
+
+        scrollToHittable(app.staticTexts["Active Transits"], in: app)
+        XCTAssertTrue(app.staticTexts["Complete filtered list"].exists)
+        XCTAssertTrue(app.buttons["All"].exists)
+        XCTAssertTrue(app.buttons["Long-term"].exists)
+        XCTAssertTrue(app.buttons["Current"].exists)
+        XCTAssertTrue(app.buttons["Daily"].exists)
+        let activeRows = app.buttons.matching(
+            NSPredicate(format: "identifier BEGINSWITH 'transit-active-'")
+        )
+        XCTAssertGreaterThan(activeRows.count, 0)
+        XCTAssertLessThanOrEqual(activeRows.count, 5)
+        attachScreenshot(named: "modern-transit-active-filtered")
+
+        activeRows.firstMatch.tap()
+        XCTAssertTrue(app.staticTexts["Technical basis"].waitForExistence(timeout: 5))
+        attachScreenshot(named: "modern-transit-active-drawer")
     }
 
     @MainActor
@@ -150,16 +240,22 @@ final class VisualRegressionTests: XCTestCase {
         chartsTab.tap()
         XCTAssertTrue(app.staticTexts["星盘"].waitForExistence(timeout: 8), "星盘页面未显示")
 
-        let allow = app.buttons["Allow"]
+        let allow = app.buttons["允许"]
         if allow.waitForExistence(timeout: 3) {
             allow.tap()
         }
 
-        func select(_ label: String) {
+        func select(_ label: String, replacing previousCard: String? = nil) {
             scrollToTop(app)
             let button = app.buttons[label]
             XCTAssertTrue(button.waitForExistence(timeout: 10), "Missing chart selector button: \(label)")
             button.tap()
+            if let previousCard {
+                XCTAssertTrue(
+                    app.staticTexts[previousCard].waitForNonExistence(timeout: 40),
+                    "Previous chart did not finish switching from \(previousCard)"
+                )
+            }
         }
 
         func find(_ label: String) {
@@ -176,28 +272,43 @@ final class VisualRegressionTests: XCTestCase {
             XCTAssertTrue(found, "Expected card \(label) to be visible")
         }
 
+        select("本命", replacing: "当前主线")
         assertNoCardError(app)
         find("本命解读")
+        find("核心性格")
 
-        select("天象")
+        select("天象", replacing: "本命解读")
         assertNoCardError(app)
         find("当前天空总览")
+        find("当前天空")
 
-        select("行运")
+        select("行运", replacing: "当前天空总览")
         assertNoCardError(app)
         find("当前主线")
+        find("最强周期如何共同作用")
+        find("扩展")
+        find("构建")
+        find("生活领域")
+        XCTAssertTrue(app.staticTexts["活跃度，不是运气"].exists)
+        XCTAssertTrue(app.staticTexts["个人重心"].exists)
+        XCTAssertFalse(app.staticTexts["身份与自主方向"].exists)
+        XCTAssertFalse(app.staticTexts["自我表达与第一印象"].exists)
+        attachScreenshot(named: "modern-transit-life-areas-zh-Hans")
 
-        select("次限")
+        select("次限", replacing: "当前主线")
         assertNoCardError(app)
         find("发展阶段")
+        find("当前发展")
 
-        select("日返盘")
+        select("日返盘", replacing: "发展阶段")
         assertNoCardError(app)
         find("你的生日年")
+        find("年度主题")
 
-        select("合盘")
+        select("合盘", replacing: "你的生日年")
         assertNoCardError(app)
         find("关系总览")
+        find("这段关系")
     }
 
     @MainActor
@@ -370,6 +481,24 @@ final class VisualRegressionTests: XCTestCase {
         for _ in 0 ..< 8 where !element.exists {
             app.swipeUp()
         }
+    }
+
+    @MainActor
+    private func scrollToHittable(_ element: XCUIElement, in app: XCUIApplication) {
+        var attempts = 0
+        while !element.isHittable, attempts < 30 {
+            app.swipeUp()
+            attempts += 1
+        }
+        XCTAssertTrue(element.isHittable, "Expected \(element) to become visible")
+    }
+
+    @MainActor
+    private func attachScreenshot(named name: String) {
+        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
     }
 
     @MainActor

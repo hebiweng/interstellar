@@ -18,6 +18,23 @@
         }
       }
     },
+    "12 months": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "12 months"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "12 个月"
+          }
+        }
+      }
+    },
     "24-month timeline": {
       "extractionState": "manual",
       "localizations": {
@@ -86,23 +103,6 @@
         }
       }
     },
-    "90 days": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "90 days"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "90 天"
-          }
-        }
-      }
-    },
     "a beginning-and-building stage": {
       "extractionState": "manual",
       "localizations": {
@@ -133,6 +133,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "收尾并准备更新的阶段"
+          }
+        }
+      }
+    },
+    "A planet can matter because of the house it occupies even when no exact natal aspect is active.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A planet can matter because of the house it occupies even when no exact natal aspect is active."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即使没有正在生效的精确本命相位，行星也会因所处宫位而具有明确的领域重点。"
           }
         }
       }
@@ -256,6 +273,23 @@
         }
       }
     },
+    "Active Transits": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active Transits"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "进行中的行运"
+          }
+        }
+      }
+    },
     "ACTIVE TRANSITS": {
       "extractionState": "manual",
       "localizations": {
@@ -269,6 +303,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "进行中的变化"
+          }
+        }
+      }
+    },
+    "Active window": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active window"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "生效窗口"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ventana activa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenêtre active"
           }
         }
       }
@@ -320,6 +383,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "这里反映当前的活跃程度，不是运势分数。"
+          }
+        }
+      }
+    },
+    "Activity reflects transiting houses, activated natal planets and overlapping exact contacts. It is not a fortune or success score.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activity reflects transiting houses, activated natal planets and overlapping exact contacts. It is not a fortune or success score."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "活动度反映行运行星落宫、被触发的本命星体与重叠的精确接触；它不是运气或成功评分。"
+          }
+        }
+      }
+    },
+    "Activity, not fortune": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activity, not fortune"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "活跃度，不是运气"
           }
         }
       }
@@ -640,6 +737,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "Apparence"
+          }
+        }
+      }
+    },
+    "Applying": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applying"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "入相"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplicativo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appliquant"
           }
         }
       }
@@ -2461,6 +2587,35 @@
         }
       }
     },
+    "Complete filtered list": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Complete filtered list"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完整筛选列表"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lista filtrada completa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liste filtrée complète"
+          }
+        }
+      }
+    },
     "CONCENTRATION": {
       "extractionState": "manual",
       "localizations": {
@@ -2784,6 +2939,23 @@
         }
       }
     },
+    "Current Cycles": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current Cycles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前周期"
+          }
+        }
+      }
+    },
     "CURRENT DEVELOPMENT": {
       "extractionState": "manual",
       "localizations": {
@@ -2826,6 +2998,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Position actuelle"
+          }
+        }
+      }
+    },
+    "CURRENT PERIOD": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CURRENT PERIOD"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前阶段"
           }
         }
       }
@@ -2898,6 +3087,23 @@
         }
       }
     },
+    "Current Story": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current Story"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前主线"
+          }
+        }
+      }
+    },
     "Custom": {
       "extractionState": "manual",
       "localizations": {
@@ -2945,6 +3151,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "每日"
+          }
+        }
+      }
+    },
+    "DAILY MOVEMENT": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DAILY MOVEMENT"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每日变化"
           }
         }
       }
@@ -3150,6 +3373,35 @@
         }
       }
     },
+    "Difference from Active Transits": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Difference from Active Transits"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "与进行中的变化有何不同"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diferencia con Tránsitos activos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Différence avec les transits actifs"
+          }
+        }
+      }
+    },
     "direct": {
       "extractionState": "manual",
       "localizations": {
@@ -3163,6 +3415,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "顺行"
+          }
+        }
+      }
+    },
+    "Direct": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Direct"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顺行"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Directo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Direct"
           }
         }
       }
@@ -3196,7 +3477,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "打破"
+            "value": "重塑"
           }
         },
         "es": {
@@ -3492,6 +3773,23 @@
         }
       }
     },
+    "EMOTIONAL NEEDS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EMOTIONAL NEEDS"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "情绪需要"
+          }
+        }
+      }
+    },
     "Emphasis": {
       "extractionState": "manual",
       "localizations": {
@@ -3509,6 +3807,23 @@
         }
       }
     },
+    "End": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "End"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "结束"
+          }
+        }
+      }
+    },
     "End date": {
       "extractionState": "manual",
       "localizations": {
@@ -3522,6 +3837,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "结束日期"
+          }
+        }
+      }
+    },
+    "Ends today": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ends today"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今天结束"
+          }
+        }
+      }
+    },
+    "Ends tomorrow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ends tomorrow"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "明天结束"
           }
         }
       }
@@ -3556,6 +3905,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "晚间"
+          }
+        }
+      }
+    },
+    "Event": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Event"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "事件"
           }
         }
       }
@@ -3607,35 +3973,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "精确"
-          }
-        }
-      }
-    },
-    "EXPANDING": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "EXPANDING"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "展开"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "EXPANSIÓN"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "EXPANSION"
           }
         }
       }
@@ -4038,23 +4375,6 @@
         }
       }
     },
-    "Generating…": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Generating…"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "正在生成…"
-          }
-        }
-      }
-    },
     "GNU AGPL 3.0": {
       "extractionState": "manual",
       "localizations": {
@@ -4140,23 +4460,6 @@
         }
       }
     },
-    "Hide details": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hide details"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "收起详情"
-          }
-        }
-      }
-    },
     "high": {
       "extractionState": "manual",
       "localizations": {
@@ -4191,23 +4494,6 @@
         }
       }
     },
-    "Highlighted days carry an exact transit contact.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Highlighted days carry an exact transit contact."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "高亮的日期带有精确行运触发。"
-          }
-        }
-      }
-    },
     "History": {
       "extractionState": "manual",
       "localizations": {
@@ -4233,6 +4519,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Historique"
+          }
+        }
+      }
+    },
+    "House": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "House"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "宫位"
           }
         }
       }
@@ -4301,6 +4604,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "流动方式"
+          }
+        }
+      }
+    },
+    "How it works": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How it works"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "原理说明"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cómo funciona"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fonctionnement"
+          }
+        }
+      }
+    },
+    "How the strongest cycles combine": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How the strongest cycles combine"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最强周期如何共同作用"
           }
         }
       }
@@ -4424,23 +4773,6 @@
         }
       }
     },
-    "Ingress": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ingress"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "下次换座"
-          }
-        }
-      }
-    },
     "insight.progressed-moon.fact": {
       "extractionState": "manual",
       "localizations": {
@@ -4524,23 +4856,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "En révision"
-          }
-        }
-      }
-    },
-    "Insights": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Insights"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "解读"
           }
         }
       }
@@ -4982,6 +5297,23 @@
         }
       }
     },
+    "Life Areas": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Life Areas"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "生活领域"
+          }
+        }
+      }
+    },
     "LIFE AREAS": {
       "extractionState": "manual",
       "localizations": {
@@ -5261,6 +5593,23 @@
         }
       }
     },
+    "long-term": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "long-term"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "长期"
+          }
+        }
+      }
+    },
     "Long-term": {
       "extractionState": "manual",
       "localizations": {
@@ -5291,6 +5640,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "长期背景"
+          }
+        }
+      }
+    },
+    "LONG-TERM CHAPTER": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LONG-TERM CHAPTER"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "长期篇章"
           }
         }
       }
@@ -6232,6 +6598,23 @@
         }
       }
     },
+    "No active cycle at this time scale.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No active cycle at this time scale."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前没有这个时间尺度的生效周期。"
+          }
+        }
+      }
+    },
     "No calculated sky events in the next seven days.": {
       "extractionState": "manual",
       "localizations": {
@@ -6553,6 +6936,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "过去"
+          }
+        }
+      }
+    },
+    "One theme per time scale": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One theme per time scale"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每个时间尺度一个主题"
           }
         }
       }
@@ -6887,6 +7287,23 @@
         }
       }
     },
+    "Personal focus": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personal focus"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "个人重心"
+          }
+        }
+      }
+    },
     "Personal timing": {
       "extractionState": "manual",
       "localizations": {
@@ -7006,6 +7423,23 @@
         }
       }
     },
+    "Planet Paths": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planet Paths"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行星路径"
+          }
+        }
+      }
+    },
     "PLANET PATHS": {
       "extractionState": "manual",
       "localizations": {
@@ -7019,6 +7453,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "行星路径"
+          }
+        }
+      }
+    },
+    "Planet Paths shows location and motion. Active Transits shows exact relationships to natal planets and points.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planet Paths shows location and motion. Active Transits shows exact relationships to natal planets and points."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行星路径显示位置与运动；进行中的变化显示行运行星与本命星体或点位之间的精确关系。"
           }
         }
       }
@@ -7189,23 +7640,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "隐私"
-          }
-        }
-      }
-    },
-    "Professional interpretation unavailable": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Professional interpretation unavailable"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "专业解读暂不可用"
           }
         }
       }
@@ -7429,23 +7863,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Période"
-          }
-        }
-      }
-    },
-    "Read details": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Read details"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "查看详情"
           }
         }
       }
@@ -7729,6 +8146,35 @@
         }
       }
     },
+    "Retrograde": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retrograde"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "逆行"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retrógrado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rétrograde"
+          }
+        }
+      }
+    },
     "Retrogrades": {
       "extractionState": "manual",
       "localizations": {
@@ -7742,6 +8188,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "回顾调整"
+          }
+        }
+      }
+    },
+    "Return": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Return"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "回返"
           }
         }
       }
@@ -7776,6 +8239,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "日返年度"
+          }
+        }
+      }
+    },
+    "Returning": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Returning"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "回返中"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retorno"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retour exact"
           }
         }
       }
@@ -8139,6 +8631,35 @@
         }
       }
     },
+    "Separating": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Separating"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "离相"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Separativo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Séparant"
+          }
+        }
+      }
+    },
     "Setting": {
       "extractionState": "manual",
       "localizations": {
@@ -8236,19 +8757,19 @@
         }
       }
     },
-    "Show fewer areas": {
+    "Show key transits": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Show fewer areas"
+            "value": "Show key transits"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "收起领域"
+            "value": "只看重点行运"
           }
         }
       }
@@ -8481,7 +9002,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "稳定"
+            "value": "稳固"
           }
         },
         "es": {
@@ -8528,6 +9049,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "标准"
+          }
+        }
+      }
+    },
+    "Start": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始"
+          }
+        }
+      }
+    },
+    "Start · Exact · Return · End": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start · Exact · Return · End"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始 · 精确 · 回返 · 结束"
           }
         }
       }
@@ -8668,35 +9223,6 @@
         }
       }
     },
-    "STRUCTURING": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "STRUCTURING"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "定型"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ESTRUCTURACIÓN"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "STRUCTURATION"
-          }
-        }
-      }
-    },
     "subtle but present": {
       "extractionState": "manual",
       "localizations": {
@@ -8794,7 +9320,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "支持"
+            "value": "助力"
           }
         },
         "es": {
@@ -8988,6 +9514,23 @@
         }
       }
     },
+    "Target": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Target"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目标位置"
+          }
+        }
+      }
+    },
     "Target date": {
       "extractionState": "manual",
       "localizations": {
@@ -9035,6 +9578,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "目标时间"
+          }
+        }
+      }
+    },
+    "Technical basis": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Technical basis"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "技术依据"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Base técnica"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Base technique"
           }
         }
       }
@@ -9260,6 +9832,23 @@
         }
       }
     },
+    "This module shows each transiting planet's sign, natal house, direction and next calculated ingress or station.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This module shows each transiting planet's sign, natal house, direction and next calculated ingress or station."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这里显示每颗行运行星的星座、本命宫位、运动方向，以及下一次已计算的换座、换宫或转向。"
+          }
+        }
+      }
+    },
     "This removes all saved chart reports from this device.": {
       "extractionState": "manual",
       "localizations": {
@@ -9311,6 +9900,23 @@
         }
       }
     },
+    "This separates planetary location from aspect interpretation.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This separates planetary location from aspect interpretation."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这里将行星位置与相位解读分开呈现。"
+          }
+        }
+      }
+    },
     "This week's intensity": {
       "extractionState": "manual",
       "localizations": {
@@ -9341,6 +9947,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "今年"
+          }
+        }
+      }
+    },
+    "Time": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "时间"
           }
         }
       }
@@ -9404,6 +10027,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "时间线"
+          }
+        }
+      }
+    },
+    "Timing, orb, house and motion are calculated for the selected chart moment and time zone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timing, orb, house and motion are calculated for the selected chart moment and time zone."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "时间、容许度、宫位和运动状态均按当前选择的星盘时刻与时区计算。"
           }
         }
       }
@@ -9643,6 +10283,52 @@
         }
       }
     },
+    "Transit Timeline": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transit Timeline"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行运时间线"
+          }
+        }
+      }
+    },
+    "Transiting houses & motion": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transiting houses & motion"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行运宫位与运动状态"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Casas en tránsito y movimiento"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maisons transitées et mouvement"
+          }
+        }
+      }
+    },
     "TRANSITION": {
       "extractionState": "manual",
       "localizations": {
@@ -9770,6 +10456,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "类型"
+          }
+        }
+      }
+    },
+    "Unknown": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未知"
+          }
+        }
+      }
+    },
+    "Unknown house": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown house"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "宫位未知"
           }
         }
       }
@@ -9957,6 +10677,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "查看全部"
+          }
+        }
+      }
+    },
+    "View all active transits": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View all active transits"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "查看全部进行中行运"
           }
         }
       }
@@ -10211,6 +10948,23 @@
         }
       }
     },
+    "Where the current planets are moving": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Where the current planets are moving"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前行星正在经过哪里"
+          }
+        }
+      }
+    },
     "Which One?": {
       "extractionState": "manual",
       "localizations": {
@@ -10241,6 +10995,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "整宫制"
+          }
+        }
+      }
+    },
+    "Why separate it": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Why separate it"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "为什么单独呈现"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Por qué se muestra aparte"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pourquoi le séparer"
           }
         }
       }

@@ -364,6 +364,68 @@ enum InsightTone: String, Equatable {
     case neutral
 }
 
+enum TransitPathState: Equatable {
+    case direct
+    case retrograde
+    case next
+}
+
+struct TransitPlanetPathRow: Identifiable, Equatable {
+    let id: String
+    let sourceFactIDs: [String]
+    let body: CelestialBody
+    let house: Int
+    let symbol: String
+    let title: String
+    let detail: String
+    let state: TransitPathState
+    let timing: String
+}
+
+struct TransitLifeAreaRow: Identifiable, Equatable {
+    let id: String
+    let sourceFactIDs: [String]
+    let title: String
+    let activity: String
+    let triggerCount: Int
+    let progress: Double
+}
+
+struct TransitCyclePresentation: Equatable {
+    let roleID: String
+    let fallbackTitle: String
+    let tags: [String]
+    let sourceFactIDs: [String]
+}
+
+enum TransitActiveStatus: Equatable {
+    case applying
+    case returning
+    case ingress
+    case separating
+    case exact
+    case retrograde
+    case direct
+}
+
+struct TransitTechnicalField: Identifiable, Equatable {
+    let id: String
+    let label: String
+    let value: String
+}
+
+struct TransitActiveRow: Identifiable, Equatable {
+    let id: String
+    let sourceFactIDs: [String]
+    let symbol: String
+    let title: String
+    let detail: String
+    let category: String
+    let status: TransitActiveStatus
+    let technicalValue: String
+    let fields: [TransitTechnicalField]
+}
+
 enum InsightVisual: Equatable {
     case natalCore
     case rankedThemes
@@ -384,9 +446,10 @@ enum InsightVisual: Equatable {
     case transitOverview(intensity: Int, rhythm: [Double])
     case gantt
     case transitTimeline(
-        windows: [ChartEventData.TransitWindow],
+        entries: [TransitTimelineEntry],
+        calendar: [TransitCalendarFact],
         anchorDate: Date,
-        rangeDays: Int,
+        initialRangeDays: Int,
         timeZoneIdentifier: String
     )
     case balanceRing(supportive: Int, challenging: Int, neutral: Int)
@@ -404,7 +467,14 @@ enum InsightVisual: Equatable {
     case placementList
     case aspectList
     case storyWeave(expanding: String, structuring: String, result: String)
-    case cycleTabs(long: String, longMeta: String, current: String, currentMeta: String, daily: String, dailyMeta: String)
+    case cycleTabs(
+        long: TransitCyclePresentation?,
+        current: TransitCyclePresentation?,
+        daily: TransitCyclePresentation?
+    )
+    case transitPlanetPaths([TransitPlanetPathRow])
+    case transitLifeAreas([TransitLifeAreaRow])
+    case transitActiveRows([TransitActiveRow])
     case positionRows
     case areaRows
     case phaseDial(phase: Double, illumination: Double)
@@ -484,11 +554,19 @@ struct CardTextModel: Codable, Equatable, Sendable {
     let copyPackID: String?
     let scopeID: String?
     let roleTexts: [CardRoleText]?
+    let cycleTexts: [TransitCycleText]?
 }
 
 struct CardRoleText: Codable, Equatable, Sendable {
     let roleID: String
     let text: String
+    let sourceFactIDs: [String]
+}
+
+struct TransitCycleText: Codable, Equatable, Sendable {
+    let roleID: String
+    let headline: String
+    let body: String
     let sourceFactIDs: [String]
 }
 

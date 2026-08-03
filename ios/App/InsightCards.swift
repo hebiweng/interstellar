@@ -5,36 +5,40 @@ import SwiftUI
 struct InsightCardView: View {
     let card: InsightCardModel
     let language: AppLanguage
-    var aiDetail: String? = nil
-    var aiStatus: AIDetailStatus = .hidden
-    @State private var expanded = false
+    var prototypeTransitStyle = false
+    var externalHeaderStyle = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if let kicker = cardKicker(card.id, language: language), !kicker.isEmpty {
+            if !externalHeaderStyle,
+               (!isPrototypeTransitCard || card.id == "current-story"),
+               let kicker = cardKicker(card.id, language: language),
+               !kicker.isEmpty
+            {
                 Text(kicker.uppercased())
                     .font(.system(size: 9, weight: .bold))
                     .tracking(1.2)
                     .foregroundStyle(AppTheme.violet)
             }
-            Text(card.title.isEmpty ? card.summary : card.title)
-                .font(.system(size: 18, weight: .bold))
-                .kerning(-0.3)
-                .foregroundStyle(AppTheme.text)
-                .fixedSize(horizontal: false, vertical: true)
+            if !externalHeaderStyle {
+                Text(card.title.isEmpty ? card.summary : card.title)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundStyle(AppTheme.text)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
 
-            if let text = card.text {
+            if showsGenericCopy, let text = card.text {
                 if let headline = text.headline, !headline.isEmpty, headline != card.title {
                     Text(headline)
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: card.id == "current-story" ? 21 : 16, weight: .semibold))
                         .foregroundStyle(AppTheme.text)
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if let body = text.body, !body.isEmpty, body != text.headline {
                     Text(body)
-                        .font(.system(size: 12.5, weight: .medium))
-                        .foregroundStyle(AppTheme.text.opacity(0.95))
+                        .font(.system(size: card.id == "current-story" ? 11 : 11.5, weight: .medium))
+                        .foregroundStyle(card.id == "current-story" ? AppTheme.muted : AppTheme.text.opacity(0.95))
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -43,14 +47,18 @@ struct InsightCardView: View {
                    !secondary.isEmpty
                 {
                     Text(secondary)
-                        .font(.system(size: 11.5))
+                        .font(.system(size: 10.5))
                         .foregroundStyle(AppTheme.muted)
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-            } else if !card.facts.isEmpty, !card.summary.isEmpty && card.summary != card.title {
+            } else if showsGenericCopy,
+                      !card.facts.isEmpty,
+                      !card.summary.isEmpty,
+                      card.summary != card.title
+            {
                 Text(card.summary)
-                    .font(.system(size: 12.5, weight: .medium))
+                    .font(.system(size: 11.5, weight: .medium))
                     .foregroundStyle(AppTheme.text.opacity(0.95))
                     .lineSpacing(3)
                     .fixedSize(horizontal: false, vertical: true)
@@ -62,63 +70,7 @@ struct InsightCardView: View {
             {
                 storyRoleWeave(roleTexts, result: card.text?.secondaryBody)
             } else {
-                InsightVisualView(visual: card.visual, facts: card.facts, language: language)
-            }
-
-            Divider().overlay(AppTheme.line)
-
-            if let detail = aiDetail, !detail.isEmpty {
-                Button {
-                    withAnimation(.easeInOut(duration: 0.22)) {
-                        expanded.toggle()
-                    }
-                } label: {
-                    HStack {
-                        Text(expanded
-                             ? localized("Hide details", "收起详情", language: language)
-                             : localized("Read details", "查看详情", language: language))
-                        Spacer()
-                        Image(systemName: expanded ? "chevron.up" : "chevron.down")
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                    .contentShape(Rectangle())
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(AppTheme.violet)
-                }
-                .buttonStyle(.plain)
-
-                if expanded {
-                    Text(detail)
-                        .font(.system(size: 12))
-                        .foregroundStyle(AppTheme.muted)
-                        .lineSpacing(4)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(13)
-                        .background(AppTheme.background.opacity(0.42), in: RoundedRectangle(cornerRadius: 14))
-                        .transition(.opacity.combined(with: .move(edge: .top)))
-                }
-            } else if aiStatus == .generating {
-                HStack(spacing: 8) {
-                    ProgressView().controlSize(.small).tint(AppTheme.violet)
-                    Text(localized("Generating…", "正在生成…", language: language))
-                        .font(.system(size: 11))
-                        .foregroundStyle(AppTheme.muted)
-                }
-                .frame(maxWidth: .infinity, minHeight: 34, alignment: .leading)
-            } else if case let .failed(message) = aiStatus {
-                VStack(alignment: .leading, spacing: 7) {
-                    Label(
-                        localized("Professional interpretation unavailable", "专业解读暂不可用", language: language),
-                        systemImage: "exclamationmark.circle"
-                    )
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(AppTheme.coral)
-                    Text(message)
-                        .font(.system(size: 10))
-                        .foregroundStyle(AppTheme.muted)
-                        .lineLimit(2)
-                }
-                .frame(maxWidth: .infinity, minHeight: 38, alignment: .leading)
+                InsightVisualView(visual: card.visual, facts: card.facts, text: card.text, language: language)
             }
         }
         .padding(16)
@@ -127,6 +79,14 @@ struct InsightCardView: View {
             in: RoundedRectangle(cornerRadius: 22, style: .continuous)
         )
         .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(AppTheme.line, lineWidth: 1))
+    }
+
+    private var isPrototypeTransitCard: Bool {
+        prototypeTransitStyle && TransitContentPlan.cardIDs.contains(card.id)
+    }
+
+    private var showsGenericCopy: Bool {
+        !isPrototypeTransitCard || card.id == "current-story"
     }
 
     private func storyRoleWeave(_ roleTexts: [CardRoleText], result: String?) -> some View {
@@ -167,15 +127,15 @@ struct InsightCardView: View {
     private func storyRoleLabel(_ roleID: String) -> String {
         switch roleID {
         case TransitStorySignalRoleID.expanding.rawValue:
-            localized("EXPANDING", "展开", language: language)
+            localized("EXPANDING", "扩展", language: language)
         case TransitStorySignalRoleID.structuring.rawValue:
-            localized("STRUCTURING", "定型", language: language)
+            localized("STRUCTURING", "构建", language: language)
         case TransitStorySignalRoleID.disrupting.rawValue:
-            localized("DISRUPTING", "打破", language: language)
+            localized("DISRUPTING", "重塑", language: language)
         case TransitStorySignalRoleID.stabilizing.rawValue:
-            localized("STABILIZING", "稳定", language: language)
+            localized("STABILIZING", "稳固", language: language)
         default:
-            localized("SUPPORTING", "支持", language: language)
+            localized("SUPPORTING", "助力", language: language)
         }
     }
 
@@ -202,6 +162,7 @@ func cardKicker(_ id: String, language: AppLanguage) -> String? {
     case "element-climate": return localized("ELEMENT CLIMATE", "元素气候", language: language)
     case "upcoming-7-days": return localized("UPCOMING 7 DAYS", "未来七天", language: language)
     case "natal-interpretation": return localized("CORE PERSONALITY", "核心性格", language: language)
+    case "emotional-needs": return localized("EMOTIONAL NEEDS", "情绪需要", language: language)
     case "love-connection": return localized("LOVE & CONNECTION", "爱与连接", language: language)
     case "career-direction": return localized("PUBLIC DIRECTION", "公共方向", language: language)
     case "strengths-growth": return localized("YOUR EDGES", "你的优势与成长面", language: language)
@@ -340,12 +301,28 @@ private struct SectionSub: View {
 
 // MARK: - Visual renderer
 
+private enum TransitDetailDrawer: Identifiable {
+    case planetPaths([TransitPlanetPathRow])
+    case activeTransit(TransitActiveRow)
+
+    var id: String {
+        switch self {
+        case .planetPaths: "planet-paths"
+        case let .activeTransit(row): "active-\(row.id)"
+        }
+    }
+}
+
 private struct InsightVisualView: View {
     let visual: InsightVisual
     let facts: [InsightFact]
+    let text: CardTextModel?
     let language: AppLanguage
     @State private var showAllAreas = false
+    @State private var showAllActiveTransits = false
     @State private var transitFilter: String? = nil
+    @State private var selectedCycleIndex = 0
+    @State private var transitDetailDrawer: TransitDetailDrawer?
 
     var body: some View {
         Group {
@@ -375,11 +352,12 @@ private struct InsightVisualView: View {
             case let .transitOverview(intensity, rhythm):
                 transitOverview(intensity: intensity, rhythm: rhythm)
             case .gantt: gantt
-            case let .transitTimeline(windows, anchorDate, rangeDays, timeZoneIdentifier):
+            case let .transitTimeline(entries, calendar, anchorDate, initialRangeDays, timeZoneIdentifier):
                 TransitTimelineView(
-                    windows: windows,
+                    entries: entries,
+                    calendarFacts: calendar,
                     anchorDate: anchorDate,
-                    rangeDays: rangeDays,
+                    initialRangeDays: initialRangeDays,
                     timeZoneIdentifier: timeZoneIdentifier,
                     language: language
                 )
@@ -401,7 +379,10 @@ private struct InsightVisualView: View {
             case .placementList: placementRows
             case .aspectList: aspectRows
             case let .storyWeave(expanding, structuring, result): storyWeave(expanding: expanding, structuring: structuring, result: result)
-            case let .cycleTabs(long, longMeta, current, currentMeta, daily, dailyMeta): cycleTabs(long: long, longMeta: longMeta, current: current, currentMeta: currentMeta, daily: daily, dailyMeta: dailyMeta)
+            case let .cycleTabs(long, current, daily): cycleTabs(long: long, current: current, daily: daily)
+            case let .transitPlanetPaths(rows): transitPlanetPaths(rows)
+            case let .transitLifeAreas(rows): transitLifeAreas(rows)
+            case let .transitActiveRows(rows): transitActiveRows(rows)
             case .positionRows: positionRows
             case .areaRows: areaRows
             case let .phaseDial(phase, illumination): phaseDial(phase: phase, illumination: illumination)
@@ -428,6 +409,12 @@ private struct InsightVisualView: View {
                 case .houseOverlayRows: houseOverlayRows
                 }
             }
+        }
+        .sheet(item: $transitDetailDrawer) { drawer in
+            transitDrawer(drawer)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(AppTheme.panel)
         }
     }
 
@@ -1068,11 +1055,423 @@ private struct InsightVisualView: View {
         }
     }
 
+    private func transitPlanetPaths(_ rows: [TransitPlanetPathRow]) -> some View {
+        VStack(spacing: 0) {
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(localized("Transiting houses & motion", "行运宫位与运动状态", language: language))
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(AppTheme.text)
+                    Text(localized(
+                        "This separates planetary location from aspect interpretation.",
+                        "这里将行星位置与相位解读分开呈现。",
+                        language: language
+                    ))
+                    .font(.system(size: 9.5))
+                    .lineSpacing(2)
+                    .foregroundStyle(AppTheme.muted)
+                }
+                Spacer(minLength: 8)
+                Button {
+                    transitDetailDrawer = .planetPaths(rows)
+                } label: {
+                    Text(localized("How it works", "原理说明", language: language))
+                        .font(.system(size: 9.5, weight: .semibold))
+                        .foregroundStyle(AppTheme.violet)
+                        .frame(minHeight: 44, alignment: .topTrailing)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("transit-planet-paths-how-it-works")
+            }
+            .padding(.bottom, 2)
+
+            ForEach(Array(rows.enumerated()), id: \.element.id) { index, row in
+                if index > 0 {
+                    Divider().overlay(AppTheme.line)
+                }
+                HStack(spacing: 10) {
+                    Text(row.symbol)
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(AppTheme.text)
+                        .frame(width: 36, height: 36)
+                        .background(AppTheme.background.opacity(0.6), in: RoundedRectangle(cornerRadius: 12))
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppTheme.line, lineWidth: 1))
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(row.title)
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(AppTheme.text)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Text(row.detail)
+                            .font(.system(size: 9))
+                            .lineSpacing(2)
+                            .foregroundStyle(AppTheme.muted)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    VStack(alignment: .trailing, spacing: 3) {
+                        Text(transitPathStateLabel(row.state))
+                            .font(.system(size: 9, weight: .medium))
+                            .foregroundStyle(AppTheme.text.opacity(0.86))
+                        Text(row.timing)
+                            .font(.system(size: 9))
+                            .foregroundStyle(AppTheme.muted)
+                            .multilineTextAlignment(.trailing)
+                    }
+                    .frame(minWidth: 52, alignment: .trailing)
+                }
+                .padding(.vertical, 11)
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("transit-path-\(row.id)")
+            }
+        }
+    }
+
+    private func transitLifeAreas(_ rows: [TransitLifeAreaRow]) -> some View {
+        let shown = showAllAreas ? rows : Array(rows.prefix(4))
+        return VStack(spacing: 0) {
+            Text(localized(
+                "Activity reflects transiting houses, activated natal planets and overlapping exact contacts. It is not a fortune or success score.",
+                "活动度反映行运行星落宫、被触发的本命星体与重叠的精确接触；它不是运气或成功评分。",
+                language: language
+            ))
+            .font(.system(size: 9.5))
+            .lineSpacing(3)
+            .foregroundStyle(AppTheme.muted)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(10)
+            .background(AppTheme.background.opacity(0.55), in: RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppTheme.line, lineWidth: 1))
+            .padding(.bottom, 12)
+
+            ForEach(shown) { row in
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 8) {
+                        Text(row.title)
+                            .font(.system(size: 10.5, weight: .semibold))
+                            .foregroundStyle(AppTheme.text)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 8)
+                        Text(transitTriggerSummary(row))
+                            .font(.system(size: 9))
+                            .foregroundStyle(AppTheme.muted)
+                            .multilineTextAlignment(.trailing)
+                    }
+                    GeometryReader { proxy in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(AppTheme.background.opacity(0.78))
+                            Capsule()
+                                .fill(LinearGradient(colors: [AppTheme.blue, AppTheme.violet], startPoint: .leading, endPoint: .trailing))
+                                .frame(width: proxy.size.width * max(0, min(1, row.progress)))
+                        }
+                    }
+                    .frame(height: 8)
+                }
+                .padding(.bottom, 12)
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("transit-life-area-\(row.id)")
+            }
+
+            if rows.count > 4 {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { showAllAreas.toggle() }
+                } label: {
+                    Text(showAllAreas
+                         ? localized("Show fewer areas", "收起部分领域", language: language)
+                         : LocalizedFormatters.viewAllAreas(rows.count, language: language))
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(AppTheme.text)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .background(AppTheme.background.opacity(0.55), in: RoundedRectangle(cornerRadius: 8))
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(AppTheme.line, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("transit-life-areas-toggle")
+            }
+        }
+    }
+
+    private func transitActiveRows(_ rows: [TransitActiveRow]) -> some View {
+        let filtered = transitFilter == nil ? rows : rows.filter { $0.category == transitFilter }
+        let prioritized = filtered.sorted(by: transitActivePriority)
+        let shown = showAllActiveTransits ? prioritized : Array(prioritized.prefix(5))
+        return VStack(spacing: 0) {
+            HStack(spacing: 6) {
+                aspectFilterChip(nil, localized("All", "全部", language: language))
+                aspectFilterChip("long-term", localized("Long-term", "长期", language: language))
+                aspectFilterChip("current", localized("Current", "当前", language: language))
+                aspectFilterChip("daily", localized("Daily", "每日", language: language))
+                Spacer(minLength: 0)
+            }
+            .padding(.bottom, 1)
+
+            ForEach(Array(shown.enumerated()), id: \.element.id) { index, row in
+                if index > 0 {
+                    Divider().overlay(AppTheme.line)
+                }
+                Button {
+                    transitDetailDrawer = .activeTransit(row)
+                } label: {
+                    HStack(alignment: .top, spacing: 10) {
+                        Text(row.symbol)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(AppTheme.text)
+                            .frame(width: 34, height: 34)
+                            .background(AppTheme.violet.opacity(0.13), in: RoundedRectangle(cornerRadius: 12))
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(row.title)
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(AppTheme.text)
+                                .fixedSize(horizontal: false, vertical: true)
+                            if !row.detail.isEmpty {
+                                Text(row.detail)
+                                    .font(.system(size: 9))
+                                    .lineSpacing(2)
+                                    .foregroundStyle(AppTheme.muted)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        VStack(alignment: .trailing, spacing: 3) {
+                            Text(transitActiveStatusLabel(row.status))
+                                .font(.system(size: 8.5, weight: .semibold))
+                                .foregroundStyle(AppTheme.text.opacity(0.85))
+                                .padding(.horizontal, 7)
+                                .padding(.vertical, 4)
+                                .background(AppTheme.background.opacity(0.65), in: Capsule())
+                                .overlay(Capsule().stroke(AppTheme.line, lineWidth: 1))
+                            Text(row.technicalValue)
+                                .font(.system(size: 8.5, weight: .medium))
+                                .foregroundStyle(AppTheme.muted)
+                                .padding(.horizontal, 7)
+                                .padding(.vertical, 4)
+                                .background(AppTheme.background.opacity(0.45), in: Capsule())
+                        }
+                        .multilineTextAlignment(.trailing)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    .padding(.vertical, 12)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("transit-active-\(row.id)")
+            }
+            if prioritized.count > 5 {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showAllActiveTransits.toggle()
+                    }
+                } label: {
+                    Text(showAllActiveTransits
+                         ? localized("Show key transits", "只看重点行运", language: language)
+                         : localized("View all active transits", "查看全部进行中行运", language: language))
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(AppTheme.text)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .background(AppTheme.background.opacity(0.55), in: RoundedRectangle(cornerRadius: 8))
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(AppTheme.line, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 8)
+            }
+        }
+    }
+
+    private func transitActivePriority(_ lhs: TransitActiveRow, _ rhs: TransitActiveRow) -> Bool {
+        let lhsRank = transitActiveStatusRank(lhs.status)
+        let rhsRank = transitActiveStatusRank(rhs.status)
+        if lhsRank != rhsRank { return lhsRank < rhsRank }
+        let categoryOrder = ["long-term": 0, "current": 1, "daily": 2]
+        let lhsCategory = categoryOrder[lhs.category] ?? 3
+        let rhsCategory = categoryOrder[rhs.category] ?? 3
+        if lhsCategory != rhsCategory { return lhsCategory < rhsCategory }
+        return lhs.id < rhs.id
+    }
+
+    private func transitActiveStatusRank(_ status: TransitActiveStatus) -> Int {
+        switch status {
+        case .exact: 0
+        case .returning: 1
+        case .applying: 2
+        case .ingress: 3
+        case .retrograde, .direct: 4
+        case .separating: 5
+        }
+    }
+
+    @ViewBuilder
+    private func transitDrawer(_ drawer: TransitDetailDrawer) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                switch drawer {
+                case let .planetPaths(rows):
+                    Text(localized("Planet Paths", "行星路径", language: language))
+                        .font(.system(size: 23, weight: .bold))
+                        .foregroundStyle(AppTheme.text)
+                    Text(localized(
+                        "This module shows each transiting planet's sign, natal house, direction and next calculated ingress or station.",
+                        "这里显示每颗行运行星的星座、本命宫位、运动方向，以及下一次已计算的换座、换宫或转向。",
+                        language: language
+                    ))
+                    .font(.system(size: 11))
+                    .lineSpacing(4)
+                    .foregroundStyle(AppTheme.muted)
+                    LazyVGrid(
+                        columns: [GridItem(.flexible(), spacing: 9), GridItem(.flexible(), spacing: 9)],
+                        spacing: 9
+                    ) {
+                        ForEach(rows.prefix(4)) { row in
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text(bodyName(row.body, language: language))
+                                    .font(.system(size: 9))
+                                    .foregroundStyle(AppTheme.muted)
+                                Text(transitDrawerHouse(row.house))
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundStyle(AppTheme.text)
+                            }
+                            .frame(maxWidth: .infinity, minHeight: 62, alignment: .leading)
+                            .padding(12)
+                            .background(AppTheme.background.opacity(0.55), in: RoundedRectangle(cornerRadius: 8))
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(AppTheme.line, lineWidth: 1))
+                        }
+                    }
+                    transitDrawerSection(
+                        title: localized("Why separate it", "为什么单独呈现", language: language),
+                        body: localized(
+                            "A planet can matter because of the house it occupies even when no exact natal aspect is active.",
+                            "即使没有正在生效的精确本命相位，行星也会因所处宫位而具有明确的领域重点。",
+                            language: language
+                        )
+                    )
+                    transitDrawerSection(
+                        title: localized("Difference from Active Transits", "与进行中的变化有何不同", language: language),
+                        body: localized(
+                            "Planet Paths shows location and motion. Active Transits shows exact relationships to natal planets and points.",
+                            "行星路径显示位置与运动；进行中的变化显示行运行星与本命星体或点位之间的精确关系。",
+                            language: language
+                        )
+                    )
+                case let .activeTransit(row):
+                    Text(row.title)
+                        .font(.system(size: 23, weight: .bold))
+                        .foregroundStyle(AppTheme.text)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if !row.detail.isEmpty {
+                        Text(row.detail)
+                            .font(.system(size: 11))
+                            .lineSpacing(4)
+                            .foregroundStyle(AppTheme.muted)
+                    }
+                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 9), GridItem(.flexible(), spacing: 9)], spacing: 9) {
+                        ForEach(row.fields) { field in
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text(field.label)
+                                    .font(.system(size: 9))
+                                    .foregroundStyle(AppTheme.muted)
+                                Text(field.value)
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundStyle(AppTheme.text)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            .frame(maxWidth: .infinity, minHeight: 62, alignment: .leading)
+                            .padding(12)
+                            .background(AppTheme.background.opacity(0.55), in: RoundedRectangle(cornerRadius: 8))
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(AppTheme.line, lineWidth: 1))
+                        }
+                    }
+                    transitDrawerSection(
+                        title: localized("Technical basis", "技术依据", language: language),
+                        body: localized(
+                            "Timing, orb, house and motion are calculated for the selected chart moment and time zone.",
+                            "时间、容许度、宫位和运动状态均按当前选择的星盘时刻与时区计算。",
+                            language: language
+                        )
+                    )
+                }
+                Button {
+                    transitDetailDrawer = nil
+                } label: {
+                    Text(localized("Done", "完成", language: language))
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(Color.white)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .background(AppTheme.violet, in: RoundedRectangle(cornerRadius: 8))
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 19)
+            .padding(.top, 10)
+            .padding(.bottom, 32)
+        }
+        .background(AppTheme.panel)
+    }
+
+    private func transitDrawerSection(title: String, body: String) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Divider().overlay(AppTheme.line)
+            Text(title)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(AppTheme.text)
+                .padding(.top, 8)
+            Text(body)
+                .font(.system(size: 10))
+                .lineSpacing(3)
+                .foregroundStyle(AppTheme.muted)
+        }
+    }
+
+    private func transitDrawerHouse(_ house: Int) -> String {
+        guard (1 ... 12).contains(house) else { return localized("Unknown house", "宫位未知", language: language) }
+        return localized("\(ordinalLabel(house)) house", "第\(house)宫", language: language)
+    }
+
+    private func ordinalLabel(_ value: Int) -> String {
+        let remainder = value % 100
+        if (11 ... 13).contains(remainder) { return "\(value)th" }
+        return switch value % 10 {
+        case 1: "\(value)st"
+        case 2: "\(value)nd"
+        case 3: "\(value)rd"
+        default: "\(value)th"
+        }
+    }
+
+    private func transitPathStateLabel(_ state: TransitPathState) -> String {
+        switch state {
+        case .direct: localized("Direct", "顺行", language: language)
+        case .retrograde: localized("Retrograde", "逆行", language: language)
+        case .next: localized("Next", "接下来", language: language)
+        }
+    }
+
+    private func transitActiveStatusLabel(_ status: TransitActiveStatus) -> String {
+        switch status {
+        case .applying: localized("Applying", "入相", language: language)
+        case .returning: localized("Returning", "回返中", language: language)
+        case .ingress: localized("Ingress", "进入", language: language)
+        case .separating: localized("Separating", "离相", language: language)
+        case .exact: localized("Exact", "精确", language: language)
+        case .retrograde: localized("Retrograde", "逆行", language: language)
+        case .direct: localized("Direct", "顺行", language: language)
+        }
+    }
+
+    private func transitTriggerSummary(_ row: TransitLifeAreaRow) -> String {
+        if row.triggerCount == 0 {
+            return localized("\(row.activity) · no exact hit", "\(row.activity) · 无精确触发", language: language)
+        }
+        return localized(
+            "\(row.activity) · \(row.triggerCount) \(row.triggerCount == 1 ? "trigger" : "triggers")",
+            "\(row.activity) · \(row.triggerCount) 个触发",
+            language: language
+        )
+    }
+
     private func aspectFilterChip(_ category: String?, _ label: String) -> some View {
         let selected = transitFilter == category
         return Button {
             withAnimation(.easeInOut(duration: 0.18)) {
                 transitFilter = category
+                showAllActiveTransits = false
             }
         } label: {
             Text(label)
@@ -1293,41 +1692,104 @@ private struct InsightVisualView: View {
 
     // MARK: - Cycle tabs (prototype .cycle-tabs)
 
-    private func cycleTabs(long: String, longMeta: String, current: String, currentMeta: String, daily: String, dailyMeta: String) -> some View {
-        VStack(spacing: 10) {
+    private func cycleTabs(
+        long: TransitCyclePresentation?,
+        current: TransitCyclePresentation?,
+        daily: TransitCyclePresentation?
+    ) -> some View {
+        let options = [
+            (
+                localized("Long-term", "长期", language: language),
+                localized("LONG-TERM CHAPTER", "长期篇章", language: language),
+                long,
+                InsightTone.supportive
+            ),
+            (
+                localized("Current", "当前", language: language),
+                localized("CURRENT PERIOD", "当前阶段", language: language),
+                current,
+                InsightTone.transition
+            ),
+            (
+                localized("Daily", "每日", language: language),
+                localized("DAILY MOVEMENT", "每日变化", language: language),
+                daily,
+                InsightTone.neutral
+            ),
+        ]
+        let selected = options[selectedCycleIndex]
+        return VStack(spacing: 10) {
             HStack(spacing: 4) {
-                cycleTabChip(localized("Long-term", "长期", language: language), active: true)
-                cycleTabChip(localized("Current", "当前", language: language), active: false)
-                cycleTabChip(localized("Daily", "每日", language: language), active: false)
+                ForEach(options.indices, id: \.self) { index in
+                    cycleTabChip(options[index].0, index: index)
+                }
             }
-            cycleRow(label: localized("Long-term", "长期", language: language), value: long, tone: .supportive, meta: longMeta)
-            cycleRow(label: localized("Current", "当前", language: language), value: current, tone: .transition, meta: currentMeta)
-            cycleRow(label: localized("Daily", "每日", language: language), value: daily, tone: .neutral, meta: dailyMeta)
+            cycleRow(kicker: selected.1, presentation: selected.2, tone: selected.3)
         }
     }
 
-    private func cycleTabChip(_ label: String, active: Bool) -> some View {
-        Text(label)
-            .font(.system(size: 11, weight: .semibold))
-            .foregroundStyle(active ? Color.white : AppTheme.muted)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background(active ? AppTheme.violet : AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 10))
+    private func cycleTabChip(_ label: String, index: Int) -> some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.18)) { selectedCycleIndex = index }
+        } label: {
+            Text(label)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(selectedCycleIndex == index ? Color.white : AppTheme.muted)
+                .frame(maxWidth: .infinity, minHeight: 34)
+                .background(
+                    selectedCycleIndex == index ? AppTheme.violet : AppTheme.background.opacity(0.4),
+                    in: RoundedRectangle(cornerRadius: 8)
+                )
+        }
+        .buttonStyle(.plain)
     }
 
-    private func cycleRow(label: String, value: String, tone: InsightTone, meta: String = "") -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 10) {
-                Text(label).font(.system(size: 10, weight: .bold)).foregroundStyle(AppTheme.tone(tone))
-                Text(value).font(.system(size: 11.5, weight: .medium)).foregroundStyle(AppTheme.text)
-                Spacer()
-            }
-            if !meta.isEmpty {
-                Text(meta).font(.system(size: 9.5)).foregroundStyle(AppTheme.muted)
+    private func cycleRow(
+        kicker: String,
+        presentation: TransitCyclePresentation?,
+        tone: InsightTone
+    ) -> some View {
+        let copy = presentation.flatMap { item in
+            text?.cycleTexts?.first(where: { $0.roleID == item.roleID })
+        }
+        return VStack(alignment: .leading, spacing: 7) {
+            Text(kicker.uppercased())
+                .font(.system(size: 9, weight: .bold))
+                .tracking(1.1)
+                .foregroundStyle(AppTheme.tone(tone))
+            if let presentation {
+                Text(copy?.headline ?? presentation.fallbackTitle)
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(AppTheme.text)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let body = copy?.body, !body.isEmpty {
+                    Text(body)
+                        .font(.system(size: 10))
+                        .lineSpacing(3)
+                        .foregroundStyle(AppTheme.muted)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                VStack(alignment: .leading, spacing: 6) {
+                    ForEach(Array(presentation.tags.enumerated()), id: \.offset) { _, tag in
+                        Text(tag)
+                            .font(.system(size: 9, weight: .medium))
+                            .foregroundStyle(AppTheme.text.opacity(0.82))
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 5)
+                            .background(AppTheme.background.opacity(0.65), in: RoundedRectangle(cornerRadius: 8))
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(AppTheme.line, lineWidth: 1))
+                    }
+                }
+                .padding(.top, 2)
+            } else {
+                Text(localized("No active cycle at this time scale.", "当前没有这个时间尺度的生效周期。", language: language))
+                    .font(.system(size: 10))
+                    .foregroundStyle(AppTheme.muted)
             }
         }
-        .padding(11)
-        .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     // MARK: - Stage flow (prototype .stage-flow)
@@ -1510,28 +1972,40 @@ private struct InsightVisualView: View {
     // MARK: - Transit timeline (prototype TR-03: range + timeline/calendar)
 
     private struct TransitTimelineView: View {
-        let windows: [ChartEventData.TransitWindow]
+        let entries: [TransitTimelineEntry]
+        let calendarFacts: [TransitCalendarFact]
         let anchorDate: Date
-        let rangeDays: Int
         let timeZoneIdentifier: String
         let language: AppLanguage
         @State private var selectedDays: Int
         @State private var showCalendar = false
+        @State private var displayedMonth: Date
         private var timeZone: TimeZone { TimeZone(identifier: timeZoneIdentifier) ?? .current }
 
         init(
-            windows: [ChartEventData.TransitWindow],
+            entries: [TransitTimelineEntry],
+            calendarFacts: [TransitCalendarFact],
             anchorDate: Date,
-            rangeDays: Int,
+            initialRangeDays: Int,
             timeZoneIdentifier: String,
             language: AppLanguage
         ) {
-            self.windows = windows
+            self.entries = entries
+            self.calendarFacts = calendarFacts
             self.anchorDate = anchorDate
-            self.rangeDays = rangeDays
             self.timeZoneIdentifier = timeZoneIdentifier
             self.language = language
-            _selectedDays = State(initialValue: rangeDays)
+            let normalizedRange = TransitTimelineContract.rangeDays.contains(initialRangeDays)
+                ? initialRangeDays
+                : TransitTimelineContract.defaultRangeDays
+            _selectedDays = State(initialValue: normalizedRange)
+            var calendar = Calendar(identifier: .gregorian)
+            calendar.timeZone = TimeZone(identifier: timeZoneIdentifier) ?? .current
+            _displayedMonth = State(
+                initialValue: calendar.date(
+                    from: calendar.dateComponents([.year, .month], from: anchorDate)
+                ) ?? anchorDate
+            )
         }
 
         private var axisStart: Date { anchorDate }
@@ -1545,9 +2019,9 @@ private struct InsightVisualView: View {
         var body: some View {
             VStack(alignment: .leading, spacing: 11) {
                 HStack(spacing: 6) {
-                    rangeButton(7, localized("7 days", "7 天", language: language))
                     rangeButton(30, localized("30 days", "30 天", language: language))
-                    rangeButton(90, localized("90 days", "90 天", language: language))
+                    rangeButton(7, localized("7 days", "7 天", language: language))
+                    rangeButton(365, localized("12 months", "12 个月", language: language))
                     Spacer()
                 }
                 HStack(spacing: 6) {
@@ -1565,7 +2039,10 @@ private struct InsightVisualView: View {
 
         private func rangeButton(_ days: Int, _ label: String) -> some View {
             Button {
-                withAnimation(.easeInOut(duration: 0.18)) { selectedDays = days }
+                withAnimation(.easeInOut(duration: 0.18)) {
+                    selectedDays = days
+                    displayedMonth = monthStart(anchorDate)
+                }
             } label: {
                 Text(label)
                     .font(.system(size: 10, weight: .semibold))
@@ -1593,8 +2070,8 @@ private struct InsightVisualView: View {
         }
 
         private var timelineRows: some View {
-            let visible = windows.filter {
-                $0.end.timeIntervalSince(axisStart) >= 0 && $0.start.timeIntervalSince(axisEnd) <= 0
+            let visible = entries.filter {
+                ($0.end ?? $0.start) >= axisStart && $0.start <= axisEnd
             }
             if visible.isEmpty {
                 return AnyView(
@@ -1606,62 +2083,159 @@ private struct InsightVisualView: View {
             }
             return AnyView(
                 VStack(spacing: 11) {
-                    ForEach(Array(visible.prefix(5).enumerated()), id: \.offset) { _, window in
-                        let title = "\(bodyName(window.first, language: language)) \(window.kind.symbol) \(bodyName(window.second, language: language))"
-                        let start = max(window.start, axisStart)
-                        let end = min(window.end, axisEnd)
-                        let total = max(1, axisEnd.timeIntervalSince(axisStart))
-                        let barStart = max(0, start.timeIntervalSince(axisStart) / total)
-                        let barEnd = max(0, end.timeIntervalSince(axisStart) / total)
-                        let anchorRatio = min(1, max(0, anchorDate.timeIntervalSince(axisStart) / total))
-                        VStack(alignment: .leading, spacing: 5) {
-                            HStack {
-                                Text(title)
-                                    .font(.system(size: 11.5, weight: .semibold))
-                                    .foregroundStyle(AppTheme.text)
-                                Spacer()
-                                Text(window.start.shortEventRange(to: window.end, language: language, timeZone: timeZone))
-                                    .font(.system(size: 9.5))
-                                    .foregroundStyle(AppTheme.muted)
-                            }
-                            GeometryReader { proxy in
-                                ZStack(alignment: .leading) {
-                                    Capsule().fill(AppTheme.line.opacity(0.6)).frame(height: 6)
-                                    Capsule()
-                                        .fill(LinearGradient(colors: [AppTheme.blue.opacity(0.8), AppTheme.violet], startPoint: .leading, endPoint: .trailing))
-                                        .frame(
-                                            width: proxy.size.width * max(0.03, min(1, barEnd - barStart)),
-                                            height: 6
-                                        )
-                                        .offset(x: proxy.size.width * max(0, min(1, barStart)))
-                                    Circle()
-                                        .fill(Color.white)
-                                        .overlay(Circle().stroke(AppTheme.violet, lineWidth: 2.5))
-                                        .frame(width: 9, height: 9)
-                                        .offset(x: proxy.size.width * anchorRatio - 4.5)
-                                }
-                            }
-                            .frame(height: 10)
-                        }
+                    markerLegend
+                    ForEach(Array(visible.prefix(8)), id: \.id) { entry in
+                        timelineRow(entry)
                     }
                 }
             )
         }
 
+        private var markerLegend: some View {
+            HStack(spacing: 4) {
+                markerLegendItem(localized("Start", "开始", language: language), color: AppTheme.blue)
+                markerLegendItem(localized("Exact", "精确", language: language), color: AppTheme.violet)
+                markerLegendItem(localized("Return", "回返", language: language), color: AppTheme.amber)
+                markerLegendItem(localized("End", "结束", language: language), color: AppTheme.muted)
+            }
+        }
+
+        private func markerLegendItem(_ label: String, color: Color) -> some View {
+            HStack(spacing: 4) {
+                Circle().fill(color).frame(width: 5, height: 5)
+                Text(label).font(.system(size: 8.5, weight: .medium)).foregroundStyle(AppTheme.muted)
+            }
+            .frame(maxWidth: .infinity)
+        }
+
+        private func timelineRow(_ entry: TransitTimelineEntry) -> some View {
+            let total = max(1, axisEnd.timeIntervalSince(axisStart))
+            let startRatio = ratio(entry.start, total: total)
+            let endRatio = entry.end.map { ratio($0, total: total) }
+            return VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text(entryTitle(entry))
+                        .font(.system(size: 11.5, weight: .semibold))
+                        .foregroundStyle(AppTheme.text)
+                        .lineLimit(2)
+                    Spacer(minLength: 6)
+                    Text(entryDateRange(entry))
+                        .font(.system(size: 9.5))
+                        .foregroundStyle(AppTheme.muted)
+                        .multilineTextAlignment(.trailing)
+                }
+                GeometryReader { proxy in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(AppTheme.line.opacity(0.6)).frame(height: 5)
+                        if let endRatio {
+                            Capsule()
+                                .fill(AppTheme.blue.opacity(0.5))
+                                .frame(
+                                    width: proxy.size.width * max(0.025, endRatio - startRatio),
+                                    height: 5
+                                )
+                                .offset(x: proxy.size.width * startRatio)
+                        }
+                        timelineMarker(ratio: startRatio, color: AppTheme.blue, filled: true, width: proxy.size.width)
+                        ForEach(Array(entry.exactDates.enumerated()), id: \.offset) { index, date in
+                            timelineMarker(
+                                ratio: ratio(date, total: total),
+                                color: index == 0 ? AppTheme.violet : AppTheme.amber,
+                                filled: index == 0,
+                                width: proxy.size.width
+                            )
+                        }
+                        if let endRatio {
+                            timelineMarker(ratio: endRatio, color: AppTheme.muted, filled: false, width: proxy.size.width)
+                        }
+                    }
+                }
+                .frame(height: 11)
+            }
+        }
+
+        private func timelineMarker(ratio: Double, color: Color, filled: Bool, width: CGFloat) -> some View {
+            Circle()
+                .fill(filled ? color : AppTheme.panel)
+                .overlay(Circle().stroke(color, lineWidth: 1.5))
+                .frame(width: 9, height: 9)
+                .offset(x: width * ratio - 4.5)
+        }
+
+        private func ratio(_ date: Date, total: TimeInterval) -> Double {
+            min(1, max(0, date.timeIntervalSince(axisStart) / total))
+        }
+
+        private func entryTitle(_ entry: TransitTimelineEntry) -> String {
+            let body = bodyName(entry.movingBody, language: language)
+            switch entry.kind {
+            case let .aspect(kind):
+                let reference = entry.referenceBody.map { bodyName($0, language: language) } ?? ""
+                return "\(body) \(kind.symbol) \(reference)"
+            case let .houseResidence(house):
+                return localized("\(body) crosses \(ordinal(house)) house", "\(body) 进入第\(house)宫", language: language)
+            case let .signIngress(sign):
+                return localized(
+                    "\(body) enters \(Zodiac.name(index: sign, language: language))",
+                    "\(body) 进入\(Zodiac.name(index: sign, language: language))",
+                    language: language
+                )
+            case .stationRetrograde:
+                return localized("\(body) stations retrograde", "\(body) 转逆", language: language)
+            case .stationDirect:
+                return localized("\(body) stations direct", "\(body) 转顺", language: language)
+            }
+        }
+
+        private func entryDateRange(_ entry: TransitTimelineEntry) -> String {
+            guard let end = entry.end else {
+                return entry.start.shortEventDate(language: language, timeZone: timeZone)
+            }
+            return entry.start.shortEventRange(to: end, language: language, timeZone: timeZone)
+        }
+
+        private func ordinal(_ value: Int) -> String {
+            let remainder = value % 100
+            if (11 ... 13).contains(remainder) { return "\(value)th" }
+            return switch value % 10 {
+            case 1: "\(value)st"
+            case 2: "\(value)nd"
+            case 3: "\(value)rd"
+            default: "\(value)th"
+            }
+        }
+
         private var calendarGrid: some View {
             var calendar = Calendar(identifier: .gregorian)
             calendar.timeZone = timeZone
-            let eventDates = Set(windows.flatMap {
-                [$0.start, $0.exact, $0.end] + [$0.repeatExact, $0.nextExact].compactMap { $0 }
-            }.map { calendar.startOfDay(for: $0) })
             let today = calendar.startOfDay(for: anchorDate)
-            let first = calendar.date(from: calendar.dateComponents([.year, .month], from: today)) ?? today
+            let first = monthStart(displayedMonth)
             let firstWeekday = calendar.component(.weekday, from: first)
             let daysInMonth = calendar.range(of: .day, in: .month, for: first)?.count ?? 30
             let leading = (firstWeekday + 5) % 7
             let weekdayLabels = language == .english ? ["M", "T", "W", "T", "F", "S", "S"] : ["一", "二", "三", "四", "五", "六", "日"]
             let columns = Array(repeating: GridItem(.flexible(), spacing: 5), count: 7)
+            let factsByDay = Dictionary(
+                uniqueKeysWithValues: calendarFacts.map { (calendar.startOfDay(for: $0.date), $0) }
+            )
+            let eventKindsByDay = Dictionary(
+                grouping: entries.flatMap { entry in
+                    ([entry.start] + entry.exactDates + [entry.end].compactMap { $0 }).map {
+                        (calendar.startOfDay(for: $0), entry.kind)
+                    }
+                },
+                by: { $0.0 }
+            ).mapValues { $0.map { $0.1 } }
             return VStack(spacing: 6) {
+                HStack {
+                    monthButton(systemName: "chevron.left", delta: -1, enabled: canMoveMonth(-1))
+                    Spacer()
+                    Text(displayedMonth.shortEventMonthYear(language: language, timeZone: timeZone))
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(AppTheme.text)
+                    Spacer()
+                    monthButton(systemName: "chevron.right", delta: 1, enabled: canMoveMonth(1))
+                }
                 HStack(spacing: 5) {
                     ForEach(weekdayLabels, id: \.self) { label in
                         Text(label).font(.system(size: 9)).foregroundStyle(AppTheme.muted).frame(maxWidth: .infinity)
@@ -1673,21 +2247,86 @@ private struct InsightVisualView: View {
                     }
                     ForEach(1 ... daysInMonth, id: \.self) { day in
                         let date = calendar.date(byAdding: .day, value: day - 1, to: first) ?? today
-                        let hasEvent = eventDates.contains(date)
-                        Text("\(day)")
-                            .font(.system(size: 10, weight: hasEvent ? .bold : .medium))
-                            .foregroundStyle(hasEvent ? AppTheme.violet : AppTheme.muted)
+                        let fact = factsByDay[date]
+                        let kinds = eventKindsByDay[date] ?? []
+                        let inRange = date >= today && date <= calendar.startOfDay(for: axisEnd)
+                        VStack(spacing: 3) {
+                            HStack(spacing: 2) {
+                                Text("\(day)")
+                                    .font(.system(size: 10, weight: fact == nil ? .medium : .bold))
+                                if let fact, !fact.sourceFactIDs.isEmpty {
+                                    Text("\(fact.sourceFactIDs.count)")
+                                        .font(.system(size: 7.5, weight: .bold))
+                                        .foregroundStyle(AppTheme.violet)
+                                }
+                            }
+                            HStack(spacing: 2) {
+                                ForEach(Array(calendarColors(for: kinds).prefix(3).enumerated()), id: \.offset) { _, color in
+                                    Circle().fill(color).frame(width: 4, height: 4)
+                                }
+                            }
+                            .frame(height: 4)
+                        }
+                            .foregroundStyle(inRange ? AppTheme.text : AppTheme.muted.opacity(0.45))
                             .frame(maxWidth: .infinity, minHeight: 30)
                             .background(
-                                hasEvent ? AppTheme.violet.opacity(0.16) : AppTheme.background.opacity(0.4),
+                                calendarCellBackground(score: inRange ? fact?.score : nil),
                                 in: RoundedRectangle(cornerRadius: 7)
                             )
                     }
                 }
-                Text(localized("Highlighted days carry an exact transit contact.", "高亮的日期带有精确行运触发。", language: language))
-                    .font(.system(size: 9.5))
-                    .foregroundStyle(AppTheme.muted)
             }
+        }
+
+        private func monthStart(_ date: Date) -> Date {
+            var calendar = Calendar(identifier: .gregorian)
+            calendar.timeZone = timeZone
+            return calendar.date(from: calendar.dateComponents([.year, .month], from: date)) ?? date
+        }
+
+        private func canMoveMonth(_ delta: Int) -> Bool {
+            var calendar = Calendar(identifier: .gregorian)
+            calendar.timeZone = timeZone
+            guard let target = calendar.date(byAdding: .month, value: delta, to: displayedMonth) else { return false }
+            return monthStart(target) >= monthStart(anchorDate) && monthStart(target) <= monthStart(axisEnd)
+        }
+
+        private func monthButton(systemName: String, delta: Int, enabled: Bool) -> some View {
+            Button {
+                var calendar = Calendar(identifier: .gregorian)
+                calendar.timeZone = timeZone
+                displayedMonth = calendar.date(byAdding: .month, value: delta, to: displayedMonth) ?? displayedMonth
+            } label: {
+                Image(systemName: systemName)
+                    .font(.system(size: 11, weight: .semibold))
+                    .frame(width: 30, height: 30)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(enabled ? AppTheme.violet : AppTheme.muted.opacity(0.35))
+            .disabled(!enabled)
+        }
+
+        private func calendarCellBackground(score: Int?) -> Color {
+            guard let score else { return AppTheme.background.opacity(0.4) }
+            return AppTheme.violet.opacity(0.08 + 0.18 * min(1, Double(score) / 100))
+        }
+
+        private func calendarColors(for kinds: [TransitTimelineEntryKind]) -> [Color] {
+            var colors: [Color] = []
+            if kinds.contains(where: { if case .aspect = $0 { true } else { false } }) {
+                colors.append(AppTheme.violet)
+            }
+            if kinds.contains(where: {
+                if case .houseResidence = $0 { return true }
+                if case .signIngress = $0 { return true }
+                return false
+            }) {
+                colors.append(AppTheme.blue)
+            }
+            if kinds.contains(where: { $0 == .stationRetrograde || $0 == .stationDirect }) {
+                colors.append(AppTheme.amber)
+            }
+            return colors
         }
     }
 

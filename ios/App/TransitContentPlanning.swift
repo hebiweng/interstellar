@@ -19,6 +19,7 @@ enum TransitEvidenceRole: String, Equatable, Hashable, Sendable {
     case cycleCalendar
     case timeline
     case path
+    case pathEvent
     case lifeArea
     case active
     case activeWindow
@@ -108,6 +109,16 @@ enum TransitCycleBand: String, Equatable, Sendable {
             self = .current
         }
     }
+}
+
+enum TransitTimelineContract {
+    static let defaultRangeDays = 30
+    static let rangeDays = [30, 7, 365]
+    static let maximumRangeDays = 365
+}
+
+enum TransitCycleContract {
+    static let minimumLongTermDuration: TimeInterval = 60 * 86_400
 }
 
 struct TransitAspectFact: Equatable, Sendable {
@@ -218,6 +229,117 @@ struct TransitCalendarFact: Equatable, Sendable {
     let score: Int
     let sourceFactIDs: [String]
     let timeZoneIdentifier: String
+}
+
+enum TransitTimelineEntryKind: Equatable, Sendable {
+    case aspect(AspectKind)
+    case houseResidence(Int)
+    case signIngress(Int)
+    case stationRetrograde
+    case stationDirect
+}
+
+struct TransitTimelineEntry: Equatable, Sendable {
+    let id: String
+    let sourceFactIDs: [String]
+    let movingBody: CelestialBody
+    let referenceBody: CelestialBody?
+    let kind: TransitTimelineEntryKind
+    let start: Date
+    let exactDates: [Date]
+    let end: Date?
+    let timeZoneIdentifier: String
+}
+
+enum TransitTimelineProjection {
+    static func entries(from evidence: [TransitPlannedEvidence]) -> [TransitTimelineEntry] {
+        let windows = evidence.compactMap { item -> TransitWindowFact? in
+            guard case let .window(window) = item.fact else { return nil }
+            return window
+        }
+        let events = evidence.compactMap { item -> TransitPlanetEventFact? in
+            guard case let .planetEvent(event) = item.fact else { return nil }
+            return event
+        }
+
+        var entries = windows.compactMap { window -> TransitTimelineEntry? in
+            guard let movingBody = CelestialBody(rawValue: window.movingID),
+                  let referenceBody = CelestialBody(rawValue: window.referenceID)
+            else { return nil }
+            return TransitTimelineEntry(
+                id: window.factID,
+                sourceFactIDs: TransitFact.window(window).sourceFactIDs,
+                movingBody: movingBody,
+                referenceBody: referenceBody,
+                kind: .aspect(window.kind),
+                start: window.start,
+                exactDates: window.exactDates,
+                end: window.end,
+                timeZoneIdentifier: window.timeZoneIdentifier
+            )
+        }
+
+        let houseEventsByBody = Dictionary(
+            grouping: events.filter { $0.kind == .houseIngress },
+            by: \TransitPlanetEventFact.body
+        )
+        for bodyEvents in houseEventsByBody.values {
+            let sorted = bodyEvents.sorted(by: eventOrder)
+            for (index, event) in sorted.enumerated() {
+                guard let house = event.toIndex else { continue }
+                let next = sorted.indices.contains(index + 1) ? sorted[index + 1] : nil
+                entries.append(
+                    TransitTimelineEntry(
+                        id: event.factID,
+                        sourceFactIDs: [event.factID] + [next?.factID].compactMap { $0 },
+                        movingBody: event.body,
+                        referenceBody: nil,
+                        kind: .houseResidence(house),
+                        start: event.timestamp,
+                        exactDates: [],
+                        end: next?.timestamp,
+                        timeZoneIdentifier: event.timeZoneIdentifier
+                    )
+                )
+            }
+        }
+
+        entries += events.compactMap { event -> TransitTimelineEntry? in
+            let kind: TransitTimelineEntryKind
+            switch event.kind {
+            case .houseIngress:
+                return nil
+            case .signIngress:
+                guard let sign = event.toIndex else { return nil }
+                kind = .signIngress(sign)
+            case .stationRetrograde:
+                kind = .stationRetrograde
+            case .stationDirect:
+                kind = .stationDirect
+            }
+            return TransitTimelineEntry(
+                id: event.factID,
+                sourceFactIDs: [event.factID],
+                movingBody: event.body,
+                referenceBody: nil,
+                kind: kind,
+                start: event.timestamp,
+                exactDates: [event.timestamp],
+                end: nil,
+                timeZoneIdentifier: event.timeZoneIdentifier
+            )
+        }
+
+        return entries.sorted {
+            if $0.start != $1.start { return $0.start < $1.start }
+            return $0.id < $1.id
+        }
+    }
+
+    private static func eventOrder(_ lhs: TransitPlanetEventFact, _ rhs: TransitPlanetEventFact) -> Bool {
+        if lhs.timestamp != rhs.timestamp { return lhs.timestamp < rhs.timestamp }
+        return lhs.factID < rhs.factID
+    }
 }
 
 enum TransitFact: Equatable, Sendable {
@@ -352,7 +474,7 @@ enum TransitFactBundleBuilder {
         preset: String,
         timeZone: TimeZone
     ) -> TransitFactBundle {
-        let normalizedRangeDays = [7, 30, 90].contains(rangeDays) ? rangeDays : 7
+        let normalizedRangeDays = max(1, min(rangeDays, TransitTimelineContract.maximumRangeDays))
         let scopeID = makeScopeID(
             snapshot: snapshot,
             natal: natal,
@@ -579,7 +701,7 @@ enum TransitContentPlanner {
         let placements = bundle.planetPlacements.sorted(by: placementOrder)
         let lifeAreas = bundle.lifeAreaScores.sorted(by: lifeAreaOrder)
 
-        let storyFacts = Array(aspects.prefix(3))
+        let storyFacts = storyFacts(from: aspects)
         let storyEvidence = storyFacts.enumerated().compactMap { index, fact in
             ledger.claim(
                 .aspect(fact),
@@ -601,17 +723,32 @@ enum TransitContentPlanner {
         let calendar = bundle.transitCalendar.sorted {
             $0.date == $1.date ? $0.factID < $1.factID : $0.date < $1.date
         }
-        let cycleEvidence = cyclePlans(windows: windows, aspects: aspects, calendar: calendar, ledger: &ledger)
-        let timelineEvidence = windows.compactMap {
+        let cycleEvidence = cyclePlans(
+            windows: windows,
+            aspects: aspects,
+            calendar: calendar,
+            anchorDate: bundle.anchorDate,
+            ledger: &ledger
+        )
+        var timelineEvidence = windows.compactMap {
             ledger.claim(.window($0), mode: .technical, role: .timeline)
         }
-        let pathEvidence = placements.compactMap {
+        timelineEvidence += planetEvents.compactMap {
+            ledger.claim(.planetEvent($0), mode: .technical, role: .timeline)
+        }
+        timelineEvidence += calendar.compactMap {
+            ledger.claim(.calendar($0), mode: .technical, role: .timeline)
+        }
+        var pathEvidence = placements.compactMap {
             ledger.claim(.placement($0), mode: .technical, role: .path)
+        }
+        pathEvidence += planetEvents.compactMap {
+            ledger.claim(.planetEvent($0), mode: .technical, role: .pathEvent)
         }
         let areaEvidence = lifeAreas.compactMap {
             ledger.claim(.lifeArea($0), mode: .aggregate, role: .lifeArea)
         }
-        var activeEvidence = aspects.prefix(6).compactMap {
+        var activeEvidence = aspects.compactMap {
             ledger.claim(.aspect($0), mode: .short, role: .active)
         }
         let activeAspectIDs = Set(activeEvidence.map(\.fact.factID))
@@ -621,7 +758,7 @@ enum TransitContentPlanner {
             else { return nil }
             return ledger.claim(.window(window), mode: .technical, role: .activeWindow)
         }
-        activeEvidence += planetEvents.prefix(6).compactMap { event in
+        activeEvidence += planetEvents.compactMap { event in
             ledger.claim(
                 .planetEvent(event),
                 mode: .short,
@@ -672,6 +809,7 @@ enum TransitContentPlanner {
         windows: [TransitWindowFact],
         aspects: [TransitAspectFact],
         calendar: [TransitCalendarFact],
+        anchorDate: Date,
         ledger: inout EvidenceUsageLedger
     ) -> [TransitPlannedEvidence] {
         let roles: [(TransitCycleBand, TransitEvidenceRole)] = [
@@ -680,13 +818,21 @@ enum TransitContentPlanner {
             (.daily, .dailyCycle),
         ]
         var evidence = roles.compactMap { band, role -> TransitPlannedEvidence? in
-            if let window = windows.first(where: { $0.cycleBand == band }) {
+            let activeWindow = windows.first { window in
+                guard window.cycleBand == band,
+                      window.start <= anchorDate,
+                      window.end >= anchorDate
+                else { return false }
+                return band != .longTerm
+                    || window.end.timeIntervalSince(window.start) >= TransitCycleContract.minimumLongTermDuration
+            }
+            if let window = activeWindow {
                 return ledger.claim(.window(window), mode: .aggregate, role: role)
             }
             guard let aspect = aspects.first(where: { $0.cycleBand == band }) else { return nil }
             return ledger.claim(.aspect(aspect), mode: .aggregate, role: role)
         }
-        evidence += calendar.compactMap {
+        evidence += calendar.prefix(TransitTimelineContract.defaultRangeDays).compactMap {
             ledger.claim(.calendar($0), mode: .aggregate, role: .cycleCalendar)
         }
         return evidence
@@ -705,8 +851,10 @@ enum TransitContentPlanner {
             switch item.fact {
             case .aspect, .placement, .lifeArea:
                 themeInput(from: item.fact, roleID: item.role.rawValue)
-            case .planetEvent:
+            case .planetEvent where item.role != .pathEvent:
                 themeInput(from: item.fact, roleID: item.role.rawValue)
+            case .planetEvent:
+                nil
             case .window where item.role != .primaryWindow && item.role != .supportingWindow && item.role != .activeWindow:
                 themeInput(from: item.fact, roleID: item.role.rawValue)
             case .window, .calendar:
@@ -738,12 +886,29 @@ enum TransitContentPlanner {
         case .jupiter:
             .expanding
         case .saturn:
-            fact.kind.supportive ? .stabilizing : .structuring
+            .structuring
         case .uranus, .pluto:
             .disrupting
+        case .moon where fact.kind.supportive:
+            .stabilizing
+        case .venus where fact.kind.supportive:
+            .stabilizing
         default:
             fact.kind.challenging ? .disrupting : .supporting
         }
+    }
+
+    private static func storyFacts(from aspects: [TransitAspectFact]) -> [TransitAspectFact] {
+        var selected: [TransitAspectFact] = []
+        for body in [CelestialBody.jupiter, .saturn] {
+            if let fact = aspects.first(where: { $0.movingID == body.rawValue }) {
+                selected.append(fact)
+            }
+        }
+        for fact in aspects where selected.count < 3 && !selected.contains(where: { $0.factID == fact.factID }) {
+            selected.append(fact)
+        }
+        return selected
     }
 
     private static func themeInput(from fact: TransitFact, roleID: String) -> TransitThemeInput {
