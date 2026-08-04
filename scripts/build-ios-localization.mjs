@@ -43,9 +43,15 @@ for (const locale of ["en", "zh-Hans", "es", "fr"]) {
   }
 }
 
-const swiftFiles = fs.readdirSync(appDir)
-  .filter((name) => name.endsWith(".swift"))
-  .map((name) => path.join(appDir, name));
+function swiftFilesUnder(directory) {
+  return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) return swiftFilesUnder(entryPath);
+    return entry.isFile() && entry.name.endsWith(".swift") ? [entryPath] : [];
+  });
+}
+
+const swiftFiles = swiftFilesUnder(appDir);
 const translations = JSON.parse(fs.readFileSync(translationPath, "utf8"));
 const pattern = /localized\(\s*"((?:[^"\\]|\\.)*)"\s*,\s*"((?:[^"\\]|\\.)*)"/gs;
 const keyedPattern = /localized\(\s*"((?:[^"\\]|\\.)*)"\s*,\s*default:\s*"((?:[^"\\]|\\.)*)"\s*,\s*chinese:\s*"((?:[^"\\]|\\.)*)"/gs;

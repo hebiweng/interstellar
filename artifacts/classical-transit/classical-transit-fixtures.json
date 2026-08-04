@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-03T15:19:11.484Z",
+  "fixtureCount": 24,
+  "fixtures": [
+    {
+      "supported": true,
+      "id": "benefic-dominant"
+    },
+    {
+      "supported": true,
+      "id": "malefic-dominant"
+    },
+    {
+      "supported": true,
+      "id": "mixed-testimony"
+    },
+    {
+      "supported": true,
+      "id": "essential-dignity"
+    },
+    {
+      "supported": true,
+      "id": "essential-debility"
+    },
+    {
+      "capabilityGap": "AstroCore does not expose a sect/day-chart fact for Transit planning.",
+      "supported": false,
+      "id": "day-sect"
+    },
+    {
+      "capabilityGap": "AstroCore does not expose a sect/night-chart fact for Transit planning.",
+      "supported": false,
+      "id": "night-sect"
+    },
+    {
+      "supported": true,
+      "id": "reception"
+    },
+    {
+      "supported": true,
+      "id": "no-reception"
+    },
+    {
+      "supported": true,
+      "id": "applying"
+    },
+    {
+      "supported": true,
+      "id": "separating"
+    },
+    {
+      "supported": true,
+      "id": "completion-window"
+    },
+    {
+      "capabilityGap": "AstroCore does not expose prohibition, frustration, or prevented-perfection facts.",
+      "supported": false,
+      "id": "prohibited-completion"
+    },
+    {
+      "id": "retrograde",
+      "supported": true
+    },
+    {
+      "id": "station-retrograde",
+      "supported": true
+    },
+    {
+      "id": "station-direct",
+      "supported": true
+    },
+    {
+      "id": "solar-condition",
+      "supported": true
+    },
+    {
+      "id": "house-strength",
+      "supported": true
+    },
+    {
+      "id": "returning-pass",
+      "supported": true
+    },
+    {
+      "id": "events-only",
+      "supported": true
+    },
+    {
+      "id": "aspects-no-window",
+      "supported": true
+    },
+    {
+      "id": "sparse-facts",
+      "supported": true
+    },
+    {
+      "id": "duplicate-theme-evidence",
+      "supported": true
+    },
+    {
+      "id": "empty",
+      "supported": true
+    }
+  ],
+  "realRunCount": 9,
+  "realRuns": [
+    {
+      "id": "shanghai-1769947200",
+      "scopeID": "4e066c90811422f2",
+      "requestCount": 10
+    },
+    {
+      "id": "shanghai-1785672000",
+      "scopeID": "487175d7d70d1cf0",
+      "requestCount": 10
+    },
+    {
+      "id": "shanghai-1793534400",
+      "scopeID": "7e7af8b22fe078be",
+      "requestCount": 10
+    },
+    {
+      "id": "london-1769947200",
+      "scopeID": "762b4dbeb1e355b3",
+      "requestCount": 10
+    },
+    {
+      "id": "london-1785672000",
+      "scopeID": "529075e90cd1977a",
+      "requestCount": 10
+    },
+    {
+      "id": "london-1793534400",
+      "scopeID": "b86707ab28ddb7e3",
+      "requestCount": 10
+    },
+    {
+      "id": "new-york-1769947200",
+      "scopeID": "e95409267bc6c18d",
+      "requestCount": 10
+    },
+    {
+      "scopeID": "dd7f8a7243e9238b",
+      "requestCount": 10,
+      "id": "new-york-1785672000"
+    },
+    {
+      "scopeID": "42b5b39e17b08728",
+      "requestCount": 10,
+      "id": "new-york-1793534400"
+    }
+  ],
+  "capabilityGaps": [
+    "AstroCore does not expose a sect/day-chart fact for Transit planning.",
+    "AstroCore does not expose a sect/night-chart fact for Transit planning.",
+    "AstroCore does not expose prohibition, frustration, or prevented-perfection facts."
+  ]
+}

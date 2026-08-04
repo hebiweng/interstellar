@@ -133,6 +133,42 @@ struct TransitAspectFact: Equatable, Sendable {
     let referenceLongitude: Double
     let natalHouse: Int
     let cycleBand: TransitCycleBand
+    let classicalContext: ClassicalTransitAspectContext?
+
+    init(
+        factID: String,
+        movingID: String,
+        referenceID: String,
+        kind: AspectKind,
+        orbDegrees: Double,
+        phase: AspectPhase,
+        strength: Double,
+        movingLongitude: Double,
+        referenceLongitude: Double,
+        natalHouse: Int,
+        cycleBand: TransitCycleBand,
+        classicalContext: ClassicalTransitAspectContext? = nil
+    ) {
+        self.factID = factID
+        self.movingID = movingID
+        self.referenceID = referenceID
+        self.kind = kind
+        self.orbDegrees = orbDegrees
+        self.phase = phase
+        self.strength = strength
+        self.movingLongitude = movingLongitude
+        self.referenceLongitude = referenceLongitude
+        self.natalHouse = natalHouse
+        self.cycleBand = cycleBand
+        self.classicalContext = classicalContext
+    }
+}
+
+struct ClassicalTransitAspectContext: Equatable, Sendable {
+    let movingScore: Double
+    let movingConditions: [TraditionalCondition]
+    let receptionFromMoving: Bool
+    let receptionFromReference: Bool
 }
 
 struct TransitWindowFact: Equatable, Sendable {
@@ -214,6 +250,32 @@ struct TransitPlanetPlacementFact: Equatable, Sendable {
     let natalHouse: Int
     let retrograde: Bool
     let longitudeSpeedDegreesPerDay: Double
+    let classicalScore: Double?
+    let classicalConditions: [TraditionalCondition]
+
+    init(
+        factID: String,
+        body: CelestialBody,
+        longitudeDegrees: Double,
+        signIndex: Int,
+        degreeInSign: Double,
+        natalHouse: Int,
+        retrograde: Bool,
+        longitudeSpeedDegreesPerDay: Double,
+        classicalScore: Double? = nil,
+        classicalConditions: [TraditionalCondition] = []
+    ) {
+        self.factID = factID
+        self.body = body
+        self.longitudeDegrees = longitudeDegrees
+        self.signIndex = signIndex
+        self.degreeInSign = degreeInSign
+        self.natalHouse = natalHouse
+        self.retrograde = retrograde
+        self.longitudeSpeedDegreesPerDay = longitudeSpeedDegreesPerDay
+        self.classicalScore = classicalScore
+        self.classicalConditions = classicalConditions
+    }
 }
 
 struct TransitLifeAreaFact: Equatable, Sendable {
@@ -394,6 +456,29 @@ struct TransitThemeInput: Equatable, Sendable {
     let tone: String
     let house: Int?
     let roleID: String
+    let classicalThemeID: ClassicalTransitThemeID?
+
+    init(
+        signalID: String,
+        sourceFactIDs: [String],
+        movingID: String?,
+        referenceID: String?,
+        aspectKind: AspectKind?,
+        tone: String,
+        house: Int?,
+        roleID: String,
+        classicalThemeID: ClassicalTransitThemeID? = nil
+    ) {
+        self.signalID = signalID
+        self.sourceFactIDs = sourceFactIDs
+        self.movingID = movingID
+        self.referenceID = referenceID
+        self.aspectKind = aspectKind
+        self.tone = tone
+        self.house = house
+        self.roleID = roleID
+        self.classicalThemeID = classicalThemeID
+    }
 }
 
 struct TransitStorySignalAssignment: Equatable, Sendable {
@@ -410,12 +495,15 @@ enum TransitCardEmptyState: String, Equatable, Sendable {
 
 struct CardEvidencePlan: Equatable, Sendable {
     let scopeID: String
+    let preset: String
     let cardID: String
     let evidence: [TransitPlannedEvidence]
     let primaryFactID: String?
     let themeInputs: [TransitThemeInput]
     let signalRoles: [TransitStorySignalAssignment]
     let integratedThemeID: TransitIntegratedThemeID?
+    let classicalSignalRoles: [ClassicalTransitStorySignalAssignment]
+    let classicalIntegratedThemeID: ClassicalTransitIntegratedThemeID?
     let copySlot: TransitCopySlot?
     let emptyState: TransitCardEmptyState
 
@@ -485,7 +573,29 @@ enum TransitFactBundleBuilder {
         )
         let prefix = "transit.\(scopeID)"
         let aspectFacts = crossAspects.map { aspect in
-            TransitAspectFact(
+            let movingBody = CelestialBody(rawValue: aspect.firstID)
+            let referenceBody = CelestialBody(rawValue: aspect.secondID)
+            let classicalContext: ClassicalTransitAspectContext?
+            if preset == CalculationPreset.classical.rawValue,
+               let movingBody,
+               HoraryEngine.traditionalPlanets.contains(movingBody)
+            {
+                let movingSignIndex = Int(aspect.firstLongitude / 30) % 12
+                let referenceSignIndex = Int(aspect.secondLongitude / 30) % 12
+                classicalContext = ClassicalTransitAspectContext(
+                    movingScore: HoraryEngine.assess(movingBody, in: snapshot).score,
+                    movingConditions: HoraryEngine.assess(movingBody, in: snapshot).conditions,
+                    receptionFromMoving: referenceBody.map {
+                        HoraryEngine.reception(from: movingBody, to: $0, fromSignIndex: movingSignIndex).isPresent
+                    } ?? false,
+                    receptionFromReference: referenceBody.map { referenceBody in
+                        HoraryEngine.reception(from: referenceBody, to: movingBody, fromSignIndex: referenceSignIndex).isPresent
+                    } ?? false
+                )
+            } else {
+                classicalContext = nil
+            }
+            return TransitAspectFact(
                 factID: "\(prefix).aspect.\(aspect.firstID).\(aspect.kind.rawValue).\(aspect.secondID)",
                 movingID: aspect.firstID,
                 referenceID: aspect.secondID,
@@ -496,7 +606,8 @@ enum TransitFactBundleBuilder {
                 movingLongitude: aspect.firstLongitude,
                 referenceLongitude: aspect.secondLongitude,
                 natalHouse: natal?.house(containing: aspect.firstLongitude) ?? 0,
-                cycleBand: TransitCycleBand(movingID: aspect.firstID)
+                cycleBand: TransitCycleBand(movingID: aspect.firstID),
+                classicalContext: classicalContext
             )
         }
         let aspectByKey = Dictionary(
@@ -548,7 +659,11 @@ enum TransitFactBundleBuilder {
             )
         }
         let placementFacts = snapshot.points.map { point in
-            TransitPlanetPlacementFact(
+            let assessment = preset == CalculationPreset.classical.rawValue
+                && HoraryEngine.traditionalPlanets.contains(point.body)
+                ? HoraryEngine.assess(point.body, in: snapshot)
+                : nil
+            return TransitPlanetPlacementFact(
                 factID: "\(prefix).placement.\(point.id)",
                 body: point.body,
                 longitudeDegrees: point.longitudeDegrees,
@@ -556,7 +671,9 @@ enum TransitFactBundleBuilder {
                 degreeInSign: point.degreeInSign,
                 natalHouse: natal?.house(containing: point.longitudeDegrees) ?? 0,
                 retrograde: point.retrograde,
-                longitudeSpeedDegreesPerDay: point.position.longitudeSpeedDegreesPerDay
+                longitudeSpeedDegreesPerDay: point.position.longitudeSpeedDegreesPerDay,
+                classicalScore: assessment?.score,
+                classicalConditions: assessment?.conditions ?? []
             )
         }
         let lifeAreaFacts = makeLifeAreaFacts(
@@ -689,6 +806,13 @@ enum TransitFactBundleBuilder {
 
 enum TransitContentPlanner {
     static func plan(_ bundle: TransitFactBundle) -> TransitContentPlan {
+        if bundle.preset == CalculationPreset.classical.rawValue {
+            return ClassicalTransitPlanningStrategy.plan(bundle)
+        }
+        return planModern(bundle)
+    }
+
+    private static func planModern(_ bundle: TransitFactBundle) -> TransitContentPlan {
         var ledger = EvidenceUsageLedger()
         let aspects = bundle.crossAspects.sorted(by: aspectOrder)
         let rangeEnd = planningRangeEnd(for: bundle)
@@ -783,17 +907,18 @@ enum TransitContentPlanner {
         let cards = [
             makePlan(
                 scopeID: bundle.scopeID,
+                preset: bundle.preset,
                 cardID: "current-story",
                 evidence: storyEvidence + storyWindowEvidence,
                 copySlot: .integratedStory,
                 signalRoles: storyAssignments,
                 integratedThemeID: integratedThemeID
             ),
-            makePlan(scopeID: bundle.scopeID, cardID: "current-cycles", evidence: cycleEvidence, copySlot: .cycleChapter),
-            makePlan(scopeID: bundle.scopeID, cardID: "transit-timeline", evidence: timelineEvidence, copySlot: nil),
-            makePlan(scopeID: bundle.scopeID, cardID: "planet-paths", evidence: pathEvidence, copySlot: .planetPathShort),
-            makePlan(scopeID: bundle.scopeID, cardID: "life-areas", evidence: areaEvidence, copySlot: .lifeAreaShort),
-            makePlan(scopeID: bundle.scopeID, cardID: "active-transits", evidence: activeEvidence, copySlot: .activeTransitShort),
+            makePlan(scopeID: bundle.scopeID, preset: bundle.preset, cardID: "current-cycles", evidence: cycleEvidence, copySlot: .cycleChapter),
+            makePlan(scopeID: bundle.scopeID, preset: bundle.preset, cardID: "transit-timeline", evidence: timelineEvidence, copySlot: nil),
+            makePlan(scopeID: bundle.scopeID, preset: bundle.preset, cardID: "planet-paths", evidence: pathEvidence, copySlot: .planetPathShort),
+            makePlan(scopeID: bundle.scopeID, preset: bundle.preset, cardID: "life-areas", evidence: areaEvidence, copySlot: .lifeAreaShort),
+            makePlan(scopeID: bundle.scopeID, preset: bundle.preset, cardID: "active-transits", evidence: activeEvidence, copySlot: .activeTransitShort),
         ]
         return TransitContentPlan(
             scopeID: bundle.scopeID,
@@ -840,6 +965,7 @@ enum TransitContentPlanner {
 
     private static func makePlan(
         scopeID: String,
+        preset: String,
         cardID: String,
         evidence: [TransitPlannedEvidence],
         copySlot: TransitCopySlot?,
@@ -863,12 +989,15 @@ enum TransitContentPlanner {
         }
         return CardEvidencePlan(
             scopeID: scopeID,
+            preset: preset,
             cardID: cardID,
             evidence: evidence,
             primaryFactID: primary?.fact.factID,
             themeInputs: themeInputs,
             signalRoles: signalRoles,
             integratedThemeID: integratedThemeID,
+            classicalSignalRoles: [],
+            classicalIntegratedThemeID: nil,
             copySlot: copySlot,
             emptyState: .showInsufficientFacts
         )

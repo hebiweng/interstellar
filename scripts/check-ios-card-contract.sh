@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-factory="ios/App/InsightFactory.swift"
+factory="ios/App/Insights"
 models="ios/App/Models.swift"
-views="ios/App/InsightCards.swift"
+views="ios/App/Insights"
 
 expected_ids=(
   natal-interpretation emotional-needs love-connection career-direction strengths-growth element-balance house-emphasis chart-signature planet-placements key-aspects

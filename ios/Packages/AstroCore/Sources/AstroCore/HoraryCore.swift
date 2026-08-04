@@ -290,11 +290,19 @@ public enum HoraryEngine {
         in snapshot: ChartSnapshot
     ) -> HoraryReception {
         let sign = snapshot.point(from)?.signIndex ?? 0
+        return reception(from: from, to: to, fromSignIndex: sign)
+    }
+
+    public static func reception(
+        from: CelestialBody,
+        to: CelestialBody,
+        fromSignIndex: Int
+    ) -> HoraryReception {
         return HoraryReception(
             from: from,
             to: to,
-            byDomicile: ruler(ofSign: sign) == to,
-            byExaltation: exaltationRuler(ofSign: sign) == to
+            byDomicile: ruler(ofSign: fromSignIndex) == to,
+            byExaltation: exaltationRuler(ofSign: fromSignIndex) == to
         )
     }
 

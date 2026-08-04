@@ -778,7 +778,7 @@ final class AppModel: ObservableObject {
                 : chartSubjectProfile.timezoneID
             let cardTimeZone = TimeZone(identifier: cardTimeZoneID) ?? .current
             let cardTransitCalendar = isFocusedTransit ? [] : transitCalendar
-            let plannedTransit = chart == .transit && preset(for: chart) == .modern
+            let plannedTransit = chart == .transit
                 ? makeTransitContentPlan(
                     snapshot: cardSnapshot,
                     natal: cardNatal,

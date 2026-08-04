@@ -819,6 +819,7 @@ final class TransitContentPlannerTests: XCTestCase {
 
     private func makeBundle(
         scopeID: String = "scope",
+        preset: String = "modern",
         aspects: [TransitAspectFact]? = nil,
         windows: [TransitWindowFact]? = nil,
         events: [TransitPlanetEventFact]? = nil,
@@ -852,7 +853,7 @@ final class TransitContentPlannerTests: XCTestCase {
             anchorDate: testAnchor,
             timeZoneIdentifier: testTimeZone,
             rangeDays: rangeDays,
-            preset: "modern",
+            preset: preset,
             crossAspects: scopedAspects,
             transitWindows: scopedWindows,
             aspectWindowFactIDs: links,

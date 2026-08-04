@@ -526,5 +526,17 @@ iOS 首版已完成可构建的纵向实现，尚未提交或推送：
 - 中文六盘 UI 流程在执行中被用户中断，尚未形成最终通过证据；提交后需要优先补跑。当前只完成 `modern.transit` Planner 垂直切片，Classical 行运和其他盘型尚未迁移，后续顺序冻结为 Classical Transit → Current Sky → Natal → Solar Return → Secondary Progressions → Synastry。
 - 在迁移 Classical Transit 前，先按盘型和职责拆分 `InsightFactory.swift`、`InsightCards.swift` 与行运规划文件；只做行为不变的文件移动。错误旧 Copy key 只允许通过构建期 alias / deprecated manifest 审计，不得成为运行时回退。
 
+### 2026-08-03 更新：六盘文件归位与 Classical Transit 迁移
+
+- `InsightFactory.swift` 已归位到 `ios/App/Insights/Shared/Routing/` 并仅保留六盘路由；共享 Factory 上下文、Assembler、Validation 和 UI dispatcher 分别进入 `Shared/`。本命、天象、次限、日返、合盘的现有业务构建原样进入各盘 `Legacy/`，由稳定的 `ChartCardFactory` 转发；六盘专属 Copy matcher extension 和 View 已归位到对应模块。
+- 现代行运继续使用原有 `TransitFactBundle → TransitContentPlanner → CardEvidencePlan → CopyCatalogMatcher → TransitCardFactory` 链路。现代基线复核保持 requirements 219、reachable 216、unreachable 3、unknown 0、missing 0；19 项现代行运专项测试全部通过。
+- Classical Transit 已移除 Legacy/Modern fallback，`preset == classical` 明确进入 `ClassicalTransitPlanningStrategy`。六张卡 ID、数量、顺序、UI dispatcher 与 View 保持不变；Timeline 只消费 technical evidence 且不请求消费者 Copy。
+- 古典事实只使用 AstroCore 已提供且可追踪的七曜尊贵/失势、角续果宫、逆行、日心/燃烧/日光下、交叉相位入相/精确/出相、按交叉相位两端真实经度计算的接纳、真实窗口/重复精确和换座/换宫/转逆/转顺事件。外行星不会进入古典证据选择。
+- 古典有限语义域为 3 个 integrated theme、5 个 signal role、3 个周期角色各 10 个合法主题、8 个行星路径主题、12 个宫位和 13 个 active transit 角色/主题组合，共 71 个静态可达 Copy requirement。Registry 只声明 Planner 可产生的合法输出，不再用“样本未观察到”判定不可达。
+- `ios/ContentSchema/classical-transit-copy-registry.json` 是有限输出合同；运行时 Registry 仍由 JSON Catalog 管理，没有新增 Swift Registry。Classical Copy 请求只允许 `classical.transit.*`。英文和简中 71 条 approved Classical 文案已进入 Git 忽略的 v2 私有源并重建运行时 Catalog；西语和法语继续按语言合同回退英文消费者正文。
+- 最终导出位于 `artifacts/classical-transit/`：requirements 71、reachable 71、observed 71、unobserved 0、unreachable 0、missing 0、unknown 0、approved Classical reuse 71、Classical → Modern fallback 0、Timeline consumer Copy request 0、invalid sourceFactID 0。24 个固定 fixture、68 个有限域探针和 9 个真实盘/日期组合全部通过。
+- AstroCore 当前没有 Transit 可用的昼夜 sect 事实，也没有 prohibition、frustration 或 prevented-perfection 事实；这些能力明确记录在 validation/fixtures 中，Planner 和文案均未猜测。
+- 验证通过：Simulator Debug build、全部 29 项 iOS 单元测试（含英/简中 71 个古典请求的实际组装门禁）、现代行运冻结导出（219/216/3/0/0）、卡片合同、四语 Localization、四语 Copy Catalog、私有内容边界、架构检查、lint、Xcode project plist 和 `git diff --check`。完整 UI 套件中 8 项通过、1 项因生产 App Attest 仅支持真机而跳过；西/法核心本地化测试仍在西语 `Parámetros` 按钮查找处失败，该失败与 Classical Copy key/内容覆盖无关，需单独修复 UI 测试导航状态。
+
 
 > AI生成

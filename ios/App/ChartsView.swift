@@ -34,7 +34,7 @@ struct ChartsView: View {
                                     InsightCardView(
                                         card: card,
                                         language: model.language,
-                                        prototypeTransitStyle: isModernTransitCard(card.id),
+                                        prototypeTransitStyle: isPlannedTransitCard(card.id),
                                         externalHeaderStyle: true
                                     )
                                 }
@@ -133,18 +133,17 @@ struct ChartsView: View {
         .padding(.top, 7)
     }
 
-    private func isModernTransitCard(_ cardID: String) -> Bool {
+    private func isPlannedTransitCard(_ cardID: String) -> Bool {
         model.selectedChart == .transit
-            && model.preset(for: .transit) == .modern
             && TransitContentPlan.cardIDs.contains(cardID)
     }
 
     private func cardSectionTitle(_ card: InsightCardModel) -> String {
-        isModernTransitCard(card.id) ? transitSectionTitle(card.id) : card.title
+        isPlannedTransitCard(card.id) ? transitSectionTitle(card.id) : card.title
     }
 
     private func cardSectionSubtitle(_ card: InsightCardModel) -> String {
-        if isModernTransitCard(card.id) {
+        if isPlannedTransitCard(card.id) {
             return transitSectionSubtitle(card.id)
         }
         return cardKicker(card.id, language: model.language) ?? ""

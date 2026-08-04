@@ -18,6 +18,7 @@
     "ios:localization:validate": "node scripts/build-ios-localization.mjs --validate",
     "ios:transit-copy:observe": "node scripts/export-modern-transit-observations.mjs",
     "ios:transit-copy:export": "npm run ios:transit-copy:observe && node scripts/export-modern-transit-copy-keys.mjs",
+    "ios:classical-transit-copy:export": "node scripts/export-classical-transit-observations.mjs && node scripts/export-classical-transit-copy-keys.mjs",
     "test:web": "npm run build && node --test tests/rendered-html.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "docs:validate": "python3 scripts/validate_catalogs.py",

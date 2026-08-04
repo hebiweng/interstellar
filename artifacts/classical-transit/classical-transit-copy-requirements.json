@@ -1,0 +1,1291 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-03T15:19:11.479Z",
+  "chartID": "classical.transit",
+  "requirementCount": 71,
+  "reachableCount": 71,
+  "unreachableCount": 0,
+  "observedCount": 71,
+  "unobservedCount": 0,
+  "missingCount": 0,
+  "requirements": [
+    {
+      "key": "classical.transit.activeTransitShort.active.applying-contact",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "applying-contact",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "Primary active evidence has role active and theme applying-contact.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.active-transits"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.activeTransitShort.active.debilitated-planet",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "debilitated-planet",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "Primary active evidence has role active and theme debilitated-planet.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.active-transits"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.activeTransitShort.active.exact-contact",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "exact-contact",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "Primary active evidence has role active and theme exact-contact.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.active-transits"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.activeTransitShort.active.fortified-planet",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "fortified-planet",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "Primary active evidence has role active and theme fortified-planet.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.active-transits"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.activeTransitShort.active.reception-support",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "reception-support",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "Primary active evidence has role active and theme reception-support.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.active-transits"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.activeTransitShort.active.retrograde-review",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "retrograde-review",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "Primary active evidence has role active and theme retrograde-review.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.active-transits"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.activeTransitShort.active.separating-contact",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "separating-contact",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "Primary active evidence has role active and theme separating-contact.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.active-transits"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.activeTransitShort.active.solar-fortification",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "solar-fortification",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "Primary active evidence has role active and theme solar-fortification.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.active-transits"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.activeTransitShort.active.solar-impairment",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "solar-impairment",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "Primary active evidence has role active and theme solar-impairment.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.active-transits"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.activeTransitShort.activeHouseIngress.motion-change",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "motion-change",
+      "integratedThemeID": null,
+      "roleID": "activeHouseIngress",
+      "variables": [],
+      "useCondition": "Primary active evidence has role activeHouseIngress and theme motion-change.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.active-transits"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.activeTransitShort.activeSignIngress.motion-change",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "motion-change",
+      "integratedThemeID": null,
+      "roleID": "activeSignIngress",
+      "variables": [],
+      "useCondition": "Primary active evidence has role activeSignIngress and theme motion-change.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.active-transits"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.activeTransitShort.activeStationDirect.motion-change",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "motion-change",
+      "integratedThemeID": null,
+      "roleID": "activeStationDirect",
+      "variables": [],
+      "useCondition": "Primary active evidence has role activeStationDirect and theme motion-change.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.active-transits"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.activeTransitShort.activeStationRetrograde.motion-change",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "motion-change",
+      "integratedThemeID": null,
+      "roleID": "activeStationRetrograde",
+      "variables": [],
+      "useCondition": "Primary active evidence has role activeStationRetrograde and theme motion-change.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.active-transits"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.currentCycle.applying-contact",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "applying-contact",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "currentCycle aggregate maps to applying-contact.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.currentCycle.debilitated-planet",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "debilitated-planet",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "currentCycle aggregate maps to debilitated-planet.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.currentCycle.exact-contact",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "exact-contact",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "currentCycle aggregate maps to exact-contact.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.currentCycle.fortified-planet",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "fortified-planet",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "currentCycle aggregate maps to fortified-planet.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.currentCycle.motion-change",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "motion-change",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "currentCycle aggregate maps to motion-change.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.currentCycle.reception-support",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "reception-support",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "currentCycle aggregate maps to reception-support.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.currentCycle.retrograde-review",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "retrograde-review",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "currentCycle aggregate maps to retrograde-review.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.currentCycle.separating-contact",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "separating-contact",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "currentCycle aggregate maps to separating-contact.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.currentCycle.solar-fortification",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "solar-fortification",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "currentCycle aggregate maps to solar-fortification.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.currentCycle.solar-impairment",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "solar-impairment",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "currentCycle aggregate maps to solar-impairment.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.dailyCycle.applying-contact",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "applying-contact",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "dailyCycle aggregate maps to applying-contact.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.dailyCycle.debilitated-planet",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "debilitated-planet",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "dailyCycle aggregate maps to debilitated-planet.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.dailyCycle.exact-contact",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "exact-contact",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "dailyCycle aggregate maps to exact-contact.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.dailyCycle.fortified-planet",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "fortified-planet",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "dailyCycle aggregate maps to fortified-planet.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.dailyCycle.motion-change",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "motion-change",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "dailyCycle aggregate maps to motion-change.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.dailyCycle.reception-support",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "reception-support",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "dailyCycle aggregate maps to reception-support.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.dailyCycle.retrograde-review",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "retrograde-review",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "dailyCycle aggregate maps to retrograde-review.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.dailyCycle.separating-contact",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "separating-contact",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "dailyCycle aggregate maps to separating-contact.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.dailyCycle.solar-fortification",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "solar-fortification",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "dailyCycle aggregate maps to solar-fortification.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.dailyCycle.solar-impairment",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "solar-impairment",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "dailyCycle aggregate maps to solar-impairment.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.longCycle.applying-contact",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "applying-contact",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "longCycle aggregate maps to applying-contact.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.longCycle.debilitated-planet",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "debilitated-planet",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "longCycle aggregate maps to debilitated-planet.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.longCycle.exact-contact",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "exact-contact",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "longCycle aggregate maps to exact-contact.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.longCycle.fortified-planet",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "fortified-planet",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "longCycle aggregate maps to fortified-planet.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.longCycle.motion-change",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "motion-change",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "longCycle aggregate maps to motion-change.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.longCycle.reception-support",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "reception-support",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "longCycle aggregate maps to reception-support.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.longCycle.retrograde-review",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "retrograde-review",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "longCycle aggregate maps to retrograde-review.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.longCycle.separating-contact",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "separating-contact",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "longCycle aggregate maps to separating-contact.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.longCycle.solar-fortification",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "solar-fortification",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "longCycle aggregate maps to solar-fortification.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.cycleChapter.longCycle.solar-impairment",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "solar-impairment",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "longCycle aggregate maps to solar-impairment.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-cycles"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.integratedStory.constrained-momentum",
+      "cardID": "current-story",
+      "copySlot": "integratedStory",
+      "themeID": null,
+      "integratedThemeID": "constrained-momentum",
+      "roleID": null,
+      "variables": [],
+      "useCondition": "Current Story resolves to constrained-momentum.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-story"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.integratedStory.mixed-testimony",
+      "cardID": "current-story",
+      "copySlot": "integratedStory",
+      "themeID": null,
+      "integratedThemeID": "mixed-testimony",
+      "roleID": null,
+      "variables": [],
+      "useCondition": "Current Story resolves to mixed-testimony.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-story"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.integratedStory.supported-momentum",
+      "cardID": "current-story",
+      "copySlot": "integratedStory",
+      "themeID": null,
+      "integratedThemeID": "supported-momentum",
+      "roleID": null,
+      "variables": [],
+      "useCondition": "Current Story resolves to supported-momentum.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-story"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.lifeAreaShort.house-1",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "House 1 is the leading activity aggregate.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.life-areas"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.lifeAreaShort.house-10",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "House 10 is the leading activity aggregate.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.life-areas"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.lifeAreaShort.house-11",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "House 11 is the leading activity aggregate.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.life-areas"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.lifeAreaShort.house-12",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "House 12 is the leading activity aggregate.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.life-areas"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.lifeAreaShort.house-2",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "House 2 is the leading activity aggregate.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.life-areas"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.lifeAreaShort.house-3",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "House 3 is the leading activity aggregate.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.life-areas"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.lifeAreaShort.house-4",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "House 4 is the leading activity aggregate.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.life-areas"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.lifeAreaShort.house-5",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "House 5 is the leading activity aggregate.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.life-areas"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.lifeAreaShort.house-6",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "House 6 is the leading activity aggregate.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.life-areas"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.lifeAreaShort.house-7",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "House 7 is the leading activity aggregate.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.life-areas"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.lifeAreaShort.house-8",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "House 8 is the leading activity aggregate.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.life-areas"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.lifeAreaShort.house-9",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "House 9 is the leading activity aggregate.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.life-areas"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.planetPathShort.angular-emphasis",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": "angular-emphasis",
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "Primary planned path has angular-emphasis.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.planet-paths"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.planetPathShort.cadent-delay",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": "cadent-delay",
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "Primary planned path has cadent-delay.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.planet-paths"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.planetPathShort.debilitated-planet",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": "debilitated-planet",
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "Primary planned path has debilitated-planet.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.planet-paths"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.planetPathShort.fortified-planet",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": "fortified-planet",
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "Primary planned path has fortified-planet.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.planet-paths"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.planetPathShort.retrograde-review",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": "retrograde-review",
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "Primary planned path has retrograde-review.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.planet-paths"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.planetPathShort.solar-fortification",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": "solar-fortification",
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "Primary planned path has solar-fortification.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.planet-paths"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.planetPathShort.solar-impairment",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": "solar-impairment",
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "Primary planned path has solar-impairment.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.planet-paths"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.planetPathShort.succedent-continuity",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": "succedent-continuity",
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "Primary planned path has succedent-continuity.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.planet-paths"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.signalRole.beneficSupport",
+      "cardID": "current-story",
+      "copySlot": "signalRole",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "beneficSupport",
+      "variables": [],
+      "useCondition": "A selected Classical testimony has role beneficSupport.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-story"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.signalRole.fortified",
+      "cardID": "current-story",
+      "copySlot": "signalRole",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "fortified",
+      "variables": [],
+      "useCondition": "A selected Classical testimony has role fortified.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-story"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.signalRole.impaired",
+      "cardID": "current-story",
+      "copySlot": "signalRole",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "impaired",
+      "variables": [],
+      "useCondition": "A selected Classical testimony has role impaired.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-story"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.signalRole.maleficPressure",
+      "cardID": "current-story",
+      "copySlot": "signalRole",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "maleficPressure",
+      "variables": [],
+      "useCondition": "A selected Classical testimony has role maleficPressure.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-story"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "classical.transit.signalRole.received",
+      "cardID": "current-story",
+      "copySlot": "signalRole",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "received",
+      "variables": [],
+      "useCondition": "A selected Classical testimony has role received.",
+      "requiredBy": [
+        "ClassicalTransitPlanningStrategy",
+        "CopyCatalogMatcher.classicalTransitCopyRequests",
+        "TransitCardFactory.current-story"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed",
+      "catalogStatus": "present"
+    }
+  ]
+}
