@@ -22,7 +22,7 @@ struct RootView: View {
                     )
                 }
 
-            ChartsView()
+            ChartsView(selectedTab: $selection)
                 .tag(RootTab.charts)
                 .tabItem {
                     Label(

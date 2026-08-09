@@ -13,6 +13,10 @@ enum InsightFactory {
         transitCalendar: [TransitCalendarDay],
         transitRangeDays: Int = 7,
         transitContentPlan: TransitContentPlan? = nil,
+        synastryComparison: SynastryComparison? = nil,
+        synastryContentPlan: SynastryContentPlan? = nil,
+        synastryFirstName: String? = nil,
+        synastrySecondName: String? = nil,
         preset: String? = nil,
         events: ChartEventData = .empty,
         timeZone: TimeZone = .current
@@ -29,6 +33,10 @@ enum InsightFactory {
             transitCalendar: transitCalendar,
             transitRangeDays: transitRangeDays,
             transitContentPlan: transitContentPlan,
+            synastryComparison: synastryComparison,
+            synastryContentPlan: synastryContentPlan,
+            synastryFirstName: synastryFirstName,
+            synastrySecondName: synastrySecondName,
             preset: preset,
             events: events,
             timeZone: timeZone

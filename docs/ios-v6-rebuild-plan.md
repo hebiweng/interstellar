@@ -25,7 +25,8 @@
 - 六盘：本命 10、天象 7、行运 6、次限 6、日返 7、合盘 8；
 - Today：`Current Chapter / Active Today / Coming Next / Moon Today / Timeline / Upcoming Sky / Retrogrades / Current Sky`；
 - `InsightCard`：卡片级可选结论 + 多个稳定事实；每个事实为“计算结果 + 私有一句自然解读”；
-- 约 100 字详情与 4–8 节专业报告：整盘 AI 一次生成，本机长期保存；
+- 永久取消单卡 AI 详情；六盘各自只生成一份 4–8 节整盘报告，并在本机长期保存；
+- 星盘计算和 Charts 打开不得自动触发 AI。用户进入 Reports 后明确点击“生成报告”才联网；同语义再次进入直接展示已有报告，“重新生成”成功后覆盖原报告；
 - 同语义指纹命中本地 Artifact 时网络请求数必须为零；
 - Relay 只保留 24 小时加密幂等缓存；AI 只能解释并引用请求事实；
 - Modern / Classical、英文 / 简体中文、System / Light / Dark；
@@ -72,10 +73,10 @@ ChartSnapshot / Aspect / Event
 
 ## 4. AI 与缓存
 
-`GeneratedChartArtifact` 必须记录语义指纹、盘型、人物哈希、参数、语言、预设、卡片合同、事实哈希、Provider、模型、提示词版本、Schema、生成时间、整盘报告和卡片详情。
+`GeneratedChartArtifact` 必须记录语义指纹、盘型、人物哈希、参数、语言、预设、事实哈希、Provider、模型、提示词版本、Schema、生成时间和整盘报告。
 
-- 首次联网前只展示一次完整数据范围和删除方式；
-- 同意后新语义盘首次打开自动生成；
+- 首次联网前展示一次完整数据范围和删除方式；授权不等于自动生成，必须由用户在 Reports 中明确触发；
+- 生成期间允许离开 Reports 页面并稍后返回查看；重新生成失败时保留旧报告，成功后原子覆盖同语义报告；
 - 撤回授权不删除已有报告，但阻止后续请求；
 - 人物删除同步删除关联 Artifact；支持按人物、盘型和全部清除；
 - 文件原子写入并启用 iOS 文件保护；损坏文件视为未命中；
@@ -84,8 +85,9 @@ ChartSnapshot / Aspect / Event
 ## 5. Relay 与后台
 
 - Relay 与独立后台的正式权威域名为 `https://aaadmin.xiaoguiwk.top`；站点根路径与 `/xiaoguiwk` 均打开嵌入式管理端，不依赖旧 Web；
-- 请求包含稳定事实、`semanticFingerprint / factsHash / generationSchemaVersion`、卡片 ID 和每卡允许引用事实；
-- 响应的章节和卡片都包含 `evidenceFactIDs`；Relay 验证引用、卡片覆盖、4–8 节、80–120 字/词与语言；
+- 请求包含稳定事实、`semanticFingerprint / factsHash / generationSchemaVersion`、语言和预设；不再包含卡片 ID、每卡允许证据或 `TransitContentPlan`；
+- 响应只包含 4–8 节整盘报告；每节携带 `evidenceFactIDs`，Relay 验证其来自本次请求事实，并验证 Schema 与语言；
+- `forceRegenerate` 只绕过同键缓存读取，成功结果仍覆盖同一缓存身份；失败不得写入残缺结果；
 - 上游非法 JSON 最多修复重试一次；失败不缓存残缺产物；
 - Provider/模型停用必须阻止生成；默认 Provider 由设置决定，不硬编码 `default`；
 - 管理密码使用 bcrypt，管理会话持久、可撤销、HttpOnly/SameSite；同源访问，不允许 `*` CORS；
@@ -114,8 +116,8 @@ ChartSnapshot / Aspect / Event
 - Charts 选择行运盘的渲染循环已修复：卡片构建不再在 SwiftUI `body` 求值期间写回 `@Published transitContentPlan`；最新 Debug 签名构建已覆盖安装并启动到连接的 iPhone 12 mini（`HUAWEI PURA 70`），CoreDevice 确认 `com.xiaoguiwk.interstellar` 进程 PID 4197；
 - Charts 轮盘上方只保留页面栏、盘型、Wheel/Aspects 与单一参数入口，人物/预设/时间/地点收进参数弹窗，展开参数不得把轮盘整体挤出初始视口；Ask 恢复简洁输入、键盘 Return 为“完成”并接通 History，两个专项 UI 测试通过；
 - 阶段 7 已完成：Relay 已通过本机构建的 `linux/amd64` 镜像部署到 `https://aaadmin.xiaoguiwk.top`；公开 Cloudflare 健康检查、管理页、随机管理员登录/退出撤销均通过。旧 Web/API 容器保持停止且未删除；
-- 阶段 6 已完成代码门禁：Relay 强制六盘 44 卡精确覆盖、事实引用和语言/长度校验；24 小时加密缓存、一次 JSON 修复、安装配额、App Attest 请求体断言、Provider/模型真实停用、bcrypt 管理员、可撤销安全会话和不记录正文的审计均已接通；
+- 阶段 6 已完成代码门禁：Relay 验证整盘报告 Schema、4–8 节、事实引用和语言；24 小时加密缓存、强制重新生成、一次 JSON 修复、安装配额、App Attest 请求体断言、Provider/模型真实停用、bcrypt 管理员、可撤销安全会话和不记录正文的审计均已接通；
 - 独立 `/xiaoguiwk` 管理页已内嵌在 Relay，自动初始化 DeepSeek `deepseek-v4-flash` 以及六盘中英文分盘提示词，支持 API Key、模型发现/停用、连接测试、提示词编辑/恢复和含错误数的用量查看；Go 测试、vet、Compose 校验和本地 HTTP 冒烟通过；
-- 生产发布目录为 `/opt/interstellar/releases/v6-relay-20260801-2119/infra/deploy`，旧 `.env` 备份为 `/opt/interstellar/backups/env-before-relay-v6-20260801-2119`。部署前服务器不存在旧 Relay 数据卷；新卷已以非 root SQLite 权限通过健康检查；
-- 管理员凭据仅写入本机 Git 忽略、权限 600 的 `Interstellar-Relay-管理员凭据.txt`，未进入 Git、Bark、命令输出或截图。DeepSeek API Key 保持为空，等待用户在后台填写并测试；
+- 当前 report-only 生产发布目录为 `/opt/interstellar/releases/v6-relay-v6-20260809-report-only`，镜像为 `interstellar-relay:v6-20260809-report-only`；切换前数据库备份为 `/opt/interstellar/backups/relay-20260809-1243.db`；
+- 生产默认 Provider 已修正为带有效密钥的 `DeepSeek`。真实 Relay → DeepSeek 请求和同键缓存命中均已通过；密钥未写入 Git、日志、命令输出或截图；
 - 下一步为最终阶段：全量工程门禁、最新签名 Release 真机安装以及 iPhone 12 mini 逐屏验收。

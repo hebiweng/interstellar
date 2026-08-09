@@ -12,6 +12,10 @@ struct ChartCardFactoryContext {
     let transitCalendar: [TransitCalendarDay]
     let transitRangeDays: Int
     let transitContentPlan: TransitContentPlan?
+    let synastryComparison: SynastryComparison?
+    let synastryContentPlan: SynastryContentPlan?
+    let synastryFirstName: String?
+    let synastrySecondName: String?
     let preset: String?
     let events: ChartEventData
     let timeZone: TimeZone

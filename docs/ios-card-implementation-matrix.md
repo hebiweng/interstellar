@@ -9,12 +9,12 @@
 - 稳定 `cardID`、标题、独立 `visualKind`；
 - 一个或多个带稳定 ID 的真实事实；每个事实明确 `metricLabel / calculatedValue / interpretationKey / sourceFactIDs / visualRole`；
 - 首屏呈现“计算结果 + 一句自然解读”；短解读来自被 Git 忽略的私有、已审核内容包，Swift 不拼解释句；
-- 当前 Charts 卡片不展示 `GeneratedChartArtifact.cardDetails[cardID]` 的展开入口、状态区或箭头；本机产物仍由整盘 AI 请求一次生成并保留给报告等明确入口，不为单卡另发请求；
-- 生成中、失败、离线、本地命中和事实不足的明确状态；事实不足时隐藏无效子项，整卡无事实才显示空状态；
+- Charts 卡片永久不提供 AI 单卡详情、生成状态或详情入口；卡片只消费本地计算和已审核 Copy Catalog；
+- 卡片事实不足时隐藏无效子项，整卡无事实才显示空状态；整盘 AI 的生成中、失败、本地命中和重新生成状态只属于 Reports；
 - 中英文单语、浅色/深色/跟随系统、小屏和 Dynamic Type；
 - 所有视觉由真实事实映射，不得使用示例分数、默认进度、固定节点或估算日期。
 
-AI 详情不是固定 corpus。完整报告和卡片详情必须携带 `evidenceFactIDs`，只能引用请求中存在且该卡允许使用的事实 ID。
+AI 与六卡是两个并列消费者：六卡按本矩阵选择摘要事实；Reports 使用同盘完整、合法的计算事实生成整盘报告。报告章节必须携带 `evidenceFactIDs`，且只能引用本次请求中存在的事实 ID。
 
 ## 本命盘（10 张）
 
@@ -85,14 +85,18 @@ AI 详情不是固定 corpus。完整报告和卡片详情必须携带 `evidence
 
 | 顺序 | cardID | 事实核心 | 视觉职责 |
 |---|---|---|---|
-| 1 | `relationship-overview` | 两张本命盘的主要跨盘结构 | 关系总览轨道 |
-| 2 | `perspectives` | 双方分别接收的触发 | 双视角切换 |
-| 3 | `emotional-connection` | 月亮及情绪相关跨盘相位 | 情绪连接网格 |
-| 4 | `communication` | 水星及沟通相关跨盘相位 | 沟通路径 |
-| 5 | `chemistry` | 金星/火星及吸引结构 | 吸引双指标 |
-| 6 | `commitment` | 土星及长期结构 | 承诺结构 |
-| 7 | `house-overlays` | 双方星体进入对方宫位 | 落宫叠加行 |
-| 8 | `key-inter-aspects` | 结构排序后的跨盘相位 | 主要相互相位列表 |
+| 1 | `relationship-overview` | 两张本命盘的主要跨盘结构；Planner 输出 communication / emotionalPace / chemistry 三个维度状态及各自 sourceFactIDs | 双人 68 px 圆形节点、渐变连线、32 px 心形节点、三枚维度标签 |
+| 2 | `perspectives` | A 体验只消费 B→A 落宫，B 体验只消费 A→B 落宫 | 姓名 `feels` 双视角切换；正文使用 `you/your + otherName`，切换必须更换证据 |
+| 3 | `emotional-connection` | 月亮相关事实中最重要的支持结构和差异结构；缺项不伪造 | 固定 `WHAT FLOWS / WHAT DIFFERS` 双列；整卡点击打开抽屉 |
+| 4 | `communication` | 最多 3 个按相关性排序的水星跨盘相位 | 三节点沟通路径与综合说明；整卡点击打开抽屉 |
+| 5 | `chemistry` | 分别选择 attraction 与不同的 intensity 事实；Classical 不含 Pluto | 固定 `ATTRACTION / INTENSITY` 双指标；整卡点击打开抽屉 |
+| 6 | `commitment` | Saturn stability 与不同的 Jupiter growth 事实；古典可引用真实 reception/condition | 固定 `STABILITY / GROWTH` 双列；整卡点击打开抽屉 |
+| 7 | `house-overlays` | 双向各 2 个、共 4 个按结构相关性排序的落宫 | 每行明确 `sourceName → receiverName`；条宽只表示相关性，不表示关系质量 |
+| 8 | `key-inter-aspects` | 3–6 条按 strength/相关性排序的跨盘相位 | 每行显示有序双方姓名与星体；点击单行打开事实抽屉 |
+
+`relationship-overview` 卡片眉题显示两人的有序完整姓名，圆内只显示最多两个姓名首字母并提供完整姓名无障碍标签。整卡点击打开详情抽屉；抽屉复用本卡正文和计算相位证据，固定说明标题为 `How to read this`，不得显示总兼容分数。
+
+合盘姓名合同分三类：`perspectives` 的标签使用体验者姓名，正文仅以第二人称称呼体验者并用 `{{otherName}}` 称呼对方；`house-overlays` 使用 `{{sourceName}}’s {{body}} in {{receiverName}}’s {{house}}`；`key-inter-aspects` 同时显示有序 `personAName/personBName`。姓名顺序与 sourceFactID 方向必须一致，禁止仅交换文字。
 
 合盘人物有序，缓存指纹不包含当前时间。Composite 明确延期，不得偷偷加入 `ChartKind`、卡片合同或 Today 分支。
 

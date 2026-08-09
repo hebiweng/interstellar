@@ -67,7 +67,10 @@ func main() {
 		for _, scope := range validScopes() {
 			for _, locale := range []string{"zh-Hans", "en"} {
 				prompt, _, _ := store.GetPrompt(scope, locale)
-				if strings.TrimSpace(prompt) == "" || prompt == legacyDefaultPromptV1(scope, locale) {
+				if strings.TrimSpace(prompt) == "" ||
+					prompt == legacyDefaultPromptV1(scope, locale) ||
+					prompt == legacyDefaultPromptV2(scope, locale) ||
+					((scope == "chart.transit" || scope == "chart.synastry") && prompt == legacyDefaultPromptV3(scope, locale)) {
 					if _, err := store.UpsertPrompt(scope, locale, defaultPrompt(scope, locale)); err != nil {
 						log.Printf("seed prompt %s/%s: %v", scope, locale, err)
 					}

@@ -5,7 +5,8 @@ enum InsightCardAssembler {
     static func assemble(
         _ cards: [InsightCardModel],
         context: ChartCardFactoryContext,
-        transitPlan: TransitContentPlan? = nil
+        transitPlan: TransitContentPlan? = nil,
+        synastryPlan: SynastryContentPlan? = nil
     ) throws -> [InsightCardModel] {
         let renderedCards = try cards.map { draft in
             let cardAspects: [ChartAspect]
@@ -39,6 +40,14 @@ enum InsightCardAssembler {
                 cardText = plan.evidence.isEmpty || plan.copySlot == nil
                     ? nil
                     : try context.copyCatalog?.transitCardText(plan: plan)
+            } else if let plan = synastryPlan?.card(draft.id) {
+                cardText = plan.evidence.isEmpty
+                    ? nil
+                    : try context.copyCatalog?.synastryCardText(
+                        plan: plan,
+                        firstName: synastryPlan?.firstName ?? "Person A",
+                        secondName: synastryPlan?.secondName ?? "Person B"
+                    )
             } else {
                 cardText = context.copyCatalog?.cardText(
                     chart: context.chart,
@@ -49,7 +58,9 @@ enum InsightCardAssembler {
                     preset: context.preset
                 )
             }
-            let plannedEvidenceAvailable = transitPlan?.card(draft.id).map { !$0.evidence.isEmpty } ?? true
+            let plannedEvidenceAvailable = transitPlan?.card(draft.id).map { !$0.evidence.isEmpty }
+                ?? synastryPlan?.card(draft.id).map { !$0.evidence.isEmpty }
+                ?? true
             if context.copyCatalog != nil, cardText == nil, plannedEvidenceAvailable,
                context.copyCatalog?.copyRequired(chart: context.chart, cardID: draft.id) == true {
                 throw InsightFactoryError.invalidCardContract(
@@ -92,11 +103,14 @@ enum InsightCardAssembler {
                 conclusionKey: "\(context.chart.contentPrefix).\(draft.id)",
                 conclusion: conclusion,
                 text: cardText,
-                scopeID: transitPlan?.scopeID
+                scopeID: transitPlan?.scopeID ?? synastryPlan?.scopeID
             )
         }
         if let transitPlan {
             try TransitCardContractValidator.validate(cards: renderedCards, plan: transitPlan)
+        }
+        if let synastryPlan {
+            try SynastryCardContractValidator.validate(cards: renderedCards, plan: synastryPlan)
         }
         try CardContractValidator.validate(renderedCards, for: context.chart)
         return renderedCards

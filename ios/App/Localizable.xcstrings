@@ -205,6 +205,23 @@
         }
       }
     },
+    "active": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "active"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "活跃"
+          }
+        }
+      }
+    },
     "Active": {
       "extractionState": "manual",
       "localizations": {
@@ -862,35 +879,6 @@
         }
       }
     },
-    "Ask something else": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ask something else"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "返回选择"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hacer otra pregunta"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Poser une autre question"
-          }
-        }
-      }
-    },
     "Ask the chart": {
       "extractionState": "manual",
       "localizations": {
@@ -1064,40 +1052,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "吸引"
-          }
-        }
-      }
-    },
-    "Attraction & chemistry": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Attraction & chemistry"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "吸引与化学反应"
-          }
-        }
-      }
-    },
-    "Available": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Available"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "可生成"
           }
         }
       }
@@ -1408,6 +1362,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "上弦阶段"
+          }
+        }
+      }
+    },
+    "Calculate this chart first": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculate this chart first"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请先完成该盘计算"
           }
         }
       }
@@ -1732,6 +1703,23 @@
         }
       }
     },
+    "Chart Reports": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chart Reports"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星盘报告"
+          }
+        }
+      }
+    },
     "Chart ruler": {
       "extractionState": "manual",
       "localizations": {
@@ -1882,35 +1870,6 @@
         }
       }
     },
-    "charts.ai.network-consent.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow network generation?"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "允许联网生成解读？"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "¿Permitir la interpretación en línea?"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Autoriser l’interprétation en ligne ?"
-          }
-        }
-      }
-    },
     "charts.event.back-to-now": {
       "extractionState": "manual",
       "localizations": {
@@ -2023,6 +1982,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Paramètres"
+          }
+        }
+      }
+    },
+    "Chemistry": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chemistry"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "吸引力"
           }
         }
       }
@@ -2376,35 +2352,6 @@
         }
       }
     },
-    "Close": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Close"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "关闭"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cerrar"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fermer"
-          }
-        }
-      }
-    },
     "Close call": {
       "extractionState": "manual",
       "localizations": {
@@ -2469,23 +2416,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "承诺"
-          }
-        }
-      }
-    },
-    "Commitment & longevity": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Commitment & longevity"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "承诺与长久"
           }
         }
       }
@@ -3402,6 +3332,23 @@
         }
       }
     },
+    "different": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "different"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不同"
+          }
+        }
+      }
+    },
     "direct": {
       "extractionState": "manual",
       "localizations": {
@@ -3722,23 +3669,6 @@
         }
       }
     },
-    "Emotional connection": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Emotional connection"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "情感连接"
-          }
-        }
-      }
-    },
     "EMOTIONAL CONNECTION": {
       "extractionState": "manual",
       "localizations": {
@@ -3786,6 +3716,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "情绪需要"
+          }
+        }
+      }
+    },
+    "Emotional pace": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emotional pace"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "情感节奏"
           }
         }
       }
@@ -4261,6 +4208,23 @@
         }
       }
     },
+    "FORTIFIED": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FORTIFIED"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "得助"
+          }
+        }
+      }
+    },
     "Friend": {
       "extractionState": "manual",
       "localizations": {
@@ -4324,6 +4288,23 @@
         }
       }
     },
+    "Generate Report": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Generate Report"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "生成报告"
+          }
+        }
+      }
+    },
     "Generate when ready": {
       "extractionState": "manual",
       "localizations": {
@@ -4375,6 +4356,57 @@
         }
       }
     },
+    "Generated only when you ask": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Generated only when you ask"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅在你点击后生成"
+          }
+        }
+      }
+    },
+    "Generating…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Generating…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在生成…"
+          }
+        }
+      }
+    },
+    "Generation failed. You can try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Generation failed. You can try again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "生成失败，可以重试。"
+          }
+        }
+      }
+    },
     "GNU AGPL 3.0": {
       "extractionState": "manual",
       "localizations": {
@@ -4405,6 +4437,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "目标"
+          }
+        }
+      }
+    },
+    "GROWTH": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GROWTH"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "成长性"
           }
         }
       }
@@ -4557,23 +4606,6 @@
         }
       }
     },
-    "House overlays": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "House overlays"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "落宫叠加"
-          }
-        }
-      }
-    },
     "HOUSE OVERLAYS": {
       "extractionState": "manual",
       "localizations": {
@@ -4587,6 +4619,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "落宫叠加"
+          }
+        }
+      }
+    },
+    "How ideas are exchanged": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How ideas are exchanged"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "想法如何交流"
           }
         }
       }
@@ -4654,6 +4703,40 @@
         }
       }
     },
+    "How to read this": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How to read this"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "如何理解"
+          }
+        }
+      }
+    },
+    "How two charts affect each other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How two charts affect each other"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "两张星盘如何彼此影响"
+          }
+        }
+      }
+    },
     "How two natal charts meet": {
       "extractionState": "manual",
       "localizations": {
@@ -4667,23 +4750,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "两张本命盘如何相遇"
-          }
-        }
-      }
-    },
-    "How you experience each other": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "How you experience each other"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "彼此的体验"
           }
         }
       }
@@ -4752,6 +4818,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "照亮"
+          }
+        }
+      }
+    },
+    "IMPAIRED": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IMPAIRED"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "受损"
           }
         }
       }
@@ -4928,13 +5011,13 @@
         }
       }
     },
-    "Interpretation defaults": {
+    "Interpretation Defaults": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Interpretation defaults"
+            "value": "Interpretation Defaults"
           }
         },
         "zh-Hans": {
@@ -4962,36 +5045,19 @@
         }
       }
     },
-    "Interstellar sends only the selected chart's calculated facts and requested card IDs to the configured AI service. The relay may keep an encrypted idempotency result for up to 24 hours; your device keeps the long-term report until you delete it in Settings. You can revoke future network generation at any time.": {
+    "Interstellar sends the selected chart's calculated facts to the configured AI service only after you tap Generate. The relay may keep an encrypted idempotency result for up to 24 hours; your device keeps the long-term report until you delete it in Settings. You can revoke future network generation at any time.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Interstellar sends only the selected chart's calculated facts and requested card IDs to the configured AI service. The relay may keep an encrypted idempotency result for up to 24 hours; your device keeps the long-term report until you delete it in Settings. You can revoke future network generation at any time."
+            "value": "Interstellar sends the selected chart's calculated facts to the configured AI service only after you tap Generate. The relay may keep an encrypted idempotency result for up to 24 hours; your device keeps the long-term report until you delete it in Settings. You can revoke future network generation at any time."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Interstellar 只会把所选盘的计算事实和所需卡片 ID 发送给配置的 AI 服务。中继服务最多保留 24 小时的加密幂等结果；长期报告只保存在本机，直到你在设置中删除。你可以随时撤回后续联网生成授权。"
-          }
-        }
-      }
-    },
-    "Interstellar sends only this chart's calculated facts and requested card IDs to the configured AI service. The relay may keep an encrypted idempotency result for up to 24 hours; your device keeps the long-term report until you delete it in Settings. You can revoke future network generation at any time.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Interstellar sends only this chart's calculated facts and requested card IDs to the configured AI service. The relay may keep an encrypted idempotency result for up to 24 hours; your device keeps the long-term report until you delete it in Settings. You can revoke future network generation at any time."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Interstellar 只会把本盘的计算事实和所需卡片 ID 发送给配置的 AI 服务。中继服务最多保留 24 小时的加密幂等结果；长期报告只保存在本机，直到你在设置中删除。你可以随时撤回后续联网生成授权。"
+            "value": "只有在你点击生成后，Interstellar 才会把所选星盘的计算事实发送给配置的 AI 服务。中继服务最多保留 24 小时的加密幂等结果；长期报告只保存在本机，直到你在设置中删除。你可以随时撤回后续联网生成授权。"
           }
         }
       }
@@ -5060,23 +5126,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "关键连接"
-          }
-        }
-      }
-    },
-    "Key inter-aspects": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Key inter-aspects"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "主要相互连接"
           }
         }
       }
@@ -5462,13 +5511,13 @@
         }
       }
     },
-    "Local data": {
+    "Local Data": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Local data"
+            "value": "Local Data"
           }
         },
         "zh-Hans": {
@@ -5814,6 +5863,23 @@
         }
       }
     },
+    "Main pattern": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Main pattern"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主要结构"
+          }
+        }
+      }
+    },
     "Major aspect pattern": {
       "extractionState": "manual",
       "localizations": {
@@ -5861,6 +5927,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "天顶"
+          }
+        }
+      }
+    },
+    "mixed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "mixed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "交错"
           }
         }
       }
@@ -6026,6 +6109,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "月亮领域"
+          }
+        }
+      }
+    },
+    "Moon contacts and emotional house overlays": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon contacts and emotional house overlays"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月亮联系与情感落宫"
           }
         }
       }
@@ -6649,6 +6749,23 @@
         }
       }
     },
+    "No distinct signal": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No distinct signal"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂无独立信号"
+          }
+        }
+      }
+    },
     "No exact events today. A quieter day.": {
       "extractionState": "manual",
       "localizations": {
@@ -6763,31 +6880,19 @@
         }
       }
     },
-    "No reports yet. Chart reports are generated automatically once available.": {
+    "No reports yet. Choose a chart above and generate its report when you are ready.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No reports yet. Chart reports are generated automatically once available."
+            "value": "No reports yet. Choose a chart above and generate its report when you are ready."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "暂无报告。星盘报告会在就绪后自动生成。"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aún no hay informes. Se generarán automáticamente cuando estén disponibles."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aucun rapport pour le moment. Ils seront générés automatiquement dès qu’ils seront disponibles."
+            "value": "暂无报告。请在上方选择一个星盘，并在需要时生成报告。"
           }
         }
       }
@@ -6805,6 +6910,108 @@
           "stringUnit": {
             "state": "translated",
             "value": "还没有保存的问题"
+          }
+        }
+      }
+    },
+    "No separate contrasting Moon contact met the current threshold.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No separate contrasting Moon contact met the current threshold."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前没有另一条达到门槛的月亮差异相位。"
+          }
+        }
+      }
+    },
+    "No separate Jupiter contact met the current threshold.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No separate Jupiter contact met the current threshold."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前没有另一条达到门槛的木星相位。"
+          }
+        }
+      }
+    },
+    "No separate qualifying contact was found.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No separate qualifying contact was found."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前没有另一条符合条件的相位。"
+          }
+        }
+      }
+    },
+    "No separate Saturn contact met the current threshold.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No separate Saturn contact met the current threshold."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前没有另一条达到门槛的土星相位。"
+          }
+        }
+      }
+    },
+    "No separate supportive Moon contact met the current threshold.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No separate supportive Moon contact met the current threshold."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前没有另一条达到门槛的月亮支持相位。"
+          }
+        }
+      }
+    },
+    "No signal": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No signal"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂无信号"
           }
         }
       }
@@ -7229,6 +7436,23 @@
         }
       }
     },
+    "Period Reports": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Period Reports"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "周期报告"
+          }
+        }
+      }
+    },
     "Person": {
       "extractionState": "manual",
       "localizations": {
@@ -7593,6 +7817,40 @@
         }
       }
     },
+    "PRESSURE": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PRESSURE"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "压力"
+          }
+        }
+      }
+    },
+    "Primary contrast": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Primary contrast"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主要差异"
+          }
+        }
+      }
+    },
     "Priority areas": {
       "extractionState": "manual",
       "localizations": {
@@ -7623,23 +7881,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "优先领域"
-          }
-        }
-      }
-    },
-    "Privacy": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Privacy"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "隐私"
           }
         }
       }
@@ -7838,6 +8079,23 @@
         }
       }
     },
+    "quiet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "quiet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平静"
+          }
+        }
+      }
+    },
     "Range": {
       "extractionState": "manual",
       "localizations": {
@@ -7901,6 +8159,23 @@
         }
       }
     },
+    "RECEIVED": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RECEIVED"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接纳"
+          }
+        }
+      }
+    },
     "Reception": {
       "extractionState": "manual",
       "localizations": {
@@ -7952,6 +8227,40 @@
         }
       }
     },
+    "Regenerate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regenerate"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新生成"
+          }
+        }
+      }
+    },
+    "Regeneration failed; your saved report is unchanged": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regeneration failed; your saved report is unchanged"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新生成失败；原报告仍保留"
+          }
+        }
+      }
+    },
     "Relational pattern": {
       "extractionState": "manual",
       "localizations": {
@@ -7969,13 +8278,13 @@
         }
       }
     },
-    "Relationship overview": {
+    "Relationship Overview": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Relationship overview"
+            "value": "Relationship Overview"
           }
         },
         "zh-Hans": {
@@ -8391,6 +8700,23 @@
         }
       }
     },
+    "Saturn, Jupiter and angle contacts": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saturn, Jupiter and angle contacts"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "土星、木星与长期结构"
+          }
+        }
+      }
+    },
     "Save": {
       "extractionState": "manual",
       "localizations": {
@@ -8445,6 +8771,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Enregistré"
+          }
+        }
+      }
+    },
+    "Saved on this device": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved on this device"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已保存在本机"
           }
         }
       }
@@ -8973,6 +9316,23 @@
         }
       }
     },
+    "Sorted by relevance, not positivity": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sorted by relevance, not positivity"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按相关性排序，而非按正负排序"
+          }
+        }
+      }
+    },
     "Special": {
       "extractionState": "manual",
       "localizations": {
@@ -8986,6 +9346,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "特殊"
+          }
+        }
+      }
+    },
+    "STABILITY": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "STABILITY"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "稳定性"
           }
         }
       }
@@ -9155,6 +9532,23 @@
         }
       }
     },
+    "steady": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "steady"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "稳定"
+          }
+        }
+      }
+    },
     "Steady": {
       "extractionState": "manual",
       "localizations": {
@@ -9219,6 +9613,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "优势与成长面"
+          }
+        }
+      }
+    },
+    "strong": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "strong"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "强"
+          }
+        }
+      }
+    },
+    "Strongest link": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strongest link"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最强连接"
           }
         }
       }
@@ -9304,6 +9732,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "支持"
+          }
+        }
+      }
+    },
+    "SUPPORT": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SUPPORT"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "助益"
           }
         }
       }
@@ -9832,6 +10277,23 @@
         }
       }
     },
+    "This may take a little while. You can leave this page and come back later.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This may take a little while. You can leave this page and come back later."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "生成可能需要一点时间，你可以先离开，稍后再回来查看。"
+          }
+        }
+      }
+    },
     "This module shows each transiting planet's sign, natal house, direction and next calculated ingress or station.": {
       "extractionState": "manual",
       "localizations": {
@@ -9845,6 +10307,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "这里显示每颗行运行星的星座、本命宫位、运动方向，以及下一次已计算的换座、换宫或转向。"
+          }
+        }
+      }
+    },
+    "This overview separates relationship functions because the same connection can flow easily in one area and require adjustment in another.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This overview separates relationship functions because the same connection can flow easily in one area and require adjustment in another."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这张总览会分别呈现不同关系功能，因为同一段连接可能在一个领域自然顺畅，在另一个领域需要磨合。"
           }
         }
       }
@@ -10443,6 +10922,23 @@
         }
       }
     },
+    "Two directions, not one shared score": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Two directions, not one shared score"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "两个方向，而非一个共同评分"
+          }
+        }
+      }
+    },
     "Type": {
       "extractionState": "manual",
       "localizations": {
@@ -10732,6 +11228,23 @@
         }
       }
     },
+    "View Report": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View Report"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "查看报告"
+          }
+        }
+      }
+    },
     "Void of course": {
       "extractionState": "manual",
       "localizations": {
@@ -10868,6 +11381,23 @@
         }
       }
     },
+    "WHAT DIFFERS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WHAT DIFFERS"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "差异之处"
+          }
+        }
+      }
+    },
     "What do you want to ask?": {
       "extractionState": "manual",
       "localizations": {
@@ -10881,6 +11411,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "你想问什么？"
+          }
+        }
+      }
+    },
+    "WHAT FLOWS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WHAT FLOWS"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顺畅之处"
           }
         }
       }
@@ -10944,6 +11491,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Roue"
+          }
+        }
+      }
+    },
+    "Where each person lands in the other’s life": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Where each person lands in the other’s life"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "彼此进入对方生活的领域"
           }
         }
       }

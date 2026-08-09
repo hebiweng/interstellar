@@ -37,7 +37,7 @@ targets:
       base:
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_ENTITLEMENTS: App/Interstellar.entitlements
-        DEVELOPMENT_TEAM: M2A7RHP7MT
+        DEVELOPMENT_TEAM: YD3FY9ZB52
         PRODUCT_BUNDLE_IDENTIFIER: com.xiaoguiwk.interstellar
         PRODUCT_NAME: Interstellar
         MARKETING_VERSION: 0.1.0
@@ -94,7 +94,7 @@ targets:
     settings:
       base:
         CODE_SIGN_STYLE: Automatic
-        DEVELOPMENT_TEAM: M2A7RHP7MT
+        DEVELOPMENT_TEAM: YD3FY9ZB52
         PRODUCT_BUNDLE_IDENTIFIER: com.xiaoguiwk.interstellar.tests
         GENERATE_INFOPLIST_FILE: YES
   InterstellarUITests:
@@ -107,7 +107,7 @@ targets:
     settings:
       base:
         CODE_SIGN_STYLE: Automatic
-        DEVELOPMENT_TEAM: M2A7RHP7MT
+        DEVELOPMENT_TEAM: YD3FY9ZB52
         PRODUCT_BUNDLE_IDENTIFIER: com.xiaoguiwk.interstellar.uitests
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: Interstellar

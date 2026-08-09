@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -43,30 +42,28 @@ func TestProviderKeyEncryptionRoundTrip(t *testing.T) {
 
 func TestGenerationResultValidation(t *testing.T) {
 	evidence := map[string]bool{"point.sun": true}
-	allowed := map[string][]string{"a": {"point.sun"}, "b": {"point.sun"}, "missing": {"point.sun"}}
 	var r GenerationResult
-	if err := json.Unmarshal([]byte(`{"report":{"title":"t","subtitle":"s","sections":[]},"cards":{}}`), &r); err != nil {
+	if err := json.Unmarshal([]byte(`{"report":{"title":"t","subtitle":"s","sections":[]}}`), &r); err != nil {
 		t.Fatal(err)
 	}
-	if err := r.Validate([]string{"a"}, "en", allowed, evidence); err == nil {
+	if err := r.Validate("en", evidence); err == nil {
 		t.Fatal("expected validation failure for empty sections")
 	}
 
-	detail := strings.TrimSpace(strings.Repeat("clear grounded interpretation follows the calculated evidence without inventing any additional event or certainty ", 7))
-	valid := fmt.Sprintf(`{"report":{"title":"t","subtitle":"s","sections":[
+	valid := `{"report":{"title":"t","subtitle":"s","sections":[
 		{"number":"01","title":"One","body":"body one","evidenceFactIDs":["point.sun"]},
 		{"number":"02","title":"Two","body":"body two","evidenceFactIDs":["point.sun"]},
 		{"number":"03","title":"Three","body":"body three","evidenceFactIDs":["point.sun"]},
-		{"number":"04","title":"Four","body":"body four","evidenceFactIDs":["point.sun"]}]},
-		"cards":{"a":{"detail":%q,"evidenceFactIDs":["point.sun"]},"b":{"detail":%q,"evidenceFactIDs":["point.sun"]}}}`, detail, detail)
+		{"number":"04","title":"Four","body":"body four","evidenceFactIDs":["point.sun"]}]}}`
 	if err := json.Unmarshal([]byte(valid), &r); err != nil {
 		t.Fatal(err)
 	}
-	if err := r.Validate([]string{"a", "b"}, "en", allowed, evidence); err != nil {
+	if err := r.Validate("en", evidence); err != nil {
 		t.Fatalf("expected valid: %v", err)
 	}
-	if err := r.Validate([]string{"a", "missing"}, "en", allowed, evidence); err == nil {
-		t.Fatal("expected validation failure for missing card")
+	r.Report.Sections[0].EvidenceFactIDs = []string{"missing"}
+	if err := r.Validate("en", evidence); err == nil {
+		t.Fatal("expected validation failure for unknown report evidence")
 	}
 }
 
@@ -233,19 +230,50 @@ func TestLegacyGenericChartPromptCanBeMigratedWithoutMatchingEditedCopy(t *testi
 	}
 }
 
-func TestSixChartCardContracts(t *testing.T) {
-	expectedCounts := map[string]int{
-		"natal": 10, "current-sky": 7, "transit": 6,
-		"secondary": 6, "solar-return": 7, "synastry": 8,
-	}
-	for kind, count := range expectedCounts {
-		cards, ok := chartCardContract(kind)
-		if !ok || len(cards) != count {
-			t.Fatalf("%s contract count=%d ok=%v; want %d", kind, len(cards), ok, count)
+func TestTransitReportPromptHasFocusedAnalysisAndBoundedOutput(t *testing.T) {
+	english := defaultPrompt("chart.transit", "en")
+	for _, marker := range []string{"applying/exact/separating", "90–150 English words", "Completing and closing the JSON"} {
+		if !strings.Contains(english, marker) {
+			t.Fatalf("English transit prompt is missing %q", marker)
 		}
 	}
-	if _, ok := chartCardContract("composite"); ok {
-		t.Fatal("composite must remain outside the v6 relay contract")
+	chinese := defaultPrompt("chart.transit", "zh-Hans")
+	for _, marker := range []string{"入相/精确/离相", "140–240 字", "完整输出并闭合 JSON"} {
+		if !strings.Contains(chinese, marker) {
+			t.Fatalf("Chinese transit prompt is missing %q", marker)
+		}
+	}
+	if strings.Contains(defaultPrompt("chart.natal", "en"), "90–150 English words") {
+		t.Fatal("the transit-only output constraint must not change other chart prompts")
+	}
+}
+
+func TestSynastryReportPromptRequiresNamesPerspectivesAndPresetBoundary(t *testing.T) {
+	english := defaultPrompt("chart.synastry", "en")
+	for _, marker := range []string{"Always use both names", "how each person affects and experiences the other", "request preset", "Classical must not import Modern", "80–140 English words"} {
+		if !strings.Contains(english, marker) {
+			t.Fatalf("English synastry prompt is missing %q", marker)
+		}
+	}
+	if strings.Contains(english, `"cards"`) {
+		t.Fatal("synastry prompt must remain report-only")
+	}
+	chinese := defaultPrompt("chart.synastry", "zh-Hans")
+	for _, marker := range []string{"两个人姓名", "每个人如何影响和体验对方", "请求 preset", "Classical 不得混入 Modern", "120–220 字"} {
+		if !strings.Contains(chinese, marker) {
+			t.Fatalf("Chinese synastry prompt is missing %q", marker)
+		}
+	}
+}
+
+func TestUntouchedReportOnlyPromptCanBeMigratedWithoutMatchingEditedCopy(t *testing.T) {
+	legacy := legacyDefaultPromptV3("chart.transit", "en")
+	current := defaultPrompt("chart.transit", "en")
+	if legacy == current || !strings.Contains(current, "applying/exact/separating") {
+		t.Fatal("current transit prompt must differ from the first report-only default")
+	}
+	if legacy+"\nAdministrator edit." == legacy {
+		t.Fatal("edited prompt must not match the exact migration sentinel")
 	}
 }
 
@@ -265,11 +293,9 @@ func TestProviderModelDisableBlocksSelection(t *testing.T) {
 
 func TestEnglishUserContentHasNoChineseHeadings(t *testing.T) {
 	req := generateRequest{
-		Locale:                "en",
-		Facts:                 json.RawMessage(`{"evidenceFacts":[{"id":"point.sun"}]}`),
-		Params:                json.RawMessage(`{"preset":"modern"}`),
-		CardIDs:               []string{"natal-interpretation"},
-		AllowedEvidenceByCard: map[string][]string{"natal-interpretation": {"point.sun"}},
+		Locale: "en",
+		Facts:  json.RawMessage(`{"evidenceFacts":[{"id":"point.sun"}]}`),
+		Params: json.RawMessage(`{"preset":"modern"}`),
 	}
 	content := buildUserContent(req, "chart.natal")
 	if strings.Contains(content, "计算事实") || !strings.Contains(content, "Calculated facts") {
@@ -310,14 +336,6 @@ func TestAdminMutationMethodAndPromptValidation(t *testing.T) {
 // E2E: full generate pipeline against a mock OpenAI-compatible provider.
 func TestGeneratePipelineWithMockProvider(t *testing.T) {
 	// Mock upstream: returns a valid structured JSON completion.
-	detail := strings.TrimSpace(strings.Repeat("This grounded interpretation follows the supplied calculation fact and explains its practical meaning without inventing dates events outcomes or certainty for the reader. ", 4))
-	cardIDs, _ := chartCardContract("natal")
-	cards := map[string]any{}
-	allowed := map[string][]string{}
-	for _, cardID := range cardIDs {
-		cards[cardID] = map[string]any{"detail": detail, "evidenceFactIDs": []string{"point.sun"}}
-		allowed[cardID] = []string{"point.sun"}
-	}
 	upstreamPayload := map[string]any{
 		"report": map[string]any{
 			"title": "Your year", "subtitle": "A structured reading",
@@ -328,7 +346,6 @@ func TestGeneratePipelineWithMockProvider(t *testing.T) {
 				{"number": "04", "title": "Advice", "body": "Body four.", "evidenceFactIDs": []string{"point.sun"}},
 			},
 		},
-		"cards": cards,
 	}
 	upstreamJSON, err := json.Marshal(upstreamPayload)
 	if err != nil {
@@ -355,13 +372,13 @@ func TestGeneratePipelineWithMockProvider(t *testing.T) {
 	// First call: upstream hit, cached=false.
 	requestPayload := map[string]any{
 		"mode": "chart", "chartKind": "natal", "preset": "modern", "profileHash": "h1",
-		"semanticFingerprint": "semantic-1", "factsHash": "facts-1", "generationSchemaVersion": 1,
+		"semanticFingerprint": "semantic-1", "factsHash": "facts-1", "generationSchemaVersion": 2,
 		"params": map[string]any{"anchor": "2026-07-31"},
 		"facts": map[string]any{
 			"person": map[string]any{"name": "Darryl"}, "chart": map[string]any{"points": []any{}},
 			"evidenceFacts": []map[string]any{{"id": "point.sun", "type": "point"}},
 		},
-		"cardIDs": cardIDs, "allowedEvidenceByCard": allowed, "locale": "en", "clientVersion": "test",
+		"locale": "en", "clientVersion": "test",
 	}
 	requestJSON, err := json.Marshal(requestPayload)
 	if err != nil {
@@ -385,6 +402,16 @@ func TestGeneratePipelineWithMockProvider(t *testing.T) {
 	}
 	if mock.count != 0 {
 		t.Fatalf("expected no upstream call on cache hit, got %d", mock.count)
+	}
+
+	requestPayload["forceRegenerate"] = true
+	forcedJSON, err := json.Marshal(requestPayload)
+	if err != nil {
+		t.Fatal(err)
+	}
+	third := roundTripGenerate(t, s, string(forcedJSON))
+	if third["cached"] == true || mock.count != 1 {
+		t.Fatalf("forced regeneration must bypass cache; cached=%v upstream=%d", third["cached"], mock.count)
 	}
 }
 
@@ -423,7 +450,12 @@ func (m *mockProvider) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var req struct {
-		Model    string `json:"model"`
+		Model           string `json:"model"`
+		MaxTokens       int    `json:"max_tokens"`
+		ReasoningEffort string `json:"reasoning_effort"`
+		Thinking        struct {
+			Type string `json:"type"`
+		} `json:"thinking"`
 		Messages []struct {
 			Role    string `json:"role"`
 			Content string `json:"content"`
@@ -432,6 +464,12 @@ func (m *mockProvider) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewDecoder(r.Body).Decode(&req)
 	if req.Model == "" || len(req.Messages) == 0 {
 		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+	validEnabled := req.Thinking.Type == "enabled" && req.ReasoningEffort == "low"
+	validFallback := req.Thinking.Type == "disabled" && req.ReasoningEffort == ""
+	if (!validEnabled && !validFallback) || req.MaxTokens != 10000 {
+		http.Error(w, "structured report reasoning budget is incorrect", http.StatusBadRequest)
 		return
 	}
 	// The prompt must carry the fixed safety boundary and the name rule.

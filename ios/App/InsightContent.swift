@@ -374,13 +374,14 @@ struct CopyCatalogMatcher {
         from selection: CopySelection?,
         cardID: String,
         scopeID: String? = nil,
+        variables: [String: String] = [:],
         roleTexts: [CardRoleText] = [],
         cycleTexts: [TransitCycleText] = []
     ) -> CardTextModel? {
         guard let selection else { return nil }
-        let resolved = selection.basePath.map { resolve(base: $0) }
+        let resolved = selection.basePath.map { resolve(base: $0, variables: variables) }
         let secondaryBody = resolved?.secondary
-            ?? selection.secondaryPath.flatMap { resolve(base: $0).body }
+            ?? selection.secondaryPath.flatMap { resolve(base: $0, variables: variables).body }
         let headline = resolved?.headline
         let body = resolved?.body
         guard headline != nil || body != nil || secondaryBody != nil else { return nil }
@@ -404,11 +405,11 @@ struct CopyCatalogMatcher {
         )
     }
 
-    func resolve(base: String) -> (headline: String?, body: String?, secondary: String?) {
-        let headline = valueIfPresent(at: "\(base).headline") ?? valueIfPresent(at: "\(base).label")
-        let body = valueIfPresent(at: "\(base).body") ?? valueIfPresent(at: base)
-        let secondary = valueIfPresent(at: "\(base).guidance")
-            ?? valueIfPresent(at: "\(base).secondary")
+    func resolve(base: String, variables: [String: String] = [:]) -> (headline: String?, body: String?, secondary: String?) {
+        let headline = valueIfPresent(at: "\(base).headline", variables: variables) ?? valueIfPresent(at: "\(base).label", variables: variables)
+        let body = valueIfPresent(at: "\(base).body", variables: variables) ?? valueIfPresent(at: base, variables: variables)
+        let secondary = valueIfPresent(at: "\(base).guidance", variables: variables)
+            ?? valueIfPresent(at: "\(base).secondary", variables: variables)
         return (headline, body, secondary)
     }
 

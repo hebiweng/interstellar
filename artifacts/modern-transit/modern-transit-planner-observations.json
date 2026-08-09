@@ -1,0 +1,4718 @@
+{
+  "generatedAt": "2026-08-03T15:22:36.057Z",
+  "realRuns": [
+    {
+      "anchorTimestamp": 1769947200,
+      "requestCount": 11,
+      "scopeID": "62c036a2afba56fa",
+      "chartID": "real-chart-01"
+    },
+    {
+      "anchorTimestamp": 1777636800,
+      "requestCount": 11,
+      "scopeID": "f1cd99960d63b62c",
+      "chartID": "real-chart-01"
+    },
+    {
+      "anchorTimestamp": 1785672000,
+      "requestCount": 11,
+      "scopeID": "75dbee7ba5031aef",
+      "chartID": "real-chart-01"
+    },
+    {
+      "anchorTimestamp": 1793534400,
+      "requestCount": 11,
+      "scopeID": "b51ba65c7ed7568b",
+      "chartID": "real-chart-01"
+    },
+    {
+      "anchorTimestamp": 1769947200,
+      "requestCount": 11,
+      "scopeID": "e6e4fbd37662f9f0",
+      "chartID": "real-chart-02"
+    },
+    {
+      "anchorTimestamp": 1777636800,
+      "requestCount": 11,
+      "scopeID": "7af41fc917e36ff9",
+      "chartID": "real-chart-02"
+    },
+    {
+      "anchorTimestamp": 1785672000,
+      "requestCount": 11,
+      "scopeID": "d3508362acebb009",
+      "chartID": "real-chart-02"
+    },
+    {
+      "chartID": "real-chart-02",
+      "scopeID": "9097fbc1faff1a0f",
+      "anchorTimestamp": 1793534400,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-03",
+      "scopeID": "079ffdc5f481028a",
+      "anchorTimestamp": 1769947200,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-03",
+      "scopeID": "bf6f547f0c828f9a",
+      "anchorTimestamp": 1777636800,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-03",
+      "scopeID": "4330d775fe782036",
+      "anchorTimestamp": 1785672000,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-03",
+      "scopeID": "703d1e21673274f2",
+      "anchorTimestamp": 1793534400,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-04",
+      "scopeID": "4e46806740ede854",
+      "anchorTimestamp": 1769947200,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-04",
+      "scopeID": "9de0966136f52072",
+      "anchorTimestamp": 1777636800,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-04",
+      "scopeID": "3e010ab0628c7be3",
+      "anchorTimestamp": 1785672000,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-04",
+      "scopeID": "02ca221d3c4ef83b",
+      "anchorTimestamp": 1793534400,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-05",
+      "scopeID": "4cdd886d202e3013",
+      "anchorTimestamp": 1769947200,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-05",
+      "scopeID": "7342a7b80f956a87",
+      "anchorTimestamp": 1777636800,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-05",
+      "scopeID": "b1aba74e786dd947",
+      "anchorTimestamp": 1785672000,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-05",
+      "scopeID": "f5a86272cea2cf25",
+      "anchorTimestamp": 1793534400,
+      "requestCount": 10
+    }
+  ],
+  "coverage": {
+    "cycleRole": [
+      "currentCycle",
+      "dailyCycle",
+      "longCycle"
+    ],
+    "signalRole": [
+      "disrupting",
+      "expanding",
+      "stabilizing",
+      "structuring",
+      "supporting"
+    ],
+    "integratedStory": [
+      "durable-structure",
+      "expansion-structure",
+      "focused-expansion",
+      "steady-realignment"
+    ],
+    "planetEvent": [
+      "houseIngress",
+      "signIngress",
+      "stationDirect",
+      "stationRetrograde"
+    ],
+    "houseIngress": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12"
+    ]
+  },
+  "fixedFixtureIDs": [
+    "challenging-only",
+    "complete-paths-areas",
+    "disrupting-signal",
+    "empty",
+    "events-only",
+    "mixed-complete",
+    "neutral-only",
+    "no-window-signals",
+    "range-filter",
+    "returning-pass",
+    "same-theme-multi-signal",
+    "stabilizing-signal",
+    "supportive-only",
+    "windows-only"
+  ],
+  "exhaustiveProbeCount": 4623,
+  "observations": [
+    {
+      "key": "modern.transit.activeTransitShort.active.career.restructuring",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "cardID": "active-transits",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-challenging-10",
+        "probe-aspect-mars-mars-challenging-10",
+        "probe-aspect-mercury-mercury-challenging-10",
+        "probe-aspect-moon-moon-challenging-10",
+        "probe-aspect-saturn-saturn-challenging-10",
+        "probe-aspect-saturn-uranus-challenging-1",
+        "probe-aspect-sun-sun-challenging-10",
+        "probe-aspect-venus-venus-challenging-10"
+      ],
+      "occurrenceCount": 35,
+      "roleID": "active",
+      "copySlot": "activeTransitShort",
+      "themeID": "career.restructuring"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.career.visibility",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "cardID": "active-transits",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-supportive-10",
+        "probe-aspect-mars-mars-supportive-10",
+        "probe-aspect-mercury-mercury-supportive-10",
+        "probe-aspect-moon-moon-supportive-10",
+        "probe-aspect-saturn-saturn-supportive-10",
+        "probe-aspect-sun-sun-supportive-10",
+        "probe-aspect-uranus-uranus-supportive-10",
+        "probe-aspect-venus-venus-supportive-10"
+      ],
+      "occurrenceCount": 11,
+      "roleID": "active",
+      "copySlot": "activeTransitShort",
+      "themeID": "career.visibility"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.commitment.deepening",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "cardID": "active-transits",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-neutral-7",
+        "probe-aspect-jupiter-saturn-neutral-1",
+        "probe-aspect-jupiter-saturn-neutral-2",
+        "probe-aspect-mars-mars-neutral-7",
+        "probe-aspect-mercury-mercury-neutral-7",
+        "probe-aspect-moon-moon-neutral-7",
+        "probe-aspect-sun-sun-neutral-7",
+        "probe-aspect-venus-venus-neutral-7"
+      ],
+      "occurrenceCount": 107,
+      "roleID": "active",
+      "copySlot": "activeTransitShort",
+      "themeID": "commitment.deepening"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.communication.friction",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "cardID": "active-transits",
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-mercury-challenging-1",
+        "probe-aspect-sun-mercury-challenging-2",
+        "probe-aspect-sun-mercury-challenging-3",
+        "probe-aspect-sun-mercury-challenging-4",
+        "probe-aspect-sun-mercury-challenging-5",
+        "probe-aspect-sun-mercury-challenging-6",
+        "probe-aspect-sun-mercury-challenging-7",
+        "probe-aspect-sun-sun-challenging-3"
+      ],
+      "occurrenceCount": 203,
+      "roleID": "active",
+      "copySlot": "activeTransitShort",
+      "themeID": "communication.friction"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.communication.opening",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "cardID": "active-transits",
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-mercury-supportive-1",
+        "probe-aspect-sun-mercury-supportive-2",
+        "probe-aspect-sun-mercury-supportive-3",
+        "probe-aspect-sun-mercury-supportive-4",
+        "probe-aspect-sun-mercury-supportive-5",
+        "probe-aspect-sun-mercury-supportive-6",
+        "probe-aspect-sun-sun-supportive-3",
+        "real-chart-02-1793534400"
+      ],
+      "occurrenceCount": 180,
+      "roleID": "active",
+      "copySlot": "activeTransitShort",
+      "themeID": "communication.opening"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.confidence.expansion",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture"
+      ],
+      "cardID": "active-transits",
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-mars-supportive-1",
+        "probe-aspect-sun-mars-supportive-2",
+        "probe-aspect-sun-mars-supportive-3",
+        "probe-aspect-sun-mars-supportive-4",
+        "probe-aspect-sun-mars-supportive-5",
+        "probe-aspect-sun-sun-supportive-1",
+        "probe-aspect-sun-sun-supportive-5",
+        "same-theme-multi-signal"
+      ],
+      "occurrenceCount": 215,
+      "roleID": "active",
+      "copySlot": "activeTransitShort",
+      "themeID": "confidence.expansion"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.direction.alignment",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "cardID": "active-transits",
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-trueNode-supportive-1",
+        "probe-aspect-sun-trueNode-supportive-2",
+        "probe-aspect-sun-trueNode-supportive-3",
+        "probe-aspect-sun-trueNode-supportive-4",
+        "probe-aspect-sun-trueNode-supportive-5",
+        "probe-aspect-sun-trueNode-supportive-6",
+        "real-chart-02-1777636800",
+        "real-chart-05-1777636800"
+      ],
+      "occurrenceCount": 242,
+      "roleID": "active",
+      "copySlot": "activeTransitShort",
+      "themeID": "direction.alignment"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.direction.reorientation",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "cardID": "active-transits",
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-trueNode-challenging-1",
+        "probe-aspect-sun-trueNode-challenging-2",
+        "probe-aspect-sun-trueNode-challenging-3",
+        "probe-aspect-sun-trueNode-challenging-4",
+        "probe-aspect-sun-trueNode-challenging-5",
+        "probe-aspect-sun-trueNode-challenging-6",
+        "probe-aspect-sun-trueNode-challenging-7",
+        "real-chart-02-1785672000"
+      ],
+      "occurrenceCount": 241,
+      "roleID": "active",
+      "copySlot": "activeTransitShort",
+      "themeID": "direction.reorientation"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.direction.turning-point",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "cardID": "active-transits",
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-trueNode-neutral-1",
+        "probe-aspect-sun-trueNode-neutral-2",
+        "probe-aspect-sun-trueNode-neutral-3",
+        "probe-aspect-sun-trueNode-neutral-4",
+        "probe-aspect-sun-trueNode-neutral-5",
+        "probe-aspect-sun-trueNode-neutral-6",
+        "real-chart-01-1785672000",
+        "real-chart-02-1769947200"
+      ],
+      "occurrenceCount": 242,
+      "roleID": "active",
+      "copySlot": "activeTransitShort",
+      "themeID": "direction.turning-point"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.emotional.disruption",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "cardID": "active-transits",
+      "exampleScenarioIDs": [
+        "disrupting-signal",
+        "probe-aspect-sun-moon-challenging-1",
+        "probe-aspect-sun-moon-challenging-2",
+        "probe-aspect-sun-moon-challenging-3",
+        "probe-aspect-sun-moon-challenging-4",
+        "probe-aspect-sun-moon-challenging-5",
+        "probe-aspect-sun-sun-neutral-4",
+        "real-chart-04-1777636800"
+      ],
+      "occurrenceCount": 133,
+      "roleID": "active",
+      "copySlot": "activeTransitShort",
+      "themeID": "emotional.disruption"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.emotional.sensitivity",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "cardID": "active-transits",
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-moon-neutral-1",
+        "probe-aspect-sun-moon-neutral-2",
+        "probe-aspect-sun-moon-neutral-3",
+        "probe-aspect-sun-moon-neutral-4",
+        "probe-aspect-sun-moon-neutral-5",
+        "probe-aspect-sun-moon-neutral-6",
+        "probe-aspect-sun-sun-neutral-12",
+        "real-chart-05-1793534400"
+      ],
+      "occurrenceCount": 228,
+      "roleID": "active",
+      "copySlot": "activeTransitShort",
+      "themeID": "emotional.sensitivity"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.emotional.stability",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "cardID": "active-transits",
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-moon-supportive-1",
+        "probe-aspect-sun-moon-supportive-2",
+        "probe-aspect-sun-moon-supportive-3",
+        "probe-aspect-sun-moon-supportive-4",
+        "probe-aspect-sun-sun-supportive-4",
+        "real-chart-03-1769947200",
+        "stabilizing-signal",
+        "supportive-only"
+      ],
+      "occurrenceCount": 182,
+      "roleID": "active",
+      "copySlot": "activeTransitShort",
+      "themeID": "emotional.stability"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.emotional.weight",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "cardID": "active-transits",
+      "exampleScenarioIDs": [
+        "probe-aspect-moon-saturn-challenging-1",
+        "probe-aspect-moon-saturn-challenging-2",
+        "probe-aspect-moon-saturn-challenging-3",
+        "probe-aspect-moon-saturn-challenging-4",
+        "probe-aspect-moon-saturn-challenging-5",
+        "probe-aspect-moon-saturn-challenging-6",
+        "probe-aspect-moon-saturn-challenging-7",
+        "probe-aspect-moon-saturn-challenging-8"
+      ],
+      "occurrenceCount": 24,
+      "roleID": "active",
+      "copySlot": "activeTransitShort",
+      "themeID": "emotional.weight"
+    },
+    {
+      "themeID": "healing.integration",
+      "occurrenceCount": 22,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-mercury-mercury-neutral-6",
+        "probe-aspect-mercury-mercury-supportive-12",
+        "probe-aspect-moon-moon-neutral-6",
+        "probe-aspect-moon-moon-supportive-12",
+        "probe-aspect-sun-sun-neutral-6",
+        "probe-aspect-sun-sun-supportive-12",
+        "probe-aspect-venus-venus-neutral-6",
+        "probe-aspect-venus-venus-supportive-12"
+      ],
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "roleID": "active",
+      "variables": {},
+      "key": "modern.transit.activeTransitShort.active.healing.integration"
+    },
+    {
+      "themeID": "home.adjustment",
+      "occurrenceCount": 12,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-challenging-4",
+        "probe-aspect-mars-mars-challenging-4",
+        "probe-aspect-mercury-mercury-challenging-4",
+        "probe-aspect-moon-moon-challenging-4",
+        "probe-aspect-saturn-saturn-challenging-4",
+        "probe-aspect-sun-sun-challenging-4",
+        "probe-aspect-venus-venus-challenging-4",
+        "real-chart-05-1769947200"
+      ],
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "roleID": "active",
+      "variables": {},
+      "key": "modern.transit.activeTransitShort.active.home.adjustment"
+    },
+    {
+      "themeID": "identity.reconstruction",
+      "occurrenceCount": 179,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-mars-neutral-1",
+        "probe-aspect-sun-mars-neutral-2",
+        "probe-aspect-sun-mars-neutral-3",
+        "probe-aspect-sun-mars-neutral-4",
+        "probe-aspect-sun-mars-neutral-5",
+        "probe-aspect-sun-mars-neutral-6",
+        "probe-aspect-sun-mars-neutral-7",
+        "probe-aspect-sun-sun-neutral-1"
+      ],
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "roleID": "active",
+      "variables": {},
+      "key": "modern.transit.activeTransitShort.active.identity.reconstruction"
+    },
+    {
+      "themeID": "identity.reinvention",
+      "occurrenceCount": 132,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-mars-challenging-1",
+        "probe-aspect-sun-mars-challenging-2",
+        "probe-aspect-sun-mars-challenging-3",
+        "probe-aspect-sun-mars-challenging-4",
+        "probe-aspect-sun-mars-challenging-5",
+        "probe-aspect-sun-mars-challenging-6",
+        "probe-aspect-sun-sun-challenging-1",
+        "real-chart-03-1777636800"
+      ],
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "roleID": "active",
+      "variables": {},
+      "key": "modern.transit.activeTransitShort.active.identity.reinvention"
+    },
+    {
+      "variables": {},
+      "occurrenceCount": 59,
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-neptune-supportive-1",
+        "probe-aspect-sun-neptune-supportive-2",
+        "probe-aspect-sun-neptune-supportive-3",
+        "probe-aspect-sun-neptune-supportive-4",
+        "probe-aspect-sun-neptune-supportive-5",
+        "probe-aspect-sun-neptune-supportive-6",
+        "probe-aspect-sun-neptune-supportive-7",
+        "probe-aspect-sun-sun-neutral-5"
+      ],
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "key": "modern.transit.activeTransitShort.active.imagination.opening",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "roleID": "active",
+      "themeID": "imagination.opening"
+    },
+    {
+      "variables": {},
+      "occurrenceCount": 59,
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-neutral-11",
+        "probe-aspect-mars-mars-neutral-11",
+        "probe-aspect-mercury-mercury-neutral-11",
+        "probe-aspect-moon-moon-neutral-11",
+        "probe-aspect-saturn-saturn-neutral-11",
+        "probe-aspect-sun-sun-neutral-11",
+        "probe-aspect-uranus-uranus-neutral-11",
+        "probe-aspect-venus-venus-neutral-11"
+      ],
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "key": "modern.transit.activeTransitShort.active.independence.growth",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "roleID": "active",
+      "themeID": "independence.growth"
+    },
+    {
+      "variables": {},
+      "occurrenceCount": 84,
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-supportive-9",
+        "probe-aspect-jupiter-uranus-supportive-1",
+        "probe-aspect-mars-mars-supportive-9",
+        "probe-aspect-mercury-mercury-supportive-9",
+        "probe-aspect-moon-moon-supportive-9",
+        "probe-aspect-sun-sun-supportive-9",
+        "probe-aspect-venus-venus-supportive-9",
+        "real-chart-05-1785672000"
+      ],
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "key": "modern.transit.activeTransitShort.active.learning.expansion",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "roleID": "active",
+      "themeID": "learning.expansion"
+    },
+    {
+      "cardID": "active-transits",
+      "roleID": "active",
+      "key": "modern.transit.activeTransitShort.active.mental.clarity",
+      "occurrenceCount": 48,
+      "themeID": "mental.clarity",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "exampleScenarioIDs": [
+        "probe-aspect-mercury-uranus-supportive-1",
+        "probe-aspect-mercury-uranus-supportive-2",
+        "probe-aspect-mercury-uranus-supportive-3",
+        "probe-aspect-mercury-uranus-supportive-4",
+        "probe-aspect-mercury-uranus-supportive-5",
+        "probe-aspect-mercury-uranus-supportive-6",
+        "probe-aspect-mercury-uranus-supportive-7",
+        "probe-aspect-mercury-uranus-supportive-8"
+      ]
+    },
+    {
+      "cardID": "active-transits",
+      "roleID": "active",
+      "key": "modern.transit.activeTransitShort.active.mental.review",
+      "occurrenceCount": 240,
+      "themeID": "mental.review",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "exampleScenarioIDs": [
+        "neutral-only",
+        "probe-aspect-sun-mercury-neutral-1",
+        "probe-aspect-sun-mercury-neutral-2",
+        "probe-aspect-sun-mercury-neutral-3",
+        "probe-aspect-sun-mercury-neutral-4",
+        "probe-aspect-sun-sun-neutral-3",
+        "probe-aspect-sun-sun-neutral-9",
+        "real-chart-01-1793534400"
+      ]
+    },
+    {
+      "cardID": "active-transits",
+      "roleID": "active",
+      "key": "modern.transit.activeTransitShort.active.momentum.blocked",
+      "occurrenceCount": 96,
+      "themeID": "momentum.blocked",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "exampleScenarioIDs": [
+        "probe-aspect-mars-jupiter-challenging-1",
+        "probe-aspect-mars-jupiter-challenging-2",
+        "probe-aspect-mars-jupiter-challenging-3",
+        "probe-aspect-mars-jupiter-challenging-4",
+        "probe-aspect-mars-jupiter-challenging-5",
+        "probe-aspect-mars-jupiter-challenging-6",
+        "probe-aspect-mars-jupiter-challenging-7",
+        "probe-aspect-mars-jupiter-challenging-8"
+      ]
+    },
+    {
+      "cardID": "active-transits",
+      "roleID": "active",
+      "key": "modern.transit.activeTransitShort.active.momentum.rising",
+      "occurrenceCount": 122,
+      "themeID": "momentum.rising",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "exampleScenarioIDs": [
+        "probe-aspect-mars-jupiter-supportive-1",
+        "probe-aspect-mars-jupiter-supportive-2",
+        "probe-aspect-mars-jupiter-supportive-3",
+        "probe-aspect-mars-jupiter-supportive-4",
+        "probe-aspect-mars-jupiter-supportive-5",
+        "probe-aspect-mars-jupiter-supportive-6",
+        "real-chart-03-1793534400",
+        "real-chart-04-1785672000"
+      ]
+    },
+    {
+      "cardID": "active-transits",
+      "roleID": "active",
+      "key": "modern.transit.activeTransitShort.active.money.review",
+      "occurrenceCount": 11,
+      "themeID": "money.review",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-challenging-2",
+        "probe-aspect-mars-mars-challenging-2",
+        "probe-aspect-mercury-mercury-challenging-2",
+        "probe-aspect-moon-moon-challenging-2",
+        "probe-aspect-saturn-saturn-challenging-2",
+        "probe-aspect-sun-sun-challenging-2",
+        "probe-aspect-uranus-uranus-challenging-2",
+        "probe-aspect-venus-venus-challenging-2"
+      ]
+    },
+    {
+      "cardID": "active-transits",
+      "roleID": "active",
+      "key": "modern.transit.activeTransitShort.active.relationship.boundaries",
+      "occurrenceCount": 156,
+      "themeID": "relationship.boundaries",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-sun-challenging-7",
+        "probe-aspect-sun-venus-challenging-1",
+        "probe-aspect-sun-venus-challenging-2",
+        "probe-aspect-sun-venus-challenging-3",
+        "probe-aspect-sun-venus-challenging-4",
+        "probe-aspect-sun-venus-challenging-5",
+        "probe-aspect-sun-venus-challenging-6",
+        "real-chart-04-1793534400"
+      ]
+    },
+    {
+      "cardID": "active-transits",
+      "roleID": "active",
+      "key": "modern.transit.activeTransitShort.active.relationship.freedom",
+      "occurrenceCount": 24,
+      "themeID": "relationship.freedom",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "exampleScenarioIDs": [
+        "probe-aspect-venus-uranus-challenging-1",
+        "probe-aspect-venus-uranus-challenging-2",
+        "probe-aspect-venus-uranus-challenging-3",
+        "probe-aspect-venus-uranus-challenging-4",
+        "probe-aspect-venus-uranus-challenging-5",
+        "probe-aspect-venus-uranus-challenging-6",
+        "probe-aspect-venus-uranus-challenging-7",
+        "probe-aspect-venus-uranus-challenging-8"
+      ]
+    },
+    {
+      "cardID": "active-transits",
+      "roleID": "active",
+      "key": "modern.transit.activeTransitShort.active.relationship.intensity",
+      "occurrenceCount": 70,
+      "themeID": "relationship.intensity",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "exampleScenarioIDs": [
+        "probe-aspect-moon-moon-challenging-5",
+        "probe-aspect-moon-moon-challenging-8",
+        "probe-aspect-moon-pluto-challenging-1",
+        "probe-aspect-moon-pluto-challenging-2",
+        "probe-aspect-moon-pluto-challenging-3",
+        "probe-aspect-moon-pluto-challenging-4",
+        "probe-aspect-sun-sun-challenging-5",
+        "probe-aspect-sun-sun-challenging-8"
+      ]
+    },
+    {
+      "cardID": "active-transits",
+      "roleID": "active",
+      "key": "modern.transit.activeTransitShort.active.relationship.opening",
+      "occurrenceCount": 181,
+      "themeID": "relationship.opening",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-sun-supportive-7",
+        "probe-aspect-sun-venus-supportive-1",
+        "probe-aspect-sun-venus-supportive-2",
+        "probe-aspect-sun-venus-supportive-3",
+        "probe-aspect-sun-venus-supportive-4",
+        "probe-aspect-sun-venus-supportive-5",
+        "real-chart-01-1769947200",
+        "real-chart-01-1777636800"
+      ]
+    },
+    {
+      "cardID": "active-transits",
+      "roleID": "active",
+      "key": "modern.transit.activeTransitShort.active.responsibility.pressure",
+      "occurrenceCount": 208,
+      "themeID": "responsibility.pressure",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture"
+      ],
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "exampleScenarioIDs": [
+        "challenging-only",
+        "mixed-complete",
+        "no-window-signals",
+        "probe-aspect-sun-saturn-challenging-1",
+        "probe-aspect-sun-saturn-challenging-2",
+        "probe-aspect-sun-sun-neutral-10",
+        "range-filter",
+        "returning-pass"
+      ]
+    },
+    {
+      "cardID": "active-transits",
+      "roleID": "active",
+      "key": "modern.transit.activeTransitShort.active.routine.disruption",
+      "occurrenceCount": 84,
+      "themeID": "routine.disruption",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "exampleScenarioIDs": [
+        "probe-aspect-mars-mars-challenging-6",
+        "probe-aspect-mars-uranus-challenging-1",
+        "probe-aspect-mars-uranus-challenging-2",
+        "probe-aspect-mercury-mercury-challenging-6",
+        "probe-aspect-moon-moon-challenging-6",
+        "probe-aspect-sun-sun-challenging-6",
+        "probe-aspect-venus-venus-challenging-6",
+        "real-chart-03-1785672000"
+      ]
+    },
+    {
+      "cardID": "active-transits",
+      "roleID": "active",
+      "key": "modern.transit.activeTransitShort.active.social.boundaries",
+      "occurrenceCount": 11,
+      "themeID": "social.boundaries",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-challenging-11",
+        "probe-aspect-mars-mars-challenging-11",
+        "probe-aspect-mercury-mercury-challenging-11",
+        "probe-aspect-moon-moon-challenging-11",
+        "probe-aspect-saturn-saturn-challenging-11",
+        "probe-aspect-sun-sun-challenging-11",
+        "probe-aspect-uranus-uranus-challenging-11",
+        "probe-aspect-venus-venus-challenging-11"
+      ]
+    },
+    {
+      "cardID": "active-transits",
+      "roleID": "active",
+      "key": "modern.transit.activeTransitShort.active.social.expansion",
+      "occurrenceCount": 12,
+      "themeID": "social.expansion",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-supportive-11",
+        "probe-aspect-mars-mars-supportive-11",
+        "probe-aspect-mercury-mercury-supportive-11",
+        "probe-aspect-moon-moon-supportive-11",
+        "probe-aspect-saturn-saturn-supportive-11",
+        "probe-aspect-sun-sun-supportive-11",
+        "probe-aspect-venus-venus-supportive-11",
+        "real-chart-04-1769947200"
+      ]
+    },
+    {
+      "themeID": "structure.building",
+      "variables": {},
+      "roleID": "active",
+      "cardID": "active-transits",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "activeTransitShort",
+      "key": "modern.transit.activeTransitShort.active.structure.building",
+      "exampleScenarioIDs": [
+        "probe-aspect-mercury-mercury-supportive-2",
+        "probe-aspect-mercury-mercury-supportive-6",
+        "probe-aspect-moon-moon-supportive-2",
+        "probe-aspect-moon-moon-supportive-6",
+        "probe-aspect-sun-sun-supportive-2",
+        "probe-aspect-sun-sun-supportive-6",
+        "probe-aspect-venus-venus-supportive-2",
+        "probe-aspect-venus-venus-supportive-6"
+      ],
+      "occurrenceCount": 118
+    },
+    {
+      "themeID": "transformation.release",
+      "variables": {},
+      "roleID": "active",
+      "cardID": "active-transits",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "activeTransitShort",
+      "key": "modern.transit.activeTransitShort.active.transformation.release",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-neutral-8",
+        "probe-aspect-mars-mars-neutral-8",
+        "probe-aspect-mercury-mercury-neutral-8",
+        "probe-aspect-moon-moon-neutral-8",
+        "probe-aspect-saturn-pluto-challenging-1",
+        "probe-aspect-saturn-saturn-neutral-8",
+        "probe-aspect-sun-sun-neutral-8",
+        "probe-aspect-venus-venus-neutral-8"
+      ],
+      "occurrenceCount": 35
+    },
+    {
+      "themeID": "trust.deepening",
+      "variables": {},
+      "roleID": "active",
+      "cardID": "active-transits",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "activeTransitShort",
+      "key": "modern.transit.activeTransitShort.active.trust.deepening",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-supportive-8",
+        "probe-aspect-mars-mars-supportive-8",
+        "probe-aspect-mercury-mercury-supportive-8",
+        "probe-aspect-moon-moon-supportive-8",
+        "probe-aspect-saturn-saturn-supportive-8",
+        "probe-aspect-sun-sun-supportive-8",
+        "probe-aspect-uranus-uranus-supportive-8",
+        "probe-aspect-venus-venus-supportive-8"
+      ],
+      "occurrenceCount": 11
+    },
+    {
+      "themeID": "uncertainty.fog",
+      "variables": {},
+      "roleID": "active",
+      "cardID": "active-transits",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "activeTransitShort",
+      "key": "modern.transit.activeTransitShort.active.uncertainty.fog",
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-neptune-challenging-1",
+        "probe-aspect-sun-neptune-challenging-2",
+        "probe-aspect-sun-neptune-challenging-3",
+        "probe-aspect-sun-neptune-challenging-4",
+        "probe-aspect-sun-neptune-challenging-5",
+        "probe-aspect-sun-neptune-challenging-6",
+        "probe-aspect-sun-sun-challenging-12",
+        "probe-aspect-sun-sun-challenging-9"
+      ],
+      "occurrenceCount": 166
+    },
+    {
+      "themeID": "values.reassessment",
+      "variables": {},
+      "roleID": "active",
+      "cardID": "active-transits",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "activeTransitShort",
+      "key": "modern.transit.activeTransitShort.active.values.reassessment",
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-sun-neutral-2",
+        "probe-aspect-sun-venus-neutral-1",
+        "probe-aspect-sun-venus-neutral-2",
+        "probe-aspect-sun-venus-neutral-3",
+        "probe-aspect-sun-venus-neutral-4",
+        "probe-aspect-sun-venus-neutral-5",
+        "probe-aspect-sun-venus-neutral-6",
+        "probe-aspect-sun-venus-neutral-7"
+      ],
+      "occurrenceCount": 203
+    },
+    {
+      "themeID": "commitment.deepening",
+      "variables": {},
+      "roleID": "activeHouseIngress",
+      "cardID": "active-transits",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "activeTransitShort",
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.commitment.deepening",
+      "exampleScenarioIDs": [
+        "probe-event-houseIngress-7"
+      ],
+      "occurrenceCount": 1
+    },
+    {
+      "themeID": "emotional.disruption",
+      "variables": {},
+      "roleID": "activeHouseIngress",
+      "cardID": "active-transits",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "activeTransitShort",
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.emotional.disruption",
+      "exampleScenarioIDs": [
+        "probe-event-houseIngress-4"
+      ],
+      "occurrenceCount": 1
+    },
+    {
+      "themeID": "emotional.sensitivity",
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "occurrenceCount": 1,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "roleID": "activeHouseIngress",
+      "exampleScenarioIDs": [
+        "probe-event-houseIngress-12"
+      ],
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.emotional.sensitivity"
+    },
+    {
+      "themeID": "healing.integration",
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "occurrenceCount": 1,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "roleID": "activeHouseIngress",
+      "exampleScenarioIDs": [
+        "probe-event-houseIngress-6"
+      ],
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.healing.integration"
+    },
+    {
+      "themeID": "identity.reconstruction",
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "occurrenceCount": 1,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "roleID": "activeHouseIngress",
+      "exampleScenarioIDs": [
+        "probe-event-houseIngress-1"
+      ],
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.identity.reconstruction"
+    },
+    {
+      "themeID": "imagination.opening",
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "occurrenceCount": 1,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "roleID": "activeHouseIngress",
+      "exampleScenarioIDs": [
+        "probe-event-houseIngress-5"
+      ],
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.imagination.opening"
+    },
+    {
+      "themeID": "independence.growth",
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "occurrenceCount": 1,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "roleID": "activeHouseIngress",
+      "exampleScenarioIDs": [
+        "probe-event-houseIngress-11"
+      ],
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.independence.growth"
+    },
+    {
+      "themeID": "mental.review",
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "occurrenceCount": 2,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "roleID": "activeHouseIngress",
+      "exampleScenarioIDs": [
+        "probe-event-houseIngress-3",
+        "probe-event-houseIngress-9"
+      ],
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.mental.review"
+    },
+    {
+      "themeID": "responsibility.pressure",
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "occurrenceCount": 1,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "roleID": "activeHouseIngress",
+      "exampleScenarioIDs": [
+        "probe-event-houseIngress-10"
+      ],
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.responsibility.pressure"
+    },
+    {
+      "themeID": "transformation.release",
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "occurrenceCount": 1,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "roleID": "activeHouseIngress",
+      "exampleScenarioIDs": [
+        "probe-event-houseIngress-8"
+      ],
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.transformation.release"
+    },
+    {
+      "themeID": "values.reassessment",
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "occurrenceCount": 1,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "roleID": "activeHouseIngress",
+      "exampleScenarioIDs": [
+        "probe-event-houseIngress-2"
+      ],
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.values.reassessment"
+    },
+    {
+      "themeID": "structure.building",
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "occurrenceCount": 2,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture"
+      ],
+      "variables": {},
+      "roleID": "activeSignIngress",
+      "exampleScenarioIDs": [
+        "events-only",
+        "probe-event-signIngress-4"
+      ],
+      "key": "modern.transit.activeTransitShort.activeSignIngress.structure.building"
+    },
+    {
+      "themeID": "structure.building",
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "occurrenceCount": 1,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "roleID": "activeStationDirect",
+      "exampleScenarioIDs": [
+        "probe-event-stationDirect-0"
+      ],
+      "key": "modern.transit.activeTransitShort.activeStationDirect.structure.building"
+    },
+    {
+      "themeID": "structure.building",
+      "copySlot": "activeTransitShort",
+      "cardID": "active-transits",
+      "occurrenceCount": 1,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "roleID": "activeStationRetrograde",
+      "exampleScenarioIDs": [
+        "probe-event-stationRetrograde-0"
+      ],
+      "key": "modern.transit.activeTransitShort.activeStationRetrograde.structure.building"
+    },
+    {
+      "themeID": "career.restructuring",
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "occurrenceCount": 2,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-challenging-10",
+        "probe-aspect-trueNode-trueNode-challenging-10"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.career.restructuring"
+    },
+    {
+      "themeID": "career.visibility",
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "occurrenceCount": 2,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-supportive-10",
+        "probe-aspect-trueNode-trueNode-supportive-10"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.career.visibility"
+    },
+    {
+      "themeID": "commitment.deepening",
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "occurrenceCount": 14,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-neutral-7",
+        "probe-aspect-jupiter-saturn-neutral-1",
+        "probe-aspect-jupiter-saturn-neutral-2",
+        "probe-aspect-jupiter-saturn-neutral-3",
+        "probe-aspect-jupiter-saturn-neutral-4",
+        "probe-aspect-jupiter-saturn-neutral-5",
+        "probe-aspect-jupiter-saturn-neutral-6",
+        "probe-aspect-jupiter-saturn-neutral-7"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.commitment.deepening"
+    },
+    {
+      "themeID": "communication.friction",
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "occurrenceCount": 15,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "variables": {},
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-mercury-challenging-1",
+        "probe-aspect-jupiter-mercury-challenging-2",
+        "probe-aspect-jupiter-mercury-challenging-3",
+        "probe-aspect-jupiter-mercury-challenging-4",
+        "probe-aspect-jupiter-mercury-challenging-5",
+        "probe-aspect-jupiter-mercury-challenging-6",
+        "probe-aspect-jupiter-mercury-challenging-7",
+        "real-chart-04-1777636800"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.communication.friction"
+    },
+    {
+      "themeID": "communication.opening",
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "occurrenceCount": 14,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-mercury-supportive-1",
+        "probe-aspect-jupiter-mercury-supportive-2",
+        "probe-aspect-jupiter-mercury-supportive-3",
+        "probe-aspect-jupiter-mercury-supportive-4",
+        "probe-aspect-jupiter-mercury-supportive-5",
+        "probe-aspect-jupiter-mercury-supportive-6",
+        "probe-aspect-jupiter-mercury-supportive-7",
+        "probe-aspect-jupiter-mercury-supportive-8"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.communication.opening"
+    },
+    {
+      "themeID": "confidence.expansion",
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "occurrenceCount": 53,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture"
+      ],
+      "variables": {},
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-sun-supportive-1",
+        "probe-aspect-jupiter-sun-supportive-2",
+        "probe-aspect-jupiter-sun-supportive-3",
+        "probe-aspect-jupiter-sun-supportive-4",
+        "probe-aspect-jupiter-sun-supportive-5",
+        "probe-aspect-jupiter-sun-supportive-6",
+        "probe-aspect-jupiter-sun-supportive-7",
+        "same-theme-multi-signal"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.confidence.expansion"
+    },
+    {
+      "themeID": "direction.alignment",
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "occurrenceCount": 136,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "variables": {},
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-trueNode-supportive-1",
+        "probe-aspect-jupiter-trueNode-supportive-2",
+        "probe-aspect-jupiter-trueNode-supportive-3",
+        "probe-aspect-jupiter-trueNode-supportive-4",
+        "real-chart-01-1777636800",
+        "real-chart-02-1777636800",
+        "real-chart-02-1793534400",
+        "real-chart-05-1777636800"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.direction.alignment"
+    },
+    {
+      "themeID": "direction.reorientation",
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "occurrenceCount": 136,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "variables": {},
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-trueNode-challenging-1",
+        "probe-aspect-jupiter-trueNode-challenging-2",
+        "probe-aspect-jupiter-trueNode-challenging-3",
+        "probe-aspect-jupiter-trueNode-challenging-4",
+        "real-chart-02-1785672000",
+        "real-chart-03-1777636800",
+        "real-chart-03-1785672000",
+        "real-chart-04-1785672000"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.direction.reorientation"
+    },
+    {
+      "themeID": "direction.turning-point",
+      "variables": {},
+      "roleID": "currentCycle",
+      "cardID": "current-cycles",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "copySlot": "cycleChapter",
+      "key": "modern.transit.cycleChapter.currentCycle.direction.turning-point",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-trueNode-neutral-1",
+        "probe-aspect-jupiter-trueNode-neutral-2",
+        "probe-aspect-jupiter-trueNode-neutral-3",
+        "probe-aspect-jupiter-trueNode-neutral-4",
+        "probe-aspect-jupiter-trueNode-neutral-5",
+        "probe-aspect-jupiter-trueNode-neutral-6",
+        "real-chart-01-1785672000",
+        "real-chart-01-1793534400"
+      ],
+      "occurrenceCount": 134
+    },
+    {
+      "themeID": "emotional.disruption",
+      "variables": {},
+      "roleID": "currentCycle",
+      "cardID": "current-cycles",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "cycleChapter",
+      "key": "modern.transit.cycleChapter.currentCycle.emotional.disruption",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-moon-challenging-1",
+        "probe-aspect-jupiter-moon-challenging-2",
+        "probe-aspect-jupiter-moon-challenging-3",
+        "probe-aspect-jupiter-moon-challenging-4",
+        "probe-aspect-jupiter-moon-challenging-5",
+        "probe-aspect-jupiter-moon-challenging-6",
+        "probe-aspect-jupiter-moon-challenging-7",
+        "probe-aspect-jupiter-moon-challenging-8"
+      ],
+      "occurrenceCount": 14
+    },
+    {
+      "themeID": "emotional.sensitivity",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.emotional.sensitivity",
+      "occurrenceCount": 14,
+      "copySlot": "cycleChapter",
+      "roleID": "currentCycle",
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-moon-neutral-1",
+        "probe-aspect-jupiter-moon-neutral-2",
+        "probe-aspect-jupiter-moon-neutral-3",
+        "probe-aspect-jupiter-moon-neutral-4",
+        "probe-aspect-jupiter-moon-neutral-5",
+        "probe-aspect-jupiter-moon-neutral-6",
+        "probe-aspect-jupiter-moon-neutral-7",
+        "probe-aspect-jupiter-moon-neutral-8"
+      ]
+    },
+    {
+      "themeID": "emotional.stability",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.emotional.stability",
+      "occurrenceCount": 17,
+      "copySlot": "cycleChapter",
+      "roleID": "currentCycle",
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "mixed-complete",
+        "no-window-signals",
+        "probe-aspect-jupiter-moon-supportive-1",
+        "probe-aspect-jupiter-moon-supportive-2",
+        "probe-aspect-jupiter-moon-supportive-3",
+        "probe-aspect-jupiter-moon-supportive-4",
+        "probe-aspect-jupiter-moon-supportive-5",
+        "supportive-only"
+      ]
+    },
+    {
+      "themeID": "healing.integration",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.healing.integration",
+      "occurrenceCount": 4,
+      "copySlot": "cycleChapter",
+      "roleID": "currentCycle",
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-neutral-6",
+        "probe-aspect-jupiter-jupiter-supportive-12",
+        "probe-aspect-trueNode-trueNode-neutral-6",
+        "probe-aspect-trueNode-trueNode-supportive-12"
+      ]
+    },
+    {
+      "themeID": "home.adjustment",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.home.adjustment",
+      "occurrenceCount": 2,
+      "copySlot": "cycleChapter",
+      "roleID": "currentCycle",
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-challenging-4",
+        "probe-aspect-trueNode-trueNode-challenging-4"
+      ]
+    },
+    {
+      "themeID": "identity.reconstruction",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.identity.reconstruction",
+      "occurrenceCount": 15,
+      "copySlot": "cycleChapter",
+      "roleID": "currentCycle",
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-sun-neutral-1",
+        "probe-aspect-jupiter-sun-neutral-2",
+        "probe-aspect-jupiter-sun-neutral-3",
+        "probe-aspect-jupiter-sun-neutral-4",
+        "probe-aspect-jupiter-sun-neutral-5",
+        "probe-aspect-jupiter-sun-neutral-6",
+        "probe-aspect-jupiter-sun-neutral-7",
+        "real-chart-02-1769947200"
+      ]
+    },
+    {
+      "themeID": "identity.reinvention",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.identity.reinvention",
+      "occurrenceCount": 14,
+      "copySlot": "cycleChapter",
+      "roleID": "currentCycle",
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-sun-challenging-1",
+        "probe-aspect-jupiter-sun-challenging-2",
+        "probe-aspect-jupiter-sun-challenging-3",
+        "probe-aspect-jupiter-sun-challenging-4",
+        "probe-aspect-jupiter-sun-challenging-5",
+        "probe-aspect-jupiter-sun-challenging-6",
+        "probe-aspect-jupiter-sun-challenging-7",
+        "probe-aspect-jupiter-sun-challenging-8"
+      ]
+    },
+    {
+      "themeID": "imagination.opening",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.imagination.opening",
+      "occurrenceCount": 2,
+      "copySlot": "cycleChapter",
+      "roleID": "currentCycle",
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-neutral-5",
+        "probe-aspect-trueNode-trueNode-neutral-5"
+      ]
+    },
+    {
+      "themeID": "independence.growth",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.independence.growth",
+      "occurrenceCount": 2,
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-neutral-11",
+        "probe-aspect-trueNode-trueNode-neutral-11"
+      ]
+    },
+    {
+      "themeID": "learning.expansion",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.learning.expansion",
+      "occurrenceCount": 38,
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-supportive-9",
+        "probe-aspect-jupiter-uranus-supportive-1",
+        "probe-aspect-jupiter-uranus-supportive-2",
+        "probe-aspect-jupiter-uranus-supportive-3",
+        "probe-aspect-jupiter-uranus-supportive-4",
+        "probe-aspect-jupiter-uranus-supportive-5",
+        "probe-aspect-jupiter-uranus-supportive-6",
+        "probe-aspect-jupiter-uranus-supportive-7"
+      ]
+    },
+    {
+      "themeID": "mental.review",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.mental.review",
+      "occurrenceCount": 16,
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-mercury-neutral-1",
+        "probe-aspect-jupiter-mercury-neutral-2",
+        "probe-aspect-jupiter-mercury-neutral-3",
+        "probe-aspect-jupiter-mercury-neutral-4",
+        "probe-aspect-jupiter-mercury-neutral-5",
+        "probe-aspect-jupiter-mercury-neutral-6",
+        "probe-aspect-jupiter-mercury-neutral-7",
+        "probe-aspect-jupiter-mercury-neutral-8"
+      ]
+    },
+    {
+      "themeID": "momentum.blocked",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.momentum.blocked",
+      "occurrenceCount": 13,
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-mars-challenging-1",
+        "probe-aspect-jupiter-mars-challenging-2",
+        "probe-aspect-jupiter-mars-challenging-3",
+        "probe-aspect-jupiter-mars-challenging-4",
+        "probe-aspect-jupiter-mars-challenging-5",
+        "probe-aspect-jupiter-mars-challenging-6",
+        "probe-aspect-jupiter-mars-challenging-7",
+        "real-chart-05-1785672000"
+      ]
+    },
+    {
+      "themeID": "momentum.rising",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.momentum.rising",
+      "occurrenceCount": 14,
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-mars-supportive-1",
+        "probe-aspect-jupiter-mars-supportive-2",
+        "probe-aspect-jupiter-mars-supportive-3",
+        "probe-aspect-jupiter-mars-supportive-4",
+        "probe-aspect-jupiter-mars-supportive-5",
+        "probe-aspect-jupiter-mars-supportive-6",
+        "real-chart-01-1769947200",
+        "real-chart-03-1793534400"
+      ]
+    },
+    {
+      "themeID": "money.review",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.money.review",
+      "occurrenceCount": 2,
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-challenging-2",
+        "probe-aspect-trueNode-trueNode-challenging-2"
+      ]
+    },
+    {
+      "themeID": "relationship.boundaries",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.relationship.boundaries",
+      "occurrenceCount": 14,
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-venus-challenging-1",
+        "probe-aspect-jupiter-venus-challenging-2",
+        "probe-aspect-jupiter-venus-challenging-3",
+        "probe-aspect-jupiter-venus-challenging-4",
+        "probe-aspect-jupiter-venus-challenging-5",
+        "probe-aspect-jupiter-venus-challenging-6",
+        "probe-aspect-jupiter-venus-challenging-7",
+        "probe-aspect-jupiter-venus-challenging-8"
+      ]
+    },
+    {
+      "themeID": "relationship.intensity",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.relationship.intensity",
+      "occurrenceCount": 4,
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-challenging-5",
+        "probe-aspect-jupiter-jupiter-challenging-8",
+        "probe-aspect-trueNode-trueNode-challenging-5",
+        "probe-aspect-trueNode-trueNode-challenging-8"
+      ]
+    },
+    {
+      "themeID": "relationship.opening",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.relationship.opening",
+      "occurrenceCount": 15,
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-venus-supportive-1",
+        "probe-aspect-jupiter-venus-supportive-2",
+        "probe-aspect-jupiter-venus-supportive-3",
+        "probe-aspect-jupiter-venus-supportive-4",
+        "probe-aspect-jupiter-venus-supportive-5",
+        "probe-aspect-jupiter-venus-supportive-6",
+        "probe-aspect-jupiter-venus-supportive-7",
+        "real-chart-05-1769947200"
+      ]
+    },
+    {
+      "variables": {},
+      "themeID": "responsibility.pressure",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.responsibility.pressure",
+      "occurrenceCount": 26,
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-mars-neutral-1",
+        "probe-aspect-jupiter-mars-neutral-2",
+        "probe-aspect-jupiter-mars-neutral-3",
+        "probe-aspect-jupiter-mars-neutral-4",
+        "probe-aspect-jupiter-mars-neutral-5",
+        "probe-aspect-jupiter-mars-neutral-6",
+        "probe-aspect-jupiter-mars-neutral-7",
+        "probe-aspect-jupiter-mars-neutral-8"
+      ]
+    },
+    {
+      "variables": {},
+      "themeID": "routine.disruption",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.routine.disruption",
+      "occurrenceCount": 2,
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-challenging-6",
+        "probe-aspect-trueNode-trueNode-challenging-6"
+      ]
+    },
+    {
+      "themeID": "social.boundaries",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.social.boundaries",
+      "occurrenceCount": 2,
+      "copySlot": "cycleChapter",
+      "roleID": "currentCycle",
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-challenging-11",
+        "probe-aspect-trueNode-trueNode-challenging-11"
+      ]
+    },
+    {
+      "variables": {},
+      "themeID": "social.expansion",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.social.expansion",
+      "occurrenceCount": 3,
+      "copySlot": "cycleChapter",
+      "cardID": "current-cycles",
+      "roleID": "currentCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-supportive-11",
+        "probe-aspect-trueNode-trueNode-supportive-11",
+        "real-chart-04-1769947200"
+      ]
+    },
+    {
+      "themeID": "structure.building",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "key": "modern.transit.cycleChapter.currentCycle.structure.building",
+      "occurrenceCount": 17,
+      "copySlot": "cycleChapter",
+      "roleID": "currentCycle",
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-supportive-2",
+        "probe-aspect-jupiter-jupiter-supportive-6",
+        "probe-aspect-jupiter-saturn-supportive-1",
+        "probe-aspect-jupiter-saturn-supportive-2",
+        "probe-aspect-jupiter-saturn-supportive-3",
+        "probe-aspect-jupiter-saturn-supportive-4",
+        "probe-aspect-jupiter-saturn-supportive-5",
+        "real-chart-03-1769947200"
+      ]
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.transformation.release",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-neutral-8",
+        "probe-aspect-trueNode-trueNode-neutral-8"
+      ],
+      "roleID": "currentCycle",
+      "themeID": "transformation.release",
+      "variables": {},
+      "occurrenceCount": 2,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.trust.deepening",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-supportive-8",
+        "probe-aspect-trueNode-trueNode-supportive-8"
+      ],
+      "roleID": "currentCycle",
+      "themeID": "trust.deepening",
+      "variables": {},
+      "occurrenceCount": 2,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.uncertainty.fog",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-jupiter-challenging-12",
+        "probe-aspect-jupiter-jupiter-challenging-9",
+        "probe-aspect-jupiter-uranus-challenging-1",
+        "probe-aspect-jupiter-uranus-challenging-2",
+        "probe-aspect-jupiter-uranus-challenging-3",
+        "probe-aspect-jupiter-uranus-challenging-4",
+        "probe-aspect-jupiter-uranus-challenging-5",
+        "real-chart-04-1793534400"
+      ],
+      "roleID": "currentCycle",
+      "themeID": "uncertainty.fog",
+      "variables": {},
+      "occurrenceCount": 41,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.values.reassessment",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-jupiter-venus-neutral-1",
+        "probe-aspect-jupiter-venus-neutral-2",
+        "probe-aspect-jupiter-venus-neutral-3",
+        "probe-aspect-jupiter-venus-neutral-4",
+        "probe-aspect-jupiter-venus-neutral-5",
+        "probe-aspect-jupiter-venus-neutral-6",
+        "probe-aspect-jupiter-venus-neutral-7",
+        "probe-aspect-jupiter-venus-neutral-8"
+      ],
+      "roleID": "currentCycle",
+      "themeID": "values.reassessment",
+      "variables": {},
+      "occurrenceCount": 14,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.career.restructuring",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-mars-mars-challenging-10",
+        "probe-aspect-mercury-mercury-challenging-10",
+        "probe-aspect-moon-moon-challenging-10",
+        "probe-aspect-sun-sun-challenging-10",
+        "probe-aspect-venus-venus-challenging-10"
+      ],
+      "roleID": "dailyCycle",
+      "themeID": "career.restructuring",
+      "variables": {},
+      "occurrenceCount": 5,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.career.visibility",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-mars-mars-supportive-10",
+        "probe-aspect-mercury-mercury-supportive-10",
+        "probe-aspect-moon-moon-supportive-10",
+        "probe-aspect-sun-sun-supportive-10",
+        "probe-aspect-venus-venus-supportive-10"
+      ],
+      "roleID": "dailyCycle",
+      "themeID": "career.visibility",
+      "variables": {},
+      "occurrenceCount": 5,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.commitment.deepening",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-mars-mars-neutral-7",
+        "probe-aspect-mercury-mercury-neutral-7",
+        "probe-aspect-moon-moon-neutral-7",
+        "probe-aspect-sun-sun-neutral-7",
+        "probe-aspect-venus-venus-neutral-7"
+      ],
+      "roleID": "dailyCycle",
+      "themeID": "commitment.deepening",
+      "variables": {},
+      "occurrenceCount": 5,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.communication.friction",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-mercury-challenging-1",
+        "probe-aspect-sun-mercury-challenging-2",
+        "probe-aspect-sun-mercury-challenging-3",
+        "probe-aspect-sun-mercury-challenging-4",
+        "probe-aspect-sun-mercury-challenging-5",
+        "probe-aspect-sun-mercury-challenging-6",
+        "probe-aspect-sun-sun-challenging-3",
+        "real-chart-03-1777636800"
+      ],
+      "roleID": "dailyCycle",
+      "themeID": "communication.friction",
+      "variables": {},
+      "occurrenceCount": 150,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.communication.opening",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-mercury-supportive-1",
+        "probe-aspect-sun-mercury-supportive-2",
+        "probe-aspect-sun-mercury-supportive-3",
+        "probe-aspect-sun-sun-supportive-3",
+        "real-chart-01-1777636800",
+        "real-chart-02-1793534400",
+        "real-chart-03-1769947200",
+        "real-chart-04-1769947200"
+      ],
+      "roleID": "dailyCycle",
+      "themeID": "communication.opening",
+      "variables": {},
+      "occurrenceCount": 141,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.confidence.expansion",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-mars-supportive-1",
+        "probe-aspect-sun-mars-supportive-2",
+        "probe-aspect-sun-mars-supportive-3",
+        "probe-aspect-sun-mars-supportive-4",
+        "probe-aspect-sun-mars-supportive-5",
+        "probe-aspect-sun-sun-supportive-1",
+        "probe-aspect-sun-sun-supportive-5",
+        "same-theme-multi-signal"
+      ],
+      "roleID": "dailyCycle",
+      "themeID": "confidence.expansion",
+      "variables": {},
+      "occurrenceCount": 83,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.direction.alignment",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-trueNode-supportive-1",
+        "probe-aspect-sun-trueNode-supportive-2",
+        "probe-aspect-sun-trueNode-supportive-3",
+        "probe-aspect-sun-trueNode-supportive-4",
+        "probe-aspect-sun-trueNode-supportive-5",
+        "probe-aspect-sun-trueNode-supportive-6",
+        "real-chart-01-1769947200",
+        "real-chart-01-1785672000"
+      ],
+      "roleID": "dailyCycle",
+      "themeID": "direction.alignment",
+      "variables": {},
+      "occurrenceCount": 62,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.direction.reorientation",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-trueNode-challenging-1",
+        "probe-aspect-sun-trueNode-challenging-2",
+        "probe-aspect-sun-trueNode-challenging-3",
+        "probe-aspect-sun-trueNode-challenging-4",
+        "probe-aspect-sun-trueNode-challenging-5",
+        "probe-aspect-sun-trueNode-challenging-6",
+        "probe-aspect-sun-trueNode-challenging-7",
+        "probe-aspect-sun-trueNode-challenging-8"
+      ],
+      "roleID": "dailyCycle",
+      "themeID": "direction.reorientation",
+      "variables": {},
+      "occurrenceCount": 60,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.direction.turning-point",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-trueNode-neutral-1",
+        "probe-aspect-sun-trueNode-neutral-2",
+        "probe-aspect-sun-trueNode-neutral-3",
+        "probe-aspect-sun-trueNode-neutral-4",
+        "probe-aspect-sun-trueNode-neutral-5",
+        "real-chart-02-1769947200",
+        "real-chart-03-1793534400",
+        "real-chart-05-1785672000"
+      ],
+      "roleID": "dailyCycle",
+      "themeID": "direction.turning-point",
+      "variables": {},
+      "occurrenceCount": 63,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.emotional.disruption",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-moon-challenging-1",
+        "probe-aspect-sun-moon-challenging-2",
+        "probe-aspect-sun-moon-challenging-3",
+        "probe-aspect-sun-moon-challenging-4",
+        "probe-aspect-sun-moon-challenging-5",
+        "probe-aspect-sun-moon-challenging-6",
+        "probe-aspect-sun-sun-neutral-4",
+        "real-chart-04-1777636800"
+      ],
+      "roleID": "dailyCycle",
+      "themeID": "emotional.disruption",
+      "variables": {},
+      "occurrenceCount": 90,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.emotional.sensitivity",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-moon-neutral-1",
+        "probe-aspect-sun-moon-neutral-2",
+        "probe-aspect-sun-moon-neutral-3",
+        "probe-aspect-sun-moon-neutral-4",
+        "probe-aspect-sun-moon-neutral-5",
+        "probe-aspect-sun-moon-neutral-6",
+        "probe-aspect-sun-sun-neutral-12",
+        "real-chart-05-1793534400"
+      ],
+      "roleID": "dailyCycle",
+      "themeID": "emotional.sensitivity",
+      "variables": {},
+      "occurrenceCount": 126,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.emotional.stability",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-moon-supportive-1",
+        "probe-aspect-sun-moon-supportive-2",
+        "probe-aspect-sun-moon-supportive-3",
+        "probe-aspect-sun-moon-supportive-4",
+        "probe-aspect-sun-moon-supportive-5",
+        "probe-aspect-sun-sun-supportive-4",
+        "real-chart-05-1777636800",
+        "stabilizing-signal"
+      ],
+      "roleID": "dailyCycle",
+      "themeID": "emotional.stability",
+      "variables": {},
+      "occurrenceCount": 127,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.emotional.weight",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-moon-saturn-challenging-1",
+        "probe-aspect-moon-saturn-challenging-2",
+        "probe-aspect-moon-saturn-challenging-3",
+        "probe-aspect-moon-saturn-challenging-4",
+        "probe-aspect-moon-saturn-challenging-5",
+        "probe-aspect-moon-saturn-challenging-6",
+        "probe-aspect-moon-saturn-challenging-7",
+        "probe-aspect-moon-saturn-challenging-8"
+      ],
+      "roleID": "dailyCycle",
+      "themeID": "emotional.weight",
+      "variables": {},
+      "occurrenceCount": 12,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.healing.integration",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-mercury-mercury-neutral-6",
+        "probe-aspect-mercury-mercury-supportive-12",
+        "probe-aspect-moon-moon-neutral-6",
+        "probe-aspect-moon-moon-supportive-12",
+        "probe-aspect-sun-sun-neutral-6",
+        "probe-aspect-sun-sun-supportive-12",
+        "probe-aspect-venus-venus-neutral-6",
+        "probe-aspect-venus-venus-supportive-12"
+      ],
+      "roleID": "dailyCycle",
+      "themeID": "healing.integration",
+      "variables": {},
+      "occurrenceCount": 10,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.home.adjustment",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-mars-mars-challenging-4",
+        "probe-aspect-mercury-mercury-challenging-4",
+        "probe-aspect-moon-moon-challenging-4",
+        "probe-aspect-sun-sun-challenging-4",
+        "probe-aspect-venus-venus-challenging-4",
+        "real-chart-05-1769947200"
+      ],
+      "roleID": "dailyCycle",
+      "themeID": "home.adjustment",
+      "variables": {},
+      "occurrenceCount": 6,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.identity.reconstruction",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-mars-neutral-1",
+        "probe-aspect-sun-mars-neutral-2",
+        "probe-aspect-sun-mars-neutral-3",
+        "probe-aspect-sun-mars-neutral-4",
+        "probe-aspect-sun-mars-neutral-5",
+        "probe-aspect-sun-mars-neutral-6",
+        "probe-aspect-sun-mars-neutral-7",
+        "probe-aspect-sun-sun-neutral-1"
+      ],
+      "roleID": "dailyCycle",
+      "themeID": "identity.reconstruction",
+      "variables": {},
+      "occurrenceCount": 101,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.identity.reinvention",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-mars-challenging-1",
+        "probe-aspect-sun-mars-challenging-2",
+        "probe-aspect-sun-mars-challenging-3",
+        "probe-aspect-sun-mars-challenging-4",
+        "probe-aspect-sun-mars-challenging-5",
+        "probe-aspect-sun-mars-challenging-6",
+        "probe-aspect-sun-mars-challenging-7",
+        "probe-aspect-sun-sun-challenging-1"
+      ],
+      "roleID": "dailyCycle",
+      "themeID": "identity.reinvention",
+      "variables": {},
+      "occurrenceCount": 53,
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter"
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "themeID": "imagination.opening",
+      "copySlot": "cycleChapter",
+      "key": "modern.transit.cycleChapter.dailyCycle.imagination.opening",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 17,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-neptune-supportive-1",
+        "probe-aspect-sun-neptune-supportive-2",
+        "probe-aspect-sun-neptune-supportive-3",
+        "probe-aspect-sun-neptune-supportive-4",
+        "probe-aspect-sun-neptune-supportive-5",
+        "probe-aspect-sun-neptune-supportive-6",
+        "probe-aspect-sun-neptune-supportive-7",
+        "probe-aspect-sun-sun-neutral-5"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "themeID": "independence.growth",
+      "copySlot": "cycleChapter",
+      "key": "modern.transit.cycleChapter.dailyCycle.independence.growth",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 5,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-mars-mars-neutral-11",
+        "probe-aspect-mercury-mercury-neutral-11",
+        "probe-aspect-moon-moon-neutral-11",
+        "probe-aspect-sun-sun-neutral-11",
+        "probe-aspect-venus-venus-neutral-11"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "themeID": "learning.expansion",
+      "copySlot": "cycleChapter",
+      "key": "modern.transit.cycleChapter.dailyCycle.learning.expansion",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 5,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-mars-mars-supportive-9",
+        "probe-aspect-mercury-mercury-supportive-9",
+        "probe-aspect-moon-moon-supportive-9",
+        "probe-aspect-sun-sun-supportive-9",
+        "probe-aspect-venus-venus-supportive-9"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "themeID": "mental.clarity",
+      "copySlot": "cycleChapter",
+      "key": "modern.transit.cycleChapter.dailyCycle.mental.clarity",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 24,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-mercury-uranus-supportive-1",
+        "probe-aspect-mercury-uranus-supportive-2",
+        "probe-aspect-mercury-uranus-supportive-3",
+        "probe-aspect-mercury-uranus-supportive-4",
+        "probe-aspect-mercury-uranus-supportive-5",
+        "probe-aspect-mercury-uranus-supportive-6",
+        "probe-aspect-mercury-uranus-supportive-7",
+        "probe-aspect-mercury-uranus-supportive-8"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "variables": {},
+      "themeID": "mental.review",
+      "copySlot": "cycleChapter",
+      "key": "modern.transit.cycleChapter.dailyCycle.mental.review",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 170,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "neutral-only",
+        "probe-aspect-sun-mercury-neutral-1",
+        "probe-aspect-sun-mercury-neutral-2",
+        "probe-aspect-sun-sun-neutral-3",
+        "probe-aspect-sun-sun-neutral-9",
+        "real-chart-01-1793534400",
+        "real-chart-02-1777636800",
+        "real-chart-02-1785672000"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "themeID": "momentum.blocked",
+      "copySlot": "cycleChapter",
+      "key": "modern.transit.cycleChapter.dailyCycle.momentum.blocked",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 48,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-mars-jupiter-challenging-1",
+        "probe-aspect-mars-jupiter-challenging-2",
+        "probe-aspect-mars-jupiter-challenging-3",
+        "probe-aspect-mars-jupiter-challenging-4",
+        "probe-aspect-mars-jupiter-challenging-5",
+        "probe-aspect-mars-jupiter-challenging-6",
+        "probe-aspect-mars-jupiter-challenging-7",
+        "probe-aspect-mars-jupiter-challenging-8"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "variables": {},
+      "themeID": "momentum.rising",
+      "copySlot": "cycleChapter",
+      "key": "modern.transit.cycleChapter.dailyCycle.momentum.rising",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 61,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-mars-jupiter-supportive-1",
+        "probe-aspect-mars-jupiter-supportive-2",
+        "probe-aspect-mars-jupiter-supportive-3",
+        "probe-aspect-mars-jupiter-supportive-4",
+        "probe-aspect-mars-jupiter-supportive-5",
+        "probe-aspect-mars-jupiter-supportive-6",
+        "probe-aspect-mars-jupiter-supportive-7",
+        "real-chart-04-1785672000"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "themeID": "money.review",
+      "copySlot": "cycleChapter",
+      "key": "modern.transit.cycleChapter.dailyCycle.money.review",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 5,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-mars-mars-challenging-2",
+        "probe-aspect-mercury-mercury-challenging-2",
+        "probe-aspect-moon-moon-challenging-2",
+        "probe-aspect-sun-sun-challenging-2",
+        "probe-aspect-venus-venus-challenging-2"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "variables": {},
+      "themeID": "relationship.boundaries",
+      "copySlot": "cycleChapter",
+      "key": "modern.transit.cycleChapter.dailyCycle.relationship.boundaries",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 115,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "mixed-complete",
+        "probe-aspect-sun-sun-challenging-7",
+        "probe-aspect-sun-venus-challenging-1",
+        "probe-aspect-sun-venus-challenging-2",
+        "probe-aspect-sun-venus-challenging-3",
+        "probe-aspect-sun-venus-challenging-4",
+        "probe-aspect-sun-venus-challenging-5",
+        "real-chart-04-1793534400"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "cycleChapter",
+      "themeID": "relationship.freedom",
+      "variables": {},
+      "key": "modern.transit.cycleChapter.dailyCycle.relationship.freedom",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 12,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-venus-uranus-challenging-1",
+        "probe-aspect-venus-uranus-challenging-2",
+        "probe-aspect-venus-uranus-challenging-3",
+        "probe-aspect-venus-uranus-challenging-4",
+        "probe-aspect-venus-uranus-challenging-5",
+        "probe-aspect-venus-uranus-challenging-6",
+        "probe-aspect-venus-uranus-challenging-7",
+        "probe-aspect-venus-uranus-challenging-8"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "themeID": "relationship.intensity",
+      "copySlot": "cycleChapter",
+      "key": "modern.transit.cycleChapter.dailyCycle.relationship.intensity",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 34,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-moon-moon-challenging-5",
+        "probe-aspect-moon-moon-challenging-8",
+        "probe-aspect-moon-pluto-challenging-1",
+        "probe-aspect-moon-pluto-challenging-2",
+        "probe-aspect-moon-pluto-challenging-3",
+        "probe-aspect-moon-pluto-challenging-4",
+        "probe-aspect-sun-sun-challenging-5",
+        "probe-aspect-sun-sun-challenging-8"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "themeID": "relationship.opening",
+      "copySlot": "cycleChapter",
+      "key": "modern.transit.cycleChapter.dailyCycle.relationship.opening",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 113,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-sun-supportive-7",
+        "probe-aspect-sun-venus-supportive-1",
+        "probe-aspect-sun-venus-supportive-2",
+        "probe-aspect-sun-venus-supportive-3",
+        "probe-aspect-sun-venus-supportive-4",
+        "probe-aspect-sun-venus-supportive-5",
+        "probe-aspect-sun-venus-supportive-6",
+        "probe-aspect-sun-venus-supportive-7"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "variables": {},
+      "themeID": "responsibility.pressure",
+      "copySlot": "cycleChapter",
+      "key": "modern.transit.cycleChapter.dailyCycle.responsibility.pressure",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 77,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-saturn-challenging-1",
+        "probe-aspect-sun-saturn-challenging-2",
+        "probe-aspect-sun-saturn-challenging-3",
+        "probe-aspect-sun-saturn-challenging-4",
+        "probe-aspect-sun-saturn-challenging-5",
+        "probe-aspect-sun-saturn-challenging-6",
+        "probe-aspect-sun-saturn-challenging-7",
+        "probe-aspect-sun-sun-neutral-10"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "variables": {},
+      "themeID": "routine.disruption",
+      "copySlot": "cycleChapter",
+      "key": "modern.transit.cycleChapter.dailyCycle.routine.disruption",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 18,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-mars-mars-challenging-6",
+        "probe-aspect-mars-uranus-challenging-1",
+        "probe-aspect-mars-uranus-challenging-2",
+        "probe-aspect-mercury-mercury-challenging-6",
+        "probe-aspect-moon-moon-challenging-6",
+        "probe-aspect-sun-sun-challenging-6",
+        "probe-aspect-venus-venus-challenging-6",
+        "real-chart-03-1785672000"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "themeID": "social.boundaries",
+      "key": "modern.transit.cycleChapter.dailyCycle.social.boundaries",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 5,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-mars-mars-challenging-11",
+        "probe-aspect-mercury-mercury-challenging-11",
+        "probe-aspect-moon-moon-challenging-11",
+        "probe-aspect-sun-sun-challenging-11",
+        "probe-aspect-venus-venus-challenging-11"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "themeID": "social.expansion",
+      "key": "modern.transit.cycleChapter.dailyCycle.social.expansion",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 5,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-mars-mars-supportive-11",
+        "probe-aspect-mercury-mercury-supportive-11",
+        "probe-aspect-moon-moon-supportive-11",
+        "probe-aspect-sun-sun-supportive-11",
+        "probe-aspect-venus-venus-supportive-11"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "themeID": "structure.building",
+      "key": "modern.transit.cycleChapter.dailyCycle.structure.building",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 10,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-mercury-mercury-supportive-2",
+        "probe-aspect-mercury-mercury-supportive-6",
+        "probe-aspect-moon-moon-supportive-2",
+        "probe-aspect-moon-moon-supportive-6",
+        "probe-aspect-sun-sun-supportive-2",
+        "probe-aspect-sun-sun-supportive-6",
+        "probe-aspect-venus-venus-supportive-2",
+        "probe-aspect-venus-venus-supportive-6"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "themeID": "transformation.release",
+      "key": "modern.transit.cycleChapter.dailyCycle.transformation.release",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 5,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-mars-mars-neutral-8",
+        "probe-aspect-mercury-mercury-neutral-8",
+        "probe-aspect-moon-moon-neutral-8",
+        "probe-aspect-sun-sun-neutral-8",
+        "probe-aspect-venus-venus-neutral-8"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "themeID": "trust.deepening",
+      "key": "modern.transit.cycleChapter.dailyCycle.trust.deepening",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 5,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-mars-mars-supportive-8",
+        "probe-aspect-mercury-mercury-supportive-8",
+        "probe-aspect-moon-moon-supportive-8",
+        "probe-aspect-sun-sun-supportive-8",
+        "probe-aspect-venus-venus-supportive-8"
+      ]
+    },
+    {
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "themeID": "uncertainty.fog",
+      "key": "modern.transit.cycleChapter.dailyCycle.uncertainty.fog",
+      "roleID": "dailyCycle",
+      "occurrenceCount": 34,
+      "cardID": "current-cycles",
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-neptune-challenging-1",
+        "probe-aspect-sun-neptune-challenging-2",
+        "probe-aspect-sun-neptune-challenging-3",
+        "probe-aspect-sun-neptune-challenging-4",
+        "probe-aspect-sun-neptune-challenging-5",
+        "probe-aspect-sun-neptune-challenging-6",
+        "probe-aspect-sun-sun-challenging-12",
+        "probe-aspect-sun-sun-challenging-9"
+      ]
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.values.reassessment",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "dailyCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-sun-sun-neutral-2",
+        "probe-aspect-sun-venus-neutral-1",
+        "probe-aspect-sun-venus-neutral-2",
+        "probe-aspect-sun-venus-neutral-3",
+        "probe-aspect-sun-venus-neutral-4",
+        "probe-aspect-sun-venus-neutral-5",
+        "probe-aspect-sun-venus-neutral-6",
+        "probe-aspect-sun-venus-neutral-7"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 137,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "themeID": "values.reassessment"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.career.restructuring",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-saturn-challenging-10",
+        "probe-aspect-saturn-uranus-challenging-1",
+        "probe-aspect-saturn-uranus-challenging-2",
+        "probe-aspect-saturn-uranus-challenging-3",
+        "probe-aspect-saturn-uranus-challenging-4",
+        "probe-aspect-saturn-uranus-challenging-5",
+        "probe-aspect-saturn-uranus-challenging-6",
+        "probe-aspect-saturn-uranus-challenging-7"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 28,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "themeID": "career.restructuring"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.career.visibility",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-neptune-neptune-supportive-10",
+        "probe-aspect-pluto-pluto-supportive-10",
+        "probe-aspect-saturn-saturn-supportive-10",
+        "probe-aspect-uranus-uranus-supportive-10"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 4,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "themeID": "career.visibility"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.commitment.deepening",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-jupiter-neutral-1",
+        "probe-aspect-saturn-jupiter-neutral-2",
+        "probe-aspect-saturn-jupiter-neutral-3",
+        "probe-aspect-saturn-jupiter-neutral-4",
+        "probe-aspect-saturn-jupiter-neutral-5",
+        "probe-aspect-saturn-jupiter-neutral-6",
+        "probe-aspect-saturn-jupiter-neutral-7",
+        "probe-aspect-saturn-jupiter-neutral-8"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 88,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "themeID": "commitment.deepening"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.communication.friction",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-mercury-challenging-1",
+        "probe-aspect-saturn-mercury-challenging-2",
+        "probe-aspect-saturn-mercury-challenging-3",
+        "probe-aspect-saturn-mercury-challenging-4",
+        "probe-aspect-saturn-mercury-challenging-5",
+        "probe-aspect-saturn-mercury-challenging-6",
+        "probe-aspect-saturn-mercury-challenging-7",
+        "probe-aspect-saturn-mercury-challenging-8"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 40,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "themeID": "communication.friction"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.communication.opening",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-mercury-supportive-1",
+        "probe-aspect-saturn-mercury-supportive-2",
+        "probe-aspect-saturn-mercury-supportive-3",
+        "probe-aspect-saturn-mercury-supportive-4",
+        "probe-aspect-saturn-mercury-supportive-5",
+        "probe-aspect-saturn-mercury-supportive-6",
+        "probe-aspect-saturn-mercury-supportive-7",
+        "real-chart-01-1785672000"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 29,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "themeID": "communication.opening"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.confidence.expansion",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-sun-supportive-1",
+        "probe-aspect-saturn-sun-supportive-2",
+        "probe-aspect-saturn-sun-supportive-3",
+        "probe-aspect-saturn-sun-supportive-4",
+        "probe-aspect-saturn-sun-supportive-5",
+        "probe-aspect-saturn-sun-supportive-6",
+        "probe-aspect-saturn-sun-supportive-7",
+        "probe-aspect-saturn-sun-supportive-8"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 80,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "themeID": "confidence.expansion"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.direction.alignment",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-trueNode-supportive-1",
+        "probe-aspect-saturn-trueNode-supportive-2",
+        "probe-aspect-saturn-trueNode-supportive-3",
+        "probe-aspect-saturn-trueNode-supportive-4",
+        "probe-aspect-saturn-trueNode-supportive-5",
+        "probe-aspect-saturn-trueNode-supportive-6",
+        "probe-aspect-saturn-trueNode-supportive-7",
+        "real-chart-02-1793534400"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 49,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "themeID": "direction.alignment"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.direction.reorientation",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-trueNode-challenging-1",
+        "probe-aspect-saturn-trueNode-challenging-2",
+        "probe-aspect-saturn-trueNode-challenging-3",
+        "probe-aspect-saturn-trueNode-challenging-4",
+        "probe-aspect-saturn-trueNode-challenging-5",
+        "probe-aspect-saturn-trueNode-challenging-6",
+        "real-chart-04-1777636800",
+        "real-chart-04-1793534400"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 50,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "themeID": "direction.reorientation"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.direction.turning-point",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-trueNode-neutral-1",
+        "probe-aspect-saturn-trueNode-neutral-2",
+        "probe-aspect-saturn-trueNode-neutral-3",
+        "probe-aspect-saturn-trueNode-neutral-4",
+        "probe-aspect-saturn-trueNode-neutral-5",
+        "probe-aspect-saturn-trueNode-neutral-6",
+        "real-chart-02-1769947200",
+        "real-chart-02-1777636800"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 50,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "themeID": "direction.turning-point"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.emotional.disruption",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "disrupting-signal",
+        "probe-aspect-saturn-saturn-neutral-4",
+        "probe-aspect-uranus-moon-challenging-1",
+        "probe-aspect-uranus-moon-challenging-2",
+        "probe-aspect-uranus-moon-challenging-3",
+        "probe-aspect-uranus-moon-challenging-4",
+        "real-chart-01-1793534400",
+        "real-chart-03-1785672000"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 31,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "themeID": "emotional.disruption"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.emotional.sensitivity",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-moon-neutral-1",
+        "probe-aspect-saturn-moon-neutral-2",
+        "probe-aspect-saturn-moon-neutral-3",
+        "probe-aspect-saturn-moon-neutral-4",
+        "probe-aspect-saturn-moon-neutral-5",
+        "probe-aspect-saturn-moon-neutral-6",
+        "probe-aspect-saturn-moon-neutral-7",
+        "probe-aspect-saturn-moon-neutral-8"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 88,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "themeID": "emotional.sensitivity"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.emotional.stability",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-moon-supportive-1",
+        "probe-aspect-saturn-moon-supportive-2",
+        "probe-aspect-saturn-moon-supportive-3",
+        "probe-aspect-saturn-moon-supportive-4",
+        "probe-aspect-saturn-moon-supportive-5",
+        "probe-aspect-saturn-moon-supportive-6",
+        "real-chart-03-1769947200",
+        "real-chart-04-1769947200"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 42,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "themeID": "emotional.stability"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.emotional.weight",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-moon-challenging-1",
+        "probe-aspect-saturn-moon-challenging-2",
+        "probe-aspect-saturn-moon-challenging-3",
+        "probe-aspect-saturn-moon-challenging-4",
+        "probe-aspect-saturn-moon-challenging-5",
+        "probe-aspect-saturn-moon-challenging-6",
+        "probe-aspect-saturn-moon-challenging-7",
+        "probe-aspect-saturn-moon-challenging-8"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 12,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "themeID": "emotional.weight"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.healing.integration",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-neptune-neptune-neutral-6",
+        "probe-aspect-neptune-neptune-supportive-12",
+        "probe-aspect-pluto-pluto-neutral-6",
+        "probe-aspect-pluto-pluto-supportive-12",
+        "probe-aspect-saturn-saturn-neutral-6",
+        "probe-aspect-saturn-saturn-supportive-12",
+        "probe-aspect-uranus-uranus-neutral-6",
+        "probe-aspect-uranus-uranus-supportive-12"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 8,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "themeID": "healing.integration"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.home.adjustment",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-neptune-neptune-challenging-4",
+        "probe-aspect-pluto-pluto-challenging-4",
+        "probe-aspect-saturn-saturn-challenging-4",
+        "probe-aspect-uranus-uranus-challenging-4"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 4,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "themeID": "home.adjustment"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.identity.reconstruction",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-sun-neutral-1",
+        "probe-aspect-saturn-sun-neutral-2",
+        "probe-aspect-saturn-sun-neutral-3",
+        "probe-aspect-saturn-sun-neutral-4",
+        "probe-aspect-saturn-sun-neutral-5",
+        "probe-aspect-saturn-sun-neutral-6",
+        "probe-aspect-saturn-sun-neutral-7",
+        "probe-aspect-saturn-sun-neutral-8"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 64,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "themeID": "identity.reconstruction"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.identity.reinvention",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-saturn-challenging-1",
+        "probe-aspect-uranus-sun-challenging-1",
+        "probe-aspect-uranus-sun-challenging-2",
+        "probe-aspect-uranus-sun-challenging-3",
+        "probe-aspect-uranus-sun-challenging-4",
+        "probe-aspect-uranus-sun-challenging-5",
+        "probe-aspect-uranus-sun-challenging-6",
+        "real-chart-03-1777636800"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 65,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "themeID": "identity.reinvention"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.imagination.opening",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-neptune-sun-supportive-1",
+        "probe-aspect-neptune-sun-supportive-2",
+        "probe-aspect-neptune-sun-supportive-3",
+        "probe-aspect-neptune-sun-supportive-4",
+        "probe-aspect-neptune-sun-supportive-5",
+        "probe-aspect-saturn-saturn-neutral-5",
+        "probe-aspect-uranus-uranus-neutral-5",
+        "real-chart-03-1793534400"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 41,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "themeID": "imagination.opening"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.independence.growth",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-saturn-neutral-11",
+        "probe-aspect-uranus-neptune-supportive-1",
+        "probe-aspect-uranus-neptune-supportive-2",
+        "probe-aspect-uranus-neptune-supportive-3",
+        "probe-aspect-uranus-neptune-supportive-4",
+        "probe-aspect-uranus-neptune-supportive-5",
+        "probe-aspect-uranus-neptune-supportive-6",
+        "probe-aspect-uranus-uranus-neutral-11"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 52,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "themeID": "independence.growth"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.learning.expansion",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-saturn-supportive-9",
+        "probe-aspect-uranus-jupiter-supportive-1",
+        "probe-aspect-uranus-jupiter-supportive-2",
+        "probe-aspect-uranus-jupiter-supportive-3",
+        "probe-aspect-uranus-jupiter-supportive-4",
+        "real-chart-05-1777636800",
+        "real-chart-05-1785672000",
+        "real-chart-05-1793534400"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 43,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "themeID": "learning.expansion"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.mental.clarity",
+      "cardID": "current-cycles",
+      "variables": {},
+      "roleID": "longCycle",
+      "exampleScenarioIDs": [
+        "probe-aspect-uranus-mercury-supportive-1",
+        "probe-aspect-uranus-mercury-supportive-2",
+        "probe-aspect-uranus-mercury-supportive-3",
+        "probe-aspect-uranus-mercury-supportive-4",
+        "probe-aspect-uranus-mercury-supportive-5",
+        "probe-aspect-uranus-mercury-supportive-6",
+        "probe-aspect-uranus-mercury-supportive-7",
+        "probe-aspect-uranus-mercury-supportive-8"
+      ],
+      "copySlot": "cycleChapter",
+      "occurrenceCount": 24,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "themeID": "mental.clarity"
+    },
+    {
+      "variables": {},
+      "copySlot": "cycleChapter",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-mercury-neutral-1",
+        "probe-aspect-saturn-mercury-neutral-2",
+        "probe-aspect-saturn-mercury-neutral-3",
+        "probe-aspect-saturn-mercury-neutral-4",
+        "probe-aspect-saturn-mercury-neutral-5",
+        "probe-aspect-saturn-mercury-neutral-6",
+        "probe-aspect-saturn-mercury-neutral-7",
+        "probe-aspect-saturn-mercury-neutral-8"
+      ],
+      "occurrenceCount": 56,
+      "themeID": "mental.review",
+      "key": "modern.transit.cycleChapter.longCycle.mental.review",
+      "roleID": "longCycle",
+      "cardID": "current-cycles"
+    },
+    {
+      "variables": {},
+      "copySlot": "cycleChapter",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-mars-challenging-1",
+        "probe-aspect-saturn-mars-challenging-2",
+        "probe-aspect-saturn-mars-challenging-3",
+        "probe-aspect-saturn-mars-challenging-4",
+        "probe-aspect-saturn-mars-challenging-5",
+        "probe-aspect-saturn-mars-challenging-6",
+        "probe-aspect-saturn-mars-challenging-7",
+        "probe-aspect-saturn-mars-challenging-8"
+      ],
+      "occurrenceCount": 36,
+      "themeID": "momentum.blocked",
+      "key": "modern.transit.cycleChapter.longCycle.momentum.blocked",
+      "roleID": "longCycle",
+      "cardID": "current-cycles"
+    },
+    {
+      "variables": {},
+      "copySlot": "cycleChapter",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-mars-supportive-1",
+        "probe-aspect-saturn-mars-supportive-2",
+        "probe-aspect-saturn-mars-supportive-3",
+        "probe-aspect-saturn-mars-supportive-4",
+        "probe-aspect-saturn-mars-supportive-5",
+        "probe-aspect-saturn-mars-supportive-6",
+        "probe-aspect-saturn-mars-supportive-7",
+        "probe-aspect-saturn-mars-supportive-8"
+      ],
+      "occurrenceCount": 48,
+      "themeID": "momentum.rising",
+      "key": "modern.transit.cycleChapter.longCycle.momentum.rising",
+      "roleID": "longCycle",
+      "cardID": "current-cycles"
+    },
+    {
+      "variables": {},
+      "copySlot": "cycleChapter",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-neptune-neptune-challenging-2",
+        "probe-aspect-pluto-pluto-challenging-2",
+        "probe-aspect-saturn-saturn-challenging-2",
+        "probe-aspect-uranus-uranus-challenging-2"
+      ],
+      "occurrenceCount": 4,
+      "roleID": "longCycle",
+      "cardID": "current-cycles",
+      "key": "modern.transit.cycleChapter.longCycle.money.review",
+      "themeID": "money.review"
+    },
+    {
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-venus-challenging-1",
+        "probe-aspect-saturn-venus-challenging-2",
+        "probe-aspect-saturn-venus-challenging-3",
+        "probe-aspect-saturn-venus-challenging-4",
+        "probe-aspect-saturn-venus-challenging-5",
+        "probe-aspect-saturn-venus-challenging-6",
+        "probe-aspect-saturn-venus-challenging-7",
+        "probe-aspect-saturn-venus-challenging-8"
+      ],
+      "occurrenceCount": 28,
+      "key": "modern.transit.cycleChapter.longCycle.relationship.boundaries",
+      "themeID": "relationship.boundaries",
+      "roleID": "longCycle",
+      "cardID": "current-cycles"
+    },
+    {
+      "variables": {},
+      "copySlot": "cycleChapter",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-uranus-venus-challenging-1",
+        "probe-aspect-uranus-venus-challenging-2",
+        "probe-aspect-uranus-venus-challenging-3",
+        "probe-aspect-uranus-venus-challenging-4",
+        "probe-aspect-uranus-venus-challenging-5",
+        "probe-aspect-uranus-venus-challenging-6",
+        "probe-aspect-uranus-venus-challenging-7",
+        "probe-aspect-uranus-venus-challenging-8"
+      ],
+      "occurrenceCount": 12,
+      "roleID": "longCycle",
+      "cardID": "current-cycles",
+      "key": "modern.transit.cycleChapter.longCycle.relationship.freedom",
+      "themeID": "relationship.freedom"
+    },
+    {
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-neptune-neptune-challenging-5",
+        "probe-aspect-neptune-neptune-challenging-8",
+        "probe-aspect-pluto-moon-challenging-1",
+        "probe-aspect-pluto-moon-challenging-2",
+        "probe-aspect-saturn-saturn-challenging-5",
+        "probe-aspect-saturn-saturn-challenging-8",
+        "probe-aspect-uranus-uranus-challenging-5",
+        "probe-aspect-uranus-uranus-challenging-8"
+      ],
+      "occurrenceCount": 32,
+      "key": "modern.transit.cycleChapter.longCycle.relationship.intensity",
+      "cardID": "current-cycles",
+      "themeID": "relationship.intensity",
+      "roleID": "longCycle"
+    },
+    {
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-venus-supportive-1",
+        "probe-aspect-saturn-venus-supportive-2",
+        "probe-aspect-saturn-venus-supportive-3",
+        "probe-aspect-saturn-venus-supportive-4",
+        "probe-aspect-saturn-venus-supportive-5",
+        "real-chart-01-1769947200",
+        "real-chart-01-1777636800",
+        "real-chart-02-1785672000"
+      ],
+      "occurrenceCount": 55,
+      "key": "modern.transit.cycleChapter.longCycle.relationship.opening",
+      "cardID": "current-cycles",
+      "themeID": "relationship.opening",
+      "roleID": "longCycle"
+    },
+    {
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture"
+      ],
+      "exampleScenarioIDs": [
+        "challenging-only",
+        "mixed-complete",
+        "no-window-signals",
+        "probe-aspect-saturn-sun-challenging-1",
+        "probe-aspect-saturn-sun-challenging-2",
+        "probe-aspect-saturn-sun-challenging-3",
+        "range-filter",
+        "returning-pass"
+      ],
+      "occurrenceCount": 105,
+      "key": "modern.transit.cycleChapter.longCycle.responsibility.pressure",
+      "cardID": "current-cycles",
+      "roleID": "longCycle",
+      "themeID": "responsibility.pressure"
+    },
+    {
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-saturn-challenging-6",
+        "probe-aspect-uranus-mars-challenging-1",
+        "probe-aspect-uranus-mars-challenging-2",
+        "probe-aspect-uranus-mars-challenging-3",
+        "probe-aspect-uranus-mars-challenging-4",
+        "probe-aspect-uranus-mars-challenging-5",
+        "probe-aspect-uranus-mars-challenging-6",
+        "probe-aspect-uranus-mars-challenging-7"
+      ],
+      "occurrenceCount": 64,
+      "key": "modern.transit.cycleChapter.longCycle.routine.disruption",
+      "cardID": "current-cycles",
+      "roleID": "longCycle",
+      "themeID": "routine.disruption"
+    },
+    {
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-neptune-neptune-challenging-11",
+        "probe-aspect-pluto-pluto-challenging-11",
+        "probe-aspect-saturn-saturn-challenging-11",
+        "probe-aspect-uranus-uranus-challenging-11"
+      ],
+      "occurrenceCount": 4,
+      "key": "modern.transit.cycleChapter.longCycle.social.boundaries",
+      "cardID": "current-cycles",
+      "roleID": "longCycle",
+      "themeID": "social.boundaries"
+    },
+    {
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-neptune-neptune-supportive-11",
+        "probe-aspect-pluto-pluto-supportive-11",
+        "probe-aspect-saturn-saturn-supportive-11",
+        "probe-aspect-uranus-uranus-supportive-11"
+      ],
+      "occurrenceCount": 4,
+      "key": "modern.transit.cycleChapter.longCycle.social.expansion",
+      "cardID": "current-cycles",
+      "roleID": "longCycle",
+      "themeID": "social.expansion"
+    },
+    {
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-jupiter-supportive-1",
+        "probe-aspect-saturn-jupiter-supportive-2",
+        "probe-aspect-saturn-jupiter-supportive-3",
+        "probe-aspect-saturn-jupiter-supportive-4",
+        "probe-aspect-saturn-jupiter-supportive-5",
+        "probe-aspect-saturn-jupiter-supportive-6",
+        "probe-aspect-saturn-jupiter-supportive-7",
+        "real-chart-04-1785672000"
+      ],
+      "occurrenceCount": 93,
+      "key": "modern.transit.cycleChapter.longCycle.structure.building",
+      "cardID": "current-cycles",
+      "roleID": "longCycle",
+      "themeID": "structure.building"
+    },
+    {
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-pluto-challenging-1",
+        "probe-aspect-saturn-pluto-challenging-2",
+        "probe-aspect-saturn-pluto-challenging-3",
+        "probe-aspect-saturn-pluto-challenging-4",
+        "probe-aspect-saturn-pluto-challenging-5",
+        "probe-aspect-saturn-pluto-challenging-6",
+        "probe-aspect-saturn-pluto-challenging-7",
+        "probe-aspect-saturn-saturn-neutral-8"
+      ],
+      "occurrenceCount": 28,
+      "key": "modern.transit.cycleChapter.longCycle.transformation.release",
+      "cardID": "current-cycles",
+      "roleID": "longCycle",
+      "themeID": "transformation.release"
+    },
+    {
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-neptune-neptune-supportive-8",
+        "probe-aspect-pluto-pluto-supportive-8",
+        "probe-aspect-saturn-saturn-supportive-8",
+        "probe-aspect-uranus-uranus-supportive-8"
+      ],
+      "occurrenceCount": 4,
+      "key": "modern.transit.cycleChapter.longCycle.trust.deepening",
+      "cardID": "current-cycles",
+      "roleID": "longCycle",
+      "themeID": "trust.deepening"
+    },
+    {
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-saturn-challenging-12",
+        "probe-aspect-saturn-saturn-challenging-9",
+        "probe-aspect-uranus-jupiter-challenging-1",
+        "probe-aspect-uranus-jupiter-challenging-2",
+        "probe-aspect-uranus-jupiter-challenging-3",
+        "probe-aspect-uranus-jupiter-challenging-4",
+        "probe-aspect-uranus-jupiter-challenging-5",
+        "real-chart-05-1769947200"
+      ],
+      "occurrenceCount": 93,
+      "key": "modern.transit.cycleChapter.longCycle.uncertainty.fog",
+      "cardID": "current-cycles",
+      "roleID": "longCycle",
+      "themeID": "uncertainty.fog"
+    },
+    {
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-aspect-saturn-venus-neutral-1",
+        "probe-aspect-saturn-venus-neutral-2",
+        "probe-aspect-saturn-venus-neutral-3",
+        "probe-aspect-saturn-venus-neutral-4",
+        "probe-aspect-saturn-venus-neutral-5",
+        "probe-aspect-saturn-venus-neutral-6",
+        "probe-aspect-saturn-venus-neutral-7",
+        "probe-aspect-saturn-venus-neutral-8"
+      ],
+      "occurrenceCount": 52,
+      "key": "modern.transit.cycleChapter.longCycle.values.reassessment",
+      "cardID": "current-cycles",
+      "roleID": "longCycle",
+      "themeID": "values.reassessment"
+    },
+    {
+      "variables": {},
+      "copySlot": "integratedStory",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "challenging-only",
+        "disrupting-signal",
+        "probe-aspect-sun-sun-challenging-1",
+        "probe-aspect-sun-sun-challenging-2",
+        "range-filter",
+        "real-chart-04-1777636800",
+        "real-chart-04-1793534400",
+        "returning-pass"
+      ],
+      "integratedThemeID": "durable-structure",
+      "occurrenceCount": 1458,
+      "key": "modern.transit.integratedStory.durable-structure",
+      "cardID": "current-story"
+    },
+    {
+      "variables": {},
+      "copySlot": "integratedStory",
+      "scenarioKinds": [
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "mixed-complete",
+        "no-window-signals",
+        "real-chart-01-1777636800",
+        "real-chart-01-1793534400",
+        "real-chart-02-1785672000",
+        "real-chart-03-1777636800",
+        "real-chart-03-1785672000",
+        "real-chart-04-1769947200"
+      ],
+      "integratedThemeID": "expansion-structure",
+      "occurrenceCount": 13,
+      "key": "modern.transit.integratedStory.expansion-structure",
+      "cardID": "current-story"
+    },
+    {
+      "variables": {},
+      "copySlot": "integratedStory",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "real-chart-01-1769947200",
+        "real-chart-01-1785672000",
+        "real-chart-02-1769947200",
+        "real-chart-02-1777636800",
+        "real-chart-02-1793534400",
+        "same-theme-multi-signal",
+        "stabilizing-signal",
+        "supportive-only"
+      ],
+      "integratedThemeID": "focused-expansion",
+      "occurrenceCount": 1462,
+      "key": "modern.transit.integratedStory.focused-expansion",
+      "cardID": "current-story"
+    },
+    {
+      "variables": {},
+      "copySlot": "integratedStory",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture"
+      ],
+      "exampleScenarioIDs": [
+        "neutral-only",
+        "probe-aspect-sun-sun-neutral-1",
+        "probe-aspect-sun-sun-neutral-2",
+        "probe-aspect-sun-sun-neutral-3",
+        "probe-aspect-sun-sun-neutral-4",
+        "probe-aspect-sun-sun-neutral-5",
+        "probe-aspect-sun-sun-neutral-6",
+        "probe-aspect-sun-sun-neutral-7"
+      ],
+      "integratedThemeID": "steady-realignment",
+      "occurrenceCount": 1453,
+      "key": "modern.transit.integratedStory.steady-realignment",
+      "cardID": "current-story"
+    },
+    {
+      "key": "modern.transit.signalRole.disrupting",
+      "cardID": "current-story",
+      "copySlot": "signalRole",
+      "exampleScenarioIDs": [
+        "disrupting-signal",
+        "mixed-complete",
+        "real-chart-01-1777636800",
+        "real-chart-03-1769947200",
+        "real-chart-03-1777636800",
+        "real-chart-03-1785672000",
+        "real-chart-04-1777636800",
+        "real-chart-04-1793534400"
+      ],
+      "variables": {
+        "transitPlanet": "mars",
+        "lifeAreas": "7"
+      },
+      "roleID": "disrupting",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "occurrenceCount": 1726
+    },
+    {
+      "key": "modern.transit.signalRole.expanding",
+      "cardID": "current-story",
+      "copySlot": "signalRole",
+      "exampleScenarioIDs": [
+        "mixed-complete",
+        "no-window-signals",
+        "real-chart-01-1769947200",
+        "real-chart-01-1777636800",
+        "real-chart-01-1785672000",
+        "real-chart-01-1793534400",
+        "same-theme-multi-signal",
+        "supportive-only"
+      ],
+      "variables": {
+        "transitPlanet": "jupiter",
+        "lifeAreas": "2"
+      },
+      "roleID": "expanding",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "occurrenceCount": 420
+    },
+    {
+      "key": "modern.transit.signalRole.stabilizing",
+      "cardID": "current-story",
+      "copySlot": "signalRole",
+      "exampleScenarioIDs": [
+        "probe-aspect-moon-sun-supportive-1",
+        "probe-aspect-moon-sun-supportive-2",
+        "probe-aspect-moon-sun-supportive-3",
+        "probe-aspect-moon-sun-supportive-4",
+        "probe-aspect-moon-sun-supportive-5",
+        "probe-aspect-moon-sun-supportive-6",
+        "probe-aspect-moon-sun-supportive-7",
+        "stabilizing-signal"
+      ],
+      "variables": {
+        "transitPlanet": "venus",
+        "lifeAreas": "4"
+      },
+      "roleID": "stabilizing",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture"
+      ],
+      "occurrenceCount": 265
+    },
+    {
+      "key": "modern.transit.signalRole.structuring",
+      "cardID": "current-story",
+      "copySlot": "signalRole",
+      "exampleScenarioIDs": [
+        "challenging-only",
+        "mixed-complete",
+        "no-window-signals",
+        "range-filter",
+        "real-chart-01-1769947200",
+        "real-chart-01-1777636800",
+        "real-chart-01-1785672000",
+        "returning-pass"
+      ],
+      "variables": {
+        "transitPlanet": "saturn",
+        "lifeAreas": "10"
+      },
+      "roleID": "structuring",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "occurrenceCount": 421
+    },
+    {
+      "key": "modern.transit.signalRole.supporting",
+      "cardID": "current-story",
+      "copySlot": "signalRole",
+      "exampleScenarioIDs": [
+        "neutral-only",
+        "real-chart-01-1769947200",
+        "real-chart-01-1785672000",
+        "real-chart-01-1793534400",
+        "real-chart-02-1769947200",
+        "real-chart-02-1777636800",
+        "real-chart-02-1785672000",
+        "same-theme-multi-signal"
+      ],
+      "variables": {
+        "transitPlanet": "mercury",
+        "lifeAreas": "3"
+      },
+      "roleID": "supporting",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "occurrenceCount": 1598
+    },
+    {
+      "key": "shared.bodyMotion.jupiter.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "exampleScenarioIDs": [
+        "probe-path-jupiter-direct-1",
+        "probe-path-jupiter-direct-2",
+        "probe-path-jupiter-direct-3",
+        "probe-path-jupiter-direct-4",
+        "probe-path-jupiter-direct-5",
+        "probe-path-jupiter-direct-6",
+        "probe-path-jupiter-direct-7",
+        "probe-path-jupiter-direct-8"
+      ],
+      "variables": {},
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "occurrenceCount": 12
+    },
+    {
+      "key": "shared.bodyMotion.jupiter.retrograde",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "exampleScenarioIDs": [
+        "probe-path-jupiter-retrograde-1",
+        "probe-path-jupiter-retrograde-2",
+        "probe-path-jupiter-retrograde-3",
+        "probe-path-jupiter-retrograde-4",
+        "probe-path-jupiter-retrograde-5",
+        "probe-path-jupiter-retrograde-6",
+        "probe-path-jupiter-retrograde-7",
+        "probe-path-jupiter-retrograde-8"
+      ],
+      "variables": {},
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "occurrenceCount": 12
+    },
+    {
+      "key": "shared.bodyMotion.mars.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "exampleScenarioIDs": [
+        "probe-path-mars-direct-1",
+        "probe-path-mars-direct-2",
+        "probe-path-mars-direct-3",
+        "probe-path-mars-direct-4",
+        "probe-path-mars-direct-5",
+        "probe-path-mars-direct-6",
+        "probe-path-mars-direct-7",
+        "probe-path-mars-direct-8"
+      ],
+      "variables": {},
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "occurrenceCount": 12
+    },
+    {
+      "key": "shared.bodyMotion.mars.retrograde",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "exampleScenarioIDs": [
+        "probe-path-mars-retrograde-1",
+        "probe-path-mars-retrograde-2",
+        "probe-path-mars-retrograde-3",
+        "probe-path-mars-retrograde-4",
+        "probe-path-mars-retrograde-5",
+        "probe-path-mars-retrograde-6",
+        "probe-path-mars-retrograde-7",
+        "probe-path-mars-retrograde-8"
+      ],
+      "variables": {},
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "occurrenceCount": 12
+    },
+    {
+      "key": "shared.bodyMotion.mercury.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "exampleScenarioIDs": [
+        "probe-path-mercury-direct-1",
+        "probe-path-mercury-direct-2",
+        "probe-path-mercury-direct-3",
+        "probe-path-mercury-direct-4",
+        "probe-path-mercury-direct-5",
+        "probe-path-mercury-direct-6",
+        "probe-path-mercury-direct-7",
+        "probe-path-mercury-direct-8"
+      ],
+      "variables": {},
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "occurrenceCount": 12
+    },
+    {
+      "key": "shared.bodyMotion.mercury.retrograde",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "exampleScenarioIDs": [
+        "probe-path-mercury-retrograde-1",
+        "probe-path-mercury-retrograde-2",
+        "probe-path-mercury-retrograde-3",
+        "probe-path-mercury-retrograde-4",
+        "probe-path-mercury-retrograde-5",
+        "probe-path-mercury-retrograde-6",
+        "probe-path-mercury-retrograde-7",
+        "probe-path-mercury-retrograde-8"
+      ],
+      "variables": {},
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "occurrenceCount": 12
+    },
+    {
+      "key": "shared.bodyMotion.moon.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "exampleScenarioIDs": [
+        "probe-path-moon-direct-1",
+        "probe-path-moon-direct-2",
+        "probe-path-moon-direct-3",
+        "probe-path-moon-direct-4",
+        "probe-path-moon-direct-5",
+        "probe-path-moon-direct-6",
+        "probe-path-moon-direct-7",
+        "probe-path-moon-direct-8"
+      ],
+      "variables": {},
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "occurrenceCount": 12
+    },
+    {
+      "key": "shared.bodyMotion.neptune.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "exampleScenarioIDs": [
+        "probe-path-neptune-direct-1",
+        "probe-path-neptune-direct-2",
+        "probe-path-neptune-direct-3",
+        "real-chart-01-1777636800",
+        "real-chart-02-1777636800",
+        "real-chart-03-1777636800",
+        "real-chart-04-1777636800",
+        "real-chart-05-1777636800"
+      ],
+      "variables": {},
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "occurrenceCount": 17
+    },
+    {
+      "key": "shared.bodyMotion.neptune.retrograde",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "exampleScenarioIDs": [
+        "real-chart-01-1785672000",
+        "real-chart-01-1793534400",
+        "real-chart-02-1785672000",
+        "real-chart-02-1793534400",
+        "real-chart-03-1785672000",
+        "real-chart-03-1793534400",
+        "real-chart-04-1785672000",
+        "real-chart-04-1793534400"
+      ],
+      "variables": {},
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "occurrenceCount": 22
+    },
+    {
+      "key": "shared.bodyMotion.pluto.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "exampleScenarioIDs": [
+        "probe-path-pluto-direct-1",
+        "probe-path-pluto-direct-2",
+        "probe-path-pluto-direct-3",
+        "probe-path-pluto-direct-4",
+        "probe-path-pluto-direct-5",
+        "probe-path-pluto-direct-6",
+        "probe-path-pluto-direct-7",
+        "probe-path-pluto-direct-8"
+      ],
+      "variables": {},
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "occurrenceCount": 12
+    },
+    {
+      "key": "shared.bodyMotion.pluto.retrograde",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "exampleScenarioIDs": [
+        "challenging-only",
+        "complete-paths-areas",
+        "events-only",
+        "mixed-complete",
+        "neutral-only",
+        "returning-pass",
+        "supportive-only",
+        "windows-only"
+      ],
+      "variables": {},
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture"
+      ],
+      "occurrenceCount": 25
+    },
+    {
+      "key": "shared.bodyMotion.saturn.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "exampleScenarioIDs": [
+        "probe-path-saturn-direct-1",
+        "probe-path-saturn-direct-2",
+        "probe-path-saturn-direct-3",
+        "probe-path-saturn-direct-4",
+        "probe-path-saturn-direct-5",
+        "probe-path-saturn-direct-6",
+        "probe-path-saturn-direct-7",
+        "probe-path-saturn-direct-8"
+      ],
+      "variables": {},
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "occurrenceCount": 12
+    },
+    {
+      "key": "shared.bodyMotion.saturn.retrograde",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "exampleScenarioIDs": [
+        "probe-path-saturn-retrograde-1",
+        "probe-path-saturn-retrograde-2",
+        "probe-path-saturn-retrograde-3",
+        "probe-path-saturn-retrograde-4",
+        "probe-path-saturn-retrograde-5",
+        "probe-path-saturn-retrograde-6",
+        "probe-path-saturn-retrograde-7",
+        "probe-path-saturn-retrograde-8"
+      ],
+      "variables": {},
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "occurrenceCount": 12
+    },
+    {
+      "key": "shared.bodyMotion.sun.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "exampleScenarioIDs": [
+        "probe-path-sun-direct-1",
+        "probe-path-sun-direct-2",
+        "probe-path-sun-direct-3",
+        "probe-path-sun-direct-4",
+        "probe-path-sun-direct-5",
+        "probe-path-sun-direct-6",
+        "probe-path-sun-direct-7",
+        "probe-path-sun-direct-8"
+      ],
+      "variables": {},
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "occurrenceCount": 12
+    },
+    {
+      "key": "shared.bodyMotion.trueNode.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "exampleScenarioIDs": [
+        "probe-path-trueNode-direct-1",
+        "probe-path-trueNode-direct-2",
+        "probe-path-trueNode-direct-3",
+        "probe-path-trueNode-direct-4",
+        "probe-path-trueNode-direct-5",
+        "probe-path-trueNode-direct-6",
+        "probe-path-trueNode-direct-7",
+        "probe-path-trueNode-direct-8"
+      ],
+      "variables": {},
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "occurrenceCount": 12
+    },
+    {
+      "cardID": "planet-paths",
+      "occurrenceCount": 12,
+      "copySlot": "planetPathShort",
+      "key": "shared.bodyMotion.trueNode.retrograde",
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-path-trueNode-retrograde-1",
+        "probe-path-trueNode-retrograde-2",
+        "probe-path-trueNode-retrograde-3",
+        "probe-path-trueNode-retrograde-4",
+        "probe-path-trueNode-retrograde-5",
+        "probe-path-trueNode-retrograde-6",
+        "probe-path-trueNode-retrograde-7",
+        "probe-path-trueNode-retrograde-8"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "planet-paths",
+      "occurrenceCount": 12,
+      "copySlot": "planetPathShort",
+      "key": "shared.bodyMotion.uranus.direct",
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-path-uranus-direct-1",
+        "probe-path-uranus-direct-2",
+        "probe-path-uranus-direct-3",
+        "probe-path-uranus-direct-4",
+        "probe-path-uranus-direct-5",
+        "probe-path-uranus-direct-6",
+        "probe-path-uranus-direct-7",
+        "probe-path-uranus-direct-8"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "planet-paths",
+      "occurrenceCount": 17,
+      "copySlot": "planetPathShort",
+      "key": "shared.bodyMotion.uranus.retrograde",
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-path-uranus-retrograde-1",
+        "probe-path-uranus-retrograde-2",
+        "probe-path-uranus-retrograde-3",
+        "real-chart-01-1769947200",
+        "real-chart-02-1769947200",
+        "real-chart-03-1769947200",
+        "real-chart-04-1769947200",
+        "real-chart-05-1769947200"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "planet-paths",
+      "occurrenceCount": 12,
+      "copySlot": "planetPathShort",
+      "key": "shared.bodyMotion.venus.direct",
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-path-venus-direct-1",
+        "probe-path-venus-direct-2",
+        "probe-path-venus-direct-3",
+        "probe-path-venus-direct-4",
+        "probe-path-venus-direct-5",
+        "probe-path-venus-direct-6",
+        "probe-path-venus-direct-7",
+        "probe-path-venus-direct-8"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "planet-paths",
+      "occurrenceCount": 12,
+      "copySlot": "planetPathShort",
+      "key": "shared.bodyMotion.venus.retrograde",
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-path-venus-retrograde-1",
+        "probe-path-venus-retrograde-2",
+        "probe-path-venus-retrograde-3",
+        "probe-path-venus-retrograde-4",
+        "probe-path-venus-retrograde-5",
+        "probe-path-venus-retrograde-6",
+        "probe-path-venus-retrograde-7",
+        "probe-path-venus-retrograde-8"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "life-areas",
+      "occurrenceCount": 17,
+      "copySlot": "lifeAreaShort",
+      "key": "shared.lifeAreas.1",
+      "roleID": "lifeArea",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "challenging-only",
+        "complete-paths-areas",
+        "events-only",
+        "mixed-complete",
+        "neutral-only",
+        "returning-pass",
+        "supportive-only",
+        "windows-only"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "planet-paths",
+      "occurrenceCount": 20,
+      "copySlot": "planetPathShort",
+      "key": "shared.lifeAreas.1",
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-path-mars-direct-1",
+        "probe-path-mars-retrograde-1",
+        "probe-path-mercury-direct-1",
+        "probe-path-mercury-retrograde-1",
+        "probe-path-moon-direct-1",
+        "probe-path-sun-direct-1",
+        "probe-path-venus-direct-1",
+        "probe-path-venus-retrograde-1"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "life-areas",
+      "occurrenceCount": 3,
+      "copySlot": "lifeAreaShort",
+      "key": "shared.lifeAreas.10",
+      "roleID": "lifeArea",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-life-area-10",
+        "real-chart-04-1769947200",
+        "real-chart-05-1785672000"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "planet-paths",
+      "occurrenceCount": 33,
+      "copySlot": "planetPathShort",
+      "key": "shared.lifeAreas.10",
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "fixed-fixture"
+      ],
+      "exampleScenarioIDs": [
+        "challenging-only",
+        "complete-paths-areas",
+        "events-only",
+        "mixed-complete",
+        "neutral-only",
+        "returning-pass",
+        "supportive-only",
+        "windows-only"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "life-areas",
+      "occurrenceCount": 3,
+      "copySlot": "lifeAreaShort",
+      "key": "shared.lifeAreas.11",
+      "roleID": "lifeArea",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-life-area-11",
+        "real-chart-02-1769947200",
+        "real-chart-02-1785672000"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "planet-paths",
+      "occurrenceCount": 20,
+      "copySlot": "planetPathShort",
+      "key": "shared.lifeAreas.11",
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-path-mars-direct-11",
+        "probe-path-mars-retrograde-11",
+        "probe-path-mercury-direct-11",
+        "probe-path-mercury-retrograde-11",
+        "probe-path-moon-direct-11",
+        "probe-path-sun-direct-11",
+        "probe-path-venus-direct-11",
+        "probe-path-venus-retrograde-11"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "life-areas",
+      "occurrenceCount": 3,
+      "copySlot": "lifeAreaShort",
+      "key": "shared.lifeAreas.12",
+      "roleID": "lifeArea",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-life-area-12",
+        "real-chart-04-1777636800",
+        "real-chart-04-1785672000"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "planet-paths",
+      "occurrenceCount": 23,
+      "copySlot": "planetPathShort",
+      "key": "shared.lifeAreas.12",
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-path-mercury-direct-12",
+        "probe-path-mercury-retrograde-12",
+        "probe-path-moon-direct-12",
+        "probe-path-sun-direct-12",
+        "probe-path-venus-direct-12",
+        "real-chart-04-1777636800",
+        "real-chart-04-1785672000",
+        "real-chart-04-1793534400"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "life-areas",
+      "occurrenceCount": 6,
+      "copySlot": "lifeAreaShort",
+      "key": "shared.lifeAreas.2",
+      "roleID": "lifeArea",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-life-area-2",
+        "real-chart-01-1777636800",
+        "real-chart-01-1793534400",
+        "real-chart-03-1769947200",
+        "real-chart-03-1785672000",
+        "real-chart-03-1793534400"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "planet-paths",
+      "occurrenceCount": 26,
+      "copySlot": "planetPathShort",
+      "key": "shared.lifeAreas.2",
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-path-moon-direct-2",
+        "probe-path-sun-direct-2",
+        "real-chart-01-1777636800",
+        "real-chart-01-1785672000",
+        "real-chart-01-1793534400",
+        "real-chart-03-1777636800",
+        "real-chart-03-1793534400",
+        "real-chart-04-1769947200"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "life-areas",
+      "occurrenceCount": 3,
+      "copySlot": "lifeAreaShort",
+      "key": "shared.lifeAreas.3",
+      "roleID": "lifeArea",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-life-area-3",
+        "real-chart-02-1793534400",
+        "real-chart-03-1777636800"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "planet-paths",
+      "occurrenceCount": 22,
+      "copySlot": "planetPathShort",
+      "key": "shared.lifeAreas.3",
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-path-mercury-direct-3",
+        "probe-path-mercury-retrograde-3",
+        "probe-path-moon-direct-3",
+        "probe-path-sun-direct-3",
+        "probe-path-venus-direct-3",
+        "probe-path-venus-retrograde-3",
+        "real-chart-01-1769947200",
+        "real-chart-03-1785672000"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "life-areas",
+      "occurrenceCount": 2,
+      "copySlot": "lifeAreaShort",
+      "key": "shared.lifeAreas.4",
+      "roleID": "lifeArea",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-life-area-4",
+        "real-chart-05-1769947200"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "planet-paths",
+      "occurrenceCount": 21,
+      "copySlot": "planetPathShort",
+      "key": "shared.lifeAreas.4",
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "exampleScenarioIDs": [
+        "probe-path-mars-direct-4",
+        "probe-path-mercury-direct-4",
+        "probe-path-mercury-retrograde-4",
+        "probe-path-moon-direct-4",
+        "probe-path-sun-direct-4",
+        "probe-path-venus-direct-4",
+        "probe-path-venus-retrograde-4",
+        "real-chart-03-1769947200"
+      ],
+      "variables": {}
+    },
+    {
+      "cardID": "life-areas",
+      "occurrenceCount": 1,
+      "copySlot": "lifeAreaShort",
+      "key": "shared.lifeAreas.5",
+      "roleID": "lifeArea",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "exampleScenarioIDs": [
+        "probe-life-area-5"
+      ],
+      "variables": {}
+    },
+    {
+      "key": "shared.lifeAreas.5",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "exampleScenarioIDs": [
+        "probe-path-mars-direct-5",
+        "probe-path-mars-retrograde-5",
+        "probe-path-mercury-direct-5",
+        "probe-path-mercury-retrograde-5",
+        "probe-path-moon-direct-5",
+        "probe-path-sun-direct-5",
+        "probe-path-venus-direct-5",
+        "probe-path-venus-retrograde-5"
+      ],
+      "variables": {},
+      "roleID": "path",
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ],
+      "occurrenceCount": 20
+    },
+    {
+      "key": "shared.lifeAreas.6",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "exampleScenarioIDs": [
+        "probe-life-area-6",
+        "real-chart-05-1777636800"
+      ],
+      "variables": {},
+      "roleID": "lifeArea",
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ],
+      "occurrenceCount": 2
+    },
+    {
+      "roleID": "path",
+      "variables": {},
+      "key": "shared.lifeAreas.6",
+      "exampleScenarioIDs": [
+        "probe-path-mercury-direct-6",
+        "probe-path-mercury-retrograde-6",
+        "probe-path-moon-direct-6",
+        "probe-path-sun-direct-6",
+        "probe-path-venus-direct-6",
+        "real-chart-05-1777636800",
+        "real-chart-05-1785672000",
+        "real-chart-05-1793534400"
+      ],
+      "copySlot": "planetPathShort",
+      "cardID": "planet-paths",
+      "occurrenceCount": 23,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ]
+    },
+    {
+      "roleID": "lifeArea",
+      "variables": {},
+      "key": "shared.lifeAreas.7",
+      "exampleScenarioIDs": [
+        "probe-life-area-7",
+        "real-chart-04-1793534400"
+      ],
+      "copySlot": "lifeAreaShort",
+      "cardID": "life-areas",
+      "occurrenceCount": 2,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ]
+    },
+    {
+      "roleID": "path",
+      "variables": {},
+      "key": "shared.lifeAreas.7",
+      "exampleScenarioIDs": [
+        "probe-path-mars-direct-7",
+        "probe-path-mercury-direct-7",
+        "probe-path-mercury-retrograde-7",
+        "probe-path-moon-direct-7",
+        "probe-path-sun-direct-7",
+        "probe-path-venus-direct-7",
+        "probe-path-venus-retrograde-7",
+        "real-chart-05-1769947200"
+      ],
+      "copySlot": "planetPathShort",
+      "cardID": "planet-paths",
+      "occurrenceCount": 21,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ]
+    },
+    {
+      "roleID": "lifeArea",
+      "variables": {},
+      "key": "shared.lifeAreas.8",
+      "exampleScenarioIDs": [
+        "probe-life-area-8",
+        "real-chart-02-1777636800"
+      ],
+      "copySlot": "lifeAreaShort",
+      "cardID": "life-areas",
+      "occurrenceCount": 2,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ]
+    },
+    {
+      "roleID": "path",
+      "variables": {},
+      "key": "shared.lifeAreas.8",
+      "exampleScenarioIDs": [
+        "probe-path-mercury-direct-8",
+        "probe-path-mercury-retrograde-8",
+        "probe-path-moon-direct-8",
+        "probe-path-sun-direct-8",
+        "probe-path-venus-direct-8",
+        "real-chart-02-1777636800",
+        "real-chart-02-1785672000",
+        "real-chart-02-1793534400"
+      ],
+      "copySlot": "planetPathShort",
+      "cardID": "planet-paths",
+      "occurrenceCount": 23,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ]
+    },
+    {
+      "roleID": "lifeArea",
+      "variables": {},
+      "key": "shared.lifeAreas.9",
+      "exampleScenarioIDs": [
+        "probe-life-area-9"
+      ],
+      "copySlot": "lifeAreaShort",
+      "cardID": "life-areas",
+      "occurrenceCount": 1,
+      "scenarioKinds": [
+        "exhaustive-probe"
+      ]
+    },
+    {
+      "roleID": "path",
+      "variables": {},
+      "key": "shared.lifeAreas.9",
+      "exampleScenarioIDs": [
+        "probe-path-mars-direct-9",
+        "probe-path-mercury-direct-9",
+        "probe-path-mercury-retrograde-9",
+        "probe-path-moon-direct-9",
+        "probe-path-sun-direct-9",
+        "probe-path-venus-direct-9",
+        "probe-path-venus-retrograde-9",
+        "real-chart-02-1769947200"
+      ],
+      "copySlot": "planetPathShort",
+      "cardID": "planet-paths",
+      "occurrenceCount": 21,
+      "scenarioKinds": [
+        "exhaustive-probe",
+        "real-chart"
+      ]
+    }
+  ],
+  "schemaVersion": 1
+}

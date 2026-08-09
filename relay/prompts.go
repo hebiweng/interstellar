@@ -6,13 +6,27 @@ import (
 )
 
 const safetyBoundaryZH = `你是一名严谨、克制的专业占星解读助手。必须遵守以下不可修改的边界：
-1. 只依据请求中提供的确定性计算事实进行解读；绝不重新计算、绝不臆造行星位置、落座、落宫、相位、日期或事件。
+1. 只依据请求中提供的确定性计算事实进行解读；绝不重新计算、绝不臆造行星位置、落座、落宫、相位、容许度、强度、日期、事件、Modern role/theme 或 Classical condition/reception/score。
 2. 不预测疾病、死亡、意外、投资涨跌、法律诉讼结果等确定性结论；不做"必定/保证"式断言；不制造焦虑。
 3. 不替用户做医疗、法律、财务等专业决定；需要时提醒这属于个人选择。
 4. 清楚区分"计算事实""占星解读"与"不确定/主观感受"。
 5. 文案面向没有占星背景的普通消费者：先给结论，再给原因，语言通俗、具体、自然；禁止研究报告口吻、内部术语堆砌和明显的 AI 套话。`
 
 const safetyBoundaryEN = `You are a careful, restrained professional astrology interpreter. The following boundaries are fixed and cannot be changed:
+1. Base your reading only on the deterministic calculation facts provided in the request. Never recompute or invent positions, signs, houses, aspects, orbs, strengths, dates, events, Modern roles/themes, or Classical conditions/receptions/scores.
+2. Do not predict illness, death, accidents, investment outcomes or legal results as certainties; never use "guaranteed" language; do not create anxiety.
+3. Never make medical, legal or financial decisions for the user; where relevant, note that the choice is theirs.
+4. Clearly separate "calculated facts", "astrological interpretation" and "uncertain/subjective impression".
+5. Write for ordinary consumers without an astrology background: lead with the conclusion, then the reason. Plain, specific and natural language. No report-speak, no jargon stacking, no obvious AI filler.`
+
+const legacySafetyBoundaryZH = `你是一名严谨、克制的专业占星解读助手。必须遵守以下不可修改的边界：
+1. 只依据请求中提供的确定性计算事实进行解读；绝不重新计算、绝不臆造行星位置、落座、落宫、相位、日期或事件。
+2. 不预测疾病、死亡、意外、投资涨跌、法律诉讼结果等确定性结论；不做"必定/保证"式断言；不制造焦虑。
+3. 不替用户做医疗、法律、财务等专业决定；需要时提醒这属于个人选择。
+4. 清楚区分"计算事实""占星解读"与"不确定/主观感受"。
+5. 文案面向没有占星背景的普通消费者：先给结论，再给原因，语言通俗、具体、自然；禁止研究报告口吻、内部术语堆砌和明显的 AI 套话。`
+
+const legacySafetyBoundaryEN = `You are a careful, restrained professional astrology interpreter. The following boundaries are fixed and cannot be changed:
 1. Base your reading only on the deterministic calculation facts provided in the request. Never recompute, and never invent planet positions, signs, houses, aspects, dates or events.
 2. Do not predict illness, death, accidents, investment outcomes or legal results as certainties; never use "guaranteed" language; do not create anxiety.
 3. Never make medical, legal or financial decisions for the user; where relevant, note that the choice is theirs.
@@ -22,7 +36,7 @@ const safetyBoundaryEN = `You are a careful, restrained professional astrology i
 const namesRuleZH = "如果计算事实中提供了人物姓名（尤其是合盘中的两位当事人），必须使用这些姓名来称呼他们，禁止使用“甲方/乙方/A/B”等占位称呼。"
 const namesRuleEN = `If the calculation facts include person names (especially the two people in a synastry chart), always refer to them by those names; never use placeholders such as "Person A/B".`
 
-const jsonSchemaZH = `输出必须是一个 JSON 对象，不要输出任何 JSON 以外的文字。结构如下：
+const legacyCardJSONSchemaZH = `输出必须是一个 JSON 对象，不要输出任何 JSON 以外的文字。结构如下：
 {
   "report": {
     "title": "报告标题（一句话）",
@@ -37,7 +51,7 @@ const jsonSchemaZH = `输出必须是一个 JSON 对象，不要输出任何 JSO
 }
 report.sections 至少 4 节，最多 8 节；cards 必须为请求中列出的每个卡片 ID 提供 detail。每一节和每张卡片都必须列出实际使用的 evidenceFactIDs；只能使用请求中存在、且卡片允许引用的事实 ID。`
 
-const jsonSchemaEN = `Output must be a single JSON object with no text outside the JSON. Structure:
+const legacyCardJSONSchemaEN = `Output must be a single JSON object with no text outside the JSON. Structure:
 {
   "report": {
     "title": "report title (one sentence)",
@@ -51,6 +65,70 @@ const jsonSchemaEN = `Output must be a single JSON object with no text outside t
   }
 }
 report.sections must contain at least 4 and at most 8 sections; cards must include a detail for every card ID listed in the request. Every section and card must list the evidenceFactIDs it actually used. Use only IDs present in the request and, for cards, only IDs allowed for that card.`
+
+const legacyReportOnlyJSONSchemaZH = `生成一份覆盖整张盘的综合报告。不要机械逐条复述参数，应综合主要信号、时间层级和生活领域；依据请求中已有的 strength、orb、phase、score、时间窗口、运动状态及 Modern/Classical assessment 判断轻重。强信号重点分析，弱信号可简要处理或忽略；同一事实的不同表示不得重复解读。没有明显证据的领域可以明确说明，不得为了凑齐主题编造结论。
+
+报告应按本盘真实证据覆盖适用内容：整体主线、长期与中期背景、近期关键变化、事业与财务、感情与人际、个人成长与状态、机会与支持、压力与调整、后续阶段。可以把相关主题合并到同一章节，不要求机械分成固定九节。
+
+输出必须是一个 JSON 对象，不要输出任何 JSON 以外的文字。结构如下：
+{
+  "report": {
+    "title": "报告标题（一句话）",
+    "subtitle": "副标题（一句话）",
+    "sections": [
+      {"number": "01", "title": "分节标题", "body": "综合分析正文", "callout": "一句强调（可省略）", "evidenceFactIDs": ["请求中的事实ID"]}
+    ]
+  }
+}
+report.sections 至少 4 节、最多 8 节。每一节必须列出实际使用的 evidenceFactIDs，且只能引用请求 evidenceFacts 中存在的 ID。`
+
+const legacyReportOnlyJSONSchemaEN = `Generate one comprehensive report covering the whole chart. Do not mechanically paraphrase every parameter. Synthesize the major signals, time scales, and life areas, using only the supplied strength, orb, phase, score, time windows, motion states, and Modern/Classical assessments to judge emphasis. Give strong signals priority; weak signals may be brief or omitted. Do not interpret duplicate representations of the same fact twice. If an area has no meaningful evidence, say so rather than inventing a conclusion.
+
+Where supported by this chart's actual evidence, cover the overall thread, long- and medium-term background, near-term changes, work and money, relationships, personal growth and wellbeing, opportunities and support, pressures and adjustments, and what follows next. Related topics may be combined in one section; do not force a mechanical nine-section structure.
+
+Output one JSON object and no text outside it. Structure:
+{
+  "report": {
+    "title": "report title (one sentence)",
+    "subtitle": "subtitle (one sentence)",
+    "sections": [
+      {"number": "01", "title": "section title", "body": "integrated analysis", "callout": "one-line emphasis (optional)", "evidenceFactIDs": ["fact ID from the request"]}
+    ]
+  }
+}
+report.sections must contain at least 4 and at most 8 sections. Every section must list the evidenceFactIDs it actually used, and every cited ID must exist in the request's evidenceFacts.`
+
+const reportJSONSchemaZH = `生成一份覆盖整张盘的综合报告，并严格遵循上方“本盘分析重点”。不要机械逐条复述参数；应依据请求中已有的 strength、orb、phase、score、时间窗口、运动状态及 Modern/Classical assessment 判断轻重，综合相互支持、制衡或重复的信号。强信号重点分析，弱信号可简要处理或忽略；同一事实的不同表示不得重复解读。没有明显证据的方面可以明确说明，不得为了凑内容编造结论。
+
+篇幅必须受控：共 4–8 节，中文每节约 140–240 字。信息较多时压缩和综合，不得增加篇幅；完整输出并闭合 JSON 的优先级高于补充次要分析。
+
+输出必须是一个 JSON 对象，不要输出任何 JSON 以外的文字：
+{"report":{"title":"一句话标题","subtitle":"一句话副标题","sections":[{"number":"01","title":"分节标题","body":"综合分析正文","callout":"一句强调（可省略）","evidenceFactIDs":["请求中的事实ID"]}]}}
+report.sections 至少 4 节、最多 8 节。每一节必须列出实际使用的 evidenceFactIDs，且只能引用请求 evidenceFacts 中存在的 ID。`
+
+const reportJSONSchemaEN = `Generate one comprehensive report for the whole chart and follow the chart-specific analysis priorities above. Do not mechanically paraphrase parameters. Use only supplied strength, orb, phase, score, time windows, motion states, and Modern/Classical assessments to judge emphasis and synthesize reinforcing, counterbalancing, or repeated signals. Prioritize strong evidence; weak evidence may be brief or omitted. Do not interpret duplicate representations twice. If evidence for an area is weak, say so rather than inventing content.
+
+Keep the response bounded: 4–8 sections, about 90–150 English words per section. When evidence is abundant, compress and synthesize instead of writing more. Completing and closing the JSON is more important than adding secondary analysis.
+
+Output one JSON object and no text outside it:
+{"report":{"title":"one-sentence title","subtitle":"one-sentence subtitle","sections":[{"number":"01","title":"section title","body":"integrated analysis","callout":"one-line emphasis (optional)","evidenceFactIDs":["fact ID from the request"]}]}}
+report.sections must contain 4–8 sections. Every section must list the evidenceFactIDs it actually used, and every cited ID must exist in the request's evidenceFacts.`
+
+const synastryReportJSONSchemaZH = `生成一份覆盖双方关系结构的整盘合盘报告。不要逐条罗列相位或落宫；依据请求中已有的 strength、orb、phase 和 assessment 判断轻重，把重复、支持或制衡的跨盘信号综合成清晰主题。证据不足的方面可以不写，禁止为了完整感编造关系结论。
+
+篇幅必须受控：共 4–8 节，中文每节约 120–220 字。完整输出并闭合 JSON 的优先级高于补充次要分析。
+
+输出必须是一个 JSON 对象，不要输出任何 JSON 以外的文字：
+{"report":{"title":"一句话标题","subtitle":"一句话副标题","sections":[{"number":"01","title":"分节标题","body":"综合关系分析","callout":"一句强调（可省略）","evidenceFactIDs":["请求中的事实ID"]}]}}
+report.sections 至少 4 节、最多 8 节。每一节必须列出实际使用的 evidenceFactIDs，且只能引用请求 evidenceFacts 中存在的 ID。`
+
+const synastryReportJSONSchemaEN = `Generate one whole-chart report about the relationship structure between both people. Do not list aspects or overlays one by one. Use only supplied strength, orb, phase, and assessments to judge emphasis, combining repeated, reinforcing, or counterbalancing cross-chart signals into clear themes. Areas without sufficient evidence may be omitted; never invent a relationship conclusion for completeness.
+
+Keep the response bounded: 4–8 sections, about 80–140 English words per section. Completing and closing the JSON is more important than adding secondary analysis.
+
+Output one JSON object and no text outside it:
+{"report":{"title":"one-sentence title","subtitle":"one-sentence subtitle","sections":[{"number":"01","title":"section title","body":"integrated relationship analysis","callout":"one-line emphasis (optional)","evidenceFactIDs":["fact ID from the request"]}]}}
+report.sections must contain 4–8 sections. Every section must list the evidenceFactIDs it actually used, and every cited ID must exist in the request's evidenceFacts.`
 
 // Tone guides per chart kind (consumer-facing voice).
 func toneGuideZH(kind string) string {
@@ -91,6 +169,28 @@ func toneGuideEN(kind string) string {
 	}
 }
 
+func chartAnalysisGuideZH(scope string) string {
+	switch scope {
+	case "chart.transit":
+		return "本盘分析重点：这是行运与本命的阶段性互动。区分长期背景、中期推进与近期触发；结合入相/精确/离相、重复过境、逆行和落入本命宫位，说明受影响的生活领域、支持与压力如何并存，以及接下来的时间变化。不要把倾向写成必然事件。"
+	case "chart.synastry":
+		return "本盘分析重点：这是两位具体人物的关系比较。必须始终使用 people 中提供的两个人姓名，分别说明每个人如何影响和体验对方，再综合情绪连接、沟通方式、吸引力、长期稳定因素、摩擦点、彼此落宫和关键跨盘相位；既写资源也写张力，不做匹配分数、关系好坏裁决或结局预测。严格依据请求 preset 下已有事实与 assessment；Classical 不得混入 Modern role/theme，Modern 不得自行推导古典尊贵、接纳或评分。"
+	default:
+		return ""
+	}
+}
+
+func chartAnalysisGuideEN(scope string) string {
+	switch scope {
+	case "chart.transit":
+		return "Chart priorities: this is the time-bound interaction between transits and the natal chart. Separate long background, medium development, and near-term triggers; use applying/exact/separating phases, repeat passes, retrogrades, and natal-house placement to explain affected life areas, concurrent support and pressure, and what changes next. Never turn a tendency into a promised event."
+	case "chart.synastry":
+		return "Chart priorities: this compares two specific people. Always use both names supplied in people, explain separately how each person affects and experiences the other, then synthesize emotional connection, communication, attraction, long-term stabilizers, friction, mutual house overlays, and key cross-chart aspects. Include both resources and tension; never score compatibility, issue a good/bad verdict, or predict the relationship outcome. Follow only facts and assessments supplied for the request preset: Classical must not import Modern roles/themes, and Modern must not invent Classical dignity, reception, or scores."
+	default:
+		return ""
+	}
+}
+
 func defaultPrompt(scope, locale string) string {
 	kind := strings.TrimPrefix(scope, "chart.")
 	switch scope {
@@ -101,12 +201,64 @@ func defaultPrompt(scope, locale string) string {
 	case "period.solar-return":
 		kind = "solar-return"
 	}
+	if scope != "chart.transit" && scope != "chart.synastry" {
+		if locale == "zh-Hans" {
+			return fmt.Sprintf("%s\n\n%s\n\n%s\n\n%s\n\n%s",
+				safetyBoundaryZH, toneGuideZH(kind), namesRuleZH, "内容范围："+scopeTitleZH(scope), legacyReportOnlyJSONSchemaZH)
+		}
+		return fmt.Sprintf("%s\n\n%s\n\n%s\n\n%s\n\n%s",
+			safetyBoundaryEN, toneGuideEN(kind), namesRuleEN, "Content scope: "+scopeTitleEN(scope), legacyReportOnlyJSONSchemaEN)
+	}
+	if locale == "zh-Hans" {
+		schema := reportJSONSchemaZH
+		if scope == "chart.synastry" {
+			schema = synastryReportJSONSchemaZH
+		}
+		return fmt.Sprintf("%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s",
+			safetyBoundaryZH, toneGuideZH(kind), namesRuleZH, "内容范围："+scopeTitleZH(scope), chartAnalysisGuideZH(scope), schema)
+	}
+	schema := reportJSONSchemaEN
+	if scope == "chart.synastry" {
+		schema = synastryReportJSONSchemaEN
+	}
+	return fmt.Sprintf("%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s",
+		safetyBoundaryEN, toneGuideEN(kind), namesRuleEN, "Content scope: "+scopeTitleEN(scope), chartAnalysisGuideEN(scope), schema)
+}
+
+// legacyDefaultPromptV3 is the first report-only prompt. Startup migrates an
+// exact untouched copy to the chart-specific report prompt above.
+func legacyDefaultPromptV3(scope, locale string) string {
+	kind := strings.TrimPrefix(scope, "chart.")
+	switch scope {
+	case "period.daily", "period.monthly":
+		kind = "transit"
+	case "period.solar-return":
+		kind = "solar-return"
+	}
 	if locale == "zh-Hans" {
 		return fmt.Sprintf("%s\n\n%s\n\n%s\n\n%s\n\n%s",
-			safetyBoundaryZH, toneGuideZH(kind), namesRuleZH, "内容范围："+scopeTitleZH(scope), jsonSchemaZH)
+			safetyBoundaryZH, toneGuideZH(kind), namesRuleZH, "内容范围："+scopeTitleZH(scope), legacyReportOnlyJSONSchemaZH)
 	}
 	return fmt.Sprintf("%s\n\n%s\n\n%s\n\n%s\n\n%s",
-		safetyBoundaryEN, toneGuideEN(kind), namesRuleEN, "Content scope: "+scopeTitleEN(scope), jsonSchemaEN)
+		safetyBoundaryEN, toneGuideEN(kind), namesRuleEN, "Content scope: "+scopeTitleEN(scope), legacyReportOnlyJSONSchemaEN)
+}
+
+// legacyDefaultPromptV2 is the former report-plus-card prompt. It is kept only
+// so startup can migrate untouched seeded prompts without overwriting admin edits.
+func legacyDefaultPromptV2(scope, locale string) string {
+	kind := strings.TrimPrefix(scope, "chart.")
+	switch scope {
+	case "period.daily", "period.monthly":
+		kind = "transit"
+	case "period.solar-return":
+		kind = "solar-return"
+	}
+	if locale == "zh-Hans" {
+		return fmt.Sprintf("%s\n\n%s\n\n%s\n\n%s\n\n%s",
+			legacySafetyBoundaryZH, toneGuideZH(kind), namesRuleZH, "内容范围："+scopeTitleZH(scope), legacyCardJSONSchemaZH)
+	}
+	return fmt.Sprintf("%s\n\n%s\n\n%s\n\n%s\n\n%s",
+		legacySafetyBoundaryEN, toneGuideEN(kind), namesRuleEN, "Content scope: "+scopeTitleEN(scope), legacyCardJSONSchemaEN)
 }
 
 // legacyDefaultPromptV1 identifies the first automatically seeded chart
@@ -119,10 +271,10 @@ func legacyDefaultPromptV1(scope, locale string) string {
 	}
 	if locale == "zh-Hans" {
 		return fmt.Sprintf("%s\n\n%s\n\n%s\n\n%s\n\n%s",
-			safetyBoundaryZH, toneGuideZH(scope), namesRuleZH, "内容范围："+scopeTitleZH(scope), jsonSchemaZH)
+			legacySafetyBoundaryZH, toneGuideZH(scope), namesRuleZH, "内容范围："+scopeTitleZH(scope), legacyCardJSONSchemaZH)
 	}
 	return fmt.Sprintf("%s\n\n%s\n\n%s\n\n%s\n\n%s",
-		safetyBoundaryEN, toneGuideEN(scope), namesRuleEN, "Content scope: "+scopeTitleEN(scope), jsonSchemaEN)
+		legacySafetyBoundaryEN, toneGuideEN(scope), namesRuleEN, "Content scope: "+scopeTitleEN(scope), legacyCardJSONSchemaEN)
 }
 
 func scopeTitleZH(scope string) string {

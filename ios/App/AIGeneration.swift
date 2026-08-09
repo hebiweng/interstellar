@@ -6,10 +6,10 @@ import Security
 
 // MARK: - Generation states
 
-enum AIDetailStatus: Equatable {
-    case hidden      // offline, not authorized, or never requested
-    case generating  // request in flight
-    case ready       // detail available locally
+enum AIReportGenerationStatus: Equatable, Sendable {
+    case idle
+    case generating
+    case ready
     case failed(String)
 }
 
@@ -41,12 +41,7 @@ struct AIGenerateResponse: Codable, Equatable, Sendable {
         let subtitle: String
         let sections: [AIReportSection]
     }
-    struct CardDetail: Codable, Equatable, Sendable {
-        let detail: String
-        let evidenceFactIDs: [String]?
-    }
     let report: Report
-    let cards: [String: CardDetail]
     let provider: String?
     let model: String?
     let cached: Bool?
@@ -58,7 +53,7 @@ struct AIGenerateResponse: Codable, Equatable, Sendable {
 }
 
 struct GeneratedChartArtifact: Codable, Equatable, Sendable, Identifiable {
-    static let schemaVersion = 1
+    static let schemaVersion = 2
 
     let semanticFingerprint: String
     let chartKind: String
@@ -66,7 +61,6 @@ struct GeneratedChartArtifact: Codable, Equatable, Sendable, Identifiable {
     let parameters: [String: String]
     let locale: String
     let preset: String
-    let cardContractVersion: Int
     let factsHash: String
     let provider: String?
     let model: String?
@@ -80,14 +74,21 @@ struct GeneratedChartArtifact: Codable, Equatable, Sendable, Identifiable {
 
 struct AIChartContent: Equatable, Sendable {
     var cacheKey: String = ""
-    var cardDetails: [String: String] = [:]
     var report: AIReport?
-    var statusByCard: [String: AIDetailStatus] = [:]
+    var status: AIReportGenerationStatus = .idle
 
     static let empty = AIChartContent()
+}
 
-    func status(for cardID: String) -> AIDetailStatus {
-        statusByCard[cardID] ?? .hidden
+enum AIArtifactIdentity {
+    /// Report identity follows the calculated chart, not the language used to
+    /// narrate it. The full request facts hash still includes locale and is
+    /// verified independently by the Relay response contract.
+    static func factsIdentityHash(_ facts: [String: Any]) throws -> String {
+        var identityFacts = facts
+        identityFacts.removeValue(forKey: "locale")
+        let data = try JSONSerialization.data(withJSONObject: identityFacts, options: [.sortedKeys])
+        return SHA256Digest.hash(data).hex
     }
 }
 
@@ -103,16 +104,31 @@ enum AIFactsBuilder {
         personName: String,
         partnerName: String?,
         partnerChart: ChartSnapshot?,
+        classicalSynastryAssessment: ClassicalSynastryAssessment? = nil,
         events: ChartEventData,
         params: [String: String],
-        locale: String,
-        cardIDs: [String]
+        locale: String
     ) -> [String: Any] {
+        if chart == .synastry,
+           let secondChart = partnerChart ?? reference,
+           let partnerName
+        {
+            return synastryDocument(
+                firstName: personName,
+                firstChart: snapshot,
+                secondName: partnerName,
+                secondChart: secondChart,
+                crossAspects: comparisonAspects,
+                classicalAssessment: classicalSynastryAssessment,
+                preset: preset,
+                params: params,
+                locale: locale
+            )
+        }
         var document: [String: Any] = [
             "kind": chart.contentPrefix,
             "preset": preset.rawValue,
             "locale": locale,
-            "cardIDs": cardIDs,
             "params": params,
             "chart": chartDocument(snapshot, houseReference: chart.isComparison ? (reference ?? snapshot) : snapshot),
             "evidenceFacts": evidenceDocuments(
@@ -137,6 +153,97 @@ enum AIFactsBuilder {
             ]
         }
         return document
+    }
+
+    static func synastryDocument(
+        firstName: String,
+        firstChart: ChartSnapshot,
+        secondName: String,
+        secondChart: ChartSnapshot,
+        crossAspects: [ChartAspect],
+        classicalAssessment: ClassicalSynastryAssessment? = nil,
+        preset: CalculationPreset,
+        params: [String: String],
+        locale: String
+    ) -> [String: Any] {
+        let firstID = "person-1"
+        let secondID = "person-2"
+        let firstNatalFacts = synastryNatalFacts(personID: firstID, snapshot: firstChart)
+        let secondNatalFacts = synastryNatalFacts(personID: secondID, snapshot: secondChart)
+        let receptions = Dictionary(
+            uniqueKeysWithValues: (classicalAssessment?.crossChartReceptions ?? []).map {
+                ("\($0.firstBody.rawValue)|\($0.aspectKind.rawValue)|\($0.secondBody.rawValue)", $0)
+            }
+        )
+        let crossFacts = crossAspects.map { aspect -> [String: Any] in
+            var fact: [String: Any] = [
+                "id": "synastry.cross.\(firstID).\(aspect.firstID).\(aspect.kind.rawValue).\(secondID).\(aspect.secondID)",
+                "type": "crossAspect",
+                "firstPersonID": firstID,
+                "firstBody": aspect.firstID,
+                "secondPersonID": secondID,
+                "secondBody": aspect.secondID,
+                "aspect": aspect.kind.rawValue,
+                "phase": aspect.phase.rawValue,
+                "orb": round2(aspect.orbDegrees),
+                "strength": round3(aspect.strength),
+                "firstLongitude": round2(aspect.firstLongitude),
+                "secondLongitude": round2(aspect.secondLongitude),
+            ]
+            if let reception = receptions["\(aspect.firstID)|\(aspect.kind.rawValue)|\(aspect.secondID)"] {
+                fact["classicalAssessment"] = [
+                    "receptionFromFirst": receptionDocument(reception.receptionFromFirst),
+                    "receptionFromSecond": receptionDocument(reception.receptionFromSecond),
+                ]
+            }
+            return fact
+        }
+        let overlayFacts = synastryOverlayFacts(
+            sourceID: firstID,
+            source: firstChart,
+            receivingID: secondID,
+            receiving: secondChart
+        ) + synastryOverlayFacts(
+            sourceID: secondID,
+            source: secondChart,
+            receivingID: firstID,
+            receiving: firstChart
+        )
+        let conditionFacts = synastryConditionFacts(
+            personID: firstID,
+            assessments: classicalAssessment?.firstPlanets ?? []
+        ) + synastryConditionFacts(
+            personID: secondID,
+            assessments: classicalAssessment?.secondPlanets ?? []
+        )
+        let evidenceFacts = (firstNatalFacts + secondNatalFacts + crossFacts + overlayFacts + conditionFacts).sorted {
+            ($0["id"] as? String ?? "") < ($1["id"] as? String ?? "")
+        }
+
+        return [
+            "kind": ChartKind.synastry.contentPrefix,
+            "preset": preset.rawValue,
+            "locale": locale,
+            "params": params,
+            "people": [
+                [
+                    "id": firstID,
+                    "name": firstName,
+                    "natalFactIDs": firstNatalFacts.compactMap { $0["id"] as? String },
+                ],
+                [
+                    "id": secondID,
+                    "name": secondName,
+                    "natalFactIDs": secondNatalFacts.compactMap { $0["id"] as? String },
+                ],
+            ],
+            "relationship": [
+                "crossAspectFactIDs": crossFacts.compactMap { $0["id"] as? String },
+                "houseOverlayFactIDs": overlayFacts.compactMap { $0["id"] as? String },
+                "classicalConditionFactIDs": conditionFacts.compactMap { $0["id"] as? String },
+            ],
+            "evidenceFacts": evidenceFacts,
+        ]
     }
 
     static func periodDocument(
@@ -169,6 +276,80 @@ enum AIFactsBuilder {
             "houses": snapshot.houses.map { ["number": $0.number, "cusp": round2($0.cuspDegrees)] },
             "points": snapshot.points.map { pointDocument($0, houseReference: houseReference) },
             "aspects": snapshot.aspects.map(aspectDocument),
+        ]
+    }
+
+    private static func synastryNatalFacts(personID: String, snapshot: ChartSnapshot) -> [[String: Any]] {
+        let points = snapshot.points.map { point -> [String: Any] in
+            [
+                "id": "synastry.\(personID).point.\(point.body.rawValue)",
+                "type": "natalPoint",
+                "personID": personID,
+                "body": point.body.rawValue,
+                "longitude": round2(point.longitudeDegrees),
+                "sign": Zodiac.englishNames[point.signIndex],
+                "degreeInSign": round2(point.degreeInSign),
+                "natalHouse": snapshot.house(containing: point.longitudeDegrees),
+                "retrograde": point.retrograde,
+                "speed": round4(point.position.longitudeSpeedDegreesPerDay),
+            ]
+        }
+        let angles: [String: Any] = [
+            "id": "synastry.\(personID).angles",
+            "type": "natalAngles",
+            "personID": personID,
+            "ascendant": round2(snapshot.angles.ascendantDegrees),
+            "midheaven": round2(snapshot.angles.midheavenDegrees),
+            "descendant": round2((snapshot.angles.ascendantDegrees + 180).truncatingRemainder(dividingBy: 360)),
+            "imumCoeli": round2((snapshot.angles.midheavenDegrees + 180).truncatingRemainder(dividingBy: 360)),
+        ]
+        return points + [angles]
+    }
+
+    private static func synastryOverlayFacts(
+        sourceID: String,
+        source: ChartSnapshot,
+        receivingID: String,
+        receiving: ChartSnapshot
+    ) -> [[String: Any]] {
+        source.points.map { point in
+            let house = receiving.house(containing: point.longitudeDegrees)
+            return [
+                "id": "synastry.overlay.\(sourceID).\(point.body.rawValue).in.\(receivingID).house.\(house)",
+                "type": "houseOverlay",
+                "sourcePersonID": sourceID,
+                "body": point.body.rawValue,
+                "receivingPersonID": receivingID,
+                "house": house,
+            ] as [String: Any]
+        }
+    }
+
+    private static func synastryConditionFacts(
+        personID: String,
+        assessments: [HoraryPlanetAssessment]
+    ) -> [[String: Any]] {
+        assessments.map { assessment in
+            [
+                "id": "synastry.\(personID).classical-condition.\(assessment.body.rawValue)",
+                "type": "classicalPlanetCondition",
+                "personID": personID,
+                "body": assessment.body.rawValue,
+                "house": assessment.house,
+                "signIndex": assessment.signIndex,
+                "score": round2(assessment.score),
+                "conditions": assessment.conditions.map(\.rawValue),
+            ] as [String: Any]
+        }
+    }
+
+    private static func receptionDocument(_ reception: HoraryReception) -> [String: Any] {
+        [
+            "from": reception.from.rawValue,
+            "to": reception.to.rawValue,
+            "byDomicile": reception.byDomicile,
+            "byExaltation": reception.byExaltation,
+            "isPresent": reception.isPresent,
         ]
     }
 

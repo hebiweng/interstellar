@@ -57,15 +57,7 @@ struct AskView: View {
             ZStack {
                 ScreenBackground()
                 ScrollView(.vertical, showsIndicators: false) {
-                    Group {
-                        if let session {
-                            resultView(session)
-                        } else if let mode {
-                            configurationView(mode)
-                        } else {
-                            modeSelection
-                        }
-                    }
+                    modeSelection
                     .padding(.horizontal, 18)
                     .padding(.top, 18)
                     .padding(.bottom, 34)
@@ -87,14 +79,51 @@ struct AskView: View {
             .onChange(of: startDate) { _, _ in
                 customEndDate = min(max(customEndDate, startDate), maximumEndDate)
             }
-            .onDisappear {
-                calculationTask?.cancel()
+            .navigationDestination(
+                isPresented: Binding(
+                    get: { mode != nil },
+                    set: { isPresented in
+                        if !isPresented {
+                            resetToModes()
+                        }
+                    }
+                )
+            ) {
+                if let mode {
+                    askFlow(mode)
+                }
             }
-            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(isPresented: $showAskHistory) {
                 AskHistoryView(entries: askHistory, language: model.language)
             }
         }
+        .onDisappear {
+            calculationTask?.cancel()
+        }
+    }
+
+    private func askFlow(_ mode: HoraryQuestionMode) -> some View {
+        ZStack {
+            ScreenBackground()
+            ScrollView(.vertical, showsIndicators: false) {
+                Group {
+                    if let session {
+                        resultView(session)
+                    } else {
+                        configurationView(mode)
+                    }
+                }
+                .padding(.horizontal, 18)
+                .padding(.top, 18)
+                .padding(.bottom, 34)
+            }
+            .scrollDismissesKeyboard(.interactively)
+        }
+        .toolbar(.visible, for: .navigationBar)
+        .navigationTitle(session == nil
+            ? modeTitle(mode)
+            : localized("Your answer", "问事结果", language: model.language))
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private var modeSelection: some View {
@@ -223,7 +252,8 @@ struct AskView: View {
 
     private func configurationView(_ mode: HoraryQuestionMode) -> some View {
         VStack(alignment: .leading, spacing: 18) {
-            backHeader(
+            ScreenTitle(
+                eyebrow: localized("ASK THE CHART", "问事盘", language: model.language),
                 title: modeTitle(mode),
                 subtitle: modeSubtitle(mode)
             )
@@ -506,7 +536,8 @@ struct AskView: View {
     private func resultView(_ session: HorarySession) -> some View {
         let overlay = overlay(for: session)
         return VStack(alignment: .leading, spacing: 18) {
-            backHeader(
+            ScreenTitle(
+                eyebrow: localized("ASK THE CHART", "问事盘", language: model.language),
                 title: localized("Your answer", "问事结果", language: model.language),
                 subtitle: formattedSessionDate(session)
             )
@@ -728,29 +759,6 @@ struct AskView: View {
                 }
             }
         )
-    }
-
-    private func backHeader(title: String, subtitle: String) -> some View {
-        VStack(alignment: .leading, spacing: 9) {
-            Button {
-                resetToModes()
-            } label: {
-                Label(
-                    localized("Ask something else", "返回选择", language: model.language),
-                    systemImage: "chevron.left"
-                )
-                .font(AppTypography.label)
-                .frame(minHeight: 44)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(AppTheme.violet)
-            ScreenTitle(
-                eyebrow: localized("ASK THE CHART", "问事盘", language: model.language),
-                title: title,
-                subtitle: subtitle
-            )
-        }
     }
 
     private func fieldTitle(_ title: String) -> some View {
@@ -1581,8 +1589,6 @@ private struct HoraryProfessionalView: View {
 struct AskHistoryView: View {
     let entries: [AskHistoryEntry]
     let language: AppLanguage
-    @Environment(\.dismiss) private var dismiss
-    @State private var selected: AskHistoryEntry?
 
     var body: some View {
         ZStack {
@@ -1601,8 +1607,8 @@ struct AskHistoryView: View {
                             .cardSurface()
                     } else {
                         ForEach(entries) { entry in
-                            Button {
-                                selected = entry
+                            NavigationLink {
+                                AskHistoryDetailView(entry: entry, language: language)
                             } label: {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(entry.question)
@@ -1629,21 +1635,9 @@ struct AskHistoryView: View {
                 .padding(.bottom, 30)
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "chevron.left").foregroundStyle(AppTheme.text)
-                }
-                .accessibilityLabel(localized("Back", "返回", language: language))
-            }
-        }
-        .sheet(item: $selected) { entry in
-            AskHistoryDetailView(entry: entry, language: language)
-        }
+        .toolbar(.visible, for: .navigationBar)
+        .navigationTitle(localized("History", "历史", language: language))
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private func shortDate(_ date: Date) -> String {
@@ -1657,39 +1651,29 @@ struct AskHistoryView: View {
 struct AskHistoryDetailView: View {
     let entry: AskHistoryEntry
     let language: AppLanguage
-    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                ScreenBackground()
-                ScrollView(.vertical, showsIndicators: false) {
-                    LazyVStack(alignment: .leading, spacing: 14) {
-                        Text(entry.question)
-                            .font(.title2.weight(.bold))
+        ZStack {
+            ScreenBackground()
+            ScrollView(.vertical, showsIndicators: false) {
+                LazyVStack(alignment: .leading, spacing: 14) {
+                    Text(entry.question)
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(AppTheme.text)
+                    Text(entry.answerTitle)
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(AppTheme.violet)
+                    if !entry.answerText.isEmpty {
+                        Text(entry.answerText)
+                            .font(.body)
                             .foregroundStyle(AppTheme.text)
-                        Text(entry.answerTitle)
-                            .font(.title3.weight(.semibold))
-                            .foregroundStyle(AppTheme.violet)
-                        if !entry.answerText.isEmpty {
-                            Text(entry.answerText)
-                                .font(.body)
-                                .foregroundStyle(AppTheme.text)
-                        }
                     }
-                    .padding(18)
                 }
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark").foregroundStyle(AppTheme.text)
-                    }
-                    .accessibilityLabel(localized("Close", "关闭", language: language))
-                }
+                .padding(18)
             }
         }
+        .toolbar(.visible, for: .navigationBar)
+        .navigationTitle(localized("History", "历史", language: language))
+        .navigationBarTitleDisplayMode(.inline)
     }
 }

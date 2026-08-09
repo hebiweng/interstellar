@@ -10,6 +10,8 @@ struct InsightVisualView: View {
     @State var transitFilter: String? = nil
     @State var selectedCycleIndex = 0
     @State var transitDetailDrawer: TransitDetailDrawer?
+    @State var selectedSynastryPerspective = 0
+    @State var synastryFactDrawer: InsightFact?
 
     var body: some View {
         Group {
@@ -89,17 +91,27 @@ struct InsightVisualView: View {
             case .overlayCompare: compareStrip(natal: localized("Natal", "本命", language: language), progressed: localized("This year", "今年", language: language))
             case let .natalOverlay(firstLabel, firstValue, secondLabel, secondValue):
                 natalOverlay(firstLabel: firstLabel, firstValue: firstValue, secondLabel: secondLabel, secondValue: secondValue)
-            case .bondOrbit: bondOrbit
-            case .perspectiveTabs: perspectiveTabs
+            case let .bondOrbit(presentation): bondOrbit(presentation)
+            case let .perspectiveTabs(presentation): perspectiveTabs(presentation)
             case .connectionGrid: connectionGrid
             case .pathFlow: pathFlow(title: localized("How it flows", "流动方式", language: language))
-                case .houseOverlayRows: houseOverlayRows
+            case let .synastryConnectionGrid(kind): synastryConnectionGrid(kind)
+            case .synastryPathFlow: synastryPathFlow
+            case .synastryChemistry: synastryChemistry
+            case let .synastryHouseOverlayRows(pair): synastryHouseOverlayRows(pair)
+            case let .synastryInterAspectRows(pair): synastryInterAspectRows(pair)
                 }
             }
         }
         .sheet(item: $transitDetailDrawer) { drawer in
             transitDrawer(drawer)
                 .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(AppTheme.panel)
+        }
+        .sheet(item: $synastryFactDrawer) { fact in
+            SynastryFactDetailSheet(fact: fact, language: language)
+                .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
                 .presentationBackground(AppTheme.panel)
         }

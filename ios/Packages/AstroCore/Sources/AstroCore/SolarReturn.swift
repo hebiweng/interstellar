@@ -1,21 +1,85 @@
 import CSwissEphemeris
 import Foundation
 
+/// Frozen capability boundary for the first Classical Synastry release.
+///
+/// Lunar nodes are deliberately outside this MVP, rather than declared
+/// permanently unsupported by classical astrology. Expanding this boundary
+/// requires a separate product and calculation contract.
+public enum ClassicalSynastryMVPCapability {
+    public static let traditionalBodies: [CelestialBody] = [
+        .sun, .moon, .mercury, .venus, .mars, .jupiter, .saturn,
+    ]
+    public static let aspectKinds: [AspectKind] = [
+        .conjunction, .sextile, .square, .trine, .opposition,
+    ]
+    public static let includesLunarNodes = false
+}
+
+/// Directional traditional reception for one actual cross-chart aspect.
+/// `first` and `second` always retain the caller's person ordering.
+public struct CrossChartReceptionAssessment: Sendable, Equatable, Identifiable, Codable {
+    public let firstBody: CelestialBody
+    public let secondBody: CelestialBody
+    public let aspectKind: AspectKind
+    public let receptionFromFirst: HoraryReception
+    public let receptionFromSecond: HoraryReception
+
+    public var id: String {
+        "first.\(firstBody.rawValue).\(aspectKind.rawValue).second.\(secondBody.rawValue)"
+    }
+
+    public init(
+        firstBody: CelestialBody,
+        secondBody: CelestialBody,
+        aspectKind: AspectKind,
+        receptionFromFirst: HoraryReception,
+        receptionFromSecond: HoraryReception
+    ) {
+        self.firstBody = firstBody
+        self.secondBody = secondBody
+        self.aspectKind = aspectKind
+        self.receptionFromFirst = receptionFromFirst
+        self.receptionFromSecond = receptionFromSecond
+    }
+}
+
+/// Classical conditions for both ordered natal charts and the traditional,
+/// bidirectional reception attached to every actual cross-chart aspect.
+public struct ClassicalSynastryAssessment: Sendable, Equatable, Codable {
+    public let firstPlanets: [HoraryPlanetAssessment]
+    public let secondPlanets: [HoraryPlanetAssessment]
+    public let crossChartReceptions: [CrossChartReceptionAssessment]
+
+    public init(
+        firstPlanets: [HoraryPlanetAssessment],
+        secondPlanets: [HoraryPlanetAssessment],
+        crossChartReceptions: [CrossChartReceptionAssessment]
+    ) {
+        self.firstPlanets = firstPlanets
+        self.secondPlanets = secondPlanets
+        self.crossChartReceptions = crossChartReceptions
+    }
+}
+
 /// Result of a two-person (synastry) comparison: both natal snapshots plus the
 /// cross-chart aspects between them, all produced from one immutable pass.
 public struct SynastryComparison: Sendable, Equatable, Codable {
     public let first: ChartSnapshot
     public let second: ChartSnapshot
     public let crossAspects: [ChartAspect]
+    public let classicalAssessment: ClassicalSynastryAssessment?
 
     public init(
         first: ChartSnapshot,
         second: ChartSnapshot,
-        crossAspects: [ChartAspect]
+        crossAspects: [ChartAspect],
+        classicalAssessment: ClassicalSynastryAssessment? = nil
     ) {
         self.first = first
         self.second = second
         self.crossAspects = crossAspects
+        self.classicalAssessment = classicalAssessment
     }
 }
 
@@ -115,16 +179,32 @@ extension SwissEphemerisCalculator {
         preset: CalculationPreset = .modern,
         aspectOrbDegrees: Double? = nil
     ) throws -> SynastryComparison {
-        let firstSnapshot = try calculateSnapshot(
-            first,
-            preset: preset,
-            aspectOrbDegrees: aspectOrbDegrees
-        )
-        let secondSnapshot = try calculateSnapshot(
-            second,
-            preset: preset,
-            aspectOrbDegrees: aspectOrbDegrees
-        )
+        let firstSnapshot: ChartSnapshot
+        let secondSnapshot: ChartSnapshot
+        if preset == .classical {
+            // Synastry has a narrower MVP boundary than the global Classical
+            // preset: calculate only the seven traditional planets so Node
+            // facts cannot leak into internal or cross-chart aspects.
+            let configuration = ChartCalculationConfiguration(
+                pointIDs: ClassicalSynastryMVPCapability.traditionalBodies,
+                houseSystemCode: preset.houseSystemCode,
+                aspectOrbDegrees: aspectOrbDegrees ?? preset.defaultOrbDegrees,
+                orbsByBody: ChartOrbProfile.classicalStarlight
+            )
+            firstSnapshot = try calculateSnapshot(first, configuration: configuration)
+            secondSnapshot = try calculateSnapshot(second, configuration: configuration)
+        } else {
+            firstSnapshot = try calculateSnapshot(
+                first,
+                preset: preset,
+                aspectOrbDegrees: aspectOrbDegrees
+            )
+            secondSnapshot = try calculateSnapshot(
+                second,
+                preset: preset,
+                aspectOrbDegrees: aspectOrbDegrees
+            )
+        }
         let crossAspects: [ChartAspect]
         if preset == .classical {
             crossAspects = Self.compare(
@@ -139,11 +219,70 @@ extension SwissEphemerisCalculator {
                 orbsByKind: ChartOrbProfile.comparisonB
             )
         }
+        let deterministicCrossAspects = Self.deterministicSynastryOrder(crossAspects)
+        let classicalAssessment = preset == .classical
+            ? Self.classicalSynastryAssessment(
+                first: firstSnapshot,
+                second: secondSnapshot,
+                crossAspects: deterministicCrossAspects
+            )
+            : nil
         return SynastryComparison(
             first: firstSnapshot,
             second: secondSnapshot,
-            crossAspects: crossAspects
+            crossAspects: deterministicCrossAspects,
+            classicalAssessment: classicalAssessment
         )
+    }
+
+    private nonisolated static func classicalSynastryAssessment(
+        first: ChartSnapshot,
+        second: ChartSnapshot,
+        crossAspects: [ChartAspect]
+    ) -> ClassicalSynastryAssessment {
+        let bodies = ClassicalSynastryMVPCapability.traditionalBodies
+        let receptions = crossAspects.compactMap { aspect -> CrossChartReceptionAssessment? in
+            guard let firstBody = CelestialBody(rawValue: aspect.firstID),
+                  let secondBody = CelestialBody(rawValue: aspect.secondID),
+                  bodies.contains(firstBody),
+                  bodies.contains(secondBody)
+            else {
+                return nil
+            }
+            return CrossChartReceptionAssessment(
+                firstBody: firstBody,
+                secondBody: secondBody,
+                aspectKind: aspect.kind,
+                receptionFromFirst: HoraryEngine.reception(
+                    from: firstBody,
+                    to: secondBody,
+                    in: first
+                ),
+                receptionFromSecond: HoraryEngine.reception(
+                    from: secondBody,
+                    to: firstBody,
+                    in: second
+                )
+            )
+        }
+        return ClassicalSynastryAssessment(
+            firstPlanets: bodies.map { HoraryEngine.assess($0, in: first) },
+            secondPlanets: bodies.map { HoraryEngine.assess($0, in: second) },
+            crossChartReceptions: receptions
+        )
+    }
+
+    private nonisolated static func deterministicSynastryOrder(
+        _ aspects: [ChartAspect]
+    ) -> [ChartAspect] {
+        aspects.sorted { lhs, rhs in
+            if lhs.strength != rhs.strength { return lhs.strength > rhs.strength }
+            if lhs.firstID != rhs.firstID { return lhs.firstID < rhs.firstID }
+            if lhs.secondID != rhs.secondID { return lhs.secondID < rhs.secondID }
+            if lhs.kind.rawValue != rhs.kind.rawValue { return lhs.kind.rawValue < rhs.kind.rawValue }
+            if lhs.orbDegrees != rhs.orbDegrees { return lhs.orbDegrees < rhs.orbDegrees }
+            return lhs.phase.rawValue < rhs.phase.rawValue
+        }
     }
 
     // MARK: - Solar return moment search

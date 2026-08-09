@@ -19,8 +19,8 @@ the result so identical parameters never call the LLM twice.
 ## Endpoints
 
 - `POST /v1/generate` — consumer generation (chart or period report).
-  Body: `{mode, chartKind|periodType, preset, profileHash, params, facts, cardIDs, locale, clientVersion}`.
-  Response: `{report: {title, subtitle, sections[]}, cards: {cardID: {detail}}, model, cached}`.
+  Body: `{mode, chartKind|periodType, preset, profileHash, params, facts, locale, clientVersion, forceRegenerate?}`.
+  Response: `{report: {title, subtitle, sections[]}, model, cached}`. Chart report sections cite only IDs from `facts.evidenceFacts`; no per-card content is generated.
 - `GET /v1/health`
 - Admin API (revocable secure cookie from `POST /admin/login`):
   - `GET|POST|PUT /admin/providers` · `DELETE /admin/providers/{id}`
@@ -40,10 +40,10 @@ the result so identical parameters never call the LLM twice.
 | `RELAY_ADMIN_USER` / `RELAY_ADMIN_PASS` | bootstrap admin; password must contain at least 24 bytes |
 | `RELAY_PRUNE_OTHER_ADMINS` | `1` verifies the bootstrap account, then removes older admins and sessions |
 | `RELAY_SEED_PROMPTS` | `1` to insert default prompt templates for missing scopes |
-| `RELAY_SEED_DEEPSEEK` | defaults to `1`; ensures the DeepSeek V4 Flash provider exists |
+| `RELAY_SEED_DEEPSEEK` | `1` only for first-time bootstrap; production is `0` after Provider configuration so a deleted or manually named Provider is not recreated |
 | `RELAY_ALLOWED_ORIGIN` | production origin, `https://aaadmin.xiaoguiwk.top` |
 | `RELAY_DAILY_GENERATION_QUOTA` | per-installation daily successful generation limit (default `20`) |
-| `RELAY_ALLOW_DEV_BYPASS` | simulator-only development bypass; must be `0` in production |
+| `RELAY_ALLOW_DEV_BYPASS` | temporary Debug/simulator development bypass while App Attest entitlement is unavailable; must be `0` before release |
 | `RELAY_APP_ATTEST_APP_ID` | production App Attest app identifier |
 | `RELAY_APP_ATTEST_ENVIRONMENT` | `production` for App Store/TestFlight/device release builds |
 | `RELAY_APP_ATTEST_ALLOW_DEVELOPMENT` | `1` accepts Apple-verified development AAGUIDs for direct developer installs; this is not the simulator bypass |

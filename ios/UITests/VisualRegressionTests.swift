@@ -410,14 +410,6 @@ final class VisualRegressionTests: XCTestCase {
             XCTAssertTrue(settings.waitForExistence(timeout: 10))
             settings.tap()
 
-            let clearCache = app.buttons["Clear generated content cache"]
-            scrollTo(clearCache, in: app)
-            XCTAssertTrue(clearCache.waitForExistence(timeout: 10))
-            clearCache.tap()
-            let clear = app.buttons["Clear"]
-            XCTAssertTrue(clear.waitForExistence(timeout: 10))
-            clear.tap()
-
             let consent = app.switches["Allow new AI generation"]
             scrollTo(consent, in: app)
             XCTAssertTrue(consent.waitForExistence(timeout: 10))
@@ -430,31 +422,41 @@ final class VisualRegressionTests: XCTestCase {
             let chartsTab = app.tabBars.buttons["Charts"]
             XCTAssertTrue(chartsTab.waitForExistence(timeout: 30))
             chartsTab.tap()
+            let transitChart = app.buttons["Transits"]
+            XCTAssertTrue(transitChart.waitForExistence(timeout: 20))
+            transitChart.tap()
+            scrollToTop(app)
+            let reports = app.buttons["Reports"]
+            XCTAssertTrue(reports.waitForExistence(timeout: 10))
+            reports.tap()
+
+            let generate = app.buttons["Generate Report"].firstMatch
+            XCTAssertTrue(generate.waitForExistence(timeout: 20), "The report must wait for an explicit Generate action")
+            XCTAssertTrue(generate.isEnabled, "The selected chart report should be ready to generate on the physical device")
+            generate.tap()
             let allow = app.buttons["Allow"]
             if allow.waitForExistence(timeout: 5) {
                 allow.tap()
             }
 
+            let viewReport = app.buttons["View Report"].firstMatch
             XCTAssertTrue(
-                waitForGeneratedDetail(in: app, timeout: 240),
-                "A physical-device App Attest request did not produce a saved chart artifact"
+                waitForReport(viewReport, in: app, timeout: 240),
+                "The explicit physical-device report request did not produce a saved chart artifact"
             )
-
-            scrollToTop(app)
-            let reports = app.buttons["Reports"]
-            XCTAssertTrue(reports.waitForExistence(timeout: 10))
-            reports.tap()
-            let natalReport = app.staticTexts["Natal Report"]
-            scrollTo(natalReport, in: app)
-            XCTAssertTrue(natalReport.waitForExistence(timeout: 20), "Generated natal report was not saved on device")
+            viewReport.tap()
+            XCTAssertTrue(app.buttons["Regenerate"].waitForExistence(timeout: 20))
 
             app.terminate()
             app.launch()
             XCTAssertTrue(chartsTab.waitForExistence(timeout: 30))
             chartsTab.tap()
+            scrollToTop(app)
+            XCTAssertTrue(reports.waitForExistence(timeout: 10))
+            reports.tap()
             XCTAssertTrue(
-                waitForGeneratedDetail(in: app, timeout: 20),
-                "The second launch did not restore the chart artifact from local storage"
+                app.buttons["Regenerate"].waitForExistence(timeout: 20),
+                "The second launch did not restore and open the chart report from local storage"
             )
         #endif
     }
@@ -502,19 +504,20 @@ final class VisualRegressionTests: XCTestCase {
     }
 
     @MainActor
-    private func waitForGeneratedDetail(in app: XCUIApplication, timeout: TimeInterval) -> Bool {
-        let ready = app.buttons["Read details"].firstMatch
-        let failed = app.staticTexts["Professional interpretation unavailable"].firstMatch
+    private func waitForReport(_ reportButton: XCUIElement, in app: XCUIApplication, timeout: TimeInterval) -> Bool {
+        let failed = app.staticTexts.matching(
+            NSPredicate(format: "label CONTAINS[c] 'failed' OR label CONTAINS[c] 'unavailable' OR label CONTAINS '失败' OR label CONTAINS '不可用'")
+        ).firstMatch
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
-            if ready.exists { return true }
+            if reportButton.exists { return true }
             if failed.exists {
-                XCTFail("Professional interpretation failed on the physical device")
+                XCTFail("Report generation failed: \(failed.label)")
                 return false
             }
-            app.swipeUp()
             usleep(700_000)
         }
-        return ready.exists
+        return reportButton.exists
     }
+
 }

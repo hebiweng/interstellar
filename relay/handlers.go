@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"sort"
 	"strings"
@@ -39,20 +40,19 @@ type relayConfig struct {
 }
 
 type generateRequest struct {
-	Mode                    string              `json:"mode"`                 // chart | period
-	ChartKind               string              `json:"chartKind"`            // natal | current-sky | transit | secondary | solar-return | synastry
-	PeriodType              string              `json:"periodType,omitempty"` // daily | monthly | solar-return
-	Preset                  string              `json:"preset,omitempty"`     // modern | classical
-	ProfileHash             string              `json:"profileHash"`
-	SemanticFingerprint     string              `json:"semanticFingerprint,omitempty"`
-	FactsHash               string              `json:"factsHash,omitempty"`
-	GenerationSchemaVersion int                 `json:"generationSchemaVersion,omitempty"`
-	Params                  json.RawMessage     `json:"params"`
-	Facts                   json.RawMessage     `json:"facts"`
-	CardIDs                 []string            `json:"cardIDs"`
-	AllowedEvidenceByCard   map[string][]string `json:"allowedEvidenceByCard,omitempty"`
-	Locale                  string              `json:"locale"`
-	ClientVer               string              `json:"clientVersion,omitempty"`
+	Mode                    string          `json:"mode"`                 // chart | period
+	ChartKind               string          `json:"chartKind"`            // natal | current-sky | transit | secondary | solar-return | synastry
+	PeriodType              string          `json:"periodType,omitempty"` // daily | monthly | solar-return
+	Preset                  string          `json:"preset,omitempty"`     // modern | classical
+	ProfileHash             string          `json:"profileHash"`
+	SemanticFingerprint     string          `json:"semanticFingerprint,omitempty"`
+	FactsHash               string          `json:"factsHash,omitempty"`
+	GenerationSchemaVersion int             `json:"generationSchemaVersion,omitempty"`
+	Params                  json.RawMessage `json:"params"`
+	Facts                   json.RawMessage `json:"facts"`
+	Locale                  string          `json:"locale"`
+	ClientVer               string          `json:"clientVersion,omitempty"`
+	ForceRegenerate         bool            `json:"forceRegenerate,omitempty"`
 }
 
 func (g *generateRequest) scope() (string, error) {
@@ -174,13 +174,15 @@ func (c *relayConfig) handleGenerate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cacheKey := cacheKeyFor(req, scope, model, locale, version)
-	if payload, hit, _ := c.store.CacheGet(cacheKey); hit {
-		var cached map[string]any
-		_ = json.Unmarshal([]byte(payload), &cached)
-		cached["cached"] = true
-		_ = c.store.RecordUsage(scope, model, 0, 0, true)
-		writeJSON(w, http.StatusOK, cached)
-		return
+	if !req.ForceRegenerate {
+		if payload, hit, _ := c.store.CacheGet(cacheKey); hit {
+			var cached map[string]any
+			_ = json.Unmarshal([]byte(payload), &cached)
+			cached["cached"] = true
+			_ = c.store.RecordUsage(scope, model, 0, 0, true)
+			writeJSON(w, http.StatusOK, cached)
+			return
+		}
 	}
 
 	count, allowed, err := c.store.ConsumeInstallationQuota(installationID, c.dailyQuota)
@@ -197,10 +199,14 @@ func (c *relayConfig) handleGenerate(w http.ResponseWriter, r *http.Request) {
 	userContent := buildUserContent(req, scope)
 	result, usedModel, promptTokens, completionTokens, err := Generate(
 		r.Context(), c.client, provider.BaseURL, provider.APIKey, model, prompt, userContent,
-		req.CardIDs, req.Locale, req.AllowedEvidenceByCard, evidenceIDs,
+		req.Locale, evidenceIDs,
 	)
 	if err != nil {
 		_ = c.store.RecordUsage(scope, model, 0, 0, false)
+		log.Printf(
+			"generation failed scope=%s model=%s facts_bytes=%d evidence_count=%d user_content_bytes=%d: %v",
+			scope, model, len(req.Facts), len(evidenceIDs), len(userContent), err,
+		)
 		writeError(w, http.StatusBadGateway, "upstream_generation_failed", "generation failed: "+err.Error(), true)
 		return
 	}
@@ -208,7 +214,6 @@ func (c *relayConfig) handleGenerate(w http.ResponseWriter, r *http.Request) {
 
 	response := map[string]any{
 		"report":                  result.Report,
-		"cards":                   result.Cards,
 		"provider":                provider.ID,
 		"model":                   usedModel,
 		"cached":                  false,
@@ -235,7 +240,7 @@ func cacheKeyFor(req generateRequest, scope, model, locale string, promptVersion
 	raw := strings.Join([]string{
 		scope, req.Preset, req.ProfileHash, req.SemanticFingerprint, req.FactsHash,
 		fmt.Sprintf("schema%d", req.GenerationSchemaVersion), params, facts, model, locale,
-		fmt.Sprintf("p%d", promptVersion), req.ClientVer, JSONMarshal(req.AllowedEvidenceByCard),
+		fmt.Sprintf("p%d", promptVersion), req.ClientVer,
 	}, "|")
 	sum := sha256.Sum256([]byte(raw))
 	return hex.EncodeToString(sum[:])
@@ -245,13 +250,6 @@ func validateGenerationRequest(req generateRequest) (map[string]bool, error) {
 	if req.Mode != "period" {
 		if req.SemanticFingerprint == "" || req.FactsHash == "" || req.GenerationSchemaVersion <= 0 {
 			return nil, errors.New("semanticFingerprint, factsHash and generationSchemaVersion are required")
-		}
-		expected, ok := chartCardContract(req.ChartKind)
-		if !ok {
-			return nil, errors.New("unknown chart card contract")
-		}
-		if !sameStringSet(req.CardIDs, expected) {
-			return nil, fmt.Errorf("cardIDs must exactly cover the %s contract", req.ChartKind)
 		}
 	}
 	var facts struct {
@@ -272,64 +270,7 @@ func validateGenerationRequest(req generateRequest) (map[string]bool, error) {
 	if req.Mode != "period" && len(evidence) == 0 {
 		return nil, errors.New("chart generation requires stable evidence facts")
 	}
-	seenCards := map[string]bool{}
-	for _, cardID := range req.CardIDs {
-		if cardID == "" || seenCards[cardID] {
-			return nil, errors.New("cardIDs must be non-empty and unique")
-		}
-		seenCards[cardID] = true
-		allowed, ok := req.AllowedEvidenceByCard[cardID]
-		if !ok || len(allowed) == 0 {
-			return nil, fmt.Errorf("missing allowed evidence for card %q", cardID)
-		}
-		seenAllowed := map[string]bool{}
-		for _, id := range allowed {
-			if seenAllowed[id] {
-				return nil, fmt.Errorf("card %q repeats allowed evidence %q", cardID, id)
-			}
-			seenAllowed[id] = true
-			if !evidence[id] {
-				return nil, fmt.Errorf("card %q allows unknown evidence %q", cardID, id)
-			}
-		}
-	}
-	for cardID := range req.AllowedEvidenceByCard {
-		if !seenCards[cardID] {
-			return nil, fmt.Errorf("allowed evidence contains unexpected card %q", cardID)
-		}
-	}
 	return evidence, nil
-}
-
-func chartCardContract(kind string) ([]string, bool) {
-	contracts := map[string][]string{
-		"natal":        {"natal-interpretation", "emotional-needs", "love-connection", "career-direction", "strengths-growth", "element-balance", "house-emphasis", "chart-signature", "planet-placements", "key-aspects"},
-		"current-sky":  {"sky-overview", "moon-now", "aspect-pattern", "planetary-motion", "sign-changes", "element-climate", "upcoming-7-days"},
-		"transit":      {"current-story", "current-cycles", "transit-timeline", "planet-paths", "life-areas", "active-transits"},
-		"secondary":    {"developmental-chapter", "progressed-moon", "identity-development", "turning-points", "areas-maturing", "timeline"},
-		"solar-return": {"year-theme", "year-anchors", "priority-areas", "year-dynamics", "year-timeline", "natal-overlay", "year-aspects"},
-		"synastry":     {"relationship-overview", "perspectives", "emotional-connection", "communication", "chemistry", "commitment", "house-overlays", "key-inter-aspects"},
-	}
-	value, ok := contracts[kind]
-	return value, ok
-}
-
-func sameStringSet(actual, expected []string) bool {
-	if len(actual) != len(expected) {
-		return false
-	}
-	want := make(map[string]bool, len(expected))
-	for _, value := range expected {
-		want[value] = true
-	}
-	seen := make(map[string]bool, len(actual))
-	for _, value := range actual {
-		if !want[value] || seen[value] {
-			return false
-		}
-		seen[value] = true
-	}
-	return true
 }
 
 func buildUserContent(req generateRequest, scope string) string {
@@ -346,20 +287,6 @@ func buildUserContent(req generateRequest, scope string) string {
 		b.WriteString("\n\nParameters and scope:\n")
 	}
 	b.WriteString(string(req.Params))
-	if len(req.CardIDs) > 0 {
-		if req.Locale == "zh-Hans" {
-			b.WriteString("\n\n需要提供展开解读的卡片 ID：\n")
-		} else {
-			b.WriteString("\n\nCard IDs requiring expanded interpretations:\n")
-		}
-		b.WriteString(strings.Join(req.CardIDs, ", "))
-		if req.Locale == "zh-Hans" {
-			b.WriteString("\n\n每张卡片允许引用的事实 ID：\n")
-		} else {
-			b.WriteString("\n\nEvidence fact IDs allowed for each card:\n")
-		}
-		b.WriteString(JSONMarshal(req.AllowedEvidenceByCard))
-	}
 	return b.String()
 }
 
@@ -641,13 +568,14 @@ func (c *relayConfig) handleProviderTest(w http.ResponseWriter, r *http.Request)
 		writeError(w, http.StatusConflict, "model_disabled", "model is disabled", false)
 		return
 	}
-	ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
 	defer cancel()
 	_, usedModel, _, _, err := Generate(ctx, c.client, provider.BaseURL, provider.APIKey, model,
-		`You are a connectivity check. Return JSON only. Create a report object with a title, subtitle and exactly four non-empty sections. Each section has number, title, body and an empty evidenceFactIDs array. Also return an empty cards object.`,
-		`{"purpose":"provider connectivity test; do not interpret user data"}`, nil, "en", nil, nil)
+		`You are a connectivity check. Return JSON only. Create a report object with a title, subtitle and exactly four non-empty sections. Each section has number, title, body and an empty evidenceFactIDs array.`,
+		`{"purpose":"provider connectivity test; do not interpret user data"}`, "en", nil)
 	if err != nil {
 		_ = c.store.RecordAudit(adminUsername(r), "provider.test", id, map[string]any{"ok": false, "model": model})
+		log.Printf("provider test failed provider=%s model=%s: %v", id, model, err)
 		writeJSON(w, http.StatusBadGateway, map[string]any{"ok": false, "error": err.Error()})
 		return
 	}

@@ -54,12 +54,8 @@ struct ProfileView: View {
                     .accessibilityLabel(localized("Settings", "设置", language: model.language))
                 }
             }
-            .sheet(isPresented: $showsSettings) {
+            .navigationDestination(isPresented: $showsSettings) {
                 SettingsView()
-                    .environmentObject(model)
-                    .presentationDetents([.fraction(0.82)])
-                    .presentationDragIndicator(.visible)
-                    .presentationBackgroundInteraction(.disabled)
             }
             .sheet(isPresented: $showsEditor) {
                 ProfileEditorView(profile: model.profile, language: model.language) { profile in
@@ -472,212 +468,250 @@ private enum LocalDataClear: Identifiable {
 
 private struct SettingsView: View {
     @EnvironmentObject private var model: AppModel
-    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        List {
+            NavigationLink {
+                AppearanceSettingsView()
+            } label: {
+                Label(localized("Appearance", "外观", language: model.language), systemImage: "circle.lefthalf.filled")
+            }
+            NavigationLink {
+                InterpretationDefaultsSettingsView()
+            } label: {
+                Label(localized("Interpretation Defaults", "解读预设", language: model.language), systemImage: "slider.horizontal.3")
+            }
+            NavigationLink {
+                LanguageSettingsView()
+            } label: {
+                Label(localized("Language", "语言", language: model.language), systemImage: "globe")
+            }
+            NavigationLink {
+                LocalDataSettingsView()
+            } label: {
+                Label(localized("Local Data", "本地数据", language: model.language), systemImage: "internaldrive")
+            }
+            NavigationLink {
+                SupportSettingsView()
+            } label: {
+                Label(localized("Support", "支持", language: model.language), systemImage: "questionmark.bubble")
+            }
+            NavigationLink {
+                AboutSettingsView()
+            } label: {
+                Label(localized("About", "关于", language: model.language), systemImage: "info.circle")
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(AppTheme.background)
+        .navigationTitle(localized("Settings", "设置", language: model.language))
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct AppearanceSettingsView: View {
+    @EnvironmentObject private var model: AppModel
+
+    var body: some View {
+        Form {
+            Picker(localized("Theme", "主题", language: model.language), selection: $model.appearance) {
+                ForEach(AppAppearance.allCases) { appearance in
+                    Text(appearance.title(language: model.language)).tag(appearance)
+                }
+            }
+            .pickerStyle(.segmented)
+
+            Picker(localized("Text size", "字体大小", language: model.language), selection: $model.fontSize) {
+                ForEach(AppFontSize.allCases) { size in
+                    Text(size.title(language: model.language)).tag(size)
+                }
+            }
+            .pickerStyle(.navigationLink)
+        }
+        .settingsDetailStyle(title: localized("Appearance", "外观", language: model.language))
+    }
+}
+
+private struct InterpretationDefaultsSettingsView: View {
+    @EnvironmentObject private var model: AppModel
+
+    var body: some View {
+        Form {
+            Section {
+                ForEach(ChartKind.allCases) { chart in
+                    Picker(
+                        chart.title(language: model.language),
+                        selection: Binding(
+                            get: { model.preset(for: chart) },
+                            set: { model.setPreset($0, for: chart) }
+                        )
+                    ) {
+                        ForEach(CalculationPreset.consumerCases) { preset in
+                            Text(preset.title(language: model.language)).tag(preset)
+                        }
+                    }
+                }
+            } footer: {
+                Text(localized(
+                    "Modern and Classical change how each chart is calculated.",
+                    "现代与古典会改变每张盘的计算方式。",
+                    language: model.language
+                ))
+            }
+        }
+        .settingsDetailStyle(title: localized("Interpretation Defaults", "解读预设", language: model.language))
+    }
+}
+
+private struct LanguageSettingsView: View {
+    @EnvironmentObject private var model: AppModel
+
+    var body: some View {
+        Form {
+            Picker(localized("App language", "应用语言", language: model.language), selection: $model.language) {
+                ForEach(AppLanguage.allCases) { language in
+                    Text(language.title).tag(language)
+                }
+            }
+            .pickerStyle(.inline)
+        }
+        .settingsDetailStyle(title: localized("Language", "语言", language: model.language))
+    }
+}
+
+private struct LocalDataSettingsView: View {
+    @EnvironmentObject private var model: AppModel
     @State private var pendingClear: LocalDataClear?
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Section(localized("Appearance", "外观", language: model.language)) {
-                    Picker(
-                        localized("Theme", "主题", language: model.language),
-                        selection: $model.appearance
-                    ) {
-                        ForEach(AppAppearance.allCases) { appearance in
-                            Text(appearance.title(language: model.language)).tag(appearance)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-
-                    Picker(
-                        localized("Text size", "字体大小", language: model.language),
-                        selection: $model.fontSize
-                    ) {
-                        ForEach(AppFontSize.allCases) { size in
-                            Text(size.title(language: model.language)).tag(size)
-                        }
-                    }
-                    .pickerStyle(.navigationLink)
-                }
-
-                Section(localized("Interpretation defaults", "解读预设", language: model.language)) {
-                    let presetCases = CalculationPreset.consumerCases
-                    ForEach(ChartKind.allCases) { chart in
-                        Picker(
-                            chart.title(language: model.language),
-                            selection: Binding(
-                                get: { model.preset(for: chart) },
-                                set: { model.setPreset($0, for: chart) }
-                            )
-                        ) {
-                            ForEach(presetCases) { preset in
-                                Text(preset.title(language: model.language)).tag(preset)
-                            }
-                        }
-                    }
-                    Text(
-                        localized(
-                            "Modern and Classical change how each chart is calculated.",
-                            "现代与古典会改变每张盘的计算方式。",
-                            language: model.language
-                        )
+        Form {
+            Section {
+                Label(localized("Local-first calculations", "本地优先计算", language: model.language), systemImage: "lock.shield")
+                Text(localized(
+                    "Interstellar does not require an account for chart calculation.",
+                    "Interstellar 的星盘计算不要求注册账户。",
+                    language: model.language
+                ))
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                Toggle(
+                    localized("Allow new AI generation", "允许新的 AI 生成", language: model.language),
+                    isOn: Binding(
+                        get: { model.aiConsentGranted },
+                        set: { $0 ? model.grantAIConsent() : model.revokeAIConsent() }
                     )
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                }
-
-                Section(localized("Language", "语言", language: model.language)) {
-                    Picker(
-                        localized("App language", "应用语言", language: model.language),
-                        selection: $model.language
-                    ) {
-                        ForEach(AppLanguage.allCases) { language in
-                            Text(language.title).tag(language)
-                        }
-                    }
-                    .pickerStyle(.inline)
-                }
-
-                Section(localized("Privacy", "隐私", language: model.language)) {
-                    Label(
-                        localized("Local-first calculations", "本地优先计算", language: model.language),
-                        systemImage: "lock.shield"
-                    )
-                    Text(
-                        localized(
-                            "Interstellar does not require an account for chart calculation.",
-                            "Interstellar 的星盘计算不要求注册账户。",
-                            language: model.language
-                        )
-                    )
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    Toggle(
-                        localized("Allow new AI generation", "允许新的 AI 生成", language: model.language),
-                        isOn: Binding(
-                            get: { model.aiConsentGranted },
-                            set: { $0 ? model.grantAIConsent() : model.revokeAIConsent() }
-                        )
-                    )
-                    Text(
-                        localized(
-                            "Turning this off stops future network requests. Reports already stored on this device remain readable.",
-                            "关闭后不再发送新的联网请求；已经保存在本机的报告仍可阅读。",
-                            language: model.language
-                        )
-                    )
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                }
-
-                Section(localized("Local data", "本地数据", language: model.language)) {
-                    Button {
-                        pendingClear = .reports
-                    } label: {
-                        Label(localized("Clear saved reports", "清除已保存报告", language: model.language), systemImage: "doc.text")
-                    }
-                    Button {
-                        pendingClear = .askHistory
-                    } label: {
-                        Label(localized("Clear ask history", "清除问事历史", language: model.language), systemImage: "questionmark.circle")
-                    }
-                    Button {
-                        pendingClear = .aiCache
-                    } label: {
-                        Label(localized("Clear generated content cache", "清除生成内容缓存", language: model.language), systemImage: "sparkles")
-                    }
-                    Menu {
-                        Button(model.profile.name) { pendingClear = .currentPersonArtifacts }
-                        ForEach(model.savedPeople) { person in
-                            Button(person.profile.name) { pendingClear = .personArtifacts(person) }
-                        }
-                    } label: {
-                        Label(localized("Clear by person", "按人物清除", language: model.language), systemImage: "person.crop.circle.badge.minus")
-                    }
-                    Menu {
-                        ForEach(ChartKind.allCases) { chart in
-                            Button(chart.title(language: model.language)) { pendingClear = .chartArtifacts(chart) }
-                        }
-                    } label: {
-                        Label(localized("Clear by chart type", "按盘型清除", language: model.language), systemImage: "square.stack.3d.up.slash")
-                    }
-                    Text(
-                        localized(
-                            "Clearing removes data stored on this device only.",
-                            "清除只会删除保存在本机的数据。",
-                            language: model.language
-                        )
-                    )
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                }
-                .confirmationDialog(
-                    localized("Clear data?", "确认清除？", language: model.language),
-                    isPresented: Binding(
-                        get: { pendingClear != nil },
-                        set: { if !$0 { pendingClear = nil } }
-                    ),
-                    presenting: pendingClear
-                ) { item in
-                    Button(localized("Clear", "清除", language: model.language), role: .destructive) {
-                        switch item {
-                        case .reports: model.clearReports()
-                        case .askHistory: model.clearAskHistory()
-                        case .aiCache: model.clearAICache()
-                        case .currentPersonArtifacts: model.clearGeneratedArtifactsForCurrentPerson()
-                        case let .chartArtifacts(chart): model.clearGeneratedArtifacts(for: chart)
-                        case let .personArtifacts(person): model.clearGeneratedArtifacts(for: person)
-                        }
-                        pendingClear = nil
-                    }
-                    Button(localized("Cancel", "取消", language: model.language), role: .cancel) {
-                        pendingClear = nil
-                    }
-                } message: { item in
-                    Text(item.message(language: model.language))
-                }
-
-                Section(localized("Support", "支持", language: model.language)) {
-                    NavigationLink {
-                        FeedbackView(language: model.language)
-                    } label: {
-                        Label(
-                            localized("Report or suggest a feature", "问题反馈与功能建议", language: model.language),
-                            systemImage: "exclamationmark.bubble"
-                        )
-                    }
-                }
-
-                Section(localized("About", "关于", language: model.language)) {
-                    LabeledContent(
-                        localized("Version", "版本", language: model.language),
-                        value: "0.1.0"
-                    )
-                    LabeledContent(
-                        localized("Calculation", "计算引擎", language: model.language),
-                        value: "Swiss Ephemeris"
-                    )
-                    LabeledContent(
-                        localized("Editorial content", "原创解读内容", language: model.language),
-                        value: "© 2026 Interstellar"
-                    )
-                    NavigationLink(localized("Open-source licenses", "开源许可证", language: model.language)) {
-                        LicenseView(language: model.language)
-                    }
-                }
+                )
+                Text(localized(
+                    "Turning this off stops future network requests. Reports already stored on this device remain readable.",
+                    "关闭后不再发送新的联网请求；已经保存在本机的报告仍可阅读。",
+                    language: model.language
+                ))
+                .font(.footnote)
+                .foregroundStyle(.secondary)
             }
-            .scrollContentBackground(.hidden)
-            .background(AppTheme.background)
-            .navigationTitle(localized("Settings", "设置", language: model.language))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(localized("Done", "完成", language: model.language)) {
-                        dismiss()
-                    }
+
+            Section {
+                Button { pendingClear = .reports } label: {
+                    Label(localized("Clear saved reports", "清除已保存报告", language: model.language), systemImage: "doc.text")
                 }
+                Button { pendingClear = .askHistory } label: {
+                    Label(localized("Clear ask history", "清除问事历史", language: model.language), systemImage: "questionmark.circle")
+                }
+                Button { pendingClear = .aiCache } label: {
+                    Label(localized("Clear generated content cache", "清除生成内容缓存", language: model.language), systemImage: "sparkles")
+                }
+                Menu {
+                    Button(model.profile.name) { pendingClear = .currentPersonArtifacts }
+                    ForEach(model.savedPeople) { person in
+                        Button(person.profile.name) { pendingClear = .personArtifacts(person) }
+                    }
+                } label: {
+                    Label(localized("Clear by person", "按人物清除", language: model.language), systemImage: "person.crop.circle.badge.minus")
+                }
+                Menu {
+                    ForEach(ChartKind.allCases) { chart in
+                        Button(chart.title(language: model.language)) { pendingClear = .chartArtifacts(chart) }
+                    }
+                } label: {
+                    Label(localized("Clear by chart type", "按盘型清除", language: model.language), systemImage: "square.stack.3d.up.slash")
+                }
+            } footer: {
+                Text(localized(
+                    "Clearing removes data stored on this device only.",
+                    "清除只会删除保存在本机的数据。",
+                    language: model.language
+                ))
             }
         }
+        .settingsDetailStyle(title: localized("Local Data", "本地数据", language: model.language))
+        .confirmationDialog(
+            localized("Clear data?", "确认清除？", language: model.language),
+            isPresented: Binding(
+                get: { pendingClear != nil },
+                set: { if !$0 { pendingClear = nil } }
+            ),
+            presenting: pendingClear
+        ) { item in
+            Button(localized("Clear", "清除", language: model.language), role: .destructive) {
+                switch item {
+                case .reports: model.clearReports()
+                case .askHistory: model.clearAskHistory()
+                case .aiCache: model.clearAICache()
+                case .currentPersonArtifacts: model.clearGeneratedArtifactsForCurrentPerson()
+                case let .chartArtifacts(chart): model.clearGeneratedArtifacts(for: chart)
+                case let .personArtifacts(person): model.clearGeneratedArtifacts(for: person)
+                }
+                pendingClear = nil
+            }
+            Button(localized("Cancel", "取消", language: model.language), role: .cancel) {
+                pendingClear = nil
+            }
+        } message: { item in
+            Text(item.message(language: model.language))
+        }
+    }
+}
+
+private struct SupportSettingsView: View {
+    @EnvironmentObject private var model: AppModel
+
+    var body: some View {
+        Form {
+            NavigationLink {
+                FeedbackView(language: model.language)
+            } label: {
+                Label(
+                    localized("Report or suggest a feature", "问题反馈与功能建议", language: model.language),
+                    systemImage: "exclamationmark.bubble"
+                )
+            }
+        }
+        .settingsDetailStyle(title: localized("Support", "支持", language: model.language))
+    }
+}
+
+private struct AboutSettingsView: View {
+    @EnvironmentObject private var model: AppModel
+
+    var body: some View {
+        Form {
+            LabeledContent(localized("Version", "版本", language: model.language), value: "0.1.0")
+            LabeledContent(localized("Calculation", "计算引擎", language: model.language), value: "Swiss Ephemeris")
+            LabeledContent(localized("Editorial content", "原创解读内容", language: model.language), value: "© 2026 Interstellar")
+            NavigationLink(localized("Open-source licenses", "开源许可证", language: model.language)) {
+                LicenseView(language: model.language)
+            }
+        }
+        .settingsDetailStyle(title: localized("About", "关于", language: model.language))
+    }
+}
+
+private extension View {
+    func settingsDetailStyle(title: String) -> some View {
+        scrollContentBackground(.hidden)
+            .background(AppTheme.background)
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
     }
 }
 

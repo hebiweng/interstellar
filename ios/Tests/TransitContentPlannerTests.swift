@@ -3,6 +3,158 @@ import XCTest
 @testable import Interstellar
 
 final class TransitContentPlannerTests: XCTestCase {
+    func testExportSynastryPlannerObservationsFromSyntheticPairs() async throws {
+        struct PersonInput {
+            let date: Date
+            let latitude: Double
+            let longitude: Double
+        }
+        let calculator = try SwissEphemerisCalculator(ephemerisDirectory: ephemerisDirectory)
+        let pairs: [(String, PersonInput, PersonInput)] = [
+            ("france-canada", .init(date: utcDate(1992, 5, 14, 6), latitude: 48.8566, longitude: 2.3522), .init(date: utcDate(1988, 10, 3, 2), latitude: 45.5019, longitude: -73.5674)),
+            ("britain-italy", .init(date: utcDate(1984, 2, 19, 6), latitude: 51.5074, longitude: -0.1278), .init(date: utcDate(1991, 7, 28, 12), latitude: 41.9028, longitude: 12.4964)),
+            ("usa-germany", .init(date: utcDate(1979, 11, 9, 18), latitude: 42.3601, longitude: -71.0589), .init(date: utcDate(1994, 3, 22, 4), latitude: 52.5200, longitude: 13.4050)),
+            ("spain-ireland", .init(date: utcDate(1987, 6, 2, 9), latitude: 40.4168, longitude: -3.7038), .init(date: utcDate(1990, 12, 17, 23), latitude: 53.3498, longitude: -6.2603)),
+            ("sweden-usa", .init(date: utcDate(1996, 1, 30, 15), latitude: 59.3293, longitude: 18.0686), .init(date: utcDate(1982, 8, 11, 7), latitude: 34.0522, longitude: -118.2437)),
+            ("netherlands-portugal", .init(date: utcDate(1976, 4, 6, 3), latitude: 52.3676, longitude: 4.9041), .init(date: utcDate(1998, 9, 25, 20), latitude: 38.7223, longitude: -9.1393)),
+        ]
+        var observations: [[String: Any]] = []
+        for preset in [CalculationPreset.modern, .classical] {
+            for (scenarioID, first, second) in pairs {
+                let comparison = try await calculator.calculateSynastry(
+                    first: NatalInput(utcDate: first.date, location: .init(latitudeDegrees: first.latitude, longitudeDegrees: first.longitude)),
+                    second: NatalInput(utcDate: second.date, location: .init(latitudeDegrees: second.latitude, longitudeDegrees: second.longitude)),
+                    preset: preset
+                )
+                let bundle = SynastryFactBundleBuilder.build(comparison: comparison, preset: preset.rawValue)
+                let plan = SynastryContentPlanner.plan(bundle)
+                XCTAssertEqual(plan.cards.map(\.cardID), SynastryContentPlanner.cardIDs)
+                XCTAssertEqual(plan, SynastryContentPlanner.plan(bundle))
+                let overview = try XCTUnwrap(plan.card("relationship-overview"))
+                XCTAssertEqual(overview.overviewDimensions.map(\.id), [.communication, .emotionalPace, .chemistry])
+                XCTAssertTrue(overview.overviewDimensions.flatMap(\.sourceFactIDs).allSatisfy {
+                    Set(bundle.aspects.map(\.factID)).contains($0)
+                })
+                let perspectives = try XCTUnwrap(plan.card("perspectives"))
+                XCTAssertEqual(perspectives.perspectives.map(\.person), [.personA, .personB])
+                XCTAssertTrue(perspectives.perspectives[0].evidence.allSatisfy {
+                    guard case let .overlay(value) = $0 else { return false }
+                    return value.direction == .personBToA
+                })
+                XCTAssertTrue(perspectives.perspectives[1].evidence.allSatisfy {
+                    guard case let .overlay(value) = $0 else { return false }
+                    return value.direction == .personAToB
+                })
+                let houseOverlays = try XCTUnwrap(plan.card("house-overlays"))
+                XCTAssertEqual(houseOverlays.evidence.count, 4)
+                let overlayDirections: [SynastryOverlayDirection] = houseOverlays.evidence.compactMap {
+                    guard case let .overlay(value) = $0 else { return nil }
+                    return value.direction
+                }
+                XCTAssertEqual(Set(overlayDirections), Set<SynastryOverlayDirection>([.personAToB, .personBToA]))
+                if preset == .classical {
+                    XCTAssertTrue(bundle.first.points.allSatisfy { ClassicalSynastryMVPCapability.traditionalBodies.contains($0.body) })
+                    XCTAssertTrue(bundle.second.points.allSatisfy { ClassicalSynastryMVPCapability.traditionalBodies.contains($0.body) })
+                }
+                observations.append([
+                    "scenarioID": scenarioID,
+                    "preset": preset.rawValue,
+                    "scopeID": plan.scopeID,
+                    "aspectCount": bundle.aspects.count,
+                    "overlayCount": bundle.overlays.count,
+                    "conditionCount": bundle.planetConditions.count,
+                    "copyKeys": plan.cards.map(\.copyKey),
+                    "themes": Dictionary(uniqueKeysWithValues: plan.cards.map { ($0.cardID, $0.themeID.rawValue) }),
+                    "overviewDimensions": overview.overviewDimensions.map {
+                        ["id": $0.id.rawValue, "state": $0.state.rawValue, "sourceFactIDs": $0.sourceFactIDs]
+                    },
+                ])
+            }
+        }
+        let payload: [String: Any] = ["schemaVersion": 1, "observations": observations]
+        let data = try JSONSerialization.data(withJSONObject: payload, options: [.sortedKeys])
+        print("SYNASTRY_PLANNER_OBSERVATIONS_BASE64:\(data.base64EncodedString())")
+    }
+
+    func testSynastryAIRequestIsPresetSpecificNamedAndBounded() async throws {
+        let calculator = try SwissEphemerisCalculator(ephemerisDirectory: ephemerisDirectory)
+        let first = NatalInput(
+            utcDate: Date(timeIntervalSince1970: 824_259_600),
+            location: GeographicLocation(latitudeDegrees: 48.8566, longitudeDegrees: 2.3522)
+        )
+        let second = NatalInput(
+            utcDate: Date(timeIntervalSince1970: 818_035_200),
+            location: GeographicLocation(latitudeDegrees: 43.6532, longitudeDegrees: -79.3832)
+        )
+
+        for preset in [CalculationPreset.modern, .classical] {
+            let comparison = try await calculator.calculateSynastry(
+                first: first,
+                second: second,
+                preset: preset
+            )
+            let document = AIFactsBuilder.synastryDocument(
+                firstName: "Elena Hart",
+                firstChart: comparison.first,
+                secondName: "Julian Mercer",
+                secondChart: comparison.second,
+                crossAspects: comparison.crossAspects,
+                classicalAssessment: comparison.classicalAssessment,
+                preset: preset,
+                params: ["partnerHash": "test"],
+                locale: "en"
+            )
+            let people = try XCTUnwrap(document["people"] as? [[String: Any]])
+            let facts = try XCTUnwrap(document["evidenceFacts"] as? [[String: Any]])
+            let factIDs = facts.compactMap { $0["id"] as? String }
+            let data = try JSONSerialization.data(withJSONObject: document, options: [.sortedKeys])
+
+            XCTAssertEqual(document["preset"] as? String, preset.rawValue)
+            XCTAssertEqual(people.compactMap { $0["name"] as? String }, ["Elena Hart", "Julian Mercer"])
+            XCTAssertEqual(factIDs.count, Set(factIDs).count)
+            XCTAssertLessThanOrEqual(facts.count, 200)
+            XCTAssertLessThan(data.count, 80_000)
+            XCTAssertNil(document["reference"])
+            XCTAssertNil(document["partner"])
+            XCTAssertNil(document["chart"])
+            XCTAssertNil(document["comparisonAspects"])
+        }
+    }
+
+    func testAIArtifactFactsIdentityIgnoresNarrationLocale() throws {
+        let english: [String: Any] = [
+            "kind": "natal",
+            "locale": "en",
+            "evidenceFacts": [["id": "point.sun", "longitude": 10.5]],
+        ]
+        let chinese: [String: Any] = [
+            "kind": "natal",
+            "locale": "zh-Hans",
+            "evidenceFacts": [["id": "point.sun", "longitude": 10.5]],
+        ]
+
+        XCTAssertEqual(
+            try AIArtifactIdentity.factsIdentityHash(english),
+            try AIArtifactIdentity.factsIdentityHash(chinese)
+        )
+    }
+
+    func testAIArtifactFactsIdentityStillChangesWithCalculatedFacts() throws {
+        let first: [String: Any] = [
+            "locale": "en",
+            "evidenceFacts": [["id": "point.sun", "longitude": 10.5]],
+        ]
+        let changed: [String: Any] = [
+            "locale": "en",
+            "evidenceFacts": [["id": "point.sun", "longitude": 11.5]],
+        ]
+
+        XCTAssertNotEqual(
+            try AIArtifactIdentity.factsIdentityHash(first),
+            try AIArtifactIdentity.factsIdentityHash(changed)
+        )
+    }
+
     func testFixedFixturesProduceTheFrozenSixCardContract() {
         let fixtures = makeFixtures()
 

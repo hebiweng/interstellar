@@ -3,7 +3,7 @@ import SwiftUI
 
 struct ChartsView: View {
     @EnvironmentObject private var model: AppModel
-    @State private var showAIConsent = false
+    @Binding var selectedTab: RootTab
     @State private var showLocationPicker = false
     @State private var showReports = false
     @State private var showParameters = false
@@ -59,7 +59,12 @@ struct ChartsView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(isPresented: $showReports) {
-                ReportsView()
+                ReportsView(initialChart: model.selectedChart)
+            }
+            .onChange(of: selectedTab) { _, newTab in
+                if newTab != .charts {
+                    showReports = false
+                }
             }
             .sheet(isPresented: $showLocationPicker) {
                 LocationSearchView(language: model.language) { selection in
@@ -89,29 +94,6 @@ struct ChartsView: View {
                 }
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
-            }
-            .task(id: model.selectedChart) {
-                if !model.aiConsentGranted, model.isOnline, model.snapshot(for: model.selectedChart) != nil {
-                    showAIConsent = true
-                } else {
-                    model.ensureAIGeneration(for: model.selectedChart)
-                }
-            }
-            .alert(
-                localized("charts.ai.network-consent.title", default: "Allow network generation?", chinese: "允许联网生成解读？", language: model.language),
-                isPresented: $showAIConsent
-            ) {
-                Button(localized("Allow", "允许", language: model.language)) {
-                    model.grantAIConsent()
-                    model.ensureAIGeneration(for: model.selectedChart)
-                }
-                Button(localized("Not now", "暂不", language: model.language), role: .cancel) {}
-            } message: {
-                Text(localized(
-                    "Interstellar sends only this chart's calculated facts and requested card IDs to the configured AI service. The relay may keep an encrypted idempotency result for up to 24 hours; your device keeps the long-term report until you delete it in Settings. You can revoke future network generation at any time.",
-                    "Interstellar 只会把本盘的计算事实和所需卡片 ID 发送给配置的 AI 服务。中继服务最多保留 24 小时的加密幂等结果；长期报告只保存在本机，直到你在设置中删除。你可以随时撤回后续联网生成授权。",
-                    language: model.language
-                ))
             }
         }
     }
@@ -145,6 +127,31 @@ struct ChartsView: View {
     private func cardSectionSubtitle(_ card: InsightCardModel) -> String {
         if isPlannedTransitCard(card.id) {
             return transitSectionSubtitle(card.id)
+        }
+        if model.selectedChart == .synastry {
+            switch card.id {
+            case "relationship-overview":
+                return localized("How two charts affect each other", "两张星盘如何彼此影响", language: model.language)
+            case "perspectives":
+                return localized("Two directions, not one shared score", "两个方向，而非一个共同评分", language: model.language)
+            case "emotional-connection":
+                return localized("Moon contacts and emotional house overlays", "月亮联系与情感落宫", language: model.language)
+            case "communication":
+                return localized("How ideas are exchanged", "想法如何交流", language: model.language)
+            case "chemistry":
+                let english = model.preset(for: .synastry) == .classical
+                    ? "Venus and Mars contacts"
+                    : "Venus, Mars and Pluto contacts"
+                return localized(english, "金星、火星与吸引结构", language: model.language)
+            case "commitment":
+                return localized("Saturn, Jupiter and angle contacts", "土星、木星与长期结构", language: model.language)
+            case "house-overlays":
+                return localized("Where each person lands in the other’s life", "彼此进入对方生活的领域", language: model.language)
+            case "key-inter-aspects":
+                return localized("Sorted by relevance, not positivity", "按相关性排序，而非按正负排序", language: model.language)
+            default:
+                break
+            }
         }
         return cardKicker(card.id, language: model.language) ?? ""
     }

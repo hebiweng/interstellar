@@ -1,0 +1,3999 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-03T15:22:36.347Z",
+  "catalog": "ios/App/Resources/CopyCatalog-en.json",
+  "chartID": "modern.transit",
+  "requirementCount": 219,
+  "reachableCount": 216,
+  "unreachableCount": 3,
+  "missingCount": 0,
+  "requirements": [
+    {
+      "key": "modern.transit.activeTransitShort.active.career.restructuring",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "career.restructuring",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to career.restructuring.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.career.visibility",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "career.visibility",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to career.visibility.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.commitment.deepening",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "commitment.deepening",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to commitment.deepening.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.communication.friction",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "communication.friction",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to communication.friction.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.communication.opening",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "communication.opening",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to communication.opening.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.confidence.expansion",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "confidence.expansion",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to confidence.expansion.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.direction.alignment",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "direction.alignment",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to direction.alignment.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.direction.reorientation",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "direction.reorientation",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to direction.reorientation.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.direction.turning-point",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "direction.turning-point",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to direction.turning-point.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.emotional.disruption",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "emotional.disruption",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to emotional.disruption.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.emotional.sensitivity",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "emotional.sensitivity",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to emotional.sensitivity.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.emotional.stability",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "emotional.stability",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to emotional.stability.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.emotional.weight",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "emotional.weight",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to emotional.weight.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.healing.integration",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "healing.integration",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to healing.integration.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.home.adjustment",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "home.adjustment",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to home.adjustment.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.identity.reconstruction",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "identity.reconstruction",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to identity.reconstruction.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.identity.reinvention",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "identity.reinvention",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to identity.reinvention.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.imagination.opening",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "imagination.opening",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to imagination.opening.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.independence.growth",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "independence.growth",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to independence.growth.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.learning.expansion",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "learning.expansion",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to learning.expansion.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.mental.clarity",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "mental.clarity",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to mental.clarity.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.mental.review",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "mental.review",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to mental.review.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.momentum.blocked",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "momentum.blocked",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to momentum.blocked.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.momentum.rising",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "momentum.rising",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to momentum.rising.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.money.review",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "money.review",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to money.review.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.relationship.boundaries",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "relationship.boundaries",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to relationship.boundaries.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.relationship.freedom",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "relationship.freedom",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to relationship.freedom.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.relationship.intensity",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "relationship.intensity",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to relationship.intensity.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.relationship.opening",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "relationship.opening",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to relationship.opening.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.responsibility.pressure",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "responsibility.pressure",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to responsibility.pressure.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.routine.disruption",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "routine.disruption",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to routine.disruption.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.social.boundaries",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "social.boundaries",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to social.boundaries.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.social.expansion",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "social.expansion",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to social.expansion.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.structure.building",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "structure.building",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to structure.building.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.transformation.release",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "transformation.release",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to transformation.release.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.trust.deepening",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "trust.deepening",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to trust.deepening.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.uncertainty.fog",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "uncertainty.fog",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to uncertainty.fog.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.active.values.reassessment",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "values.reassessment",
+      "integratedThemeID": null,
+      "roleID": "active",
+      "variables": [],
+      "useCondition": "The first active evidence is a transit aspect mapped to values.reassessment.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.commitment.deepening",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "commitment.deepening",
+      "integratedThemeID": null,
+      "roleID": "activeHouseIngress",
+      "variables": [],
+      "useCondition": "The first active evidence is a house-ingress event entering natal house 7.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.emotional.disruption",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "emotional.disruption",
+      "integratedThemeID": null,
+      "roleID": "activeHouseIngress",
+      "variables": [],
+      "useCondition": "The first active evidence is a house-ingress event entering natal house 4.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.emotional.sensitivity",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "emotional.sensitivity",
+      "integratedThemeID": null,
+      "roleID": "activeHouseIngress",
+      "variables": [],
+      "useCondition": "The first active evidence is a house-ingress event entering natal house 12.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.healing.integration",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "healing.integration",
+      "integratedThemeID": null,
+      "roleID": "activeHouseIngress",
+      "variables": [],
+      "useCondition": "The first active evidence is a house-ingress event entering natal house 6.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.identity.reconstruction",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "identity.reconstruction",
+      "integratedThemeID": null,
+      "roleID": "activeHouseIngress",
+      "variables": [],
+      "useCondition": "The first active evidence is a house-ingress event entering natal house 1.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.imagination.opening",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "imagination.opening",
+      "integratedThemeID": null,
+      "roleID": "activeHouseIngress",
+      "variables": [],
+      "useCondition": "The first active evidence is a house-ingress event entering natal house 5.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.independence.growth",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "independence.growth",
+      "integratedThemeID": null,
+      "roleID": "activeHouseIngress",
+      "variables": [],
+      "useCondition": "The first active evidence is a house-ingress event entering natal house 11.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.mental.review",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "mental.review",
+      "integratedThemeID": null,
+      "roleID": "activeHouseIngress",
+      "variables": [],
+      "useCondition": "The first active evidence is a house-ingress event entering natal house 3 or 9.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.responsibility.pressure",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "responsibility.pressure",
+      "integratedThemeID": null,
+      "roleID": "activeHouseIngress",
+      "variables": [],
+      "useCondition": "The first active evidence is a house-ingress event entering natal house 10.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.transformation.release",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "transformation.release",
+      "integratedThemeID": null,
+      "roleID": "activeHouseIngress",
+      "variables": [],
+      "useCondition": "The first active evidence is a house-ingress event entering natal house 8.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.activeHouseIngress.values.reassessment",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "values.reassessment",
+      "integratedThemeID": null,
+      "roleID": "activeHouseIngress",
+      "variables": [],
+      "useCondition": "The first active evidence is a house-ingress event entering natal house 2.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.activeSignIngress.structure.building",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "structure.building",
+      "integratedThemeID": null,
+      "roleID": "activeSignIngress",
+      "variables": [],
+      "useCondition": "The first active evidence is a sign-ingress event.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.activeStationDirect.structure.building",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "structure.building",
+      "integratedThemeID": null,
+      "roleID": "activeStationDirect",
+      "variables": [],
+      "useCondition": "The first active evidence is a station-direct event.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.activeTransitShort.activeStationRetrograde.structure.building",
+      "cardID": "active-transits",
+      "copySlot": "activeTransitShort",
+      "themeID": "structure.building",
+      "integratedThemeID": null,
+      "roleID": "activeStationRetrograde",
+      "variables": [],
+      "useCondition": "The first active evidence is a station-retrograde event.",
+      "requiredBy": [
+        "TransitContentPlanner.active-transits",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.active-transits",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.career.restructuring",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "career.restructuring",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to career.restructuring.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.career.visibility",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "career.visibility",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to career.visibility.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.commitment.deepening",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "commitment.deepening",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to commitment.deepening.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.communication.friction",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "communication.friction",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to communication.friction.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.communication.opening",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "communication.opening",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to communication.opening.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.confidence.expansion",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "confidence.expansion",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to confidence.expansion.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.direction.alignment",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "direction.alignment",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to direction.alignment.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.direction.reorientation",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "direction.reorientation",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to direction.reorientation.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.direction.turning-point",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "direction.turning-point",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to direction.turning-point.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.emotional.disruption",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "emotional.disruption",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to emotional.disruption.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.emotional.sensitivity",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "emotional.sensitivity",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to emotional.sensitivity.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.emotional.stability",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "emotional.stability",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to emotional.stability.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.emotional.weight",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "emotional.weight",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to emotional.weight.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "unreachable",
+      "catalogStatus": "missing-copy"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.healing.integration",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "healing.integration",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to healing.integration.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.home.adjustment",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "home.adjustment",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to home.adjustment.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.identity.reconstruction",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "identity.reconstruction",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to identity.reconstruction.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.identity.reinvention",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "identity.reinvention",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to identity.reinvention.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.imagination.opening",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "imagination.opening",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to imagination.opening.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.independence.growth",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "independence.growth",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to independence.growth.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.learning.expansion",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "learning.expansion",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to learning.expansion.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.mental.clarity",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "mental.clarity",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to mental.clarity.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "unreachable",
+      "catalogStatus": "missing-copy"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.mental.review",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "mental.review",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to mental.review.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.momentum.blocked",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "momentum.blocked",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to momentum.blocked.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.momentum.rising",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "momentum.rising",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to momentum.rising.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.money.review",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "money.review",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to money.review.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.relationship.boundaries",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "relationship.boundaries",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to relationship.boundaries.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.relationship.freedom",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "relationship.freedom",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to relationship.freedom.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "unreachable",
+      "catalogStatus": "missing-copy"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.relationship.intensity",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "relationship.intensity",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to relationship.intensity.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.relationship.opening",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "relationship.opening",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to relationship.opening.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.responsibility.pressure",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "responsibility.pressure",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to responsibility.pressure.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.routine.disruption",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "routine.disruption",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to routine.disruption.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.social.boundaries",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "social.boundaries",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to social.boundaries.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.social.expansion",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "social.expansion",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to social.expansion.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.structure.building",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "structure.building",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to structure.building.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.transformation.release",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "transformation.release",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to transformation.release.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.trust.deepening",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "trust.deepening",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to trust.deepening.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.uncertainty.fog",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "uncertainty.fog",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to uncertainty.fog.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.values.reassessment",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "values.reassessment",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to values.reassessment.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.career.restructuring",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "career.restructuring",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to career.restructuring.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.career.visibility",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "career.visibility",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to career.visibility.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.commitment.deepening",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "commitment.deepening",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to commitment.deepening.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.communication.friction",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "communication.friction",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to communication.friction.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.communication.opening",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "communication.opening",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to communication.opening.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.confidence.expansion",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "confidence.expansion",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to confidence.expansion.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.direction.alignment",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "direction.alignment",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to direction.alignment.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.direction.reorientation",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "direction.reorientation",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to direction.reorientation.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.direction.turning-point",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "direction.turning-point",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to direction.turning-point.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.emotional.disruption",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "emotional.disruption",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to emotional.disruption.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.emotional.sensitivity",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "emotional.sensitivity",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to emotional.sensitivity.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.emotional.stability",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "emotional.stability",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to emotional.stability.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.emotional.weight",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "emotional.weight",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to emotional.weight.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.healing.integration",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "healing.integration",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to healing.integration.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.home.adjustment",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "home.adjustment",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to home.adjustment.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.identity.reconstruction",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "identity.reconstruction",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to identity.reconstruction.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.identity.reinvention",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "identity.reinvention",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to identity.reinvention.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.imagination.opening",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "imagination.opening",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to imagination.opening.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.independence.growth",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "independence.growth",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to independence.growth.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.learning.expansion",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "learning.expansion",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to learning.expansion.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.mental.clarity",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "mental.clarity",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to mental.clarity.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.mental.review",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "mental.review",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to mental.review.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.momentum.blocked",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "momentum.blocked",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to momentum.blocked.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.momentum.rising",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "momentum.rising",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to momentum.rising.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.money.review",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "money.review",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to money.review.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.relationship.boundaries",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "relationship.boundaries",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to relationship.boundaries.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.relationship.freedom",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "relationship.freedom",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to relationship.freedom.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.relationship.intensity",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "relationship.intensity",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to relationship.intensity.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.relationship.opening",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "relationship.opening",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to relationship.opening.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.responsibility.pressure",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "responsibility.pressure",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to responsibility.pressure.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.routine.disruption",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "routine.disruption",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to routine.disruption.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.social.boundaries",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "social.boundaries",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to social.boundaries.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.social.expansion",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "social.expansion",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to social.expansion.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.structure.building",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "structure.building",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to structure.building.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.transformation.release",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "transformation.release",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to transformation.release.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.trust.deepening",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "trust.deepening",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to trust.deepening.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.uncertainty.fog",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "uncertainty.fog",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to uncertainty.fog.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.dailyCycle.values.reassessment",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "values.reassessment",
+      "integratedThemeID": null,
+      "roleID": "dailyCycle",
+      "variables": [],
+      "useCondition": "The first available dailyCycle aggregate signal maps to values.reassessment.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.career.restructuring",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "career.restructuring",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to career.restructuring.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.career.visibility",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "career.visibility",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to career.visibility.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.commitment.deepening",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "commitment.deepening",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to commitment.deepening.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.communication.friction",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "communication.friction",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to communication.friction.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.communication.opening",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "communication.opening",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to communication.opening.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.confidence.expansion",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "confidence.expansion",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to confidence.expansion.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.direction.alignment",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "direction.alignment",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to direction.alignment.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.direction.reorientation",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "direction.reorientation",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to direction.reorientation.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.direction.turning-point",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "direction.turning-point",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to direction.turning-point.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.emotional.disruption",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "emotional.disruption",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to emotional.disruption.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.emotional.sensitivity",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "emotional.sensitivity",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to emotional.sensitivity.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.emotional.stability",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "emotional.stability",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to emotional.stability.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.emotional.weight",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "emotional.weight",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to emotional.weight.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.healing.integration",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "healing.integration",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to healing.integration.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.home.adjustment",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "home.adjustment",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to home.adjustment.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.identity.reconstruction",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "identity.reconstruction",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to identity.reconstruction.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.identity.reinvention",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "identity.reinvention",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to identity.reinvention.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.imagination.opening",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "imagination.opening",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to imagination.opening.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.independence.growth",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "independence.growth",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to independence.growth.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.learning.expansion",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "learning.expansion",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to learning.expansion.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.mental.clarity",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "mental.clarity",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to mental.clarity.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.mental.review",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "mental.review",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to mental.review.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.momentum.blocked",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "momentum.blocked",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to momentum.blocked.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.momentum.rising",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "momentum.rising",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to momentum.rising.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.money.review",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "money.review",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to money.review.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.relationship.boundaries",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "relationship.boundaries",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to relationship.boundaries.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.relationship.freedom",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "relationship.freedom",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to relationship.freedom.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.relationship.intensity",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "relationship.intensity",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to relationship.intensity.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.relationship.opening",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "relationship.opening",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to relationship.opening.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.responsibility.pressure",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "responsibility.pressure",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to responsibility.pressure.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.routine.disruption",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "routine.disruption",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to routine.disruption.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.social.boundaries",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "social.boundaries",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to social.boundaries.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.social.expansion",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "social.expansion",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to social.expansion.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.structure.building",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "structure.building",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to structure.building.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.transformation.release",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "transformation.release",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to transformation.release.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.trust.deepening",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "trust.deepening",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to trust.deepening.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.uncertainty.fog",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "uncertainty.fog",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to uncertainty.fog.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.cycleChapter.longCycle.values.reassessment",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "values.reassessment",
+      "integratedThemeID": null,
+      "roleID": "longCycle",
+      "variables": [],
+      "useCondition": "The first available longCycle aggregate signal maps to values.reassessment.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.integratedStory.durable-structure",
+      "cardID": "current-story",
+      "copySlot": "integratedStory",
+      "themeID": null,
+      "integratedThemeID": "durable-structure",
+      "roleID": null,
+      "variables": [],
+      "useCondition": "Current Story contains challenging aspect signals and no supportive signal.",
+      "requiredBy": [
+        "TransitContentPlanner.current-story",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-story",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.integratedStory.expansion-structure",
+      "cardID": "current-story",
+      "copySlot": "integratedStory",
+      "themeID": null,
+      "integratedThemeID": "expansion-structure",
+      "roleID": null,
+      "variables": [],
+      "useCondition": "Current Story contains at least one supportive and one challenging aspect signal.",
+      "requiredBy": [
+        "TransitContentPlanner.current-story",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-story",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.integratedStory.focused-expansion",
+      "cardID": "current-story",
+      "copySlot": "integratedStory",
+      "themeID": null,
+      "integratedThemeID": "focused-expansion",
+      "roleID": null,
+      "variables": [],
+      "useCondition": "Current Story contains supportive aspect signals and no challenging signal.",
+      "requiredBy": [
+        "TransitContentPlanner.current-story",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-story",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.integratedStory.steady-realignment",
+      "cardID": "current-story",
+      "copySlot": "integratedStory",
+      "themeID": null,
+      "integratedThemeID": "steady-realignment",
+      "roleID": null,
+      "variables": [],
+      "useCondition": "Current Story contains only neutral aspect signals.",
+      "requiredBy": [
+        "TransitContentPlanner.current-story",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-story",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.signalRole.disrupting",
+      "cardID": "current-story",
+      "copySlot": "signalRole",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "disrupting",
+      "variables": [
+        {
+          "name": "transitPlanet",
+          "type": "body"
+        },
+        {
+          "name": "lifeAreas",
+          "type": "houseList"
+        }
+      ],
+      "useCondition": "A Current Story signal is assigned the disrupting role; interpolate its transit planet and localized life-area list.",
+      "requiredBy": [
+        "TransitContentPlanner.current-story.signalRoles",
+        "CopyCatalogMatcher.transitStorySignalRoleText",
+        "InsightFactory.current-story",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.signalRole.expanding",
+      "cardID": "current-story",
+      "copySlot": "signalRole",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "expanding",
+      "variables": [
+        {
+          "name": "transitPlanet",
+          "type": "body"
+        },
+        {
+          "name": "lifeAreas",
+          "type": "houseList"
+        }
+      ],
+      "useCondition": "A Current Story signal is assigned the expanding role; interpolate its transit planet and localized life-area list.",
+      "requiredBy": [
+        "TransitContentPlanner.current-story.signalRoles",
+        "CopyCatalogMatcher.transitStorySignalRoleText",
+        "InsightFactory.current-story",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.signalRole.stabilizing",
+      "cardID": "current-story",
+      "copySlot": "signalRole",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "stabilizing",
+      "variables": [
+        {
+          "name": "transitPlanet",
+          "type": "body"
+        },
+        {
+          "name": "lifeAreas",
+          "type": "houseList"
+        }
+      ],
+      "useCondition": "A Current Story signal is assigned the stabilizing role; interpolate its transit planet and localized life-area list.",
+      "requiredBy": [
+        "TransitContentPlanner.current-story.signalRoles",
+        "CopyCatalogMatcher.transitStorySignalRoleText",
+        "InsightFactory.current-story",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.signalRole.structuring",
+      "cardID": "current-story",
+      "copySlot": "signalRole",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "structuring",
+      "variables": [
+        {
+          "name": "transitPlanet",
+          "type": "body"
+        },
+        {
+          "name": "lifeAreas",
+          "type": "houseList"
+        }
+      ],
+      "useCondition": "A Current Story signal is assigned the structuring role; interpolate its transit planet and localized life-area list.",
+      "requiredBy": [
+        "TransitContentPlanner.current-story.signalRoles",
+        "CopyCatalogMatcher.transitStorySignalRoleText",
+        "InsightFactory.current-story",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "modern.transit.signalRole.supporting",
+      "cardID": "current-story",
+      "copySlot": "signalRole",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "supporting",
+      "variables": [
+        {
+          "name": "transitPlanet",
+          "type": "body"
+        },
+        {
+          "name": "lifeAreas",
+          "type": "houseList"
+        }
+      ],
+      "useCondition": "A Current Story signal is assigned the supporting role; interpolate its transit planet and localized life-area list.",
+      "requiredBy": [
+        "TransitContentPlanner.current-story.signalRoles",
+        "CopyCatalogMatcher.transitStorySignalRoleText",
+        "InsightFactory.current-story",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.jupiter.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is jupiter in direct motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.jupiter.retrograde",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is jupiter in retrograde motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.mars.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is mars in direct motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.mars.retrograde",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is mars in retrograde motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.mercury.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is mercury in direct motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.mercury.retrograde",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is mercury in retrograde motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.moon.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is moon in direct motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.neptune.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is neptune in direct motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.neptune.retrograde",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is neptune in retrograde motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.pluto.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is pluto in direct motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.pluto.retrograde",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is pluto in retrograde motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.saturn.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is saturn in direct motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.saturn.retrograde",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is saturn in retrograde motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.sun.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is sun in direct motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.trueNode.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is trueNode in direct motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.trueNode.retrograde",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is trueNode in retrograde motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.uranus.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is uranus in direct motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.uranus.retrograde",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is uranus in retrograde motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.venus.direct",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is venus in direct motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.bodyMotion.venus.retrograde",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path is venus in retrograde motion.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.1",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "Natal house 1 is the highest-ranked complete life-area aggregate.",
+      "requiredBy": [
+        "TransitContentPlanner.life-areas",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.life-areas",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.1",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path occupies natal house 1.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.10",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "Natal house 10 is the highest-ranked complete life-area aggregate.",
+      "requiredBy": [
+        "TransitContentPlanner.life-areas",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.life-areas",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.10",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path occupies natal house 10.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.11",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "Natal house 11 is the highest-ranked complete life-area aggregate.",
+      "requiredBy": [
+        "TransitContentPlanner.life-areas",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.life-areas",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.11",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path occupies natal house 11.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.12",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "Natal house 12 is the highest-ranked complete life-area aggregate.",
+      "requiredBy": [
+        "TransitContentPlanner.life-areas",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.life-areas",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.12",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path occupies natal house 12.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.2",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "Natal house 2 is the highest-ranked complete life-area aggregate.",
+      "requiredBy": [
+        "TransitContentPlanner.life-areas",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.life-areas",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.2",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path occupies natal house 2.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.3",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "Natal house 3 is the highest-ranked complete life-area aggregate.",
+      "requiredBy": [
+        "TransitContentPlanner.life-areas",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.life-areas",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.3",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path occupies natal house 3.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.4",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "Natal house 4 is the highest-ranked complete life-area aggregate.",
+      "requiredBy": [
+        "TransitContentPlanner.life-areas",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.life-areas",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.4",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path occupies natal house 4.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.5",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "Natal house 5 is the highest-ranked complete life-area aggregate.",
+      "requiredBy": [
+        "TransitContentPlanner.life-areas",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.life-areas",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.5",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path occupies natal house 5.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.6",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "Natal house 6 is the highest-ranked complete life-area aggregate.",
+      "requiredBy": [
+        "TransitContentPlanner.life-areas",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.life-areas",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.6",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path occupies natal house 6.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.7",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "Natal house 7 is the highest-ranked complete life-area aggregate.",
+      "requiredBy": [
+        "TransitContentPlanner.life-areas",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.life-areas",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.7",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path occupies natal house 7.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.8",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "Natal house 8 is the highest-ranked complete life-area aggregate.",
+      "requiredBy": [
+        "TransitContentPlanner.life-areas",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.life-areas",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.8",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path occupies natal house 8.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.9",
+      "cardID": "life-areas",
+      "copySlot": "lifeAreaShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "lifeArea",
+      "variables": [],
+      "useCondition": "Natal house 9 is the highest-ranked complete life-area aggregate.",
+      "requiredBy": [
+        "TransitContentPlanner.life-areas",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.life-areas",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    },
+    {
+      "key": "shared.lifeAreas.9",
+      "cardID": "planet-paths",
+      "copySlot": "planetPathShort",
+      "themeID": null,
+      "integratedThemeID": null,
+      "roleID": "path",
+      "variables": [],
+      "useCondition": "The primary planned path occupies natal house 9.",
+      "requiredBy": [
+        "TransitContentPlanner.planet-paths",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.planet-paths",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "reachable",
+      "catalogStatus": "present"
+    }
+  ]
+}

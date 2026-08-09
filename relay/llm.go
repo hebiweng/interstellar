@@ -9,24 +9,32 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 	"unicode"
 )
 
 type ChatMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+	Role             string `json:"role"`
+	Content          string `json:"content"`
+	ReasoningContent string `json:"reasoning_content,omitempty"`
 }
 
 type ChatRequest struct {
-	Model          string        `json:"model"`
-	Messages       []ChatMessage `json:"messages"`
-	Temperature    float64       `json:"temperature"`
-	MaxTokens      int           `json:"max_tokens,omitempty"`
-	ResponseFormat *ResponseFmt  `json:"response_format,omitempty"`
-	Stream         bool          `json:"stream"`
+	Model           string        `json:"model"`
+	Messages        []ChatMessage `json:"messages"`
+	Temperature     float64       `json:"temperature"`
+	MaxTokens       int           `json:"max_tokens,omitempty"`
+	ReasoningEffort string        `json:"reasoning_effort,omitempty"`
+	ResponseFormat  *ResponseFmt  `json:"response_format,omitempty"`
+	Thinking        *ThinkingMode `json:"thinking,omitempty"`
+	Stream          bool          `json:"stream"`
 }
 
 type ResponseFmt struct {
+	Type string `json:"type"`
+}
+
+type ThinkingMode struct {
 	Type string `json:"type"`
 }
 
@@ -59,16 +67,10 @@ type GenerationResult struct {
 			EvidenceFactIDs []string `json:"evidenceFactIDs"`
 		} `json:"sections"`
 	} `json:"report"`
-	Cards map[string]struct {
-		Detail          string   `json:"detail"`
-		EvidenceFactIDs []string `json:"evidenceFactIDs"`
-	} `json:"cards"`
 }
 
 func (r *GenerationResult) Validate(
-	expectedCardIDs []string,
 	locale string,
-	allowedEvidenceByCard map[string][]string,
 	requestEvidence map[string]bool,
 ) error {
 	if strings.TrimSpace(r.Report.Title) == "" || strings.TrimSpace(r.Report.Subtitle) == "" {
@@ -87,7 +89,7 @@ func (r *GenerationResult) Validate(
 		if err := validateLanguagePurity(section.Title+" "+section.Body+" "+section.Callout, locale); err != nil {
 			return fmt.Errorf("report section %d: %w", index+1, err)
 		}
-		if len(expectedCardIDs) > 0 && len(section.EvidenceFactIDs) == 0 {
+		if len(requestEvidence) > 0 && len(section.EvidenceFactIDs) == 0 {
 			return fmt.Errorf("report section %q has no evidenceFactIDs", section.Title)
 		}
 		for _, id := range section.EvidenceFactIDs {
@@ -95,64 +97,6 @@ func (r *GenerationResult) Validate(
 				return fmt.Errorf("report section %q cites unknown evidence %q", section.Title, id)
 			}
 		}
-	}
-	if len(r.Cards) != len(expectedCardIDs) {
-		return fmt.Errorf("cards must exactly cover %d requested IDs", len(expectedCardIDs))
-	}
-	expected := make(map[string]bool, len(expectedCardIDs))
-	for _, id := range expectedCardIDs {
-		expected[id] = true
-	}
-	for id := range r.Cards {
-		if !expected[id] {
-			return fmt.Errorf("unexpected card detail for %q", id)
-		}
-	}
-	for _, id := range expectedCardIDs {
-		card, ok := r.Cards[id]
-		if !ok || strings.TrimSpace(card.Detail) == "" {
-			return fmt.Errorf("missing card detail for %q", id)
-		}
-		if err := validateDetailLanguageAndLength(card.Detail, locale); err != nil {
-			return fmt.Errorf("card %q: %w", id, err)
-		}
-		allowed := map[string]bool{}
-		for _, evidenceID := range allowedEvidenceByCard[id] {
-			allowed[evidenceID] = true
-		}
-		if len(card.EvidenceFactIDs) == 0 {
-			return fmt.Errorf("card %q has no evidenceFactIDs", id)
-		}
-		for _, evidenceID := range card.EvidenceFactIDs {
-			if !requestEvidence[evidenceID] || !allowed[evidenceID] {
-				return fmt.Errorf("card %q cites disallowed evidence %q", id, evidenceID)
-			}
-		}
-	}
-	return nil
-}
-
-func validateDetailLanguageAndLength(detail, locale string) error {
-	if err := validateLanguagePurity(detail, locale); err != nil {
-		return err
-	}
-	if locale == "zh-Hans" {
-		count := 0
-		for _, r := range []rune(detail) {
-			if unicode.Is(unicode.Han, r) {
-				count++
-			} else if unicode.IsLetter(r) || unicode.IsDigit(r) {
-				count++
-			}
-		}
-		if count < 80 || count > 120 {
-			return fmt.Errorf("Chinese detail length is %d; expected 80-120 characters", count)
-		}
-		return nil
-	}
-	words := len(strings.Fields(detail))
-	if words < 80 || words > 120 {
-		return fmt.Errorf("English detail length is %d; expected 80-120 words", words)
 	}
 	return nil
 }
@@ -180,9 +124,7 @@ func Generate(
 	ctx context.Context,
 	client *http.Client,
 	baseURL, apiKey, model, systemPrompt, userContent string,
-	expectedCardIDs []string,
 	locale string,
-	allowedEvidenceByCard map[string][]string,
 	requestEvidence map[string]bool,
 ) (*GenerationResult, string, int, int, error) {
 	var totalPromptTokens, totalCompletionTokens int
@@ -191,16 +133,25 @@ func Generate(
 		prompt := systemPrompt
 		content := userContent
 		if attempt == 1 {
-			prompt += "\n\nYour previous output failed structural validation. Return a complete corrected JSON object only. Do not omit evidenceFactIDs and do not add facts."
+			prompt += "\n\nYour previous output failed structural validation. Return one complete corrected report JSON object only. Keep every section within the requested length, compress detail when needed, and prioritize closing every JSON object and array before the output limit. Do not omit evidenceFactIDs and do not add facts."
 			content += "\n\nValidation problem to repair: " + lastErr.Error()
 		}
+		thinkingMode := "enabled"
+		attemptContext := ctx
+		cancel := func() {}
+		if attempt == 0 {
+			attemptContext, cancel = context.WithTimeout(ctx, 45*time.Second)
+		} else {
+			thinkingMode = "disabled"
+		}
 		result, usedModel, promptTokens, completionTokens, err := generateOnce(
-			ctx, client, baseURL, apiKey, model, prompt, content,
+			attemptContext, client, baseURL, apiKey, model, prompt, content, thinkingMode,
 		)
+		cancel()
 		totalPromptTokens += promptTokens
 		totalCompletionTokens += completionTokens
 		if err == nil {
-			err = result.Validate(expectedCardIDs, locale, allowedEvidenceByCard, requestEvidence)
+			err = result.Validate(locale, requestEvidence)
 		}
 		if err == nil {
 			return result, usedModel, totalPromptTokens, totalCompletionTokens, nil
@@ -210,7 +161,11 @@ func Generate(
 	return nil, "", totalPromptTokens, totalCompletionTokens, lastErr
 }
 
-func generateOnce(ctx context.Context, client *http.Client, baseURL, apiKey, model, systemPrompt, userContent string) (*GenerationResult, string, int, int, error) {
+func generateOnce(
+	ctx context.Context,
+	client *http.Client,
+	baseURL, apiKey, model, systemPrompt, userContent, thinkingMode string,
+) (*GenerationResult, string, int, int, error) {
 	body := ChatRequest{
 		Model: model,
 		Messages: []ChatMessage{
@@ -218,11 +173,15 @@ func generateOnce(ctx context.Context, client *http.Client, baseURL, apiKey, mod
 			{Role: "user", Content: userContent},
 		},
 		Temperature: 0.3,
-		MaxTokens:   6000,
+		MaxTokens:   10000,
 		ResponseFormat: &ResponseFmt{
 			Type: "json_object",
 		},
-		Stream: false,
+		Thinking: &ThinkingMode{Type: thinkingMode},
+		Stream:   false,
+	}
+	if thinkingMode == "enabled" {
+		body.ReasoningEffort = "low"
 	}
 	payload, err := json.Marshal(body)
 	if err != nil {
@@ -258,13 +217,20 @@ func generateOnce(ctx context.Context, client *http.Client, baseURL, apiKey, mod
 		return nil, "", 0, 0, errors.New("upstream returned no choices")
 	}
 	content := strings.TrimSpace(chat.Choices[0].Message.Content)
+	reasoningBytes := len(strings.TrimSpace(chat.Choices[0].Message.ReasoningContent))
 	content = strings.TrimPrefix(content, "```json")
 	content = strings.TrimSuffix(content, "```")
 	content = strings.TrimSpace(content)
 
 	var result GenerationResult
 	if err := json.Unmarshal([]byte(content), &result); err != nil {
-		return nil, "", 0, 0, fmt.Errorf("upstream content is not valid JSON: %w", err)
+		return nil, "", 0, 0, fmt.Errorf(
+			"upstream content is not valid JSON (finish_reason=%q, content_bytes=%d, reasoning_bytes=%d): %w",
+			chat.Choices[0].FinishReason,
+			len(content),
+			reasoningBytes,
+			err,
+		)
 	}
 	return &result, chat.Model, chat.Usage.PromptTokens, chat.Usage.CompletionTokens, nil
 }

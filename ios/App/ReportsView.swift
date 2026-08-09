@@ -1,10 +1,18 @@
 import SwiftUI
 
 struct ReportsView: View {
+    let initialChart: ChartKind?
     @EnvironmentObject private var model: AppModel
     @State private var selectedReport: SavedReport?
     @State private var showConsent = false
     @State private var generatingScope: ReportScope?
+    @State private var pendingChart: ChartKind?
+    @State private var pendingForceRegenerate = false
+    @State private var pendingScope: ReportScope?
+
+    init(initialChart: ChartKind? = nil) {
+        self.initialChart = initialChart
+    }
 
     var body: some View {
         ZStack {
@@ -22,14 +30,22 @@ struct ReportsView: View {
                         .foregroundStyle(AppTheme.muted)
                         .cardSurface()
 
-                    sectionTitle(localized("Available", "可生成", language: model.language), sub: localized("Generate when ready", "到日子即可生成", language: model.language))
+                    sectionTitle(
+                        localized("Chart Reports", "星盘报告", language: model.language),
+                        sub: localized("Generated only when you ask", "仅在你点击后生成", language: model.language)
+                    )
+                    ForEach(orderedCharts) { chart in
+                        chartReportRow(chart)
+                    }
+
+                    sectionTitle(localized("Period Reports", "周期报告", language: model.language), sub: localized("Generate when ready", "到日子即可生成", language: model.language))
                     ForEach(model.availableReports) { report in
                         availableRow(report)
                     }
 
                     sectionTitle(localized("Saved", "已保存", language: model.language), sub: localized("Stored on device", "保存在本机", language: model.language))
                     if model.savedReports.isEmpty {
-                        Text(localized("No reports yet. Chart reports are generated automatically once available.", "暂无报告。星盘报告会在就绪后自动生成。", language: model.language))
+                        Text(localized("No reports yet. Choose a chart above and generate its report when you are ready.", "暂无报告。请在上方选择一个星盘，并在需要时生成报告。", language: model.language))
                             .font(.footnote)
                             .foregroundStyle(AppTheme.muted)
                             .cardSurface()
@@ -44,40 +60,52 @@ struct ReportsView: View {
                 .padding(.bottom, 30)
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "chevron.left")
-                        .foregroundStyle(AppTheme.text)
-                }
-                .accessibilityLabel(localized("Back", "返回", language: model.language))
-            }
-        }
+        .toolbar(.visible, for: .navigationBar)
+        .navigationBarTitleDisplayMode(.inline)
         .alert(localized("ai.network-consent.title", default: "Allow network generation?", chinese: "允许联网生成？", language: model.language), isPresented: $showConsent) {
             Button(localized("Allow", "允许", language: model.language)) {
                 model.grantAIConsent()
+                if let chart = pendingChart {
+                    model.generateAIReport(for: chart, forceRegenerate: pendingForceRegenerate)
+                } else if let scope = pendingScope {
+                    generate(scope)
+                }
+                pendingChart = nil
+                pendingForceRegenerate = false
+                pendingScope = nil
             }
-            Button(localized("Not now", "暂不", language: model.language), role: .cancel) {}
+            Button(localized("Not now", "暂不", language: model.language), role: .cancel) {
+                pendingChart = nil
+                pendingForceRegenerate = false
+                pendingScope = nil
+            }
         } message: {
             Text(localized(
-                "Interstellar sends only the selected chart's calculated facts and requested card IDs to the configured AI service. The relay may keep an encrypted idempotency result for up to 24 hours; your device keeps the long-term report until you delete it in Settings. You can revoke future network generation at any time.",
-                "Interstellar 只会把所选盘的计算事实和所需卡片 ID 发送给配置的 AI 服务。中继服务最多保留 24 小时的加密幂等结果；长期报告只保存在本机，直到你在设置中删除。你可以随时撤回后续联网生成授权。",
+                "Interstellar sends the selected chart's calculated facts to the configured AI service only after you tap Generate. The relay may keep an encrypted idempotency result for up to 24 hours; your device keeps the long-term report until you delete it in Settings. You can revoke future network generation at any time.",
+                "只有在你点击生成后，Interstellar 才会把所选星盘的计算事实发送给配置的 AI 服务。中继服务最多保留 24 小时的加密幂等结果；长期报告只保存在本机，直到你在设置中删除。你可以随时撤回后续联网生成授权。",
                 language: model.language
             ))
         }
         .task {
+            model.refreshAIReportStates()
             await model.refreshAvailableReports()
+            if let initialChart, let saved = model.currentSavedReport(for: initialChart) {
+                selectedReport = saved
+            }
         }
         .fullScreenCover(item: $selectedReport) { report in
-            ReportReaderView(report: report, language: model.language)
+            ReportReaderView(
+                report: report,
+                language: model.language,
+                onRegenerate: regenerationAction(for: report)
+            )
         }
     }
 
-    @Environment(\.dismiss) private var dismiss
+    private var orderedCharts: [ChartKind] {
+        guard let initialChart else { return ChartKind.allCases }
+        return [initialChart] + ChartKind.allCases.filter { $0 != initialChart }
+    }
 
     private func sectionTitle(_ title: String, sub: String) -> some View {
         VStack(alignment: .leading, spacing: 3) {
@@ -110,6 +138,8 @@ struct ReportsView: View {
             if unlocked {
                 Button {
                     if !model.aiConsentGranted {
+                        pendingChart = nil
+                        pendingScope = report.scope
                         showConsent = true
                     } else {
                         generate(report.scope)
@@ -135,6 +165,137 @@ struct ReportsView: View {
         }
         .cardSurface()
         .opacity(unlocked ? 1 : 0.7)
+    }
+
+    @ViewBuilder
+    private func chartReportRow(_ chart: ChartKind) -> some View {
+        let hasSnapshot = model.snapshot(for: chart) != nil
+        let saved = model.currentSavedReport(for: chart)
+        let status = model.aiReportStatus(for: chart)
+
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                Text(savedReportScopeSymbol("chart.\(chart.contentPrefix)"))
+                    .font(.title2)
+                    .foregroundStyle(AppTheme.violet)
+                    .frame(width: 40, height: 40)
+                    .background(AppTheme.violet.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(savedReportScopeTitle("chart.\(chart.contentPrefix)", language: model.language))
+                        .font(.headline)
+                        .foregroundStyle(AppTheme.text)
+                    Text(chartStatusText(status, hasSnapshot: hasSnapshot, hasSavedReport: saved != nil))
+                        .font(.caption)
+                        .foregroundStyle(chartStatusColor(status, hasSnapshot: hasSnapshot))
+                }
+                Spacer()
+            }
+
+            if case .generating = status {
+                HStack(spacing: 9) {
+                    ProgressView().controlSize(.small).tint(AppTheme.violet)
+                    Text(localized(
+                        "This may take a little while. You can leave this page and come back later.",
+                        "生成可能需要一点时间，你可以先离开，稍后再回来查看。",
+                        language: model.language
+                    ))
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.muted)
+                }
+            }
+
+            if case let .failed(message) = status {
+                Text(message)
+                    .font(.caption2)
+                    .foregroundStyle(AppTheme.coral)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            HStack(spacing: 10) {
+                if let saved {
+                    Button(localized("View Report", "查看报告", language: model.language)) {
+                        selectedReport = saved
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(AppTheme.violet)
+
+                    Button(localized("Regenerate", "重新生成", language: model.language)) {
+                        requestChartGeneration(chart, force: true)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(AppTheme.violet)
+                    .disabled(status == .generating || !hasSnapshot || !model.isOnline)
+                } else {
+                    Button(localized("Generate Report", "生成报告", language: model.language)) {
+                        requestChartGeneration(chart, force: false)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(AppTheme.violet)
+                    .disabled(status == .generating || !hasSnapshot || !model.isOnline)
+                }
+            }
+        }
+        .cardSurface()
+        .overlay {
+            if initialChart == chart {
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(AppTheme.violet.opacity(0.35), lineWidth: 1)
+            }
+        }
+        .opacity(hasSnapshot ? 1 : 0.65)
+    }
+
+    private func chartStatusText(
+        _ status: AIReportGenerationStatus,
+        hasSnapshot: Bool,
+        hasSavedReport: Bool
+    ) -> String {
+        guard hasSnapshot else {
+            return localized("Calculate this chart first", "请先完成该盘计算", language: model.language)
+        }
+        switch status {
+        case .idle:
+            return localized("Ready to generate", "可以生成", language: model.language)
+        case .generating:
+            return localized("Generating…", "正在生成…", language: model.language)
+        case .ready:
+            return localized("Saved on this device", "已保存在本机", language: model.language)
+        case .failed:
+            return hasSavedReport
+                ? localized("Regeneration failed; your saved report is unchanged", "重新生成失败；原报告仍保留", language: model.language)
+                : localized("Generation failed. You can try again.", "生成失败，可以重试。", language: model.language)
+        }
+    }
+
+    private func chartStatusColor(_ status: AIReportGenerationStatus, hasSnapshot: Bool) -> Color {
+        guard hasSnapshot else { return AppTheme.muted }
+        return switch status {
+        case .ready: AppTheme.mint
+        case .failed: AppTheme.coral
+        case .generating: AppTheme.violet
+        case .idle: AppTheme.muted
+        }
+    }
+
+    private func requestChartGeneration(_ chart: ChartKind, force: Bool) {
+        guard model.aiConsentGranted else {
+            pendingChart = chart
+            pendingForceRegenerate = force
+            pendingScope = nil
+            showConsent = true
+            return
+        }
+        model.generateAIReport(for: chart, forceRegenerate: force)
+    }
+
+    private func regenerationAction(for report: SavedReport) -> (() -> Void)? {
+        guard let chart = ChartKind.allCases.first(where: {
+            report.scope == "chart.\($0.contentPrefix)" && model.currentSavedReport(for: $0)?.id == report.id
+        }) else { return nil }
+        return {
+            selectedReport = nil
+            requestChartGeneration(chart, force: true)
+        }
     }
 
     private func savedRow(_ report: SavedReport) -> some View {
@@ -198,9 +359,16 @@ struct ReportsView: View {
 struct ReportReaderView: View {
     let report: SavedReport
     let language: AppLanguage
+    let onRegenerate: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
     @State private var sectionIndex = 0
     @State private var scrollID: Int? = 0
+
+    init(report: SavedReport, language: AppLanguage, onRegenerate: (() -> Void)? = nil) {
+        self.report = report
+        self.language = language
+        self.onRegenerate = onRegenerate
+    }
 
     private var readProgress: Double {
         let count = max(1, report.report.sections.count)
@@ -308,6 +476,14 @@ struct ReportReaderView: View {
                         Image(systemName: "chevron.left").foregroundStyle(AppTheme.text)
                     }
                     .accessibilityLabel(localized("Back", "返回", language: language))
+                }
+                if let onRegenerate {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(localized("Regenerate", "重新生成", language: language)) {
+                            onRegenerate()
+                        }
+                        .foregroundStyle(AppTheme.violet)
+                    }
                 }
             }
             .navigationBarTitleDisplayMode(.inline)

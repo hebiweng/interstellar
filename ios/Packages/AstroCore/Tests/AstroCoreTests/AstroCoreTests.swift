@@ -365,10 +365,38 @@ struct AstroCoreTests {
         #expect(modern.crossAspects == direct)
 
         let classical = try await calculator.calculateSynastry(first: first, second: second, preset: .classical)
-        #expect(classical.first.points.count == 8)
-        #expect(classical.second.points.count == 8)
+        #expect(classical.first.points.count == 7)
+        #expect(classical.second.points.count == 7)
+        #expect(classical.first.point(.trueNode) == nil)
+        #expect(classical.second.point(.trueNode) == nil)
+        #expect(classical.first.aspects.allSatisfy { $0.firstID != "trueNode" && $0.secondID != "trueNode" })
+        #expect(classical.second.aspects.allSatisfy { $0.firstID != "trueNode" && $0.secondID != "trueNode" })
+        #expect(classical.crossAspects.allSatisfy { $0.firstID != "trueNode" && $0.secondID != "trueNode" })
         // Same preset is used for both sides of the comparison.
         #expect(classical.first.points.map(\.body) == classical.second.points.map(\.body))
+
+        let assessment = try #require(classical.classicalAssessment)
+        #expect(assessment.firstPlanets.map(\.body) == ClassicalSynastryMVPCapability.traditionalBodies)
+        #expect(assessment.secondPlanets.map(\.body) == ClassicalSynastryMVPCapability.traditionalBodies)
+        #expect(assessment.crossChartReceptions.count == classical.crossAspects.count)
+        #expect(assessment.crossChartReceptions.contains {
+            $0.receptionFromFirst.isPresent || $0.receptionFromSecond.isPresent
+        })
+        for reception in assessment.crossChartReceptions {
+            #expect(reception.receptionFromFirst == HoraryEngine.reception(
+                from: reception.firstBody,
+                to: reception.secondBody,
+                in: classical.first
+            ))
+            #expect(reception.receptionFromSecond == HoraryEngine.reception(
+                from: reception.secondBody,
+                to: reception.firstBody,
+                in: classical.second
+            ))
+        }
+
+        let repeated = try await calculator.calculateSynastry(first: first, second: second, preset: .classical)
+        #expect(repeated == classical)
     }
 
 

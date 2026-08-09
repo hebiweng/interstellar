@@ -23,9 +23,11 @@ extension InsightCardView {
                         .foregroundStyle(AppTheme.muted)
                 }
                 HStack(alignment: .top, spacing: 10) {
-                    Text(storyRoleLabel(roleText.roleID))
+                    let presentation = storyRolePresentation(roleText.roleID)
+                    Label(presentation.label, systemImage: presentation.systemImage)
                         .font(.system(size: 9, weight: .bold))
-                        .foregroundStyle(AppTheme.tone(storyRoleTone(roleText.roleID)))
+                        .foregroundStyle(AppTheme.tone(presentation.tone))
+                        .accessibilityLabel(presentation.label)
                     Text(roleText.text)
                         .font(.system(size: 11.5, weight: .medium))
                         .foregroundStyle(AppTheme.text)
@@ -50,29 +52,37 @@ extension InsightCardView {
     }
 
     func storyRoleLabel(_ roleID: String) -> String {
-        switch roleID {
-        case TransitStorySignalRoleID.expanding.rawValue:
-            localized("EXPANDING", "扩展", language: language)
-        case TransitStorySignalRoleID.structuring.rawValue:
-            localized("STRUCTURING", "构建", language: language)
-        case TransitStorySignalRoleID.disrupting.rawValue:
-            localized("DISRUPTING", "重塑", language: language)
-        case TransitStorySignalRoleID.stabilizing.rawValue:
-            localized("STABILIZING", "稳固", language: language)
-        default:
-            localized("SUPPORTING", "助力", language: language)
-        }
+        storyRolePresentation(roleID).label
     }
 
     func storyRoleTone(_ roleID: String) -> InsightTone {
+        storyRolePresentation(roleID).tone
+    }
+
+    private func storyRolePresentation(_ roleID: String) -> (label: String, tone: InsightTone, systemImage: String) {
         switch roleID {
+        case TransitStorySignalRoleID.expanding.rawValue:
+            (localized("EXPANDING", "扩展", language: language), .supportive, "arrow.up.right")
+        case TransitStorySignalRoleID.structuring.rawValue:
+            (localized("STRUCTURING", "构建", language: language), .transition, "square.3.layers.3d")
         case TransitStorySignalRoleID.disrupting.rawValue:
-            .challenging
-        case TransitStorySignalRoleID.structuring.rawValue,
-             TransitStorySignalRoleID.stabilizing.rawValue:
-            .transition
+            (localized("DISRUPTING", "重塑", language: language), .challenging, "bolt")
+        case TransitStorySignalRoleID.stabilizing.rawValue:
+            (localized("STABILIZING", "稳固", language: language), .transition, "shield")
+        case TransitStorySignalRoleID.supporting.rawValue:
+            (localized("SUPPORTING", "助力", language: language), .supportive, "plus.circle")
+        case ClassicalTransitSignalRoleID.beneficSupport.rawValue:
+            (localized("SUPPORT", "助益", language: language), .supportive, "plus.circle")
+        case ClassicalTransitSignalRoleID.maleficPressure.rawValue:
+            (localized("PRESSURE", "压力", language: language), .challenging, "exclamationmark.triangle")
+        case ClassicalTransitSignalRoleID.fortified.rawValue:
+            (localized("FORTIFIED", "得助", language: language), .supportive, "shield.checkered")
+        case ClassicalTransitSignalRoleID.impaired.rawValue:
+            (localized("IMPAIRED", "受损", language: language), .challenging, "shield.slash")
+        case ClassicalTransitSignalRoleID.received.rawValue:
+            (localized("RECEIVED", "接纳", language: language), .transition, "arrow.left.arrow.right")
         default:
-            .supportive
+            (roleID.uppercased(), .neutral, "circle")
         }
     }
 }

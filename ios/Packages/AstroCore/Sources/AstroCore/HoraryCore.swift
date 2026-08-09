@@ -30,7 +30,7 @@ public struct HoraryScoreComponent: Sendable, Equatable, Identifiable {
     }
 }
 
-public struct HoraryPlanetAssessment: Sendable, Equatable, Identifiable {
+public struct HoraryPlanetAssessment: Sendable, Equatable, Identifiable, Codable {
     public let body: CelestialBody
     public let house: Int
     public let signIndex: Int
@@ -40,7 +40,7 @@ public struct HoraryPlanetAssessment: Sendable, Equatable, Identifiable {
     public var id: String { body.id }
 }
 
-public struct HoraryReception: Sendable, Equatable {
+public struct HoraryReception: Sendable, Equatable, Codable {
     public let from: CelestialBody
     public let to: CelestialBody
     public let byDomicile: Bool

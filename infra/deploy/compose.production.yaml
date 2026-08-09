@@ -127,7 +127,7 @@ services:
       RELAY_ADMIN_PASS: ${RELAY_ADMIN_PASS:?set RELAY_ADMIN_PASS in .env}
       RELAY_PRUNE_OTHER_ADMINS: "1"
       RELAY_SEED_PROMPTS: "1"
-      RELAY_SEED_DEEPSEEK: "1"
+      RELAY_SEED_DEEPSEEK: "0"
       RELAY_ALLOWED_ORIGIN: https://aaadmin.xiaoguiwk.top
       RELAY_DAILY_GENERATION_QUOTA: ${RELAY_DAILY_GENERATION_QUOTA:-20}
       # Temporary: App Attest is disabled while the Apple Developer Program is not purchased.

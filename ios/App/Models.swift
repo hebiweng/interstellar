@@ -201,12 +201,12 @@ struct UserProfile: Codable, Equatable {
     var avatarData: Data? = nil
 
     static let sample = UserProfile(
-        name: "Darryl Smith",
-        birthDateUTC: Date(timeIntervalSince1970: 824_259_600),
-        placeName: "Yuncheng, China",
-        timezoneID: "Asia/Shanghai",
-        latitude: 35.0263,
-        longitude: 111.0073
+        name: "Elena Hart",
+        birthDateUTC: Date(timeIntervalSince1970: 705_824_400),
+        placeName: "Paris, France",
+        timezoneID: "Europe/Paris",
+        latitude: 48.8566,
+        longitude: 2.3522
     )
 
     var initials: String {
@@ -491,11 +491,58 @@ enum InsightVisual: Equatable {
     case quarterTabs
     case overlayCompare
     case natalOverlay(firstLabel: String, firstValue: String, secondLabel: String, secondValue: String)
-    case bondOrbit
-    case perspectiveTabs
+    case bondOrbit(SynastryOverviewPresentation)
+    case perspectiveTabs(SynastryPerspectivePresentation)
     case connectionGrid
     case pathFlow
-    case houseOverlayRows
+    case synastryConnectionGrid(SynastryConnectionGridKind)
+    case synastryPathFlow
+    case synastryChemistry
+    case synastryHouseOverlayRows(SynastryPairPresentation)
+    case synastryInterAspectRows(SynastryPairPresentation)
+}
+
+enum SynastryOverviewDimensionID: String, CaseIterable, Equatable, Sendable {
+    case communication
+    case emotionalPace
+    case chemistry
+}
+
+enum SynastryOverviewDimensionState: String, CaseIterable, Equatable, Sendable {
+    case strong
+    case steady
+    case active
+    case mixed
+    case different
+    case quiet
+}
+
+struct SynastryOverviewDimension: Equatable, Sendable {
+    let id: SynastryOverviewDimensionID
+    let state: SynastryOverviewDimensionState
+    let sourceFactIDs: [String]
+}
+
+struct SynastryOverviewPresentation: Equatable, Sendable {
+    let firstName: String
+    let secondName: String
+    let dimensions: [SynastryOverviewDimension]
+}
+
+struct SynastryPairPresentation: Equatable, Sendable {
+    let firstName: String
+    let secondName: String
+}
+
+struct SynastryPerspectivePresentation: Equatable, Sendable {
+    let pair: SynastryPairPresentation
+    let firstSourceFactIDs: [String]
+    let secondSourceFactIDs: [String]
+}
+
+enum SynastryConnectionGridKind: Equatable, Sendable {
+    case emotional
+    case commitment
 }
 
 struct InsightCardModel: Identifiable, Equatable {

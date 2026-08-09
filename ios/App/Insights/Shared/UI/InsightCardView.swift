@@ -7,6 +7,8 @@ struct InsightCardView: View {
     let language: AppLanguage
     var prototypeTransitStyle = false
     var externalHeaderStyle = false
+    @State private var showsSynastryOverviewDetail = false
+    @State private var showsSynastryCardDetail = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -27,18 +29,28 @@ struct InsightCardView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
+            if let presentation = synastryOverviewPresentation {
+                Text("\(presentation.firstName) + \(presentation.secondName)".uppercased())
+                    .font(.system(size: 9, weight: .bold))
+                    .tracking(1.2)
+                    .foregroundStyle(Color(red: 0.80, green: 0.75, blue: 1))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+                    .accessibilityLabel("\(presentation.firstName) and \(presentation.secondName)")
+            }
+
             if showsGenericCopy, let text = card.text {
                 if let headline = text.headline, !headline.isEmpty, headline != card.title {
                     Text(headline)
-                        .font(.system(size: card.id == "current-story" ? 21 : 16, weight: .semibold))
+                        .font(.system(size: heroHeadline ? 21 : 16, weight: .semibold))
                         .foregroundStyle(AppTheme.text)
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if let body = text.body, !body.isEmpty, body != text.headline {
                     Text(body)
-                        .font(.system(size: card.id == "current-story" ? 11 : 11.5, weight: .medium))
-                        .foregroundStyle(card.id == "current-story" ? AppTheme.muted : AppTheme.text.opacity(0.95))
+                        .font(.system(size: heroHeadline ? 11 : 11.5, weight: .medium))
+                        .foregroundStyle(heroHeadline ? AppTheme.muted : AppTheme.text.opacity(0.95))
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -79,6 +91,32 @@ struct InsightCardView: View {
             in: RoundedRectangle(cornerRadius: 22, style: .continuous)
         )
         .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(AppTheme.line, lineWidth: 1))
+        .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .onTapGesture {
+            if synastryOverviewPresentation != nil {
+                showsSynastryOverviewDetail = true
+            } else if synastryDetailCardIDs.contains(card.id) {
+                showsSynastryCardDetail = true
+            }
+        }
+        .sheet(isPresented: $showsSynastryOverviewDetail) {
+            if let presentation = synastryOverviewPresentation {
+                SynastryOverviewDetailSheet(
+                    card: card,
+                    presentation: presentation,
+                    language: language
+                )
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.hidden)
+                .presentationBackground(AppTheme.panel)
+            }
+        }
+        .sheet(isPresented: $showsSynastryCardDetail) {
+            SynastryCardDetailSheet(card: card, language: language)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(AppTheme.panel)
+        }
     }
 
     private var isPrototypeTransitCard: Bool {
@@ -86,7 +124,27 @@ struct InsightCardView: View {
     }
 
     private var showsGenericCopy: Bool {
-        !isPrototypeTransitCard || card.id == "current-story"
+        (!isPrototypeTransitCard || card.id == "current-story")
+            && !synastryStructuredCardIDs.contains(card.id)
+    }
+
+    private var heroHeadline: Bool {
+        card.id == "current-story" || card.id == "relationship-overview"
+    }
+
+    private var synastryOverviewPresentation: SynastryOverviewPresentation? {
+        guard card.id == "relationship-overview",
+              case let .bondOrbit(presentation) = card.visual
+        else { return nil }
+        return presentation
+    }
+
+    private var synastryStructuredCardIDs: Set<String> {
+        ["perspectives", "emotional-connection", "communication", "chemistry", "commitment", "house-overlays", "key-inter-aspects"]
+    }
+
+    private var synastryDetailCardIDs: Set<String> {
+        ["emotional-connection", "communication", "chemistry", "commitment"]
     }
 
 }

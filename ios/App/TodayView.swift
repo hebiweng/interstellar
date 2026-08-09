@@ -46,6 +46,11 @@ struct TodayView: View {
             .navigationDestination(isPresented: $showReports) {
                 ReportsView()
             }
+            .onChange(of: selectedTab) { _, newTab in
+                if newTab != .today {
+                    showReports = false
+                }
+            }
         }
     }
 

@@ -149,12 +149,12 @@ final class AppModel: ObservableObject {
             let partner = SavedPerson(
                 id: UUID(uuidString: "72A8F98A-2E25-4CC3-91D5-65FCFEC808A4")!,
                 profile: UserProfile(
-                    name: "Alex Morgan",
-                    birthDateUTC: Date(timeIntervalSince1970: 663_422_400),
-                    placeName: "Shanghai, China",
-                    timezoneID: "Asia/Shanghai",
-                    latitude: 31.2304,
-                    longitude: 121.4737
+                    name: "Julian Mercer",
+                    birthDateUTC: Date(timeIntervalSince1970: 591_849_900),
+                    placeName: "Montreal, Canada",
+                    timezoneID: "America/Toronto",
+                    latitude: 45.5019,
+                    longitude: -73.5674
                 ),
                 relationship: .partner
             )
@@ -799,6 +799,9 @@ final class AppModel: ObservableObject {
                 transitCalendar: cardTransitCalendar,
                 transitRangeDays: transitRangeDays,
                 transitContentPlan: plannedTransit,
+                synastryComparison: chart == .synastry ? synastry : nil,
+                synastryFirstName: chart == .synastry ? chartSubjectProfile.name : nil,
+                synastrySecondName: chart == .synastry ? synastryPartnerID.flatMap(profileForPersonID)?.name : nil,
                 preset: preset(for: chart).rawValue,
                 events: cardEvents,
                 timeZone: cardTimeZone
@@ -1323,19 +1326,38 @@ final class AppModel: ObservableObject {
         timeZone: TimeZone,
         calendarDays: [TransitCalendarDay]? = nil
     ) -> TransitContentPlan? {
+        guard let bundle = makeTransitFactBundle(
+            snapshot: snapshot,
+            natal: natal,
+            aspects: aspects,
+            events: events,
+            timeZone: timeZone,
+            calendarDays: calendarDays
+        ) else { return nil }
+        return TransitContentPlanner.plan(bundle)
+    }
+
+    private func makeTransitFactBundle(
+        snapshot: ChartSnapshot?,
+        natal: ChartSnapshot?,
+        aspects: [ChartAspect],
+        events: ChartEventData,
+        timeZone: TimeZone,
+        calendarDays: [TransitCalendarDay]? = nil,
+        rangeDays: Int = TransitTimelineContract.maximumRangeDays
+    ) -> TransitFactBundle? {
         guard let snapshot else { return nil }
-        let bundle = TransitFactBundleBuilder.build(
+        return TransitFactBundleBuilder.build(
             snapshot: snapshot,
             natal: natal,
             crossAspects: aspects,
             transitWindows: events.transitWindows,
             planetEvents: events.transitPlanetEvents,
             transitCalendar: calendarDays ?? transitCalendar,
-            rangeDays: TransitTimelineContract.maximumRangeDays,
+            rangeDays: rangeDays,
             preset: preset(for: .transit).rawValue,
             timeZone: timeZone
         )
-        return TransitContentPlanner.plan(bundle)
     }
     // MARK: - AI generation (LLM interpretation + reports)
 
@@ -1349,93 +1371,83 @@ final class AppModel: ObservableObject {
         defaults.set(false, forKey: "ai.network.consent.v1")
     }
 
-    func aiCardDetail(for chart: ChartKind, cardID: String) -> (detail: String?, status: AIDetailStatus) {
-        let content = aiContent[chart] ?? .empty
-        if let detail = content.cardDetails[cardID] {
-            return (detail, .ready)
-        }
-        return (nil, content.status(for: cardID))
-    }
-
     func aiReport(for chart: ChartKind) -> AIReport? {
         aiContent[chart]?.report
     }
 
-    func ensureAIGeneration(for chart: ChartKind) {
+    func currentSavedReport(for chart: ChartKind) -> SavedReport? {
+        guard let key = aiContent[chart]?.cacheKey, !key.isEmpty else { return nil }
+        return savedReports.first { $0.id == key }
+    }
+
+    func aiReportStatus(for chart: ChartKind) -> AIReportGenerationStatus {
+        aiContent[chart]?.status ?? .idle
+    }
+
+    func refreshAIReportStates() {
+        for chart in ChartKind.allCases where snapshot(for: chart) != nil {
+            guard let context = try? aiReportRequestContext(for: chart) else { continue }
+            if let artifact = artifactStore.load(key: context.key) {
+                applyArtifact(artifact, chart: chart)
+            } else if aiContent[chart]?.cacheKey != context.key {
+                aiContent[chart] = .empty
+            }
+        }
+        reloadSavedReports()
+    }
+
+    func generateAIReport(for chart: ChartKind, forceRegenerate: Bool = false) {
         guard snapshot(for: chart) != nil else { return }
         guard !generatingCharts.contains(chart) else { return }
 
-        let cardIDs = Self.expectedCardIDs(for: chart)
-        let params = aiParams(for: chart)
-        guard let facts = try? buildAIFacts(chart: chart, params: params, cardIDs: cardIDs),
-              let factsData = try? JSONSerialization.data(withJSONObject: facts, options: [.sortedKeys])
-        else { return }
-        let factsHash = SHA256Digest.hash(factsData).hex
-        let key = semanticFingerprint(
-            chart: chart,
-            cardIDs: cardIDs,
-            params: params,
-            factsHash: factsHash
-        )
-        if let artifact = artifactStore.load(key: key) {
-            applyArtifact(artifact, chart: chart, cardIDs: cardIDs)
+        guard let context = try? aiReportRequestContext(for: chart) else { return }
+        if !forceRegenerate, let artifact = artifactStore.load(key: context.key) {
+            applyArtifact(artifact, chart: chart)
             return
         }
-        if let existing = aiContent[chart], existing.cacheKey == key {
+        if !forceRegenerate,
+           let existing = aiContent[chart],
+           existing.cacheKey == context.key,
+           existing.report != nil
+        {
             return
         }
         guard aiConsentGranted, isOnline else { return }
 
         generatingCharts.insert(chart)
         var content = aiContent[chart] ?? .empty
-        content.cacheKey = key
-        for id in cardIDs {
-            content.statusByCard[id] = .generating
-        }
+        content.cacheKey = context.key
+        content.status = .generating
         aiContent[chart] = content
 
         Task {
             await performAIGeneration(
                 chart: chart,
-                key: key,
-                cardIDs: cardIDs,
-                params: params,
-                facts: facts,
-                factsHash: factsHash
+                key: context.key,
+                params: context.params,
+                facts: context.facts,
+                factsHash: context.factsHash,
+                requestLocale: context.locale,
+                forceRegenerate: forceRegenerate
             )
         }
     }
 
     func regenerateAIArtifact(for chart: ChartKind) {
-        let cardIDs = Self.expectedCardIDs(for: chart)
-        let params = aiParams(for: chart)
-        guard let facts = try? buildAIFacts(chart: chart, params: params, cardIDs: cardIDs),
-              let factsData = try? JSONSerialization.data(withJSONObject: facts, options: [.sortedKeys])
-        else { return }
-        let factsHash = SHA256Digest.hash(factsData).hex
-        let key = semanticFingerprint(chart: chart, cardIDs: cardIDs, params: params, factsHash: factsHash)
-        artifactStore.remove(key: key)
-        aiContent[chart] = .empty
-        ensureAIGeneration(for: chart)
+        generateAIReport(for: chart, forceRegenerate: true)
     }
 
     private func performAIGeneration(
         chart: ChartKind,
         key: String,
-        cardIDs: [String],
         params: [String: String],
         facts: [String: Any],
-        factsHash: String
+        factsHash: String,
+        requestLocale: String,
+        forceRegenerate: Bool
     ) async {
         defer { generatingCharts.remove(chart) }
         do {
-            let evidenceFacts = facts["evidenceFacts"] as? [[String: Any]] ?? []
-            let evidenceIDs = evidenceFacts.compactMap { $0["id"] as? String }
-            let allowedEvidence = allowedEvidenceByCard(
-                chart: chart,
-                cardIDs: cardIDs,
-                evidenceIDs: evidenceIDs
-            )
             let body: [String: Any] = [
                 "mode": "chart",
                 "chartKind": chart.contentPrefix,
@@ -1447,10 +1459,9 @@ final class AppModel: ObservableObject {
                 "semanticFingerprint": key,
                 "factsHash": factsHash,
                 "generationSchemaVersion": GeneratedChartArtifact.schemaVersion,
-                "cardIDs": cardIDs,
-                "allowedEvidenceByCard": allowedEvidence,
-                "locale": language.corpusLanguage.rawValue,
+                "locale": requestLocale,
                 "clientVersion": "ios-v6",
+                "forceRegenerate": forceRegenerate,
             ]
             let bodyData = try JSONSerialization.data(withJSONObject: body, options: [])
             let request = AIGenerateRequest(bodyData: bodyData)
@@ -1472,9 +1483,8 @@ final class AppModel: ObservableObject {
                 chartKind: chart.contentPrefix,
                 subjectHashes: subjectHashes(for: chart),
                 parameters: params,
-                locale: language.corpusLanguage.rawValue,
+                locale: requestLocale,
                 preset: preset(for: chart).rawValue,
-                cardContractVersion: 3,
                 factsHash: factsHash,
                 provider: response.provider,
                 model: response.model,
@@ -1484,87 +1494,38 @@ final class AppModel: ObservableObject {
                 response: response
             )
             artifactStore.save(artifact)
-            applyArtifact(artifact, chart: chart, cardIDs: cardIDs)
+            applyArtifact(artifact, chart: chart)
         } catch {
             var content = aiContent[chart] ?? .empty
-            for id in cardIDs {
-                content.statusByCard[id] = .failed(error.localizedDescription)
-            }
+            content.status = .failed(error.localizedDescription)
             aiContent[chart] = content
         }
     }
 
-    private func allowedEvidenceByCard(
-        chart: ChartKind,
-        cardIDs: [String],
-        evidenceIDs: [String]
-    ) -> [String: [String]] {
-        let available = Set(evidenceIDs)
-        if chart == .transit, let plan = transitContentPlan {
-            return Dictionary(uniqueKeysWithValues: cardIDs.map { cardID in
-                let sourceFactIDs = plan.card(cardID)?.sourceFactIDs.filter(available.contains) ?? []
-                return (cardID, sourceFactIDs)
-            })
-        }
-        let pointIDs = evidenceIDs.filter { $0.hasPrefix("point.") }
-        let aspectIDs = evidenceIDs.filter { $0.hasPrefix("aspect.") }
-        let angleIDs = evidenceIDs.filter { $0.hasPrefix("angle.") }
-        let eventIDs = evidenceIDs.filter { $0.hasPrefix("event.") }
-        let cards = insightCards(for: chart).cards
-
-        return Dictionary(uniqueKeysWithValues: cardIDs.map { cardID in
-            let explicit = cards
-                .first(where: { $0.id == cardID })?
-                .facts
-                .flatMap(\.sourceFactIDs)
-                .filter { available.contains($0) } ?? []
-            if !explicit.isEmpty {
-                return (cardID, Array(Set(explicit)).sorted())
-            }
-
-            let lower = cardID.lowercased()
-            var policy: [String] = []
-            if lower.contains("moon") || lower.contains("emotional") {
-                policy += pointIDs.filter { $0 == "point.moon" }
-                policy += aspectIDs.filter { $0.contains(".moon.") || $0.hasSuffix(".moon") }
-            }
-            if lower.contains("aspect") || lower.contains("cycle") || lower.contains("turning") || lower.contains("dynamic") {
-                policy += aspectIDs
-            }
-            if lower.contains("placement") || lower.contains("motion") || lower.contains("element") || lower.contains("area") || lower.contains("path") {
-                policy += pointIDs
-            }
-            if lower.contains("anchor") || lower.contains("signature") || lower.contains("overview") || lower.contains("interpretation") || lower.contains("perspective") {
-                policy += pointIDs + angleIDs
-            }
-            if lower.contains("timeline") || lower.contains("story") || lower.contains("connection") || lower.contains("chemistry") || lower.contains("commitment") || lower.contains("overlay") || lower.contains("upcoming") || lower.contains("change") {
-                policy += pointIDs + aspectIDs + eventIDs
-            }
-            if policy.isEmpty {
-                policy = pointIDs + aspectIDs + angleIDs
-            }
-            return (cardID, Array(Set(policy)).sorted())
-        })
-    }
-
-    private func applyArtifact(_ artifact: GeneratedChartArtifact, chart: ChartKind, cardIDs: [String]) {
+    private func applyArtifact(_ artifact: GeneratedChartArtifact, chart: ChartKind) {
         let response = artifact.response
         var content = aiContent[chart] ?? .empty
         content.cacheKey = artifact.semanticFingerprint
         content.report = AIReport(title: response.report.title, subtitle: response.report.subtitle, sections: response.report.sections)
-        for id in cardIDs {
-            if let detail = response.cards[id]?.detail, !detail.isEmpty {
-                content.cardDetails[id] = detail
-                content.statusByCard[id] = .ready
-            } else {
-                content.statusByCard[id] = .hidden
-            }
-        }
+        content.status = .ready
         aiContent[chart] = content
         reloadSavedReports()
     }
 
-    private func buildAIFacts(chart: ChartKind, params: [String: String], cardIDs: [String]) throws -> [String: Any] {
+    private func aiReportRequestContext(for chart: ChartKind) throws -> (
+        params: [String: String], facts: [String: Any], factsHash: String, key: String, locale: String
+    ) {
+        let requestLocale = language.corpusLanguage.rawValue
+        let params = aiParams(for: chart)
+        let facts = try buildAIFacts(chart: chart, params: params)
+        let factsData = try JSONSerialization.data(withJSONObject: facts, options: [.sortedKeys])
+        let factsHash = SHA256Digest.hash(factsData).hex
+        let identityFactsHash = try AIArtifactIdentity.factsIdentityHash(facts)
+        let key = semanticFingerprint(chart: chart, params: params, factsHash: identityFactsHash)
+        return (params, facts, factsHash, key, requestLocale)
+    }
+
+    private func buildAIFacts(chart: ChartKind, params: [String: String]) throws -> [String: Any] {
         guard let snapshot = snapshot(for: chart) else {
             throw AppModelError.missingSnapshot
         }
@@ -1581,6 +1542,7 @@ final class AppModel: ObservableObject {
         } else {
             partner = nil
         }
+        let aiEvents: ChartEventData = chart == .transit ? .empty : chartEvents
         var document = AIFactsBuilder.document(
             chart: chart,
             snapshot: snapshot,
@@ -1590,79 +1552,95 @@ final class AppModel: ObservableObject {
             personName: chartSubjectProfile.name,
             partnerName: partner?.name,
             partnerChart: partner?.chart,
-            events: chartEvents,
+            classicalSynastryAssessment: chart == .synastry ? synastry?.classicalAssessment : nil,
+            events: aiEvents,
             params: params,
-            locale: language.corpusLanguage.rawValue,
-            cardIDs: cardIDs
+            locale: language.corpusLanguage.rawValue
         )
         if chart == .transit {
             let timeZone = TimeZone(
                 identifier: transitLocationOverride?.timezoneID ?? chartSubjectProfile.timezoneID
             ) ?? .current
-            let isFocusedTransit = focusedChart == .transit
-            let plan = makeTransitContentPlan(
+            let bundle = makeTransitFactBundle(
                 snapshot: snapshot,
                 natal: reference,
                 aspects: comparison,
-                events: isFocusedTransit ? .empty : chartEvents,
+                events: .empty,
                 timeZone: timeZone,
-                calendarDays: isFocusedTransit ? [] : transitCalendar
+                calendarDays: [],
+                rangeDays: 1
             )
-            transitContentPlan = plan
-            if let plan {
-                document["transitContentPlan"] = transitPlanDocument(plan)
-                document["evidenceFacts"] = transitEvidenceFacts(plan)
+            if let bundle {
+                let plan = TransitContentPlanner.plan(bundle)
+                transitContentPlan = plan
+                document["transit"] = transitBundleDocument(bundle)
+                document["transitAssessment"] = transitAssessmentDocument(plan)
+                document["evidenceFacts"] = transitEvidenceFacts(bundle)
             }
         }
         return document
     }
 
-    private func transitPlanDocument(_ plan: TransitContentPlan) -> [String: Any] {
+    private func transitBundleDocument(_ bundle: TransitFactBundle) -> [String: Any] {
         [
-            "scopeID": plan.scopeID,
-            "anchorDate": ISO8601DateFormatter().string(from: plan.anchorDate),
-            "timeZone": plan.timeZoneIdentifier,
-            "rangeDays": plan.rangeDays,
-            "preset": plan.preset,
-            "cards": plan.cards.map { card in
-                [
-                    "cardID": card.cardID,
-                    "copySlot": card.copySlot.map { $0.rawValue as Any } ?? NSNull(),
-                    "primaryFactID": card.primaryFactID.map { $0 as Any } ?? NSNull(),
-                    "integratedThemeID": card.integratedThemeID.map { $0.rawValue as Any } ?? NSNull(),
-                    "sourceFactIDs": card.sourceFactIDs,
-                    "evidence": card.evidence.map {
-                        [
-                            "factID": $0.fact.factID,
-                            "claimMode": $0.claimMode.rawValue,
-                            "roleID": $0.role.rawValue,
-                        ]
-                    },
-                    "signals": card.signalRoles.map {
-                        [
-                            "signalID": $0.signalID,
-                            "signalRole": $0.signalRole.rawValue,
-                            "transitPlanet": $0.movingID,
-                            "lifeAreas": $0.lifeAreas,
-                            "sourceFactIDs": $0.sourceFactIDs,
-                        ]
-                    },
-                ]
-            },
+            "scopeID": bundle.scopeID,
+            "anchorDate": ISO8601DateFormatter().string(from: bundle.anchorDate),
+            "timeZone": bundle.timeZoneIdentifier,
+            "rangeDays": bundle.rangeDays,
+            "preset": bundle.preset,
         ]
     }
 
-    private func transitEvidenceFacts(_ plan: TransitContentPlan) -> [[String: Any]] {
+    private func transitAssessmentDocument(_ plan: TransitContentPlan) -> [String: Any] {
+        let currentStory = plan.card("current-story")
+        let themeInputs = plan.cards.flatMap(\.themeInputs).map { input in
+            [
+                "signalID": input.signalID,
+                "sourceFactIDs": input.sourceFactIDs,
+                "movingID": input.movingID.map { $0 as Any } ?? NSNull(),
+                "referenceID": input.referenceID.map { $0 as Any } ?? NSNull(),
+                "aspect": input.aspectKind.map { $0.rawValue as Any } ?? NSNull(),
+                "tone": input.tone,
+                "house": input.house.map { $0 as Any } ?? NSNull(),
+                "roleID": input.roleID,
+                "classicalThemeID": input.classicalThemeID.map { $0.rawValue as Any } ?? NSNull(),
+            ] as [String: Any]
+        }
+        return [
+            "preset": plan.preset,
+            "themeInputs": themeInputs,
+            "currentStoryAnchor": [
+                "modernIntegratedThemeID": currentStory?.integratedThemeID?.rawValue as Any? ?? NSNull(),
+                "modernSignalRoles": currentStory?.signalRoles.map {
+                    [
+                        "signalID": $0.signalID,
+                        "signalRole": $0.signalRole.rawValue,
+                        "movingID": $0.movingID,
+                        "lifeAreas": $0.lifeAreas,
+                        "sourceFactIDs": $0.sourceFactIDs,
+                    ]
+                } ?? [],
+                "classicalIntegratedThemeID": currentStory?.classicalIntegratedThemeID?.rawValue as Any? ?? NSNull(),
+                "classicalSignalRoles": currentStory?.classicalSignalRoles.map {
+                    [
+                        "signalRole": $0.signalRole.rawValue,
+                        "movingID": $0.movingID,
+                        "sourceFactIDs": $0.sourceFactIDs,
+                    ]
+                } ?? [],
+            ] as [String: Any],
+        ]
+    }
+
+    private func transitEvidenceFacts(_ bundle: TransitFactBundle) -> [[String: Any]] {
         var factsByID: [String: [String: Any]] = [:]
-        for evidence in plan.cards.flatMap(\.evidence) {
-            let fact = evidence.fact
+        let facts: [TransitFact] = bundle.crossAspects.map(TransitFact.aspect)
+            + bundle.transitWindows.map(TransitFact.window)
+            + bundle.planetEvents.map(TransitFact.planetEvent)
+            + bundle.planetPlacements.map(TransitFact.placement)
+            + bundle.lifeAreaScores.map(TransitFact.lifeArea)
+        for fact in facts {
             factsByID[fact.factID] = transitEvidenceDocument(fact)
-            for sourceFactID in fact.sourceFactIDs where factsByID[sourceFactID] == nil {
-                factsByID[sourceFactID] = [
-                    "id": sourceFactID,
-                    "kind": "source-reference",
-                ]
-            }
         }
         return factsByID.values.sorted {
             ($0["id"] as? String ?? "") < ($1["id"] as? String ?? "")
@@ -1684,12 +1662,26 @@ final class AppModel: ObservableObject {
                 "movingLongitude": value.movingLongitude,
                 "referenceLongitude": value.referenceLongitude,
                 "natalHouse": value.natalHouse,
+                "cycleBand": value.cycleBand.rawValue,
+                "classicalContext": value.classicalContext.map {
+                    [
+                        "movingScore": $0.movingScore,
+                        "movingConditions": $0.movingConditions.map(\.rawValue),
+                        "receptionFromMoving": $0.receptionFromMoving,
+                        "receptionFromReference": $0.receptionFromReference,
+                    ] as [String: Any]
+                } ?? NSNull(),
             ]
         case let .window(value):
             return [
                 "id": value.factID,
                 "kind": "transit-window",
                 "sourceAspectFactID": value.sourceAspectFactID.map { $0 as Any } ?? NSNull(),
+                "movingID": value.movingID,
+                "referenceID": value.referenceID,
+                "aspect": value.kind.rawValue,
+                "movingLongitude": value.movingLongitude,
+                "natalHouse": value.natalHouse,
                 "start": ISO8601DateFormatter().string(from: value.start),
                 "exact": ISO8601DateFormatter().string(from: value.exact),
                 "end": ISO8601DateFormatter().string(from: value.end),
@@ -1699,6 +1691,7 @@ final class AppModel: ObservableObject {
                 "passCount": value.passCount,
                 "returning": value.returning,
                 "timeZone": value.timeZoneIdentifier,
+                "cycleBand": value.cycleBand.rawValue,
             ]
         case let .planetEvent(value):
             return [
@@ -1722,6 +1715,8 @@ final class AppModel: ObservableObject {
                 "natalHouse": value.natalHouse,
                 "retrograde": value.retrograde,
                 "longitudeSpeedDegreesPerDay": value.longitudeSpeedDegreesPerDay,
+                "classicalScore": value.classicalScore.map { $0 as Any } ?? NSNull(),
+                "classicalConditions": value.classicalConditions.map(\.rawValue),
             ]
         case let .lifeArea(value):
             return [
@@ -1789,7 +1784,7 @@ final class AppModel: ObservableObject {
         }
     }
 
-    private func semanticFingerprint(chart: ChartKind, cardIDs: [String], params: [String: String], factsHash: String) -> String {
+    private func semanticFingerprint(chart: ChartKind, params: [String: String], factsHash: String) -> String {
         let includeExactFacts: Bool = switch chartContext(for: chart).target {
         case .natal, .solarReturn, .synastry: true
         case let .currentSky(_, _, usesLiveDefault): !usesLiveDefault
@@ -1801,9 +1796,6 @@ final class AppModel: ObservableObject {
             preset(for: chart).rawValue,
             subjectHashes(for: chart).joined(separator: ","),
             params.keys.sorted().map { "\($0)=\(params[$0] ?? "")" }.joined(separator: ","),
-            language.corpusLanguage.rawValue,
-            cardIDs.joined(separator: ","),
-            "contract=3",
             "generation=\(GeneratedChartArtifact.schemaVersion)",
             includeExactFacts ? factsHash : "semantic-bucket",
         ].joined(separator: "|")
@@ -1854,29 +1846,12 @@ final class AppModel: ObservableObject {
         return formatter.string(from: Date(timeIntervalSince1970: seconds))
     }
 
-    private static func expectedCardIDs(for chart: ChartKind) -> [String] {
-        switch chart {
-        case .natal: ["natal-interpretation", "emotional-needs", "love-connection", "career-direction", "strengths-growth", "element-balance", "house-emphasis", "chart-signature", "planet-placements", "key-aspects"]
-        case .currentSky: ["sky-overview", "moon-now", "aspect-pattern", "planetary-motion", "sign-changes", "element-climate", "upcoming-7-days"]
-        case .transit: ["current-story", "current-cycles", "transit-timeline", "planet-paths", "life-areas", "active-transits"]
-        case .secondary: ["developmental-chapter", "progressed-moon", "identity-development", "turning-points", "areas-maturing", "timeline"]
-        case .solarReturn: ["year-theme", "year-anchors", "priority-areas", "year-dynamics", "year-timeline", "natal-overlay", "year-aspects"]
-        case .synastry: ["relationship-overview", "perspectives", "emotional-connection", "communication", "chemistry", "commitment", "house-overlays", "key-inter-aspects"]
-        }
-    }
-
     // MARK: - Report library
 
     func refreshAvailableReports() async {
         let timeZone = TimeZone(identifier: profile.timezoneID) ?? .current
         let now = Date()
         var reports: [AvailableReport] = []
-        reports.append(
-            AvailableReport(
-                scope: .daily,
-                unlockedAt: ReportUnlock.nextLocalMidnight(after: now, timeZone: timeZone)
-            )
-        )
         reports.append(
             AvailableReport(
                 scope: .monthly,
@@ -1938,9 +1913,8 @@ final class AppModel: ObservableObject {
                 "profileHash": profileHashValue,
                 "params": params,
                 "facts": facts,
-                "cardIDs": [String](),
                 "locale": language.corpusLanguage.rawValue,
-                "clientVersion": "ios-v2",
+                "clientVersion": "ios-v6",
             ]
             let bodyData = try JSONSerialization.data(withJSONObject: body, options: [])
             let response = try await aiClient.generate(AIGenerateRequest(bodyData: bodyData))
