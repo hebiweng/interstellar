@@ -1202,10 +1202,7 @@ final class AppModel: ObservableObject {
         params: [String: String], facts: [String: Any], factsHash: String, key: String, locale: String
     ) {
         let requestLocale = language.corpusLanguage.rawValue
-        var params = aiParams(for: chart)
-        if chart == .synastry, let relationship {
-            params["relationship"] = relationship.rawValue
-        }
+        let params = aiParams(for: chart, relationship: relationship)
         let facts = try buildAIFacts(chart: chart, relationship: relationship, params: params)
         let factsData = try JSONSerialization.data(withJSONObject: facts, options: [.sortedKeys])
         let factsHash = SHA256Digest.hash(factsData).hex
@@ -1278,11 +1275,12 @@ final class AppModel: ObservableObject {
         aiReportService.profileHash(profile)
     }
 
-    private func aiParams(for chart: ChartKind) -> [String: String] {
+    private func aiParams(for chart: ChartKind, relationship: PersonRelationship? = nil) -> [String: String] {
         aiReportService.parameters(
             for: chartContext(for: chart).target,
             subjectTimeZoneID: chartSubjectProfile.timezoneID,
-            subjectHashes: subjectHashes(for: chart)
+            subjectHashes: subjectHashes(for: chart),
+            relationship: relationship
         )
     }
 

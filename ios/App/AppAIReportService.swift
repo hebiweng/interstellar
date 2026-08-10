@@ -52,7 +52,8 @@ final class AppAIReportService {
     func parameters(
         for target: ChartTarget,
         subjectTimeZoneID: String,
-        subjectHashes: [String]
+        subjectHashes: [String],
+        relationship: PersonRelationship? = nil
     ) -> [String: String] {
         let formatter = ISO8601DateFormatter()
         switch target {
@@ -85,7 +86,11 @@ final class AppAIReportService {
         case let .solarReturn(year, location):
             return locationParameters(location).merging(["returnYear": String(year)]) { _, new in new }
         case .synastry:
-            return ["partnerHash": subjectHashes.dropFirst().first ?? ""]
+            var params: [String: String] = ["partnerHash": subjectHashes.dropFirst().first ?? ""]
+            if let relationship {
+                params["relationship"] = relationship.rawValue
+            }
+            return params
         }
     }
 

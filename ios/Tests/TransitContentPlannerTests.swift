@@ -17,6 +17,14 @@ final class TransitContentPlannerTests: XCTestCase {
             ("spain-ireland", .init(date: utcDate(1987, 6, 2, 9), latitude: 40.4168, longitude: -3.7038), .init(date: utcDate(1990, 12, 17, 23), latitude: 53.3498, longitude: -6.2603)),
             ("sweden-usa", .init(date: utcDate(1996, 1, 30, 15), latitude: 59.3293, longitude: 18.0686), .init(date: utcDate(1982, 8, 11, 7), latitude: 34.0522, longitude: -118.2437)),
             ("netherlands-portugal", .init(date: utcDate(1976, 4, 6, 3), latitude: 52.3676, longitude: 4.9041), .init(date: utcDate(1998, 9, 25, 20), latitude: 38.7223, longitude: -9.1393)),
+            ("china-usa", .init(date: utcDate(1985, 8, 20, 10), latitude: 39.9042, longitude: 116.4074), .init(date: utcDate(1995, 3, 8, 14), latitude: 40.7128, longitude: -74.0060)),
+            ("japan-brazil", .init(date: utcDate(1978, 1, 12, 20), latitude: 35.6762, longitude: 139.6503), .init(date: utcDate(1992, 6, 30, 22), latitude: -23.5505, longitude: -46.6333)),
+            ("india-southafrica", .init(date: utcDate(1990, 10, 5, 2), latitude: 19.0760, longitude: 72.8777), .init(date: utcDate(1983, 4, 17, 16), latitude: -33.9249, longitude: 18.4241)),
+            ("argentina-egypt", .init(date: utcDate(1982, 7, 25, 12), latitude: -34.6037, longitude: -58.3816), .init(date: utcDate(1997, 9, 11, 8), latitude: 30.0444, longitude: 31.2357)),
+            ("russia-australia", .init(date: utcDate(1993, 12, 3, 18), latitude: 55.7558, longitude: 37.6173), .init(date: utcDate(1986, 5, 29, 4), latitude: -33.8688, longitude: 151.2093)),
+            ("mexico-uk", .init(date: utcDate(1980, 3, 14, 7), latitude: 19.4326, longitude: -99.1332), .init(date: utcDate(1989, 11, 2, 1), latitude: 51.5074, longitude: -0.1278)),
+            ("turkey-indonesia", .init(date: utcDate(1987, 6, 9, 21), latitude: 41.0082, longitude: 28.9784), .init(date: utcDate(1999, 2, 27, 11), latitude: -6.2088, longitude: 106.8456)),
+            ("newzealand-egypt", .init(date: utcDate(1991, 4, 22, 0), latitude: -36.8485, longitude: 174.7633), .init(date: utcDate(1975, 8, 6, 6), latitude: 30.0444, longitude: 31.2357)),
         ]
         var observations: [[String: Any]] = []
         for preset in [CalculationPreset.modern, .classical] {
@@ -105,7 +113,7 @@ final class TransitContentPlannerTests: XCTestCase {
                 crossAspects: comparison.crossAspects,
                 classicalAssessment: comparison.classicalAssessment,
                 preset: preset,
-                params: ["partnerHash": "test"],
+                params: ["partnerHash": "test", "relationship": "friend"],
                 locale: "en"
             )
             let people = try XCTUnwrap(document["people"] as? [[String: Any]])
@@ -122,6 +130,8 @@ final class TransitContentPlannerTests: XCTestCase {
             XCTAssertNil(document["partner"])
             XCTAssertNil(document["chart"])
             XCTAssertNil(document["comparisonAspects"])
+            let params = try XCTUnwrap(document["params"] as? [String: String])
+            XCTAssertEqual(params["relationship"], "friend")
         }
     }
 
