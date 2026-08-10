@@ -518,19 +518,19 @@
         }
       }
     },
-    "Add another person in Profile to compare.": {
+    "Add person in Profile": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Add another person in Profile to compare."
+            "value": "Add person in Profile"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "请在个人资料中添加其他人物以合盘。"
+            "value": "去个人资料添加人物"
           }
         }
       }

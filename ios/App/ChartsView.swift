@@ -219,24 +219,43 @@ struct ChartsView: View {
         }
     }
 
-   private var synastryPeopleSelector: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 10) {
-                Text(model.profile.name)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(AppTheme.text)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
+    private var synastryPeopleSelector: some View {
+        HStack(spacing: 10) {
+            Text(model.profile.name)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(AppTheme.text)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .background(AppTheme.background.opacity(0.48), in: RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppTheme.line))
+
+            Image(systemName: "heart.fill")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(AppTheme.violet)
+                .accessibilityHidden(true)
+
+            if model.savedPeople.isEmpty {
+                Button {
+                    selectedTab = .profile
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "person.crop.circle.badge.plus")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(AppTheme.muted)
+                        Text(localized("Add person in Profile", "去个人资料添加人物", language: model.language))
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(AppTheme.muted)
+                        Spacer(minLength: 0)
+                    }
                     .padding(.horizontal, 12)
                     .frame(maxWidth: .infinity, minHeight: 44)
                     .background(AppTheme.background.opacity(0.48), in: RoundedRectangle(cornerRadius: 12))
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppTheme.line))
-
-                Image(systemName: "heart.fill")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(AppTheme.violet)
-                    .accessibilityHidden(true)
-
+                }
+                .buttonStyle(.plain)
+            } else {
                 Menu {
                     ForEach(model.savedPeople) { person in
                         Button(person.profile.name) {
@@ -261,21 +280,6 @@ struct ChartsView: View {
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppTheme.line))
                 }
                 .buttonStyle(.plain)
-                .disabled(model.savedPeople.isEmpty)
-            }
-
-            if model.savedPeople.isEmpty {
-                HStack(spacing: 6) {
-                    Image(systemName: "person.crop.circle.badge.plus")
-                        .font(.caption2)
-                        .foregroundStyle(AppTheme.muted)
-                    Text(localized("Add another person in Profile to compare.", "请在个人资料中添加其他人物以合盘。", language: model.language))
-                        .font(.caption2)
-                        .foregroundStyle(AppTheme.muted)
-                        .lineLimit(2)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Spacer(minLength: 0)
-                }
             }
         }
         .padding(.horizontal, 15)
