@@ -110,9 +110,9 @@ struct InsightVisualView: View {
                 .presentationBackground(AppTheme.panel)
         }
         .sheet(item: $synastryFactDrawer) { fact in
-            SynastryFactDetailSheet(fact: fact, language: language)
-                .presentationDetents([.medium])
-                .presentationDragIndicator(.visible)
+            SynastryFactDetailSheet(fact: fact, interpretation: text?.body, language: language)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.hidden)
                 .presentationBackground(AppTheme.panel)
         }
     }
@@ -127,7 +127,7 @@ struct InsightVisualView: View {
             ),
             systemImage: "circle.dashed"
         )
-        .font(.system(size: 11, weight: .medium))
+        .font(AppTypography.supporting.weight(.medium))
         .foregroundStyle(AppTheme.muted)
         .frame(maxWidth: .infinity, minHeight: 72, alignment: .leading)
         .padding(12)
@@ -144,15 +144,15 @@ struct InsightVisualView: View {
                             Text(symbol).font(.system(size: 12, weight: .bold)).foregroundStyle(AppTheme.tone(fact.emphasis))
                         }
                         Text(fact.label)
-                            .font(.system(size: 10, weight: .semibold))
+                            .font(AppTypography.compactLabel)
                             .foregroundStyle(AppTheme.muted)
                     }
                     Text(fact.value)
-                        .font(.system(size: 12.5, weight: .semibold))
+                        .font(AppTypography.factValue)
                         .foregroundStyle(AppTheme.text)
                         .fixedSize(horizontal: false, vertical: true)
                     if let note = fact.note {
-                        Text(note).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
+                        Text(note).font(AppTypography.supporting).foregroundStyle(AppTheme.muted)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     if let progress = fact.progress {
@@ -179,16 +179,16 @@ struct InsightVisualView: View {
                             .background(AppTheme.tone(fact.emphasis).opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
                     }
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(fact.label).font(.system(size: 10, weight: .semibold)).foregroundStyle(AppTheme.muted)
-                        Text(fact.value).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
+                        Text(fact.label).font(AppTypography.compactLabel).foregroundStyle(AppTheme.muted)
+                        Text(fact.value).font(AppTypography.factValue).foregroundStyle(AppTheme.text)
                         if let note = fact.note {
-                            Text(note).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
+                            Text(note).font(AppTypography.supporting).foregroundStyle(AppTheme.muted)
                         }
                     }
                     Spacer()
                     if let progress = fact.progress {
                         Text("\(Int(progress * 100))%")
-                            .font(.system(size: 10, weight: .semibold).monospacedDigit())
+                            .font(AppTypography.compactLabel.monospacedDigit())
                             .foregroundStyle(AppTheme.muted)
                     }
                 }
@@ -229,7 +229,7 @@ struct InsightVisualView: View {
     func metric(_ value: String, _ title: String, _ tone: InsightTone) -> some View {
         HStack {
             Text(value).font(.system(size: 15, weight: .bold).monospacedDigit()).foregroundStyle(AppTheme.tone(tone))
-            Text(title).font(.system(size: 11)).foregroundStyle(AppTheme.muted)
+            Text(title).font(AppTypography.supporting).foregroundStyle(AppTheme.muted)
             Spacer()
         }
         .padding(.horizontal, 10)
@@ -239,8 +239,13 @@ struct InsightVisualView: View {
 
     func trioCell(label: String, value: String) -> some View {
         VStack(spacing: 4) {
-            Text(label).font(.system(size: 9)).foregroundStyle(AppTheme.muted).multilineTextAlignment(.center)
-            Text(value).font(.system(size: 12, weight: .semibold)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
+            Text(label)
+                .font(AppTypography.metadata)
+                .foregroundStyle(AppTheme.muted)
+                .multilineTextAlignment(.center)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            Text(value).font(AppTypography.factValue).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
                 .lineLimit(2)
         }
         .frame(maxWidth: .infinity)
@@ -262,15 +267,12 @@ struct InsightVisualView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(fact.label).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
                         if let note = fact.note {
-                            Text(note).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
+                            Text(note).font(AppTypography.supporting).foregroundStyle(AppTheme.muted)
                         }
                     }
                     Spacer()
                     VStack(alignment: .trailing, spacing: 1) {
-                        Text(fact.value).font(.system(size: 10.5, weight: .semibold)).foregroundStyle(AppTheme.text)
-                        if let note = fact.note, !note.isEmpty {
-                            Text(note).font(.system(size: 9)).foregroundStyle(AppTheme.muted)
-                        }
+                        Text(fact.value).font(AppTypography.compactLabel).foregroundStyle(AppTheme.text)
                     }
                 }
                 .padding(11)
@@ -302,13 +304,15 @@ struct InsightVisualView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(fact.label).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
                         if let note = fact.note {
-                            Text(note).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
+                            Text(note).font(AppTypography.supporting).foregroundStyle(AppTheme.muted)
                         }
                     }
                     Spacer()
-                    Text(technicalTag(fact.emphasis)).font(.system(size: 9, weight: .semibold))
+                    Text(technicalTag(fact.emphasis)).font(AppTypography.compactLabel)
                         .foregroundStyle(AppTheme.muted)
                         .multilineTextAlignment(.trailing)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
                         .padding(.horizontal, 7)
                         .padding(.vertical, 4)
                         .background(AppTheme.background.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
@@ -361,7 +365,7 @@ struct InsightVisualView: View {
                 .buttonStyle(.plain)
             }
             Text(localized("Activity reflects the current signals, not a fortune score.", "这里反映当前的活跃程度，不是运势分数。", language: language))
-                .font(.system(size: 9.5))
+                .font(AppTypography.supporting)
                 .foregroundStyle(AppTheme.muted)
                 .padding(.top, 2)
         }
@@ -388,7 +392,9 @@ struct InsightVisualView: View {
                 HStack(spacing: 6) {
                     ForEach(Array(facts.dropFirst(4).prefix(3).enumerated()), id: \.offset) { _, fact in
                         Text("\(fact.label)：\(fact.value)")
-                            .font(.system(size: 9.5, weight: .medium))
+                            .font(AppTypography.metadata.weight(.medium))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
                             .background(AppTheme.violet.opacity(0.1), in: Capsule())
@@ -406,15 +412,23 @@ struct InsightVisualView: View {
     func dualInsight(opening: String, demand: String, openingLabel: String, demandLabel: String) -> some View {
         HStack(spacing: 9) {
             VStack(spacing: 5) {
-                Text(openingLabel).font(.system(size: 8, weight: .bold)).foregroundStyle(AppTheme.mint)
-                Text(opening).font(.system(size: 10, weight: .semibold)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
+                Text(openingLabel)
+                    .font(AppTypography.compactLabel)
+                    .foregroundStyle(AppTheme.mint)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Text(opening).font(AppTypography.label).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
             .padding(11)
             .background(AppTheme.mint.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
             VStack(spacing: 5) {
-                Text(demandLabel).font(.system(size: 8, weight: .bold)).foregroundStyle(AppTheme.coral)
-                Text(demand).font(.system(size: 10, weight: .semibold)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
+                Text(demandLabel)
+                    .font(AppTypography.compactLabel)
+                    .foregroundStyle(AppTheme.coral)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Text(demand).font(AppTypography.label).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
             .padding(11)
@@ -426,11 +440,11 @@ struct InsightVisualView: View {
         LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
             ForEach(Array(facts.prefix(4).enumerated()), id: \.offset) { _, fact in
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(fact.label).font(.system(size: 9, weight: .bold)).foregroundStyle(AppTheme.muted)
-                    Text(fact.value).font(.system(size: 12, weight: .semibold)).foregroundStyle(AppTheme.text)
+                    Text(fact.label).font(AppTypography.compactLabel).foregroundStyle(AppTheme.muted)
+                    Text(fact.value).font(AppTypography.factValue).foregroundStyle(AppTheme.text)
                         .fixedSize(horizontal: false, vertical: true)
                     if let note = fact.note {
-                        Text(note).font(.system(size: 9.5)).foregroundStyle(AppTheme.muted)
+                        Text(note).font(AppTypography.supporting).foregroundStyle(AppTheme.muted)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -443,7 +457,7 @@ struct InsightVisualView: View {
 
     func pathFlow(title: String) -> some View {
         VStack(alignment: .leading, spacing: 9) {
-            Text(title).font(.system(size: 10, weight: .semibold)).foregroundStyle(AppTheme.muted)
+            Text(title).font(AppTypography.supporting.weight(.semibold)).foregroundStyle(AppTheme.muted)
             HStack(spacing: 6) {
                 ForEach(Array(facts.prefix(3).enumerated()), id: \.offset) { index, fact in
                     VStack(spacing: 4) {
@@ -452,7 +466,7 @@ struct InsightVisualView: View {
                             .foregroundStyle(AppTheme.tone(fact.emphasis))
                             .frame(width: 30, height: 30)
                             .background(AppTheme.tone(fact.emphasis).opacity(0.12), in: Circle())
-                        Text(fact.label).font(.system(size: 9.5, weight: .medium)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
+                        Text(fact.label).font(AppTypography.metadata.weight(.medium)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity)
                     if index < min(3, facts.count) - 1 {

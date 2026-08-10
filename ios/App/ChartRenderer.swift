@@ -640,9 +640,9 @@ struct AspectChartView: View {
                 matrixCorner
                 ForEach(columns) { body in
                     Text(body.symbol)
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(size: comparison ? 14 : 13, weight: .semibold))
                         .foregroundStyle(comparison ? AppTheme.muted : AppTheme.violet)
-                        .frame(width: 23, height: 23)
+                        .frame(width: matrixCellSize, height: matrixCellSize)
                         .accessibilityLabel(bodyName(body, language: language))
                 }
             }
@@ -650,9 +650,9 @@ struct AspectChartView: View {
             ForEach(Array(rows.enumerated()), id: \.element.id) { rowIndex, rowBody in
                 HStack(spacing: 3) {
                     Text(rowBody.symbol)
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(size: comparison ? 14 : 13, weight: .semibold))
                         .foregroundStyle(comparison ? AppTheme.violet : AppTheme.muted)
-                        .frame(width: 23, height: 23)
+                        .frame(width: matrixCellSize, height: matrixCellSize)
                         .accessibilityLabel(bodyName(rowBody, language: language))
 
                     ForEach(Array(columns.enumerated()), id: \.element.id) { columnIndex, columnBody in
@@ -674,13 +674,13 @@ struct AspectChartView: View {
                 .fill(AppTheme.panelRaised.opacity(0.65))
             if comparison {
                 Path { path in
-                    path.move(to: CGPoint(x: 4, y: 19))
-                    path.addLine(to: CGPoint(x: 19, y: 4))
+                    path.move(to: CGPoint(x: 4, y: matrixCellSize - 4))
+                    path.addLine(to: CGPoint(x: matrixCellSize - 4, y: 4))
                 }
                 .stroke(AppTheme.line, lineWidth: 1)
             }
         }
-        .frame(width: 23, height: 23)
+        .frame(width: matrixCellSize, height: matrixCellSize)
         .accessibilityHidden(true)
     }
 
@@ -698,13 +698,13 @@ struct AspectChartView: View {
                         ? AppTheme.violet.opacity(0.09)
                         : Color.clear
                 )
-                .frame(width: 23, height: 23)
+                .frame(width: matrixCellSize, height: matrixCellSize)
                 .accessibilityHidden(true)
         } else if let aspect = matrixAspect(row: row, column: column) {
             Text(aspect.kind.symbol)
-                .font(.system(size: 12, weight: .bold))
+                .font(.system(size: comparison ? 14 : 13, weight: .bold))
                 .foregroundStyle(AppTheme.tone(tone(aspect.kind)))
-                .frame(width: 23, height: 23)
+                .frame(width: matrixCellSize, height: matrixCellSize)
                 .background(
                     AppTheme.tone(tone(aspect.kind)).opacity(0.12 + aspect.strength * 0.13),
                     in: RoundedRectangle(cornerRadius: 5)
@@ -723,7 +723,7 @@ struct AspectChartView: View {
         } else {
             RoundedRectangle(cornerRadius: 5)
                 .fill(AppTheme.panelRaised.opacity(0.42))
-                .frame(width: 23, height: 23)
+                .frame(width: matrixCellSize, height: matrixCellSize)
                 .overlay(
                     RoundedRectangle(cornerRadius: 5)
                         .stroke(AppTheme.line, lineWidth: 0.6)
@@ -749,6 +749,10 @@ struct AspectChartView: View {
             return (aspect.firstID == row.id && aspect.secondID == column.id)
                 || (aspect.firstID == column.id && aspect.secondID == row.id)
         }
+    }
+
+    private var matrixCellSize: CGFloat {
+        comparison ? 28 : 26
     }
 
     private func legend(_ tone: InsightTone, label: String) -> some View {

@@ -18,7 +18,7 @@ struct InsightCardView: View {
                !kicker.isEmpty
             {
                 Text(kicker.uppercased())
-                    .font(.system(size: 9, weight: .bold))
+                    .font(AppTypography.eyebrow)
                     .tracking(1.2)
                     .foregroundStyle(AppTheme.violet)
             }
@@ -31,9 +31,9 @@ struct InsightCardView: View {
 
             if let presentation = synastryOverviewPresentation {
                 Text("\(presentation.firstName) + \(presentation.secondName)".uppercased())
-                    .font(.system(size: 9, weight: .bold))
+                    .font(AppTypography.eyebrow)
                     .tracking(1.2)
-                    .foregroundStyle(Color(red: 0.80, green: 0.75, blue: 1))
+                    .foregroundStyle(AppTheme.violet)
                     .lineLimit(1)
                     .minimumScaleFactor(0.72)
                     .accessibilityLabel("\(presentation.firstName) and \(presentation.secondName)")
@@ -49,7 +49,7 @@ struct InsightCardView: View {
                 }
                 if let body = text.body, !body.isEmpty, body != text.headline {
                     Text(body)
-                        .font(.system(size: heroHeadline ? 11 : 11.5, weight: .medium))
+                        .font(heroHeadline ? AppTypography.supporting.weight(.medium) : AppTypography.summary)
                         .foregroundStyle(heroHeadline ? AppTheme.muted : AppTheme.text.opacity(0.95))
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
@@ -59,7 +59,7 @@ struct InsightCardView: View {
                    !secondary.isEmpty
                 {
                     Text(secondary)
-                        .font(.system(size: 10.5))
+                        .font(AppTypography.supporting)
                         .foregroundStyle(AppTheme.muted)
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
@@ -70,7 +70,7 @@ struct InsightCardView: View {
                       card.summary != card.title
             {
                 Text(card.summary)
-                    .font(.system(size: 11.5, weight: .medium))
+                    .font(AppTypography.summary.weight(.medium))
                     .foregroundStyle(AppTheme.text.opacity(0.95))
                     .lineSpacing(3)
                     .fixedSize(horizontal: false, vertical: true)
@@ -114,7 +114,7 @@ struct InsightCardView: View {
         .sheet(isPresented: $showsSynastryCardDetail) {
             SynastryCardDetailSheet(card: card, language: language)
                 .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
+                .presentationDragIndicator(.hidden)
                 .presentationBackground(AppTheme.panel)
         }
     }

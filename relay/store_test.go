@@ -243,8 +243,58 @@ func TestTransitReportPromptHasFocusedAnalysisAndBoundedOutput(t *testing.T) {
 			t.Fatalf("Chinese transit prompt is missing %q", marker)
 		}
 	}
-	if strings.Contains(defaultPrompt("chart.natal", "en"), "90–150 English words") {
-		t.Fatal("the transit-only output constraint must not change other chart prompts")
+	if !strings.Contains(defaultPrompt("chart.natal", "en"), "90–150 English words") {
+		t.Fatal("all whole-chart report prompts must keep a bounded output contract")
+	}
+}
+
+func TestRemainingChartPromptsHaveDistinctAnalysisBoundaries(t *testing.T) {
+	tests := []struct {
+		scope     string
+		enMarkers []string
+		zhMarkers []string
+	}{
+		{
+			scope:     "chart.natal",
+			enMarkers: []string{"natal structure, not a timing forecast", "Never substitute sign stereotypes", "90–150 English words"},
+			zhMarkers: []string{"本命结构，不是时间预测", "不得把星座刻板印象", "140–240 字"},
+		},
+		{
+			scope:     "chart.current-sky",
+			enMarkers: []string{"collective atmosphere", "not compared with any person's natal chart", "never calculate dates"},
+			zhMarkers: []string{"当前天空的集体氛围", "不与任何个人本命盘比较", "不得自行推算"},
+		},
+		{
+			scope:     "chart.secondary",
+			enMarkers: []string{"long-term development", "small set of supplied exact turning dates", "never inflate them into external event predictions"},
+			zhMarkers: []string{"长期发展对照", "少量精确转折日期", "不得扩写为外部事件预言"},
+		},
+		{
+			scope:     "chart.solar-return",
+			enMarkers: []string{"supplied exact solar-return moment", "four annual phase boundaries", "Never calculate extra dates"},
+			zhMarkers: []string{"精确日返时刻", "年度四阶段日期", "不得自行推算额外日期"},
+		},
+	}
+
+	for _, test := range tests {
+		english := defaultPrompt(test.scope, "en")
+		chinese := defaultPrompt(test.scope, "zh-Hans")
+		for _, marker := range test.enMarkers {
+			if !strings.Contains(english, marker) {
+				t.Fatalf("%s English prompt is missing %q", test.scope, marker)
+			}
+		}
+		for _, marker := range test.zhMarkers {
+			if !strings.Contains(chinese, marker) {
+				t.Fatalf("%s Chinese prompt is missing %q", test.scope, marker)
+			}
+		}
+		if strings.Contains(english, `"cards"`) || strings.Contains(chinese, `"cards"`) {
+			t.Fatalf("%s prompt must remain report-only", test.scope)
+		}
+		if defaultPrompt(test.scope, "en") == legacyDefaultPromptV3(test.scope, "en") {
+			t.Fatalf("%s untouched generic report prompt would not migrate", test.scope)
+		}
 	}
 }
 

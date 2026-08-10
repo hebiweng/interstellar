@@ -670,7 +670,7 @@ struct TodayView: View {
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(AppTheme.text)
                     Text(localized("Planet positions · Aspects · Houses · Motion", "行星位置 · 连接 · 宫位 · 运动", language: model.language))
-                        .font(.system(size: 10.5))
+                        .font(AppTypography.supporting)
                         .foregroundStyle(AppTheme.muted)
                 }
                 Spacer()
@@ -690,7 +690,7 @@ struct TodayView: View {
         HStack(spacing: 12) {
             ProgressView().tint(AppTheme.violet)
             Text(localized("Calculating locally…", "正在本机计算…", language: model.language))
-                .font(.system(size: 12))
+                .font(AppTypography.summary)
                 .foregroundStyle(AppTheme.muted)
         }
         .frame(maxWidth: .infinity, minHeight: 160)
@@ -706,7 +706,7 @@ struct TodayView: View {
         HStack(alignment: .firstTextBaseline) {
             Text(title).font(.system(size: 18, weight: .bold)).kerning(-0.3).foregroundStyle(AppTheme.text)
             if let sub {
-                Text(sub).font(.system(size: 10.5)).foregroundStyle(AppTheme.muted)
+                Text(sub).font(AppTypography.supporting).foregroundStyle(AppTheme.muted)
             }
             Spacer()
             if let link {

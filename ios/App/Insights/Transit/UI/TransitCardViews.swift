@@ -457,7 +457,7 @@ extension InsightVisualView {
                         "这里显示每颗行运行星的星座、本命宫位、运动方向，以及下一次已计算的换座、换宫或转向。",
                         language: language
                     ))
-                    .font(.system(size: 11))
+                    .font(AppTypography.supporting)
                     .lineSpacing(4)
                     .foregroundStyle(AppTheme.muted)
                     LazyVGrid(
@@ -467,7 +467,7 @@ extension InsightVisualView {
                         ForEach(rows.prefix(4)) { row in
                             VStack(alignment: .leading, spacing: 5) {
                                 Text(bodyName(row.body, language: language))
-                                    .font(.system(size: 9))
+                                    .font(AppTypography.metadata)
                                     .foregroundStyle(AppTheme.muted)
                                 Text(transitDrawerHouse(row.house))
                                     .font(.system(size: 12, weight: .semibold))
@@ -502,7 +502,7 @@ extension InsightVisualView {
                         .fixedSize(horizontal: false, vertical: true)
                     if !row.detail.isEmpty {
                         Text(row.detail)
-                            .font(.system(size: 11))
+                            .font(AppTypography.supporting)
                             .lineSpacing(4)
                             .foregroundStyle(AppTheme.muted)
                     }
@@ -510,7 +510,7 @@ extension InsightVisualView {
                         ForEach(row.fields) { field in
                             VStack(alignment: .leading, spacing: 5) {
                                 Text(field.label)
-                                    .font(.system(size: 9))
+                                    .font(AppTypography.metadata)
                                     .foregroundStyle(AppTheme.muted)
                                 Text(field.value)
                                     .font(.system(size: 12, weight: .semibold))
@@ -554,11 +554,11 @@ extension InsightVisualView {
         VStack(alignment: .leading, spacing: 5) {
             Divider().overlay(AppTheme.line)
             Text(title)
-                .font(.system(size: 11, weight: .semibold))
+                .font(AppTypography.label)
                 .foregroundStyle(AppTheme.text)
                 .padding(.top, 8)
             Text(body)
-                .font(.system(size: 10))
+                .font(AppTypography.supporting)
                 .lineSpacing(3)
                 .foregroundStyle(AppTheme.muted)
         }
@@ -620,8 +620,10 @@ extension InsightVisualView {
             }
         } label: {
             Text(label)
-                .font(.system(size: 10, weight: .semibold))
+                .font(AppTypography.compactLabel)
                 .foregroundStyle(selected ? Color.white : AppTheme.muted)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
                 .background(selected ? AppTheme.violet : AppTheme.background.opacity(0.4), in: Capsule())

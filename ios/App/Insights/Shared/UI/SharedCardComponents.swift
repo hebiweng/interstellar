@@ -6,9 +6,11 @@ private struct Kicker: View {
     let text: String
     var body: some View {
         Text(text)
-            .font(.system(size: 11, weight: .bold))
+            .font(AppTypography.eyebrow)
             .tracking(1.6)
             .foregroundStyle(AppTheme.violet)
+            .lineLimit(1)
+            .minimumScaleFactor(0.85)
     }
 }
 
@@ -24,8 +26,10 @@ struct InsightBadge: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: 10, weight: .semibold))
+            .font(AppTypography.compactLabel)
             .foregroundStyle(foreground)
+            .lineLimit(1)
+            .minimumScaleFactor(0.82)
             .padding(.horizontal, 9)
             .padding(.vertical, 5)
             .background(background, in: Capsule())
@@ -34,7 +38,7 @@ struct InsightBadge: View {
 
     private var foreground: Color {
         switch tone {
-        case .purple: Color(red: 0.85, green: 0.82, blue: 1.0)
+        case .purple: AppTheme.violet
         case .warm: AppTheme.amber
         case .good: AppTheme.mint
         }
@@ -62,29 +66,14 @@ struct TagChip: View {
     var tone: InsightTone = .neutral
     var body: some View {
         Text(text)
-            .font(.system(size: 10, weight: .medium))
+            .font(AppTypography.metadata.weight(.medium))
+            .lineLimit(1)
+            .minimumScaleFactor(0.82)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(AppTheme.tone(tone).opacity(0.1), in: Capsule())
             .overlay(Capsule().stroke(AppTheme.tone(tone).opacity(0.25), lineWidth: 1))
-            .foregroundStyle(AppTheme.tone(tone).mix(with: AppTheme.text, by: 0.35))
-    }
-}
-
-private extension Color {
-    func mix(with other: Color, by amount: Double) -> Color {
-        let lhs = UIColor(self)
-        let rhs = UIColor(other)
-        var lr: CGFloat = 0, lg: CGFloat = 0, lb: CGFloat = 0, la: CGFloat = 0
-        var rr: CGFloat = 0, rg: CGFloat = 0, rb: CGFloat = 0, ra: CGFloat = 0
-        lhs.getRed(&lr, green: &lg, blue: &lb, alpha: &la)
-        rhs.getRed(&rr, green: &rg, blue: &rb, alpha: &ra)
-        return Color(
-            red: Double(lr * (1 - amount) + rr * amount),
-            green: Double(lg * (1 - amount) + rg * amount),
-            blue: Double(lb * (1 - amount) + rb * amount),
-            opacity: Double(la * (1 - amount) + ra * amount)
-        )
+            .foregroundStyle(AppTheme.tone(tone))
     }
 }
 
@@ -92,10 +81,9 @@ private struct SectionSub: View {
     let text: String
     var body: some View {
         Text(text)
-            .font(.system(size: 11))
+            .font(AppTypography.supporting)
             .foregroundStyle(AppTheme.muted)
     }
 }
 
 // MARK: - Visual renderer
-

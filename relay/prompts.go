@@ -171,10 +171,18 @@ func toneGuideEN(kind string) string {
 
 func chartAnalysisGuideZH(scope string) string {
 	switch scope {
+	case "chart.natal":
+		return "本盘分析重点：这是一个人的本命结构，不是时间预测。综合太阳、月亮、上升、个人行星、宫位与盘内关键相位，说明核心性格、情绪需要、思考沟通、亲密关系方式、行动模式、优势、成长张力与人生方向。只有请求明确提供相应计算事实时才讨论元素、模式、宫位侧重或 Classical condition；不得把星座刻板印象当作结论，也不得把本命倾向写成命运。"
+	case "chart.current-sky":
+		return "本盘分析重点：这是当前天空的集体氛围，不与任何个人本命盘比较。综合当前月相、盘内主要相位、行星运动与逆行，以及请求中给出的换座、精确相位和转向关键日期，说明当下氛围、短期节奏、支持与张力如何变化。不得使用人物姓名或写成个人事件预测；没有提供的未来日期不得自行推算。"
 	case "chart.transit":
 		return "本盘分析重点：这是行运与本命的阶段性互动。区分长期背景、中期推进与近期触发；结合入相/精确/离相、重复过境、逆行和落入本命宫位，说明受影响的生活领域、支持与压力如何并存，以及接下来的时间变化。不要把倾向写成必然事件。"
+	case "chart.secondary":
+		return "本盘分析重点：这是次限推运与本命结构的长期发展对照，不是短期事件时钟。综合次限日月阶段、次限月亮落座落宫与下一次换座、次限太阳和个人行星、次限盘内结构、次限—本命相位及请求给出的少量精确转折日期，说明身份、情绪需求、成熟领域和内在方向如何演变。日期只作为已计算的发展节点，不得扩写为外部事件预言。"
+	case "chart.solar-return":
+		return "本盘分析重点：这是从请求给出的精确日返时刻开始的一年主题盘。综合日返太阳、月亮、上升与角点、日返盘内关键相位、日返—本命叠加，以及请求提供的年度四阶段日期，说明年度主线、优先领域、资源、张力与节奏。四阶段是时间组织边界，不代表必然发生事件；不得自行推算额外日期，也不得把年度倾向写成保证。"
 	case "chart.synastry":
-		return "本盘分析重点：这是两位具体人物的关系比较。必须始终使用 people 中提供的两个人姓名，分别说明每个人如何影响和体验对方，再综合情绪连接、沟通方式、吸引力、长期稳定因素、摩擦点、彼此落宫和关键跨盘相位；既写资源也写张力，不做匹配分数、关系好坏裁决或结局预测。严格依据请求 preset 下已有事实与 assessment；Classical 不得混入 Modern role/theme，Modern 不得自行推导古典尊贵、接纳或评分。"
+		return "本盘分析重点：这是两位具体人物的关系比较。必须始终使用 people 中提供的两个人姓名，分别说明每个人如何影响和体验对方，再综合情绪连接、沟通方式、吸引力、长期稳定因素、摩擦点、彼此落宫和关键跨盘相位；既写资源也写张力，不做匹配分数、关系好坏裁决或结局预测。严格依据请求 preset 下已有事实与 assessment；Classical 不得混入 Modern role/theme，Modern 不得自行推导古典尊贵、接纳或评分。如果参数中包含 relationship 字段，必须按关系类型调整解读：partner（伴侣）可以正常讨论亲密、吸引与情感；family（家人）侧重亲情、责任与长期相处模式，避免恋爱或性吸引语言；friend（朋友）侧重友谊、信任与共同兴趣，避免浪漫或亲密暗示；colleague（同事）侧重合作、沟通、边界与职场互动，避免情感与吸引解读；other（其他）保持客观、克制，除非事实明确支持否则不做关系定性。"
 	default:
 		return ""
 	}
@@ -182,10 +190,18 @@ func chartAnalysisGuideZH(scope string) string {
 
 func chartAnalysisGuideEN(scope string) string {
 	switch scope {
+	case "chart.natal":
+		return "Chart priorities: this is one person's natal structure, not a timing forecast. Synthesize the Sun, Moon, Ascendant, personal planets, houses, and major internal aspects to explain core character, emotional needs, thinking and communication, relating style, agency, strengths, growth tensions, and direction. Discuss element, mode, house emphasis, or Classical conditions only when the request explicitly supplies those calculated facts. Never substitute sign stereotypes for evidence or turn a natal tendency into fate."
+	case "chart.current-sky":
+		return "Chart priorities: this is the collective atmosphere of the current sky and is not compared with any person's natal chart. Synthesize the lunar phase, major internal aspects, planetary motion and retrogrades, plus only the supplied key dates for ingresses, exact aspects, and stations, to explain the current climate and how the short-term rhythm changes. Do not use a person's name or make personal event predictions, and never calculate dates that were not supplied."
 	case "chart.transit":
 		return "Chart priorities: this is the time-bound interaction between transits and the natal chart. Separate long background, medium development, and near-term triggers; use applying/exact/separating phases, repeat passes, retrogrades, and natal-house placement to explain affected life areas, concurrent support and pressure, and what changes next. Never turn a tendency into a promised event."
+	case "chart.secondary":
+		return "Chart priorities: secondary progressions describe long-term development relative to the natal chart, not a short-term event clock. Synthesize the progressed Sun–Moon phase, progressed Moon sign and house and its supplied next ingress, progressed Sun and personal planets, internal progressed patterns, progressed-to-natal aspects, and the small set of supplied exact turning dates. Explain identity, emotional needs, maturing areas, and inner direction; treat dates only as calculated developmental markers and never inflate them into external event predictions."
+	case "chart.solar-return":
+		return "Chart priorities: this annual chart begins at the supplied exact solar-return moment. Synthesize the return Sun, Moon, Ascendant and angles, major internal return aspects, return-to-natal contacts, and only the supplied four annual phase boundaries to explain the year's main thread, priorities, resources, tensions, and rhythm. The four phases organize time; they do not promise events. Never calculate extra dates or turn annual tendencies into guarantees."
 	case "chart.synastry":
-		return "Chart priorities: this compares two specific people. Always use both names supplied in people, explain separately how each person affects and experiences the other, then synthesize emotional connection, communication, attraction, long-term stabilizers, friction, mutual house overlays, and key cross-chart aspects. Include both resources and tension; never score compatibility, issue a good/bad verdict, or predict the relationship outcome. Follow only facts and assessments supplied for the request preset: Classical must not import Modern roles/themes, and Modern must not invent Classical dignity, reception, or scores."
+		return "Chart priorities: this compares two specific people. Always use both names supplied in people, explain separately how each person affects and experiences the other, then synthesize emotional connection, communication, attraction, long-term stabilizers, friction, mutual house overlays, and key cross-chart aspects. Include both resources and tension; never score compatibility, issue a good/bad verdict, or predict the relationship outcome. Follow only facts and assessments supplied for the request preset: Classical must not import Modern roles/themes, and Modern must not invent Classical dignity, reception, or scores. If the params include a relationship field, adjust the reading accordingly. For partner, discuss intimacy, attraction, and emotional bond normally. For family, focus on kinship, responsibility, and long-term patterns; avoid romantic or sexual attraction language. For friend, focus on friendship, trust, and shared interests; avoid romantic or intimate framing. For colleague, focus on cooperation, communication, boundaries, and workplace interaction; avoid emotional or attraction interpretations. For other, stay objective and restrained; do not characterize the relationship unless the facts clearly support it."
 	default:
 		return ""
 	}
@@ -201,7 +217,7 @@ func defaultPrompt(scope, locale string) string {
 	case "period.solar-return":
 		kind = "solar-return"
 	}
-	if scope != "chart.transit" && scope != "chart.synastry" {
+	if !strings.HasPrefix(scope, "chart.") {
 		if locale == "zh-Hans" {
 			return fmt.Sprintf("%s\n\n%s\n\n%s\n\n%s\n\n%s",
 				safetyBoundaryZH, toneGuideZH(kind), namesRuleZH, "内容范围："+scopeTitleZH(scope), legacyReportOnlyJSONSchemaZH)

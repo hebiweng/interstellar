@@ -21,6 +21,10 @@
 		232F7FD0850336F8033F6943 /* Insights/Secondary/Copy/CopyCatalogMatcher+Secondary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1633A44EE64206F77AD3111 /* Insights/Secondary/Copy/CopyCatalogMatcher+Secondary.swift */; };
 		32E4EC5F0E9F52585B25C822 /* Insights/Transit/Planning/TransitContentPlanning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F4FC24162F432CAB03EB271 /* Insights/Transit/Planning/TransitContentPlanning.swift */; };
 		33AF4A0526E3FCBA484AE56F /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E20C395BDFD8BD0B24388C /* AppModel.swift */; };
+		A30000000000000000000001 /* SnapshotCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40000000000000000000001 /* SnapshotCache.swift */; };
+		A30000000000000000000002 /* AppChartCalculationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40000000000000000000002 /* AppChartCalculationService.swift */; };
+		A30000000000000000000003 /* AppEnrichmentService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40000000000000000000003 /* AppEnrichmentService.swift */; };
+		A30000000000000000000004 /* AppAIReportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40000000000000000000004 /* AppAIReportService.swift */; };
 		374360C2266B05B53EB6D0B7 /* Insights/Shared/Factory/ChartCardFactoryContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62CF192AD988F079E6544240 /* Insights/Shared/Factory/ChartCardFactoryContext.swift */; };
 		388FE3F37754814E0A699FE6 /* agpl-3.0.txt in Resources */ = {isa = PBXBuildFile; fileRef = 304F386EC1EE838F3AD709A9 /* agpl-3.0.txt */; };
 		3FF959A490BE10D499C12683 /* ReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E55B957F3B40BB06BDBB4DE /* ReportsView.swift */; };
@@ -115,6 +119,10 @@
 
 /* Begin PBXFileReference section */
 		02E20C395BDFD8BD0B24388C /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		A40000000000000000000001 /* SnapshotCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotCache.swift; sourceTree = "<group>"; };
+		A40000000000000000000002 /* AppChartCalculationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppChartCalculationService.swift; sourceTree = "<group>"; };
+		A40000000000000000000003 /* AppEnrichmentService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnrichmentService.swift; sourceTree = "<group>"; };
+		A40000000000000000000004 /* AppAIReportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAIReportService.swift; sourceTree = "<group>"; };
 		03268C1EAB77BCD4B05BCC74 /* InterpretationContextFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterpretationContextFactory.swift; sourceTree = "<group>"; };
 		0340DB625FB55455A152A360 /* Insights/Shared/Validation/CardContractValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Shared/Validation/CardContractValidator.swift; sourceTree = "<group>"; };
 		0355A3D026033EDC953FBED3 /* Insights/CurrentSky/Legacy/CurrentSkyLegacyCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/CurrentSky/Legacy/CurrentSkyLegacyCardFactory.swift; sourceTree = "<group>"; };
@@ -326,6 +334,10 @@
 				C20000000000000000000003 /* Insights/Transit/Validation/ClassicalTransitContractValidator.swift */,
 				2114D2FD8739C6BB62FD26EF /* AIGeneration.swift */,
 				02E20C395BDFD8BD0B24388C /* AppModel.swift */,
+				A40000000000000000000001 /* SnapshotCache.swift */,
+				A40000000000000000000002 /* AppChartCalculationService.swift */,
+				A40000000000000000000003 /* AppEnrichmentService.swift */,
+				A40000000000000000000004 /* AppAIReportService.swift */,
 				3E1C2A46A3725C8A3CDBFC8B /* AskHistory.swift */,
 				4E6DA38605D25A9654FE7E62 /* Assets.xcassets */,
 				AD2F2C2DC93A3770F96DC584 /* AstroTerms.swift */,
@@ -644,6 +656,10 @@
 				C10000000000000000000003 /* Insights/Transit/Validation/ClassicalTransitContractValidator.swift in Sources */,
 				7B37214AECB62744C27DD168 /* AIGeneration.swift in Sources */,
 				33AF4A0526E3FCBA484AE56F /* AppModel.swift in Sources */,
+				A30000000000000000000001 /* SnapshotCache.swift in Sources */,
+				A30000000000000000000002 /* AppChartCalculationService.swift in Sources */,
+				A30000000000000000000003 /* AppEnrichmentService.swift in Sources */,
+				A30000000000000000000004 /* AppAIReportService.swift in Sources */,
 				7054C08BB4A305C2CE8328DA /* AskHistory.swift in Sources */,
 				BF84B2B0706F6DBB8773DCD3 /* AstroTerms.swift in Sources */,
 				80B678D9DAB2A785989708A6 /* ChartEvents.swift in Sources */,

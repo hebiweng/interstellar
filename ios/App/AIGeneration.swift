@@ -107,24 +107,27 @@ enum AIFactsBuilder {
         classicalSynastryAssessment: ClassicalSynastryAssessment? = nil,
         events: ChartEventData,
         params: [String: String],
-        locale: String
+        locale: String,
+        relationship: PersonRelationship? = nil
     ) -> [String: Any] {
         if chart == .synastry,
            let secondChart = partnerChart ?? reference,
            let partnerName
         {
-            return synastryDocument(
-                firstName: personName,
-                firstChart: snapshot,
-                secondName: partnerName,
-                secondChart: secondChart,
-                crossAspects: comparisonAspects,
-                classicalAssessment: classicalSynastryAssessment,
-                preset: preset,
-                params: params,
-                locale: locale
-            )
+           return synastryDocument(
+               firstName: personName,
+               firstChart: snapshot,
+               secondName: partnerName,
+               secondChart: secondChart,
+               crossAspects: comparisonAspects,
+               classicalAssessment: classicalSynastryAssessment,
+               preset: preset,
+               params: params,
+               locale: locale,
+               relationship: relationship
+           )
         }
+        let eventFacts = eventEvidenceDocuments(events, chart: chart)
         var document: [String: Any] = [
             "kind": chart.contentPrefix,
             "preset": preset.rawValue,
@@ -132,10 +135,12 @@ enum AIFactsBuilder {
             "params": params,
             "chart": chartDocument(snapshot, houseReference: chart.isComparison ? (reference ?? snapshot) : snapshot),
             "evidenceFacts": evidenceDocuments(
+                chart: chart,
                 snapshot: snapshot,
                 houseReference: chart.isComparison ? (reference ?? snapshot) : snapshot,
+                reference: reference,
                 comparisonAspects: comparisonAspects
-            ) + eventEvidenceDocuments(events),
+            ) + eventFacts,
         ]
         if let reference {
             document["reference"] = chartDocument(reference, houseReference: reference)
@@ -144,8 +149,10 @@ enum AIFactsBuilder {
         if let phase = lunarPhase(snapshot) {
             document["lunarPhase"] = phase
         }
-        document["events"] = eventEvidenceDocuments(events)
-        document["person"] = ["name": personName]
+        document["events"] = eventFacts
+        if chart != .currentSky {
+            document["person"] = ["name": personName]
+        }
         if let partnerName, let partnerChart {
             document["partner"] = [
                 "name": partnerName,
@@ -164,7 +171,8 @@ enum AIFactsBuilder {
         classicalAssessment: ClassicalSynastryAssessment? = nil,
         preset: CalculationPreset,
         params: [String: String],
-        locale: String
+        locale: String,
+        relationship: PersonRelationship? = nil
     ) -> [String: Any] {
         let firstID = "person-1"
         let secondID = "person-2"
@@ -220,12 +228,12 @@ enum AIFactsBuilder {
             ($0["id"] as? String ?? "") < ($1["id"] as? String ?? "")
         }
 
-        return [
-            "kind": ChartKind.synastry.contentPrefix,
-            "preset": preset.rawValue,
-            "locale": locale,
-            "params": params,
-            "people": [
+       return [
+           "kind": ChartKind.synastry.contentPrefix,
+           "preset": preset.rawValue,
+           "locale": locale,
+           "params": params,
+           "people": [
                 [
                     "id": firstID,
                     "name": firstName,
@@ -274,7 +282,9 @@ enum AIFactsBuilder {
                 "imumCoeli": round2((snapshot.angles.midheavenDegrees + 180).truncatingRemainder(dividingBy: 360)),
             ],
             "houses": snapshot.houses.map { ["number": $0.number, "cusp": round2($0.cuspDegrees)] },
-            "points": snapshot.points.map { pointDocument($0, houseReference: houseReference) },
+            "points": snapshot.points.map {
+                pointDocument($0, chartSnapshot: snapshot, houseReference: houseReference)
+            },
             "aspects": snapshot.aspects.map(aspectDocument),
         ]
     }
@@ -354,8 +364,10 @@ enum AIFactsBuilder {
     }
 
     private static func evidenceDocuments(
+        chart: ChartKind,
         snapshot: ChartSnapshot,
         houseReference: ChartSnapshot,
+        reference: ChartSnapshot?,
         comparisonAspects: [ChartAspect]
     ) -> [[String: Any]] {
         var facts = snapshot.points.map { point -> [String: Any] in
@@ -368,31 +380,114 @@ enum AIFactsBuilder {
                 "sign": Zodiac.englishNames[point.signIndex],
                 "degreeInSign": round2(point.degreeInSign),
                 "house": house,
+                "chartHouse": snapshot.house(containing: point.longitudeDegrees),
                 "retrograde": point.retrograde,
+                "speed": round4(point.position.longitudeSpeedDegreesPerDay),
             ]
         }
         let sourceAspects = comparisonAspects.isEmpty ? snapshot.aspects : comparisonAspects
         facts.append(contentsOf: sourceAspects.map { aspect in
-            [
+            var fact: [String: Any] = [
                 "id": "aspect.\(aspect.firstID).\(aspect.kind.rawValue).\(aspect.secondID)",
-                "type": "aspect",
+                "type": comparisonAspects.isEmpty ? "aspect" : "comparisonAspect",
                 "first": aspect.firstID,
                 "second": aspect.secondID,
                 "kind": aspect.kind.rawValue,
                 "phase": aspect.phase.rawValue,
                 "orb": round2(aspect.orbDegrees),
                 "strength": round3(aspect.strength),
+                "firstLongitude": round2(aspect.firstLongitude),
+                "secondLongitude": round2(aspect.secondLongitude),
             ]
+            if !comparisonAspects.isEmpty {
+                fact["movingChartHouse"] = snapshot.house(containing: aspect.firstLongitude)
+                fact["activatedReferenceHouse"] = reference?.house(containing: aspect.firstLongitude) ?? 0
+                fact["referenceHouse"] = reference?.house(containing: aspect.secondLongitude) ?? 0
+                if let movingPoint = snapshot.points.first(where: { $0.id == aspect.firstID }) {
+                    fact["movingSign"] = Zodiac.englishNames[movingPoint.signIndex]
+                }
+                if let referencePoint = reference?.points.first(where: { $0.id == aspect.secondID }) {
+                    fact["referenceSign"] = Zodiac.englishNames[referencePoint.signIndex]
+                }
+            }
+            return fact
         })
+        if !comparisonAspects.isEmpty {
+            facts.append(contentsOf: snapshot.aspects.map { aspect in
+                [
+                    "id": "internalAspect.\(aspect.firstID).\(aspect.kind.rawValue).\(aspect.secondID)",
+                    "type": "internalAspect",
+                    "first": aspect.firstID,
+                    "second": aspect.secondID,
+                    "kind": aspect.kind.rawValue,
+                    "phase": aspect.phase.rawValue,
+                    "orb": round2(aspect.orbDegrees),
+                    "strength": round3(aspect.strength),
+                    "firstLongitude": round2(aspect.firstLongitude),
+                    "secondLongitude": round2(aspect.secondLongitude),
+                ] as [String: Any]
+            })
+        }
         facts.append(contentsOf: [
             ["id": "angle.ascendant", "type": "angle", "longitude": round2(snapshot.angles.ascendantDegrees)],
             ["id": "angle.midheaven", "type": "angle", "longitude": round2(snapshot.angles.midheavenDegrees)],
         ])
+        if let reference, chart == .secondary || chart == .solarReturn {
+            facts.append(contentsOf: reference.points.map { point in
+                [
+                    "id": "reference.point.\(point.body.rawValue)",
+                    "type": "referencePoint",
+                    "body": point.body.rawValue,
+                    "longitude": round2(point.longitudeDegrees),
+                    "sign": Zodiac.englishNames[point.signIndex],
+                    "degreeInSign": round2(point.degreeInSign),
+                    "house": reference.house(containing: point.longitudeDegrees),
+                    "retrograde": point.retrograde,
+                    "speed": round4(point.position.longitudeSpeedDegreesPerDay),
+                ] as [String: Any]
+            })
+            facts.append(contentsOf: reference.aspects.map { aspect in
+                [
+                    "id": "reference.aspect.\(aspect.firstID).\(aspect.kind.rawValue).\(aspect.secondID)",
+                    "type": "referenceAspect",
+                    "first": aspect.firstID,
+                    "second": aspect.secondID,
+                    "kind": aspect.kind.rawValue,
+                    "phase": aspect.phase.rawValue,
+                    "orb": round2(aspect.orbDegrees),
+                    "strength": round3(aspect.strength),
+                    "firstLongitude": round2(aspect.firstLongitude),
+                    "secondLongitude": round2(aspect.secondLongitude),
+                ] as [String: Any]
+            })
+            facts.append(contentsOf: [
+                ["id": "reference.angle.ascendant", "type": "referenceAngle", "longitude": round2(reference.angles.ascendantDegrees)],
+                ["id": "reference.angle.midheaven", "type": "referenceAngle", "longitude": round2(reference.angles.midheavenDegrees)],
+            ])
+        }
         return facts
     }
 
-    private static func eventEvidenceDocuments(_ events: ChartEventData) -> [[String: Any]] {
+    private static func eventEvidenceDocuments(_ events: ChartEventData, chart: ChartKind) -> [[String: Any]] {
         let formatter = ISO8601DateFormatter()
+        switch chart {
+        case .natal, .synastry:
+            return []
+        case .currentSky:
+            return skyEventEvidenceDocuments(events, formatter: formatter)
+        case .transit:
+            return transitEventEvidenceDocuments(events, formatter: formatter)
+        case .secondary:
+            return progressedEventEvidenceDocuments(events, formatter: formatter)
+        case .solarReturn:
+            return solarReturnEventEvidenceDocuments(events, formatter: formatter)
+        }
+    }
+
+    private static func skyEventEvidenceDocuments(
+        _ events: ChartEventData,
+        formatter: ISO8601DateFormatter
+    ) -> [[String: Any]] {
         var facts: [[String: Any]] = events.skyIngresses.map { event in
             [
                 "id": "event.ingress.\(event.body.rawValue).\(Int(event.date.timeIntervalSince1970))",
@@ -422,7 +517,14 @@ enum AIFactsBuilder {
                 "retrogradeAfter": event.retrogradeAfter,
             ]
         }
-        facts += events.transitWindows.map { event in
+        return facts
+    }
+
+    private static func transitEventEvidenceDocuments(
+        _ events: ChartEventData,
+        formatter: ISO8601DateFormatter
+    ) -> [[String: Any]] {
+        events.transitWindows.map { event in
             [
                 "id": "event.transitWindow.\(event.first.rawValue).\(event.kind.rawValue).\(event.second.rawValue).\(Int(event.exact.timeIntervalSince1970))",
                 "type": "transitWindow",
@@ -435,7 +537,13 @@ enum AIFactsBuilder {
                 "nextExact": event.nextExact.map(formatter.string(from:)) ?? "",
             ]
         }
-        facts += events.progressedTurningPoints.enumerated().map { index, event in
+    }
+
+    private static func progressedEventEvidenceDocuments(
+        _ events: ChartEventData,
+        formatter: ISO8601DateFormatter
+    ) -> [[String: Any]] {
+        var facts = events.progressedTurningPoints.enumerated().map { index, event in
             [
                 "id": "event.progressed.\(event.first.rawValue).\(event.kind.rawValue).\(event.second.rawValue).\(index)",
                 "type": "progressedTurningPoint",
@@ -456,7 +564,14 @@ enum AIFactsBuilder {
                 "nextIngress": formatter.string(from: event.nextIngress),
             ])
         }
-        facts += events.solarSeasons.map { event in
+        return facts
+    }
+
+    private static func solarReturnEventEvidenceDocuments(
+        _ events: ChartEventData,
+        formatter: ISO8601DateFormatter
+    ) -> [[String: Any]] {
+        var facts: [[String: Any]] = events.solarSeasons.map { event in
             [
                 "id": "event.solarSeason.\(event.index).\(Int(event.start.timeIntervalSince1970))",
                 "type": "solarSeason",
@@ -465,10 +580,21 @@ enum AIFactsBuilder {
                 "end": formatter.string(from: event.end),
             ]
         }
+        if let start = events.solarYearStart {
+            facts.append([
+                "id": "event.solarReturnStart.\(Int(start.timeIntervalSince1970))",
+                "type": "solarReturnStart",
+                "date": formatter.string(from: start),
+            ])
+        }
         return facts
     }
 
-    private static func pointDocument(_ point: ChartPoint, houseReference: ChartSnapshot) -> [String: Any] {
+    private static func pointDocument(
+        _ point: ChartPoint,
+        chartSnapshot: ChartSnapshot,
+        houseReference: ChartSnapshot
+    ) -> [String: Any] {
         [
             "id": point.body.rawValue,
             "name": point.body.displayName,
@@ -476,6 +602,7 @@ enum AIFactsBuilder {
             "sign": Zodiac.englishNames[point.signIndex],
             "degreeInSign": round2(point.degreeInSign),
             "house": houseReference.house(containing: point.longitudeDegrees),
+            "chartHouse": chartSnapshot.house(containing: point.longitudeDegrees),
             "retrograde": point.retrograde,
             "speed": round4(point.position.longitudeSpeedDegreesPerDay),
         ]
@@ -933,20 +1060,25 @@ final class GeneratedArtifactStore: @unchecked Sendable {
         try? fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
     }
 
-    func save(_ artifact: GeneratedChartArtifact) {
-        guard let data = try? JSONEncoder().encode(artifact) else { return }
-        let destination = url(for: artifact.semanticFingerprint)
-        do {
-            try data.write(to: destination, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
-            try? fileManager.setAttributes(
-                [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication],
-                ofItemAtPath: destination.path
-            )
-        } catch {
-            // The UI keeps the in-memory result; a subsequent launch will
-            // explicitly regenerate instead of treating a partial write as a hit.
-        }
-    }
+   func save(_ artifact: GeneratedChartArtifact) {
+       guard let data = try? JSONEncoder().encode(artifact) else { return }
+       let destination = url(for: artifact.semanticFingerprint)
+       do {
+            // Keep only the latest report per chart kind. Earlier reports for
+            // the same chart kind are removed before writing the new one.
+            for existing in loadAll() where existing.chartKind == artifact.chartKind {
+                try? fileManager.removeItem(at: url(for: existing.semanticFingerprint))
+            }
+           try data.write(to: destination, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+           try? fileManager.setAttributes(
+               [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication],
+               ofItemAtPath: destination.path
+           )
+       } catch {
+           // The UI keeps the in-memory result; a subsequent launch will
+           // explicitly regenerate instead of treating a partial write as a hit.
+       }
+   }
 
     func loadAll() -> [GeneratedChartArtifact] {
         guard let urls = try? fileManager.contentsOfDirectory(

@@ -75,6 +75,9 @@ enum AppTypography {
     static let label = Font.subheadline.weight(.semibold)
     static let summary = Font.callout
     static let body = Font.body
+    static let compactLabel = Font.caption.weight(.semibold)
+    static let metadata = Font.caption
+    static let factValue = Font.subheadline.weight(.semibold)
 }
 
 struct CardSurface: ViewModifier {

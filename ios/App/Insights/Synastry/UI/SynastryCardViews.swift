@@ -10,15 +10,22 @@ extension InsightVisualView {
             }
             .padding(.top, 5)
 
-            if presentation.dimensions.count >= 3 {
+            ViewThatFits(in: .horizontal) {
                 HStack(spacing: 6) {
-                    dimensionTag(presentation.dimensions[0])
-                    dimensionTag(presentation.dimensions[1])
+                    ForEach(Array(presentation.dimensions.enumerated()), id: \.offset) { _, dimension in
+                        dimensionTag(dimension)
+                    }
                 }
-                dimensionTag(presentation.dimensions[2])
-            } else {
-                ForEach(Array(presentation.dimensions.enumerated()), id: \.offset) { _, dimension in
-                    dimensionTag(dimension)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 6) {
+                        ForEach(Array(presentation.dimensions.prefix(2).enumerated()), id: \.offset) { _, dimension in
+                            dimensionTag(dimension)
+                        }
+                    }
+                    if presentation.dimensions.count > 2 {
+                        dimensionTag(presentation.dimensions[2])
+                    }
                 }
             }
         }
@@ -63,7 +70,7 @@ extension InsightVisualView {
 
     private func dimensionTag(_ dimension: SynastryOverviewDimension) -> some View {
         Text("\(dimensionLabel(dimension.id)): \(dimensionStateLabel(dimension.state))")
-            .font(.system(size: 10, weight: .medium))
+            .font(.system(size: 11, weight: .medium))
             .foregroundStyle(AppTheme.muted)
             .padding(.horizontal, 8)
             .padding(.vertical, 5)
@@ -107,40 +114,25 @@ extension InsightVisualView {
             }
 
             let role = selectedSynastryPerspective == 0 ? "personA" : "personB"
-            let selectedIDs = Set(selectedSynastryPerspective == 0
-                ? presentation.firstSourceFactIDs
-                : presentation.secondSourceFactIDs)
-            let selectedFacts = facts.filter { selectedIDs.contains($0.id) }
             VStack(alignment: .leading, spacing: 7) {
                 if let headline = roleText("\(role).headline") {
                     Text(headline)
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 17, weight: .semibold))
                         .foregroundStyle(AppTheme.text)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if let body = roleText("\(role).body") {
                     Text(body)
-                        .font(.system(size: 11))
+                        .font(.system(size: 12.5))
                         .foregroundStyle(AppTheme.muted)
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                if !selectedFacts.isEmpty {
-                    HStack(spacing: 6) {
-                        ForEach(Array(selectedFacts.prefix(2))) { fact in
-                            Text(fact.value)
-                                .font(.system(size: 9.5, weight: .medium))
-                                .foregroundStyle(AppTheme.muted)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 5)
-                                .background(AppTheme.text.opacity(0.05), in: Capsule())
-                        }
-                    }
-                }
             }
-            .padding(13)
-            .frame(maxWidth: .infinity, minHeight: 94, alignment: .topLeading)
-            .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 13))
+            .padding(14)
+            .frame(maxWidth: .infinity, minHeight: 104, alignment: .topLeading)
+            .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(AppTheme.line, lineWidth: 1))
         }
     }
 
@@ -149,11 +141,12 @@ extension InsightVisualView {
             withAnimation(.easeInOut(duration: 0.2)) { selectedSynastryPerspective = index }
         } label: {
             Text(localized("\(name) feels", "\(name) 的感受", language: language))
-                .font(.system(size: 10.5, weight: .bold))
+                .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(selectedSynastryPerspective == index ? Color.white : AppTheme.muted)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 9)
-                .background(selectedSynastryPerspective == index ? AppTheme.violet : AppTheme.background.opacity(0.45), in: RoundedRectangle(cornerRadius: 10))
+                .padding(.vertical, 10)
+                .background(selectedSynastryPerspective == index ? AppTheme.violet.opacity(0.36) : AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppTheme.line, lineWidth: 1))
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selectedSynastryPerspective == index ? .isSelected : [])
@@ -169,40 +162,42 @@ extension InsightVisualView {
                     if let fact = facts.first(where: { $0.visualRole == role }) {
                         VStack(alignment: .leading, spacing: 5) {
                             Text(gridRoleLabel(role))
-                                .font(.system(size: 8, weight: .bold))
+                                .font(.system(size: 9.5, weight: .bold))
                                 .foregroundStyle(role == "difference" ? AppTheme.coral : AppTheme.mint)
                             Text(fact.label)
-                                .font(.system(size: 11.5, weight: .semibold))
+                                .font(.system(size: 13, weight: .semibold))
                                 .foregroundStyle(AppTheme.text)
                                 .fixedSize(horizontal: false, vertical: true)
                             if let body = roleText("\(role).body") {
                                 Text(body)
-                                    .font(.system(size: 9.5))
+                                    .font(.system(size: 11.5))
                                     .foregroundStyle(AppTheme.muted)
                                     .lineSpacing(2)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
                         }
-                        .padding(11)
-                        .frame(maxWidth: .infinity, minHeight: 105, alignment: .topLeading)
-                        .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
+                        .padding(12)
+                        .frame(maxWidth: .infinity, minHeight: 118, alignment: .topLeading)
+                        .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(AppTheme.line, lineWidth: 1))
                     } else {
                         VStack(alignment: .leading, spacing: 5) {
                             Text(gridRoleLabel(role))
-                                .font(.system(size: 8, weight: .bold))
+                                .font(.system(size: 9.5, weight: .bold))
                                 .foregroundStyle(role == "difference" ? AppTheme.coral : AppTheme.mint)
                             Text(localized("No distinct signal", "暂无独立信号", language: language))
-                                .font(.system(size: 11.5, weight: .semibold))
+                                .font(.system(size: 13, weight: .semibold))
                                 .foregroundStyle(AppTheme.text)
                             Text(missingGridRoleExplanation(role))
-                                .font(.system(size: 9.5))
+                                .font(.system(size: 11.5))
                                 .foregroundStyle(AppTheme.muted)
                                 .lineSpacing(2)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
-                        .padding(11)
-                        .frame(maxWidth: .infinity, minHeight: 105, alignment: .topLeading)
-                        .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
+                        .padding(12)
+                        .frame(maxWidth: .infinity, minHeight: 118, alignment: .topLeading)
+                        .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(AppTheme.line, lineWidth: 1))
                     }
                 }
             }
@@ -214,12 +209,13 @@ extension InsightVisualView {
             HStack(spacing: 6) {
                 ForEach(0..<3, id: \.self) { index in
                     Text(communicationStepText(index))
-                        .font(.system(size: 9.5, weight: .semibold))
+                        .font(.system(size: 11.5, weight: .semibold))
                         .foregroundStyle(AppTheme.text)
                         .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .frame(maxWidth: .infinity, minHeight: 48)
                         .padding(.horizontal, 5)
-                        .background(AppTheme.background.opacity(0.45), in: RoundedRectangle(cornerRadius: 11))
+                        .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 12))
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppTheme.line, lineWidth: 1))
                     if index < 2 {
                         Image(systemName: "arrow.right")
                             .font(.system(size: 9, weight: .bold))
@@ -229,10 +225,14 @@ extension InsightVisualView {
             }
             if let body = text?.body {
                 Text(body)
-                    .font(.system(size: 10.5))
+                    .font(.system(size: 12))
                     .foregroundStyle(AppTheme.muted)
                     .lineSpacing(3)
                     .fixedSize(horizontal: false, vertical: true)
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 13))
+                    .overlay(RoundedRectangle(cornerRadius: 13).stroke(AppTheme.line, lineWidth: 1))
             }
         }
     }
@@ -245,9 +245,14 @@ extension InsightVisualView {
             }
             if let body = text?.body {
                 Text(body)
-                    .font(.system(size: 10.5))
+                    .font(.system(size: 12))
                     .foregroundStyle(AppTheme.muted)
                     .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 13))
+                    .overlay(RoundedRectangle(cornerRadius: 13).stroke(AppTheme.line, lineWidth: 1))
             }
         }
     }
@@ -256,40 +261,44 @@ extension InsightVisualView {
     private func chemistryCell(role: String, label: String, tone: Color) -> some View {
         if let fact = facts.first(where: { $0.visualRole == role }) {
             VStack(spacing: 5) {
-                Text(label).font(.system(size: 8, weight: .bold)).foregroundStyle(tone)
+                Text(label).font(.system(size: 9.5, weight: .bold)).foregroundStyle(tone)
                 Text(fact.label)
-                    .font(.system(size: 10.5, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(AppTheme.text)
                     .multilineTextAlignment(.center)
             }
-            .frame(maxWidth: .infinity, minHeight: 66)
-            .padding(10)
-            .background(tone.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
+            .frame(maxWidth: .infinity, minHeight: 76)
+            .padding(11)
+            .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(tone.opacity(0.22), lineWidth: 1))
         }
     }
 
     func synastryHouseOverlayRows(_ pair: SynastryPairPresentation) -> some View {
         VStack(alignment: .leading, spacing: 9) {
-            ForEach(Array(facts.prefix(4))) { fact in
+            ForEach(Array(facts.prefix(4).enumerated()), id: \.element.id) { index, fact in
                 VStack(alignment: .leading, spacing: 5) {
                     HStack(alignment: .firstTextBaseline) {
                         Text(fact.label)
-                            .font(.system(size: 11.5, weight: .semibold))
+                            .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(AppTheme.text)
                         Spacer(minLength: 8)
                         Text(fact.value)
-                            .font(.system(size: 9.5, weight: .medium))
+                            .font(.system(size: 11, weight: .medium))
                             .foregroundStyle(AppTheme.muted)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                     }
-                    ProgressView(value: fact.progress ?? 0)
-                        .tint(AppTheme.violet)
+                    synastryRelevanceBar(fact.progress ?? 0)
                 }
-                .padding(10)
-                .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 11))
+                .padding(.vertical, 4)
+                if index < min(facts.count, 4) - 1 {
+                    Divider().overlay(AppTheme.line)
+                }
             }
             if let body = text?.body {
                 Text(body)
-                    .font(.system(size: 10.5))
+                    .font(.system(size: 12))
                     .foregroundStyle(AppTheme.muted)
                     .lineSpacing(3)
             }
@@ -299,7 +308,7 @@ extension InsightVisualView {
 
     func synastryInterAspectRows(_ pair: SynastryPairPresentation) -> some View {
         VStack(alignment: .leading, spacing: 9) {
-            ForEach(Array(facts.prefix(6))) { fact in
+            ForEach(Array(facts.prefix(6).enumerated()), id: \.element.id) { index, fact in
                 Button { synastryFactDrawer = fact } label: {
                     HStack(spacing: 10) {
                         Text(fact.symbol ?? "✦")
@@ -309,27 +318,31 @@ extension InsightVisualView {
                             .background(AppTheme.tone(fact.emphasis).opacity(0.1), in: RoundedRectangle(cornerRadius: 9))
                         VStack(alignment: .leading, spacing: 3) {
                             Text(fact.label)
-                                .font(.system(size: 11.5, weight: .semibold))
+                                .font(.system(size: 13, weight: .semibold))
                                 .foregroundStyle(AppTheme.text)
                                 .fixedSize(horizontal: false, vertical: true)
                             Text(fact.value)
-                                .font(.system(size: 9.5))
+                                .font(.system(size: 11))
                                 .foregroundStyle(AppTheme.muted)
                         }
                         Spacer(minLength: 8)
                         Text(technicalTag(fact.emphasis))
-                            .font(.system(size: 8.5, weight: .semibold))
+                            .font(.system(size: 9.5, weight: .semibold))
                             .foregroundStyle(AppTheme.muted)
                             .multilineTextAlignment(.trailing)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.76)
                     }
-                    .padding(10)
-                    .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 11))
+                    .padding(.vertical, 5)
                 }
                 .buttonStyle(.plain)
+                if index < min(facts.count, 6) - 1 {
+                    Divider().overlay(AppTheme.line)
+                }
             }
             if let body = text?.body {
                 Text(body)
-                    .font(.system(size: 10.5))
+                    .font(.system(size: 12))
                     .foregroundStyle(AppTheme.muted)
                     .lineSpacing(3)
             }
@@ -345,6 +358,23 @@ extension InsightVisualView {
         case "growth": localized("GROWTH", "成长性", language: language)
         default: role.uppercased()
         }
+    }
+
+    private func synastryRelevanceBar(_ value: Double) -> some View {
+        GeometryReader { proxy in
+            ZStack(alignment: .leading) {
+                Capsule().fill(AppTheme.background.opacity(0.8))
+                LinearGradient(
+                    colors: [AppTheme.blue, AppTheme.violet],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .frame(width: proxy.size.width * min(max(value, 0), 1))
+                .clipShape(Capsule())
+            }
+        }
+        .frame(height: 8)
+        .accessibilityValue(localized("Relevance \(Int(value * 100)) percent", "相关性 \(Int(value * 100))%", language: language))
     }
 
     private func missingGridRoleExplanation(_ role: String) -> String {
@@ -392,32 +422,114 @@ private extension Collection {
 
 struct SynastryFactDetailSheet: View {
     let fact: InsightFact
+    let interpretation: String?
     let language: AppLanguage
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 0) {
+                sheetHandle
                 Text(fact.label)
-                    .font(.system(size: 22, weight: .bold))
+                    .font(.system(size: 23, weight: .bold))
+                    .tracking(-0.5)
                     .foregroundStyle(AppTheme.text)
-                Text(fact.value)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(AppTheme.violet)
-                if let note = fact.note, !note.isEmpty {
-                    Text(note)
-                        .font(.system(size: 11))
-                        .foregroundStyle(AppTheme.muted)
-                        .lineSpacing(3)
+                    .padding(.bottom, 7)
+
+                Text(localized(
+                    "A cross-chart contact showing how one person’s planet meets the other person’s natal pattern.",
+                    "这是一条跨盘联系，显示一方行星如何触及另一方的本命结构。",
+                    language: language
+                ))
+                .font(.system(size: 12.5))
+                .foregroundStyle(AppTheme.muted)
+                .lineSpacing(4)
+
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 9), GridItem(.flexible())], spacing: 9) {
+                    factTile(localized("Aspect", "相位", language: language), fact.label)
+                    factTile(localized("Function", "作用", language: language), functionLabel)
+                    factTile(localized("Orb & phase", "容许度与阶段", language: language), fact.value)
+                    factTile(localized("Direction", "方向", language: language), fact.category ?? "—")
                 }
-                Button(localized("Done", "完成", language: language)) { dismiss() }
-                    .buttonStyle(.borderedProminent)
-                    .tint(AppTheme.violet)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding(.vertical, 16)
+
+                if let explanation = interpretation ?? fact.note, !explanation.isEmpty {
+                    sheetSection(
+                        title: localized("Interpretation", "解读", language: language),
+                        body: explanation
+                    )
+                }
+
+                doneButton
+                    .padding(.top, 18)
             }
-            .padding(20)
+            .padding(.top, 10)
+            .padding(.horizontal, 19)
+            .padding(.bottom, 33)
         }
         .background(AppTheme.panel.ignoresSafeArea())
+    }
+
+    private var functionLabel: String {
+        switch fact.emphasis {
+        case .supportive: localized("Core support", "核心支持", language: language)
+        case .challenging: localized("Active friction", "活跃摩擦", language: language)
+        case .transition: localized("Long-term bond", "长期联系", language: language)
+        case .neutral: localized("Supporting context", "辅助背景", language: language)
+        }
+    }
+
+    private var sheetHandle: some View {
+        Capsule()
+            .fill(AppTheme.muted.opacity(0.55))
+            .frame(width: 38, height: 5)
+            .frame(maxWidth: .infinity)
+            .padding(.bottom, 18)
+    }
+
+    private func factTile(_ label: String, _ value: String) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(label)
+                .font(.system(size: 10))
+                .foregroundStyle(AppTheme.muted)
+            Text(value)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(AppTheme.text)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, minHeight: 78, alignment: .topLeading)
+        .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(AppTheme.line, lineWidth: 1))
+    }
+
+    private func sheetSection(title: String, body: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(AppTheme.text)
+            Text(body)
+                .font(.system(size: 12))
+                .foregroundStyle(AppTheme.muted)
+                .lineSpacing(4)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 14)
+        .overlay(alignment: .top) { Rectangle().fill(AppTheme.line).frame(height: 1) }
+    }
+
+    private var doneButton: some View {
+        Button(localized("Done", "完成", language: language)) { dismiss() }
+            .font(.system(size: 13, weight: .bold))
+            .foregroundStyle(Color.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 13)
+            .background(
+                LinearGradient(colors: [AppTheme.blue, AppTheme.violet], startPoint: .leading, endPoint: .trailing),
+                in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+            )
+            .buttonStyle(.plain)
     }
 }
 
@@ -428,44 +540,125 @@ struct SynastryCardDetailSheet: View {
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 0) {
+                Capsule()
+                    .fill(AppTheme.muted.opacity(0.55))
+                    .frame(width: 38, height: 5)
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, 18)
+
                 Text(card.title)
                     .font(.system(size: 23, weight: .bold))
+                    .tracking(-0.5)
                     .foregroundStyle(AppTheme.text)
-                if let headline = card.text?.headline, !headline.isEmpty {
-                    Text(headline)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(AppTheme.text)
-                }
-                if let body = card.text?.body, !body.isEmpty {
-                    Text(body)
-                        .font(.system(size: 11))
-                        .foregroundStyle(AppTheme.muted)
-                        .lineSpacing(3)
-                }
+                    .padding(.bottom, 7)
+
+                Text(detailIntroduction)
+                    .font(.system(size: 12.5))
+                    .foregroundStyle(AppTheme.muted)
+                    .lineSpacing(4)
+
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 9), GridItem(.flexible())], spacing: 9) {
-                    ForEach(Array(card.facts.prefix(4))) { fact in
+                    ForEach(Array(card.facts.prefix(4).enumerated()), id: \.element.id) { index, fact in
                         VStack(alignment: .leading, spacing: 5) {
-                            Text(fact.label)
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundStyle(AppTheme.text)
-                            Text(fact.value)
-                                .font(.system(size: 9.5))
+                            Text(detailFactLabel(fact, index: index))
+                                .font(.system(size: 10))
                                 .foregroundStyle(AppTheme.muted)
+                            Text(fact.label)
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(AppTheme.text)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
-                        .padding(11)
-                        .frame(maxWidth: .infinity, minHeight: 68, alignment: .topLeading)
-                        .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
+                        .padding(12)
+                        .frame(maxWidth: .infinity, minHeight: 78, alignment: .topLeading)
+                        .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(AppTheme.line, lineWidth: 1))
                     }
                 }
-                Button(localized("Done", "完成", language: language)) { dismiss() }
-                    .buttonStyle(.borderedProminent)
-                    .tint(AppTheme.violet)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding(.vertical, 16)
+
+                if let headline = card.text?.headline, !headline.isEmpty {
+                    interpretationSection(title: headline, body: card.text?.body)
+                } else if let body = card.text?.body, !body.isEmpty {
+                    interpretationSection(
+                        title: localized("Interpretation", "解读", language: language),
+                        body: body
+                    )
+                }
+
+                Button {
+                    dismiss()
+                } label: {
+                    Text(localized("Done", "完成", language: language))
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(Color.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 13)
+                        .background(
+                            LinearGradient(colors: [AppTheme.blue, AppTheme.violet], startPoint: .leading, endPoint: .trailing),
+                            in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        )
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 18)
             }
-            .padding(20)
+            .padding(.top, 10)
+            .padding(.horizontal, 19)
+            .padding(.bottom, 33)
         }
         .background(AppTheme.panel.ignoresSafeArea())
+    }
+
+    private var detailIntroduction: String {
+        switch card.id {
+        case "emotional-connection":
+            localized("Moon contacts show emotional recognition, regulation and pacing.", "月亮联系显示彼此如何识别、调节与同步情绪。", language: language)
+        case "communication":
+            localized("Mercury contacts describe comprehension, pace and conflict style.", "水星联系描述理解方式、交流速度与冲突风格。", language: language)
+        case "chemistry":
+            localized("Venus and Mars contacts describe attraction and pursuit; other major contacts can add intensity.", "金星与火星联系描述吸引和追求，其他重要联系会增加强度。", language: language)
+        case "commitment":
+            localized("Saturn, Jupiter and angle contacts show reliability, growth and structural pressure.", "土星、木星与角点联系显示可靠性、成长空间与结构压力。", language: language)
+        default:
+            localized("This detail uses only the calculated evidence selected for this card.", "本详情只使用这张卡片已选中的计算证据。", language: language)
+        }
+    }
+
+    private func detailFactLabel(_ fact: InsightFact, index: Int) -> String {
+        if let role = fact.visualRole {
+            switch role {
+            case "flow": return localized("Support", "支持", language: language)
+            case "difference": return localized("Friction", "差异", language: language)
+            case "attraction": return localized("Attraction", "吸引", language: language)
+            case "intensity": return localized("Intensity", "强度", language: language)
+            case "stability": return localized("Stability", "稳定", language: language)
+            case "growth": return localized("Growth", "成长", language: language)
+            default: break
+            }
+        }
+        if card.id == "communication" {
+            if fact.emphasis == .supportive { return localized("Support", "支持", language: language) }
+            if fact.emphasis == .challenging { return localized("Friction", "摩擦", language: language) }
+        }
+        return localized("Contact \(index + 1)", "联系 \(index + 1)", language: language)
+    }
+
+    private func interpretationSection(title: String, body: String?) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(AppTheme.text)
+            if let body, !body.isEmpty {
+                Text(body)
+                    .font(.system(size: 12))
+                    .foregroundStyle(AppTheme.muted)
+                    .lineSpacing(4)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 14)
+        .overlay(alignment: .top) { Rectangle().fill(AppTheme.line).frame(height: 1) }
     }
 }
 
@@ -495,7 +688,7 @@ struct SynastryOverviewDetailSheet: View {
                     "合盘通过跨盘相位与双向落宫，比较 \(presentation.firstName) 和 \(presentation.secondName) 如何彼此影响。",
                     language: language
                 ))
-                .font(.system(size: 11))
+                .font(.system(size: 12.5))
                 .foregroundStyle(AppTheme.muted)
                 .lineSpacing(4)
 
@@ -567,10 +760,10 @@ struct SynastryOverviewDetailSheet: View {
         if let fact {
             VStack(alignment: .leading, spacing: 5) {
                 Text(label)
-                    .font(.system(size: 9))
+                    .font(.system(size: 10))
                     .foregroundStyle(AppTheme.muted)
                 Text(fact.label)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(AppTheme.text)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -584,10 +777,10 @@ struct SynastryOverviewDetailSheet: View {
     private func detailSection(title: String, body: String) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)
-                .font(.system(size: 11, weight: .bold))
+                .font(.system(size: 13, weight: .bold))
                 .foregroundStyle(AppTheme.text)
             Text(body)
-                .font(.system(size: 10))
+                .font(.system(size: 12))
                 .foregroundStyle(AppTheme.muted)
                 .lineSpacing(3)
                 .fixedSize(horizontal: false, vertical: true)

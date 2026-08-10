@@ -18,6 +18,10 @@ struct ChartsView: View {
                         topBar
                         chartSelector
 
+                        if model.selectedChart == .synastry {
+                            synastryPeopleSelector
+                        }
+
                         if model.focusedChart == model.selectedChart,
                            let date = model.focusedChartDate
                         {
@@ -58,9 +62,9 @@ struct ChartsView: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
-            .navigationDestination(isPresented: $showReports) {
-                ReportsView(initialChart: model.selectedChart)
-            }
+           .navigationDestination(isPresented: $showReports) {
+                ReportsView()
+           }
             .onChange(of: selectedTab) { _, newTab in
                 if newTab != .charts {
                     showReports = false
@@ -101,12 +105,12 @@ struct ChartsView: View {
     private func cardSectionHeader(_ card: InsightCardModel) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             Text(cardSectionTitle(card))
-                .font(.system(size: 18, weight: .bold))
+                .font(.system(size: 20, weight: .bold))
                 .foregroundStyle(AppTheme.text)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 6)
             Text(cardSectionSubtitle(card))
-                .font(.system(size: 11))
+                .font(.system(size: 12))
                 .foregroundStyle(AppTheme.muted)
                 .multilineTextAlignment(.trailing)
                 .fixedSize(horizontal: false, vertical: true)
@@ -215,6 +219,74 @@ struct ChartsView: View {
         }
     }
 
+   private var synastryPeopleSelector: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 10) {
+                Text(model.profile.name)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(AppTheme.text)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .padding(.horizontal, 12)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .background(AppTheme.background.opacity(0.48), in: RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppTheme.line))
+
+                Image(systemName: "heart.fill")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(AppTheme.violet)
+                    .accessibilityHidden(true)
+
+                Menu {
+                    ForEach(model.savedPeople) { person in
+                        Button(person.profile.name) {
+                            model.selectSynastryPartner(person.id.uuidString)
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(selectedSynastryPartnerName ?? localized("Select", "选择", language: model.language))
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(selectedSynastryPartnerName == nil ? AppTheme.muted : AppTheme.text)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.up.chevron.down")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(AppTheme.violet)
+                    }
+                    .padding(.horizontal, 12)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .background(AppTheme.background.opacity(0.48), in: RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppTheme.line))
+                }
+                .buttonStyle(.plain)
+                .disabled(model.savedPeople.isEmpty)
+            }
+
+            if model.savedPeople.isEmpty {
+                HStack(spacing: 6) {
+                    Image(systemName: "person.crop.circle.badge.plus")
+                        .font(.caption2)
+                        .foregroundStyle(AppTheme.muted)
+                    Text(localized("Add another person in Profile to compare.", "请在个人资料中添加其他人物以合盘。", language: model.language))
+                        .font(.caption2)
+                        .foregroundStyle(AppTheme.muted)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 0)
+                }
+            }
+        }
+        .padding(.horizontal, 15)
+        .padding(.vertical, 12)
+        .cardSurface()
+    }
+
+    private var selectedSynastryPartnerName: String? {
+        model.synastryPartnerID.flatMap(model.profileForPersonID)?.name
+    }
+
     private var profileStrip: some View {
         HStack(spacing: 12) {
             Text(String(model.profile.name.prefix(1)).uppercased())
@@ -302,7 +374,7 @@ struct ChartsView: View {
     @ViewBuilder
     private var chartParameters: some View {
         VStack(alignment: .leading, spacing: 10) {
-            if model.selectedChart != .currentSky {
+            if model.selectedChart != .currentSky && model.selectedChart != .synastry {
                 Text(localized("Person", "人物", language: model.language))
                     .font(.caption.weight(.bold))
                     .foregroundStyle(AppTheme.muted)
@@ -383,24 +455,11 @@ struct ChartsView: View {
             }
             .cardSurface()
         case .synastry:
-            VStack(alignment: .leading, spacing: 10) {
-                Text(localized("Compare with", "另一位人物", language: model.language))
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(AppTheme.muted)
-                Picker(localized("Person", "人物", language: model.language), selection: $model.synastryPartnerID) {
-                    Text(localized("Choose a saved person", "选择已保存人物", language: model.language)).tag(String?.none)
-                    if model.chartSubjectID != "self" {
-                        Text(model.profile.name).tag(String?.some("self"))
-                    }
-                    ForEach(model.savedPeople) { person in
-                        if person.id.uuidString != model.chartSubjectID {
-                            Text(person.profile.name).tag(String?.some(person.id.uuidString))
-                        }
-                    }
-                }
-                .pickerStyle(.menu)
-            }
-            .cardSurface()
+            parameterSummary(
+                title: localized("People", "人物", language: model.language),
+                value: localized("Choose the pair on the Synastry page", "请在合盘页面选择双方", language: model.language),
+                systemImage: "person.2"
+            )
         }
     }
 
@@ -541,7 +600,24 @@ struct ChartsView: View {
 
     @ViewBuilder
     private var chartContent: some View {
-        if (model.isCalculating || model.isCalculatingFocus),
+        if model.selectedChart == .synastry, model.synastryPartnerID == nil {
+            Label(
+                localized("Choose the other person to calculate this Synastry chart.", "请选择另一位人物以计算合盘。", language: model.language),
+                systemImage: "person.2"
+            )
+            .font(.subheadline)
+            .foregroundStyle(AppTheme.muted)
+            .frame(maxWidth: .infinity, minHeight: 180)
+            .cardSurface()
+        } else if model.selectedChart == .synastry, model.isCalculatingSynastry {
+            HStack(spacing: 12) {
+                ProgressView().tint(AppTheme.violet)
+                Text(localized("Calculating the relationship locally…", "正在本机计算双方合盘…", language: model.language))
+                    .foregroundStyle(AppTheme.muted)
+            }
+            .frame(maxWidth: .infinity, minHeight: 210)
+            .cardSurface()
+        } else if (model.isCalculating || model.isCalculatingFocus),
            model.snapshot(for: model.selectedChart) == nil
         {
             HStack(spacing: 12) {

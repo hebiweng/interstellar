@@ -253,7 +253,7 @@ enum SynastryContentPlanner {
         let communication = involving([.mercury], bundle.aspects)
         let chemistry = involving([.venus, .mars, .pluto], bundle.aspects)
         let commitment = involving([.saturn, .jupiter], bundle.aspects)
-        let emotionalSelection = emotionalEvidence(moon)
+        let emotionalSelection = emotionalEvidence(moon, bundle: bundle)
         let chemistrySelection = chemistryEvidence(chemistry, modern: modern)
         let commitmentSelection = commitmentEvidence(commitment, bundle: bundle)
         let perspectiveSelection = perspectiveEvidence(bundle)
@@ -329,7 +329,10 @@ enum SynastryContentPlanner {
         let fact: SynastryFact
     }
 
-    private static func emotionalEvidence(_ values: [SynastryAspectFact]) -> [RoleFact] {
+    private static func emotionalEvidence(
+        _ values: [SynastryAspectFact],
+        bundle: SynastryFactBundle
+    ) -> [RoleFact] {
         var result: [RoleFact] = []
         if let flow = values.first(where: { $0.kind.supportive }) {
             result.append(RoleFact(role: "flow", fact: .aspect(flow)))
@@ -337,8 +340,22 @@ enum SynastryContentPlanner {
         if let difference = values.first(where: { $0.kind.challenging }) {
             result.append(RoleFact(role: "difference", fact: .aspect(difference)))
         }
-        if result.isEmpty, let strongest = values.first {
-            result.append(RoleFact(role: "difference", fact: .aspect(strongest)))
+        let usedFactIDs = { Set(result.map(\.fact.factID)) }
+        let moonOverlays = rankedOverlays(bundle.overlays.filter { $0.body == .moon }, count: 2)
+
+        if !result.contains(where: { $0.role == "flow" }),
+           let flowOverlay = moonOverlays.first(where: {
+               [1, 4, 5, 7, 11].contains($0.receivingHouse) && !usedFactIDs().contains($0.factID)
+           }) ?? moonOverlays.first(where: { !usedFactIDs().contains($0.factID) })
+        {
+            result.append(RoleFact(role: "flow", fact: .overlay(flowOverlay)))
+        }
+        if !result.contains(where: { $0.role == "difference" }),
+           let differenceOverlay = moonOverlays.first(where: {
+               [2, 3, 6, 8, 9, 10, 12].contains($0.receivingHouse) && !usedFactIDs().contains($0.factID)
+           }) ?? moonOverlays.first(where: { !usedFactIDs().contains($0.factID) })
+        {
+            result.append(RoleFact(role: "difference", fact: .overlay(differenceOverlay)))
         }
         return result
     }
@@ -711,7 +728,17 @@ extension InsightFactory {
             let label = cardID == "key-inter-aspects"
                 ? "\(firstName) \(first) \(value.kind.symbol) \(secondName) \(second)"
                 : "\(first) \(value.kind.symbol) \(second)"
-            return fact(label, String(format: "%.2f° · %@", value.orbDegrees, phaseLabel(value.phase, language: language)), tone(value.kind), stableID: value.factID, sourceFactIDs: [value.factID], visualRole: visualRole, progress: value.strength, symbol: value.firstBody.symbol)
+            return fact(
+                label,
+                String(format: "%.2f° · %@", value.orbDegrees, phaseLabel(value.phase, language: language)),
+                tone(value.kind),
+                stableID: value.factID,
+                sourceFactIDs: [value.factID],
+                visualRole: visualRole,
+                progress: value.strength,
+                symbol: value.firstBody.symbol,
+                category: "\(firstName) → \(secondName)"
+            )
         case let .overlay(value):
             let sourceName = value.direction == .personAToB ? firstName : secondName
             let receiverName = value.direction == .personAToB ? secondName : firstName

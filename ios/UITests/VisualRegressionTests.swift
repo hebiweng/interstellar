@@ -224,6 +224,57 @@ final class VisualRegressionTests: XCTestCase {
     }
 
     @MainActor
+    func testSynastryPrototypeCardsAndDrawer() throws {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchEnvironment["INTERSTELLAR_UI_TEST_LANGUAGE"] = "en"
+        app.launchEnvironment["INTERSTELLAR_UI_TEST_APPEARANCE"] = "dark"
+        app.launchEnvironment["INTERSTELLAR_UI_TEST_SYNASTRY_SAMPLE"] = "1"
+        app.launch()
+
+        let chartsTab = app.tabBars.buttons["Charts"]
+        XCTAssertTrue(chartsTab.waitForExistence(timeout: 20))
+        chartsTab.tap()
+
+        let allow = app.buttons["Allow"]
+        if allow.waitForExistence(timeout: 3) {
+            allow.tap()
+        }
+
+        scrollToTop(app)
+        let synastry = app.buttons["Synastry"]
+        XCTAssertTrue(synastry.waitForExistence(timeout: 10))
+        synastry.tap()
+
+        let overview = app.staticTexts["Relationship overview"]
+        XCTAssertTrue(overview.waitForExistence(timeout: 40))
+        XCTAssertTrue(app.staticTexts["THE BOND"].exists)
+        attachScreenshot(named: "synastry-relationship-overview")
+
+        scrollToHittable(app.staticTexts["How you experience each other"], in: app)
+        XCTAssertTrue(app.buttons["Elena Hart"].exists)
+        XCTAssertTrue(app.buttons["Julian Mercer"].exists)
+        app.buttons["Julian Mercer"].tap()
+        attachScreenshot(named: "synastry-perspectives")
+
+        scrollToHittable(app.staticTexts["Emotional connection"], in: app)
+        attachScreenshot(named: "synastry-emotional-connection")
+        app.staticTexts["Emotional connection"].tap()
+        XCTAssertTrue(app.staticTexts["What feels natural and what needs care between you."].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Done"].exists)
+        attachScreenshot(named: "synastry-emotional-drawer")
+        app.buttons["Done"].tap()
+
+        for title in [
+            "Communication", "Attraction & chemistry", "Commitment & longevity",
+            "House overlays", "Key inter-aspects",
+        ] {
+            scrollToHittable(app.staticTexts[title], in: app)
+            attachScreenshot(named: "synastry-\(title.lowercased().replacingOccurrences(of: " ", with: "-"))")
+        }
+    }
+
+    @MainActor
     func testChineseCardsRender() throws {
         continueAfterFailure = false
         let app = XCUIApplication()

@@ -137,6 +137,23 @@
         }
       }
     },
+    "A cross-chart contact showing how one person’s planet meets the other person’s natal pattern.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A cross-chart contact showing how one person’s planet meets the other person’s natal pattern."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这是一条跨盘联系，显示一方行星如何触及另一方的本命结构。"
+          }
+        }
+      }
+    },
     "A planet can matter because of the house it occupies even when no exact natal aspect is active.": {
       "extractionState": "manual",
       "localizations": {
@@ -235,6 +252,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "活跃"
+          }
+        }
+      }
+    },
+    "Active friction": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active friction"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "活跃摩擦"
           }
         }
       }
@@ -480,6 +514,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "增加一个选项"
+          }
+        }
+      }
+    },
+    "Add another person in Profile to compare.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add another person in Profile to compare."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在个人资料中添加其他人物以合盘。"
           }
         }
       }
@@ -913,6 +964,23 @@
         }
       }
     },
+    "Aspect": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aspect"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "相位"
+          }
+        }
+      }
+    },
     "Aspect matrix": {
       "extractionState": "manual",
       "localizations": {
@@ -1039,6 +1107,23 @@
         }
       }
     },
+    "Attraction": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attraction"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "吸引"
+          }
+        }
+      }
+    },
     "ATTRACTION": {
       "extractionState": "manual",
       "localizations": {
@@ -1052,35 +1137,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "吸引"
-          }
-        }
-      }
-    },
-    "Back": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Back"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "返回"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Atrás"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Retour"
           }
         }
       }
@@ -1475,6 +1531,23 @@
         }
       }
     },
+    "Calculating the relationship locally…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculating the relationship locally…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在本机计算双方合盘…"
+          }
+        }
+      }
+    },
     "Calculation": {
       "extractionState": "manual",
       "localizations": {
@@ -1648,6 +1721,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "变化很快"
+          }
+        }
+      }
+    },
+    "Chart": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chart"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星盘"
           }
         }
       }
@@ -2049,35 +2139,6 @@
         }
       }
     },
-    "Choose a saved person": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose a saved person"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "选择已保存人物"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elige una persona guardada"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choisissez une personne enregistrée"
-          }
-        }
-      }
-    },
     "Choose an area": {
       "extractionState": "manual",
       "localizations": {
@@ -2154,6 +2215,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "选择一种方式，问题会在这台设备上完成计算。"
+          }
+        }
+      }
+    },
+    "Choose the other person to calculate this Synastry chart.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose the other person to calculate this Synastry chart."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请选择另一位人物以计算合盘。"
+          }
+        }
+      }
+    },
+    "Choose the pair on the Synastry page": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose the pair on the Synastry page"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在合盘页面选择双方"
           }
         }
       }
@@ -2500,23 +2595,6 @@
         }
       }
     },
-    "Compare with": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Compare with"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "另一位人物"
-          }
-        }
-      }
-    },
     "Complete filtered list": {
       "extractionState": "manual",
       "localizations": {
@@ -2763,6 +2841,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "核心优势"
+          }
+        }
+      }
+    },
+    "Core support": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Core support"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "核心支持"
           }
         }
       }
@@ -3391,6 +3486,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Direct"
+          }
+        }
+      }
+    },
+    "Direction": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Direction"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "方向"
           }
         }
       }
@@ -4259,6 +4371,23 @@
         }
       }
     },
+    "Function": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Function"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作用"
+          }
+        }
+      }
+    },
     "Generate": {
       "extractionState": "manual",
       "localizations": {
@@ -4301,23 +4430,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "生成报告"
-          }
-        }
-      }
-    },
-    "Generate when ready": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Generate when ready"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "到日子即可生成"
           }
         }
       }
@@ -4437,6 +4549,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "目标"
+          }
+        }
+      }
+    },
+    "Growth": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Growth"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "成长"
           }
         }
       }
@@ -4990,6 +5119,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "强度"
+          }
+        }
+      }
+    },
+    "Interpretation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interpretation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解读"
           }
         }
       }
@@ -5693,6 +5839,23 @@
         }
       }
     },
+    "Long-term bond": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Long-term bond"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "长期联系"
+          }
+        }
+      }
+    },
     "LONG-TERM CHAPTER": {
       "extractionState": "manual",
       "localizations": {
@@ -5914,6 +6077,23 @@
         }
       }
     },
+    "Mercury contacts describe comprehension, pace and conflict style.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mercury contacts describe comprehension, pace and conflict style."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "水星联系描述理解方式、交流速度与冲突风格。"
+          }
+        }
+      }
+    },
     "Midheaven": {
       "extractionState": "manual",
       "localizations": {
@@ -6126,6 +6306,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "月亮联系与情感落宫"
+          }
+        }
+      }
+    },
+    "Moon contacts show emotional recognition, regulation and pacing.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moon contacts show emotional recognition, regulation and pacing."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月亮联系显示彼此如何识别、调节与同步情绪。"
           }
         }
       }
@@ -7300,6 +7497,23 @@
         }
       }
     },
+    "Orb & phase": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orb & phase"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容许度与阶段"
+          }
+        }
+      }
+    },
     "Orientation": {
       "extractionState": "manual",
       "localizations": {
@@ -7402,6 +7616,23 @@
         }
       }
     },
+    "People": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "People"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "人物"
+          }
+        }
+      }
+    },
     "PEOPLE": {
       "extractionState": "manual",
       "localizations": {
@@ -7432,23 +7663,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "我认识的人"
-          }
-        }
-      }
-    },
-    "Period Reports": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Period Reports"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "周期报告"
           }
         }
       }
@@ -7779,23 +7993,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "精度"
-          }
-        }
-      }
-    },
-    "Preset": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Preset"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "参数预设"
           }
         }
       }
@@ -8278,6 +8475,23 @@
         }
       }
     },
+    "Relationship": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relationship"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关系"
+          }
+        }
+      }
+    },
     "Relationship Overview": {
       "extractionState": "manual",
       "localizations": {
@@ -8325,6 +8539,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "移除"
+          }
+        }
+      }
+    },
+    "Replace saved report?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replace saved report?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "覆盖已保存的报告？"
           }
         }
       }
@@ -8717,6 +8948,23 @@
         }
       }
     },
+    "Saturn, Jupiter and angle contacts show reliability, growth and structural pressure.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saturn, Jupiter and angle contacts show reliability, growth and structural pressure."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "土星、木星与角点联系显示可靠性、成长空间与结构压力。"
+          }
+        }
+      }
+    },
     "Save": {
       "extractionState": "manual",
       "localizations": {
@@ -8936,6 +9184,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "本版次限盘沿用出生地点，不提供独立迁移地点。"
+          }
+        }
+      }
+    },
+    "Select": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择"
           }
         }
       }
@@ -9346,6 +9611,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "特殊"
+          }
+        }
+      }
+    },
+    "Stability": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stability"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "稳定"
           }
         }
       }
@@ -9782,6 +10064,23 @@
         }
       }
     },
+    "Supporting context": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supporting context"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "辅助背景"
+          }
+        }
+      }
+    },
     "Supportive aspect": {
       "extractionState": "manual",
       "localizations": {
@@ -10209,6 +10508,23 @@
         }
       }
     },
+    "The new report will replace the report currently saved on this device.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The new report will replace the report currently saved on this device."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新报告会覆盖当前保存在本机的报告。"
+          }
+        }
+      }
+    },
     "The required reviewed content is missing.": {
       "extractionState": "manual",
       "localizations": {
@@ -10273,6 +10589,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "主题"
+          }
+        }
+      }
+    },
+    "This detail uses only the calculated evidence selected for this card.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This detail uses only the calculated evidence selected for this card."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本详情只使用这张卡片已选中的计算证据。"
           }
         }
       }
@@ -11054,6 +11387,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "恢复当前默认值"
+          }
+        }
+      }
+    },
+    "Venus and Mars contacts describe attraction and pursuit; other major contacts can add intensity.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Venus and Mars contacts describe attraction and pursuit; other major contacts can add intensity."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "金星与火星联系描述吸引和追求，其他重要联系会增加强度。"
           }
         }
       }

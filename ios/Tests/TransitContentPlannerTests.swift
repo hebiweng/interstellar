@@ -52,6 +52,10 @@ final class TransitContentPlannerTests: XCTestCase {
                     return value.direction
                 }
                 XCTAssertEqual(Set(overlayDirections), Set<SynastryOverlayDirection>([.personAToB, .personBToA]))
+                let emotional = try XCTUnwrap(plan.card("emotional-connection"))
+                XCTAssertEqual(Set(emotional.evidenceRoles.values), Set(["flow", "difference"]))
+                XCTAssertEqual(emotional.sourceFactIDs.count, 2)
+                XCTAssertEqual(Set(emotional.sourceFactIDs).count, 2)
                 if preset == .classical {
                     XCTAssertTrue(bundle.first.points.allSatisfy { ClassicalSynastryMVPCapability.traditionalBodies.contains($0.body) })
                     XCTAssertTrue(bundle.second.points.allSatisfy { ClassicalSynastryMVPCapability.traditionalBodies.contains($0.body) })
@@ -153,6 +157,122 @@ final class TransitContentPlannerTests: XCTestCase {
             try AIArtifactIdentity.factsIdentityHash(first),
             try AIArtifactIdentity.factsIdentityHash(changed)
         )
+    }
+
+    func testWholeChartAIFactsAreChartSpecificBoundedAndDeterministic() async throws {
+        let calculator = try SwissEphemerisCalculator(ephemerisDirectory: ephemerisDirectory)
+        let location = GeographicLocation(latitudeDegrees: 48.8566, longitudeDegrees: 2.3522)
+        let birthDate = utcDate(1990, 4, 18, 10)
+        let natal = try await calculator.calculateSnapshot(
+            NatalInput(utcDate: birthDate, location: location),
+            preset: .modern
+        )
+        let sky = try await calculator.calculateSnapshot(
+            NatalInput(utcDate: utcDate(2026, 8, 10, 12), location: location),
+            preset: .modern
+        )
+        let progressed = try await calculator.calculateSnapshot(
+            NatalInput(
+                utcDate: SwissEphemerisCalculator.secondaryProgressedDate(
+                    birthDate: birthDate,
+                    targetDate: utcDate(2026, 8, 10, 12)
+                ),
+                location: location
+            ),
+            preset: .modern
+        )
+        let solarReturn = try await calculator.calculateSnapshot(
+            NatalInput(utcDate: utcDate(2026, 4, 18, 12), location: location),
+            preset: .modern
+        )
+        let progressedComparison = SwissEphemerisCalculator.compare(
+            moving: progressed,
+            reference: natal,
+            orbDegrees: 2
+        )
+        let solarComparison = SwissEphemerisCalculator.compare(
+            moving: solarReturn,
+            reference: natal,
+            orbDegrees: 3
+        )
+
+        let anchor = utcDate(2026, 8, 10, 12)
+        var events = ChartEventData.empty
+        events.skyIngresses = [.init(body: .moon, signIndex: 5, date: anchor, nextDate: nil)]
+        events.skyExactEvents = [.init(first: .sun, second: .moon, kind: .trine, date: anchor)]
+        events.skyStations = [.init(body: .mercury, date: anchor, retrogradeAfter: true)]
+        events.progressedMoon = .init(signIndex: 3, daysInSign: 120, nextIngress: anchor)
+        events.progressedTurningPoints = [
+            .init(
+                first: .moon,
+                second: .sun,
+                kind: .square,
+                exactDate: anchor,
+                separationDegrees: 0.4,
+                phase: .applying
+            ),
+        ]
+        events.solarYearStart = anchor
+        events.solarSeasons = (0 ..< 4).map {
+            .init(
+                index: $0,
+                start: anchor.addingTimeInterval(Double($0) * 90 * 86_400),
+                end: anchor.addingTimeInterval(Double($0 + 1) * 90 * 86_400)
+            )
+        }
+
+        let cases: [(ChartKind, ChartSnapshot, ChartSnapshot?, [ChartAspect], Set<String>)] = [
+            (.natal, natal, nil, [], []),
+            (.currentSky, sky, nil, [], ["skyIngress", "skyExactAspect", "station"]),
+            (.secondary, progressed, natal, progressedComparison, ["progressedTurningPoint", "progressedMoonWindow"]),
+            (.solarReturn, solarReturn, natal, solarComparison, ["solarReturnStart", "solarSeason"]),
+        ]
+
+        for (chart, snapshot, reference, comparison, allowedEvents) in cases {
+            let makeDocument = {
+                AIFactsBuilder.document(
+                    chart: chart,
+                    snapshot: snapshot,
+                    reference: reference,
+                    comparisonAspects: comparison,
+                    preset: .modern,
+                    personName: "Elena Hart",
+                    partnerName: nil,
+                    partnerChart: nil,
+                    events: events,
+                    params: [:],
+                    locale: "en"
+                )
+            }
+            let document = makeDocument()
+            let facts = try XCTUnwrap(document["evidenceFacts"] as? [[String: Any]])
+            let factIDs = facts.compactMap { $0["id"] as? String }
+            let eventTypes = Set(
+                (try XCTUnwrap(document["events"] as? [[String: Any]]))
+                    .compactMap { $0["type"] as? String }
+            )
+            let data = try JSONSerialization.data(withJSONObject: document, options: [.sortedKeys])
+            let repeatedData = try JSONSerialization.data(withJSONObject: makeDocument(), options: [.sortedKeys])
+
+            XCTAssertEqual(eventTypes, allowedEvents, chart.rawValue)
+            XCTAssertEqual(factIDs.count, Set(factIDs).count, chart.rawValue)
+            XCTAssertEqual(data, repeatedData, chart.rawValue)
+            // Eleven moving bodies, eleven reference bodies and their finite
+            // internal/cross aspect domains keep every whole-chart request
+            // bounded without applying an AI-specific Top-N filter.
+            XCTAssertLessThanOrEqual(facts.count, 262, chart.rawValue)
+            XCTAssertLessThan(data.count, 180_000, chart.rawValue)
+
+            if chart == .currentSky {
+                XCTAssertNil(document["person"])
+            }
+            if chart == .secondary || chart == .solarReturn {
+                let types = Set(facts.compactMap { $0["type"] as? String })
+                XCTAssertTrue(types.contains("comparisonAspect"), chart.rawValue)
+                XCTAssertTrue(types.contains("internalAspect"), chart.rawValue)
+                XCTAssertTrue(types.contains("referencePoint"), chart.rawValue)
+            }
+        }
     }
 
     func testFixedFixturesProduceTheFrozenSixCardContract() {
