@@ -4,9 +4,21 @@ import SwiftUI
 struct ChartsView: View {
     @EnvironmentObject private var model: AppModel
     @Binding var selectedTab: RootTab
-    @State private var showLocationPicker = false
-    @State private var showReports = false
-    @State private var showParameters = false
+   @State private var showLocationPicker = false
+    @State private var selectedReport: SavedReport?
+    @State private var generationChart: ChartKind?
+    @State private var generationSheetRelationship = PersonRelationship.partner
+    @State private var generationSheetPreset = CalculationPreset.modern
+    @State private var pendingGeneration: PendingGeneration?
+   @State private var showParameters = false
+
+private struct PendingGeneration: Identifiable {
+    let id = UUID()
+    let chart: ChartKind
+    let force: Bool
+    let relationship: PersonRelationship?
+    let preset: CalculationPreset?
+}
 
     var body: some View {
         NavigationStack {
@@ -62,12 +74,79 @@ struct ChartsView: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
-           .navigationDestination(isPresented: $showReports) {
-                ReportsView()
-           }
+            .navigationDestination(
+                isPresented: Binding(
+                    get: { selectedReport != nil },
+                    set: { if !$0 { selectedReport = nil } }
+                )
+            ) {
+                if let report = selectedReport {
+                    ReportReaderView(
+                        report: report,
+                        language: model.language,
+                        onRegenerate: {
+                            selectedReport = nil
+                            if let chart = ChartKind.allCases.first(where: { report.scope == "chart.\($0.contentPrefix)" }) {
+                                generationChart = chart
+                                generationSheetRelationship = .partner
+                                generationSheetPreset = model.preset(for: chart)
+                            }
+                        }
+                    )
+                }
+            }
+            .sheet(item: $generationChart) { chart in
+                ReportGenerationSheet(
+                    chart: chart,
+                    relationship: $generationSheetRelationship,
+                    preset: $generationSheetPreset,
+                    onGenerate: { relationship, preset in
+                        generationChart = nil
+                        requestGeneration(for: chart, relationship: relationship, preset: preset)
+                    },
+                    onCancel: {
+                        generationChart = nil
+                    }
+                )
+            }
+            .alert(
+                localized("ai.network-consent.chart-title", default: "Allow network generation?", chinese: "允许联网生成？", language: model.language),
+                isPresented: Binding(
+                    get: { pendingGeneration != nil },
+                    set: { if !$0 { pendingGeneration = nil } }
+                ),
+                presenting: pendingGeneration
+            ) { pending in
+                Button(localized("Allow", "允许", language: model.language)) {
+                    model.grantAIConsent()
+                    Task {
+                        await model.generateAIReport(
+                            for: pending.chart,
+                            forceRegenerate: pending.force,
+                            relationship: pending.relationship,
+                            preset: pending.preset
+                        )
+                        if let saved = model.currentSavedReport(for: pending.chart) {
+                            await MainActor.run { selectedReport = saved }
+                        }
+                    }
+                    pendingGeneration = nil
+                }
+                Button(localized("Not now", "暂不", language: model.language), role: .cancel) {
+                    pendingGeneration = nil
+                }
+            } message: { _ in
+                Text(localized(
+                    "ai.network-consent.chart-message",
+                    default: "Interstellar sends the selected chart's calculated facts to the configured AI service only after you tap Generate. The relay may keep an encrypted idempotency result for up to 24 hours; your device keeps the long-term report until you delete it in Settings. You can revoke future network generation at any time.",
+                    chinese: "只有在你点击生成后，Interstellar 才会把所选星盘的计算事实发送给配置的 AI 服务。中继服务最多保留 24 小时的加密幂等结果；长期报告只保存在本机，直到你在设置中删除。你可以随时撤回后续联网生成授权。",
+                    language: model.language
+                ))
+            }
             .onChange(of: selectedTab) { _, newTab in
                 if newTab != .charts {
-                    showReports = false
+                    selectedReport = nil
+                    generationChart = nil
                 }
             }
             .sheet(isPresented: $showLocationPicker) {
@@ -191,8 +270,16 @@ struct ChartsView: View {
                 .kerning(-1)
                 .foregroundStyle(AppTheme.text)
             Spacer()
-            Button { showReports = true } label: {
-                Label(localized("Reports", "报告", language: model.language), systemImage: "doc.text.fill")
+            Button {
+                if let saved = model.currentSavedReport(for: model.selectedChart) {
+                    selectedReport = saved
+                } else {
+                    generationChart = model.selectedChart
+                    generationSheetPreset = model.preset(for: model.selectedChart)
+                    generationSheetRelationship = model.selectedChart == .synastry ? .partner : .partner
+                }
+            } label: {
+               Label(localized("Reports", "报告", language: model.language), systemImage: "doc.text.fill")
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(AppTheme.violet)
                     .padding(.horizontal, 12)
@@ -685,12 +772,40 @@ struct ChartsView: View {
         .cardSurface()
     }
 
-    private func formattedEventDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: model.language.rawValue)
-        formatter.timeZone = TimeZone(identifier: model.profile.timezoneID) ?? .current
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
+   private func formattedEventDate(_ date: Date) -> String {
+       let formatter = DateFormatter()
+       formatter.locale = Locale(identifier: model.language.rawValue)
+       formatter.timeZone = TimeZone(identifier: model.profile.timezoneID) ?? .current
+       formatter.dateStyle = .medium
+       formatter.timeStyle = .short
+      return formatter.string(from: date)
+  }
+
+   private func requestGeneration(
+        for chart: ChartKind,
+        relationship: PersonRelationship?,
+        preset: CalculationPreset
+    ) {
+        let effectiveRelationship = chart == .synastry ? relationship : nil
+        guard model.aiConsentGranted else {
+            pendingGeneration = PendingGeneration(
+                chart: chart,
+                force: false,
+                relationship: effectiveRelationship,
+                preset: preset
+            )
+            return
+        }
+        Task {
+            await model.generateAIReport(
+                for: chart,
+                forceRegenerate: false,
+                relationship: effectiveRelationship,
+                preset: preset
+            )
+            if let saved = model.currentSavedReport(for: chart) {
+                await MainActor.run { selectedReport = saved }
+            }
+        }
     }
 }
