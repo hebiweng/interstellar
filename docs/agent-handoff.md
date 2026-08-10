@@ -11,7 +11,20 @@ AIGC:
 
 # Interstellar — 当前交接
 
-> 更新时间：2026-08-09。这里只记录当前有效状态、证据和下一步；历史决策以 Git 记录为准。
+> 更新时间：2026-08-10。这里只记录当前有效状态、证据和下一步；历史决策以 Git 记录为准。
+
+## 当前会话状态（2026-08-10）
+
+- 修复了 `ios/App/ChartsView.swift` 中新增的 `ai.network-consent.title` 与 `ReportsView` 的重复 localization key，改为 `ai.network-consent.chart-title` / `ai.network-consent.chart-message`；重新生成 `ios/App/Localizable.xcstrings`。
+- 模拟器与真机构建均通过；签名使用 `Apple Development: 15296729699@163.com (M2A7RHP7MT)` 与免费 Personal Team。
+- 已通过 `xcrun devicectl` 将 Debug 构建安装到已连接设备 `00008101-0001701A1180001E`（设备名 `HUAWEI PURA 70`，实际 iPhone 12 mini）。
+- 以下任务未在本次会话完成，原因按用户指示停止或尚未推进：
+  1. 报告 UI 细节：去掉 `%read`、目录右侧的“约几分钟”、标签单行避免换行、卡片字号过小、合盘相位矩阵过小。
+  2. 生成并补充合盘测试语料，修复重复/空/fallback/what differs 结构问题。
+  3. 全项目 dark/light 硬编码检查。
+  4. 系统按钮文案（Allow/Not now/Cancel/Regenerate 等）的集中管理——用户明确指示本次不继续。
+  5. AppModel AI 编排方法迁移——用户明确指示项目架构已合理，本次不继续。
+  6. 剩余盘型迁移（天象/本命/日返/次限）——用户明确指示本次不做。
 
 ## 0. 2026-08-09 合盘八卡 v3 收口状态
 
@@ -221,6 +234,7 @@ git diff --check
 
 | 提交 | 内容 |
 |---|---|
+| `a5a757e` | 修复 chart report consent 的重复 localization key 并重新生成 Localizable.xcstrings |
 | `f679a87` | 六盘 Insights 模块化并迁移 Classical Transit |
 | `66d9880` | 完成 Modern Transit 卡片体验 |
 | `4a606b2` | 完成 Transit Copy 规划与可达性链路 |
