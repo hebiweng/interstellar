@@ -232,6 +232,35 @@ struct AstroCoreTests {
         #expect(choices == choices.sorted { $0.likelihood > $1.likelihood })
     }
 
+    @Test("Same-area choices receive distinct sect-aware triplicity rulers")
+    func sameAreaChoiceRulers() async throws {
+        let calculator = try SwissEphemerisCalculator(ephemerisDirectory: ephemerisDirectory)
+        let snapshot = try await calculator.calculateSnapshot(
+            NatalInput(
+                utcDate: Date(timeIntervalSince1970: 1_775_000_000),
+                location: GeographicLocation(latitudeDegrees: 35.0263, longitudeDegrees: 111.0073)
+            ),
+            configuration: .horary
+        )
+        let original = [
+            HoraryChoiceCandidate(label: "A", house: 10, relatedHouses: [2, 9]),
+            HoraryChoiceCandidate(label: "B", house: 10, relatedHouses: [2]),
+            HoraryChoiceCandidate(label: "C", house: 10),
+        ]
+        let results = HoraryEngine.analyzeChoices(snapshot: snapshot, candidates: original)
+        let byID = Dictionary(uniqueKeysWithValues: results.map { ($0.id, $0) })
+        let cusp = try #require(snapshot.houses.first { $0.number == 10 })
+        let sign = Int(cusp.cuspDegrees / 30)
+        let expected = HoraryEngine.triplicityRulers(
+            ofSign: sign,
+            isDayChart: HoraryEngine.isDayChart(snapshot)
+        )
+
+        #expect(original.enumerated().allSatisfy { byID[$0.element.id]?.ruler == expected[$0.offset] })
+        #expect(byID[original[0].id]?.relatedHouses == [2, 9])
+        #expect(Set(results.map(\.ruler)).count == 3)
+    }
+
     @Test("Election timing returns ranked non-overlapping days")
     func electionTimingSearch() async throws {
         let calculator = try SwissEphemerisCalculator(ephemerisDirectory: ephemerisDirectory)

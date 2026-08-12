@@ -4,12 +4,19 @@ import SwiftUI
 private struct AskOptionDraft: Identifiable, Equatable {
     let id: UUID
     var label: String
-    var house: Int?
+    var primaryHouse: Int?
+    var additionalHouses: Set<Int>
 
-    init(id: UUID = UUID(), label: String = "", house: Int? = nil) {
+    init(
+        id: UUID = UUID(),
+        label: String = "",
+        primaryHouse: Int? = nil,
+        additionalHouses: Set<Int> = []
+    ) {
         self.id = id
         self.label = label
-        self.house = house
+        self.primaryHouse = primaryHouse
+        self.additionalHouses = additionalHouses
     }
 }
 
@@ -33,8 +40,12 @@ struct AskView: View {
     @EnvironmentObject private var model: AppModel
     @State private var mode: HoraryQuestionMode?
     @State private var question = ""
-    @State private var targetHouse = 10
+    @State private var primaryHouse: Int?
+    @State private var relatedHouses: Set<Int> = []
     @State private var options = [AskOptionDraft(), AskOptionDraft()]
+    @State private var sharedSamePrimary: Bool?
+    @State private var sharedPrimaryHouse: Int?
+    @State private var sharedRelatedHouses: Set<Int> = []
     @State private var timingPrecision: TimingPrecision = .day
     @State private var timingRange: TimingRangeSelection = .medium
     @State private var startDate = Date()
@@ -49,6 +60,7 @@ struct AskView: View {
     @State private var calculationTask: Task<Void, Never>?
     @State private var askHistory: [AskHistoryEntry] = []
     @State private var showAskHistory = false
+    @State private var showLifeAreasHelp = false
     @FocusState private var focusedInputID: String?
     private let askHistoryStore = AskHistoryStore()
 
@@ -69,6 +81,9 @@ struct AskView: View {
                 LocationSearchView(language: model.language) {
                     location = $0
                 }
+            }
+            .sheet(isPresented: $showLifeAreasHelp) {
+                ABCLifeAreasHelpView(language: model.language)
             }
             .onAppear {
                 if location == nil {
@@ -319,14 +334,63 @@ struct AskView: View {
             .padding(14)
             .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 15))
 
-            housePicker(selection: $targetHouse, excluding: [])
+            LifeAreaPickerButton(
+                title: localized("ask.select-life-areas", language: model.language),
+                primary: $primaryHouse,
+                related: $relatedHouses,
+                language: model.language
+            )
         }
         .cardSurface()
     }
 
     private var choiceFields: some View {
         VStack(alignment: .leading, spacing: 14) {
-            fieldTitle(localized("ask.name-each-option", language: model.language))
+            HStack {
+                fieldTitle(localized("ask.name-each-option", language: model.language))
+                Spacer()
+                Button {
+                    showLifeAreasHelp = true
+                } label: {
+                    Image(systemName: "questionmark.circle")
+                        .font(.title3)
+                        .frame(width: 44, height: 44)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(localized("ask.life-areas-help", language: model.language))
+            }
+
+            VStack(alignment: .leading, spacing: 11) {
+                Text(localized("ask.shared-life-areas", language: model.language))
+                    .font(.headline)
+                    .foregroundStyle(AppTheme.text)
+                Text(localized("ask.do-all-options-belong-mainly-to-the-same-life-area", language: model.language))
+                    .font(AppTypography.supporting)
+                    .foregroundStyle(AppTheme.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 9) {
+                    sharedModeButton(true, title: localized("common.yes", language: model.language))
+                    sharedModeButton(false, title: localized("common.no", language: model.language))
+                }
+
+                if sharedSamePrimary == true {
+                    LifeAreaPickerButton(
+                        title: localized("ask.shared-primary-area", language: model.language),
+                        primary: $sharedPrimaryHouse,
+                        related: $sharedRelatedHouses,
+                        language: model.language
+                    )
+                } else if sharedSamePrimary == false {
+                    AdditionalLifeAreaPickerButton(
+                        title: localized("ask.shared-related-areas-optional", language: model.language),
+                        selection: $sharedRelatedHouses,
+                        excluding: [],
+                        language: model.language
+                    )
+                }
+            }
+            .padding(13)
+            .background(AppTheme.background.opacity(0.45), in: RoundedRectangle(cornerRadius: 16))
 
             ForEach($options) { $option in
                 VStack(alignment: .leading, spacing: 10) {
@@ -362,20 +426,28 @@ struct AskView: View {
                     .padding(13)
                     .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 13))
 
-                    housePicker(
-                        selection: Binding(
-                            get: { option.house ?? 0 },
-                            set: { option.house = $0 == 0 ? nil : $0 }
-                        ),
-                        excluding: selectedHouses(except: option.id),
-                        includesPrompt: true
-                    )
+                    if sharedSamePrimary == true {
+                        AdditionalLifeAreaPickerButton(
+                            title: localized("ask.additional-life-areas-optional", language: model.language),
+                            selection: $option.additionalHouses,
+                            excluding: Set([sharedPrimaryHouse].compactMap { $0 }).union(sharedRelatedHouses),
+                            language: model.language
+                        )
+                    } else if sharedSamePrimary == false {
+                        LifeAreaPickerButton(
+                            title: localized("ask.select-life-areas", language: model.language),
+                            primary: $option.primaryHouse,
+                            related: $option.additionalHouses,
+                            excluding: sharedRelatedHouses,
+                            language: model.language
+                        )
+                    }
                 }
                 .padding(13)
                 .background(AppTheme.background.opacity(0.45), in: RoundedRectangle(cornerRadius: 16))
             }
 
-            if options.count < 5 {
+            if options.count < 3 {
                 Button {
                     options.append(AskOptionDraft())
                 } label: {
@@ -408,7 +480,12 @@ struct AskView: View {
             .padding(13)
             .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 13))
 
-            housePicker(selection: $targetHouse, excluding: [])
+            LifeAreaPickerButton(
+                title: localized("ask.select-life-areas", language: model.language),
+                primary: $primaryHouse,
+                related: $relatedHouses,
+                language: model.language
+            )
 
             fieldTitle(localized("ask.precision", language: model.language))
             Picker(
@@ -489,26 +566,6 @@ struct AskView: View {
             }
             .buttonStyle(.plain)
 
-            if let current = location {
-                HStack(spacing: 10) {
-                    coordinateField(
-                        localized("profile.latitude", language: model.language),
-                        id: "latitude",
-                        value: Binding(
-                            get: { current.latitude },
-                            set: { updateLocation(latitude: $0, longitude: current.longitude) }
-                        )
-                    )
-                    coordinateField(
-                        localized("profile.longitude", language: model.language),
-                        id: "longitude",
-                        value: Binding(
-                            get: { current.longitude },
-                            set: { updateLocation(latitude: current.latitude, longitude: $0) }
-                        )
-                    )
-                }
-            }
         }
         .cardSurface()
     }
@@ -739,53 +796,6 @@ struct AskView: View {
             .foregroundStyle(AppTheme.text)
     }
 
-    private func housePicker(
-        selection: Binding<Int>,
-        excluding: Set<Int>,
-        includesPrompt: Bool = false
-    ) -> some View {
-        Picker(
-            localized("ask.life-area", language: model.language),
-            selection: selection
-        ) {
-            if includesPrompt {
-                Text(localized("ask.choose-an-area", language: model.language))
-                    .tag(0)
-            }
-            ForEach(1 ... 12, id: \.self) { house in
-                Text(houseTitle(house))
-                    .tag(house)
-                    .disabled(excluding.contains(house))
-            }
-        }
-        .pickerStyle(.navigationLink)
-        .frame(minHeight: 44)
-    }
-
-    private func coordinateField(
-        _ title: String,
-        id: String,
-        value: Binding<Double>
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 5) {
-            Text(title)
-                .font(AppTypography.supporting)
-                .foregroundStyle(AppTheme.muted)
-            TextField(
-                title,
-                value: value,
-                format: .number.precision(.fractionLength(0 ... 6))
-            )
-            .focused($focusedInputID, equals: id)
-            .submitLabel(.done)
-            .onSubmit { focusedInputID = nil }
-            .keyboardType(.numbersAndPunctuation)
-            .font(AppTypography.label)
-            .padding(10)
-            .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 12))
-        }
-    }
-
     private func generate(_ mode: HoraryQuestionMode) {
         guard let location else { return }
         calculationTask?.cancel()
@@ -801,6 +811,7 @@ struct AskView: View {
                 let newSession: HorarySession
                 switch mode {
                 case .yesNo:
+                    guard let primaryHouse else { return }
                     let moment = chartDate
                     let snapshot = try await model.calculateHorarySnapshot(
                         at: moment,
@@ -815,7 +826,8 @@ struct AskView: View {
                         snapshot: snapshot,
                         analysis: HoraryEngine.analyze(
                             snapshot: snapshot,
-                            targetHouse: targetHouse
+                            targetHouse: primaryHouse,
+                            relatedHouses: Array(relatedHouses).sorted()
                         ),
                         choices: [],
                         timingCandidates: []
@@ -827,11 +839,12 @@ struct AskView: View {
                         location: requestLocation
                     )
                     let candidates = options.compactMap { option -> HoraryChoiceCandidate? in
-                        guard let house = option.house else { return nil }
+                        guard let house = effectivePrimaryHouse(for: option) else { return nil }
                         return HoraryChoiceCandidate(
                             id: option.id,
                             label: option.label.trimmed,
-                            house: house
+                            house: house,
+                            relatedHouses: Array(effectiveRelatedHouses(for: option)).sorted()
                         )
                     }
                     newSession = HorarySession(
@@ -849,11 +862,13 @@ struct AskView: View {
                         timingCandidates: []
                     )
                 case .timing:
+                    guard let primaryHouse else { return }
                     guard let timeZone = TimeZone(identifier: location.timezoneID) else {
                         throw AskViewError.invalidTimeZone
                     }
                     let request = ElectionTimingRequest(
-                        targetHouse: targetHouse,
+                        targetHouse: primaryHouse,
+                        relatedHouses: Array(relatedHouses).sorted(),
                         startDate: startDate,
                         endDate: selectedEndDate,
                         location: requestLocation,
@@ -920,8 +935,12 @@ struct AskView: View {
         session = nil
         focusedInputID = nil
         question = ""
-        targetHouse = 10
+        primaryHouse = nil
+        relatedHouses = []
         options = [AskOptionDraft(), AskOptionDraft()]
+        sharedSamePrimary = nil
+        sharedPrimaryHouse = nil
+        sharedRelatedHouses = []
         timingPrecision = .day
         timingRange = .medium
         startDate = Date()
@@ -936,24 +955,56 @@ struct AskView: View {
         guard location != nil else { return false }
         switch mode {
         case .yesNo:
-            return !question.trimmed.isEmpty
+            return !question.trimmed.isEmpty && primaryHouse != nil
         case .choice:
-            let houses = options.compactMap(\.house)
             return options.count >= 2
-                && options.allSatisfy { !$0.label.trimmed.isEmpty && $0.house != nil }
-                && Set(houses).count == houses.count
+                && sharedSamePrimary != nil
+                && options.allSatisfy {
+                    !$0.label.trimmed.isEmpty && effectivePrimaryHouse(for: $0) != nil
+                }
         case .timing:
-            return selectedEndDate > startDate
+            return primaryHouse != nil && selectedEndDate > startDate
         }
-    }
-
-    private func selectedHouses(except id: UUID) -> Set<Int> {
-        Set(options.filter { $0.id != id }.compactMap(\.house))
     }
 
     private func optionLetter(_ id: UUID) -> String {
         guard let index = options.firstIndex(where: { $0.id == id }) else { return "" }
         return String(UnicodeScalar(65 + index)!)
+    }
+
+    private func effectivePrimaryHouse(for option: AskOptionDraft) -> Int? {
+        sharedSamePrimary == true ? sharedPrimaryHouse : option.primaryHouse
+    }
+
+    private func effectiveRelatedHouses(for option: AskOptionDraft) -> Set<Int> {
+        guard let primary = effectivePrimaryHouse(for: option) else { return [] }
+        return sharedRelatedHouses
+            .union(option.additionalHouses)
+            .subtracting([primary])
+    }
+
+    private func sharedModeButton(_ value: Bool, title: String) -> some View {
+        let selected = sharedSamePrimary == value
+        return Button {
+            sharedSamePrimary = value
+            if value {
+                for index in options.indices {
+                    options[index].primaryHouse = nil
+                }
+            } else {
+                sharedPrimaryHouse = nil
+            }
+        } label: {
+            Text(title)
+                .font(AppTypography.label)
+                .foregroundStyle(selected ? Color.white : AppTheme.text)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .background(
+                    selected ? AppTheme.violet : AppTheme.panelRaised,
+                    in: RoundedRectangle(cornerRadius: 12)
+                )
+        }
+        .buttonStyle(.plain)
     }
 
     private func historyEntry(from session: HorarySession) -> AskHistoryEntry {
@@ -999,16 +1050,6 @@ struct AskView: View {
             latitude: model.profile.latitude,
             longitude: model.profile.longitude,
             timezoneID: model.profile.timezoneID
-        )
-    }
-
-    private func updateLocation(latitude: Double, longitude: Double) {
-        guard let current = location else { return }
-        location = LocationSelection(
-            name: current.name,
-            latitude: min(90, max(-90, latitude)),
-            longitude: min(180, max(-180, longitude)),
-            timezoneID: current.timezoneID
         )
     }
 
@@ -1088,26 +1129,9 @@ struct AskView: View {
         case .yesNo:
             localized("ask.keep-the-question-specific-and-choose-the-area-it-belongs-to", language: model.language)
         case .choice:
-            localized("ask.name-the-real-options-and-give-each-one-a-different-area", language: model.language)
+            localized("ask.name-the-real-options-and-choose-their-life-areas", language: model.language)
         case .timing:
             localized("ask.choose-what-matters-how-far-to-search-and-the-precision-you-need", language: model.language)
-        }
-    }
-
-    private func houseTitle(_ house: Int) -> String {
-        switch house {
-        case 1: localized("ask.house-area.1", language: model.language)
-        case 2: localized("ask.house-area.2", language: model.language)
-        case 3: localized("ask.house-area.3", language: model.language)
-        case 4: localized("ask.house-area.4", language: model.language)
-        case 5: localized("ask.house-area.5", language: model.language)
-        case 6: localized("ask.house-area.6", language: model.language)
-        case 7: localized("ask.house-area.7", language: model.language)
-        case 8: localized("ask.house-area.8", language: model.language)
-        case 9: localized("ask.house-area.9", language: model.language)
-        case 10: localized("ask.house-area.10", language: model.language)
-        case 11: localized("ask.house-area.11", language: model.language)
-        default: localized("ask.house-area.12", language: model.language)
         }
     }
 
@@ -1234,6 +1258,266 @@ struct AskView: View {
         )
         return "\(start) – \(end)"
     }
+}
+
+private struct LifeAreaPickerButton: View {
+    let title: String
+    @Binding var primary: Int?
+    @Binding var related: Set<Int>
+    var excluding: Set<Int> = []
+    let language: AppLanguage
+    @State private var isPresented = false
+
+    var body: some View {
+        Button { isPresented = true } label: {
+            HStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(AppTypography.label)
+                        .foregroundStyle(AppTheme.text)
+                    Text(summary)
+                        .font(AppTypography.supporting)
+                        .foregroundStyle(primary == nil ? AppTheme.muted : AppTheme.violet)
+                        .lineLimit(2)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundStyle(AppTheme.violet)
+            }
+            .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .sheet(isPresented: $isPresented) {
+            LifeAreaPickerSheet(
+                title: title,
+                primary: $primary,
+                related: $related,
+                excluding: excluding,
+                allowsPrimary: true,
+                language: language
+            )
+        }
+    }
+
+    private var summary: String {
+        guard let primary else {
+            return localized("ask.select-life-areas", language: language)
+        }
+        let relatedNames = related.subtracting([primary]).sorted().map {
+            askLifeAreaTitle($0, language: language)
+        }
+        if relatedNames.isEmpty {
+            return askLifeAreaTitle(primary, language: language)
+        }
+        return askLifeAreaTitle(primary, language: language) + " · " + relatedNames.joined(separator: ", ")
+    }
+}
+
+private struct AdditionalLifeAreaPickerButton: View {
+    let title: String
+    @Binding var selection: Set<Int>
+    let excluding: Set<Int>
+    let language: AppLanguage
+    @State private var isPresented = false
+
+    var body: some View {
+        Button { isPresented = true } label: {
+            HStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(AppTypography.label)
+                        .foregroundStyle(AppTheme.text)
+                    Text(summary)
+                        .font(AppTypography.supporting)
+                        .foregroundStyle(AppTheme.muted)
+                        .lineLimit(2)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundStyle(AppTheme.violet)
+            }
+            .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .sheet(isPresented: $isPresented) {
+            LifeAreaPickerSheet(
+                title: title,
+                primary: .constant(nil),
+                related: $selection,
+                excluding: excluding,
+                allowsPrimary: false,
+                language: language
+            )
+        }
+    }
+
+    private var summary: String {
+        let names = selection.subtracting(excluding).sorted().map {
+            askLifeAreaTitle($0, language: language)
+        }
+        return names.isEmpty
+            ? localized("common.none", language: language)
+            : names.joined(separator: ", ")
+    }
+}
+
+private struct LifeAreaPickerSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let title: String
+    @Binding var primary: Int?
+    @Binding var related: Set<Int>
+    let excluding: Set<Int>
+    let allowsPrimary: Bool
+    let language: AppLanguage
+
+    var body: some View {
+        NavigationStack {
+            List(1 ... 12, id: \.self) { house in
+                let selected = primary == house || related.contains(house)
+                let disabled = excluding.contains(house) && !selected
+                HStack(alignment: .center, spacing: 12) {
+                    Button { toggle(house) } label: {
+                        Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                            .font(.title3)
+                            .foregroundStyle(selected ? AppTheme.violet : AppTheme.muted)
+                            .frame(width: 32, height: 44)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(disabled)
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(askLifeAreaTitle(house, language: language))
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(disabled ? AppTheme.muted : AppTheme.text)
+                        Text(askLifeAreaDescription(house, language: language))
+                            .font(.caption)
+                            .foregroundStyle(AppTheme.muted)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    Spacer(minLength: 4)
+                    if allowsPrimary, selected {
+                        Button { makePrimary(house) } label: {
+                            Text(primary == house
+                                ? localized("ask.primary", language: language)
+                                : localized("ask.related", language: language))
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(primary == house ? Color.white : AppTheme.violet)
+                                .padding(.horizontal, 9)
+                                .frame(minHeight: 32)
+                                .background(
+                                    primary == house ? AppTheme.violet : AppTheme.violet.opacity(0.1),
+                                    in: Capsule()
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .contentShape(Rectangle())
+                .opacity(disabled ? 0.55 : 1)
+            }
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(localized("charts.done", language: language)) { dismiss() }
+                        .disabled(allowsPrimary && primary == nil && !related.isEmpty)
+                }
+            }
+        }
+    }
+
+    private func toggle(_ house: Int) {
+        guard !excluding.contains(house) || primary == house || related.contains(house) else { return }
+        if primary == house {
+            primary = nil
+        } else if related.contains(house) {
+            related.remove(house)
+        } else if allowsPrimary, primary == nil, related.isEmpty {
+            primary = house
+        } else {
+            related.insert(house)
+        }
+    }
+
+    private func makePrimary(_ house: Int) {
+        guard allowsPrimary else { return }
+        if let previous = primary, previous != house {
+            related.insert(previous)
+        }
+        related.remove(house)
+        primary = house
+    }
+}
+
+private struct ABCLifeAreasHelpView: View {
+    @Environment(\.dismiss) private var dismiss
+    let language: AppLanguage
+
+    var body: some View {
+        NavigationStack {
+            ScrollView(.vertical, showsIndicators: false) {
+                Text(attributedText)
+                    .font(.body)
+                    .foregroundStyle(AppTheme.text)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(18)
+            }
+            .background(ScreenBackground())
+            .navigationTitle(localized("ask.life-areas-help", language: language))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(localized("charts.done", language: language)) { dismiss() }
+                }
+            }
+        }
+    }
+
+    private var attributedText: AttributedString {
+        let resource = "abc-life-areas-help-\(language.helpResourceCode)"
+        guard let url = Bundle.main.url(forResource: resource, withExtension: "md"),
+              let markdown = try? String(contentsOf: url, encoding: .utf8),
+              let value = try? AttributedString(markdown: markdown)
+        else {
+            return AttributedString(localized("ask.help-unavailable", language: language))
+        }
+        return value
+    }
+}
+
+private extension AppLanguage {
+    var helpResourceCode: String {
+        switch self {
+        case .english: "en"
+        case .simplifiedChinese: "zh-Hans"
+        case .spanish: "es"
+        case .french: "fr"
+        }
+    }
+}
+
+private func askLifeAreaTitle(_ house: Int, language: AppLanguage) -> String {
+    let keys = [
+        "ask.house-area.1", "ask.house-area.2", "ask.house-area.3", "ask.house-area.4",
+        "ask.house-area.5", "ask.house-area.6", "ask.house-area.7", "ask.house-area.8",
+        "ask.house-area.9", "ask.house-area.10", "ask.house-area.11", "ask.house-area.12",
+    ]
+    return localized(keys[min(12, max(1, house)) - 1], language: language)
+}
+
+private func askLifeAreaDescription(_ house: Int, language: AppLanguage) -> String {
+    let keys = [
+        "ask.house-area-description.1", "ask.house-area-description.2",
+        "ask.house-area-description.3", "ask.house-area-description.4",
+        "ask.house-area-description.5", "ask.house-area-description.6",
+        "ask.house-area-description.7", "ask.house-area-description.8",
+        "ask.house-area-description.9", "ask.house-area-description.10",
+        "ask.house-area-description.11", "ask.house-area-description.12",
+    ]
+    return localized(keys[min(12, max(1, house)) - 1], language: language)
 }
 
 private enum AskViewError: Error {
@@ -1399,7 +1683,7 @@ private struct HoraryProfessionalView: View {
                     comparison: false
                 )
 
-                ForEach(analyses, id: \.targetHouse) { analysis in
+                ForEach(Array(analyses.enumerated()), id: \.offset) { _, analysis in
                     analysisBlock(analysis)
                 }
             }

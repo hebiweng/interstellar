@@ -407,6 +407,35 @@
         }
       }
     },
+    "ask.additional-life-areas-optional": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Additional Life Areas · Optional"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "附加生活领域 · 可选"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Áreas de vida adicionales · Opcional"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domaines de vie supplémentaires · Facultatif"
+          }
+        }
+      }
+    },
     "ask.answer": {
       "extractionState": "manual",
       "localizations": {
@@ -819,25 +848,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Compare two to five real options."
+            "value": "Compare two or three real options."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "比较两个到五个实际选项。"
+            "value": "比较两个或三个实际选项。"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Compara entre dos y cinco opciones reales."
+            "value": "Compara dos o tres opciones reales."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Comparez deux à cinq options réelles."
+            "value": "Comparez deux ou trois options réelles."
           }
         }
       }
@@ -925,6 +954,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "Jour"
+          }
+        }
+      }
+    },
+    "ask.do-all-options-belong-mainly-to-the-same-life-area": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Do all options belong mainly to the same life area?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有选项主要属于同一个生活领域吗？"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Todas las opciones pertenecen principalmente a la misma área de vida?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toutes les options relèvent-elles principalement du même domaine de vie ?"
           }
         }
       }
@@ -1335,6 +1393,35 @@
         }
       }
     },
+    "ask.help-unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Help is currently unavailable."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "帮助内容暂时无法显示。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La ayuda no está disponible en este momento."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’aide est momentanément indisponible."
+          }
+        }
+      }
+    },
     "ask.history": {
       "extractionState": "manual",
       "localizations": {
@@ -1364,31 +1451,379 @@
         }
       }
     },
+    "ask.house-area-description.1": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your identity, body, choices, health, and actions you take."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你的身份、身体、选择、健康和个人行动。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu identidad, cuerpo, decisiones, salud y acciones personales."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre identité, votre corps, vos choix, votre santé et vos actions."
+          }
+        }
+      }
+    },
+    "ask.house-area-description.10": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Career direction, promotion, status, reputation, bosses, and public life."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "事业方向、晋升、地位、声誉、上级和公众生活。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rumbo profesional, ascensos, estatus, reputación, jefes y vida pública."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orientation professionnelle, promotion, statut, réputation, hiérarchie et vie publique."
+          }
+        }
+      }
+    },
+    "ask.house-area-description.11": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Friends, communities, networks, organizations, and long-term hopes."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "朋友、社群、人脉、组织和长期愿望。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amistades, comunidades, redes, organizaciones y aspiraciones a largo plazo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amis, communautés, réseaux, organisations et aspirations à long terme."
+          }
+        }
+      }
+    },
+    "ask.house-area-description.12": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy, isolation, hidden issues, confidential matters, and what happens behind the scenes."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隐私、独处、隐藏问题、保密事务和幕后情况。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacidad, aislamiento, asuntos ocultos, temas confidenciales y lo que ocurre entre bastidores."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vie privée, isolement, problèmes cachés, affaires confidentielles et coulisses."
+          }
+        }
+      }
+    },
+    "ask.house-area-description.2": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Income, spending, personal finances, belongings, and resources."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收入、支出、个人财务、物品和资源。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingresos, gastos, finanzas personales, bienes y recursos."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revenus, dépenses, finances personnelles, biens et ressources."
+          }
+        }
+      }
+    },
+    "ask.house-area-description.3": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Messages, learning, siblings, documents, short trips, and daily movement."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "消息、学习、手足、文件、短途出行和日常往来。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mensajes, aprendizaje, hermanos, documentos, trayectos cortos y desplazamientos diarios."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Messages, apprentissage, fratrie, documents, courts trajets et déplacements quotidiens."
+          }
+        }
+      }
+    },
+    "ask.house-area-description.4": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Home, property, parents, family matters, and living situation."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "家庭、房产、父母、家事和居住状况。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hogar, vivienda, padres, asuntos familiares y situación de vida."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foyer, logement, parents, affaires familiales et conditions de vie."
+          }
+        }
+      }
+    },
+    "ask.house-area-description.5": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dating, romance, pleasure, creativity, pregnancy, and children."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "约会、恋爱、乐趣、创作、怀孕和子女。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Citas, romance, placer, creatividad, embarazo e hijos."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rencontres, amour, plaisir, créativité, grossesse et enfants."
+          }
+        }
+      }
+    },
+    "ask.house-area-description.6": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Job duties, coworkers, routines, service, and everyday health."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "工作职责、同事、日常习惯、服务和日常健康。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tareas laborales, compañeros, rutinas, servicio y salud cotidiana."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tâches professionnelles, collègues, routines, services et santé quotidienne."
+          }
+        }
+      }
+    },
+    "ask.house-area-description.7": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partners, relationships, contracts, competitors, and one-to-one matters."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "伴侣、关系、合同、竞争者和一对一事务。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parejas, relaciones, contratos, competidores y asuntos entre dos personas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partenaires, relations, contrats, concurrents et affaires en tête-à-tête."
+          }
+        }
+      }
+    },
+    "ask.house-area-description.8": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Debt, taxes, inheritance, shared finances, loss, and major transitions."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "债务、税务、继承、共同财务、损失和重大转变。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deudas, impuestos, herencias, finanzas compartidas, pérdidas y grandes transiciones."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dettes, impôts, héritages, finances partagées, pertes et transitions majeures."
+          }
+        }
+      }
+    },
+    "ask.house-area-description.9": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Long-distance travel, higher education, publishing, law, and beliefs."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "长途旅行、高等教育、出版、法律和信念。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viajes largos, educación superior, publicaciones, derecho y creencias."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voyages lointains, études supérieures, édition, droit et croyances."
+          }
+        }
+      }
+    },
     "ask.house-area.1": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Self & action"
+            "value": "Self & Personal Action"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "自我与行动"
+            "value": "自我与个人行动"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Identidad y acción"
+            "value": "Identidad y acción personal"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Identité et action"
+            "value": "Identité et action personnelle"
           }
         }
       }
@@ -1399,19 +1834,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Career & public role"
+            "value": "Career & Public Role"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "事业与社会位置"
+            "value": "事业与公众角色"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Carrera y papel público"
+            "value": "Carrera y vida pública"
           }
         },
         "fr": {
@@ -1428,25 +1863,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Friends, community & goals"
+            "value": "Friends & Groups"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "朋友、社群与目标"
+            "value": "朋友与群体"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Amistades, comunidad y metas"
+            "value": "Amistades y grupos"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Amis, communauté et objectifs"
+            "value": "Amis et groupes"
           }
         }
       }
@@ -1457,25 +1892,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rest & private matters"
+            "value": "Private & Hidden Matters"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "休息与隐秘事务"
+            "value": "私人及隐秘事务"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Descanso y asuntos privados"
+            "value": "Asuntos privados y ocultos"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Repos et affaires privées"
+            "value": "Affaires privées et cachées"
           }
         }
       }
@@ -1486,25 +1921,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Money & resources"
+            "value": "Money & Possessions"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "金钱与资源"
+            "value": "金钱与财物"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dinero y recursos"
+            "value": "Dinero y posesiones"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Argent et ressources"
+            "value": "Argent et possessions"
           }
         }
       }
@@ -1515,25 +1950,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Learning & short travel"
+            "value": "Communication & Local Life"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "学习、沟通与短途旅行"
+            "value": "沟通与本地生活"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aprendizaje y viajes cortos"
+            "value": "Comunicación y vida local"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Apprentissage et courts voyages"
+            "value": "Communication et vie locale"
           }
         }
       }
@@ -1544,7 +1979,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Home & family"
+            "value": "Home & Family"
           }
         },
         "zh-Hans": {
@@ -1573,7 +2008,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Romance & creativity"
+            "value": "Love, Creativity & Children"
           }
         },
         "zh-Hans": {
@@ -1585,13 +2020,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Romance y creatividad"
+            "value": "Amor, creatividad e hijos"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Romance et créativité"
+            "value": "Amour, créativité et enfants"
           }
         }
       }
@@ -1602,25 +2037,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Work, health & routine"
+            "value": "Work & Daily Routine"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "日常工作、健康与习惯"
+            "value": "工作与日常事务"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Trabajo, salud y rutina"
+            "value": "Trabajo y rutina diaria"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Travail, santé et routine"
+            "value": "Travail et quotidien"
           }
         }
       }
@@ -1631,25 +2066,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Partners & agreements"
+            "value": "Partnerships & Other People"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "伴侣、合作与契约"
+            "value": "伴侣关系与他人"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Parejas y acuerdos"
+            "value": "Relaciones y otras personas"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Partenaires et accords"
+            "value": "Partenariats et autres personnes"
           }
         }
       }
@@ -1660,25 +2095,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Shared money & change"
+            "value": "Shared Money & Major Change"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "共同财务与改变"
+            "value": "共同财务与重大变化"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dinero compartido y cambios"
+            "value": "Dinero compartido y grandes cambios"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Finances partagées et changement"
+            "value": "Finances partagées et changements majeurs"
           }
         }
       }
@@ -1689,25 +2124,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Travel & higher learning"
+            "value": "Travel, Study & Beliefs"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "远行、深造与信念"
+            "value": "旅行、学习与信念"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Viajes y estudios superiores"
+            "value": "Viajes, estudios y creencias"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Voyages et études supérieures"
+            "value": "Voyages, études et croyances"
           }
         }
       }
@@ -1824,6 +2259,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "Domaine de vie"
+          }
+        }
+      }
+    },
+    "ask.life-areas-help": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Life Areas Help"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "生活领域帮助"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ayuda sobre áreas de vida"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aide sur les domaines de vie"
           }
         }
       }
@@ -2114,6 +2578,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nommez chaque option"
+          }
+        }
+      }
+    },
+    "ask.name-the-real-options-and-choose-their-life-areas": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name the real options and choose the life areas that apply to them."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "为实际选项命名，并选择它们涉及的生活领域。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombra las opciones reales y elige las áreas de vida que les corresponden."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nommez les options réelles et choisissez les domaines de vie concernés."
           }
         }
       }
@@ -2524,6 +3017,35 @@
         }
       }
     },
+    "ask.primary": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Primary"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主要"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Principal"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Principal"
+          }
+        }
+      }
+    },
     "ask.querent-ruler": {
       "extractionState": "manual",
       "localizations": {
@@ -2607,6 +3129,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fenêtre recommandée"
+          }
+        }
+      }
+    },
+    "ask.related": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Related"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "相关"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relacionada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Associé"
           }
         }
       }
@@ -2810,6 +3361,122 @@
           "stringUnit": {
             "state": "translated",
             "value": "Recherche dans la période sélectionnée…"
+          }
+        }
+      }
+    },
+    "ask.select-life-areas": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select life areas"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择生活领域"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecciona áreas de vida"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir les domaines de vie"
+          }
+        }
+      }
+    },
+    "ask.shared-life-areas": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shared Life Areas"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共同生活领域"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Áreas de vida compartidas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domaines de vie partagés"
+          }
+        }
+      }
+    },
+    "ask.shared-primary-area": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shared Primary Area"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共同主要领域"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Área principal compartida"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domaine principal partagé"
+          }
+        }
+      }
+    },
+    "ask.shared-related-areas-optional": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shared Related Areas · Optional"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共同相关领域 · 可选"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Áreas relacionadas compartidas · Opcional"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Domaines associés partagés · Facultatif"
           }
         }
       }
@@ -5739,6 +6406,93 @@
           "stringUnit": {
             "state": "translated",
             "value": "Détails"
+          }
+        }
+      }
+    },
+    "common.no": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "否"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non"
+          }
+        }
+      }
+    },
+    "common.none": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ninguna"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun"
+          }
+        }
+      }
+    },
+    "common.yes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "是"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sí"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oui"
           }
         }
       }

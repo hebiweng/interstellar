@@ -74,11 +74,13 @@ public struct HoraryChoiceCandidate: Sendable, Equatable, Identifiable {
     public let id: UUID
     public let label: String
     public let house: Int
+    public let relatedHouses: [Int]
 
-    public init(id: UUID = UUID(), label: String, house: Int) {
+    public init(id: UUID = UUID(), label: String, house: Int, relatedHouses: [Int] = []) {
         self.id = id
         self.label = label
         self.house = house
+        self.relatedHouses = relatedHouses.filter { $0 != house }
     }
 }
 
@@ -86,6 +88,7 @@ public struct HoraryChoiceResult: Sendable, Equatable, Identifiable {
     public let id: UUID
     public let label: String
     public let house: Int
+    public let relatedHouses: [Int]
     public let ruler: CelestialBody
     public let rawScore: Double
     public let likelihood: Double
@@ -95,6 +98,7 @@ public struct HoraryChoiceResult: Sendable, Equatable, Identifiable {
         id: UUID,
         label: String,
         house: Int,
+        relatedHouses: [Int],
         ruler: CelestialBody,
         rawScore: Double,
         likelihood: Double,
@@ -103,6 +107,7 @@ public struct HoraryChoiceResult: Sendable, Equatable, Identifiable {
         self.id = id
         self.label = label
         self.house = house
+        self.relatedHouses = relatedHouses
         self.ruler = ruler
         self.rawScore = rawScore
         self.likelihood = likelihood
@@ -118,6 +123,7 @@ public enum TimingPrecision: String, Sendable, Codable, CaseIterable {
 
 public struct ElectionTimingRequest: Sendable, Equatable {
     public let targetHouse: Int
+    public let relatedHouses: [Int]
     public let startDate: Date
     public let endDate: Date
     public let location: GeographicLocation
@@ -127,6 +133,7 @@ public struct ElectionTimingRequest: Sendable, Equatable {
 
     public init(
         targetHouse: Int,
+        relatedHouses: [Int] = [],
         startDate: Date,
         endDate: Date,
         location: GeographicLocation,
@@ -135,6 +142,7 @@ public struct ElectionTimingRequest: Sendable, Equatable {
         precision: TimingPrecision
     ) {
         self.targetHouse = targetHouse
+        self.relatedHouses = relatedHouses.filter { $0 != targetHouse }
         self.startDate = startDate
         self.endDate = endDate
         self.location = location
@@ -308,10 +316,12 @@ public enum HoraryEngine {
 
     public static func analyze(
         snapshot: ChartSnapshot,
-        targetHouse: Int
+        targetHouse: Int,
+        targetRuler override: CelestialBody? = nil,
+        relatedHouses: [Int] = []
     ) -> HoraryAnalysis {
         let querentRuler = ruler(ofHouse: 1, in: snapshot)
-        let targetRuler = ruler(ofHouse: targetHouse, in: snapshot)
+        let targetRuler = override ?? ruler(ofHouse: targetHouse, in: snapshot)
         let querent = assess(querentRuler, in: snapshot)
         let target = assess(targetRuler, in: snapshot)
         let relationship = validTraditionalAspects(in: snapshot).first {
@@ -350,6 +360,18 @@ public enum HoraryEngine {
         let strengthScore = clamp((querent.score + target.score) / 4, lower: -10, upper: 10)
         components.append(.init(id: "strength", value: strengthScore))
 
+        let relatedRulers = Set(relatedHouses.filter { $0 != targetHouse }.map {
+            ruler(ofHouse: $0, in: snapshot)
+        })
+        if !relatedRulers.isEmpty {
+            let average = relatedRulers
+                .map { assess($0, in: snapshot).score }
+                .reduce(0, +) / Double(relatedRulers.count)
+            components.append(
+                .init(id: "related-area-support", value: clamp(average / 6, lower: -5, upper: 5))
+            )
+        }
+
         var obstruction = 0.0
         if relationship?.phase == .separating { obstruction -= 8 }
         if relationship?.kind.challenging == true { obstruction -= 7 }
@@ -383,8 +405,34 @@ public enum HoraryEngine {
         snapshot: ChartSnapshot,
         candidates: [HoraryChoiceCandidate]
     ) -> [HoraryChoiceResult] {
+        var occurrenceByHouse: [Int: Int] = [:]
+        let duplicateHouses = Set(
+            Dictionary(grouping: candidates, by: \.house)
+                .filter { $0.value.count > 1 }
+                .keys
+        )
         let analyses = candidates.map { candidate in
-            (candidate, analyze(snapshot: snapshot, targetHouse: candidate.house))
+            let occurrence = occurrenceByHouse[candidate.house, default: 0]
+            occurrenceByHouse[candidate.house] = occurrence + 1
+            let assignedRuler: CelestialBody?
+            if duplicateHouses.contains(candidate.house),
+               let cusp = snapshot.houses.first(where: { $0.number == candidate.house })
+            {
+                let signIndex = Int(normalizeDegrees(cusp.cuspDegrees) / 30)
+                let rulers = triplicityRulers(ofSign: signIndex, isDayChart: isDayChart(snapshot))
+                assignedRuler = occurrence < rulers.count ? rulers[occurrence] : nil
+            } else {
+                assignedRuler = nil
+            }
+            return (
+                candidate,
+                analyze(
+                    snapshot: snapshot,
+                    targetHouse: candidate.house,
+                    targetRuler: assignedRuler,
+                    relatedHouses: candidate.relatedHouses
+                )
+            )
         }
         let weights = analyses.map { max(1, $0.1.score) }
         let total = max(1, weights.reduce(0, +))
@@ -395,6 +443,7 @@ public enum HoraryEngine {
                 id: candidate.id,
                 label: candidate.label,
                 house: candidate.house,
+                relatedHouses: candidate.relatedHouses,
                 ruler: analysis.targetRuler,
                 rawScore: analysis.score,
                 likelihood: weights[index] / total * 100,
@@ -411,9 +460,14 @@ public enum HoraryEngine {
 
     public static func timingAnalysis(
         snapshot: ChartSnapshot,
-        targetHouse: Int
+        targetHouse: Int,
+        relatedHouses: [Int] = []
     ) -> HoraryAnalysis {
-        let base = analyze(snapshot: snapshot, targetHouse: targetHouse)
+        let base = analyze(
+            snapshot: snapshot,
+            targetHouse: targetHouse,
+            relatedHouses: relatedHouses
+        )
         let ascendantRuler = ruler(ofHouse: 1, in: snapshot)
         let ascendant = assess(ascendantRuler, in: snapshot)
         let target = base.target
@@ -473,6 +527,29 @@ public enum HoraryEngine {
             score: total,
             components: components
         )
+    }
+
+    /// Traditional Dorothean triplicity rulers, ordered for the chart sect.
+    /// The third value is the participating ruler used for a third same-area option.
+    public static func triplicityRulers(
+        ofSign signIndex: Int,
+        isDayChart: Bool
+    ) -> [CelestialBody] {
+        let rulers: (day: CelestialBody, night: CelestialBody, participating: CelestialBody)
+        switch normalizedSign(signIndex) % 4 {
+        case 0: rulers = (.sun, .jupiter, .saturn)       // Fire
+        case 1: rulers = (.venus, .moon, .mars)          // Earth
+        case 2: rulers = (.saturn, .mercury, .jupiter)   // Air
+        default: rulers = (.venus, .mars, .moon)         // Water
+        }
+        return isDayChart
+            ? [rulers.day, rulers.night, rulers.participating]
+            : [rulers.night, rulers.day, rulers.participating]
+    }
+
+    public static func isDayChart(_ snapshot: ChartSnapshot) -> Bool {
+        guard let sun = snapshot.point(.sun) else { return true }
+        return (7 ... 12).contains(snapshot.house(containing: sun.longitudeDegrees))
     }
 
     public static func validTraditionalAspects(in snapshot: ChartSnapshot) -> [ChartAspect] {
@@ -678,7 +755,8 @@ public struct ElectionTimingEngine: Sendable {
             )
             let analysis = HoraryEngine.timingAnalysis(
                 snapshot: snapshot,
-                targetHouse: request.targetHouse
+                targetHouse: request.targetHouse,
+                relatedHouses: request.relatedHouses
             )
             samples.append((date, snapshot, analysis))
             progress(Double(index + 1) / Double(count + 1) * 0.78)
@@ -707,7 +785,8 @@ public struct ElectionTimingEngine: Sendable {
                 )
                 let analysis = HoraryEngine.timingAnalysis(
                     snapshot: snapshot,
-                    targetHouse: request.targetHouse
+                    targetHouse: request.targetHouse,
+                    relatedHouses: request.relatedHouses
                 )
                 let day = calendar.startOfDay(for: cursor)
                 if refined[day] == nil || analysis.score > refined[day]!.2.score {

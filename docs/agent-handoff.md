@@ -51,6 +51,11 @@ AIGC:
 
 ### 本轮 UI 与事实修复
 
+- Today 头部已改为标题、完整日期、姓名与地点三层；长姓名和长地址不再与日期争抢同一行。
+- Profile、其他人物与 Ask 的地点入口统一为 Apple Maps；不再展示或编辑经纬度，地点和时区不能手填，时区随地图结果自动更新并只读显示。
+- Ask 三流程的 Life Areas 默认均为空，改为显式 Primary + Related 多选；未选 Primary 时不能计算，列表提供四语生活场景说明。
+- A/B/C 只支持 2–3 个选项；可选择共同 Primary/Related，也可为不同类型选项分别选择 Primary，共同 Primary 下 Option Additional 永远只作为 Related。相同 Primary 的候选由 AstroCore 按日夜盘 triplicity rulers 分配独立主星，普通 UI 不显示专业术语。
+- A/B/C 页面已加入问号入口，长帮助正文按 en / zh-Hans / es / fr 四个 Markdown 运行时资源独立维护。
 - 报告页删除 `% read`、阅读分钟估算；标签保持单行。
 - 合盘相位矩阵已增大并响应 Dynamic Type。
 - 卡片、Charts、Today 和普通 UI 的固定点字号已迁为 semantic / scaled Dynamic Type；架构门禁阻止重新引入。
@@ -100,6 +105,8 @@ AstroCore Snapshot / Aspect / Event
 
 ## 4. 最新验证证据
 
+- AstroCore 23 项测试通过，包含同领域 A/B/C 的 sect-aware triplicity 分配、三个独立主星和 Related Areas 传递测试。
+- iPhoneOS arm64 Debug 无签名构建通过；四语帮助 Markdown 已进入 App Resources，固定 UI 888 条四语本地化生成与构建期校验通过。
 - iPhoneOS arm64 Debug 真机构建通过，并已覆盖安装、启动到 iPhone 12 mini。
 - 真机月相数学与 14 对人物 × Modern/Classical 共 28 份合盘计划测试通过：8 卡顺序正确、空卡 0、卡内重复 0、事实引用与角色方向合法；所有实际选中事实在 en / zh-Hans / es / fr 均能命中非空解读。
 - 已用真机当前保存人物复现并修复合盘 `missingCopy`：未观察过的 `modern / relationship-overview / Jupiter conjunction Jupiter` 现命中已审核基础选择器；修复后同一真机页面正常显示 Relationship Overview。永久单元测试覆盖该键以及四语全部 planet-role / 12 宫 house-overlay 基础选择器。

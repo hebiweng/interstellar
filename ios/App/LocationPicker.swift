@@ -47,11 +47,17 @@ final class LocationSearchService: NSObject, ObservableObject, @preconcurrency M
             } else {
                 coordinate = item.placemark.coordinate
             }
+            guard let timeZone = item.timeZone,
+                  !(item.name ?? completion.title).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            else {
+                errorMessage = localizedDescriptionForMissingPlace
+                return nil
+            }
             return LocationSelection(
                 name: item.name ?? completion.title,
                 latitude: coordinate.latitude,
                 longitude: coordinate.longitude,
-                timezoneID: item.timeZone?.identifier ?? TimeZone.current.identifier
+                timezoneID: timeZone.identifier
             )
         } catch {
             errorMessage = error.localizedDescription
@@ -77,21 +83,24 @@ final class LocationSearchService: NSObject, ObservableObject, @preconcurrency M
             .reduce(into: [String]()) { result, value in
                 if !result.contains(value) { result.append(value) }
             }
+            guard !parts.isEmpty, let timeZone = placemark?.timeZone else {
+                errorMessage = localizedDescriptionForMissingPlace
+                return nil
+            }
             return LocationSelection(
-                name: parts.isEmpty ? String(format: "%.4f, %.4f", coordinate.latitude, coordinate.longitude) : parts.joined(separator: ", "),
+                name: parts.joined(separator: ", "),
                 latitude: coordinate.latitude,
                 longitude: coordinate.longitude,
-                timezoneID: placemark?.timeZone?.identifier ?? TimeZone.current.identifier
+                timezoneID: timeZone.identifier
             )
         } catch {
             errorMessage = error.localizedDescription
-            return LocationSelection(
-                name: String(format: "%.4f, %.4f", coordinate.latitude, coordinate.longitude),
-                latitude: coordinate.latitude,
-                longitude: coordinate.longitude,
-                timezoneID: TimeZone.current.identifier
-            )
+            return nil
         }
+    }
+
+    private var localizedDescriptionForMissingPlace: String {
+        "The selected map location does not include a valid address and time zone."
     }
 }
 

@@ -60,6 +60,10 @@ ChartSnapshot / Aspect / Event
 
 ## 3. ChartContext 参数
 
+地点参数只能来自 Apple 地图当前位置、搜索或点选；消费者 UI 不显示或编辑经纬度，时区由地点自动确定并只读展示。
+
+Ask Life Areas 默认空且必须显式选择。一个 Primary Area 决定核心 significator，Related Areas 只提供辅助证据。A/B/C 可使用 Shared Primary + Shared Related + Option Additional，或无 Shared Primary 时由每个 Option 显式选择 Primary；禁止 option-level Primary override。同一 Primary 的候选按盘的 sect 使用 triplicity rulers 分配独立 significator。
+
 | 盘型 | 参数 |
 |---|---|
 | 本命 | 人物出生资料 |

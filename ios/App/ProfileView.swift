@@ -110,12 +110,6 @@ struct ProfileView: View {
                 title: localized("profile.time-zone", language: model.language),
                 value: model.profile.timezoneID
             )
-            Divider().overlay(AppTheme.line)
-            detailRow(
-                icon: "location",
-                title: localized("profile.coordinates", language: model.language),
-                value: String(format: "%.4f, %.4f", model.profile.latitude, model.profile.longitude)
-            )
         }
         .cardSurface()
     }
@@ -325,36 +319,19 @@ private struct SavedPersonEditorView: View {
                         selection: $draft.profile.birthDateUTC,
                         displayedComponents: [.date, .hourAndMinute]
                     )
-                    TextField(
-                        localized("profile.place", language: language),
-                        text: $draft.profile.placeName
-                    )
-                    TextField(
-                        localized("profile.time-zone", language: language),
-                        text: $draft.profile.timezoneID
-                    )
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
                     Button {
                         showsLocationSearch = true
                     } label: {
-                        Label(
-                            localized("profile.choose-on-apple-maps", language: language),
-                            systemImage: "map"
-                        )
+                        HStack {
+                            Label(draft.profile.placeName, systemImage: "map")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                        }
                     }
-                    TextField(
-                        localized("profile.latitude", language: language),
-                        value: $draft.profile.latitude,
-                        format: .number.precision(.fractionLength(0 ... 6))
+                    LabeledContent(
+                        localized("profile.time-zone", language: language),
+                        value: draft.profile.timezoneID
                     )
-                    .keyboardType(.numbersAndPunctuation)
-                    TextField(
-                        localized("profile.longitude", language: language),
-                        value: $draft.profile.longitude,
-                        format: .number.precision(.fractionLength(0 ... 6))
-                    )
-                    .keyboardType(.numbersAndPunctuation)
                 }
 
                 Section {
@@ -381,8 +358,6 @@ private struct SavedPersonEditorView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(localized("profile.save", language: language)) {
-                        draft.profile.latitude = min(90, max(-90, draft.profile.latitude))
-                        draft.profile.longitude = min(180, max(-180, draft.profile.longitude))
                         onSave(draft)
                         dismiss()
                     }
@@ -1004,22 +979,19 @@ private struct ProfileEditorView: View {
                         selection: $draft.birthDateUTC,
                         displayedComponents: [.date, .hourAndMinute]
                     )
-                    TextField(localized("profile.place", language: language), text: $draft.placeName)
-                    TextField(localized("profile.time-zone", language: language), text: $draft.timezoneID)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
                     Button {
                         showsLocationSearch = true
                     } label: {
-                        Label(
-                            localized("profile.choose-on-apple-maps", language: language),
-                            systemImage: "map"
-                        )
+                        HStack {
+                            Label(draft.placeName, systemImage: "map")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                        }
                     }
-                    TextField(localized("profile.latitude", language: language), value: $draft.latitude, format: .number.precision(.fractionLength(0 ... 6)))
-                        .keyboardType(.numbersAndPunctuation)
-                    TextField(localized("profile.longitude", language: language), value: $draft.longitude, format: .number.precision(.fractionLength(0 ... 6)))
-                        .keyboardType(.numbersAndPunctuation)
+                    LabeledContent(
+                        localized("profile.time-zone", language: language),
+                        value: draft.timezoneID
+                    )
                 }
             }
             .environment(\.timeZone, TimeZone(identifier: draft.timezoneID) ?? .current)
@@ -1031,8 +1003,6 @@ private struct ProfileEditorView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(localized("profile.save", language: language)) {
-                        draft.latitude = min(90, max(-90, draft.latitude))
-                        draft.longitude = min(180, max(-180, draft.longitude))
                         onSave(draft)
                         dismiss()
                     }

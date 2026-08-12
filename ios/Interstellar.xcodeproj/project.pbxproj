@@ -7,8 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		00585B25977B0E4F127CB7B4 /* SecondaryLegacyCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80BDDA4426433E7E69C99A22 /* SecondaryLegacyCardFactory.swift */; };
+		02366B954939BBA2E0278EAB /* CopyCatalogMatcher+CurrentSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9246EC3FF329DF2BC403326 /* CopyCatalogMatcher+CurrentSky.swift */; };
 		026D94872BB73545933C4DFD /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = BB5BCE81BEF6F479DD875A36 /* LICENSE */; };
-		0460CF7D8F3E22B9075D2983 /* Insights/Secondary/UI/SecondaryCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFFCE1116941D55DB3B0CEB9 /* Insights/Secondary/UI/SecondaryCardViews.swift */; };
 		06CFB14BDA022A6FBA3EF7C2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4E6DA38605D25A9654FE7E62 /* Assets.xcassets */; };
 		0855A21E00DD103101CF2006 /* CopyCatalog-fr.json in Resources */ = {isa = PBXBuildFile; fileRef = 372507314C545F3C463E6AFA /* CopyCatalog-fr.json */; };
 		0DADEB896547684C5A4056A8 /* ChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5C939878A4D22398ADB7CBE /* ChartsView.swift */; };
@@ -17,87 +18,90 @@
 		1385C846098AD427DA218E0C /* VisualRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501ADE1C8B476ED84F14B948 /* VisualRegressionTests.swift */; };
 		15A53D4BD43601EE6426BA5A /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA31C8B1C13F10113F10E112 /* TodayView.swift */; };
 		16C6E1985313246353EDB4F7 /* AstroTerms-es.json in Resources */ = {isa = PBXBuildFile; fileRef = AB744A28C654F60FA3B7A42F /* AstroTerms-es.json */; };
+		1794539D993157B75CDD0030 /* abc-life-areas-help-zh-Hans.md in Resources */ = {isa = PBXBuildFile; fileRef = 51D302BEED2320F6644CB2B1 /* abc-life-areas-help-zh-Hans.md */; };
 		17DA24AF7292AB4828A37395 /* InsightContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B2767ACABFDDAEEBA88C4E /* InsightContent.swift */; };
-		232F7FD0850336F8033F6943 /* Insights/Secondary/Copy/CopyCatalogMatcher+Secondary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1633A44EE64206F77AD3111 /* Insights/Secondary/Copy/CopyCatalogMatcher+Secondary.swift */; };
-		32E4EC5F0E9F52585B25C822 /* Insights/Transit/Planning/TransitContentPlanning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F4FC24162F432CAB03EB271 /* Insights/Transit/Planning/TransitContentPlanning.swift */; };
+		1D9909C647E496C423149F54 /* NatalCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70137E5B98FB7ED9A5271D4E /* NatalCardViews.swift */; };
+		22FE763B15FC08F52E396C93 /* InsightVisualRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C15B6C5E4FC301E99B2B07C /* InsightVisualRouter.swift */; };
+		33054AA25131FE100A8ACD0B /* ClassicalTransitPlanningTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CBBF3C1035EE83B4DD9EADC /* ClassicalTransitPlanningTests.swift */; };
 		33AF4A0526E3FCBA484AE56F /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E20C395BDFD8BD0B24388C /* AppModel.swift */; };
-		A30000000000000000000001 /* SnapshotCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40000000000000000000001 /* SnapshotCache.swift */; };
-		A30000000000000000000002 /* AppChartCalculationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40000000000000000000002 /* AppChartCalculationService.swift */; };
-		A30000000000000000000003 /* AppEnrichmentService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40000000000000000000003 /* AppEnrichmentService.swift */; };
-		A30000000000000000000004 /* AppAIReportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40000000000000000000004 /* AppAIReportService.swift */; };
-		374360C2266B05B53EB6D0B7 /* Insights/Shared/Factory/ChartCardFactoryContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62CF192AD988F079E6544240 /* Insights/Shared/Factory/ChartCardFactoryContext.swift */; };
 		388FE3F37754814E0A699FE6 /* agpl-3.0.txt in Resources */ = {isa = PBXBuildFile; fileRef = 304F386EC1EE838F3AD709A9 /* agpl-3.0.txt */; };
+		3C1AFAC75A47C87CC9F4D40C /* SynastryLegacyCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0F4E5EB51698A7A4BAD76D /* SynastryLegacyCardFactory.swift */; };
 		3FF959A490BE10D499C12683 /* ReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E55B957F3B40BB06BDBB4DE /* ReportsView.swift */; };
+		44FD8E26CE2466635A276B1D /* CurrentSkyChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0FB53B8C0D70570B8A46BF6 /* CurrentSkyChartCardFactory.swift */; };
 		464458B2F8E2AF6F04173689 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2A9B7F6653E3B21A74DFFF2 /* Models.swift */; };
+		4929DDDC3B76B0B33EF5FE0F /* SharedCardComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C9751803A580CFFD4F8F56 /* SharedCardComponents.swift */; };
+		495F919A17C34BF2A6544CDA /* CopyCatalogMatcher+Natal.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2ECE55A8EDFBADC38950773 /* CopyCatalogMatcher+Natal.swift */; };
+		4980870A6064480F223751CA /* CardContractValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E40E064E50A383864A2EE726 /* CardContractValidator.swift */; };
 		4C985AF7B6AFDBAB6785A004 /* TodayEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8B5EDCA7BBB5A87878D3A6E /* TodayEngine.swift */; };
-		4CBC092DCB6BD499035C595E /* Insights/Natal/UI/NatalCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8D585830B5A1A12C639A232 /* Insights/Natal/UI/NatalCardViews.swift */; };
 		4E2C9AE9DCCE3BFD47E957F3 /* PrivateCorpus-en.json in Resources */ = {isa = PBXBuildFile; fileRef = 35AF946924FFE0C5C53C364D /* PrivateCorpus-en.json */; };
+		4E899578F7FE3416C60B223B /* CopyCatalogMatcher+SolarReturn.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2144E58BD7D63D1B164367E /* CopyCatalogMatcher+SolarReturn.swift */; };
 		4ECA6EA76176B0C5FBEB5EB9 /* PrivateContent-en.json in Resources */ = {isa = PBXBuildFile; fileRef = F68BC5DCEB635B9D898E770C /* PrivateContent-en.json */; };
-		4F03729FB25AA92D7D49BB00 /* Insights/CurrentSky/Copy/CopyCatalogMatcher+CurrentSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5300C9897C49074140DC341F /* Insights/CurrentSky/Copy/CopyCatalogMatcher+CurrentSky.swift */; };
 		4F27F066D66B76B397D64A03 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BDBF1C8DDAF72951EAEA6DCF /* Localizable.xcstrings */; };
-		50F051BFE4B35370AC3EFF82 /* Insights/CurrentSky/Legacy/CurrentSkyLegacyCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0355A3D026033EDC953FBED3 /* Insights/CurrentSky/Legacy/CurrentSkyLegacyCardFactory.swift */; };
+		5028400A7A6E814BF89BCD27 /* SynastryChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18C0A36185173B04800EC00 /* SynastryChartCardFactory.swift */; };
 		5335DA4440460DC6D77949CA /* ephe in Resources */ = {isa = PBXBuildFile; fileRef = 0CA4E3ABEDF5DDF5FAB1AC76 /* ephe */; };
-		53AAFE73B01CB1098CC93B62 /* Insights/Synastry/Legacy/SynastryLegacyCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 123A6EF815ACB10EA4B196F7 /* Insights/Synastry/Legacy/SynastryLegacyCardFactory.swift */; };
+		55F5308410E0745739D19183 /* SecondaryChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F219C33B43B0E13C2DE254 /* SecondaryChartCardFactory.swift */; };
 		5950553625EE9C7B0A2F7DF4 /* AstroTerms-en.json in Resources */ = {isa = PBXBuildFile; fileRef = E49BBC6A375BF1066E055FC2 /* AstroTerms-en.json */; };
+		5971882F0B032678A52F2356 /* InsightFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F8D78DCB5EEDC2C7B7AB0F3 /* InsightFactory.swift */; };
 		59E494C9AC4EB5EEDFB910CD /* LocalizedFormatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B5FB5FF8C581EAA64A6F58 /* LocalizedFormatters.swift */; };
-		5AE741FC967DD2F173E6AFD9 /* Insights/Synastry/Copy/CopyCatalogMatcher+Synastry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893561A9824817AC3B24CE70 /* Insights/Synastry/Copy/CopyCatalogMatcher+Synastry.swift */; };
 		5EA16EAEC323BA7C8DD81A9A /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A6D85449819D6C4E404066 /* Theme.swift */; };
 		5F50F5CBE22497DE87F201C7 /* TransitContentPlannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0741E435F931A6CA96910082 /* TransitContentPlannerTests.swift */; };
 		61351E9509F520477D1797F6 /* InterstellarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 055D71348E930EDB7CEA9D25 /* InterstellarApp.swift */; };
 		62DD96AFCE12CF9A7D1E0BF8 /* CopyCatalog-es.json in Resources */ = {isa = PBXBuildFile; fileRef = 16E441C69E6B1A0FDF26C840 /* CopyCatalog-es.json */; };
-		6799FC7090A83402FE95795E /* Insights/Shared/Routing/InsightFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10109DF1D818133D4F69FB22 /* Insights/Shared/Routing/InsightFactory.swift */; };
-		69DB53289152794B203CFD7E /* Insights/Shared/Factory/LegacyCardFactorySupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BA2BD6F4842A1476CCA0515 /* Insights/Shared/Factory/LegacyCardFactorySupport.swift */; };
-		6D8A2F8094995AA04F3B6CAC /* Insights/Shared/Validation/CardContractValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0340DB625FB55455A152A360 /* Insights/Shared/Validation/CardContractValidator.swift */; };
+		69D2947D4DAEF327395440EC /* TransitChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1046F5BCC8A7B5114076BE5 /* TransitChartCardFactory.swift */; };
+		6DF8FD6A4F935548CE5FFF08 /* CurrentSkyCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4A3A93914F96ADD04BCE584 /* CurrentSkyCardViews.swift */; };
 		7054C08BB4A305C2CE8328DA /* AskHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1C2A46A3725C8A3CDBFC8B /* AskHistory.swift */; };
 		7146C73C4FBB984FB0E84E57 /* Reports.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3989AA7077B4B8CF57C56610 /* Reports.swift */; };
 		7195DECE9971A2CC7BF9F222 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F53A273536232B2755B411 /* RootView.swift */; };
-		7228931DBEF07D48D1609EE1 /* Insights/SolarReturn/UI/SolarReturnCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CC3C86CDD51A564B9BC5A4E /* Insights/SolarReturn/UI/SolarReturnCardViews.swift */; };
-		75B169088CF8E2A1A77C1B6D /* Insights/Synastry/UI/SynastryCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1815FD0591CF3657617BC19 /* Insights/Synastry/UI/SynastryCardViews.swift */; };
 		77C79F87ECF06FBD5A1BBC66 /* AstroCore in Frameworks */ = {isa = PBXBuildFile; productRef = 920366345E4608960231F5F8 /* AstroCore */; };
-		79461AF274F6E7E356F10E9F /* Insights/Transit/Factory/TransitChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = E12BEAE3A00ACE6CE0C81462 /* Insights/Transit/Factory/TransitChartCardFactory.swift */; };
+		79F33F52F35C68F4E0743487 /* abc-life-areas-help-es.md in Resources */ = {isa = PBXBuildFile; fileRef = 3D415F3E6315EB99B176E7CB /* abc-life-areas-help-es.md */; };
 		7B00116445E815363BD4B368 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 12B96210B8B65212F06462C7 /* InfoPlist.strings */; };
 		7B37214AECB62744C27DD168 /* AIGeneration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2114D2FD8739C6BB62FD26EF /* AIGeneration.swift */; };
-		7BD2BF590431A95DD7F38983 /* Insights/CurrentSky/Factory/CurrentSkyChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB46E948AED3EC723B7948EC /* Insights/CurrentSky/Factory/CurrentSkyChartCardFactory.swift */; };
-		7C558D621D8F9097B359C9E6 /* Insights/Transit/Validation/TransitCardContractValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B159C1D551E1C85DF54E78E1 /* Insights/Transit/Validation/TransitCardContractValidator.swift */; };
-		7E4D7C8BD1B7749EF758D4AA /* Insights/Secondary/Factory/SecondaryChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7880310205AF5E10CFC0EF7 /* Insights/Secondary/Factory/SecondaryChartCardFactory.swift */; };
+		7BA26679B82098921000CCF4 /* SecondaryCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA033884853D4F649DCA3A50 /* SecondaryCardViews.swift */; };
 		7FDF5EB81E59857B29D526B5 /* AstroTerms-fr.json in Resources */ = {isa = PBXBuildFile; fileRef = A638D9D9A2F918B27471D35F /* AstroTerms-fr.json */; };
 		80B678D9DAB2A785989708A6 /* ChartEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FFE425FA91D67D5112FB3FE /* ChartEvents.swift */; };
-		80DA0FD95955E53A192D662E /* Insights/Shared/UI/InsightVisualRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8BB2A42780ADAE8B1055014 /* Insights/Shared/UI/InsightVisualRouter.swift */; };
+		81879C97D92790AA2A645A78 /* ClassicalTransitPlanningStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7B06AF686095F8D7074FC4 /* ClassicalTransitPlanningStrategy.swift */; };
 		82A5A08E61A2A43E19EC5007 /* LocationPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1C4311E86E866790B89BEA /* LocationPicker.swift */; };
+		832EEE8C722945D95B952F99 /* NatalChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 870550BABBB1A4045FB38419 /* NatalChartCardFactory.swift */; };
 		83E776DFD24F77B62FDFF78B /* WeeklyForecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D7BD1EE6C166DE149FA32C4 /* WeeklyForecast.swift */; };
-		89312B6AF2D05656AA96EAE1 /* Insights/CurrentSky/UI/CurrentSkyCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEFE173B33980515FC04F0F7 /* Insights/CurrentSky/UI/CurrentSkyCardViews.swift */; };
+		8548C3309D21611BA159183D /* AppAIReportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16CCFFB5C0A8A83EACE8C47F /* AppAIReportService.swift */; };
+		88E12219F4EFF13E0736FE45 /* CopyCatalogMatcher+Secondary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DA05D01ACC5CCFEED503A57 /* CopyCatalogMatcher+Secondary.swift */; };
 		89A77CE8E88720666E5ECE90 /* SynastryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 499908CB866531E9C208DDCF /* SynastryView.swift */; };
+		910D7E37690DFE9CF39B6CCB /* abc-life-areas-help-en.md in Resources */ = {isa = PBXBuildFile; fileRef = E8C236CDE4D10394DD945034 /* abc-life-areas-help-en.md */; };
 		9724D9A3584084D69C4A0CFC /* AstroTerms-zh-Hans.json in Resources */ = {isa = PBXBuildFile; fileRef = C5445403CDC1A5A53F3CA7BE /* AstroTerms-zh-Hans.json */; };
-		99722C7906C688B6A8F32D6E /* Insights/SolarReturn/Factory/SolarReturnChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8B1E414892E11EA1A733138 /* Insights/SolarReturn/Factory/SolarReturnChartCardFactory.swift */; };
-		A22342FBE9C22D58E56E7C48 /* Insights/Transit/Copy/CopyCatalogMatcher+Transit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28FDC399EDDF5B6931F9D81A /* Insights/Transit/Copy/CopyCatalogMatcher+Transit.swift */; };
-		A3042F968B932D14C41DF29A /* Insights/Shared/Factory/InsightCardAssembler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88276D31AF7038746C9CE9E8 /* Insights/Shared/Factory/InsightCardAssembler.swift */; };
-		A6E3FC3B0D1D0ECB38441B5C /* Insights/Transit/Factory/TransitCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69C046582BB6396A8D36D58C /* Insights/Transit/Factory/TransitCardFactory.swift */; };
+		9DFD0DFF988B807727C7E222 /* abc-life-areas-help-fr.md in Resources */ = {isa = PBXBuildFile; fileRef = 14356E98A5D38BD641396766 /* abc-life-areas-help-fr.md */; };
+		A3239AD8EAACA0ACDAB0DD80 /* CurrentSkyLegacyCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3611EB071ABBD875FD657E40 /* CurrentSkyLegacyCardFactory.swift */; };
+		A67DFAE27B65045744E93553 /* TransitCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 981F4C2821CFBF67FAAA0AD8 /* TransitCardFactory.swift */; };
 		A863BE485A3BF7AE893CF28F /* ContentKit in Frameworks */ = {isa = PBXBuildFile; productRef = 5B9BE7BBBE9923D7E31A58CA /* ContentKit */; };
+		AA34CAD28D767A1F2C0D2D42 /* AppChartCalculationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0D4BA551D42474094AA7BA /* AppChartCalculationService.swift */; };
 		ACE891B9EF0E4DF7055CA6D8 /* PrivateRules-Today.json in Resources */ = {isa = PBXBuildFile; fileRef = DEAB31C516DCEE8FEDBE75A8 /* PrivateRules-Today.json */; };
-		B2456C396CD70966D99C6C41 /* Insights/Natal/Copy/CopyCatalogMatcher+Natal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FCA5B3E4611E5BFECBED4E2 /* Insights/Natal/Copy/CopyCatalogMatcher+Natal.swift */; };
+		AEBFB69B492E07ADA4D3ECFB /* ClassicalTransitContractValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96EA5C5093F66F8DBEDE5D37 /* ClassicalTransitContractValidator.swift */; };
+		B1F740BBC29FB11A27FD3A37 /* LegacyCardFactorySupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F38F42C1794260A5DB8E8B /* LegacyCardFactorySupport.swift */; };
 		B47D63ACE732AFE79F71740D /* InterpretationContextFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03268C1EAB77BCD4B05BCC74 /* InterpretationContextFactory.swift */; };
 		B6111E2F452E307366314E7C /* ConsumerCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C28BE23BBAEDB4F998B852E4 /* ConsumerCopy.swift */; };
-		B6D4C285194905AAF84364FD /* Insights/SolarReturn/Legacy/SolarReturnLegacyCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7013E792CEB70BD25A6E03E /* Insights/SolarReturn/Legacy/SolarReturnLegacyCardFactory.swift */; };
-		B81A0F114E0471AE204D21DC /* Insights/Secondary/Legacy/SecondaryLegacyCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 920B179C793896511AB47267 /* Insights/Secondary/Legacy/SecondaryLegacyCardFactory.swift */; };
-		BD9A8CBEC8A8A165EB90E4A4 /* Insights/Natal/Legacy/NatalLegacyCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07DCEFA9FF1F1CFACF0FD258 /* Insights/Natal/Legacy/NatalLegacyCardFactory.swift */; };
+		BA383EA66FF2C6A25247DE91 /* AppEnrichmentService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A787B2E1810C2E4F9D1CB9 /* AppEnrichmentService.swift */; };
+		BD54F74F35A8C8E4B7EBEA87 /* ClassicalTransitThemeMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F3351613FF5684A3CC89A3 /* ClassicalTransitThemeMapper.swift */; };
 		BF84B2B0706F6DBB8773DCD3 /* AstroTerms.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD2F2C2DC93A3770F96DC584 /* AstroTerms.swift */; };
+		BFEF26946DEBCC71082A8828 /* CopyCatalogMatcher+Synastry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5E38526DAC47EF3413FD59 /* CopyCatalogMatcher+Synastry.swift */; };
 		C09B0F0F7FF22C4AC54D285B /* ChartRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B958CF1AD3B3C7FE6219102 /* ChartRenderer.swift */; };
-		C10000000000000000000001 /* Insights/Transit/Copy/ClassicalTransitThemeMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000001 /* Insights/Transit/Copy/ClassicalTransitThemeMapper.swift */; };
-		C10000000000000000000002 /* Insights/Transit/Planning/ClassicalTransitPlanningStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000002 /* Insights/Transit/Planning/ClassicalTransitPlanningStrategy.swift */; };
-		C10000000000000000000003 /* Insights/Transit/Validation/ClassicalTransitContractValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000003 /* Insights/Transit/Validation/ClassicalTransitContractValidator.swift */; };
-		C10000000000000000000004 /* ClassicalTransitPlanningTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000004 /* ClassicalTransitPlanningTests.swift */; };
-		CB76B673890DCC538012DDEC /* Insights/Natal/Factory/NatalChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1876329C2EC39EE6C406FA75 /* Insights/Natal/Factory/NatalChartCardFactory.swift */; };
+		C4222E4A7E9E56D1FA7C480C /* TransitCardContractValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4C25AC99C2A3DD4770FC077 /* TransitCardContractValidator.swift */; };
+		C5F5F67D0BA780D9C8C43E5F /* NatalLegacyCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34DD069878C0A81B66276264 /* NatalLegacyCardFactory.swift */; };
+		CB9F0FB190BD8004F5C091BC /* SolarReturnCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5BC32F5A9499E4F9D5AE269 /* SolarReturnCardViews.swift */; };
 		CD7C5811C4C499E2E242E0D1 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45FCBC91108D8B597D89E39C /* ProfileView.swift */; };
 		CE67DE4D3AB8A95E65BF59BA /* AstroCore in Frameworks */ = {isa = PBXBuildFile; productRef = C9A7C547B8DF2CD2A8F2A498 /* AstroCore */; };
-		CED8706F864B396FF90616DF /* Insights/Shared/UI/SharedCardComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8DD6E36567C504326AF839E /* Insights/Shared/UI/SharedCardComponents.swift */; };
+		CF0A13278301A647D1CD133E /* SolarReturnChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37CFC1E719FF3811269D124 /* SolarReturnChartCardFactory.swift */; };
+		D00797D053FAE29DE567A3DC /* TransitContentPlanning.swift in Sources */ = {isa = PBXBuildFile; fileRef = A42D05993CC02C05A0EF29EC /* TransitContentPlanning.swift */; };
 		D1DE9CA0D5D198E080205D30 /* CopyCatalog-en.json in Resources */ = {isa = PBXBuildFile; fileRef = 60593A20AA82B656CE29E02E /* CopyCatalog-en.json */; };
+		D2D0091B09F103587B4248E8 /* ChartCardFactoryContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216680241A82944F268E9E7 /* ChartCardFactoryContext.swift */; };
+		D40BC4EC458DE75C314BC350 /* TransitCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 540E8C52B9FD903F6E70EFDF /* TransitCardViews.swift */; };
+		D51DC095CC19CE43B59D3CBC /* SnapshotCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E86A56712B23B2F792406049 /* SnapshotCache.swift */; };
+		D580F0929EEB4324DD916489 /* ChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7374A19C7F598DB01612A991 /* ChartCardFactory.swift */; };
 		D915AAF8D61193EBD6DC7A70 /* PrivateCorpus-zh-Hans.json in Resources */ = {isa = PBXBuildFile; fileRef = 6CEE7F82FD5619F1FB01932D /* PrivateCorpus-zh-Hans.json */; };
-		DB3E41AF84B76A41254E081C /* Insights/Synastry/Factory/SynastryChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E351C1266146755569C335 /* Insights/Synastry/Factory/SynastryChartCardFactory.swift */; };
-		E22EBFCED8B7BE3E02961EAB /* Insights/Shared/Factory/ChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC97B798E244196817CB315F /* Insights/Shared/Factory/ChartCardFactory.swift */; };
-		ECC6E0550C9AC3BE38AC331A /* Insights/SolarReturn/Copy/CopyCatalogMatcher+SolarReturn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DE68EEC7E979FA9F00998CA /* Insights/SolarReturn/Copy/CopyCatalogMatcher+SolarReturn.swift */; };
+		DA6B16C2768D7B5927B08060 /* InsightCardAssembler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46DDB44B7F03260D94FE6C9A /* InsightCardAssembler.swift */; };
+		E15F9DA314345C1942C995D4 /* SolarReturnLegacyCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F67D601B0B8854BCF28D43 /* SolarReturnLegacyCardFactory.swift */; };
+		E597F871F49F5F2A9A054A7F /* SynastryCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BAD00A6ED8F9C344824B06F /* SynastryCardViews.swift */; };
+		EC6A8A4FDB2270B2A17EE47E /* CopyCatalogMatcher+Transit.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3E51ABD17125BFA6309793 /* CopyCatalogMatcher+Transit.swift */; };
+		F148813E729FEB595A1040DC /* InsightCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840A27B131AF789B41A4F43C /* InsightCardView.swift */; };
 		F36779F7EEAAF8EFA1F68D6E /* CopyCatalog-zh-Hans.json in Resources */ = {isa = PBXBuildFile; fileRef = 637B2FF5242CA3AC15B710C9 /* CopyCatalog-zh-Hans.json */; };
-		F549DCAA0B906EC4BB3FEFF2 /* Insights/Shared/UI/InsightCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 082CC325E9CEC17F0EDE722A /* Insights/Shared/UI/InsightCardView.swift */; };
-		FC5DF24A6F1FF776A22ED042 /* Insights/Transit/UI/TransitCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0E502D38699375F399B8FD /* Insights/Transit/UI/TransitCardViews.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -119,100 +123,104 @@
 
 /* Begin PBXFileReference section */
 		02E20C395BDFD8BD0B24388C /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
-		A40000000000000000000001 /* SnapshotCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotCache.swift; sourceTree = "<group>"; };
-		A40000000000000000000002 /* AppChartCalculationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppChartCalculationService.swift; sourceTree = "<group>"; };
-		A40000000000000000000003 /* AppEnrichmentService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnrichmentService.swift; sourceTree = "<group>"; };
-		A40000000000000000000004 /* AppAIReportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAIReportService.swift; sourceTree = "<group>"; };
 		03268C1EAB77BCD4B05BCC74 /* InterpretationContextFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterpretationContextFactory.swift; sourceTree = "<group>"; };
-		0340DB625FB55455A152A360 /* Insights/Shared/Validation/CardContractValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Shared/Validation/CardContractValidator.swift; sourceTree = "<group>"; };
-		0355A3D026033EDC953FBED3 /* Insights/CurrentSky/Legacy/CurrentSkyLegacyCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/CurrentSky/Legacy/CurrentSkyLegacyCardFactory.swift; sourceTree = "<group>"; };
 		055D71348E930EDB7CEA9D25 /* InterstellarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterstellarApp.swift; sourceTree = "<group>"; };
 		0741E435F931A6CA96910082 /* TransitContentPlannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitContentPlannerTests.swift; sourceTree = "<group>"; };
-		07DCEFA9FF1F1CFACF0FD258 /* Insights/Natal/Legacy/NatalLegacyCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Natal/Legacy/NatalLegacyCardFactory.swift; sourceTree = "<group>"; };
-		082CC325E9CEC17F0EDE722A /* Insights/Shared/UI/InsightCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Shared/UI/InsightCardView.swift; sourceTree = "<group>"; };
-		0BA2BD6F4842A1476CCA0515 /* Insights/Shared/Factory/LegacyCardFactorySupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Shared/Factory/LegacyCardFactorySupport.swift; sourceTree = "<group>"; };
 		0CA4E3ABEDF5DDF5FAB1AC76 /* ephe */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ephe; path = ../vendor/swisseph/ephe; sourceTree = SOURCE_ROOT; };
 		0D7BD1EE6C166DE149FA32C4 /* WeeklyForecast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyForecast.swift; sourceTree = "<group>"; };
-		0DE68EEC7E979FA9F00998CA /* Insights/SolarReturn/Copy/CopyCatalogMatcher+SolarReturn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Insights/SolarReturn/Copy/CopyCatalogMatcher+SolarReturn.swift"; sourceTree = "<group>"; };
-		10109DF1D818133D4F69FB22 /* Insights/Shared/Routing/InsightFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Shared/Routing/InsightFactory.swift; sourceTree = "<group>"; };
-		123A6EF815ACB10EA4B196F7 /* Insights/Synastry/Legacy/SynastryLegacyCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Synastry/Legacy/SynastryLegacyCardFactory.swift; sourceTree = "<group>"; };
+		14356E98A5D38BD641396766 /* abc-life-areas-help-fr.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "abc-life-areas-help-fr.md"; sourceTree = "<group>"; };
+		16CCFFB5C0A8A83EACE8C47F /* AppAIReportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAIReportService.swift; sourceTree = "<group>"; };
 		16E441C69E6B1A0FDF26C840 /* CopyCatalog-es.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "CopyCatalog-es.json"; sourceTree = "<group>"; };
-		1876329C2EC39EE6C406FA75 /* Insights/Natal/Factory/NatalChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Natal/Factory/NatalChartCardFactory.swift; sourceTree = "<group>"; };
+		1C15B6C5E4FC301E99B2B07C /* InsightVisualRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightVisualRouter.swift; sourceTree = "<group>"; };
+		1D5E38526DAC47EF3413FD59 /* CopyCatalogMatcher+Synastry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CopyCatalogMatcher+Synastry.swift"; sourceTree = "<group>"; };
 		2114D2FD8739C6BB62FD26EF /* AIGeneration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIGeneration.swift; sourceTree = "<group>"; };
 		28B5FB5FF8C581EAA64A6F58 /* LocalizedFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedFormatters.swift; sourceTree = "<group>"; };
-		28FDC399EDDF5B6931F9D81A /* Insights/Transit/Copy/CopyCatalogMatcher+Transit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Insights/Transit/Copy/CopyCatalogMatcher+Transit.swift"; sourceTree = "<group>"; };
 		2A4FBE0CC517EF4C1D54C807 /* InterstellarUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = InterstellarUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C19015724A0F9DB648CEDBD /* Interstellar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Interstellar.entitlements; sourceTree = "<group>"; };
+		2DA05D01ACC5CCFEED503A57 /* CopyCatalogMatcher+Secondary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CopyCatalogMatcher+Secondary.swift"; sourceTree = "<group>"; };
 		304F386EC1EE838F3AD709A9 /* agpl-3.0.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "agpl-3.0.txt"; sourceTree = "<group>"; };
 		33F53A273536232B2755B411 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		34DD069878C0A81B66276264 /* NatalLegacyCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NatalLegacyCardFactory.swift; sourceTree = "<group>"; };
 		35AF946924FFE0C5C53C364D /* PrivateCorpus-en.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "PrivateCorpus-en.json"; sourceTree = "<group>"; };
+		3611EB071ABBD875FD657E40 /* CurrentSkyLegacyCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentSkyLegacyCardFactory.swift; sourceTree = "<group>"; };
 		372507314C545F3C463E6AFA /* CopyCatalog-fr.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "CopyCatalog-fr.json"; sourceTree = "<group>"; };
 		3989AA7077B4B8CF57C56610 /* Reports.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reports.swift; sourceTree = "<group>"; };
 		3B958CF1AD3B3C7FE6219102 /* ChartRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartRenderer.swift; sourceTree = "<group>"; };
+		3D415F3E6315EB99B176E7CB /* abc-life-areas-help-es.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "abc-life-areas-help-es.md"; sourceTree = "<group>"; };
 		3E1C2A46A3725C8A3CDBFC8B /* AskHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskHistory.swift; sourceTree = "<group>"; };
 		40093D315097B7945D211895 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		45FCBC91108D8B597D89E39C /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		46DDB44B7F03260D94FE6C9A /* InsightCardAssembler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightCardAssembler.swift; sourceTree = "<group>"; };
 		499908CB866531E9C208DDCF /* SynastryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynastryView.swift; sourceTree = "<group>"; };
+		49A787B2E1810C2E4F9D1CB9 /* AppEnrichmentService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnrichmentService.swift; sourceTree = "<group>"; };
+		4BAD00A6ED8F9C344824B06F /* SynastryCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynastryCardViews.swift; sourceTree = "<group>"; };
 		4E6DA38605D25A9654FE7E62 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		501ADE1C8B476ED84F14B948 /* VisualRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualRegressionTests.swift; sourceTree = "<group>"; };
-		5300C9897C49074140DC341F /* Insights/CurrentSky/Copy/CopyCatalogMatcher+CurrentSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Insights/CurrentSky/Copy/CopyCatalogMatcher+CurrentSky.swift"; sourceTree = "<group>"; };
+		50F219C33B43B0E13C2DE254 /* SecondaryChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondaryChartCardFactory.swift; sourceTree = "<group>"; };
+		50F3351613FF5684A3CC89A3 /* ClassicalTransitThemeMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassicalTransitThemeMapper.swift; sourceTree = "<group>"; };
+		51D302BEED2320F6644CB2B1 /* abc-life-areas-help-zh-Hans.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "abc-life-areas-help-zh-Hans.md"; sourceTree = "<group>"; };
+		540E8C52B9FD903F6E70EFDF /* TransitCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitCardViews.swift; sourceTree = "<group>"; };
+		57F38F42C1794260A5DB8E8B /* LegacyCardFactorySupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyCardFactorySupport.swift; sourceTree = "<group>"; };
 		5A1C4311E86E866790B89BEA /* LocationPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPicker.swift; sourceTree = "<group>"; };
 		5CCCA84B397C2C9CC92887D6 /* ContentKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ContentKit; path = Packages/ContentKit; sourceTree = SOURCE_ROOT; };
 		5E55B957F3B40BB06BDBB4DE /* ReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsView.swift; sourceTree = "<group>"; };
-		5F4FC24162F432CAB03EB271 /* Insights/Transit/Planning/TransitContentPlanning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Transit/Planning/TransitContentPlanning.swift; sourceTree = "<group>"; };
 		60593A20AA82B656CE29E02E /* CopyCatalog-en.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "CopyCatalog-en.json"; sourceTree = "<group>"; };
-		62CF192AD988F079E6544240 /* Insights/Shared/Factory/ChartCardFactoryContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Shared/Factory/ChartCardFactoryContext.swift; sourceTree = "<group>"; };
 		637B2FF5242CA3AC15B710C9 /* CopyCatalog-zh-Hans.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "CopyCatalog-zh-Hans.json"; sourceTree = "<group>"; };
-		661AA6692BBDB981B3874B3C /* Interstellar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Interstellar.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		69C046582BB6396A8D36D58C /* Insights/Transit/Factory/TransitCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Transit/Factory/TransitCardFactory.swift; sourceTree = "<group>"; };
+		63F67D601B0B8854BCF28D43 /* SolarReturnLegacyCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolarReturnLegacyCardFactory.swift; sourceTree = "<group>"; };
+		65C9751803A580CFFD4F8F56 /* SharedCardComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCardComponents.swift; sourceTree = "<group>"; };
+		661AA6692BBDB981B3874B3C /* Interstellar.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Interstellar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6CEE7F82FD5619F1FB01932D /* PrivateCorpus-zh-Hans.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "PrivateCorpus-zh-Hans.json"; sourceTree = "<group>"; };
-		6FCA5B3E4611E5BFECBED4E2 /* Insights/Natal/Copy/CopyCatalogMatcher+Natal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Insights/Natal/Copy/CopyCatalogMatcher+Natal.swift"; sourceTree = "<group>"; };
 		6FFE425FA91D67D5112FB3FE /* ChartEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartEvents.swift; sourceTree = "<group>"; };
-		7CC3C86CDD51A564B9BC5A4E /* Insights/SolarReturn/UI/SolarReturnCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/SolarReturn/UI/SolarReturnCardViews.swift; sourceTree = "<group>"; };
-		88276D31AF7038746C9CE9E8 /* Insights/Shared/Factory/InsightCardAssembler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Shared/Factory/InsightCardAssembler.swift; sourceTree = "<group>"; };
-		893561A9824817AC3B24CE70 /* Insights/Synastry/Copy/CopyCatalogMatcher+Synastry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Insights/Synastry/Copy/CopyCatalogMatcher+Synastry.swift"; sourceTree = "<group>"; };
-		920B179C793896511AB47267 /* Insights/Secondary/Legacy/SecondaryLegacyCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Secondary/Legacy/SecondaryLegacyCardFactory.swift; sourceTree = "<group>"; };
+		70137E5B98FB7ED9A5271D4E /* NatalCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NatalCardViews.swift; sourceTree = "<group>"; };
+		7374A19C7F598DB01612A991 /* ChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartCardFactory.swift; sourceTree = "<group>"; };
+		80BDDA4426433E7E69C99A22 /* SecondaryLegacyCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondaryLegacyCardFactory.swift; sourceTree = "<group>"; };
+		840A27B131AF789B41A4F43C /* InsightCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightCardView.swift; sourceTree = "<group>"; };
+		870550BABBB1A4045FB38419 /* NatalChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NatalChartCardFactory.swift; sourceTree = "<group>"; };
+		8F8D78DCB5EEDC2C7B7AB0F3 /* InsightFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightFactory.swift; sourceTree = "<group>"; };
+		96EA5C5093F66F8DBEDE5D37 /* ClassicalTransitContractValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassicalTransitContractValidator.swift; sourceTree = "<group>"; };
 		97EEE681F90CAE569A4F0B3A /* TodayDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayDashboard.swift; sourceTree = "<group>"; };
+		981F4C2821CFBF67FAAA0AD8 /* TransitCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitCardFactory.swift; sourceTree = "<group>"; };
 		9A6C0D4EDDAB420D5F5215EB /* PrivateContent-zh-Hans.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "PrivateContent-zh-Hans.json"; sourceTree = "<group>"; };
 		9ABF1E198A9CC166ADC05C23 /* AstroCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AstroCore; path = Packages/AstroCore; sourceTree = SOURCE_ROOT; };
+		9CBBF3C1035EE83B4DD9EADC /* ClassicalTransitPlanningTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassicalTransitPlanningTests.swift; sourceTree = "<group>"; };
+		A1046F5BCC8A7B5114076BE5 /* TransitChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitChartCardFactory.swift; sourceTree = "<group>"; };
 		A2A9B7F6653E3B21A74DFFF2 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		A2C5273C247A4AE167E5145B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A42D05993CC02C05A0EF29EC /* TransitContentPlanning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitContentPlanning.swift; sourceTree = "<group>"; };
 		A638D9D9A2F918B27471D35F /* AstroTerms-fr.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "AstroTerms-fr.json"; sourceTree = "<group>"; };
 		AB744A28C654F60FA3B7A42F /* AstroTerms-es.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "AstroTerms-es.json"; sourceTree = "<group>"; };
 		AD2F2C2DC93A3770F96DC584 /* AstroTerms.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AstroTerms.swift; sourceTree = "<group>"; };
-		B159C1D551E1C85DF54E78E1 /* Insights/Transit/Validation/TransitCardContractValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Transit/Validation/TransitCardContractValidator.swift; sourceTree = "<group>"; };
-		B8D585830B5A1A12C639A232 /* Insights/Natal/UI/NatalCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Natal/UI/NatalCardViews.swift; sourceTree = "<group>"; };
-		B8DD6E36567C504326AF839E /* Insights/Shared/UI/SharedCardComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Shared/UI/SharedCardComponents.swift; sourceTree = "<group>"; };
+		B216680241A82944F268E9E7 /* ChartCardFactoryContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartCardFactoryContext.swift; sourceTree = "<group>"; };
+		B4A3A93914F96ADD04BCE584 /* CurrentSkyCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentSkyCardViews.swift; sourceTree = "<group>"; };
 		BA31C8B1C13F10113F10E112 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
-		BB46E948AED3EC723B7948EC /* Insights/CurrentSky/Factory/CurrentSkyChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/CurrentSky/Factory/CurrentSkyChartCardFactory.swift; sourceTree = "<group>"; };
-		BB5BCE81BEF6F479DD875A36 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		BB5BCE81BEF6F479DD875A36 /* LICENSE */ = {isa = PBXFileReference; path = LICENSE; sourceTree = "<group>"; };
 		BD387F6A83026B674CCD09BF /* InterstellarTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = InterstellarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDBF1C8DDAF72951EAEA6DCF /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
-		C1633A44EE64206F77AD3111 /* Insights/Secondary/Copy/CopyCatalogMatcher+Secondary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Insights/Secondary/Copy/CopyCatalogMatcher+Secondary.swift"; sourceTree = "<group>"; };
-		C20000000000000000000001 /* Insights/Transit/Copy/ClassicalTransitThemeMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Transit/Copy/ClassicalTransitThemeMapper.swift; sourceTree = "<group>"; };
-		C20000000000000000000002 /* Insights/Transit/Planning/ClassicalTransitPlanningStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Transit/Planning/ClassicalTransitPlanningStrategy.swift; sourceTree = "<group>"; };
-		C20000000000000000000003 /* Insights/Transit/Validation/ClassicalTransitContractValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Transit/Validation/ClassicalTransitContractValidator.swift; sourceTree = "<group>"; };
-		C20000000000000000000004 /* ClassicalTransitPlanningTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassicalTransitPlanningTests.swift; sourceTree = "<group>"; };
+		C18C0A36185173B04800EC00 /* SynastryChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynastryChartCardFactory.swift; sourceTree = "<group>"; };
 		C28BE23BBAEDB4F998B852E4 /* ConsumerCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumerCopy.swift; sourceTree = "<group>"; };
+		C2ECE55A8EDFBADC38950773 /* CopyCatalogMatcher+Natal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CopyCatalogMatcher+Natal.swift"; sourceTree = "<group>"; };
+		C4C25AC99C2A3DD4770FC077 /* TransitCardContractValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitCardContractValidator.swift; sourceTree = "<group>"; };
 		C5445403CDC1A5A53F3CA7BE /* AstroTerms-zh-Hans.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "AstroTerms-zh-Hans.json"; sourceTree = "<group>"; };
 		C7B2767ACABFDDAEEBA88C4E /* InsightContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightContent.swift; sourceTree = "<group>"; };
-		CC97B798E244196817CB315F /* Insights/Shared/Factory/ChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Shared/Factory/ChartCardFactory.swift; sourceTree = "<group>"; };
-		CEFE173B33980515FC04F0F7 /* Insights/CurrentSky/UI/CurrentSkyCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/CurrentSky/UI/CurrentSkyCardViews.swift; sourceTree = "<group>"; };
-		D1815FD0591CF3657617BC19 /* Insights/Synastry/UI/SynastryCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Synastry/UI/SynastryCardViews.swift; sourceTree = "<group>"; };
-		D4E351C1266146755569C335 /* Insights/Synastry/Factory/SynastryChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Synastry/Factory/SynastryChartCardFactory.swift; sourceTree = "<group>"; };
+		C9246EC3FF329DF2BC403326 /* CopyCatalogMatcher+CurrentSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CopyCatalogMatcher+CurrentSky.swift"; sourceTree = "<group>"; };
+		D0FB53B8C0D70570B8A46BF6 /* CurrentSkyChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentSkyChartCardFactory.swift; sourceTree = "<group>"; };
+		D37CFC1E719FF3811269D124 /* SolarReturnChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolarReturnChartCardFactory.swift; sourceTree = "<group>"; };
+		D5BC32F5A9499E4F9D5AE269 /* SolarReturnCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolarReturnCardViews.swift; sourceTree = "<group>"; };
 		D6A6D85449819D6C4E404066 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
-		D7013E792CEB70BD25A6E03E /* Insights/SolarReturn/Legacy/SolarReturnLegacyCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/SolarReturn/Legacy/SolarReturnLegacyCardFactory.swift; sourceTree = "<group>"; };
 		D8B5EDCA7BBB5A87878D3A6E /* TodayEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayEngine.swift; sourceTree = "<group>"; };
+		DA7B06AF686095F8D7074FC4 /* ClassicalTransitPlanningStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassicalTransitPlanningStrategy.swift; sourceTree = "<group>"; };
+		DB0D4BA551D42474094AA7BA /* AppChartCalculationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppChartCalculationService.swift; sourceTree = "<group>"; };
 		DEAB31C516DCEE8FEDBE75A8 /* PrivateRules-Today.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "PrivateRules-Today.json"; sourceTree = "<group>"; };
-		DFFCE1116941D55DB3B0CEB9 /* Insights/Secondary/UI/SecondaryCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Secondary/UI/SecondaryCardViews.swift; sourceTree = "<group>"; };
-		E12BEAE3A00ACE6CE0C81462 /* Insights/Transit/Factory/TransitChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Transit/Factory/TransitChartCardFactory.swift; sourceTree = "<group>"; };
+		E2144E58BD7D63D1B164367E /* CopyCatalogMatcher+SolarReturn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CopyCatalogMatcher+SolarReturn.swift"; sourceTree = "<group>"; };
+		E40E064E50A383864A2EE726 /* CardContractValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardContractValidator.swift; sourceTree = "<group>"; };
 		E49BBC6A375BF1066E055FC2 /* AstroTerms-en.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "AstroTerms-en.json"; sourceTree = "<group>"; };
 		E5C939878A4D22398ADB7CBE /* ChartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartsView.swift; sourceTree = "<group>"; };
-		E8B1E414892E11EA1A733138 /* Insights/SolarReturn/Factory/SolarReturnChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/SolarReturn/Factory/SolarReturnChartCardFactory.swift; sourceTree = "<group>"; };
-		E8BB2A42780ADAE8B1055014 /* Insights/Shared/UI/InsightVisualRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Shared/UI/InsightVisualRouter.swift; sourceTree = "<group>"; };
+		E86A56712B23B2F792406049 /* SnapshotCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotCache.swift; sourceTree = "<group>"; };
+		E8C236CDE4D10394DD945034 /* abc-life-areas-help-en.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "abc-life-areas-help-en.md"; sourceTree = "<group>"; };
+		EA033884853D4F649DCA3A50 /* SecondaryCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondaryCardViews.swift; sourceTree = "<group>"; };
+		EF3E51ABD17125BFA6309793 /* CopyCatalogMatcher+Transit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CopyCatalogMatcher+Transit.swift"; sourceTree = "<group>"; };
 		F68BC5DCEB635B9D898E770C /* PrivateContent-en.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "PrivateContent-en.json"; sourceTree = "<group>"; };
-		F7880310205AF5E10CFC0EF7 /* Insights/Secondary/Factory/SecondaryChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Secondary/Factory/SecondaryChartCardFactory.swift; sourceTree = "<group>"; };
-		FB0E502D38699375F399B8FD /* Insights/Transit/UI/TransitCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights/Transit/UI/TransitCardViews.swift; sourceTree = "<group>"; };
+		FA0F4E5EB51698A7A4BAD76D /* SynastryLegacyCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynastryLegacyCardFactory.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -236,6 +244,62 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		04C3E5FA907FAC1A2EB8F8D3 /* CurrentSky */ = {
+			isa = PBXGroup;
+			children = (
+				F69C89E43B09409F2A723F56 /* Copy */,
+				D623313B2FF0105AA20B3B51 /* Factory */,
+				8D04968FC917AFC4A2A70276 /* Legacy */,
+				12D74A446EB8DF804546C4EB /* UI */,
+			);
+			path = CurrentSky;
+			sourceTree = "<group>";
+		};
+		05319538CD94D3E9FA51AF1F /* Legacy */ = {
+			isa = PBXGroup;
+			children = (
+				63F67D601B0B8854BCF28D43 /* SolarReturnLegacyCardFactory.swift */,
+			);
+			path = Legacy;
+			sourceTree = "<group>";
+		};
+		069C1E33322E4B7AE5C7CA08 /* Factory */ = {
+			isa = PBXGroup;
+			children = (
+				C18C0A36185173B04800EC00 /* SynastryChartCardFactory.swift */,
+			);
+			path = Factory;
+			sourceTree = "<group>";
+		};
+		0E1DC49FCE37A42BE37E26AB /* Help */ = {
+			isa = PBXGroup;
+			children = (
+				E8C236CDE4D10394DD945034 /* abc-life-areas-help-en.md */,
+				3D415F3E6315EB99B176E7CB /* abc-life-areas-help-es.md */,
+				14356E98A5D38BD641396766 /* abc-life-areas-help-fr.md */,
+				51D302BEED2320F6644CB2B1 /* abc-life-areas-help-zh-Hans.md */,
+			);
+			path = Help;
+			sourceTree = "<group>";
+		};
+		12D74A446EB8DF804546C4EB /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				B4A3A93914F96ADD04BCE584 /* CurrentSkyCardViews.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		1A8E09962B56340779AEAA7F /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				840A27B131AF789B41A4F43C /* InsightCardView.swift */,
+				1C15B6C5E4FC301E99B2B07C /* InsightVisualRouter.swift */,
+				65C9751803A580CFFD4F8F56 /* SharedCardComponents.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
 		22ACD26F2272D74E9E5639DC /* Packages */ = {
 			isa = PBXGroup;
 			children = (
@@ -263,6 +327,30 @@
 			path = swisseph;
 			sourceTree = "<group>";
 		};
+		3502B2324CFB9686F57F785D /* Factory */ = {
+			isa = PBXGroup;
+			children = (
+				50F219C33B43B0E13C2DE254 /* SecondaryChartCardFactory.swift */,
+			);
+			path = Factory;
+			sourceTree = "<group>";
+		};
+		3F884B5D5AFA31A92C6B35EF /* Copy */ = {
+			isa = PBXGroup;
+			children = (
+				E2144E58BD7D63D1B164367E /* CopyCatalogMatcher+SolarReturn.swift */,
+			);
+			path = Copy;
+			sourceTree = "<group>";
+		};
+		42A01D0822F438575914EB58 /* Copy */ = {
+			isa = PBXGroup;
+			children = (
+				2DA05D01ACC5CCFEED503A57 /* CopyCatalogMatcher+Secondary.swift */,
+			);
+			path = Copy;
+			sourceTree = "<group>";
+		};
 		4A94BE3C06634146226905CD /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -271,6 +359,36 @@
 				2A4FBE0CC517EF4C1D54C807 /* InterstellarUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		4ACDDC06B776EE52FAA8B6EE /* SolarReturn */ = {
+			isa = PBXGroup;
+			children = (
+				3F884B5D5AFA31A92C6B35EF /* Copy */,
+				67FE31E3BC01D6798F3367F0 /* Factory */,
+				05319538CD94D3E9FA51AF1F /* Legacy */,
+				97862C114698338B6E6167BE /* UI */,
+			);
+			path = SolarReturn;
+			sourceTree = "<group>";
+		};
+		4D274E06C1F8086361B0D075 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				6410A57A6C7CFBB193354DDF /* Factory */,
+				D83C4CF69721A60AE91FA8DA /* Routing */,
+				1A8E09962B56340779AEAA7F /* UI */,
+				51DFEF1367DCB36ED870CE95 /* Validation */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		50884E84420FD8E7FDB6BBCB /* Copy */ = {
+			isa = PBXGroup;
+			children = (
+				C2ECE55A8EDFBADC38950773 /* CopyCatalogMatcher+Natal.swift */,
+			);
+			path = Copy;
 			sourceTree = "<group>";
 		};
 		51199DA3E8F0A82E7491986C = {
@@ -285,59 +403,107 @@
 			);
 			sourceTree = "<group>";
 		};
+		51DFEF1367DCB36ED870CE95 /* Validation */ = {
+			isa = PBXGroup;
+			children = (
+				E40E064E50A383864A2EE726 /* CardContractValidator.swift */,
+			);
+			path = Validation;
+			sourceTree = "<group>";
+		};
+		554B600A12F620DFD2DDB9CA /* Copy */ = {
+			isa = PBXGroup;
+			children = (
+				1D5E38526DAC47EF3413FD59 /* CopyCatalogMatcher+Synastry.swift */,
+			);
+			path = Copy;
+			sourceTree = "<group>";
+		};
+		5D3FD880A27C98BB1A72CCEC /* Insights */ = {
+			isa = PBXGroup;
+			children = (
+				04C3E5FA907FAC1A2EB8F8D3 /* CurrentSky */,
+				620E64BBA977922D3DF9E3D9 /* Natal */,
+				A0E5D4CE1194663356EA1475 /* Secondary */,
+				4D274E06C1F8086361B0D075 /* Shared */,
+				4ACDDC06B776EE52FAA8B6EE /* SolarReturn */,
+				A7BA135D6012BE6263E01287 /* Synastry */,
+				AEEBB7AA1AB3C5B85D85E72B /* Transit */,
+			);
+			path = Insights;
+			sourceTree = "<group>";
+		};
+		620E64BBA977922D3DF9E3D9 /* Natal */ = {
+			isa = PBXGroup;
+			children = (
+				50884E84420FD8E7FDB6BBCB /* Copy */,
+				BA527899CDA81D7034400E9E /* Factory */,
+				B788BD0244286471F5A7E50A /* Legacy */,
+				A6383DFB582A24E3370E569E /* UI */,
+			);
+			path = Natal;
+			sourceTree = "<group>";
+		};
+		6410A57A6C7CFBB193354DDF /* Factory */ = {
+			isa = PBXGroup;
+			children = (
+				7374A19C7F598DB01612A991 /* ChartCardFactory.swift */,
+				B216680241A82944F268E9E7 /* ChartCardFactoryContext.swift */,
+				46DDB44B7F03260D94FE6C9A /* InsightCardAssembler.swift */,
+				57F38F42C1794260A5DB8E8B /* LegacyCardFactorySupport.swift */,
+			);
+			path = Factory;
+			sourceTree = "<group>";
+		};
+		67FE31E3BC01D6798F3367F0 /* Factory */ = {
+			isa = PBXGroup;
+			children = (
+				D37CFC1E719FF3811269D124 /* SolarReturnChartCardFactory.swift */,
+			);
+			path = Factory;
+			sourceTree = "<group>";
+		};
 		6989C6012B02305C88665476 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				9CBBF3C1035EE83B4DD9EADC /* ClassicalTransitPlanningTests.swift */,
 				0741E435F931A6CA96910082 /* TransitContentPlannerTests.swift */,
-				C20000000000000000000004 /* ClassicalTransitPlanningTests.swift */,
 			);
 			path = Tests;
+			sourceTree = "<group>";
+		};
+		6EE52E643C2A9D30A537EF63 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				4BAD00A6ED8F9C344824B06F /* SynastryCardViews.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		70C3E2BFDF422B3A61DC95B4 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				EA033884853D4F649DCA3A50 /* SecondaryCardViews.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		73D0337A6FC8B80094D270CA /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				540E8C52B9FD903F6E70EFDF /* TransitCardViews.swift */,
+			);
+			path = UI;
 			sourceTree = "<group>";
 		};
 		773A4979A3B42DC40BD4E1DB /* App */ = {
 			isa = PBXGroup;
 			children = (
-				5300C9897C49074140DC341F /* Insights/CurrentSky/Copy/CopyCatalogMatcher+CurrentSky.swift */,
-				BB46E948AED3EC723B7948EC /* Insights/CurrentSky/Factory/CurrentSkyChartCardFactory.swift */,
-				0355A3D026033EDC953FBED3 /* Insights/CurrentSky/Legacy/CurrentSkyLegacyCardFactory.swift */,
-				CEFE173B33980515FC04F0F7 /* Insights/CurrentSky/UI/CurrentSkyCardViews.swift */,
-				6FCA5B3E4611E5BFECBED4E2 /* Insights/Natal/Copy/CopyCatalogMatcher+Natal.swift */,
-				1876329C2EC39EE6C406FA75 /* Insights/Natal/Factory/NatalChartCardFactory.swift */,
-				07DCEFA9FF1F1CFACF0FD258 /* Insights/Natal/Legacy/NatalLegacyCardFactory.swift */,
-				B8D585830B5A1A12C639A232 /* Insights/Natal/UI/NatalCardViews.swift */,
-				C1633A44EE64206F77AD3111 /* Insights/Secondary/Copy/CopyCatalogMatcher+Secondary.swift */,
-				F7880310205AF5E10CFC0EF7 /* Insights/Secondary/Factory/SecondaryChartCardFactory.swift */,
-				920B179C793896511AB47267 /* Insights/Secondary/Legacy/SecondaryLegacyCardFactory.swift */,
-				DFFCE1116941D55DB3B0CEB9 /* Insights/Secondary/UI/SecondaryCardViews.swift */,
-				CC97B798E244196817CB315F /* Insights/Shared/Factory/ChartCardFactory.swift */,
-				62CF192AD988F079E6544240 /* Insights/Shared/Factory/ChartCardFactoryContext.swift */,
-				88276D31AF7038746C9CE9E8 /* Insights/Shared/Factory/InsightCardAssembler.swift */,
-				0BA2BD6F4842A1476CCA0515 /* Insights/Shared/Factory/LegacyCardFactorySupport.swift */,
-				E8BB2A42780ADAE8B1055014 /* Insights/Shared/UI/InsightVisualRouter.swift */,
-				B8DD6E36567C504326AF839E /* Insights/Shared/UI/SharedCardComponents.swift */,
-				0340DB625FB55455A152A360 /* Insights/Shared/Validation/CardContractValidator.swift */,
-				0DE68EEC7E979FA9F00998CA /* Insights/SolarReturn/Copy/CopyCatalogMatcher+SolarReturn.swift */,
-				E8B1E414892E11EA1A733138 /* Insights/SolarReturn/Factory/SolarReturnChartCardFactory.swift */,
-				D7013E792CEB70BD25A6E03E /* Insights/SolarReturn/Legacy/SolarReturnLegacyCardFactory.swift */,
-				7CC3C86CDD51A564B9BC5A4E /* Insights/SolarReturn/UI/SolarReturnCardViews.swift */,
-				893561A9824817AC3B24CE70 /* Insights/Synastry/Copy/CopyCatalogMatcher+Synastry.swift */,
-				D4E351C1266146755569C335 /* Insights/Synastry/Factory/SynastryChartCardFactory.swift */,
-				123A6EF815ACB10EA4B196F7 /* Insights/Synastry/Legacy/SynastryLegacyCardFactory.swift */,
-				D1815FD0591CF3657617BC19 /* Insights/Synastry/UI/SynastryCardViews.swift */,
-				28FDC399EDDF5B6931F9D81A /* Insights/Transit/Copy/CopyCatalogMatcher+Transit.swift */,
-				69C046582BB6396A8D36D58C /* Insights/Transit/Factory/TransitCardFactory.swift */,
-				E12BEAE3A00ACE6CE0C81462 /* Insights/Transit/Factory/TransitChartCardFactory.swift */,
-				FB0E502D38699375F399B8FD /* Insights/Transit/UI/TransitCardViews.swift */,
-				B159C1D551E1C85DF54E78E1 /* Insights/Transit/Validation/TransitCardContractValidator.swift */,
-				C20000000000000000000001 /* Insights/Transit/Copy/ClassicalTransitThemeMapper.swift */,
-				C20000000000000000000002 /* Insights/Transit/Planning/ClassicalTransitPlanningStrategy.swift */,
-				C20000000000000000000003 /* Insights/Transit/Validation/ClassicalTransitContractValidator.swift */,
 				2114D2FD8739C6BB62FD26EF /* AIGeneration.swift */,
+				16CCFFB5C0A8A83EACE8C47F /* AppAIReportService.swift */,
+				DB0D4BA551D42474094AA7BA /* AppChartCalculationService.swift */,
+				49A787B2E1810C2E4F9D1CB9 /* AppEnrichmentService.swift */,
 				02E20C395BDFD8BD0B24388C /* AppModel.swift */,
-				A40000000000000000000001 /* SnapshotCache.swift */,
-				A40000000000000000000002 /* AppChartCalculationService.swift */,
-				A40000000000000000000003 /* AppEnrichmentService.swift */,
-				A40000000000000000000004 /* AppAIReportService.swift */,
 				3E1C2A46A3725C8A3CDBFC8B /* AskHistory.swift */,
 				4E6DA38605D25A9654FE7E62 /* Assets.xcassets */,
 				AD2F2C2DC93A3770F96DC584 /* AstroTerms.swift */,
@@ -345,9 +511,7 @@
 				3B958CF1AD3B3C7FE6219102 /* ChartRenderer.swift */,
 				E5C939878A4D22398ADB7CBE /* ChartsView.swift */,
 				C28BE23BBAEDB4F998B852E4 /* ConsumerCopy.swift */,
-				082CC325E9CEC17F0EDE722A /* Insights/Shared/UI/InsightCardView.swift */,
 				C7B2767ACABFDDAEEBA88C4E /* InsightContent.swift */,
-				10109DF1D818133D4F69FB22 /* Insights/Shared/Routing/InsightFactory.swift */,
 				03268C1EAB77BCD4B05BCC74 /* InterpretationContextFactory.swift */,
 				2C19015724A0F9DB648CEDBD /* Interstellar.entitlements */,
 				055D71348E930EDB7CEA9D25 /* InterstellarApp.swift */,
@@ -359,17 +523,52 @@
 				3989AA7077B4B8CF57C56610 /* Reports.swift */,
 				5E55B957F3B40BB06BDBB4DE /* ReportsView.swift */,
 				33F53A273536232B2755B411 /* RootView.swift */,
+				E86A56712B23B2F792406049 /* SnapshotCache.swift */,
 				499908CB866531E9C208DDCF /* SynastryView.swift */,
 				D6A6D85449819D6C4E404066 /* Theme.swift */,
 				97EEE681F90CAE569A4F0B3A /* TodayDashboard.swift */,
 				D8B5EDCA7BBB5A87878D3A6E /* TodayEngine.swift */,
 				BA31C8B1C13F10113F10E112 /* TodayView.swift */,
-				5F4FC24162F432CAB03EB271 /* Insights/Transit/Planning/TransitContentPlanning.swift */,
 				0D7BD1EE6C166DE149FA32C4 /* WeeklyForecast.swift */,
 				12B96210B8B65212F06462C7 /* InfoPlist.strings */,
+				5D3FD880A27C98BB1A72CCEC /* Insights */,
 				D8BBB6A7B936FB770BB2A892 /* Resources */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		7B4B1FC5E78E4C2FE1D13C3F /* Legacy */ = {
+			isa = PBXGroup;
+			children = (
+				FA0F4E5EB51698A7A4BAD76D /* SynastryLegacyCardFactory.swift */,
+			);
+			path = Legacy;
+			sourceTree = "<group>";
+		};
+		85C340F84BA0E946C5854AB2 /* Factory */ = {
+			isa = PBXGroup;
+			children = (
+				981F4C2821CFBF67FAAA0AD8 /* TransitCardFactory.swift */,
+				A1046F5BCC8A7B5114076BE5 /* TransitChartCardFactory.swift */,
+			);
+			path = Factory;
+			sourceTree = "<group>";
+		};
+		88DBFA5905683FEF7E1102E7 /* Copy */ = {
+			isa = PBXGroup;
+			children = (
+				50F3351613FF5684A3CC89A3 /* ClassicalTransitThemeMapper.swift */,
+				EF3E51ABD17125BFA6309793 /* CopyCatalogMatcher+Transit.swift */,
+			);
+			path = Copy;
+			sourceTree = "<group>";
+		};
+		8D04968FC917AFC4A2A70276 /* Legacy */ = {
+			isa = PBXGroup;
+			children = (
+				3611EB071ABBD875FD657E40 /* CurrentSkyLegacyCardFactory.swift */,
+			);
+			path = Legacy;
 			sourceTree = "<group>";
 		};
 		973ABFD6539F3FD68E979900 /* vendor */ = {
@@ -378,6 +577,105 @@
 				316183805AF5AFF0E943D1C5 /* swisseph */,
 			);
 			path = vendor;
+			sourceTree = "<group>";
+		};
+		97862C114698338B6E6167BE /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				D5BC32F5A9499E4F9D5AE269 /* SolarReturnCardViews.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		A0E5D4CE1194663356EA1475 /* Secondary */ = {
+			isa = PBXGroup;
+			children = (
+				42A01D0822F438575914EB58 /* Copy */,
+				3502B2324CFB9686F57F785D /* Factory */,
+				CD6CB907668E5C0F7C265CB0 /* Legacy */,
+				70C3E2BFDF422B3A61DC95B4 /* UI */,
+			);
+			path = Secondary;
+			sourceTree = "<group>";
+		};
+		A6383DFB582A24E3370E569E /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				70137E5B98FB7ED9A5271D4E /* NatalCardViews.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		A7BA135D6012BE6263E01287 /* Synastry */ = {
+			isa = PBXGroup;
+			children = (
+				554B600A12F620DFD2DDB9CA /* Copy */,
+				069C1E33322E4B7AE5C7CA08 /* Factory */,
+				7B4B1FC5E78E4C2FE1D13C3F /* Legacy */,
+				6EE52E643C2A9D30A537EF63 /* UI */,
+			);
+			path = Synastry;
+			sourceTree = "<group>";
+		};
+		AEEBB7AA1AB3C5B85D85E72B /* Transit */ = {
+			isa = PBXGroup;
+			children = (
+				88DBFA5905683FEF7E1102E7 /* Copy */,
+				85C340F84BA0E946C5854AB2 /* Factory */,
+				E0E965193CD9B4D3715EB446 /* Planning */,
+				73D0337A6FC8B80094D270CA /* UI */,
+				CB6A3ABBBC50F4081616E7DE /* Validation */,
+			);
+			path = Transit;
+			sourceTree = "<group>";
+		};
+		B788BD0244286471F5A7E50A /* Legacy */ = {
+			isa = PBXGroup;
+			children = (
+				34DD069878C0A81B66276264 /* NatalLegacyCardFactory.swift */,
+			);
+			path = Legacy;
+			sourceTree = "<group>";
+		};
+		BA527899CDA81D7034400E9E /* Factory */ = {
+			isa = PBXGroup;
+			children = (
+				870550BABBB1A4045FB38419 /* NatalChartCardFactory.swift */,
+			);
+			path = Factory;
+			sourceTree = "<group>";
+		};
+		CB6A3ABBBC50F4081616E7DE /* Validation */ = {
+			isa = PBXGroup;
+			children = (
+				96EA5C5093F66F8DBEDE5D37 /* ClassicalTransitContractValidator.swift */,
+				C4C25AC99C2A3DD4770FC077 /* TransitCardContractValidator.swift */,
+			);
+			path = Validation;
+			sourceTree = "<group>";
+		};
+		CD6CB907668E5C0F7C265CB0 /* Legacy */ = {
+			isa = PBXGroup;
+			children = (
+				80BDDA4426433E7E69C99A22 /* SecondaryLegacyCardFactory.swift */,
+			);
+			path = Legacy;
+			sourceTree = "<group>";
+		};
+		D623313B2FF0105AA20B3B51 /* Factory */ = {
+			isa = PBXGroup;
+			children = (
+				D0FB53B8C0D70570B8A46BF6 /* CurrentSkyChartCardFactory.swift */,
+			);
+			path = Factory;
+			sourceTree = "<group>";
+		};
+		D83C4CF69721A60AE91FA8DA /* Routing */ = {
+			isa = PBXGroup;
+			children = (
+				8F8D78DCB5EEDC2C7B7AB0F3 /* InsightFactory.swift */,
+			);
+			path = Routing;
 			sourceTree = "<group>";
 		};
 		D8BBB6A7B936FB770BB2A892 /* Resources */ = {
@@ -396,6 +694,7 @@
 				35AF946924FFE0C5C53C364D /* PrivateCorpus-en.json */,
 				6CEE7F82FD5619F1FB01932D /* PrivateCorpus-zh-Hans.json */,
 				DEAB31C516DCEE8FEDBE75A8 /* PrivateRules-Today.json */,
+				0E1DC49FCE37A42BE37E26AB /* Help */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -409,12 +708,29 @@
 			path = ..;
 			sourceTree = "<group>";
 		};
+		E0E965193CD9B4D3715EB446 /* Planning */ = {
+			isa = PBXGroup;
+			children = (
+				DA7B06AF686095F8D7074FC4 /* ClassicalTransitPlanningStrategy.swift */,
+				A42D05993CC02C05A0EF29EC /* TransitContentPlanning.swift */,
+			);
+			path = Planning;
+			sourceTree = "<group>";
+		};
 		E89DBBA3F53338C84A97210D /* AstroCore */ = {
 			isa = PBXGroup;
 			children = (
 				F9375EA2EE4FD60E26EBF3DE /* Sources */,
 			);
 			path = AstroCore;
+			sourceTree = "<group>";
+		};
+		F69C89E43B09409F2A723F56 /* Copy */ = {
+			isa = PBXGroup;
+			children = (
+				C9246EC3FF329DF2BC403326 /* CopyCatalogMatcher+CurrentSky.swift */,
+			);
+			path = Copy;
 			sourceTree = "<group>";
 		};
 		F9375EA2EE4FD60E26EBF3DE /* Sources */ = {
@@ -506,6 +822,7 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					5BDCE77BA28C6994C9CDC92D = {
+						DevelopmentTeam = YD3FY9ZB52;
 						ProvisioningStyle = Automatic;
 					};
 					C7D3DFB1A1D5EC9E657E67FB = {
@@ -569,6 +886,10 @@
 				4E2C9AE9DCCE3BFD47E957F3 /* PrivateCorpus-en.json in Resources */,
 				D915AAF8D61193EBD6DC7A70 /* PrivateCorpus-zh-Hans.json in Resources */,
 				ACE891B9EF0E4DF7055CA6D8 /* PrivateRules-Today.json in Resources */,
+				910D7E37690DFE9CF39B6CCB /* abc-life-areas-help-en.md in Resources */,
+				79F33F52F35C68F4E0743487 /* abc-life-areas-help-es.md in Resources */,
+				9DFD0DFF988B807727C7E222 /* abc-life-areas-help-fr.md in Resources */,
+				1794539D993157B75CDD0030 /* abc-life-areas-help-zh-Hans.md in Resources */,
 				388FE3F37754814E0A699FE6 /* agpl-3.0.txt in Resources */,
 				5335DA4440460DC6D77949CA /* ephe in Resources */,
 			);
@@ -619,71 +940,71 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4F03729FB25AA92D7D49BB00 /* Insights/CurrentSky/Copy/CopyCatalogMatcher+CurrentSky.swift in Sources */,
-				7BD2BF590431A95DD7F38983 /* Insights/CurrentSky/Factory/CurrentSkyChartCardFactory.swift in Sources */,
-				50F051BFE4B35370AC3EFF82 /* Insights/CurrentSky/Legacy/CurrentSkyLegacyCardFactory.swift in Sources */,
-				89312B6AF2D05656AA96EAE1 /* Insights/CurrentSky/UI/CurrentSkyCardViews.swift in Sources */,
-				B2456C396CD70966D99C6C41 /* Insights/Natal/Copy/CopyCatalogMatcher+Natal.swift in Sources */,
-				CB76B673890DCC538012DDEC /* Insights/Natal/Factory/NatalChartCardFactory.swift in Sources */,
-				BD9A8CBEC8A8A165EB90E4A4 /* Insights/Natal/Legacy/NatalLegacyCardFactory.swift in Sources */,
-				4CBC092DCB6BD499035C595E /* Insights/Natal/UI/NatalCardViews.swift in Sources */,
-				232F7FD0850336F8033F6943 /* Insights/Secondary/Copy/CopyCatalogMatcher+Secondary.swift in Sources */,
-				7E4D7C8BD1B7749EF758D4AA /* Insights/Secondary/Factory/SecondaryChartCardFactory.swift in Sources */,
-				B81A0F114E0471AE204D21DC /* Insights/Secondary/Legacy/SecondaryLegacyCardFactory.swift in Sources */,
-				0460CF7D8F3E22B9075D2983 /* Insights/Secondary/UI/SecondaryCardViews.swift in Sources */,
-				E22EBFCED8B7BE3E02961EAB /* Insights/Shared/Factory/ChartCardFactory.swift in Sources */,
-				374360C2266B05B53EB6D0B7 /* Insights/Shared/Factory/ChartCardFactoryContext.swift in Sources */,
-				A3042F968B932D14C41DF29A /* Insights/Shared/Factory/InsightCardAssembler.swift in Sources */,
-				69DB53289152794B203CFD7E /* Insights/Shared/Factory/LegacyCardFactorySupport.swift in Sources */,
-				80DA0FD95955E53A192D662E /* Insights/Shared/UI/InsightVisualRouter.swift in Sources */,
-				CED8706F864B396FF90616DF /* Insights/Shared/UI/SharedCardComponents.swift in Sources */,
-				6D8A2F8094995AA04F3B6CAC /* Insights/Shared/Validation/CardContractValidator.swift in Sources */,
-				ECC6E0550C9AC3BE38AC331A /* Insights/SolarReturn/Copy/CopyCatalogMatcher+SolarReturn.swift in Sources */,
-				99722C7906C688B6A8F32D6E /* Insights/SolarReturn/Factory/SolarReturnChartCardFactory.swift in Sources */,
-				B6D4C285194905AAF84364FD /* Insights/SolarReturn/Legacy/SolarReturnLegacyCardFactory.swift in Sources */,
-				7228931DBEF07D48D1609EE1 /* Insights/SolarReturn/UI/SolarReturnCardViews.swift in Sources */,
-				5AE741FC967DD2F173E6AFD9 /* Insights/Synastry/Copy/CopyCatalogMatcher+Synastry.swift in Sources */,
-				DB3E41AF84B76A41254E081C /* Insights/Synastry/Factory/SynastryChartCardFactory.swift in Sources */,
-				53AAFE73B01CB1098CC93B62 /* Insights/Synastry/Legacy/SynastryLegacyCardFactory.swift in Sources */,
-				75B169088CF8E2A1A77C1B6D /* Insights/Synastry/UI/SynastryCardViews.swift in Sources */,
-				A22342FBE9C22D58E56E7C48 /* Insights/Transit/Copy/CopyCatalogMatcher+Transit.swift in Sources */,
-				A6E3FC3B0D1D0ECB38441B5C /* Insights/Transit/Factory/TransitCardFactory.swift in Sources */,
-				79461AF274F6E7E356F10E9F /* Insights/Transit/Factory/TransitChartCardFactory.swift in Sources */,
-				FC5DF24A6F1FF776A22ED042 /* Insights/Transit/UI/TransitCardViews.swift in Sources */,
-				7C558D621D8F9097B359C9E6 /* Insights/Transit/Validation/TransitCardContractValidator.swift in Sources */,
-				C10000000000000000000001 /* Insights/Transit/Copy/ClassicalTransitThemeMapper.swift in Sources */,
-				C10000000000000000000002 /* Insights/Transit/Planning/ClassicalTransitPlanningStrategy.swift in Sources */,
-				C10000000000000000000003 /* Insights/Transit/Validation/ClassicalTransitContractValidator.swift in Sources */,
 				7B37214AECB62744C27DD168 /* AIGeneration.swift in Sources */,
+				8548C3309D21611BA159183D /* AppAIReportService.swift in Sources */,
+				AA34CAD28D767A1F2C0D2D42 /* AppChartCalculationService.swift in Sources */,
+				BA383EA66FF2C6A25247DE91 /* AppEnrichmentService.swift in Sources */,
 				33AF4A0526E3FCBA484AE56F /* AppModel.swift in Sources */,
-				A30000000000000000000001 /* SnapshotCache.swift in Sources */,
-				A30000000000000000000002 /* AppChartCalculationService.swift in Sources */,
-				A30000000000000000000003 /* AppEnrichmentService.swift in Sources */,
-				A30000000000000000000004 /* AppAIReportService.swift in Sources */,
 				7054C08BB4A305C2CE8328DA /* AskHistory.swift in Sources */,
 				BF84B2B0706F6DBB8773DCD3 /* AstroTerms.swift in Sources */,
+				4980870A6064480F223751CA /* CardContractValidator.swift in Sources */,
+				D580F0929EEB4324DD916489 /* ChartCardFactory.swift in Sources */,
+				D2D0091B09F103587B4248E8 /* ChartCardFactoryContext.swift in Sources */,
 				80B678D9DAB2A785989708A6 /* ChartEvents.swift in Sources */,
 				C09B0F0F7FF22C4AC54D285B /* ChartRenderer.swift in Sources */,
 				0DADEB896547684C5A4056A8 /* ChartsView.swift in Sources */,
+				AEBFB69B492E07ADA4D3ECFB /* ClassicalTransitContractValidator.swift in Sources */,
+				81879C97D92790AA2A645A78 /* ClassicalTransitPlanningStrategy.swift in Sources */,
+				BD54F74F35A8C8E4B7EBEA87 /* ClassicalTransitThemeMapper.swift in Sources */,
 				B6111E2F452E307366314E7C /* ConsumerCopy.swift in Sources */,
-				F549DCAA0B906EC4BB3FEFF2 /* Insights/Shared/UI/InsightCardView.swift in Sources */,
+				02366B954939BBA2E0278EAB /* CopyCatalogMatcher+CurrentSky.swift in Sources */,
+				495F919A17C34BF2A6544CDA /* CopyCatalogMatcher+Natal.swift in Sources */,
+				88E12219F4EFF13E0736FE45 /* CopyCatalogMatcher+Secondary.swift in Sources */,
+				4E899578F7FE3416C60B223B /* CopyCatalogMatcher+SolarReturn.swift in Sources */,
+				BFEF26946DEBCC71082A8828 /* CopyCatalogMatcher+Synastry.swift in Sources */,
+				EC6A8A4FDB2270B2A17EE47E /* CopyCatalogMatcher+Transit.swift in Sources */,
+				6DF8FD6A4F935548CE5FFF08 /* CurrentSkyCardViews.swift in Sources */,
+				44FD8E26CE2466635A276B1D /* CurrentSkyChartCardFactory.swift in Sources */,
+				A3239AD8EAACA0ACDAB0DD80 /* CurrentSkyLegacyCardFactory.swift in Sources */,
+				DA6B16C2768D7B5927B08060 /* InsightCardAssembler.swift in Sources */,
+				F148813E729FEB595A1040DC /* InsightCardView.swift in Sources */,
 				17DA24AF7292AB4828A37395 /* InsightContent.swift in Sources */,
-				6799FC7090A83402FE95795E /* Insights/Shared/Routing/InsightFactory.swift in Sources */,
+				5971882F0B032678A52F2356 /* InsightFactory.swift in Sources */,
+				22FE763B15FC08F52E396C93 /* InsightVisualRouter.swift in Sources */,
 				B47D63ACE732AFE79F71740D /* InterpretationContextFactory.swift in Sources */,
 				61351E9509F520477D1797F6 /* InterstellarApp.swift in Sources */,
+				B1F740BBC29FB11A27FD3A37 /* LegacyCardFactorySupport.swift in Sources */,
 				59E494C9AC4EB5EEDFB910CD /* LocalizedFormatters.swift in Sources */,
 				82A5A08E61A2A43E19EC5007 /* LocationPicker.swift in Sources */,
 				464458B2F8E2AF6F04173689 /* Models.swift in Sources */,
+				1D9909C647E496C423149F54 /* NatalCardViews.swift in Sources */,
+				832EEE8C722945D95B952F99 /* NatalChartCardFactory.swift in Sources */,
+				C5F5F67D0BA780D9C8C43E5F /* NatalLegacyCardFactory.swift in Sources */,
 				CD7C5811C4C499E2E242E0D1 /* ProfileView.swift in Sources */,
 				7146C73C4FBB984FB0E84E57 /* Reports.swift in Sources */,
 				3FF959A490BE10D499C12683 /* ReportsView.swift in Sources */,
 				7195DECE9971A2CC7BF9F222 /* RootView.swift in Sources */,
+				7BA26679B82098921000CCF4 /* SecondaryCardViews.swift in Sources */,
+				55F5308410E0745739D19183 /* SecondaryChartCardFactory.swift in Sources */,
+				00585B25977B0E4F127CB7B4 /* SecondaryLegacyCardFactory.swift in Sources */,
+				4929DDDC3B76B0B33EF5FE0F /* SharedCardComponents.swift in Sources */,
+				D51DC095CC19CE43B59D3CBC /* SnapshotCache.swift in Sources */,
+				CB9F0FB190BD8004F5C091BC /* SolarReturnCardViews.swift in Sources */,
+				CF0A13278301A647D1CD133E /* SolarReturnChartCardFactory.swift in Sources */,
+				E15F9DA314345C1942C995D4 /* SolarReturnLegacyCardFactory.swift in Sources */,
+				E597F871F49F5F2A9A054A7F /* SynastryCardViews.swift in Sources */,
+				5028400A7A6E814BF89BCD27 /* SynastryChartCardFactory.swift in Sources */,
+				3C1AFAC75A47C87CC9F4D40C /* SynastryLegacyCardFactory.swift in Sources */,
 				89A77CE8E88720666E5ECE90 /* SynastryView.swift in Sources */,
 				5EA16EAEC323BA7C8DD81A9A /* Theme.swift in Sources */,
 				0FAC513A2875B976CAB37574 /* TodayDashboard.swift in Sources */,
 				4C985AF7B6AFDBAB6785A004 /* TodayEngine.swift in Sources */,
 				15A53D4BD43601EE6426BA5A /* TodayView.swift in Sources */,
-				32E4EC5F0E9F52585B25C822 /* Insights/Transit/Planning/TransitContentPlanning.swift in Sources */,
+				C4222E4A7E9E56D1FA7C480C /* TransitCardContractValidator.swift in Sources */,
+				A67DFAE27B65045744E93553 /* TransitCardFactory.swift in Sources */,
+				D40BC4EC458DE75C314BC350 /* TransitCardViews.swift in Sources */,
+				69D2947D4DAEF327395440EC /* TransitChartCardFactory.swift in Sources */,
+				D00797D053FAE29DE567A3DC /* TransitContentPlanning.swift in Sources */,
 				83E776DFD24F77B62FDFF78B /* WeeklyForecast.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -692,8 +1013,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				33054AA25131FE100A8ACD0B /* ClassicalTransitPlanningTests.swift in Sources */,
 				5F50F5CBE22497DE87F201C7 /* TransitContentPlannerTests.swift in Sources */,
-				C10000000000000000000004 /* ClassicalTransitPlanningTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

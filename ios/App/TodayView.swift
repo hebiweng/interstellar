@@ -85,15 +85,26 @@ struct TodayView: View {
     }
 
     private var dateLine: some View {
-        HStack(spacing: 5) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(formattedDate(Date()))
-            Text("·")
-            Text(model.profile.placeName)
-            Text("·")
-            Text(model.profile.name)
+                .lineLimit(1)
+            HStack(spacing: 6) {
+                HStack(spacing: 3) {
+                    Text(model.profile.name)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    Image(systemName: "chevron.down")
+                        .font(.caption2.weight(.bold))
+                }
+                Text("·")
+                Text(model.profile.placeName)
+                    .lineLimit(2)
+                    .truncationMode(.tail)
+            }
         }
         .font(AppTypography.scaled(13))
         .foregroundStyle(AppTheme.muted)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, 2)
         .padding(.bottom, 17)
     }
