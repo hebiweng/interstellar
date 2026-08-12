@@ -28,7 +28,8 @@
 - 永久取消单卡 AI 详情；六盘各自只生成一份 4–8 节整盘报告，并在本机长期保存；
 - 星盘计算和 Charts 打开不得自动触发 AI。用户进入 Reports 后明确点击“生成报告”才联网；同语义再次进入直接展示已有报告，“重新生成”成功后覆盖原报告；
 - 同语义指纹命中本地 Artifact 时网络请求数必须为零；
-- Relay 只保留 24 小时加密幂等缓存；AI 只能解释并引用请求事实；
+- Relay 永不保存报告正文或报告结果缓存，只保留请求、验证、交付和 Credit 元数据；AI 只能解释并引用请求事实；
+- 生成前预留 Credit，客户端报告通过校验并成功本地持久化后发送 ACK；只有 ACK 事务消费 Credit，未 ACK、生成失败、校验失败或本地保存失败均释放预留；
 - Modern / Classical、英文 / 简体中文、System / Light / Dark；
 - 服务器已由用户重启；旧 Interstellar Web/API/Edge 容器已停止并保留。Relay 完成后使用本机/CI 产出的 linux/amd64 镜像部署，禁止在低内存服务器现场编译。
 
@@ -88,17 +89,30 @@ Ask 的 Judgment 与 Support 必须分离。Judgment 消费真实 direct perfect
 - 文件原子写入并启用 iOS 文件保护；损坏文件视为未命中；
 - 后台提示词变化不主动使本机旧报告失效；手动“重新生成”覆盖当前语义版本。
 
+### Premium、Credits 与 iCloud
+
+- 单一 Premium 权益提供 `premium_monthly`（$4.99/月）与 `premium_annual`（$39.99/年）；`credits_10` 为 $1.99 的 10 Credits 消耗型商品；开发 Scheme 固定加载 `Interstellar.storekit`；
+- Free 完整开放 Today、本命、天象、Ask、Chart Wheel、Aspects、日期、地点、范围与其他参数；Special 仅兼容历史数据，不向消费者提供选择；
+- Free 在行运、合盘、日返、次限只开放第 1 张 Interpretation Card，第 2 张起使用不泄露正文的锁定卡触发 contextual Paywall；Free 允许本人加 2 位其他人物，新增第 3 位时触发 Paywall；
+- Free 每个 UTC 自然月 refill allowance 到 2；Premium 按订阅锚点的每个月 refill 到 10，均为替换而非累加；Annual 首次购买一次性发放 20 Bonus Credits、1 年过期，续订、恢复与交易重放不得重复；
+- Credit 消耗顺序固定为 allowance → 有期限的 bonus/admin → purchased；购买的 Credits 永不过期。Relay 是余额、预留、消费、释放与 Ledger 的唯一权威；
+- 匿名 `userID` 由首次启动生成并保存到 Keychain，与 installation ID 分离；StoreKit 使用 `appAccountToken=userID`，恢复购买只允许经 Apple 签名交易把新安装重新关联到原 UUID；
+- iCloud 备份由用户设置控制，只写用户私人 ubiquity container，包含 Profile、其他人物、语言/外观/字号/预设、六盘报告和周期报告；Relay 不参与跨设备报告存储；
+- Paywall 提供 Annual 默认选中、Monthly、Continue、Restore、Terms 与 Privacy；普通设置只显示总 Credits，不暴露三个内部钱包。
+
 ## 5. Relay 与后台
 
 - Relay 与独立后台的正式权威域名为 `https://aaadmin.xiaoguiwk.top`；站点根路径与 `/xiaoguiwk` 均打开嵌入式管理端，不依赖旧 Web；
 - 请求包含稳定事实、`semanticFingerprint / factsHash / generationSchemaVersion`、语言和预设；不再包含卡片 ID、每卡允许证据或 `TransitContentPlan`；
 - 响应只包含 4–8 节整盘报告；每节携带 `evidenceFactIDs`，Relay 验证其来自本次请求事实，并验证 Schema 与语言；
-- `forceRegenerate` 只绕过同键缓存读取，成功结果仍覆盖同一缓存身份；失败不得写入残缺结果；
-- 上游非法 JSON 最多修复重试一次；失败不缓存残缺产物；
+- `requestID` 只能预留和消费一次；同 ID 的并发或重放不得再次调用 AI 或再次扣费。由于 Relay 不保存正文，未成功 ACK 的结果不能由服务器恢复，释放后必须使用新 `requestID` 重新生成；
+- 上游非法 JSON 最多修复重试一次；失败不得进入 awaiting-ACK 或消费 Credit；
 - Provider/模型停用必须阻止生成；默认 Provider 由设置决定，不硬编码 `default`；
 - 管理密码使用 bcrypt，管理会话持久、可撤销、HttpOnly/SameSite；同源访问，不允许 `*` CORS；
-- 密钥和缓存加密；审计只记动作与范围，不记出生资料、事实正文、提示词正文或 AI 正文；
+- 密钥加密；审计只记动作与范围，不记出生资料、事实正文、提示词正文或 AI 正文；Relay 数据库不建立报告正文缓存；
 - 生产生成链路需要 App Attest 安装级短期令牌、请求体断言、设备级限流和每日配额；模拟器绕过只允许开发环境。
+- App Store 客户端交易和 Server Notifications V2 均验证 Apple `x5c` / ES256 JWS；续订、到期、撤销、退款和交易重放只更新同一权威权益/Grant，不重复发放；
+- 管理端只新增 Reports 与 Users：Reports 支持 User、盘型、语言、状态、日期筛选并展示 Tokens、耗时、错误、`creditCost/creditStatus`；Users 展示 Apple/Admin Premium、到期、分钱包余额、Grant 明细和报告数，并提供带审计的 Grant/Revoke Premium 与 Grant Credits。
 
 ## 6. 实施阶段
 
@@ -122,7 +136,7 @@ Ask 的 Judgment 与 Support 必须分离。Judgment 消费真实 direct perfect
 - Charts 选择行运盘的渲染循环已修复：卡片构建不再在 SwiftUI `body` 求值期间写回 `@Published transitContentPlan`；最新 Debug 签名构建已覆盖安装并启动到连接的 iPhone 12 mini（`HUAWEI PURA 70`），CoreDevice 确认 `com.xiaoguiwk.interstellar` 进程 PID 4197；
 - Charts 轮盘上方只保留页面栏、盘型、Wheel/Aspects 与单一参数入口，人物/预设/时间/地点收进参数弹窗，展开参数不得把轮盘整体挤出初始视口；Ask 恢复简洁输入、键盘 Return 为“完成”并接通 History，两个专项 UI 测试通过；
 - 阶段 7 已完成：Relay 已通过本机构建的 `linux/amd64` 镜像部署到 `https://aaadmin.xiaoguiwk.top`；公开 Cloudflare 健康检查、管理页、随机管理员登录/退出撤销均通过。旧 Web/API 容器保持停止且未删除；
-- 阶段 6 已完成代码门禁：Relay 验证整盘报告 Schema、4–8 节、事实引用和语言；24 小时加密缓存、强制重新生成、一次 JSON 修复、安装配额、App Attest 请求体断言、Provider/模型真实停用、bcrypt 管理员、可撤销安全会话和不记录正文的审计均已接通；
+- 阶段 6 已完成代码门禁：Relay 验证整盘报告 Schema、4–8 节、事实引用和语言；报告正文零存储、客户端本地持久化后 ACK 扣费、未 ACK 释放、强制重新生成、一次 JSON 修复、安装配额、App Attest 请求体断言、Provider/模型真实停用、bcrypt 管理员、可撤销安全会话和不记录正文的审计均已接通；
 - 独立 `/xiaoguiwk` 管理页已内嵌在 Relay，自动初始化 DeepSeek `deepseek-v4-flash` 以及六盘中英文分盘提示词，支持 API Key、模型发现/停用、连接测试、提示词编辑/恢复和含错误数的用量查看；Go 测试、vet、Compose 校验和本地 HTTP 冒烟通过；
 - 当前 report-only 生产发布目录为 `/opt/interstellar/releases/v6-relay-v6-20260809-report-only`，镜像为 `interstellar-relay:v6-20260809-report-only`；切换前数据库备份为 `/opt/interstellar/backups/relay-20260809-1243.db`；
 - 生产默认 Provider 已修正为带有效密钥的 `DeepSeek`。真实 Relay → DeepSeek 请求和同键缓存命中均已通过；密钥未写入 Git、日志、命令输出或截图；

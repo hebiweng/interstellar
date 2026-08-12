@@ -119,7 +119,8 @@ ChartSnapshot / Aspect / Event
 - `approved` 只代表文案审核通过。正式条目还必须通过 JSON Schema、类型、selector、事实引用和卡片合同完整性校验；任一失败必须阻断构建和 CI。
 - 公开 Git 只放 Schema、布局、选择接口与渲染逻辑。完整原创摘要、详情、规则、运行时私有包和翻译交付不得进入公共 Git、日志、测试附件或示例截图。
 - 六盘 AI 永久只生成 4–8 节整盘报告，不生成单卡 AI 详情。报告只在 Reports 中由用户明确点击生成后请求，不得在星盘计算或页面打开时自动生成；同一语义指纹默认复用本机 `GeneratedChartArtifact`，用户明确点击重新生成时才覆盖现有报告。
-- 本机 Artifact 不设 TTL；同语义指纹命中时禁止联网。Relay 只允许最长 24 小时加密幂等缓存。
+- 本机 Artifact 不设 TTL；同语义指纹命中时禁止联网。Relay 永不保存 AI 报告正文，也不提供报告结果缓存；只保存请求、验证、交付确认与 Credit 状态等元数据。
+- Relay 在生成前预留 Credit；客户端只有在报告通过校验并成功持久化到本机后才发送 ACK，ACK 事务才正式消费 Credit。未确认交付或生成/校验/本地保存失败必须释放预留，不得出现已扣费但没有本地可读报告的状态。
 - 撤回 AI 授权后仍可读已有报告，但不得发起新请求；删除人物必须清理关联 Artifact。
 - 固定 UI 使用 `Localizable.xcstrings`；占星术语使用四语 `AstroTerms`；消费者正文只进 Copy Catalog；日期、时间、数量和语序使用 Locale-aware formatter。
 - 内容键缺失必须明确失败，不能在 Swift 中加入解释性降级句。

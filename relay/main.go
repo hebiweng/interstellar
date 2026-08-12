@@ -121,6 +121,15 @@ func main() {
 		allowDevBypass: allowDevBypass,
 		appAttest:      appAttest,
 	}
+	go func() {
+		ticker := time.NewTicker(time.Minute)
+		defer ticker.Stop()
+		for range ticker.C {
+			if err := store.ReleaseExpiredReservations(); err != nil {
+				log.Printf("release expired credit reservations: %v", err)
+			}
+		}
+	}()
 
 	limiter := newRateLimiter(60, time.Minute)
 	adminLimiter := newRateLimiter(10, time.Minute)
@@ -132,12 +141,18 @@ func main() {
 	mux.HandleFunc("/xiaoguiwk", handleAdminPage)
 	mux.HandleFunc("/xiaoguiwk/", handleAdminPage)
 	mux.HandleFunc("/v1/health", cfg.handleHealth)
+	mux.HandleFunc("/privacy", handleLegalPage)
+	mux.HandleFunc("/terms", handleLegalPage)
 	if appAttest != nil {
 		mux.HandleFunc("/v1/app-attest/challenge", attestLimiter.wrap(appAttest.handleChallenge))
 		mux.HandleFunc("/v1/app-attest/attest", attestLimiter.wrap(appAttest.handleAttestation))
 		mux.HandleFunc("/v1/app-attest/token", attestLimiter.wrap(appAttest.handleToken))
 	}
 	mux.HandleFunc("/v1/generate", limiter.wrap(cfg.handleGenerate))
+	mux.HandleFunc("/v1/account/sync", limiter.wrap(cfg.handleAccountSync))
+	mux.HandleFunc("/v1/store/transactions", limiter.wrap(cfg.handleStoreTransaction))
+	mux.HandleFunc("/v1/store/notifications", limiter.wrap(cfg.handleAppStoreNotification))
+	mux.HandleFunc("/v1/reports/ack", limiter.wrap(cfg.handleReportAck))
 	mux.HandleFunc("/v1/feedback", feedbackLimiter.wrap(cfg.handleFeedback))
 
 	// Admin API
@@ -162,6 +177,9 @@ func main() {
 	mux.HandleFunc("/admin/prompts/", requireAdmin(sessions, cfg.handlePromptRestore))
 	mux.Handle("/admin/models", requireAdmin(sessions, cfg.handleModelState))
 	mux.Handle("/admin/usage", requireAdmin(sessions, cfg.handleUsage))
+	mux.Handle("/admin/reports", requireAdmin(sessions, cfg.handleAdminReports))
+	mux.Handle("/admin/users", requireAdmin(sessions, cfg.handleAdminUsers))
+	mux.HandleFunc("/admin/users/", requireAdmin(sessions, cfg.handleAdminUserItem))
 	mux.Handle("/admin/feedback", requireAdmin(sessions, cfg.handleAdminFeedback))
 	mux.HandleFunc("/admin/feedback/", requireAdmin(sessions, cfg.handleAdminFeedbackItem))
 

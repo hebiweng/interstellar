@@ -1,0 +1,69 @@
+{
+  "identifier" : "08C8E9A8-4DCE-47A0-923F-7C7F5AE0F281",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "1.99",
+      "familyShareable" : false,
+      "internalID" : "B6AB8DA8-DB84-46E4-8857-04582C27634C",
+      "localizations" : [
+        { "description" : "10 credits for new AI report generations.", "displayName" : "10 Report Credits", "locale" : "en_US" },
+        { "description" : "用于生成新 AI 报告的 10 个 Credits。", "displayName" : "10 个报告 Credits", "locale" : "zh_Hans" },
+        { "description" : "10 créditos para generar nuevos informes de IA.", "displayName" : "10 créditos de informes", "locale" : "es_ES" },
+        { "description" : "10 crédits pour générer de nouveaux rapports IA.", "displayName" : "10 crédits de rapports", "locale" : "fr_FR" }
+      ],
+      "productID" : "credits_10",
+      "referenceName" : "10 Report Credits",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA"
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "5591092C-226A-4B1C-BA25-3D89FF8766FA",
+      "localizations" : [],
+      "name" : "Interstellar Premium",
+      "subscriptions" : [
+        {
+          "displayPrice" : "4.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "058B667B-AC05-4E1D-A555-353892824D28",
+          "localizations" : [
+            { "description" : "All chart insights, unlimited people and 10 report credits per period.", "displayName" : "Premium Monthly", "locale" : "en_US" },
+            { "description" : "全部星盘解读、不限人物，以及每周期 10 个报告 Credits。", "displayName" : "Premium 月度", "locale" : "zh_Hans" },
+            { "description" : "Todos los análisis, personas ilimitadas y 10 créditos por período.", "displayName" : "Premium mensual", "locale" : "es_ES" },
+            { "description" : "Toutes les analyses, personnes illimitées et 10 crédits par période.", "displayName" : "Premium mensuel", "locale" : "fr_FR" }
+          ],
+          "productID" : "premium_monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Premium Monthly",
+          "subscriptionGroupID" : "5591092C-226A-4B1C-BA25-3D89FF8766FA",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "displayPrice" : "39.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "4219A973-4B8B-4167-A3A0-19AC19BF8B44",
+          "localizations" : [
+            { "description" : "Annual Premium with a one-time 20-credit welcome bonus.", "displayName" : "Premium Annual", "locale" : "en_US" },
+            { "description" : "年度 Premium，并一次性赠送 20 Credits。", "displayName" : "Premium 年度", "locale" : "zh_Hans" },
+            { "description" : "Premium anual con una bonificación única de 20 créditos.", "displayName" : "Premium anual", "locale" : "es_ES" },
+            { "description" : "Premium annuel avec un bonus unique de 20 crédits.", "displayName" : "Premium annuel", "locale" : "fr_FR" }
+          ],
+          "productID" : "premium_annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Premium Annual",
+          "subscriptionGroupID" : "5591092C-226A-4B1C-BA25-3D89FF8766FA",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : { "major" : 3, "minor" : 0 }
+}

@@ -3,9 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
-	"crypto/sha256"
 	"database/sql"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -73,6 +71,9 @@ func (c *relayConfig) handleFeedback(w http.ResponseWriter, r *http.Request) {
 }
 
 type generateRequest struct {
+	UserID                  string          `json:"userID"`
+	RequestID               string          `json:"requestID"`
+	ReportID                string          `json:"reportID"`
 	Mode                    string          `json:"mode"`                 // chart | period
 	ChartKind               string          `json:"chartKind"`            // natal | current-sky | transit | secondary | solar-return | synastry
 	PeriodType              string          `json:"periodType,omitempty"` // daily | monthly | solar-return
@@ -105,10 +106,6 @@ func (g *generateRequest) scope() (string, error) {
 		return "chart." + g.ChartKind, nil
 	}
 	return "", errors.New("invalid chartKind")
-}
-
-func cacheTTL(scope string) time.Duration {
-	return 24 * time.Hour
 }
 
 func writeError(w http.ResponseWriter, status int, code, message string, retryable bool) {
@@ -153,11 +150,42 @@ func (c *relayConfig) handleGenerate(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, map[string]any{"error": err.Error()})
 		return
 	}
-	locale := req.Locale
+	requestedLocale := req.Locale
+	locale := requestedLocale
 	if locale != "zh-Hans" && locale != "en" {
 		locale = "en"
 	}
 	req.Locale = locale
+	requestHash := requestDigest(body)
+	if !validCommerceID(req.UserID) || !validCommerceID(req.RequestID) || strings.TrimSpace(req.ReportID) == "" {
+		writeError(w, http.StatusBadRequest, "commerce_identity_required", "valid userID, requestID and reportID are required", false)
+		return
+	}
+	if _, err := c.store.SyncCommerceUser(req.UserID, installationID); err != nil {
+		writeError(w, http.StatusConflict, "commerce_identity_conflict", err.Error(), false)
+		return
+	}
+	_ = c.store.ReleaseExpiredReservations()
+	if existing, lookupErr := c.store.GetReportRequest(req.UserID, req.RequestID); lookupErr == nil {
+		if existing.RequestHash != requestHash {
+			writeError(w, http.StatusConflict, "idempotency_conflict", "requestID was already used for different content", false)
+			return
+		}
+		switch existing.ReportStatus {
+		case "processing":
+			writeError(w, http.StatusAccepted, "generation_processing", "this request is still processing", true)
+			return
+		case "awaiting_ack":
+			writeError(w, http.StatusGone, "report_not_retained", "the relay does not retain report content; use a new requestID after the reservation is released", false)
+			return
+		default:
+			writeError(w, http.StatusConflict, "request_finished", "use a new requestID for another generation attempt", false)
+			return
+		}
+	} else if !errors.Is(lookupErr, sql.ErrNoRows) {
+		writeError(w, http.StatusInternalServerError, "request_lookup_failed", "could not inspect request state", true)
+		return
+	}
 
 	evidenceIDs, err := validateGenerationRequest(req)
 	if err != nil {
@@ -206,18 +234,6 @@ func (c *relayConfig) handleGenerate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	cacheKey := cacheKeyFor(req, scope, model, locale, version)
-	if !req.ForceRegenerate {
-		if payload, hit, _ := c.store.CacheGet(cacheKey); hit {
-			var cached map[string]any
-			_ = json.Unmarshal([]byte(payload), &cached)
-			cached["cached"] = true
-			_ = c.store.RecordUsage(scope, model, 0, 0, true)
-			writeJSON(w, http.StatusOK, cached)
-			return
-		}
-	}
-
 	count, allowed, err := c.store.ConsumeInstallationQuota(installationID, c.dailyQuota)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "quota_unavailable", "could not verify daily quota", true)
@@ -228,13 +244,24 @@ func (c *relayConfig) handleGenerate(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusTooManyRequests, "daily_quota_exceeded", "daily generation quota exceeded", false)
 		return
 	}
+	if _, err := c.store.ReserveCredit(req.UserID, installationID, req.RequestID, req.ReportID, requestHash, scope, requestedLocale, locale, model); err != nil {
+		status := http.StatusConflict
+		code := "credit_reservation_failed"
+		if strings.Contains(err.Error(), "insufficient") {
+			status, code = http.StatusPaymentRequired, "credits_required"
+		}
+		writeError(w, status, code, err.Error(), false)
+		return
+	}
 
+	startedAt := time.Now()
 	userContent := buildUserContent(req, scope)
-	result, usedModel, promptTokens, completionTokens, err := Generate(
+	result, usedModel, promptTokens, completionTokens, reasoningTokens, err := Generate(
 		r.Context(), c.client, provider.BaseURL, provider.APIKey, model, prompt, userContent,
 		req.Locale, evidenceIDs,
 	)
 	if err != nil {
+		_ = c.store.ReleaseCredit(req.UserID, req.RequestID, "upstream_generation_failed", err.Error())
 		_ = c.store.RecordUsage(scope, model, 0, 0, false)
 		log.Printf(
 			"generation failed scope=%s model=%s facts_bytes=%d evidence_count=%d user_content_bytes=%d: %v",
@@ -255,28 +282,15 @@ func (c *relayConfig) handleGenerate(w http.ResponseWriter, r *http.Request) {
 		"generatedAt":             time.Now().UTC().Format(time.RFC3339),
 		"semanticFingerprint":     req.SemanticFingerprint,
 		"factsHash":               req.FactsHash,
+		"requestID":               req.RequestID,
+		"reportID":                req.ReportID,
 	}
-	payload := JSONMarshal(response)
-	_ = c.store.CachePut(cacheKey, scope, payload, cacheTTL(scope))
+	if err := c.store.MarkReportAwaitingAcknowledgement(req.UserID, req.RequestID, requestHash, usedModel, promptTokens, completionTokens, reasoningTokens, int(time.Since(startedAt).Milliseconds())); err != nil {
+		_ = c.store.ReleaseCredit(req.UserID, req.RequestID, "report_persistence_failed", err.Error())
+		writeError(w, http.StatusInternalServerError, "report_state_failed", "valid report could not enter delivery state; credit was released", true)
+		return
+	}
 	writeJSON(w, http.StatusOK, response)
-}
-
-func cacheKeyFor(req generateRequest, scope, model, locale string, promptVersion int) string {
-	params := string(req.Params)
-	if params == "" {
-		params = "{}"
-	}
-	facts := string(req.Facts)
-	if facts == "" {
-		facts = "{}"
-	}
-	raw := strings.Join([]string{
-		scope, req.Preset, req.ProfileHash, req.SemanticFingerprint, req.FactsHash,
-		fmt.Sprintf("schema%d", req.GenerationSchemaVersion), params, facts, model, locale,
-		fmt.Sprintf("p%d", promptVersion), req.ClientVer,
-	}, "|")
-	sum := sha256.Sum256([]byte(raw))
-	return hex.EncodeToString(sum[:])
 }
 
 func validateGenerationRequest(req generateRequest) (map[string]bool, error) {
@@ -603,7 +617,7 @@ func (c *relayConfig) handleProviderTest(w http.ResponseWriter, r *http.Request)
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
 	defer cancel()
-	_, usedModel, _, _, err := Generate(ctx, c.client, provider.BaseURL, provider.APIKey, model,
+	_, usedModel, _, _, _, err := Generate(ctx, c.client, provider.BaseURL, provider.APIKey, model,
 		`You are a connectivity check. Return JSON only. Create a report object with a title, subtitle and exactly four non-empty sections. Each section has number, title, body and an empty evidenceFactIDs array.`,
 		`{"purpose":"provider connectivity test; do not interpret user data"}`, "en", nil)
 	if err != nil {

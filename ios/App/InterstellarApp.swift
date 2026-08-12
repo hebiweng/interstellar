@@ -9,6 +9,7 @@ struct InterstellarApp: App {
             RootView()
                 .environmentObject(model)
                 .preferredColorScheme(model.appearance.colorScheme)
+                .task { await CommerceStore.shared.start() }
         }
     }
 }

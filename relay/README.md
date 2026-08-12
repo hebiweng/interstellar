@@ -2,8 +2,9 @@
 
 Docker-containerized forwarding service: the iOS app sends calculated chart
 facts and the relay injects the admin-managed API key + prompt template, calls
-the OpenAI-compatible upstream, validates the structured JSON output and caches
-the result so identical parameters never call the LLM twice.
+the OpenAI-compatible upstream, and validates the structured JSON output. The
+Relay never stores generated report text; the client persists the report first
+and then acknowledges delivery to consume the reserved Credit.
 
 ## Production authority
 
@@ -19,8 +20,13 @@ the result so identical parameters never call the LLM twice.
 ## Endpoints
 
 - `POST /v1/generate` — consumer generation (chart or period report).
-  Body: `{mode, chartKind|periodType, preset, profileHash, params, facts, locale, clientVersion, forceRegenerate?}`.
-  Response: `{report: {title, subtitle, sections[]}, model, cached}`. Chart report sections cite only IDs from `facts.evidenceFacts`; no per-card content is generated.
+  Body includes `{userID, requestID, reportID, mode, chartKind|periodType, preset, profileHash, params, facts, locale, clientVersion}`.
+  Response includes the validated report plus the same request/report IDs. Chart report sections cite only IDs from `facts.evidenceFacts`; no per-card content is generated or retained.
+- `POST /v1/account/sync` — last-active, authoritative Premium and Credit balance.
+- `POST /v1/reports/ack` — consumes the reservation only after local persistence.
+- `POST /v1/store/transactions` — verifies StoreKit 2 signed transactions.
+- `POST /v1/store/notifications` — verifies App Store Server Notifications V2.
+- `GET /privacy` · `GET /terms` — public four-language legal pages.
 - `GET /v1/health`
 - `POST /v1/feedback` — accepts only the user-entered category, feedback text
   and optional contact. Content and contact are encrypted at rest; request and
@@ -32,6 +38,9 @@ the result so identical parameters never call the LLM twice.
   - `PUT /admin/models` — enable or disable a discovered provider model
   - `GET|PUT /admin/prompts` · `POST /admin/prompts/{scope}/{locale}/restore`
   - `GET /admin/usage`
+  - `GET /admin/reports?userID=&chartType=&language=&status=&date=`
+  - `GET /admin/users` · `GET /admin/users/{uuid}`
+  - `POST /admin/users/{uuid}/credits` · `POST /admin/users/{uuid}/premium`
   - `GET /admin/feedback?status=&type=` · `PATCH /admin/feedback/{id}`
 
 ## Environment
@@ -40,7 +49,7 @@ the result so identical parameters never call the LLM twice.
 |---|---|
 | `RELAY_ADDR` | listen address (default `:8080`) |
 | `RELAY_DB_PATH` | SQLite path (default `./relay.db`) |
-| `RELAY_SECRET` | **required, at least 32 bytes** — derives key encryption + cache encryption |
+| `RELAY_SECRET` | **required, at least 32 bytes** — derives secret-field encryption |
 | `RELAY_ADMIN_USER` / `RELAY_ADMIN_PASS` | bootstrap admin; password must contain at least 24 bytes |
 | `RELAY_PRUNE_OTHER_ADMINS` | `1` verifies the bootstrap account, then removes older admins and sessions |
 | `RELAY_SEED_PROMPTS` | `1` to insert default prompt templates for missing scopes |

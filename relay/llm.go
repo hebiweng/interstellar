@@ -39,8 +39,12 @@ type ThinkingMode struct {
 }
 
 type ChatUsage struct {
-	PromptTokens     int `json:"prompt_tokens"`
-	CompletionTokens int `json:"completion_tokens"`
+	PromptTokens      int `json:"prompt_tokens"`
+	CompletionTokens  int `json:"completion_tokens"`
+	ReasoningTokens   int `json:"reasoning_tokens"`
+	CompletionDetails struct {
+		ReasoningTokens int `json:"reasoning_tokens"`
+	} `json:"completion_tokens_details"`
 }
 
 type ChatChoice struct {
@@ -126,8 +130,8 @@ func Generate(
 	baseURL, apiKey, model, systemPrompt, userContent string,
 	locale string,
 	requestEvidence map[string]bool,
-) (*GenerationResult, string, int, int, error) {
-	var totalPromptTokens, totalCompletionTokens int
+) (*GenerationResult, string, int, int, int, error) {
+	var totalPromptTokens, totalCompletionTokens, totalReasoningTokens int
 	var lastErr error
 	for attempt := 0; attempt < 2; attempt++ {
 		prompt := systemPrompt
@@ -144,28 +148,29 @@ func Generate(
 		} else {
 			thinkingMode = "disabled"
 		}
-		result, usedModel, promptTokens, completionTokens, err := generateOnce(
+		result, usedModel, promptTokens, completionTokens, reasoningTokens, err := generateOnce(
 			attemptContext, client, baseURL, apiKey, model, prompt, content, thinkingMode,
 		)
 		cancel()
 		totalPromptTokens += promptTokens
 		totalCompletionTokens += completionTokens
+		totalReasoningTokens += reasoningTokens
 		if err == nil {
 			err = result.Validate(locale, requestEvidence)
 		}
 		if err == nil {
-			return result, usedModel, totalPromptTokens, totalCompletionTokens, nil
+			return result, usedModel, totalPromptTokens, totalCompletionTokens, totalReasoningTokens, nil
 		}
 		lastErr = err
 	}
-	return nil, "", totalPromptTokens, totalCompletionTokens, lastErr
+	return nil, "", totalPromptTokens, totalCompletionTokens, totalReasoningTokens, lastErr
 }
 
 func generateOnce(
 	ctx context.Context,
 	client *http.Client,
 	baseURL, apiKey, model, systemPrompt, userContent, thinkingMode string,
-) (*GenerationResult, string, int, int, error) {
+) (*GenerationResult, string, int, int, int, error) {
 	body := ChatRequest{
 		Model: model,
 		Messages: []ChatMessage{
@@ -185,12 +190,12 @@ func generateOnce(
 	}
 	payload, err := json.Marshal(body)
 	if err != nil {
-		return nil, "", 0, 0, err
+		return nil, "", 0, 0, 0, err
 	}
 	endpoint := strings.TrimRight(baseURL, "/") + "/chat/completions"
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(payload))
 	if err != nil {
-		return nil, "", 0, 0, err
+		return nil, "", 0, 0, 0, err
 	}
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 	req.Header.Set("Content-Type", "application/json")
@@ -198,23 +203,23 @@ func generateOnce(
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, "", 0, 0, err
+		return nil, "", 0, 0, 0, err
 	}
 	defer resp.Body.Close()
 	raw, err := io.ReadAll(io.LimitReader(resp.Body, 4<<20))
 	if err != nil {
-		return nil, "", 0, 0, err
+		return nil, "", 0, 0, 0, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, "", 0, 0, fmt.Errorf("upstream HTTP %d: %s", resp.StatusCode, strings.TrimSpace(string(raw)))
+		return nil, "", 0, 0, 0, fmt.Errorf("upstream HTTP %d: %s", resp.StatusCode, strings.TrimSpace(string(raw)))
 	}
 
 	var chat ChatResponse
 	if err := json.Unmarshal(raw, &chat); err != nil {
-		return nil, "", 0, 0, fmt.Errorf("invalid upstream response: %w", err)
+		return nil, "", 0, 0, 0, fmt.Errorf("invalid upstream response: %w", err)
 	}
 	if len(chat.Choices) == 0 {
-		return nil, "", 0, 0, errors.New("upstream returned no choices")
+		return nil, "", 0, 0, 0, errors.New("upstream returned no choices")
 	}
 	content := strings.TrimSpace(chat.Choices[0].Message.Content)
 	reasoningBytes := len(strings.TrimSpace(chat.Choices[0].Message.ReasoningContent))
@@ -224,7 +229,7 @@ func generateOnce(
 
 	var result GenerationResult
 	if err := json.Unmarshal([]byte(content), &result); err != nil {
-		return nil, "", 0, 0, fmt.Errorf(
+		return nil, "", 0, 0, 0, fmt.Errorf(
 			"upstream content is not valid JSON (finish_reason=%q, content_bytes=%d, reasoning_bytes=%d): %w",
 			chat.Choices[0].FinishReason,
 			len(content),
@@ -232,5 +237,9 @@ func generateOnce(
 			err,
 		)
 	}
-	return &result, chat.Model, chat.Usage.PromptTokens, chat.Usage.CompletionTokens, nil
+	reasoningTokens := chat.Usage.ReasoningTokens
+	if reasoningTokens == 0 {
+		reasoningTokens = chat.Usage.CompletionDetails.ReasoningTokens
+	}
+	return &result, chat.Model, chat.Usage.PromptTokens, chat.Usage.CompletionTokens, reasoningTokens, nil
 }

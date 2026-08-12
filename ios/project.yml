@@ -79,6 +79,7 @@ targets:
           - $(SRCROOT)/Localization/ui-translations.json
           - $(SRCROOT)/ContentSchema/copy-catalog.schema.json
     scheme:
+      storeKitConfiguration: App/Interstellar.storekit
       gatherCoverageData: true
       testTargets:
         - InterstellarTests

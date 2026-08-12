@@ -137,9 +137,13 @@ final class AppAIReportService {
         semanticFingerprint: String,
         factsHash: String,
         locale: String,
+		userID: String,
         forceRegenerate: Bool
     ) -> [String: Any] {
         [
+			"userID": userID,
+			"requestID": UUID().uuidString.lowercased(),
+			"reportID": semanticFingerprint,
             "mode": "chart",
             "chartKind": chart.contentPrefix,
             "periodType": NSNull(),

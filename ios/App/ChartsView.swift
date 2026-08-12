@@ -3,6 +3,7 @@ import SwiftUI
 
 struct ChartsView: View {
     @EnvironmentObject private var model: AppModel
+	@ObservedObject private var commerce = CommerceStore.shared
     @Binding var selectedTab: RootTab
    @State private var showLocationPicker = false
     @State private var selectedReport: SavedReport?
@@ -41,16 +42,8 @@ private struct PendingGeneration: Identifiable {
                         chartContent
 
                         if !insightState.cards.isEmpty {
-                            ForEach(insightState.cards) { card in
-                                VStack(alignment: .leading, spacing: 10) {
-                                    cardSectionHeader(card)
-                                    InsightCardView(
-                                        card: card,
-                                        language: model.language,
-                                        prototypeTransitStyle: isPlannedTransitCard(card.id),
-                                        externalHeaderStyle: true
-                                    )
-                                }
+                            ForEach(Array(insightState.cards.enumerated()), id: \.element.id) { index, card in
+                                insightCardRow(index: index, card: card)
                             }
                         } else if let message = insightState.errorMessage,
                                   model.snapshot(for: model.selectedChart) != nil
@@ -176,6 +169,36 @@ private struct PendingGeneration: Identifiable {
                 }
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
+            }
+        }
+    }
+
+	private func shouldLockCard(at index: Int) -> Bool {
+		index > 0 && !commerce.isPremium && ![.natal, .currentSky].contains(model.selectedChart)
+	}
+
+    @ViewBuilder
+    private func insightCardRow(index: Int, card: InsightCardModel) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            if shouldLockCard(at: index) {
+                Button { commerce.showsPaywall = true } label: {
+                    VStack(spacing: 12) {
+                        Image(systemName: "lock.fill").font(.title2)
+                        Text(localized("premium.unlock-card", language: model.language)).font(.headline)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 150)
+                    .background(AppTheme.panel, in: RoundedRectangle(cornerRadius: 20))
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint(localized("premium.see-full-picture", language: model.language))
+            } else {
+                cardSectionHeader(card)
+                InsightCardView(
+                    card: card,
+                    language: model.language,
+                    prototypeTransitStyle: isPlannedTransitCard(card.id),
+                    externalHeaderStyle: true
+                )
             }
         }
     }

@@ -9,6 +9,7 @@ enum RootTab: Hashable {
 
 struct RootView: View {
     @EnvironmentObject private var model: AppModel
+	@ObservedObject private var commerce = CommerceStore.shared
     @State private var selection: RootTab = .today
 
     var body: some View {
@@ -54,6 +55,8 @@ struct RootView: View {
         .task {
             await model.refresh()
         }
+		.sheet(isPresented: $commerce.showsPaywall) { PremiumPaywallView(language: model.language) }
+		.sheet(isPresented: $commerce.showsCredits) { CreditsPurchaseView(language: model.language) }
     }
 }
 

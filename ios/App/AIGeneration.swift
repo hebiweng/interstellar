@@ -50,6 +50,9 @@ struct AIGenerateResponse: Codable, Equatable, Sendable {
     let generatedAt: String?
     let semanticFingerprint: String?
     let factsHash: String?
+    let requestID: String?
+    let reportID: String?
+    let recovered: Bool?
 }
 
 struct GeneratedChartArtifact: Codable, Equatable, Sendable, Identifiable {
@@ -702,7 +705,7 @@ struct AIGenerationClient: Sendable {
     }
 }
 
-private actor AppAttestAuthorizer {
+actor AppAttestAuthorizer {
     static let shared = AppAttestAuthorizer()
 
     private struct ChallengeRequest: Encodable {
@@ -991,7 +994,7 @@ private extension JSONEncoder {
     }
 }
 
-private enum InstallationIdentity {
+enum InstallationIdentity {
     fileprivate static let service = "com.xiaoguiwk.interstellar.relay"
     private static let account = "installation-id"
 
@@ -1025,7 +1028,7 @@ private enum InstallationIdentity {
     }()
 }
 
-private enum KeychainValue {
+enum KeychainValue {
     static func read(service: String, account: String) -> Data? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -1098,8 +1101,8 @@ final class GeneratedArtifactStore: @unchecked Sendable {
         try? fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
     }
 
-   func save(_ artifact: GeneratedChartArtifact) {
-       guard let data = try? JSONEncoder().encode(artifact) else { return }
+   @discardableResult func save(_ artifact: GeneratedChartArtifact) -> Bool {
+       guard let data = try? JSONEncoder().encode(artifact) else { return false }
        let destination = url(for: artifact.semanticFingerprint)
        do {
             // Keep only the latest report per chart kind. Earlier reports for
@@ -1112,10 +1115,12 @@ final class GeneratedArtifactStore: @unchecked Sendable {
                [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication],
                ofItemAtPath: destination.path
            )
+			return true
        } catch {
            // The UI keeps the in-memory result; a subsequent launch will
            // explicitly regenerate instead of treating a partial write as a hit.
        }
+		return false
    }
 
     func loadAll() -> [GeneratedChartArtifact] {
@@ -1154,13 +1159,19 @@ final class GeneratedArtifactStore: @unchecked Sendable {
         return reports.sorted { $0.generatedAt > $1.generatedAt }
     }
 
-    func savePeriodReport(_ report: SavedReport) {
+    @discardableResult
+    func savePeriodReport(_ report: SavedReport) -> Bool {
         var reports = loadPeriodReports()
         reports.removeAll { $0.id == report.id }
         reports.append(report)
         reports.sort { $0.generatedAt > $1.generatedAt }
-        guard let data = try? JSONEncoder().encode(reports) else { return }
-        try? data.write(to: periodIndexURL, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+        guard let data = try? JSONEncoder().encode(reports) else { return false }
+        do {
+            try data.write(to: periodIndexURL, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+            return true
+        } catch {
+            return false
+        }
     }
 
     private func migrateLegacyPeriodReportsIfNeeded() {

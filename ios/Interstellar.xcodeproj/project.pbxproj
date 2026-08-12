@@ -22,6 +22,7 @@
 		17DA24AF7292AB4828A37395 /* InsightContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B2767ACABFDDAEEBA88C4E /* InsightContent.swift */; };
 		1D9909C647E496C423149F54 /* NatalCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70137E5B98FB7ED9A5271D4E /* NatalCardViews.swift */; };
 		22FE763B15FC08F52E396C93 /* InsightVisualRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C15B6C5E4FC301E99B2B07C /* InsightVisualRouter.swift */; };
+		2BAFAAA81DADC6247F5F641E /* Interstellar.storekit in Resources */ = {isa = PBXBuildFile; fileRef = F5469F68D509DB75F34215F3 /* Interstellar.storekit */; };
 		33054AA25131FE100A8ACD0B /* ClassicalTransitPlanningTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CBBF3C1035EE83B4DD9EADC /* ClassicalTransitPlanningTests.swift */; };
 		33AF4A0526E3FCBA484AE56F /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E20C395BDFD8BD0B24388C /* AppModel.swift */; };
 		388FE3F37754814E0A699FE6 /* agpl-3.0.txt in Resources */ = {isa = PBXBuildFile; fileRef = 304F386EC1EE838F3AD709A9 /* agpl-3.0.txt */; };
@@ -49,6 +50,7 @@
 		62DD96AFCE12CF9A7D1E0BF8 /* CopyCatalog-es.json in Resources */ = {isa = PBXBuildFile; fileRef = 16E441C69E6B1A0FDF26C840 /* CopyCatalog-es.json */; };
 		69D2947D4DAEF327395440EC /* TransitChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1046F5BCC8A7B5114076BE5 /* TransitChartCardFactory.swift */; };
 		6DF8FD6A4F935548CE5FFF08 /* CurrentSkyCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4A3A93914F96ADD04BCE584 /* CurrentSkyCardViews.swift */; };
+		6EDA491777E0013C8ED4B6FC /* ICloudBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B10192A26DC6FF24AAE0F44 /* ICloudBackup.swift */; };
 		7054C08BB4A305C2CE8328DA /* AskHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1C2A46A3725C8A3CDBFC8B /* AskHistory.swift */; };
 		7146C73C4FBB984FB0E84E57 /* Reports.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3989AA7077B4B8CF57C56610 /* Reports.swift */; };
 		7195DECE9971A2CC7BF9F222 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F53A273536232B2755B411 /* RootView.swift */; };
@@ -72,6 +74,7 @@
 		A3239AD8EAACA0ACDAB0DD80 /* CurrentSkyLegacyCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3611EB071ABBD875FD657E40 /* CurrentSkyLegacyCardFactory.swift */; };
 		A67DFAE27B65045744E93553 /* TransitCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 981F4C2821CFBF67FAAA0AD8 /* TransitCardFactory.swift */; };
 		A863BE485A3BF7AE893CF28F /* ContentKit in Frameworks */ = {isa = PBXBuildFile; productRef = 5B9BE7BBBE9923D7E31A58CA /* ContentKit */; };
+		A97623F0AAAF05AA48DDE9C2 /* Commerce.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56BC8AFFCB4F85EB79AA6B5B /* Commerce.swift */; };
 		AA34CAD28D767A1F2C0D2D42 /* AppChartCalculationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0D4BA551D42474094AA7BA /* AppChartCalculationService.swift */; };
 		ACE891B9EF0E4DF7055CA6D8 /* PrivateRules-Today.json in Resources */ = {isa = PBXBuildFile; fileRef = DEAB31C516DCEE8FEDBE75A8 /* PrivateRules-Today.json */; };
 		AEBFB69B492E07ADA4D3ECFB /* ClassicalTransitContractValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96EA5C5093F66F8DBEDE5D37 /* ClassicalTransitContractValidator.swift */; };
@@ -136,6 +139,7 @@
 		2114D2FD8739C6BB62FD26EF /* AIGeneration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIGeneration.swift; sourceTree = "<group>"; };
 		28B5FB5FF8C581EAA64A6F58 /* LocalizedFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedFormatters.swift; sourceTree = "<group>"; };
 		2A4FBE0CC517EF4C1D54C807 /* InterstellarUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = InterstellarUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2B10192A26DC6FF24AAE0F44 /* ICloudBackup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudBackup.swift; sourceTree = "<group>"; };
 		2C19015724A0F9DB648CEDBD /* Interstellar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Interstellar.entitlements; sourceTree = "<group>"; };
 		2DA05D01ACC5CCFEED503A57 /* CopyCatalogMatcher+Secondary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CopyCatalogMatcher+Secondary.swift"; sourceTree = "<group>"; };
 		304F386EC1EE838F3AD709A9 /* agpl-3.0.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "agpl-3.0.txt"; sourceTree = "<group>"; };
@@ -160,6 +164,7 @@
 		50F3351613FF5684A3CC89A3 /* ClassicalTransitThemeMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassicalTransitThemeMapper.swift; sourceTree = "<group>"; };
 		51D302BEED2320F6644CB2B1 /* abc-life-areas-help-zh-Hans.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "abc-life-areas-help-zh-Hans.md"; sourceTree = "<group>"; };
 		540E8C52B9FD903F6E70EFDF /* TransitCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitCardViews.swift; sourceTree = "<group>"; };
+		56BC8AFFCB4F85EB79AA6B5B /* Commerce.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commerce.swift; sourceTree = "<group>"; };
 		57F38F42C1794260A5DB8E8B /* LegacyCardFactorySupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyCardFactorySupport.swift; sourceTree = "<group>"; };
 		5A1C4311E86E866790B89BEA /* LocationPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPicker.swift; sourceTree = "<group>"; };
 		5CCCA84B397C2C9CC92887D6 /* ContentKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ContentKit; path = Packages/ContentKit; sourceTree = SOURCE_ROOT; };
@@ -219,6 +224,7 @@
 		E8C236CDE4D10394DD945034 /* abc-life-areas-help-en.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "abc-life-areas-help-en.md"; sourceTree = "<group>"; };
 		EA033884853D4F649DCA3A50 /* SecondaryCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondaryCardViews.swift; sourceTree = "<group>"; };
 		EF3E51ABD17125BFA6309793 /* CopyCatalogMatcher+Transit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CopyCatalogMatcher+Transit.swift"; sourceTree = "<group>"; };
+		F5469F68D509DB75F34215F3 /* Interstellar.storekit */ = {isa = PBXFileReference; path = Interstellar.storekit; sourceTree = "<group>"; };
 		F68BC5DCEB635B9D898E770C /* PrivateContent-en.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "PrivateContent-en.json"; sourceTree = "<group>"; };
 		FA0F4E5EB51698A7A4BAD76D /* SynastryLegacyCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynastryLegacyCardFactory.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -510,10 +516,13 @@
 				6FFE425FA91D67D5112FB3FE /* ChartEvents.swift */,
 				3B958CF1AD3B3C7FE6219102 /* ChartRenderer.swift */,
 				E5C939878A4D22398ADB7CBE /* ChartsView.swift */,
+				56BC8AFFCB4F85EB79AA6B5B /* Commerce.swift */,
 				C28BE23BBAEDB4F998B852E4 /* ConsumerCopy.swift */,
+				2B10192A26DC6FF24AAE0F44 /* ICloudBackup.swift */,
 				C7B2767ACABFDDAEEBA88C4E /* InsightContent.swift */,
 				03268C1EAB77BCD4B05BCC74 /* InterpretationContextFactory.swift */,
 				2C19015724A0F9DB648CEDBD /* Interstellar.entitlements */,
+				F5469F68D509DB75F34215F3 /* Interstellar.storekit */,
 				055D71348E930EDB7CEA9D25 /* InterstellarApp.swift */,
 				BDBF1C8DDAF72951EAEA6DCF /* Localizable.xcstrings */,
 				28B5FB5FF8C581EAA64A6F58 /* LocalizedFormatters.swift */,
@@ -879,6 +888,7 @@
 				0855A21E00DD103101CF2006 /* CopyCatalog-fr.json in Resources */,
 				F36779F7EEAAF8EFA1F68D6E /* CopyCatalog-zh-Hans.json in Resources */,
 				7B00116445E815363BD4B368 /* InfoPlist.strings in Resources */,
+				2BAFAAA81DADC6247F5F641E /* Interstellar.storekit in Resources */,
 				026D94872BB73545933C4DFD /* LICENSE in Resources */,
 				4F27F066D66B76B397D64A03 /* Localizable.xcstrings in Resources */,
 				4ECA6EA76176B0C5FBEB5EB9 /* PrivateContent-en.json in Resources */,
@@ -956,6 +966,7 @@
 				AEBFB69B492E07ADA4D3ECFB /* ClassicalTransitContractValidator.swift in Sources */,
 				81879C97D92790AA2A645A78 /* ClassicalTransitPlanningStrategy.swift in Sources */,
 				BD54F74F35A8C8E4B7EBEA87 /* ClassicalTransitThemeMapper.swift in Sources */,
+				A97623F0AAAF05AA48DDE9C2 /* Commerce.swift in Sources */,
 				B6111E2F452E307366314E7C /* ConsumerCopy.swift in Sources */,
 				02366B954939BBA2E0278EAB /* CopyCatalogMatcher+CurrentSky.swift in Sources */,
 				495F919A17C34BF2A6544CDA /* CopyCatalogMatcher+Natal.swift in Sources */,
@@ -966,6 +977,7 @@
 				6DF8FD6A4F935548CE5FFF08 /* CurrentSkyCardViews.swift in Sources */,
 				44FD8E26CE2466635A276B1D /* CurrentSkyChartCardFactory.swift in Sources */,
 				A3239AD8EAACA0ACDAB0DD80 /* CurrentSkyLegacyCardFactory.swift in Sources */,
+				6EDA491777E0013C8ED4B6FC /* ICloudBackup.swift in Sources */,
 				DA6B16C2768D7B5927B08060 /* InsightCardAssembler.swift in Sources */,
 				F148813E729FEB595A1040DC /* InsightCardView.swift in Sources */,
 				17DA24AF7292AB4828A37395 /* InsightContent.swift in Sources */,

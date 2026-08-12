@@ -91,13 +91,6 @@ func (s *Store) migrate() error {
 			created_at TEXT NOT NULL,
 			updated_at TEXT NOT NULL
 		)`,
-		`CREATE TABLE IF NOT EXISTS generation_cache (
-			cache_key TEXT PRIMARY KEY,
-			scope TEXT NOT NULL,
-			payload TEXT NOT NULL,
-			created_at TEXT NOT NULL,
-			expires_at TEXT NOT NULL
-		)`,
 		`CREATE TABLE IF NOT EXISTS admin_users (
 			username TEXT PRIMARY KEY,
 			password_hash TEXT NOT NULL,
@@ -153,6 +146,101 @@ func (s *Store) migrate() error {
 			expires_at TEXT NOT NULL,
 			revoked_at TEXT
 		)`,
+		`CREATE TABLE IF NOT EXISTS commerce_users (
+			user_id TEXT PRIMARY KEY,
+			created_at TEXT NOT NULL,
+			last_active_at TEXT NOT NULL,
+			admin_premium_started_at TEXT,
+			admin_premium_expires_at TEXT
+		)`,
+		`CREATE TABLE IF NOT EXISTS user_installations (
+			installation_hash TEXT PRIMARY KEY,
+			user_id TEXT NOT NULL,
+			linked_at TEXT NOT NULL,
+			FOREIGN KEY(user_id) REFERENCES commerce_users(user_id)
+		)`,
+		`CREATE TABLE IF NOT EXISTS subscriptions (
+			user_id TEXT PRIMARY KEY,
+			product_id TEXT NOT NULL,
+			status TEXT NOT NULL,
+			original_transaction_id TEXT NOT NULL,
+			started_at TEXT NOT NULL,
+			expires_at TEXT NOT NULL,
+			updated_at TEXT NOT NULL,
+			FOREIGN KEY(user_id) REFERENCES commerce_users(user_id)
+		)`,
+		`CREATE TABLE IF NOT EXISTS store_transactions (
+			transaction_id TEXT PRIMARY KEY,
+			user_id TEXT NOT NULL,
+			original_transaction_id TEXT NOT NULL,
+			product_id TEXT NOT NULL,
+			purchased_at TEXT NOT NULL,
+			revoked_at TEXT,
+			jws_hash TEXT NOT NULL,
+			created_at TEXT NOT NULL,
+			FOREIGN KEY(user_id) REFERENCES commerce_users(user_id)
+		)`,
+		`CREATE TABLE IF NOT EXISTS credit_grants (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id TEXT NOT NULL,
+			source TEXT NOT NULL,
+			original_amount INTEGER NOT NULL,
+			remaining_amount INTEGER NOT NULL,
+			granted_at TEXT NOT NULL,
+			expires_at TEXT,
+			period_key TEXT,
+			apple_transaction_id TEXT,
+			FOREIGN KEY(user_id) REFERENCES commerce_users(user_id),
+			UNIQUE(user_id, source, period_key),
+			UNIQUE(apple_transaction_id)
+		)`,
+		`CREATE TABLE IF NOT EXISTS credit_reservations (
+			user_id TEXT NOT NULL,
+			request_id TEXT NOT NULL,
+			report_id TEXT NOT NULL,
+			request_hash TEXT NOT NULL,
+			state TEXT NOT NULL,
+			allocations_json TEXT NOT NULL,
+			created_at TEXT NOT NULL,
+			expires_at TEXT NOT NULL,
+			updated_at TEXT NOT NULL,
+			PRIMARY KEY(user_id, request_id),
+			FOREIGN KEY(user_id) REFERENCES commerce_users(user_id)
+		)`,
+		`CREATE TABLE IF NOT EXISTS credit_ledger (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id TEXT NOT NULL,
+			request_id TEXT,
+			grant_id INTEGER,
+			action TEXT NOT NULL,
+			delta INTEGER NOT NULL,
+			created_at TEXT NOT NULL,
+			FOREIGN KEY(user_id) REFERENCES commerce_users(user_id)
+		)`,
+		`CREATE TABLE IF NOT EXISTS report_requests (
+			user_id TEXT NOT NULL,
+			request_id TEXT NOT NULL,
+			report_id TEXT NOT NULL,
+			request_hash TEXT NOT NULL,
+			scope TEXT NOT NULL,
+			requested_locale TEXT NOT NULL,
+			effective_locale TEXT NOT NULL,
+			model TEXT NOT NULL DEFAULT '',
+			credit_cost INTEGER NOT NULL DEFAULT 1,
+			report_status TEXT NOT NULL,
+			credit_status TEXT NOT NULL,
+			prompt_tokens INTEGER NOT NULL DEFAULT 0,
+			completion_tokens INTEGER NOT NULL DEFAULT 0,
+			reasoning_tokens INTEGER NOT NULL DEFAULT 0,
+			duration_ms INTEGER NOT NULL DEFAULT 0,
+			error_code TEXT NOT NULL DEFAULT '',
+			error_message TEXT NOT NULL DEFAULT '',
+			created_at TEXT NOT NULL,
+			updated_at TEXT NOT NULL,
+			delivered_at TEXT,
+			PRIMARY KEY(user_id, request_id),
+			FOREIGN KEY(user_id) REFERENCES commerce_users(user_id)
+		)`,
 		`CREATE INDEX IF NOT EXISTS idx_usage_ts ON usage_log(ts)`,
 		`CREATE INDEX IF NOT EXISTS idx_feedback_status_created ON feedback(status, created_at DESC)`,
 		`CREATE INDEX IF NOT EXISTS idx_feedback_type_created ON feedback(type, created_at DESC)`,
@@ -161,13 +249,86 @@ func (s *Store) migrate() error {
 		`CREATE INDEX IF NOT EXISTS idx_admin_audit_ts ON admin_audit(ts)`,
 		`CREATE INDEX IF NOT EXISTS idx_app_attest_challenge_expiry ON app_attest_challenges(expires_at)`,
 		`CREATE INDEX IF NOT EXISTS idx_app_attest_token_expiry ON app_attest_tokens(expires_at)`,
+		`CREATE INDEX IF NOT EXISTS idx_credit_grants_user_expiry ON credit_grants(user_id, expires_at)`,
+		`CREATE INDEX IF NOT EXISTS idx_reports_created ON report_requests(created_at DESC)`,
+		`CREATE INDEX IF NOT EXISTS idx_reports_user_created ON report_requests(user_id, created_at DESC)`,
 	}
 	for _, stmt := range stmts {
 		if _, err := s.db.Exec(stmt); err != nil {
 			return fmt.Errorf("migrate: %w", err)
 		}
 	}
+	if err := ensureSQLiteColumn(s.db, "report_requests", "credit_cost", "INTEGER NOT NULL DEFAULT 1"); err != nil {
+		return fmt.Errorf("migrate report credit cost: %w", err)
+	}
+	// Report bodies are client-only. Remove the legacy cache table entirely so
+	// no current code path can retain a generated report on Relay.
+	if _, err := s.db.Exec(`DROP TABLE IF EXISTS generation_cache`); err != nil {
+		return fmt.Errorf("drop legacy generation cache: %w", err)
+	}
+	hasLegacyReportBody, err := sqliteColumnExists(s.db, "report_requests", "payload_enc")
+	if err != nil {
+		return fmt.Errorf("inspect legacy report bodies: %w", err)
+	}
+	if hasLegacyReportBody {
+		if _, err := s.db.Exec(`UPDATE report_requests SET payload_enc=NULL WHERE payload_enc IS NOT NULL`); err != nil {
+			return fmt.Errorf("clear legacy report bodies: %w", err)
+		}
+		if _, err := s.db.Exec(`ALTER TABLE report_requests DROP COLUMN payload_enc`); err != nil {
+			return fmt.Errorf("remove legacy report body column: %w", err)
+		}
+	}
 	return nil
+}
+
+func sqliteColumnExists(db *sql.DB, table, column string) (bool, error) {
+	rows, err := db.Query(`PRAGMA table_info(` + table + `)`)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var cid int
+		var name, kind string
+		var notNull, primaryKey int
+		var defaultValue sql.NullString
+		if err := rows.Scan(&cid, &name, &kind, &notNull, &defaultValue, &primaryKey); err != nil {
+			return false, err
+		}
+		if name == column {
+			return true, nil
+		}
+	}
+	return false, rows.Err()
+}
+
+func ensureSQLiteColumn(db *sql.DB, table, column, declaration string) error {
+	rows, err := db.Query(`PRAGMA table_info(` + table + `)`)
+	if err != nil {
+		return err
+	}
+	found := false
+	for rows.Next() {
+		var cid int
+		var name, kind string
+		var notNull, primaryKey int
+		var defaultValue sql.NullString
+		if err := rows.Scan(&cid, &name, &kind, &notNull, &defaultValue, &primaryKey); err != nil {
+			rows.Close()
+			return err
+		}
+		if name == column {
+			found = true
+		}
+	}
+	if err := rows.Close(); err != nil {
+		return err
+	}
+	if found {
+		return nil
+	}
+	_, err = db.Exec(`ALTER TABLE ` + table + ` ADD COLUMN ` + column + ` ` + declaration)
+	return err
 }
 
 // ---- User feedback ----
@@ -666,56 +827,6 @@ func (s *Store) UsageSummary(days int) ([]map[string]any, error) {
 		})
 	}
 	return out, rows.Err()
-}
-
-// ---- Generation cache ----
-
-func (s *Store) CacheGet(key string) (string, bool, error) {
-	var payload, expires string
-	err := s.db.QueryRow(`SELECT payload, expires_at FROM generation_cache WHERE cache_key = ?`, key).Scan(&payload, &expires)
-	if errors.Is(err, sql.ErrNoRows) {
-		return "", false, nil
-	}
-	if err != nil {
-		return "", false, err
-	}
-	expiresAt, err := time.Parse(time.RFC3339, expires)
-	if err != nil || time.Now().UTC().After(expiresAt) {
-		_, _ = s.db.Exec(`DELETE FROM generation_cache WHERE cache_key = ?`, key)
-		return "", false, nil
-	}
-	plain, err := s.decrypt(payload)
-	if err != nil {
-		// Legacy plaintext and damaged cache rows are never served after the
-		// encrypted-cache migration.
-		_, _ = s.db.Exec(`DELETE FROM generation_cache WHERE cache_key = ?`, key)
-		return "", false, nil
-	}
-	return plain, true, nil
-}
-
-func (s *Store) CachePut(key, scope, payload string, ttl time.Duration) error {
-	encrypted, err := s.encrypt(payload)
-	if err != nil {
-		return err
-	}
-	now := time.Now().UTC()
-	expires := now.Add(ttl).Format(time.RFC3339)
-	_, err = s.db.Exec(
-		`INSERT INTO generation_cache (cache_key, scope, payload, created_at, expires_at)
-		 VALUES (?, ?, ?, ?, ?)
-		 ON CONFLICT(cache_key) DO UPDATE SET payload = excluded.payload, expires_at = excluded.expires_at`,
-		key, scope, encrypted, now.Format(time.RFC3339), expires,
-	)
-	return err
-}
-
-func (s *Store) CacheClear(scope string) (int64, error) {
-	res, err := s.db.Exec(`DELETE FROM generation_cache WHERE scope = ?`, scope)
-	if err != nil {
-		return 0, err
-	}
-	return res.RowsAffected()
 }
 
 // ---- Admin users ----

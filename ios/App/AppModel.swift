@@ -86,6 +86,10 @@ final class AppModel: ObservableObject {
     @Published private(set) var focusedChartDate: Date?
     @Published private(set) var isCalculatingFocus = false
     @Published private(set) var errorMessage: String?
+	@Published var iCloudBackupEnabled: Bool {
+		didSet { defaults.set(iCloudBackupEnabled, forKey: "icloud.backup.enabled.v1"); if iCloudBackupEnabled { scheduleICloudBackup() } }
+	}
+	@Published private(set) var iCloudBackupStatus = ""
 
     private var calculator: SwissEphemerisCalculator?
     private var focusedSnapshot: ChartSnapshot?
@@ -108,9 +112,11 @@ final class AppModel: ObservableObject {
     private var generatingCharts: Set<ChartKind> = []
     private var generatingPeriods: Set<ReportScope> = []
     private var networkMonitor: NWPathMonitor?
+	private var isRestoringICloudBackup = false
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+		iCloudBackupEnabled = defaults.object(forKey: "icloud.backup.enabled.v1") as? Bool ?? true
         aiConsentGranted = defaults.bool(forKey: "ai.network.consent.v1")
         synastryPartnerID = defaults.string(forKey: "synastry.partner.v1")
         chartSubjectID = defaults.string(forKey: "charts.subject.v1") ?? "self"
@@ -187,12 +193,17 @@ final class AppModel: ObservableObject {
         if let index = savedPeople.firstIndex(where: { $0.id == person.id }) {
             savedPeople[index] = person
         } else {
+			guard CommerceStore.shared.isPremium || savedPeople.count < 2 else {
+				CommerceStore.shared.showsPaywall = true
+				return
+			}
             savedPeople.append(person)
         }
         savedPeople.sort {
             $0.profile.name.localizedCaseInsensitiveCompare($1.profile.name) == .orderedAscending
         }
         persistPeople()
+		scheduleICloudBackup()
     }
 
     var chartSubjectProfile: UserProfile {
@@ -1064,13 +1075,39 @@ final class AppModel: ObservableObject {
         if let data = try? JSONEncoder().encode(profile) {
             defaults.set(data, forKey: "profile.v1")
         }
+		scheduleICloudBackup()
     }
 
     private func persistPeople() {
         if let data = try? JSONEncoder().encode(savedPeople) {
             defaults.set(data, forKey: "people.v1")
         }
+		scheduleICloudBackup()
     }
+
+	func saveICloudBackup() async {
+		guard iCloudBackupEnabled else { return }
+		let envelope = ICloudBackupEnvelope(version: 1, updatedAt: Date(), profile: profile, people: savedPeople, language: language, appearance: appearance, fontSize: fontSize, presets: presets, reports: artifactStore.loadAll(), periodReports: artifactStore.loadPeriodReports())
+		do { try await ICloudBackupStore.shared.save(envelope); iCloudBackupStatus = localized("icloud.saved", language: language) }
+		catch { iCloudBackupStatus = localized("icloud.unavailable", language: language) }
+	}
+
+	func restoreICloudBackup() async {
+		do {
+			guard let backup = try await ICloudBackupStore.shared.load() else { iCloudBackupStatus = localized("icloud.no-backup", language: language); return }
+			isRestoringICloudBackup = true
+			defer { isRestoringICloudBackup = false }
+			profile = backup.profile; savedPeople = backup.people; language = backup.language; appearance = backup.appearance; fontSize = backup.fontSize; presets = backup.presets
+			backup.reports.forEach { _ = artifactStore.save($0) }
+			(backup.periodReports ?? []).forEach { _ = artifactStore.savePeriodReport($0) }
+			persistPeople(); reloadSavedReports(); iCloudBackupStatus = localized("icloud.restored", language: language); await refresh()
+		} catch { iCloudBackupStatus = localized("icloud.unavailable", language: language) }
+	}
+
+	private func scheduleICloudBackup() {
+		guard iCloudBackupEnabled, !isRestoringICloudBackup else { return }
+		Task { await saveICloudBackup() }
+	}
 
     // MARK: - AI generation (LLM interpretation + reports)
 
@@ -1135,6 +1172,10 @@ final class AppModel: ObservableObject {
            return
        }
        guard aiConsentGranted, isOnline else { return }
+		if CommerceStore.shared.account != nil, CommerceStore.shared.totalCredits == 0 {
+			CommerceStore.shared.showsCredits = true
+			return
+		}
 
         let updatedKey = context.key
         await MainActor.run {
@@ -1179,6 +1220,7 @@ final class AppModel: ObservableObject {
                 semanticFingerprint: key,
                 factsHash: factsHash,
                 locale: requestLocale,
+				userID: CommerceStore.shared.userID.uuidString.lowercased(),
                 forceRegenerate: forceRegenerate
             )
             let bodyData = try JSONSerialization.data(withJSONObject: body, options: [])
@@ -1212,7 +1254,13 @@ final class AppModel: ObservableObject {
                 generatedAt: generatedAt,
                 response: response
             )
-            artifactStore.save(artifact)
+			guard artifactStore.save(artifact) else {
+				throw AIGenerationError.contract(requestLanguage)
+			}
+			scheduleICloudBackup()
+            if let requestID = response.requestID {
+                await CommerceStore.shared.acknowledgeReport(requestID: requestID)
+            }
             applyArtifact(artifact, chart: chart)
         } catch {
             var content = aiContent[chart] ?? .empty
@@ -1381,6 +1429,10 @@ final class AppModel: ObservableObject {
     func generatePeriodReport(_ scope: ReportScope) async {
         guard aiConsentGranted, isOnline else { return }
         guard !generatingPeriods.contains(scope) else { return }
+        guard CommerceStore.shared.account == nil || CommerceStore.shared.totalCredits > 0 else {
+            CommerceStore.shared.showsCredits = true
+            return
+        }
         generatingPeriods.insert(scope)
         defer { generatingPeriods.remove(scope) }
 
@@ -1415,7 +1467,12 @@ final class AppModel: ObservableObject {
                     params: params
                 )
             }
+            let reportID = aiPeriodCacheKey(scope: scope, params: params)
+            let requestID = UUID().uuidString.lowercased()
             let body: [String: Any] = [
+                "userID": CommerceStore.shared.userID.uuidString.lowercased(),
+                "requestID": requestID,
+                "reportID": reportID,
                 "mode": "period",
                 "periodType": scope.rawValue,
                 "preset": NSNull(),
@@ -1427,7 +1484,7 @@ final class AppModel: ObservableObject {
             ]
             let bodyData = try JSONSerialization.data(withJSONObject: body, options: [])
             let response = try await aiClient.generate(AIGenerateRequest(bodyData: bodyData, language: language))
-            let key = aiPeriodCacheKey(scope: scope, params: params)
+            let key = reportID
             let periodScope = "period.\(scope.rawValue)"
             let saved = SavedReport(
                 id: key,
@@ -1437,7 +1494,13 @@ final class AppModel: ObservableObject {
                 generatedAt: Date(),
                 report: AIReport(title: response.report.title, subtitle: response.report.subtitle, sections: response.report.sections)
             )
-            artifactStore.savePeriodReport(saved)
+            guard artifactStore.savePeriodReport(saved) else {
+                throw AIGenerationError.contract(language)
+            }
+            scheduleICloudBackup()
+            if let responseRequestID = response.requestID {
+                await CommerceStore.shared.acknowledgeReport(requestID: responseRequestID)
+            }
             reloadSavedReports()
         } catch {
             // Silent failure: the library keeps its current state; retry on next tap.

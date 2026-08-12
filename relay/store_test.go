@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -67,29 +68,6 @@ func TestGenerationResultValidation(t *testing.T) {
 	}
 }
 
-func TestCacheTTL(t *testing.T) {
-	s := openTestStore(t)
-	if err := s.CachePut("k1", "chart.natal", `{"cached":false}`, time.Hour); err != nil {
-		t.Fatal(err)
-	}
-	if _, hit, err := s.CacheGet("k1"); err != nil || !hit {
-		t.Fatalf("expected cache hit, got hit=%v err=%v", hit, err)
-	}
-	if err := s.CachePut("k2", "chart.natal", `{"cached":false}`, -time.Minute); err != nil {
-		t.Fatal(err)
-	}
-	if _, hit, _ := s.CacheGet("k2"); hit {
-		t.Fatal("expected expired cache to miss")
-	}
-	var stored string
-	if err := s.db.QueryRow(`SELECT payload FROM generation_cache WHERE cache_key = ?`, "k1").Scan(&stored); err != nil {
-		t.Fatal(err)
-	}
-	if strings.Contains(stored, `"cached"`) {
-		t.Fatal("generation cache must not store plaintext payloads")
-	}
-}
-
 func TestInstallationQuota(t *testing.T) {
 	s := openTestStore(t)
 	for expected := 1; expected <= 3; expected++ {
@@ -107,6 +85,197 @@ func TestInstallationQuota(t *testing.T) {
 	count, allowed, err := s.ConsumeInstallationQuota("install-b", 2)
 	if err != nil || count != 1 || !allowed {
 		t.Fatalf("a separate installation must have an independent quota: count=%d allowed=%v err=%v", count, allowed, err)
+	}
+}
+
+func TestCreditAcknowledgementIsExactlyOnceAndRelayHasNoReportCache(t *testing.T) {
+	s := openTestStore(t)
+	userID := "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+	requestID := "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"
+	record, err := s.ReserveCredit(userID, "installation-a", requestID, "report-a", "hash-a", "chart.natal", "en", "en", "model-a")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.MarkReportAwaitingAcknowledgement(userID, requestID, record.RequestHash, "model-a", 12, 34, 0, 56); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.AcknowledgeReport(userID, requestID); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.AcknowledgeReport(userID, requestID); err != nil {
+		t.Fatalf("repeated ACK must be idempotent: %v", err)
+	}
+	var consumes int
+	if err := s.db.QueryRow(`SELECT COUNT(*) FROM credit_ledger WHERE user_id=? AND request_id=? AND action='CONSUME'`, userID, requestID).Scan(&consumes); err != nil {
+		t.Fatal(err)
+	}
+	if consumes != 1 {
+		t.Fatalf("expected one CONSUME ledger row, got %d", consumes)
+	}
+	stored, err := s.GetReportRequest(userID, requestID)
+	if err != nil || stored.ReportStatus != "success" || stored.CreditStatus != "consumed" {
+		t.Fatalf("unexpected stored report metadata: %+v err=%v", stored, err)
+	}
+	var cacheTables int
+	if err := s.db.QueryRow(`SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='generation_cache'`).Scan(&cacheTables); err != nil {
+		t.Fatal(err)
+	}
+	if cacheTables != 0 {
+		t.Fatal("Relay must not have a report generation cache table")
+	}
+	var reportBodyColumns int
+	rows, err := s.db.Query(`PRAGMA table_info(report_requests)`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for rows.Next() {
+		var cid int
+		var name, kind string
+		var notNull, primaryKey int
+		var defaultValue any
+		if err := rows.Scan(&cid, &name, &kind, &notNull, &defaultValue, &primaryKey); err != nil {
+			rows.Close()
+			t.Fatal(err)
+		}
+		if name == "payload_enc" {
+			reportBodyColumns++
+		}
+	}
+	if err := rows.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if reportBodyColumns != 0 {
+		t.Fatal("Relay report metadata table must not contain a report body column")
+	}
+}
+
+func TestLegacyReportBodyStorageIsRemovedDuringMigration(t *testing.T) {
+	path := t.TempDir() + "/legacy.db"
+	db, err := sql.Open("sqlite", path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.Exec(`CREATE TABLE report_requests (
+		user_id TEXT NOT NULL,request_id TEXT NOT NULL,report_id TEXT NOT NULL,request_hash TEXT NOT NULL,
+		scope TEXT NOT NULL,requested_locale TEXT NOT NULL,effective_locale TEXT NOT NULL,model TEXT NOT NULL DEFAULT '',
+		payload_enc TEXT,report_status TEXT NOT NULL,credit_status TEXT NOT NULL,prompt_tokens INTEGER NOT NULL DEFAULT 0,
+		completion_tokens INTEGER NOT NULL DEFAULT 0,reasoning_tokens INTEGER NOT NULL DEFAULT 0,duration_ms INTEGER NOT NULL DEFAULT 0,
+		error_code TEXT NOT NULL DEFAULT '',error_message TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL,updated_at TEXT NOT NULL,
+		delivered_at TEXT,PRIMARY KEY(user_id,request_id))`); err != nil {
+		db.Close()
+		t.Fatal(err)
+	}
+	if _, err := db.Exec(`CREATE TABLE generation_cache (cache_key TEXT PRIMARY KEY,scope TEXT,payload TEXT,created_at TEXT,expires_at TEXT)`); err != nil {
+		db.Close()
+		t.Fatal(err)
+	}
+	_ = db.Close()
+	s, err := OpenStore(path, "test-secret-please-change-32-bytes")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	if exists, err := sqliteColumnExists(s.db, "report_requests", "payload_enc"); err != nil || exists {
+		t.Fatalf("legacy report body column remains: exists=%v err=%v", exists, err)
+	}
+	var cacheTables int
+	if err := s.db.QueryRow(`SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='generation_cache'`).Scan(&cacheTables); err != nil || cacheTables != 0 {
+		t.Fatalf("legacy cache remains: count=%d err=%v", cacheTables, err)
+	}
+}
+
+func TestUnacknowledgedReportReleasesItsOriginalCredit(t *testing.T) {
+	s := openTestStore(t)
+	userID := "cccccccc-cccc-4ccc-8ccc-cccccccccccc"
+	requestID := "dddddddd-dddd-4ddd-8ddd-dddddddddddd"
+	record, err := s.ReserveCredit(userID, "installation-b", requestID, "report-b", "hash-b", "period.monthly", "zh-Hans", "zh-Hans", "model-b")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.MarkReportAwaitingAcknowledgement(userID, requestID, record.RequestHash, "model-b", 1, 2, 0, 3); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.db.Exec(`UPDATE credit_reservations SET expires_at=? WHERE user_id=? AND request_id=?`, time.Now().UTC().Add(-time.Minute).Format(time.RFC3339), userID, requestID); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.ReleaseExpiredReservations(); err != nil {
+		t.Fatal(err)
+	}
+	balance, err := s.CreditBalance(userID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if balance.Total != freeAllowance || balance.Reserved != 0 {
+		t.Fatalf("unacknowledged credit was not restored: %+v", balance)
+	}
+	stored, _ := s.GetReportRequest(userID, requestID)
+	if stored.ReportStatus != "failed" || stored.CreditStatus != "released" || stored.ErrorCode != "delivery_ack_timeout" {
+		t.Fatalf("unexpected release metadata: %+v", stored)
+	}
+}
+
+func TestStoreTransactionReplayAndAnnualWelcomeAreIdempotent(t *testing.T) {
+	s := openTestStore(t)
+	userID := "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"
+	now := time.Now().UTC()
+	credits := AppleTransactionPayload{
+		TransactionID: "credits-transaction-1", OriginalTransactionID: "credits-original-1",
+		ProductID: "credits_10", AppAccountToken: userID, BundleID: "com.xiaoguiwk.interstellar", PurchaseDate: now.UnixMilli(),
+	}
+	if err := s.ApplyVerifiedStoreTransaction(userID, credits, "credits-jws"); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.ApplyVerifiedStoreTransaction(userID, credits, "credits-jws"); err != nil {
+		t.Fatal(err)
+	}
+	annual := AppleTransactionPayload{
+		TransactionID: "annual-transaction-1", OriginalTransactionID: "annual-original-1",
+		ProductID: "premium_annual", AppAccountToken: userID, BundleID: "com.xiaoguiwk.interstellar",
+		PurchaseDate: now.UnixMilli(), ExpiresDate: now.AddDate(1, 0, 0).UnixMilli(),
+	}
+	if err := s.ApplyVerifiedStoreTransaction(userID, annual, "annual-jws-1"); err != nil {
+		t.Fatal(err)
+	}
+	annual.TransactionID = "annual-transaction-2"
+	if err := s.ApplyVerifiedStoreTransaction(userID, annual, "annual-jws-2"); err != nil {
+		t.Fatal(err)
+	}
+	balance, err := s.CreditBalance(userID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if balance.Purchased != 10 || balance.Bonus != 20 || balance.Allowance != premiumAllowance {
+		t.Fatalf("transaction grants must be exactly once: %+v", balance)
+	}
+	annual.RevocationDate = time.Now().UTC().UnixMilli()
+	if err := s.ApplyVerifiedStoreTransaction(userID, annual, "annual-jws-2-revoked"); err != nil {
+		t.Fatal(err)
+	}
+	user, err := s.GetCommerceUser(userID)
+	if err != nil || user.Plan != "free" {
+		t.Fatalf("replayed transaction revocation must update entitlement: user=%+v err=%v", user, err)
+	}
+	if user.Credits.Bonus != 0 {
+		t.Fatalf("revoked annual purchase must remove unused welcome Credits: %+v", user.Credits)
+	}
+}
+
+func TestVerifiedSubscriptionGracePeriodKeepsPremiumActive(t *testing.T) {
+	s := openTestStore(t)
+	userID := "ffffffff-ffff-4fff-8fff-ffffffffffff"
+	now := time.Now().UTC()
+	value := AppleTransactionPayload{
+		TransactionID: "monthly-grace-1", OriginalTransactionID: "monthly-original-1",
+		ProductID: "premium_monthly", AppAccountToken: userID, BundleID: "com.xiaoguiwk.interstellar",
+		PurchaseDate: now.AddDate(0, -1, 0).UnixMilli(), ExpiresDate: now.Add(-time.Hour).UnixMilli(),
+		GraceExpiresDate: now.Add(48 * time.Hour).UnixMilli(),
+	}
+	if err := s.ApplyVerifiedStoreTransaction(userID, value, "monthly-grace-jws"); err != nil {
+		t.Fatal(err)
+	}
+	user, err := s.GetCommerceUser(userID)
+	if err != nil || user.Plan != "premium_monthly" || user.AppleSubscriptionStatus != "grace" {
+		t.Fatalf("billing grace should preserve Premium: user=%+v err=%v", user, err)
 	}
 }
 
@@ -363,10 +532,27 @@ func TestEmbeddedAdminPage(t *testing.T) {
 	if rec.Header().Get("Content-Security-Policy") == "" {
 		t.Fatal("admin page must set a content security policy")
 	}
-	for _, marker := range []string{"prompt-scope-filter", "prompt-locale-filter", "data-prompt-filter", "用户反馈", "feedback-status-filter"} {
+	for _, marker := range []string{"prompt-scope-filter", "prompt-locale-filter", "data-prompt-filter", "用户反馈", "feedback-status-filter", "data-report-filter", "user-detail"} {
 		if !strings.Contains(rec.Body.String(), marker) {
 			t.Fatalf("admin prompt filters missing %q", marker)
 		}
+	}
+}
+
+func TestPublicLegalPagesAndUnsignedStoreNotificationRejection(t *testing.T) {
+	for _, path := range []string{"/privacy", "/terms"} {
+		rec := httptest.NewRecorder()
+		handleLegalPage(rec, httptest.NewRequest(http.MethodGet, path, nil))
+		if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), "English") || !strings.Contains(rec.Body.String(), "简体中文") || !strings.Contains(rec.Body.String(), "Español") || !strings.Contains(rec.Body.String(), "Français") {
+			t.Fatalf("legal page %s is incomplete", path)
+		}
+	}
+	s := openTestStore(t)
+	cfg := &relayConfig{store: s}
+	rec := httptest.NewRecorder()
+	cfg.handleAppStoreNotification(rec, httptest.NewRequest(http.MethodPost, "/v1/store/notifications", strings.NewReader(`{"signedPayload":"not-a-jws"}`)))
+	if rec.Code != http.StatusUnprocessableEntity {
+		t.Fatalf("unsigned App Store notification returned %d: %s", rec.Code, rec.Body.String())
 	}
 }
 
@@ -466,6 +652,7 @@ func TestGeneratePipelineWithMockProvider(t *testing.T) {
 
 	// First call: upstream hit, cached=false.
 	requestPayload := map[string]any{
+		"userID": "11111111-1111-4111-8111-111111111111", "requestID": "22222222-2222-4222-8222-222222222222", "reportID": "natal-semantic-1",
 		"mode": "chart", "chartKind": "natal", "preset": "modern", "profileHash": "h1",
 		"semanticFingerprint": "semantic-1", "factsHash": "facts-1", "generationSchemaVersion": 2,
 		"params": map[string]any{"anchor": "2026-07-31"},
@@ -489,23 +676,28 @@ func TestGeneratePipelineWithMockProvider(t *testing.T) {
 		t.Fatal("expected at least 4 report sections")
 	}
 
-	// Second call with identical parameters: served from cache, upstream not hit.
-	mock.count = 0
-	second := roundTripGenerate(t, s, body)
-	if second["cached"] != true {
-		t.Fatal("expected second call to be served from cache")
+	// The Relay stores no report body. Credit stays reserved until the client
+	// confirms that it persisted the response locally.
+	record, err := s.GetReportRequest("11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222")
+	if err != nil || record.ReportStatus != "awaiting_ack" || record.CreditStatus != "reserved" || record.ReasoningTokens != 25 {
+		t.Fatalf("unexpected pre-ack state: %+v err=%v", record, err)
 	}
-	if mock.count != 0 {
-		t.Fatalf("expected no upstream call on cache hit, got %d", mock.count)
+	if err := s.AcknowledgeReport(record.UserID, record.RequestID); err != nil {
+		t.Fatal(err)
+	}
+	record, _ = s.GetReportRequest(record.UserID, record.RequestID)
+	if record.ReportStatus != "success" || record.CreditStatus != "consumed" {
+		t.Fatalf("unexpected post-ack state: %+v", record)
 	}
 
 	requestPayload["forceRegenerate"] = true
+	requestPayload["requestID"] = "33333333-3333-4333-8333-333333333333"
 	forcedJSON, err := json.Marshal(requestPayload)
 	if err != nil {
 		t.Fatal(err)
 	}
 	third := roundTripGenerate(t, s, string(forcedJSON))
-	if third["cached"] == true || mock.count != 1 {
+	if third["cached"] == true || mock.count != 2 {
 		t.Fatalf("forced regeneration must bypass cache; cached=%v upstream=%d", third["cached"], mock.count)
 	}
 }
@@ -590,6 +782,6 @@ func (m *mockProvider) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		"choices": []map[string]any{{
 			"message": map[string]any{"role": "assistant", "content": content},
 		}},
-		"usage": map[string]any{"prompt_tokens": 100, "completion_tokens": 200},
+		"usage": map[string]any{"prompt_tokens": 100, "completion_tokens": 200, "completion_tokens_details": map[string]any{"reasoning_tokens": 25}},
 	})
 }

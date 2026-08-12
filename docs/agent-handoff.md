@@ -18,13 +18,13 @@ AIGC:
 | 项目 | 当前值 |
 |---|---|
 | 分支 | `codex/ios-v6-rebuild` |
-| 当前提交 | `68fca47` |
-| 相对 `origin/dev` | 超前 15，落后 0 |
+| 当前提交 | 本轮 Premium / Credits / iCloud 提交，以 Git `HEAD` 为准 |
+| 相对 `origin/dev` | 本轮提交前超前 18、落后 0 |
 | 产品合同 | `docs/ios-v6-rebuild-plan.md` |
 | 卡片合同 | `docs/ios-card-implementation-matrix.md` |
 | iOS 测试设备 | 已连接的 iPhone 12 mini；后续不使用模拟器 |
 | Relay 权威域名 | `https://aaadmin.xiaoguiwk.top` |
-| 当前生产 Relay | `interstellar-relay:v6-20260811-feedback-admin` |
+| 当前生产 Relay | `interstellar-relay:v6-20260811-feedback-admin`；本轮代码尚未部署 |
 
 工作区有大量未提交的 iOS、本地化、Relay 和文档改动，属于当前用户任务，不得重置或覆盖。另有与当前任务来源不明的 `vendor/timezone-boundary-builder/timezones-2026b.geojson.zip` 删除，尚未处理。
 
@@ -40,7 +40,7 @@ AIGC:
 
 ### 本地化与内容
 
-- `ios/Localization/ui-translations.json` 是固定 UI 的四语唯一源，当前 900 条；Swift 只写 stable key。
+- `ios/Localization/ui-translations.json` 是固定 UI 的四语唯一源，当前 930 条；Swift 只写 stable key。
 - `scripts/build-ios-localization.mjs` 由上述 JSON 生成并校验 `Localizable.xcstrings`。
 - 消费者正文仍来自私有 Copy Catalog；西法未审核正文按合同回退英文。
 - 语料生成的标准输入是 `artifacts/<preset>-<chart>/` 下每套 10 个公开合同 JSON，不是 `PrivateContent` 或单一 worklist。
@@ -78,6 +78,17 @@ AIGC:
 - iOS 反馈发送到 `https://aaadmin.xiaoguiwk.top/v1/feedback`；Relay 管理端有平级“用户反馈”菜单。
 - 反馈内容使用 AES-GCM 存储并具有限流、字段校验、状态筛选、处理与重新打开能力。
 
+### Premium、Credits、iCloud 与 Relay 管理
+
+- StoreKit 2 已接入 `premium_monthly`、`premium_annual`、`credits_10`，Xcode Scheme 固定加载四语 `Interstellar.storekit`；Annual 在 Paywall 默认选中，购买使用 Keychain 匿名 `userID` 作为 `appAccountToken`，恢复购买只在 Apple 签名交易验证后迁回原 UUID。
+- Free 完整开放 Today、本命、天象、Ask、Wheel、Aspects、日期、地点和参数；Special 只兼容历史值，不可选。行运、合盘、日返、次限的第 2 张及后续 Interpretation Card 完全不渲染正文，使用 contextual Paywall；本人之外可免费保存 2 人。
+- Relay 是 Premium/Credits 权威：Free 自然月 refill 到 2，Premium 按订阅月锚点 refill 到 10；Annual 首购一次性发 20 个一年期 Bonus；购买的 10 Credits 永不过期；消耗顺序 allowance → bonus/admin → purchased。
+- 报告生成前只预留 Credit。Relay 完成 AI、Schema 与 evidence 校验后仅写 `awaiting_ack` 元数据，不保存正文；iOS 必须先原子保存六盘或周期报告，再 ACK。ACK 事务恰好消费一次；生成、校验、本地保存失败或未 ACK 超时均原路释放。iOS 会持久化并重试暂时失败的 ACK。
+- Relay 已删除旧 `generation_cache` 表和所有读写方法，启动迁移会清空并删除任何旧 `payload_enc` 列；当前报告元数据表没有正文列或正文读取路径。App Store 客户端交易及 Server Notifications V2 均验证 ES256/x5c JWS，并处理续订、billing grace、到期、撤销、退款和交易重放。
+- 管理端新增 Reports 与 Users：Reports 有 User/盘型/语言/状态/日期筛选、Tokens、耗时、错误、Credit 成本与状态；Users 有 Apple/Admin Premium、到期、分钱包余额、Grant 明细、报告数、跳转 Reports，以及带审计的 Grant/Revoke Premium 和 Grant Credits。
+- Profile 设置新增 Premium & Credits 权威余额页及 iCloud Backup。私人 iCloud container 备份本人/其他人物、语言、外观、字号、预设、六盘报告和周期报告；恢复时抑制中间自动覆盖。Relay 不参与 iCloud 报告存储。
+- 设置中的 Required Notices 已提供 en / zh-Hans / es / fr Swiss Ephemeris / AGPL 说明和完整随包许可证；Paywall 有四语 Terms/Privacy 入口，Relay 提供四语公开页面。App Icon 已替换为用户提供的 1024×1024 Leo 图标，无 alpha、无预烘焙圆角。
+
 ### 仓库结构与清理
 
 - `AGENTS.md` 已加入权威目录地图和固定语料链路，明确 `artifacts/` 十文件合同包、私有源、运行时包和可删除缓存的边界。
@@ -108,7 +119,7 @@ AstroCore Snapshot / Aspect / Event
 ## 4. 最新验证证据
 
 - AstroCore 25 项测试通过，包含有界 Horary Judgment 事件证据、同领域 A/B/C 的 sect-aware triplicity 分配、独立模式重复宫位不误触发，以及原始 Option 身份稳定性。
-- iPhoneOS arm64 Debug 无签名构建通过；四语帮助 Markdown 已进入 App Resources，固定 UI 900 条四语本地化生成与构建期校验通过。
+- iPhoneOS arm64 Debug 无签名构建通过；四语帮助 Markdown 已进入 App Resources，固定 UI 930 条四语本地化生成与构建期校验通过。
 - iPhoneOS arm64 Debug 真机构建通过，并已覆盖安装、启动到 iPhone 12 mini。
 - iPhone 12 mini 上 Ask 端到端 UI 测试通过：输入问题、关闭键盘、选择 Primary / Related、将 Related 设为 Primary、提交并进入 Judgment 结果页。
 - 真机月相数学与 14 对人物 × Modern/Classical 共 28 份合盘计划测试通过：8 卡顺序正确、空卡 0、卡内重复 0、事实引用与角色方向合法；所有实际选中事实在 en / zh-Hans / es / fr 均能命中非空解读。
@@ -123,13 +134,16 @@ AstroCore Snapshot / Aspect / Event
 - `scripts/check-private-content.sh` 通过。
 - `git diff --check` 通过。
 - Relay `go test ./...`、反馈接口校验和生产健康检查通过。
+- 本轮 Relay `go test ./...` 通过，新增覆盖 ACK 恰好一次、未 ACK 释放、Relay 无缓存/无正文、Credit 原 Grant 恢复、购买交易重放、Annual welcome 幂等、撤销回收和 billing grace。
+- 本轮 iPhoneOS arm64 无签名构建通过（Swift 6 + warnings-as-errors）；Scheme 已识别 `Interstellar.storekit`。首次签名真机构建确认免费 Personal Team 被 iCloud capability 阻断；按用户要求临时置空 entitlement 后，iPhone 12 mini 签名构建、覆盖安装和启动均成功。
+- 本轮 AstroCore 25 项、ContentKit 6 项测试通过；Copy Catalog、四语固定 UI（930 条）、架构、lint、卡片合同、私有内容边界和 `git diff --check` 均通过。
 - 本轮完成后已删除临时 Xcode DerivedData 和测试日志；没有使用模拟器。
 
 ## 5. 当前未完成事项
 
 ### 正在处理
 
-1. 核对当前大量未提交改动的最终提交范围；Obsidian 索引移除已经暂存，其余改动尚未统一暂存或提交。
+1. 提交本轮 Premium / Credits / iCloud / Relay 管理改动；不得包含来源不明的 timezone vendor ZIP 删除。
 
 ### 发布前仍需完成
 
@@ -150,10 +164,19 @@ AstroCore Snapshot / Aspect / Event
 
 发布前必须恢复 Apple Developer Program，重新确认届时正式 Team ID，恢复 App Attest entitlement，将 `RELAY_ALLOW_DEV_BYPASS` 改为 `"0"`，再做生产端到端验证。
 
+### iCloud / App Store 外部配置阻断
+
+- 当前免费 Personal Team 无法创建包含 iCloud container 的 provisioning profile；已确认报错来自 iCloud capability，不是 Swift 编译。为先测试其他功能，`Interstellar.entitlements` 已按用户要求临时置空，iCloud 代码仍完整保留并会显示 unavailable。购买/恢复 Apple Developer Program 后，需恢复 iCloud Documents、`iCloud.com.xiaoguiwk.interstellar` 和 ubiquity kv-store entitlements，在 Developer Portal 启用相同能力并重新生成 profile，再做真机备份/恢复验收。
+- App Store Connect 仍需按同一 Product ID 创建 Monthly、Annual 和 10 Credits 商品，配置价格/四语元数据、订阅组、退款/宽限期策略，并把 Server Notifications V2 URL 指向 `https://aaadmin.xiaoguiwk.top/v1/store/notifications`。
+- 本轮 Relay 数据库迁移与新管理端尚未部署；部署前备份 `relay-data`，使用本机/CI 构建的 linux/amd64 镜像切换，不在服务器现场编译。
+
 ## 6. 推荐下一步
 
 ```text
-核对并提交当前工作区改动
+提交当前工作区改动
+→ 恢复 Apple Developer Program 并配置 iCloud / App Store Connect
+→ 构建与部署 Relay linux/amd64 镜像，配置 Notifications V2
+→ 真机 StoreKit、iCloud、Paywall、Credits 与 Reports ACK 全链路验收
 → 真机逐屏与 Reports 确认弹窗闭环验收
 → Node policy / Horizon / Classical validator
 → 其余盘型 Legacy 迁移

@@ -42,10 +42,10 @@
     "fr": "Le service d’interprétation a renvoyé HTTP {{statusCode}}."
   },
   "ai.network-consent.chart-message": {
-    "en": "Interstellar sends the selected chart's calculated facts to the configured AI service only after you tap Generate. The relay may keep an encrypted idempotency result for up to 24 hours; your device keeps the long-term report until you delete it in Settings. You can revoke future network generation at any time.",
-    "zh": "只有在你点击生成后，Interstellar 才会把所选星盘的计算事实发送给配置的 AI 服务。中继服务最多保留 24 小时的加密幂等结果；长期报告只保存在本机，直到你在设置中删除。你可以随时撤回后续联网生成授权。",
-    "es": "Interstellar envía los datos calculados de la carta seleccionada al servicio de IA configurado solo después de que pulses Generar. El relay puede conservar un resultado de idempotencia cifrado durante un máximo de 24 horas; tu dispositivo conserva el informe a largo plazo hasta que lo elimines en Ajustes. Puedes revocar en cualquier momento el permiso para futuras generaciones en línea.",
-    "fr": "Interstellar envoie les données calculées de la carte sélectionnée au service d’IA configuré uniquement après que vous avez touché Générer. Le relais peut conserver un résultat d’idempotence chiffré pendant 24 heures au maximum ; votre appareil conserve le rapport à long terme jusqu’à sa suppression dans Réglages. Vous pouvez à tout moment révoquer l’autorisation des futures générations en ligne."
+    "en": "Interstellar sends the selected chart's calculated facts to the configured AI service only after you tap Generate. The relay never stores the generated report. One Credit is charged only after the report is verified and saved on this device. You can revoke future network generation at any time.",
+    "zh": "只有在你点击生成后，Interstellar 才会把所选星盘的计算事实发送给配置的 AI 服务。中继服务永不保存生成的报告；报告通过校验并成功保存在本机后才扣除 1 Credit。你可以随时撤回后续联网生成授权。",
+    "es": "Interstellar envía los datos calculados de la carta seleccionada al servicio de IA configurado solo después de que pulses Generar. El relay nunca almacena el informe generado. Solo se cobra un Credit cuando el informe se valida y se guarda en este dispositivo. Puedes revocar futuras generaciones en línea en cualquier momento.",
+    "fr": "Interstellar envoie les données calculées du thème sélectionné au service d’IA configuré uniquement après que vous avez touché Générer. Le relais ne conserve jamais le rapport généré. Un Credit n’est débité qu’après validation et enregistrement sur cet appareil. Vous pouvez révoquer les futures générations en ligne à tout moment."
   },
   "ai.network-consent.chart-title": {
     "en": "Allow network generation?",
@@ -4858,5 +4858,35 @@
     "zh": "事业与方向",
     "es": "Trabajo y dirección",
     "fr": "Travail et orientation"
-  }
+  },
+  "premium.see-full-picture": {"en":"See the full picture.","zh":"看见完整全貌。","es":"Descubre la imagen completa.","fr":"Découvrez la situation dans son ensemble."},
+  "premium.all-insights": {"en":"Unlock all chart insights","zh":"解锁全部星盘解读","es":"Desbloquea todos los análisis de las cartas","fr":"Débloquez toutes les analyses du thème"},
+  "premium.unlimited-people": {"en":"Add unlimited people","zh":"添加不限数量的人物","es":"Añade personas sin límite","fr":"Ajoutez un nombre illimité de personnes"},
+  "premium.ten-reports": {"en":"10 AI reports every month","zh":"每月 10 份 AI 报告","es":"10 informes de IA al mes","fr":"10 rapports IA par mois"},
+  "premium.annual": {"en":"Annual · Best Value","zh":"年度 · 最超值","es":"Anual · Mejor opción","fr":"Annuel · Meilleur choix"},
+  "premium.monthly": {"en":"Monthly","zh":"月度","es":"Mensual","fr":"Mensuel"},
+  "premium.restore": {"en":"Restore Purchases","zh":"恢复购买","es":"Restaurar compras","fr":"Restaurer les achats"},
+  "premium.continue": {"en":"Continue","zh":"继续","es":"Continuar","fr":"Continuer"},
+  "premium.annual-bonus": {"en":"Includes 20 one-time bonus reports","zh":"含一次性赠送的 20 份报告","es":"Incluye 20 informes extra por única vez","fr":"Inclut 20 rapports bonus uniques"},
+  "premium.unlock-card": {"en":"Unlock with Premium","zh":"使用 Premium 解锁","es":"Desbloquear con Premium","fr":"Débloquer avec Premium"},
+  "credits.title": {"en":"Report Credits","zh":"报告 Credits","es":"Créditos de informes","fr":"Crédits de rapports"},
+  "credits.need-more": {"en":"Need more reports?","zh":"需要更多报告？","es":"¿Necesitas más informes?","fr":"Besoin de plus de rapports ?"},
+  "credits.never-expire": {"en":"Purchased Credits never expire.","zh":"购买的 Credits 永久有效。","es":"Los créditos comprados nunca caducan.","fr":"Les crédits achetés n’expirent jamais."},
+  "credits.buy": {"en":"Buy Credits","zh":"购买 Credits","es":"Comprar créditos","fr":"Acheter des crédits"},
+  "commerce.account": {"en":"Premium & Credits","zh":"Premium 与 Credits","es":"Premium y créditos","fr":"Premium et crédits"},
+  "commerce.plan": {"en":"Plan","zh":"方案","es":"Plan","fr":"Offre"},
+  "icloud.title": {"en":"iCloud Backup","zh":"iCloud 备份","es":"Copia en iCloud","fr":"Sauvegarde iCloud"},
+  "icloud.backup-toggle": {"en":"Save personal data to iCloud","zh":"将个人数据保存到 iCloud","es":"Guardar datos personales en iCloud","fr":"Enregistrer les données personnelles dans iCloud"},
+  "icloud.backup-now": {"en":"Back Up Now","zh":"立即备份","es":"Crear copia ahora","fr":"Sauvegarder maintenant"},
+  "icloud.restore": {"en":"Restore from iCloud","zh":"从 iCloud 恢复","es":"Restaurar desde iCloud","fr":"Restaurer depuis iCloud"},
+  "icloud.description": {"en":"Backs up profiles, reports, language, appearance and interpretation settings to your private iCloud container.","zh":"将人物、报告、语言、外观和解读设置备份到你的私人 iCloud 容器。","es":"Guarda perfiles, informes, idioma, apariencia y ajustes de interpretación en tu contenedor privado de iCloud.","fr":"Sauvegarde les profils, rapports, la langue, l’apparence et les réglages d’interprétation dans votre conteneur iCloud privé."},
+  "icloud.saved": {"en":"Backup saved.","zh":"备份已保存。","es":"Copia guardada.","fr":"Sauvegarde enregistrée."},
+  "icloud.restored": {"en":"Backup restored.","zh":"备份已恢复。","es":"Copia restaurada.","fr":"Sauvegarde restaurée."},
+  "icloud.no-backup": {"en":"No iCloud backup was found.","zh":"未找到 iCloud 备份。","es":"No se encontró ninguna copia en iCloud.","fr":"Aucune sauvegarde iCloud trouvée."},
+  "icloud.unavailable": {"en":"iCloud backup is unavailable on this device or build.","zh":"此设备或构建暂不可使用 iCloud 备份。","es":"La copia en iCloud no está disponible en este dispositivo o compilación.","fr":"La sauvegarde iCloud est indisponible sur cet appareil ou cette version."},
+  "license.required-notices": {"en":"Required Notices","zh":"必要开源说明","es":"Avisos obligatorios","fr":"Mentions obligatoires"},
+  "license.swiss-attribution": {"en":"Astrological calculations use Swiss Ephemeris by Astrodienst AG under the GNU Affero General Public License v3. The copyright and full license texts are included below.","zh":"占星计算使用 Astrodienst AG 的 Swiss Ephemeris，并依照 GNU Affero 通用公共许可证第 3 版使用。版权声明和完整许可证文本见下方。","es":"Los cálculos astrológicos usan Swiss Ephemeris de Astrodienst AG bajo la Licencia Pública General Affero de GNU v3. A continuación se incluyen el aviso de copyright y la licencia completa.","fr":"Les calculs astrologiques utilisent Swiss Ephemeris d’Astrodienst AG sous licence GNU Affero General Public License v3. L’avis de copyright et le texte intégral de la licence figurent ci-dessous."},
+  "premium.renewal-note": {"en":"Subscriptions renew automatically unless cancelled in your Apple account settings.","zh":"订阅会自动续订，除非你在 Apple 账户设置中取消。","es":"Las suscripciones se renuevan automáticamente salvo cancelación en los ajustes de tu cuenta Apple.","fr":"Les abonnements se renouvellent automatiquement sauf annulation dans les réglages de votre compte Apple."},
+  "legal.terms": {"en":"Terms of Use","zh":"使用条款","es":"Términos de uso","fr":"Conditions d’utilisation"},
+  "legal.privacy": {"en":"Privacy Policy","zh":"隐私政策","es":"Política de privacidad","fr":"Politique de confidentialité"}
 }

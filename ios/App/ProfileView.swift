@@ -435,6 +435,11 @@ private struct SettingsView: View {
     var body: some View {
         List {
             NavigationLink {
+                CommerceSettingsView()
+            } label: {
+                Label(localized("commerce.account", language: model.language), systemImage: "star.circle")
+            }
+            NavigationLink {
                 AppearanceSettingsView()
             } label: {
                 Label(localized("profile.appearance", language: model.language), systemImage: "circle.lefthalf.filled")
@@ -469,6 +474,29 @@ private struct SettingsView: View {
         .background(AppTheme.background)
         .navigationTitle(localized("profile.settings", language: model.language))
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct CommerceSettingsView: View {
+    @EnvironmentObject private var model: AppModel
+    @ObservedObject private var commerce = CommerceStore.shared
+
+    var body: some View {
+        Form {
+            Section {
+                LabeledContent(localized("commerce.plan", language: model.language), value: commerce.isPremium ? "Premium" : "Free")
+                LabeledContent(localized("credits.title", language: model.language), value: String(commerce.totalCredits))
+            }
+            Section {
+                if !commerce.isPremium {
+                    Button(localized("premium.unlock-card", language: model.language)) { commerce.showsPaywall = true }
+                }
+                Button(localized("credits.buy", language: model.language)) { commerce.showsCredits = true }
+                Button(localized("premium.restore", language: model.language)) { Task { await commerce.restore() } }
+            }
+        }
+        .task { await commerce.syncAccount() }
+        .settingsDetailStyle(title: localized("commerce.account", language: model.language))
     }
 }
 
@@ -589,6 +617,17 @@ private struct LocalDataSettingsView: View {
             } footer: {
                 Text(localized("profile.clearing-removes-data-stored-on-this-device-only", language: model.language))
             }
+
+			Section {
+				Toggle(localized("icloud.backup-toggle", language: model.language), isOn: $model.iCloudBackupEnabled)
+				Button(localized("icloud.backup-now", language: model.language)) { Task { await model.saveICloudBackup() } }
+				Button(localized("icloud.restore", language: model.language)) { Task { await model.restoreICloudBackup() } }
+				if !model.iCloudBackupStatus.isEmpty { Text(model.iCloudBackupStatus).font(.footnote).foregroundStyle(.secondary) }
+			} header: {
+				Text(localized("icloud.title", language: model.language))
+			} footer: {
+				Text(localized("icloud.description", language: model.language))
+			}
         }
         .settingsDetailStyle(title: localized("profile.local-data", language: model.language))
         .confirmationDialog(
@@ -874,6 +913,9 @@ private struct LicenseView: View {
 
     var body: some View {
         List {
+			Section(localized("license.required-notices", language: language)) {
+				Text(localized("license.swiss-attribution", language: language)).font(.footnote)
+			}
             Section(localized("license.swiss-ephemeris", language: language)) {
                 Text(
                     localized("profile.swiss-ephemeris-2-10-3-is-used-under-the-gnu-affero-general-public-licen", language: language)

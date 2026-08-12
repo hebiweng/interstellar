@@ -48,7 +48,7 @@ func TestGenerateFallsBackFromLowThinkingToDisabled(t *testing.T) {
 	}))
 	defer server.Close()
 
-	result, _, _, _, err := Generate(
+	result, _, _, _, _, err := Generate(
 		context.Background(), server.Client(), server.URL, "key", "deepseek-v4-flash",
 		"Return JSON.", `{"evidenceFacts":[{"id":"fact.1"}]}`, "en", map[string]bool{"fact.1": true},
 	)
