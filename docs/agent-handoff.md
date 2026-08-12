@@ -142,13 +142,16 @@ AstroCore Snapshot / Aspect / Event
 - 本轮 Relay `go test ./...` 通过，新增覆盖 ACK 恰好一次、未 ACK 释放、Relay 无缓存/无正文、Credit 原 Grant 恢复、购买交易重放、Annual welcome 幂等、撤销回收和 billing grace。
 - 本轮 iPhoneOS arm64 无签名构建通过（Swift 6 + warnings-as-errors）；Scheme 已识别 `Interstellar.storekit`。首次签名真机构建确认免费 Personal Team 被 iCloud capability 阻断；按用户要求临时置空 entitlement 后，iPhone 12 mini 签名构建、覆盖安装和启动均成功。
 - 本轮 AstroCore 25 项、ContentKit 6 项测试通过；Copy Catalog、四语固定 UI（930 条）、架构、lint、卡片合同、私有内容边界和 `git diff --check` 均通过。
-- 本轮完成后已删除临时 Xcode DerivedData 和测试日志；没有使用模拟器。
+- 测试可见性修复后，iPhoneOS arm64 无签名与 iPhone 12 mini 签名 Debug 构建均以 Swift 6 warnings-as-errors 通过；固定 UI 更新为 962 条四语字符串。新包已覆盖安装并成功启动到同一台 iPhone 12 mini，未删除 App 数据。
+- Relay 变更专项测试通过，覆盖后台 Free/Premium/Auto 强制切换、对应 2/10 allowance 刷新、订阅宽限期与交易/报告/Credit 路径；`go vet ./...`、管理端 JavaScript 语法、全部项目门禁和 `git diff --check` 通过。
+- 已从提交 `0baacd2` 成功构建 `linux/amd64` 镜像 `interstellar-relay:v6-20260812-testability`。当前线上尚未切换：`ssh ali-server` 连续被服务器在认证阶段主动关闭，且本地镜像导出所需的沙箱升级授权被 Codex 审批额度限制拒绝；因此没有跳过数据库备份，也没有对生产容器或数据做写操作。
+- 本轮没有使用模拟器；当前 DerivedData 保留，用于已连接真机的后续快速覆盖构建。
 
 ## 5. 当前未完成事项
 
 ### 正在处理
 
-1. 将测试可见性修复部署到生产 Relay，再覆盖安装到 iPhone 12 mini；不得包含来源不明的 timezone vendor ZIP 删除。
+1. 恢复 `ssh ali-server` 认证并允许导出本地 Docker 镜像后：备份生产 `relay-data` 数据库，上传并加载 `interstellar-relay:v6-20260812-testability`，只切换 Relay 服务，验证 `/v1/account/sync`、Users/Reports 管理端和健康检查。客户端已覆盖安装完成；不得包含来源不明的 timezone vendor ZIP 删除。
 
 ### 发布前仍需完成
 
