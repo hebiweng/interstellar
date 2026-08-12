@@ -363,6 +363,51 @@ func TestEmbeddedAdminPage(t *testing.T) {
 	if rec.Header().Get("Content-Security-Policy") == "" {
 		t.Fatal("admin page must set a content security policy")
 	}
+	for _, marker := range []string{"prompt-scope-filter", "prompt-locale-filter", "data-prompt-filter", "用户反馈", "feedback-status-filter"} {
+		if !strings.Contains(rec.Body.String(), marker) {
+			t.Fatalf("admin prompt filters missing %q", marker)
+		}
+	}
+}
+
+func TestFeedbackStoredEncryptedAndManaged(t *testing.T) {
+	s := openTestStore(t)
+	item, err := s.SaveFeedback("bug", "A private feedback message", "user@example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var contentEnc, contactEnc string
+	if err := s.db.QueryRow(`SELECT content_enc, contact_enc FROM feedback WHERE id = ?`, item.ID).Scan(&contentEnc, &contactEnc); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(contentEnc, item.Content) || strings.Contains(contactEnc, item.Contact) {
+		t.Fatal("feedback content and contact must be encrypted at rest")
+	}
+	items, err := s.ListFeedback("pending", "bug", 100)
+	if err != nil || len(items) != 1 || items[0].Content != item.Content || items[0].Contact != item.Contact {
+		t.Fatalf("feedback round trip failed: items=%+v err=%v", items, err)
+	}
+	updated, err := s.UpdateFeedbackStatus(item.ID, "resolved")
+	if err != nil || updated.Status != "resolved" {
+		t.Fatalf("feedback status update failed: item=%+v err=%v", updated, err)
+	}
+}
+
+func TestFeedbackHandlerValidation(t *testing.T) {
+	s := openTestStore(t)
+	cfg := &relayConfig{store: s}
+
+	valid := httptest.NewRecorder()
+	cfg.handleFeedback(valid, httptest.NewRequest(http.MethodPost, "/v1/feedback", strings.NewReader(`{"type":"feature","content":"Please add this","contact":""}`)))
+	if valid.Code != http.StatusCreated {
+		t.Fatalf("valid feedback returned %d: %s", valid.Code, valid.Body.String())
+	}
+
+	empty := httptest.NewRecorder()
+	cfg.handleFeedback(empty, httptest.NewRequest(http.MethodPost, "/v1/feedback", strings.NewReader(`{"type":"bug","content":"","contact":""}`)))
+	if empty.Code != http.StatusUnprocessableEntity {
+		t.Fatalf("empty feedback returned %d: %s", empty.Code, empty.Body.String())
+	}
 }
 
 func TestAdminMutationMethodAndPromptValidation(t *testing.T) {

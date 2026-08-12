@@ -3,6 +3,7 @@ import AstroCore
 
 struct ReportsView: View {
    let initialChart: ChartKind?
+   @Binding var selectedTab: RootTab
    @EnvironmentObject private var model: AppModel
    @State private var selectedReport: SavedReport?
    @State private var showConsent = false
@@ -10,17 +11,13 @@ struct ReportsView: View {
    @State private var pendingChart: ChartKind?
    @State private var pendingForceRegenerate = false
    @State private var pendingScope: ReportScope?
-   @State private var pendingRelationship: PersonRelationship?
-   @State private var pendingPreset: CalculationPreset?
-   @State private var pendingRegenerateChart: ChartKind?
    @State private var hasHandledInitialChart = false
-    @State private var showGenerationSheet = false
     @State private var generationSheetChart: ChartKind?
-    @State private var generationSheetRelationship: PersonRelationship = .partner
-    @State private var generationSheetPreset: CalculationPreset = .modern
+    @State private var generationWillReplace = false
 
-    init(initialChart: ChartKind? = nil) {
+    init(initialChart: ChartKind? = nil, selectedTab: Binding<RootTab>) {
         self.initialChart = initialChart
+        _selectedTab = selectedTab
     }
 
     var body: some View {
@@ -29,27 +26,27 @@ struct ReportsView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 LazyVStack(alignment: .leading, spacing: 18) {
                     ScreenTitle(
-                        eyebrow: localized("LIBRARY", "报告库", language: model.language),
-                        title: localized("Reports", "报告", language: model.language),
-                        subtitle: localized("Generated once. Kept permanently.", "生成一次，永久保留。", language: model.language)
+                        eyebrow: localized("reports.library", language: model.language),
+                        title: localized("charts.reports", language: model.language),
+                        subtitle: localized("reports.generated-once-kept-permanently", language: model.language)
                     )
 
-                    Text(localized("Each completed report is stored on device. Read it again without regenerating the same chart or period.", "每份完成的报告都保存在本机，随时可重读，无需重新生成。", language: model.language))
+                    Text(localized("reports.each-completed-report-is-stored-on-device-read-it-again-without-regenera", language: model.language))
                         .font(.subheadline)
                         .foregroundStyle(AppTheme.muted)
                         .cardSurface()
 
                    sectionTitle(
-                       localized("Chart Reports", "星盘报告", language: model.language),
-                       sub: localized("Generated only when you ask", "仅在你点击后生成", language: model.language)
+                       localized("reports.chart-reports", language: model.language),
+                       sub: localized("reports.generated-only-when-you-ask", language: model.language)
                    )
                    ForEach(orderedCharts) { chart in
                        chartReportRow(chart)
                    }
 
-                   sectionTitle(localized("Saved", "已保存", language: model.language), sub: localized("Stored on device", "保存在本机", language: model.language))
+                   sectionTitle(localized("reports.saved", language: model.language), sub: localized("reports.stored-on-device", language: model.language))
                     if model.savedReports.isEmpty {
-                        Text(localized("No reports yet. Choose a chart above and generate its report when you are ready.", "暂无报告。请在上方选择一个星盘，并在需要时生成报告。", language: model.language))
+                        Text(localized("reports.no-reports-yet-choose-a-chart-above-and-generate-its-report-when-you-are", language: model.language))
                             .font(.footnote)
                             .foregroundStyle(AppTheme.muted)
                             .cardSurface()
@@ -66,16 +63,14 @@ struct ReportsView: View {
         }
         .toolbar(.visible, for: .navigationBar)
         .navigationBarTitleDisplayMode(.inline)
-        .alert(localized("ai.network-consent.title", default: "Allow network generation?", chinese: "允许联网生成？", language: model.language), isPresented: $showConsent) {
-            Button(localized("Allow", "允许", language: model.language)) {
+        .alert(localized("ai.network-consent.title", language: model.language), isPresented: $showConsent) {
+            Button(localized("charts.allow", language: model.language)) {
                 model.grantAIConsent()
                 if let chart = pendingChart {
                     Task {
                         await model.generateAIReport(
                             for: chart,
-                            forceRegenerate: pendingForceRegenerate,
-                            relationship: pendingRelationship,
-                            preset: pendingPreset
+                            forceRegenerate: pendingForceRegenerate
                         )
                     }
                 } else if let scope = pendingScope {
@@ -84,44 +79,14 @@ struct ReportsView: View {
                 pendingChart = nil
                 pendingForceRegenerate = false
                 pendingScope = nil
-                pendingRelationship = nil
-                pendingPreset = nil
             }
-            Button(localized("Not now", "暂不", language: model.language), role: .cancel) {
+            Button(localized("charts.not-now", language: model.language), role: .cancel) {
                 pendingChart = nil
                 pendingForceRegenerate = false
                 pendingScope = nil
-                pendingRelationship = nil
-                pendingPreset = nil
             }
         } message: {
-            Text(localized(
-                "Interstellar sends the selected chart's calculated facts to the configured AI service only after you tap Generate. The relay may keep an encrypted idempotency result for up to 24 hours; your device keeps the long-term report until you delete it in Settings. You can revoke future network generation at any time.",
-                "只有在你点击生成后，Interstellar 才会把所选星盘的计算事实发送给配置的 AI 服务。中继服务最多保留 24 小时的加密幂等结果；长期报告只保存在本机，直到你在设置中删除。你可以随时撤回后续联网生成授权。",
-                language: model.language
-            ))
-        }
-        .alert(
-            localized("Replace saved report?", "覆盖已保存的报告？", language: model.language),
-            isPresented: Binding(
-                get: { pendingRegenerateChart != nil },
-                set: { if !$0 { pendingRegenerateChart = nil } }
-            ),
-            presenting: pendingRegenerateChart
-        ) { chart in
-            Button(localized("Regenerate", "重新生成", language: model.language), role: .destructive) {
-                pendingRegenerateChart = nil
-                requestChartGeneration(chart, force: true)
-            }
-            Button(localized("Cancel", "取消", language: model.language), role: .cancel) {
-                pendingRegenerateChart = nil
-            }
-        } message: { _ in
-            Text(localized(
-                "The new report will replace the report currently saved on this device.",
-                "新报告会覆盖当前保存在本机的报告。",
-                language: model.language
-            ))
+            Text(localized("ai.network-consent.chart-message", language: model.language))
         }
        .task {
            model.refreshAIReportStates()
@@ -133,12 +98,15 @@ struct ReportsView: View {
         .sheet(item: $generationSheetChart) { chart in
             ReportGenerationSheet(
                 chart: chart,
-                relationship: $generationSheetRelationship,
-                preset: $generationSheetPreset,
-                onGenerate: { relationship, preset in
-                    showGenerationSheet = false
+                replacesExisting: generationWillReplace,
+                onGenerate: {
                     generationSheetChart = nil
-                    requestChartGeneration(chart, force: false, relationship: relationship, preset: preset)
+                    requestChartGeneration(chart, force: generationWillReplace)
+                },
+                onEdit: {
+                    generationSheetChart = nil
+                    model.requestChartParameterEditing(chart)
+                    selectedTab = .charts
                 },
                 onCancel: {
                     generationSheetChart = nil
@@ -208,7 +176,7 @@ struct ReportsView: View {
                         ProgressView().controlSize(.small).tint(.white)
                             .frame(width: 76, height: 32)
                     } else {
-                        Text(localized("Generate", "生成", language: model.language))
+                        Text(localized("reports.generate", language: model.language))
                             .font(.caption.weight(.semibold))
                             .frame(width: 76, height: 32)
                     }
@@ -217,7 +185,7 @@ struct ReportsView: View {
                 .tint(AppTheme.violet)
                 .disabled(!model.isOnline || generatingScope != nil)
             } else {
-                Text(localized("Locked", "未到日期", language: model.language))
+                Text(localized("reports.locked", language: model.language))
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(AppTheme.muted)
             }
@@ -253,11 +221,7 @@ struct ReportsView: View {
             if case .generating = status {
                 HStack(spacing: 9) {
                     ProgressView().controlSize(.small).tint(AppTheme.violet)
-                    Text(localized(
-                        "This may take a little while. You can leave this page and come back later.",
-                        "生成可能需要一点时间，你可以先离开，稍后再回来查看。",
-                        language: model.language
-                    ))
+                    Text(localized("reports.this-may-take-a-little-while-you-can-leave-this-page-and-come-back-later", language: model.language))
                     .font(.caption)
                     .foregroundStyle(AppTheme.muted)
                 }
@@ -272,21 +236,21 @@ struct ReportsView: View {
 
            HStack(spacing: 10) {
                if let saved {
-                   Button(localized("View Report", "查看报告", language: model.language)) {
+                   Button(localized("reports.view-report", language: model.language)) {
                        selectedReport = saved
                    }
                    .buttonStyle(.borderedProminent)
                    .tint(AppTheme.violet)
 
-                   Button(localized("Regenerate", "重新生成", language: model.language)) {
-                        openGenerationSheet(for: chart)
+                   Button(localized("reports.regenerate", language: model.language)) {
+                        openGenerationSheet(for: chart, replacing: true)
                    }
                    .buttonStyle(.bordered)
                    .tint(AppTheme.violet)
                    .disabled(status == .generating || !hasSnapshot || !model.isOnline)
                } else {
-                   Button(localized("Generate Report", "生成报告", language: model.language)) {
-                        openGenerationSheet(for: chart)
+                   Button(localized("reports.generate-report", language: model.language)) {
+                        openGenerationSheet(for: chart, replacing: false)
                    }
                    .buttonStyle(.borderedProminent)
                    .tint(AppTheme.violet)
@@ -310,19 +274,19 @@ struct ReportsView: View {
         hasSavedReport: Bool
     ) -> String {
         guard hasSnapshot else {
-            return localized("Calculate this chart first", "请先完成该盘计算", language: model.language)
+            return localized("reports.calculate-this-chart-first", language: model.language)
         }
         switch status {
         case .idle:
-            return localized("Ready to generate", "可以生成", language: model.language)
+            return localized("reports.ready-to-generate", language: model.language)
         case .generating:
-            return localized("Generating…", "正在生成…", language: model.language)
+            return localized("reports.generating", language: model.language)
         case .ready:
-            return localized("Saved on this device", "已保存在本机", language: model.language)
+            return localized("reports.saved-on-this-device", language: model.language)
         case .failed:
             return hasSavedReport
-                ? localized("Regeneration failed; your saved report is unchanged", "重新生成失败；原报告仍保留", language: model.language)
-                : localized("Generation failed. You can try again.", "生成失败，可以重试。", language: model.language)
+                ? localized("reports.regeneration-failed-your-saved-report-is-unchanged", language: model.language)
+                : localized("reports.generation-failed-you-can-try-again", language: model.language)
         }
     }
 
@@ -338,35 +302,26 @@ struct ReportsView: View {
 
    private func requestChartGeneration(
        _ chart: ChartKind,
-       force: Bool,
-       relationship: PersonRelationship? = nil,
-       preset: CalculationPreset? = nil
+       force: Bool
    ) {
-       let effectiveRelationship = relationship ?? (chart == .synastry ? .partner : nil)
        guard model.aiConsentGranted else {
            pendingChart = chart
            pendingForceRegenerate = force
            pendingScope = nil
-           pendingRelationship = effectiveRelationship
-           pendingPreset = preset
            showConsent = true
            return
        }
        Task {
            await model.generateAIReport(
                for: chart,
-               forceRegenerate: force,
-               relationship: effectiveRelationship,
-               preset: preset
+               forceRegenerate: force
            )
        }
    }
 
-    private func openGenerationSheet(for chart: ChartKind) {
+    private func openGenerationSheet(for chart: ChartKind, replacing: Bool) {
+        generationWillReplace = replacing
         generationSheetChart = chart
-        generationSheetRelationship = .partner
-        generationSheetPreset = model.preset(for: chart)
-        showGenerationSheet = true
     }
 
     private func regenerationAction(for report: SavedReport) -> (() -> Void)? {
@@ -375,7 +330,7 @@ struct ReportsView: View {
         }) else { return nil }
         return {
             selectedReport = nil
-            requestChartGeneration(chart, force: true)
+            openGenerationSheet(for: chart, replacing: true)
         }
     }
 
@@ -415,7 +370,7 @@ struct ReportsView: View {
 
     private func statusText(_ report: AvailableReport) -> String {
         if report.isUnlocked {
-            return localized("Ready to generate", "可以生成", language: model.language)
+            return localized("reports.ready-to-generate", language: model.language)
         }
         let timeZone = TimeZone(identifier: model.profile.timezoneID) ?? .current
         return report.countdown(language: model.language, timeZone: timeZone)
@@ -442,21 +397,11 @@ struct ReportReaderView: View {
     let language: AppLanguage
     let onRegenerate: (() -> Void)?
     @State private var sectionIndex = 0
-    @State private var scrollID: Int? = 0
-    @State private var showsRegenerateConfirmation = false
 
     init(report: SavedReport, language: AppLanguage, onRegenerate: (() -> Void)? = nil) {
         self.report = report
         self.language = language
         self.onRegenerate = onRegenerate
-    }
-
-    private var readProgress: Double {
-        let count = max(1, report.report.sections.count)
-        if let scrollID, scrollID >= 0 {
-            return min(1, Double(scrollID + 1) / Double(count))
-        }
-        return 0
     }
 
     var body: some View {
@@ -477,17 +422,6 @@ struct ReportReaderView: View {
                                 Text(report.report.subtitle)
                                     .font(.subheadline)
                                     .foregroundStyle(AppTheme.muted)
-                                // Reading progress (RR-01): width equals actual reading position
-                                GeometryReader { proxy in
-                                    ZStack(alignment: .leading) {
-                                        Capsule().fill(AppTheme.line.opacity(0.6)).frame(height: 5)
-                                        Capsule()
-                                            .fill(LinearGradient(colors: [AppTheme.blue, AppTheme.violet], startPoint: .leading, endPoint: .trailing))
-                                            .frame(width: proxy.size.width * readProgress, height: 5)
-                                    }
-                                }
-                                .frame(height: 5)
-                                .padding(.top, 10)
                                 HStack {
                                     Text("\(savedReportScopeTitle(report.scope, language: language)) · \(report.generatedAt.shortEventDate(language: language))")
                                         .font(.caption)
@@ -502,7 +436,7 @@ struct ReportReaderView: View {
 
                             // Contents (RR-02): numbered rows that jump to each section
                             VStack(alignment: .leading, spacing: 10) {
-                                Text(localized("Contents", "目录", language: language))
+                                Text(localized("reports.contents", language: language))
                                     .font(.headline)
                                     .foregroundStyle(AppTheme.text)
                                 ForEach(Array(report.report.sections.enumerated()), id: \.offset) { index, section in
@@ -538,35 +472,19 @@ struct ReportReaderView: View {
                     .padding(.bottom, 30)
                 }
             }
-            .scrollPosition(id: $scrollID)
         }
         .toolbar(.visible, for: .navigationBar)
         .toolbar {
             if onRegenerate != nil {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(localized("Regenerate", "重新生成", language: language)) {
-                        showsRegenerateConfirmation = true
+                    Button(localized("reports.regenerate", language: language)) {
+                        onRegenerate?()
                     }
                     .foregroundStyle(AppTheme.violet)
                 }
             }
         }
         .navigationBarTitleDisplayMode(.inline)
-        .alert(
-            localized("Replace saved report?", "覆盖已保存的报告？", language: language),
-            isPresented: $showsRegenerateConfirmation
-        ) {
-            Button(localized("Regenerate", "重新生成", language: language), role: .destructive) {
-                onRegenerate?()
-            }
-            Button(localized("Cancel", "取消", language: language), role: .cancel) {}
-        } message: {
-            Text(localized(
-                "The new report will replace the report currently saved on this device.",
-                "新报告会覆盖当前保存在本机的报告。",
-                language: language
-            ))
-        }
     }
 
     private func sectionCard(index: Int, section: AIReportSection) -> some View {
@@ -597,9 +515,9 @@ struct ReportReaderView: View {
 
 struct ReportGenerationSheet: View {
     let chart: ChartKind
-    @Binding var relationship: PersonRelationship
-    @Binding var preset: CalculationPreset
-    let onGenerate: (PersonRelationship, CalculationPreset) -> Void
+    let replacesExisting: Bool
+    let onGenerate: () -> Void
+    let onEdit: () -> Void
     let onCancel: () -> Void
     @EnvironmentObject private var model: AppModel
 
@@ -607,61 +525,46 @@ struct ReportGenerationSheet: View {
         NavigationStack {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 20) {
-                    Text(localized("Generate Report", "生成报告", language: model.language))
+                    Text(localized("reports.generate-report", language: model.language))
                         .font(.title2.weight(.bold))
                         .foregroundStyle(AppTheme.text)
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(localized("Chart", "星盘", language: model.language))
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(AppTheme.muted)
-                        Text(chart.title(language: model.language))
-                            .font(.headline)
-                            .foregroundStyle(AppTheme.text)
-                    }
-                    .padding(16)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .cardSurface()
+                    Text(replacesExisting
+                         ? localized("reports.current-information-will-replace", language: model.language)
+                         : localized("reports.current-information-confirmation", language: model.language))
+                        .font(.subheadline)
+                        .foregroundStyle(AppTheme.muted)
+                        .fixedSize(horizontal: false, vertical: true)
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(localized("Preset", "预设", language: model.language))
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(AppTheme.muted)
-                        Picker("", selection: $preset) {
-                            ForEach(CalculationPreset.consumerCases, id: \.self) { p in
-                                Text(p.title(language: model.language)).tag(p)
+                    VStack(spacing: 0) {
+                        ForEach(Array(contextRows.enumerated()), id: \.offset) { index, row in
+                            if index > 0 { Divider().overlay(AppTheme.line) }
+                            HStack(alignment: .firstTextBaseline, spacing: 14) {
+                                Text(row.label)
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(AppTheme.muted)
+                                    .frame(width: 86, alignment: .leading)
+                                Text(row.value)
+                                    .font(.body.weight(.medium))
+                                    .foregroundStyle(AppTheme.text)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
+                            .padding(.vertical, 12)
                         }
-                        .pickerStyle(.segmented)
                     }
-                    .padding(16)
+                    .padding(.horizontal, 16)
                     .cardSurface()
-
-                    if chart == .synastry {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(localized("Relationship", "关系", language: model.language))
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(AppTheme.muted)
-                            Picker("", selection: $relationship) {
-                                ForEach(PersonRelationship.allCases) { r in
-                                    Text(r.title(language: model.language)).tag(r)
-                                }
-                            }
-                            .pickerStyle(.menu)
-                        }
-                        .padding(16)
-                        .cardSurface()
-                    }
 
                     HStack(spacing: 12) {
-                        Button(localized("Cancel", "取消", language: model.language)) {
-                            onCancel()
+                        Button(localized("reports.edit", language: model.language)) {
+                            onEdit()
                         }
                         .buttonStyle(.bordered)
                         .tint(AppTheme.muted)
 
-                        Button(localized("Generate", "生成", language: model.language)) {
-                            onGenerate(relationship, preset)
+                        Button(localized("reports.generate", language: model.language)) {
+                            onGenerate()
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(AppTheme.violet)
@@ -673,7 +576,63 @@ struct ReportGenerationSheet: View {
             .background(AppTheme.background)
             .toolbar(.visible, for: .navigationBar)
             .navigationBarTitleDisplayMode(.inline)
-            .navigationTitle(localized("Generate Report", "生成报告", language: model.language))
+            .navigationTitle(localized("reports.generate-report", language: model.language))
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(localized("location.cancel", language: model.language)) { onCancel() }
+                }
+            }
+        }
+    }
+
+    private var contextRows: [(label: String, value: String)] {
+        var rows: [(String, String)] = [
+            (localized("reports.chart", language: model.language), chart.title(language: model.language))
+        ]
+        if chart == .synastry {
+            if let people = model.synastryReportPeople {
+                rows.append((localized("charts.people", language: model.language), "\(people.first) ↔ \(people.second)"))
+            }
+        } else if chart != .currentSky {
+            rows.append((localized("charts.person", language: model.language), model.chartSubjectProfile.name))
+        }
+        switch model.chartContext(for: chart).target {
+        case .natal:
+            rows.append((localized("charts.date-time", language: model.language), formatted(model.chartSubjectProfile.birthDateUTC, timeZoneID: model.chartSubjectProfile.timezoneID)))
+            rows.append((localized("charts.reference-location", language: model.language), model.chartSubjectProfile.placeName))
+        case let .currentSky(instant, location, _):
+            rows.append((localized("charts.date-time", language: model.language), formatted(instant, timeZoneID: location.timezoneID)))
+            rows.append((localized("charts.reference-location", language: model.language), location.placeName))
+        case let .transit(instant, location, rangeDays, _):
+            rows.append((localized("charts.target-time", language: model.language), formatted(instant, timeZoneID: location.timezoneID)))
+            rows.append((localized("charts.range", language: model.language), rangeLabel(rangeDays)))
+            rows.append((localized("charts.reference-location", language: model.language), location.placeName))
+        case let .secondary(targetDate, _):
+            rows.append((localized("charts.target-date", language: model.language), formatted(targetDate, timeZoneID: model.chartSubjectProfile.timezoneID, dateOnly: true)))
+        case let .solarReturn(year, location):
+            rows.append((localized("charts.return-year", language: model.language), String(year)))
+            rows.append((localized("charts.reference-location", language: model.language), location.placeName))
+        case .synastry:
+            break
+        }
+        rows.append((localized("reports.preset", language: model.language), model.preset(for: chart).title(language: model.language)))
+        return rows
+    }
+
+    private func formatted(_ date: Date, timeZoneID: String, dateOnly: Bool = false) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: model.language.rawValue)
+        formatter.timeZone = TimeZone(identifier: timeZoneID) ?? .current
+        formatter.dateStyle = .medium
+        formatter.timeStyle = dateOnly ? .none : .short
+        return formatter.string(from: date)
+    }
+
+    private func rangeLabel(_ days: Int) -> String {
+        switch days {
+        case 7: localized("charts.7-days", language: model.language)
+        case 365: localized("charts.12-months", language: model.language)
+        default: localized("charts.30-days", language: model.language)
         }
     }
 }

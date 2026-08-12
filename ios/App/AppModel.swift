@@ -10,6 +10,7 @@ final class AppModel: ObservableObject {
         didSet { saveProfile() }
     }
     @Published var selectedChart: ChartKind = .natal
+    @Published private(set) var chartParameterEditRequest: ChartKind? = nil
     @Published var viewMode: ChartViewMode = .wheel
     @Published private(set) var currentSkyTargetDate = Date()
     @Published private(set) var transitTargetDate = Date()
@@ -201,6 +202,13 @@ final class AppModel: ObservableObject {
     func profileForPersonID(_ id: String) -> UserProfile? {
         if id == "self" { return profile }
         return savedPeople.first(where: { $0.id.uuidString == id })?.profile
+    }
+
+    var synastryReportPeople: (first: String, second: String)? {
+        guard let partnerID = synastryPartnerID,
+              let partner = savedPeople.first(where: { $0.id.uuidString == partnerID })
+        else { return nil }
+        return (profile.name, partner.profile.name)
     }
 
     func selectSynastryPartner(_ id: String?) {
@@ -494,11 +502,7 @@ final class AppModel: ObservableObject {
             isEnriching = false
             logRefreshTiming("refresh-complete", since: refreshStartedAt)
         } catch {
-            errorMessage = localized(
-                error.localizedDescription,
-                "本地星盘计算失败，请检查出生资料后重试。",
-                language: language
-            )
+            errorMessage = localized("app.error.local-chart-calculation", language: language)
         }
         isCalculating = false
         isCalculatingSynastry = false
@@ -744,11 +748,7 @@ final class AppModel: ObservableObject {
             return .unavailable(String(describing: error))
             #else
             return .unavailable(
-                localized(
-                    "Interpretation content is incomplete for this chart.",
-                    "当前星盘的解读内容尚未完整加载。",
-                    language: language
-                )
+                localized("app.interpretation-content-is-incomplete-for-this-chart", language: language)
             )
             #endif
         }
@@ -789,6 +789,15 @@ final class AppModel: ObservableObject {
     func selectChart(_ chart: ChartKind) {
         clearChartFocus()
         selectedChart = chart
+    }
+
+    func requestChartParameterEditing(_ chart: ChartKind) {
+        selectChart(chart)
+        chartParameterEditRequest = chart
+    }
+
+    func consumeChartParameterEditRequest() {
+        chartParameterEditRequest = nil
     }
 
     func chartContext(for chart: ChartKind) -> ChartContext {
@@ -998,11 +1007,7 @@ final class AppModel: ObservableObject {
             focusedAspects = aspects
         } catch {
             guard focusedChart == chart, focusedChartDate == date else { return }
-            errorMessage = localized(
-                error.localizedDescription,
-                "无法计算所选事件时刻的星盘。",
-                language: language
-            )
+            errorMessage = localized("app.error.selected-event-chart-calculation", language: language)
         }
         if focusedChart == chart, focusedChartDate == date {
             isCalculatingFocus = false
@@ -1147,16 +1152,17 @@ final class AppModel: ObservableObject {
                 forceRegenerate: forceRegenerate
             )
             let bodyData = try JSONSerialization.data(withJSONObject: body, options: [])
-            let request = AIGenerateRequest(bodyData: bodyData)
+            let requestLanguage = AppLanguage(rawValue: requestLocale) ?? language
+            let request = AIGenerateRequest(bodyData: bodyData, language: requestLanguage)
             let response = try await aiClient.generate(request)
             guard response.semanticFingerprint == key else {
-                throw AIGenerationError.contract("semantic fingerprint mismatch")
+                throw AIGenerationError.contract(requestLanguage)
             }
             guard response.factsHash == factsHash else {
-                throw AIGenerationError.contract("facts hash mismatch")
+                throw AIGenerationError.contract(requestLanguage)
             }
             guard response.generationSchemaVersion == GeneratedChartArtifact.schemaVersion else {
-                throw AIGenerationError.contract("generation schema mismatch")
+                throw AIGenerationError.contract(requestLanguage)
             }
             let generatedAt = response.generatedAt
                 .flatMap { ISO8601DateFormatter().date(from: $0) }
@@ -1202,8 +1208,11 @@ final class AppModel: ObservableObject {
         params: [String: String], facts: [String: Any], factsHash: String, key: String, locale: String
     ) {
         let requestLocale = language.corpusLanguage.rawValue
-        let params = aiParams(for: chart, relationship: relationship)
-        let facts = try buildAIFacts(chart: chart, relationship: relationship, params: params)
+        let effectiveRelationship = chart == .synastry
+            ? relationship ?? synastryPartnerRelationship
+            : nil
+        let params = aiParams(for: chart, relationship: effectiveRelationship)
+        let facts = try buildAIFacts(chart: chart, relationship: effectiveRelationship, params: params)
         let factsData = try JSONSerialization.data(withJSONObject: facts, options: [.sortedKeys])
         let factsHash = SHA256Digest.hash(factsData).hex
         let identityFactsHash = try AIArtifactIdentity.factsIdentityHash(facts)
@@ -1273,6 +1282,11 @@ final class AppModel: ObservableObject {
 
     private var profileHashValue: String {
         aiReportService.profileHash(profile)
+    }
+
+    private var synastryPartnerRelationship: PersonRelationship? {
+        guard let partnerID = synastryPartnerID else { return nil }
+        return savedPeople.first(where: { $0.id.uuidString == partnerID })?.relationship
     }
 
     private func aiParams(for chart: ChartKind, relationship: PersonRelationship? = nil) -> [String: String] {
@@ -1382,7 +1396,7 @@ final class AppModel: ObservableObject {
                 "clientVersion": "ios-v6",
             ]
             let bodyData = try JSONSerialization.data(withJSONObject: body, options: [])
-            let response = try await aiClient.generate(AIGenerateRequest(bodyData: bodyData))
+            let response = try await aiClient.generate(AIGenerateRequest(bodyData: bodyData, language: language))
             let key = aiPeriodCacheKey(scope: scope, params: params)
             let periodScope = "period.\(scope.rawValue)"
             let saved = SavedReport(

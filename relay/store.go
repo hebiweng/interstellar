@@ -82,6 +82,15 @@ func (s *Store) migrate() error {
 			completion_tokens INTEGER NOT NULL DEFAULT 0,
 			ok INTEGER NOT NULL DEFAULT 1
 		)`,
+		`CREATE TABLE IF NOT EXISTS feedback (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			type TEXT NOT NULL,
+			content_enc TEXT NOT NULL,
+			contact_enc TEXT NOT NULL,
+			status TEXT NOT NULL DEFAULT 'pending',
+			created_at TEXT NOT NULL,
+			updated_at TEXT NOT NULL
+		)`,
 		`CREATE TABLE IF NOT EXISTS generation_cache (
 			cache_key TEXT PRIMARY KEY,
 			scope TEXT NOT NULL,
@@ -145,6 +154,8 @@ func (s *Store) migrate() error {
 			revoked_at TEXT
 		)`,
 		`CREATE INDEX IF NOT EXISTS idx_usage_ts ON usage_log(ts)`,
+		`CREATE INDEX IF NOT EXISTS idx_feedback_status_created ON feedback(status, created_at DESC)`,
+		`CREATE INDEX IF NOT EXISTS idx_feedback_type_created ON feedback(type, created_at DESC)`,
 		`CREATE INDEX IF NOT EXISTS idx_provider_models_provider ON provider_models(provider_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_admin_sessions_expiry ON admin_sessions(expires_at)`,
 		`CREATE INDEX IF NOT EXISTS idx_admin_audit_ts ON admin_audit(ts)`,
@@ -157,6 +168,137 @@ func (s *Store) migrate() error {
 		}
 	}
 	return nil
+}
+
+// ---- User feedback ----
+
+type Feedback struct {
+	ID        int64  `json:"id"`
+	Type      string `json:"type"`
+	Content   string `json:"content"`
+	Contact   string `json:"contact,omitempty"`
+	Status    string `json:"status"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+}
+
+func (s *Store) SaveFeedback(feedbackType, content, contact string) (Feedback, error) {
+	feedbackType = strings.TrimSpace(feedbackType)
+	if feedbackType != "bug" && feedbackType != "feature" && feedbackType != "other" {
+		feedbackType = "other"
+	}
+	content = strings.TrimSpace(content)
+	contact = strings.TrimSpace(contact)
+	if content == "" || len([]rune(content)) > 5000 {
+		return Feedback{}, errors.New("feedback content must contain 1 to 5000 characters")
+	}
+	if len([]rune(contact)) > 160 {
+		return Feedback{}, errors.New("feedback contact must not exceed 160 characters")
+	}
+	contentEnc, err := s.encrypt(content)
+	if err != nil {
+		return Feedback{}, err
+	}
+	contactEnc, err := s.encrypt(contact)
+	if err != nil {
+		return Feedback{}, err
+	}
+	now := time.Now().UTC().Format(time.RFC3339)
+	result, err := s.db.Exec(
+		`INSERT INTO feedback (type, content_enc, contact_enc, status, created_at, updated_at)
+		 VALUES (?, ?, ?, 'pending', ?, ?)`,
+		feedbackType, contentEnc, contactEnc, now, now,
+	)
+	if err != nil {
+		return Feedback{}, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return Feedback{}, err
+	}
+	return Feedback{ID: id, Type: feedbackType, Content: content, Contact: contact, Status: "pending", CreatedAt: now, UpdatedAt: now}, nil
+}
+
+func (s *Store) ListFeedback(status, feedbackType string, limit int) ([]Feedback, error) {
+	if limit < 1 || limit > 200 {
+		limit = 100
+	}
+	clauses := []string{"1 = 1"}
+	args := []any{}
+	if status == "pending" || status == "resolved" {
+		clauses = append(clauses, "status = ?")
+		args = append(args, status)
+	}
+	if feedbackType == "bug" || feedbackType == "feature" || feedbackType == "other" {
+		clauses = append(clauses, "type = ?")
+		args = append(args, feedbackType)
+	}
+	args = append(args, limit)
+	rows, err := s.db.Query(
+		`SELECT id, type, content_enc, contact_enc, status, created_at, updated_at
+		 FROM feedback WHERE `+strings.Join(clauses, " AND ")+` ORDER BY created_at DESC LIMIT ?`,
+		args...,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var feedback []Feedback
+	for rows.Next() {
+		var item Feedback
+		var contentEnc, contactEnc string
+		if err := rows.Scan(&item.ID, &item.Type, &contentEnc, &contactEnc, &item.Status, &item.CreatedAt, &item.UpdatedAt); err != nil {
+			return nil, err
+		}
+		item.Content, err = s.decrypt(contentEnc)
+		if err != nil {
+			return nil, err
+		}
+		item.Contact, err = s.decrypt(contactEnc)
+		if err != nil {
+			return nil, err
+		}
+		feedback = append(feedback, item)
+	}
+	return feedback, rows.Err()
+}
+
+func (s *Store) UpdateFeedbackStatus(id int64, status string) (Feedback, error) {
+	if status != "pending" && status != "resolved" {
+		return Feedback{}, errors.New("feedback status must be pending or resolved")
+	}
+	now := time.Now().UTC().Format(time.RFC3339)
+	result, err := s.db.Exec(`UPDATE feedback SET status = ?, updated_at = ? WHERE id = ?`, status, now, id)
+	if err != nil {
+		return Feedback{}, err
+	}
+	changed, err := result.RowsAffected()
+	if err != nil {
+		return Feedback{}, err
+	}
+	if changed == 0 {
+		return Feedback{}, sql.ErrNoRows
+	}
+	return s.feedbackByID(id)
+}
+
+func (s *Store) feedbackByID(id int64) (Feedback, error) {
+	var item Feedback
+	var contentEnc, contactEnc string
+	err := s.db.QueryRow(
+		`SELECT id, type, content_enc, contact_enc, status, created_at, updated_at
+		 FROM feedback WHERE id = ?`,
+		id,
+	).Scan(&item.ID, &item.Type, &contentEnc, &contactEnc, &item.Status, &item.CreatedAt, &item.UpdatedAt)
+	if err != nil {
+		return Feedback{}, err
+	}
+	item.Content, err = s.decrypt(contentEnc)
+	if err != nil {
+		return Feedback{}, err
+	}
+	item.Contact, err = s.decrypt(contactEnc)
+	return item, err
 }
 
 // ---- Provider CRUD ----

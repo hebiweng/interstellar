@@ -26,27 +26,28 @@ extension InsightFactory {
         let activity = signalDensity(snapshot.aspects, limit: 8)
         let cycleAspects = cycleLeaders(snapshot.aspects)
         let elementScores = elementBalance(snapshot)
+        let modalityScores = modalityBalance(snapshot)
         let moon = snapshot.point(.moon)
         let moonHouse = snapshot.house(containing: moon?.longitudeDegrees ?? 0)
         let overviewFacts: [InsightFact] = [
-            top.first.map { fact(localized("Dominant pattern", "主导结构", language: language), aspectTitle($0, language: language), tone($0.kind)) },
-            fact(localized("Review cycles", "回顾调整中的主题", language: language), "\(retrogrades.count)", .transition),
-            fact(localized("Atmosphere", "整体氛围", language: language), activityLabel(activity, language: language)),
+            top.first.map { fact(localized("insight.current-sky.dominant-pattern", language: language), aspectTitle($0, language: language), tone($0.kind)) },
+            fact(localized("insight.current-sky.review-cycles", language: language), "\(retrogrades.count)", .transition),
+            fact(localized("insight.current-sky.atmosphere", language: language), activityLabel(activity, language: language)),
         ].compactMap { $0 }
         let moonFacts: [InsightFact] = [
-            moon.map { fact(localized("Moon sign", "月亮落座", language: language), Zodiac.position($0, language: language), .neutral, symbol: "☽") },
-            moonHouse > 0 ? fact(localized("Moon area", "月亮领域", language: language), ConsumerCopy.lifeArea(moonHouse, language: language), .transition) : nil,
-            fact(localized("Lunar phase", "月相", language: language), progressedPhaseName(phase, language: language)),
+            moon.map { fact(localized("insight.current-sky.moon-sign", language: language), Zodiac.position($0, language: language), .neutral, symbol: "☽") },
+            moonHouse > 0 ? fact(localized("insight.current-sky.moon-area", language: language), ConsumerCopy.lifeArea(moonHouse, language: language), .transition) : nil,
+            fact(localized("insight.current-sky.lunar-phase", language: language), progressedPhaseName(phase, language: language)),
         ].compactMap { $0 }
         let patternFacts: [InsightFact] = [
-            fact(localized("Support", "支持", language: language), "\(balance.supportive)", .supportive),
-            fact(localized("Pressure", "压力", language: language), "\(balance.challenging)", .challenging),
-            dominantBodies(snapshot.aspects, language: language).map { fact(localized("Focus", "焦点", language: language), $0, .transition) },
+            fact(localized("insight.current-sky.support", language: language), "\(balance.supportive)", .supportive),
+            fact(localized("insight.current-sky.pressure", language: language), "\(balance.challenging)", .challenging),
+            dominantBodies(snapshot.aspects, language: language).map { fact(localized("insight.current-sky.focus", language: language), $0, .transition) },
         ].compactMap { $0 }
 
         return [
             card( id: "sky-overview",
-                title: localized("Sky at a glance", "当前天空总览", language: language),
+                title: localized("insight.current-sky.sky-at-a-glance", language: language),
                 icon: "◉", visual: .skyOverview(
                     phase: phase,
                     activity: activity,
@@ -56,13 +57,13 @@ extension InsightFactory {
                 language: language
             ),
             card( id: "moon-now",
-                title: localized("Moon now", "此刻的月亮", language: language),
+                title: localized("insight.current-sky.moon-now", language: language),
                 icon: "☽", visual: .phaseDial(phase: phase, illumination: moonIllumination(snapshot)),
                 facts: moonFacts,
                 language: language
             ),
             card( id: "aspect-pattern",
-                title: localized("Major aspect pattern", "主要连接结构", language: language),
+                title: localized("insight.current-sky.major-aspect-pattern", language: language),
                 icon: "◇", visual: .structureMap(
                     supportive: balance.supportive,
                     challenging: balance.challenging,
@@ -72,25 +73,25 @@ extension InsightFactory {
                 language: language
             ),
             card( id: "planetary-motion",
-                title: localized("Planetary motion", "行星运动", language: language),
+                title: localized("insight.current-sky.planetary-motion", language: language),
                 icon: "↺", visual: .motionList,
                 facts: motionFacts(snapshot, language: language),
                 language: language
             ),
             card( id: "sign-changes",
-                title: localized("Sign changes", "换座信号", language: language),
+                title: localized("insight.current-sky.sign-changes", language: language),
                 icon: "⇢", visual: .eventTimeline,
                 facts: skyIngressFacts(events, fallback: top, language: language, timeZone: timeZone),
                 language: language
             ),
             card( id: "element-climate",
-                title: localized("Element & mode climate", "元素与模式气质", language: language),
+                title: localized("insight.current-sky.element-mode-climate", language: language),
                 icon: "◪", visual: .elementRows,
-                facts: elementFacts(elementScores, orientation: elementOrientation(elementScores, language: language), language: language),
+                facts: elementFacts(elementScores, modalityScores: modalityScores, language: language),
                 language: language
             ),
             card( id: "upcoming-7-days",
-                title: localized("Upcoming 7 days", "未来七天", language: language),
+                title: localized("insight.current-sky.upcoming-7-days", language: language),
                 icon: "▦", visual: .dateEvents,
                 facts: skyUpcomingFacts(events, fallback: top, language: language, timeZone: timeZone),
                 language: language
@@ -108,10 +109,10 @@ extension InsightFactory {
 
     static func activityLabel(_ value: Int, language: AppLanguage) -> String {
         switch value {
-        case 0 ... 20: localized("Low", "低", language: language)
-        case 21 ... 45: localized("Moderate", "中等", language: language)
-        case 46 ... 70: localized("High", "高", language: language)
-        default: localized("Very high", "极高", language: language)
+        case 0 ... 20: localized("insight.current-sky.low", language: language)
+        case 21 ... 45: localized("insight.current-sky.moderate", language: language)
+        case 46 ... 70: localized("insight.current-sky.high", language: language)
+        default: localized("insight.current-sky.very-high", language: language)
         }
     }
 
@@ -141,8 +142,7 @@ extension InsightFactory {
     }
 
     static func moonIllumination(_ snapshot: ChartSnapshot) -> Double {
-        let phase = phaseAngle(snapshot)
-        return (1 - cos(phase * .pi / 180)) / 2
+        LunarPhaseGeometry.illuminationFraction(elongation: phaseAngle(snapshot))
     }
 
     static func skyIngressFacts(
@@ -156,17 +156,9 @@ extension InsightFactory {
             return timelineFacts(fallback, language: language)
         }
         return rows.map { ingress in
-            let title = localized(
-                "\(bodyName(ingress.body, language: .english)) enters \(Zodiac.englishNames[ingress.signIndex])",
-                "\(bodyName(ingress.body, language: .simplifiedChinese))进入\(Zodiac.chineseNames[ingress.signIndex])",
-                language: language
-            )
+            let title = localizedTemplate("dynamic.e2ccdb4ffa", substitutions: ["value1": String(describing: bodyName(ingress.body, language: language)), "value2": String(describing: Zodiac.name(index: ingress.signIndex, language: language))], language: language)
             let note = ingress.nextDate.map {
-                localized(
-                    "Until \($0.shortEventDate(language: .english, timeZone: timeZone))",
-                    "持续到\($0.shortEventDate(language: .simplifiedChinese, timeZone: timeZone))",
-                    language: language
-                )
+                localizedTemplate("dynamic.3abdfb89d0", substitutions: ["value1": String(describing: $0.shortEventDate(language: language, timeZone: timeZone))], language: language)
             }
             return fact(
                 ingress.date.shortEventDate(language: language, timeZone: timeZone),
@@ -189,11 +181,7 @@ extension InsightFactory {
             guard interval >= 0, interval <= 7 * 86_400 else { continue }
             rows.append((
                 ingress.date,
-                localized(
-                    "\(bodyName(ingress.body, language: .english)) enters \(Zodiac.englishNames[ingress.signIndex])",
-                    "\(bodyName(ingress.body, language: .simplifiedChinese))进入\(Zodiac.chineseNames[ingress.signIndex])",
-                    language: language
-                ),
+                localizedTemplate("dynamic.e2ccdb4ffa", substitutions: ["value1": String(describing: bodyName(ingress.body, language: language)), "value2": String(describing: Zodiac.name(index: ingress.signIndex, language: language))], language: language),
                 nil
             ))
         }
@@ -225,10 +213,10 @@ extension InsightFactory {
             || (event.first == .moon && event.second == .sun)
         if sunMoonPair {
             if event.kind == .opposition {
-                return localized("Full Moon", "满月", language: language)
+                return localized("insight.current-sky.full-moon", language: language)
             }
             if event.kind == .conjunction {
-                return localized("New Moon", "新月", language: language)
+                return localized("insight.current-sky.new-moon", language: language)
             }
         }
         return "\(bodyName(event.first, language: language)) \(event.kind.symbol) \(bodyName(event.second, language: language))"

@@ -71,34 +71,28 @@ enum InsightCardAssembler {
             if let transitCardPlan = transitPlan?.card(draft.id), transitCardPlan.copySlot == nil {
                 conclusion = ""
             } else {
-                conclusion = cardText?.headline ?? cardText?.body ?? interpretation?.summary ?? localized(
-                    "Reviewed interpretation unavailable",
-                    "已审核解读暂不可用",
-                    language: context.language
-                )
+                conclusion = cardText?.headline ?? cardText?.body ?? interpretation?.summary ?? localized("insight.shared.reviewed-interpretation-unavailable", language: context.language)
             }
             return InsightCardModel(
                 id: draft.id,
                 title: draft.title,
                 icon: draft.icon,
                 visual: draft.visual,
-                facts: draft.facts.map { fact in
+                facts: try draft.facts.map { fact in
+                    if let synastryCardPlan = synastryPlan?.card(draft.id),
+                       let plannedFact = synastryCardPlan.evidence.first(where: { $0.factID == fact.id }),
+                       let copyCatalog = context.copyCatalog
+                    {
+                        return copying(
+                            fact,
+                            interpretation: try copyCatalog.synastryFactInterpretation(
+                                fact: plannedFact,
+                                plan: synastryCardPlan
+                            )
+                        )
+                    }
                     guard draft.id == "emotional-needs", fact.interpretation == nil else { return fact }
-                    return InsightFact(
-                        id: fact.id,
-                        metricLabel: fact.metricLabel,
-                        calculatedValue: fact.calculatedValue,
-                        interpretationKey: fact.interpretationKey,
-                        interpretationVariables: fact.interpretationVariables,
-                        sourceFactIDs: fact.sourceFactIDs,
-                        visualRole: fact.visualRole,
-                        interpretation: conclusion,
-                        emphasis: fact.emphasis,
-                        progress: fact.progress,
-                        symbol: fact.symbol,
-                        category: fact.category,
-                        markers: fact.markers
-                    )
+                    return copying(fact, interpretation: conclusion)
                 },
                 conclusionKey: "\(context.chart.contentPrefix).\(draft.id)",
                 conclusion: conclusion,
@@ -114,5 +108,24 @@ enum InsightCardAssembler {
         }
         try CardContractValidator.validate(renderedCards, for: context.chart)
         return renderedCards
+    }
+
+    private static func copying(_ fact: InsightFact, interpretation: String) -> InsightFact {
+        InsightFact(
+            id: fact.id,
+            metricLabel: fact.metricLabel,
+            calculatedValue: fact.calculatedValue,
+            interpretationKey: fact.interpretationKey,
+            interpretationVariables: fact.interpretationVariables,
+            sourceFactIDs: fact.sourceFactIDs,
+            visualRole: fact.visualRole,
+            technicalDetail: fact.technicalDetail,
+            interpretation: interpretation,
+            emphasis: fact.emphasis,
+            progress: fact.progress,
+            symbol: fact.symbol,
+            category: fact.category,
+            markers: fact.markers
+        )
     }
 }

@@ -147,8 +147,8 @@ enum InterpretationContextFactory {
                 values: [
                     "bodyLabel": bodyName(event.body, language: language),
                     "consumerMotion": event.retrogradeAfter
-                        ? localized("stations retrograde", "开始逆行", language: language)
-                        : localized("stations direct", "恢复顺行", language: language),
+                        ? localized("interpretation.stations-retrograde", language: language)
+                        : localized("interpretation.stations-direct", language: language),
                     "eventDate": event.date.ISO8601Format(),
                 ]
             )
@@ -369,8 +369,8 @@ enum InterpretationContextFactory {
                     "house": house.flatMap { $0 > 0 ? String($0) : nil } ?? "",
                     "houseName": house.flatMap { $0 > 0 ? houseName($0, language: language) : nil } ?? "",
                     "motionName": point.retrograde
-                        ? localized("retrograde", "逆行", language: language)
-                        : localized("direct", "顺行", language: language),
+                        ? localized("interpretation.retrograde", language: language)
+                        : localized("interpretation.direct", language: language),
                     "speed": formatNumber(point.position.longitudeSpeedDegreesPerDay),
                 ]
             )
@@ -560,10 +560,10 @@ enum InterpretationContextFactory {
 
     private static func activityLabel(_ value: Int, language: AppLanguage) -> String {
         switch value {
-        case 0 ... 20: localized("low", "较低", language: language)
-        case 21 ... 45: localized("moderate", "中等", language: language)
-        case 46 ... 70: localized("high", "较高", language: language)
-        default: localized("very high", "很高", language: language)
+        case 0 ... 20: localized("interpretation.low", language: language)
+        case 21 ... 45: localized("interpretation.moderate", language: language)
+        case 46 ... 70: localized("interpretation.high", language: language)
+        default: localized("interpretation.very-high", language: language)
         }
     }
 

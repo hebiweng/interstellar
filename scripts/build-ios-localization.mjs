@@ -53,51 +53,75 @@ function swiftFilesUnder(directory) {
 
 const swiftFiles = swiftFilesUnder(appDir);
 const translations = JSON.parse(fs.readFileSync(translationPath, "utf8"));
-const pattern = /localized\(\s*"((?:[^"\\]|\\.)*)"\s*,\s*"((?:[^"\\]|\\.)*)"/gs;
-const keyedPattern = /localized\(\s*"((?:[^"\\]|\\.)*)"\s*,\s*default:\s*"((?:[^"\\]|\\.)*)"\s*,\s*chinese:\s*"((?:[^"\\]|\\.)*)"/gs;
+const locales = ["en", "zh", "es", "fr"];
+const catalogLocale = { en: "en", zh: "zh-Hans", es: "es", fr: "fr" };
+const referencedKeys = new Set();
+const legacyCalls = [];
+const missingKeys = [];
 
-function decodeSwiftLiteral(value) {
-  return value
-    .replaceAll("\\\"", "\"")
-    .replaceAll("\\n", "\n")
-    .replaceAll("\\t", "\t")
-    .replaceAll("\\\\", "\\");
+function placeholders(value) {
+  return (value.match(/\{\{[A-Za-z][A-Za-z0-9]*\}\}/g) ?? []).sort();
 }
 
-const candidates = new Map();
-const conflicts = new Set();
+for (const [key, entry] of Object.entries(translations)) {
+  if (!key.trim()) throw new Error("ui-translations.json contains an empty key");
+  const actualLocales = Object.keys(entry).sort();
+  if (JSON.stringify(actualLocales) !== JSON.stringify([...locales].sort())) {
+    throw new Error(`${key} must contain exactly en/zh/es/fr`);
+  }
+  for (const locale of locales) {
+    if (typeof entry[locale] !== "string" || !entry[locale].trim()) {
+      throw new Error(`${key} contains an empty/non-string ${locale} translation`);
+    }
+  }
+  const expectedPlaceholders = placeholders(entry.en);
+  for (const locale of ["zh", "es", "fr"]) {
+    if (JSON.stringify(placeholders(entry[locale])) !== JSON.stringify(expectedPlaceholders)) {
+      throw new Error(`${key} has mismatched placeholders in ${locale}`);
+    }
+  }
+}
+
 for (const file of swiftFiles) {
   const source = fs.readFileSync(file, "utf8");
-  for (const match of source.matchAll(pattern)) {
-    if (match[1].includes("\\(") || match[2].includes("\\(")) continue;
-    const english = decodeSwiftLiteral(match[1]);
-    const chinese = decodeSwiftLiteral(match[2]);
-    if (candidates.has(english) && candidates.get(english).chinese !== chinese) {
-      conflicts.add(english);
-      continue;
-    }
-    candidates.set(english, { english, chinese });
+  const relative = path.relative(root, file);
+  const legacyPattern = /\blocalized\(\s*"(?:[^"\\]|\\.)*"\s*,\s*(?:"|default:|spanish:)/gs;
+  for (const match of source.matchAll(legacyPattern)) {
+    legacyCalls.push(`${relative}:${source.slice(0, match.index).split("\n").length}`);
   }
-  for (const match of source.matchAll(keyedPattern)) {
-    if (match[1].includes("\\(") || match[2].includes("\\(") || match[3].includes("\\(")) continue;
-    const key = decodeSwiftLiteral(match[1]);
-    const english = decodeSwiftLiteral(match[2]);
-    const chinese = decodeSwiftLiteral(match[3]);
-    if (candidates.has(key)) throw new Error(`Duplicate localization key: ${key}`);
-    candidates.set(key, { english, chinese });
+  const keyPattern = /\b(?:localized|localizedTemplate|localizedValueTemplate|localizedCountTemplate)\(\s*"((?:[^"\\]|\\.)*)"/gs;
+  for (const match of source.matchAll(keyPattern)) {
+    const key = match[1].replaceAll('\\"', '"').replaceAll("\\\\", "\\");
+    referencedKeys.add(key);
+    if (!translations[key]) {
+      missingKeys.push(`${relative}:${source.slice(0, match.index).split("\n").length}: ${key}`);
+    }
+  }
+  const secondCountKeyPattern = /\blocalizedCountTemplate\(\s*"(?:[^"\\]|\\.)*"\s*,\s*"((?:[^"\\]|\\.)*)"/gs;
+  for (const match of source.matchAll(secondCountKeyPattern)) {
+    const key = match[1].replaceAll('\\"', '"').replaceAll("\\\\", "\\");
+    referencedKeys.add(key);
+    if (!translations[key]) {
+      missingKeys.push(`${relative}:${source.slice(0, match.index).split("\n").length}: ${key}`);
+    }
   }
 }
-for (const key of conflicts) candidates.delete(key);
+
+if (legacyCalls.length) {
+  throw new Error(`Legacy inline localized() calls remain:\n${legacyCalls.join("\n")}`);
+}
+if (missingKeys.length) {
+  throw new Error(`Swift references missing localization keys:\n${missingKeys.join("\n")}`);
+}
 
 const strings = {};
-for (const [key, { english, chinese }] of [...candidates].sort(([a], [b]) => a.localeCompare(b))) {
-  const localizations = {
-    en: { stringUnit: { state: "translated", value: english } },
-    "zh-Hans": { stringUnit: { state: "translated", value: chinese } },
-  };
-  const extra = translations[key] ?? translations[english];
-  if (extra?.es) localizations.es = { stringUnit: { state: "translated", value: extra.es } };
-  if (extra?.fr) localizations.fr = { stringUnit: { state: "translated", value: extra.fr } };
+for (const [key, entry] of Object.entries(translations).sort(([a], [b]) => a.localeCompare(b))) {
+  const localizations = {};
+  for (const locale of locales) {
+    localizations[catalogLocale[locale]] = {
+      stringUnit: { state: "translated", value: entry[locale] },
+    };
+  }
   strings[key] = { extractionState: "manual", localizations };
 }
 
@@ -113,9 +137,9 @@ if (validateOnly) {
 }
 
 const stats = {
-  fixedStrings: candidates.size,
-  ambiguousLegacyKeys: conflicts.size,
-  spanishStrings: Object.values(translations).filter((item) => item.es).length,
-  frenchStrings: Object.values(translations).filter((item) => item.fr).length,
+  fixedStrings: Object.keys(translations).length,
+  referencedKeys: referencedKeys.size,
+  spanishStrings: Object.keys(translations).length,
+  frenchStrings: Object.keys(translations).length,
 };
 process.stdout.write(`${JSON.stringify(stats)}\n`);

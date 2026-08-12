@@ -7,8 +7,7 @@ struct ChartsView: View {
    @State private var showLocationPicker = false
     @State private var selectedReport: SavedReport?
     @State private var generationChart: ChartKind?
-    @State private var generationSheetRelationship = PersonRelationship.partner
-    @State private var generationSheetPreset = CalculationPreset.modern
+    @State private var generationWillReplace = false
     @State private var pendingGeneration: PendingGeneration?
    @State private var showParameters = false
 
@@ -16,8 +15,6 @@ private struct PendingGeneration: Identifiable {
     let id = UUID()
     let chart: ChartKind
     let force: Bool
-    let relationship: PersonRelationship?
-    let preset: CalculationPreset?
 }
 
     var body: some View {
@@ -88,8 +85,7 @@ private struct PendingGeneration: Identifiable {
                             selectedReport = nil
                             if let chart = ChartKind.allCases.first(where: { report.scope == "chart.\($0.contentPrefix)" }) {
                                 generationChart = chart
-                                generationSheetRelationship = .partner
-                                generationSheetPreset = model.preset(for: chart)
+                                generationWillReplace = true
                             }
                         }
                     )
@@ -98,11 +94,15 @@ private struct PendingGeneration: Identifiable {
             .sheet(item: $generationChart) { chart in
                 ReportGenerationSheet(
                     chart: chart,
-                    relationship: $generationSheetRelationship,
-                    preset: $generationSheetPreset,
-                    onGenerate: { relationship, preset in
+                    replacesExisting: generationWillReplace,
+                    onGenerate: {
                         generationChart = nil
-                        requestGeneration(for: chart, relationship: relationship, preset: preset)
+                        requestGeneration(for: chart, force: generationWillReplace)
+                    },
+                    onEdit: {
+                        generationChart = nil
+                        model.selectChart(chart)
+                        showParameters = true
                     },
                     onCancel: {
                         generationChart = nil
@@ -110,21 +110,19 @@ private struct PendingGeneration: Identifiable {
                 )
             }
             .alert(
-                localized("ai.network-consent.chart-title", default: "Allow network generation?", chinese: "允许联网生成？", language: model.language),
+                localized("ai.network-consent.chart-title", language: model.language),
                 isPresented: Binding(
                     get: { pendingGeneration != nil },
                     set: { if !$0 { pendingGeneration = nil } }
                 ),
                 presenting: pendingGeneration
             ) { pending in
-                Button(localized("Allow", "允许", language: model.language)) {
+                Button(localized("charts.allow", language: model.language)) {
                     model.grantAIConsent()
                     Task {
                         await model.generateAIReport(
                             for: pending.chart,
-                            forceRegenerate: pending.force,
-                            relationship: pending.relationship,
-                            preset: pending.preset
+                            forceRegenerate: pending.force
                         )
                         if let saved = model.currentSavedReport(for: pending.chart) {
                             await MainActor.run { selectedReport = saved }
@@ -132,22 +130,23 @@ private struct PendingGeneration: Identifiable {
                     }
                     pendingGeneration = nil
                 }
-                Button(localized("Not now", "暂不", language: model.language), role: .cancel) {
+                Button(localized("charts.not-now", language: model.language), role: .cancel) {
                     pendingGeneration = nil
                 }
             } message: { _ in
-                Text(localized(
-                    "ai.network-consent.chart-message",
-                    default: "Interstellar sends the selected chart's calculated facts to the configured AI service only after you tap Generate. The relay may keep an encrypted idempotency result for up to 24 hours; your device keeps the long-term report until you delete it in Settings. You can revoke future network generation at any time.",
-                    chinese: "只有在你点击生成后，Interstellar 才会把所选星盘的计算事实发送给配置的 AI 服务。中继服务最多保留 24 小时的加密幂等结果；长期报告只保存在本机，直到你在设置中删除。你可以随时撤回后续联网生成授权。",
-                    language: model.language
-                ))
+                Text(localized("ai.network-consent.chart-message", language: model.language))
             }
             .onChange(of: selectedTab) { _, newTab in
                 if newTab != .charts {
                     selectedReport = nil
                     generationChart = nil
                 }
+            }
+            .onChange(of: model.chartParameterEditRequest) { _, chart in
+                guard let chart else { return }
+                model.selectChart(chart)
+                showParameters = true
+                model.consumeChartParameterEditRequest()
             }
             .sheet(isPresented: $showLocationPicker) {
                 LocationSearchView(language: model.language) { selection in
@@ -165,11 +164,11 @@ private struct PendingGeneration: Identifiable {
                         .padding(18)
                     }
                     .background(ScreenBackground())
-                    .navigationTitle(localized("charts.parameters.sheet-title", default: "Parameters", chinese: "参数设置", language: model.language))
+                    .navigationTitle(localized("charts.parameters.sheet-title", language: model.language))
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .confirmationAction) {
-                            Button(localized("Done", "完成", language: model.language)) {
+                            Button(localized("charts.done", language: model.language)) {
                                 showParameters = false
                             }
                         }
@@ -184,12 +183,12 @@ private struct PendingGeneration: Identifiable {
     private func cardSectionHeader(_ card: InsightCardModel) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             Text(cardSectionTitle(card))
-                .font(.system(size: 20, weight: .bold))
+                .font(AppTypography.scaled(20, weight: .bold))
                 .foregroundStyle(AppTheme.text)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 6)
             Text(cardSectionSubtitle(card))
-                .font(.system(size: 12))
+                .font(AppTypography.scaled(12))
                 .foregroundStyle(AppTheme.muted)
                 .multilineTextAlignment(.trailing)
                 .fixedSize(horizontal: false, vertical: true)
@@ -214,24 +213,24 @@ private struct PendingGeneration: Identifiable {
         if model.selectedChart == .synastry {
             switch card.id {
             case "relationship-overview":
-                return localized("How two charts affect each other", "两张星盘如何彼此影响", language: model.language)
+                return localized("charts.how-two-charts-affect-each-other", language: model.language)
             case "perspectives":
-                return localized("Two directions, not one shared score", "两个方向，而非一个共同评分", language: model.language)
+                return localized("charts.two-directions-not-one-shared-score", language: model.language)
             case "emotional-connection":
-                return localized("Moon contacts and emotional house overlays", "月亮联系与情感落宫", language: model.language)
+                return localized("charts.moon-contacts-and-emotional-house-overlays", language: model.language)
             case "communication":
-                return localized("How ideas are exchanged", "想法如何交流", language: model.language)
+                return localized("charts.how-ideas-are-exchanged", language: model.language)
             case "chemistry":
-                let english = model.preset(for: .synastry) == .classical
-                    ? "Venus and Mars contacts"
-                    : "Venus, Mars and Pluto contacts"
-                return localized(english, "金星、火星与吸引结构", language: model.language)
+                let key = model.preset(for: .synastry) == .classical
+                    ? "charts.synastry.chemistry-subtitle.classical"
+                    : "charts.synastry.chemistry-subtitle.modern"
+                return localized(key, language: model.language)
             case "commitment":
-                return localized("Saturn, Jupiter and angle contacts", "土星、木星与长期结构", language: model.language)
+                return localized("charts.saturn-jupiter-and-angle-contacts", language: model.language)
             case "house-overlays":
-                return localized("Where each person lands in the other’s life", "彼此进入对方生活的领域", language: model.language)
+                return localized("charts.where-each-person-lands-in-the-others-life", language: model.language)
             case "key-inter-aspects":
-                return localized("Sorted by relevance, not positivity", "按相关性排序，而非按正负排序", language: model.language)
+                return localized("charts.sorted-by-relevance-not-positivity", language: model.language)
             default:
                 break
             }
@@ -241,32 +240,32 @@ private struct PendingGeneration: Identifiable {
 
     private func transitSectionTitle(_ cardID: String) -> String {
         switch cardID {
-        case "current-story": localized("Current Story", "当前主线", language: model.language)
-        case "current-cycles": localized("Current Cycles", "当前周期", language: model.language)
-        case "transit-timeline": localized("Transit Timeline", "行运时间线", language: model.language)
-        case "planet-paths": localized("Planet Paths", "行星路径", language: model.language)
-        case "life-areas": localized("Life Areas", "生活领域", language: model.language)
-        case "active-transits": localized("Active Transits", "进行中的行运", language: model.language)
+        case "current-story": localized("charts.current-story", language: model.language)
+        case "current-cycles": localized("charts.current-cycles", language: model.language)
+        case "transit-timeline": localized("charts.transit-timeline", language: model.language)
+        case "planet-paths": localized("charts.planet-paths", language: model.language)
+        case "life-areas": localized("charts.life-areas", language: model.language)
+        case "active-transits": localized("charts.active-transits", language: model.language)
         default: cardID
         }
     }
 
     private func transitSectionSubtitle(_ cardID: String) -> String {
         switch cardID {
-        case "current-story": localized("How the strongest cycles combine", "最强周期如何共同作用", language: model.language)
-        case "current-cycles": localized("One theme per time scale", "每个时间尺度一个主题", language: model.language)
-        case "transit-timeline": localized("Start · Exact · Return · End", "开始 · 精确 · 回返 · 结束", language: model.language)
-        case "planet-paths": localized("Where the current planets are moving", "当前行星正在经过哪里", language: model.language)
-        case "life-areas": localized("Activity, not fortune", "活跃度，不是运气", language: model.language)
-        case "active-transits": localized("Complete filtered list", "完整筛选列表", language: model.language)
+        case "current-story": localized("charts.how-the-strongest-cycles-combine", language: model.language)
+        case "current-cycles": localized("charts.one-theme-per-time-scale", language: model.language)
+        case "transit-timeline": localized("charts.start-exact-return-end", language: model.language)
+        case "planet-paths": localized("charts.where-the-current-planets-are-moving", language: model.language)
+        case "life-areas": localized("charts.activity-not-fortune", language: model.language)
+        case "active-transits": localized("charts.complete-filtered-list", language: model.language)
         default: ""
         }
     }
 
     private var topBar: some View {
         HStack {
-            Text(localized("Charts", "星盘", language: model.language))
-                .font(.system(size: 30, weight: .bold))
+            Text(localized("charts.charts", language: model.language))
+                .font(AppTypography.scaled(30, weight: .bold))
                 .kerning(-1)
                 .foregroundStyle(AppTheme.text)
             Spacer()
@@ -275,12 +274,11 @@ private struct PendingGeneration: Identifiable {
                     selectedReport = saved
                 } else {
                     generationChart = model.selectedChart
-                    generationSheetPreset = model.preset(for: model.selectedChart)
-                    generationSheetRelationship = model.selectedChart == .synastry ? .partner : .partner
+                    generationWillReplace = false
                 }
             } label: {
-               Label(localized("Reports", "报告", language: model.language), systemImage: "doc.text.fill")
-                    .font(.system(size: 11, weight: .semibold))
+               Label(localized("charts.reports", language: model.language), systemImage: "doc.text.fill")
+                    .font(AppTypography.scaled(11, weight: .semibold))
                     .foregroundStyle(AppTheme.violet)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
@@ -294,7 +292,7 @@ private struct PendingGeneration: Identifiable {
         HStack(spacing: 10) {
             viewSelector
             Button { showParameters = true } label: {
-                Label(localized("charts.parameters.button", default: "Parameters", chinese: "参数", language: model.language), systemImage: "slider.horizontal.3")
+                Label(localized("charts.parameters.button", language: model.language), systemImage: "slider.horizontal.3")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(AppTheme.violet)
                     .padding(.horizontal, 12)
@@ -303,6 +301,7 @@ private struct PendingGeneration: Identifiable {
                     .overlay(RoundedRectangle(cornerRadius: 13).stroke(AppTheme.violet.opacity(0.22)))
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("charts-parameters-button")
         }
     }
 
@@ -319,7 +318,7 @@ private struct PendingGeneration: Identifiable {
                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppTheme.line))
 
             Image(systemName: "heart.fill")
-                .font(.system(size: 14, weight: .semibold))
+                .font(AppTypography.scaled(14, weight: .semibold))
                 .foregroundStyle(AppTheme.violet)
                 .accessibilityHidden(true)
 
@@ -331,7 +330,7 @@ private struct PendingGeneration: Identifiable {
                         Image(systemName: "person.crop.circle.badge.plus")
                             .font(.caption2.weight(.semibold))
                             .foregroundStyle(AppTheme.muted)
-                        Text(localized("Add person in Profile", "去个人资料添加人物", language: model.language))
+                        Text(localized("charts.add-person-in-profile", language: model.language))
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(AppTheme.muted)
                         Spacer(minLength: 0)
@@ -351,7 +350,7 @@ private struct PendingGeneration: Identifiable {
                     }
                 } label: {
                     HStack(spacing: 4) {
-                        Text(selectedSynastryPartnerName ?? localized("Select", "选择", language: model.language))
+                        Text(selectedSynastryPartnerName ?? localized("charts.select", language: model.language))
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(selectedSynastryPartnerName == nil ? AppTheme.muted : AppTheme.text)
                             .lineLimit(1)
@@ -381,17 +380,17 @@ private struct PendingGeneration: Identifiable {
     private var profileStrip: some View {
         HStack(spacing: 12) {
             Text(String(model.profile.name.prefix(1)).uppercased())
-                .font(.system(size: 15, weight: .bold))
+                .font(AppTypography.scaled(15, weight: .bold))
                 .foregroundStyle(AppTheme.violet)
                 .frame(width: 38, height: 38)
                 .background(AppTheme.violet.opacity(0.12), in: Circle())
                 .overlay(Circle().stroke(AppTheme.violet.opacity(0.25), lineWidth: 1))
             VStack(alignment: .leading, spacing: 3) {
                 Text(model.profile.name)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(AppTypography.scaled(15, weight: .semibold))
                     .foregroundStyle(AppTheme.text)
                 Text(birthInfo)
-                    .font(.system(size: 10))
+                    .font(AppTypography.scaled(10))
                     .foregroundStyle(AppTheme.muted)
             }
             Spacer()
@@ -420,15 +419,15 @@ private struct PendingGeneration: Identifiable {
         case .natal:
             return "\(model.profile.name) · \(model.profile.placeName)"
         case .currentSky:
-            return localized("Live sky at the saved location", "保存地点的当前天空", language: model.language)
+            return localized("charts.live-sky-at-the-saved-location", language: model.language)
         case .transit:
-            return localized("Current sky compared with the natal chart", "当前天空与本命盘的比较", language: model.language)
+            return localized("charts.current-sky-compared-with-the-natal-chart", language: model.language)
         case .secondary:
-            return localized("Day-for-a-year secondary progressions", "一日一年法次限推运", language: model.language)
+            return localized("charts.day-for-a-year-secondary-progressions", language: model.language)
         case .solarReturn:
-            return localized("The year that begins at your next solar return", "下一个日返时刻开启的年度盘", language: model.language)
+            return localized("charts.the-year-that-begins-at-your-next-solar-return", language: model.language)
         case .synastry:
-            return localized("How two natal charts meet", "两张本命盘如何相遇", language: model.language)
+            return localized("charts.how-two-natal-charts-meet", language: model.language)
         }
     }
 
@@ -466,10 +465,10 @@ private struct PendingGeneration: Identifiable {
     private var chartParameters: some View {
         VStack(alignment: .leading, spacing: 10) {
             if model.selectedChart != .currentSky && model.selectedChart != .synastry {
-                Text(localized("Person", "人物", language: model.language))
+                Text(localized("charts.person", language: model.language))
                     .font(.caption.weight(.bold))
                     .foregroundStyle(AppTheme.muted)
-                Picker(localized("Person", "人物", language: model.language), selection: $model.chartSubjectID) {
+                Picker(localized("charts.person", language: model.language), selection: $model.chartSubjectID) {
                     Text(model.profile.name).tag("self")
                     ForEach(model.savedPeople) { person in
                         Text(person.profile.name).tag(person.id.uuidString)
@@ -482,15 +481,15 @@ private struct PendingGeneration: Identifiable {
         switch model.selectedChart {
         case .natal:
             parameterSummary(
-                title: localized("Birth data", "出生资料", language: model.language),
+                title: localized("charts.birth-data", language: model.language),
                 value: birthInfo,
                 systemImage: "person.text.rectangle"
             )
         case .currentSky:
             VStack(alignment: .leading, spacing: 10) {
-                parameterHeader(resetTitle: localized("charts.parameters.back-to-now", default: "Back to now", chinese: "回到现在", language: model.language))
+                parameterHeader(resetTitle: localized("charts.parameters.back-to-now", language: model.language))
                 DatePicker(
-                    localized("Date & time", "日期与时间", language: model.language),
+                    localized("charts.date-time", language: model.language),
                     selection: targetDateBinding(for: .currentSky)
                 )
                 .datePickerStyle(.compact)
@@ -499,16 +498,16 @@ private struct PendingGeneration: Identifiable {
             .cardSurface()
         case .transit:
             VStack(alignment: .leading, spacing: 10) {
-                parameterHeader(resetTitle: localized("Use current defaults", "恢复当前默认值", language: model.language))
+                parameterHeader(resetTitle: localized("charts.use-current-defaults", language: model.language))
                 DatePicker(
-                    localized("Target time", "目标时间", language: model.language),
+                    localized("charts.target-time", language: model.language),
                     selection: targetDateBinding(for: .transit)
                 )
                 .datePickerStyle(.compact)
-                Picker(localized("Range", "范围", language: model.language), selection: transitRangeBinding) {
-                    Text(localized("30 days", "30 天", language: model.language)).tag(30)
-                    Text(localized("7 days", "7 天", language: model.language)).tag(7)
-                    Text(localized("12 months", "12 个月", language: model.language)).tag(365)
+                Picker(localized("charts.range", language: model.language), selection: transitRangeBinding) {
+                    Text(localized("charts.30-days", language: model.language)).tag(30)
+                    Text(localized("charts.7-days", language: model.language)).tag(7)
+                    Text(localized("charts.12-months", language: model.language)).tag(365)
                 }
                 .pickerStyle(.segmented)
                 locationButton(model.transitLocationOverride?.placeName ?? model.chartSubjectProfile.placeName)
@@ -516,28 +515,24 @@ private struct PendingGeneration: Identifiable {
             .cardSurface()
         case .secondary:
             VStack(alignment: .leading, spacing: 10) {
-                parameterHeader(resetTitle: localized("Back to today", "回到今天", language: model.language))
+                parameterHeader(resetTitle: localized("charts.back-to-today", language: model.language))
                 DatePicker(
-                    localized("Target date", "目标日期", language: model.language),
+                    localized("charts.target-date", language: model.language),
                     selection: targetDateBinding(for: .secondary),
                     displayedComponents: .date
                 )
                 .datePickerStyle(.compact)
-                Text(localized(
-                    "Secondary progressions use the birth place and do not relocate in this version.",
-                    "本版次限盘沿用出生地点，不提供独立迁移地点。",
-                    language: model.language
-                ))
+                Text(localized("charts.secondary-progressions-use-the-birth-place-and-do-not-relocate-in-this-v", language: model.language))
                 .font(.footnote)
                 .foregroundStyle(AppTheme.muted)
             }
             .cardSurface()
         case .solarReturn:
             VStack(alignment: .leading, spacing: 10) {
-                parameterHeader(resetTitle: localized("Current return year", "当前日返年度", language: model.language))
+                parameterHeader(resetTitle: localized("charts.current-return-year", language: model.language))
                 Stepper(value: solarYearBinding, in: 1900 ... 2200) {
                     parameterSummary(
-                        title: localized("Return year", "日返年度", language: model.language),
+                        title: localized("charts.return-year", language: model.language),
                         value: String(model.solarReturnYear),
                         systemImage: "calendar"
                     )
@@ -547,8 +542,8 @@ private struct PendingGeneration: Identifiable {
             .cardSurface()
         case .synastry:
             parameterSummary(
-                title: localized("People", "人物", language: model.language),
-                value: localized("Choose the pair on the Synastry page", "请在合盘页面选择双方", language: model.language),
+                title: localized("charts.people", language: model.language),
+                value: localized("charts.choose-the-pair-on-the-synastry-page", language: model.language),
                 systemImage: "person.2"
             )
         }
@@ -556,7 +551,7 @@ private struct PendingGeneration: Identifiable {
 
     private func parameterHeader(resetTitle: String) -> some View {
         HStack {
-            Text(localized("Chart parameters", "星盘参数", language: model.language))
+            Text(localized("charts.chart-parameters", language: model.language))
                 .font(.caption.weight(.bold))
                 .foregroundStyle(AppTheme.muted)
             Spacer()
@@ -580,7 +575,7 @@ private struct PendingGeneration: Identifiable {
     private func locationButton(_ placeName: String) -> some View {
         Button { showLocationPicker = true } label: {
             parameterSummary(
-                title: localized("Reference location", "参考地点", language: model.language),
+                title: localized("charts.reference-location", language: model.language),
                 value: placeName,
                 systemImage: "mappin.and.ellipse"
             )
@@ -621,7 +616,7 @@ private struct PendingGeneration: Identifiable {
 
     private var presetSelector: some View {
         VStack(alignment: .leading, spacing: 9) {
-            Text(localized("Preset", "参数预设", language: model.language))
+            Text(localized("charts.preset", language: model.language))
                 .font(.caption.weight(.bold))
                 .foregroundStyle(AppTheme.muted)
             HStack(spacing: 8) {
@@ -676,8 +671,8 @@ private struct PendingGeneration: Identifiable {
         } label: {
             Label(
                 mode == .wheel
-                    ? localized("Wheel", "轮盘", language: model.language)
-                    : localized("Aspects", "相位矩阵", language: model.language),
+                    ? localized("charts.wheel", language: model.language)
+                    : localized("charts.aspects", language: model.language),
                 systemImage: icon
             )
             .font(.caption.weight(.semibold))
@@ -693,7 +688,7 @@ private struct PendingGeneration: Identifiable {
     private var chartContent: some View {
         if model.selectedChart == .synastry, model.synastryPartnerID == nil {
             Label(
-                localized("Choose the other person to calculate this Synastry chart.", "请选择另一位人物以计算合盘。", language: model.language),
+                localized("charts.choose-the-other-person-to-calculate-this-synastry-chart", language: model.language),
                 systemImage: "person.2"
             )
             .font(.subheadline)
@@ -703,7 +698,7 @@ private struct PendingGeneration: Identifiable {
         } else if model.selectedChart == .synastry, model.isCalculatingSynastry {
             HStack(spacing: 12) {
                 ProgressView().tint(AppTheme.violet)
-                Text(localized("Calculating the relationship locally…", "正在本机计算双方合盘…", language: model.language))
+                Text(localized("charts.calculating-the-relationship-locally", language: model.language))
                     .foregroundStyle(AppTheme.muted)
             }
             .frame(maxWidth: .infinity, minHeight: 210)
@@ -713,7 +708,7 @@ private struct PendingGeneration: Identifiable {
         {
             HStack(spacing: 12) {
                 ProgressView().tint(AppTheme.violet)
-                Text(localized("Calculating chart locally…", "正在本机计算星盘…", language: model.language))
+                Text(localized("charts.calculating-chart-locally", language: model.language))
                     .foregroundStyle(AppTheme.muted)
             }
             .frame(maxWidth: .infinity, minHeight: 210)
@@ -755,7 +750,7 @@ private struct PendingGeneration: Identifiable {
             Image(systemName: "clock.arrow.circlepath")
                 .foregroundStyle(AppTheme.violet)
             VStack(alignment: .leading, spacing: 3) {
-                Text(localized("Event-time chart", "事件时刻星盘", language: model.language))
+                Text(localized("charts.event-time-chart", language: model.language))
                     .font(.caption.weight(.bold))
                     .foregroundStyle(AppTheme.text)
                 Text(formattedEventDate(date))
@@ -763,7 +758,7 @@ private struct PendingGeneration: Identifiable {
                     .foregroundStyle(AppTheme.muted)
             }
             Spacer()
-            Button(localized("charts.event.back-to-now", default: "Back to now", chinese: "返回现在", language: model.language)) {
+            Button(localized("charts.event.back-to-now", language: model.language)) {
                 model.clearChartFocus()
             }
             .font(.caption.weight(.semibold))
@@ -783,25 +778,19 @@ private struct PendingGeneration: Identifiable {
 
    private func requestGeneration(
         for chart: ChartKind,
-        relationship: PersonRelationship?,
-        preset: CalculationPreset
+        force: Bool
     ) {
-        let effectiveRelationship = chart == .synastry ? relationship : nil
         guard model.aiConsentGranted else {
             pendingGeneration = PendingGeneration(
                 chart: chart,
-                force: false,
-                relationship: effectiveRelationship,
-                preset: preset
+                force: force
             )
             return
         }
         Task {
             await model.generateAIReport(
                 for: chart,
-                forceRegenerate: false,
-                relationship: effectiveRelationship,
-                preset: preset
+                forceRegenerate: force
             )
             if let saved = model.currentSavedReport(for: chart) {
                 await MainActor.run { selectedReport = saved }

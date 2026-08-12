@@ -125,6 +125,7 @@ func main() {
 	limiter := newRateLimiter(60, time.Minute)
 	adminLimiter := newRateLimiter(10, time.Minute)
 	attestLimiter := newRateLimiter(30, time.Minute)
+	feedbackLimiter := newRateLimiter(10, time.Hour)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", handleAdminPage)
@@ -137,6 +138,7 @@ func main() {
 		mux.HandleFunc("/v1/app-attest/token", attestLimiter.wrap(appAttest.handleToken))
 	}
 	mux.HandleFunc("/v1/generate", limiter.wrap(cfg.handleGenerate))
+	mux.HandleFunc("/v1/feedback", feedbackLimiter.wrap(cfg.handleFeedback))
 
 	// Admin API
 	mux.HandleFunc("/admin/login", adminLimiter.wrap(cfg.handleLogin))
@@ -160,6 +162,8 @@ func main() {
 	mux.HandleFunc("/admin/prompts/", requireAdmin(sessions, cfg.handlePromptRestore))
 	mux.Handle("/admin/models", requireAdmin(sessions, cfg.handleModelState))
 	mux.Handle("/admin/usage", requireAdmin(sessions, cfg.handleUsage))
+	mux.Handle("/admin/feedback", requireAdmin(sessions, cfg.handleAdminFeedback))
+	mux.HandleFunc("/admin/feedback/", requireAdmin(sessions, cfg.handleAdminFeedbackItem))
 
 	log.Printf("relay listening on %s", addr)
 	server := &http.Server{

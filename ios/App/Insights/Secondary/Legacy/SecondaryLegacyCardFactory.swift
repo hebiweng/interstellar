@@ -33,18 +33,18 @@ extension InsightFactory {
         let moonHouse = natal?.house(containing: moon?.longitudeDegrees ?? 0) ?? 0
         let phaseSequence = progressedPhaseSequence(phase, language: language)
         let chapterFacts: [InsightFact] = [
-            fact(localized("Stage", "阶段", language: language), progressedPhaseName(phase, language: language), .transition),
-            moon.map { fact(localized("insight.progressed-moon.fact", default: "Progressed moon", chinese: "次限月亮", language: language), Zodiac.position($0, language: language), .neutral, symbol: "☽") },
-            sun.map { fact(localized("Progressed sun", "次限太阳", language: language), Zodiac.position($0, language: language), .supportive, symbol: "☉") },
+            fact(localized("insight.secondary.stage", language: language), progressedPhaseName(phase, language: language), .transition),
+            moon.map { fact(localized("insight.progressed-moon.fact", language: language), Zodiac.position($0, language: language), .neutral, symbol: "☽") },
+            sun.map { fact(localized("insight.secondary.progressed-sun", language: language), Zodiac.position($0, language: language), .supportive, symbol: "☉") },
         ].compactMap { $0 }
         let identityFacts: [InsightFact] = [
-            natalSun.map { fact(localized("Natal sun", "本命太阳", language: language), Zodiac.position($0, language: language), .neutral, symbol: "☉") },
-            sun.map { fact(localized("Progressed sun", "次限太阳", language: language), Zodiac.position($0, language: language), .supportive, symbol: "☉") },
+            natalSun.map { fact(localized("insight.secondary.natal-sun", language: language), Zodiac.position($0, language: language), .neutral, symbol: "☉") },
+            sun.map { fact(localized("insight.secondary.progressed-sun", language: language), Zodiac.position($0, language: language), .supportive, symbol: "☉") },
         ].compactMap { $0 }
 
         return [
             card( id: "developmental-chapter",
-                title: localized("Developmental chapter", "发展阶段", language: language),
+                title: localized("insight.secondary.developmental-chapter", language: language),
                 icon: "◐", visual: .stageFlow(
                     old: phaseSequence.previous,
                     transition: phaseSequence.current,
@@ -54,7 +54,7 @@ extension InsightFactory {
                 language: language
             ),
             card( id: "progressed-moon",
-                title: localized("insight.progressed-moon.title", default: "Progressed moon", chinese: "长期月亮", language: language),
+                title: localized("insight.progressed-moon.title", language: language),
                 icon: "☽", visual: .moonProgress(progress: phase / 360),
                 facts: progressedMoonFacts(
                     events,
@@ -67,7 +67,7 @@ extension InsightFactory {
                 language: language
             ),
             card( id: "identity-development",
-                title: localized("Identity development", "身份发展", language: language),
+                title: localized("insight.secondary.identity-development", language: language),
                 icon: "☉", visual: .identityCompare(
                     natal: natalSun.map { Zodiac.position($0, language: language) } ?? "",
                     progressed: sun.map { Zodiac.position($0, language: language) } ?? ""
@@ -76,19 +76,19 @@ extension InsightFactory {
                 language: language
             ),
             card( id: "turning-points",
-                title: localized("Turning points", "转折点", language: language),
+                title: localized("insight.secondary.turning-points", language: language),
                 icon: "⟐", visual: .turningRows,
                 facts: turningPointFacts(events, fallback: top, language: language, timeZone: timeZone),
                 language: language
             ),
             card( id: "areas-maturing",
-                title: localized("Areas maturing", "成熟领域", language: language),
+                title: localized("insight.secondary.areas-maturing", language: language),
                 icon: "⌂", visual: .areaRows,
                 facts: Array(activeHouses.prefix(4)),
                 language: language
             ),
             card( id: "timeline",
-                title: localized("24-month timeline", "长期时间线", language: language),
+                title: localized("insight.secondary.24-month-timeline", language: language),
                 icon: "⇢", visual: .gantt,
                 facts: secondaryTimelineFacts(events, fallback: top, language: language, timeZone: timeZone),
                 language: language
@@ -103,10 +103,10 @@ extension InsightFactory {
         language: AppLanguage
     ) -> (previous: String, current: String, next: String) {
         let labels = [
-            localized("New phase", "新月阶段", language: language),
-            localized("Building phase", "上弦阶段", language: language),
-            localized("Review phase", "满月阶段", language: language),
-            localized("Integration phase", "下弦阶段", language: language),
+            localized("insight.secondary.new-phase", language: language),
+            localized("insight.secondary.building-phase", language: language),
+            localized("insight.secondary.review-phase", language: language),
+            localized("insight.secondary.integration-phase", language: language),
         ]
         let normalized = angle.truncatingRemainder(dividingBy: 360)
         let index = min(3, max(0, Int(normalized / 90)))
@@ -126,26 +126,22 @@ extension InsightFactory {
         timeZone: TimeZone
     ) -> [InsightFact] {
         var facts: [InsightFact] = [
-            moon.map { fact(localized("Moon sign", "月亮落座", language: language), Zodiac.position($0, language: language), .neutral, symbol: "☽") },
-            moonHouse > 0 ? fact(localized("Moon area", "月亮领域", language: language), ConsumerCopy.lifeArea(moonHouse, language: language), .transition) : nil,
-            fact(localized("Phase", "月相", language: language), progressedPhaseName(phase, language: language)),
+            moon.map { fact(localized("insight.current-sky.moon-sign", language: language), Zodiac.position($0, language: language), .neutral, symbol: "☽") },
+            moonHouse > 0 ? fact(localized("insight.current-sky.moon-area", language: language), ConsumerCopy.lifeArea(moonHouse, language: language), .transition) : nil,
+            fact(localized("insight.secondary.phase", language: language), progressedPhaseName(phase, language: language)),
         ].compactMap { $0 }
         if let window = events.progressedMoon {
             let months = max(0, Int((Double(window.daysInSign) / 30.44).rounded()))
             facts.append(
                 fact(
-                    localized("In sign", "在座时长", language: language),
-                    localized(
-                        "\(months) months",
-                        "\(months)个月",
-                        language: language
-                    ),
+                    localized("insight.secondary.in-sign", language: language),
+                    localizedTemplate("dynamic.983c1afebb", substitutions: ["value1": String(describing: months)], language: language),
                     .supportive
                 )
             )
             facts.append(
                 fact(
-                    localized("Ingress", "下次换座", language: language),
+                    localized("insight.secondary.ingress", language: language),
                     window.nextIngress.shortEventMonthYear(language: language, timeZone: timeZone),
                     .transition
                 )
@@ -176,7 +172,7 @@ extension InsightFactory {
             let title = "\(bodyName(point.first, language: language)) \(point.kind.symbol) \(bodyName(point.second, language: language))"
             if let date = point.exactDate {
                 return fact(
-                    localized("Exact", "精确", language: language),
+                    localized("insight.secondary.exact", language: language),
                     title,
                     tone(point.kind),
                     note: date.shortEventMonthYear(language: language, timeZone: timeZone),
@@ -184,7 +180,7 @@ extension InsightFactory {
                 )
             }
             return fact(
-                localized("Building", "形成中", language: language),
+                localized("insight.secondary.building", language: language),
                 title,
                 .transition,
                 note: Zodiac.formatDegree(point.separationDegrees),
@@ -212,15 +208,11 @@ extension InsightFactory {
         }
         let now = Date()
         var rows: [InsightFact] = []
-        let moonTitle = localized(
-            "Moon through \(Zodiac.englishNames[moon.signIndex])",
-            "月亮行经\(Zodiac.chineseNames[moon.signIndex])",
-            language: language
-        )
+        let moonTitle = localizedTemplate("dynamic.ce5ddbd118", substitutions: ["value1": String(describing: Zodiac.name(index: moon.signIndex, language: language))], language: language)
         rows.append(
             fact(
                 moonTitle,
-                localized("Now", "现在", language: language),
+                localized("insight.secondary.now", language: language),
                 .transition,
                 note: now.shortEventRange(to: moon.nextIngress, language: language, timeZone: timeZone),
                 progress: 0

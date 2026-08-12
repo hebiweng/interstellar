@@ -11,10 +11,10 @@ enum TodayLifeDomain: String, CaseIterable, Identifiable {
 
     func title(language: AppLanguage) -> String {
         switch self {
-        case .love: localized("Love & Relationships", "感情与关系", language: language)
-        case .work: localized("Work & Direction", "事业与方向", language: language)
-        case .money: localized("Money & Resources", "财富与资源", language: language)
-        case .energy: localized("Energy & Wellbeing", "精力与状态", language: language)
+        case .love: localized("today.love-relationships", language: language)
+        case .work: localized("today.work-direction", language: language)
+        case .money: localized("today.money-resources", language: language)
+        case .energy: localized("today.energy-wellbeing", language: language)
         }
     }
 
@@ -177,9 +177,9 @@ enum TodayDashboardFactory {
         let rhythm = buildRhythm(signals: signals, timeZone: timeZone)
         let peakIndex = rhythm.enumerated().max(by: { $0.element < $1.element })?.offset ?? 0
         let rhythmLabels = [
-            localized("Morning", "上午", language: language),
-            localized("Afternoon", "下午", language: language),
-            localized("Evening", "晚间", language: language),
+            localized("today.morning", language: language),
+            localized("today.afternoon", language: language),
+            localized("today.evening", language: language),
         ]
         let nextMoments = try buildNextMoments(
             signals: signals,
@@ -225,7 +225,7 @@ enum TodayDashboardFactory {
             return TodayRhythmMoment(
                 id: signal.id,
                 stage: signal.eventDate.map(formatter.string(from:))
-                    ?? localized("Ongoing", "持续影响", language: language),
+                    ?? localized("today.ongoing", language: language),
                 source: signal.source.consumerTitle(language: language),
                 title: copy.summary,
                 summary: copy.detail,
@@ -252,13 +252,13 @@ enum TodayDashboardFactory {
         language: AppLanguage
     ) -> String {
         guard intensity >= 0.14 else {
-            return localized("Steady", "平稳", language: language)
+            return localized("today.steady", language: language)
         }
         return switch tone {
-        case .supportive: localized("Flowing", "顺畅", language: language)
-        case .challenging: localized("today.tone.tension", default: "Tension", chinese: "有拉扯", language: language)
-        case .transition: localized("Active", "活跃", language: language)
-        case .neutral: localized("Steady", "平稳", language: language)
+        case .supportive: localized("today.flowing", language: language)
+        case .challenging: localized("today.tone.tension", language: language)
+        case .transition: localized("today.active", language: language)
+        case .neutral: localized("today.steady", language: language)
         }
     }
 
@@ -308,11 +308,11 @@ private extension DailySignal.Source {
     func consumerTitle(language: AppLanguage) -> String {
         switch self {
         case .sky:
-            localized("Shared atmosphere", "整体氛围", language: language)
+            localized("today.shared-atmosphere", language: language)
         case .transit:
-            localized("Personal timing", "个人节奏", language: language)
+            localized("today.personal-timing", language: language)
         case .secondary:
-            localized("Long-term shift", "长期变化", language: language)
+            localized("today.long-term-shift", language: language)
         }
     }
 }

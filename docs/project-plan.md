@@ -12,7 +12,7 @@
 
 ## 1. 项目摘要
 
-> **iOS 适用范围：** 本文当前执行指令约束 Web、后端、API 和专业平台工作，不约束 `ios/**`。原生 iOS V1 已由用户单独授权本命、天象、行运、次限和 Today，其范围、门禁与停止条件以[iOS V1 开发计划](./ios-v1-development-plan.md)为唯一执行依据。iOS 授权不自动扩大本文的 Web 或服务端范围。
+> **iOS 适用范围：** 本文当前执行指令约束 Web、后端、API 和专业平台工作，不约束 `ios/**`。原生 iOS 的当前范围、门禁与停止条件以 [iOS v6 重构执行合同](./ios-v6-rebuild-plan.md) 和 [卡片实施矩阵](./ios-card-implementation-matrix.md) 为准。iOS 授权不自动扩大本文的 Web 或服务端范围。
 
 > **当前执行指令（优先于本文后续 M0—M24 路线）：** 项目保留完整西方占星平台的信息架构和未来入口，但当前只开发完整本命盘及其必须的平台闭环。实施、验收与停止条件以[本命盘优先开发计划](./natal-development-plan.md)、[对象库/新建分析/后台管理计划](./admin-object-analysis-plan.md)和[完整本命盘纵向切片契约](./natal-first-slice.yaml)为准。`NATAL-RELEASE`完成后停止，不自动进入行运、关系、预测或本文后续月份。本文 M0—M24 内容保留为长期能力目录，不代表当前授权或执行顺序。
 

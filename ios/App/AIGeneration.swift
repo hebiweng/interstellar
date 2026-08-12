@@ -635,18 +635,19 @@ enum AIFactsBuilder {
 
 struct AIGenerateRequest: Sendable {
     let bodyData: Data
+    let language: AppLanguage
 }
 
 enum AIGenerationError: LocalizedError {
-    case invalidResponse
+    case invalidResponse(AppLanguage)
     case server(String)
-    case contract(String)
+    case contract(AppLanguage)
 
     var errorDescription: String? {
         switch self {
-        case .invalidResponse: "Invalid response from the interpretation service."
+        case let .invalidResponse(language): localized("ai.interpretation-invalid-response", language: language)
         case let .server(message): message
-        case let .contract(message): "Interpretation response contract failed: \(message)"
+        case let .contract(language): localized("ai.interpretation-response-unverified", language: language)
         }
     }
 }
@@ -669,7 +670,8 @@ struct AIGenerationClient: Sendable {
             let authorization = try await AppAttestAuthorizer.shared.headers(
                 for: request.bodyData,
                 baseURL: baseURL,
-                forceTokenRefresh: attempt > 0
+                forceTokenRefresh: attempt > 0,
+                language: request.language
             )
             for (name, value) in authorization {
                 urlRequest.setValue(value, forHTTPHeaderField: name)
@@ -678,7 +680,7 @@ struct AIGenerationClient: Sendable {
             urlRequest.httpBody = request.bodyData
             let (data, response) = try await URLSession.shared.data(for: urlRequest)
             guard let http = response as? HTTPURLResponse else {
-                throw AIGenerationError.invalidResponse
+                throw AIGenerationError.invalidResponse(request.language)
             }
             if http.statusCode == 401, attempt == 0 {
                 await AppAttestAuthorizer.shared.invalidateToken()
@@ -686,11 +688,17 @@ struct AIGenerationClient: Sendable {
             }
             guard (200 ..< 300).contains(http.statusCode) else {
                 let message = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["error"] as? String
-                throw AIGenerationError.server(message ?? "HTTP \(http.statusCode)")
+                throw AIGenerationError.server(
+                    message ?? localizedTemplate(
+                        "ai.interpretation-server-http",
+                        substitutions: ["statusCode": String(http.statusCode)],
+                        language: request.language
+                    )
+                )
             }
             return try JSONDecoder().decode(AIGenerateResponse.self, from: data)
         }
-        throw AIGenerationError.server("App Attest authorization failed.")
+        throw AIGenerationError.server(localized("ai.authorization-failed", language: request.language))
     }
 }
 
@@ -746,18 +754,18 @@ private actor AppAttestAuthorizer {
     }
 
     private enum AuthorizationError: LocalizedError {
-        case unsupported
+        case unsupported(AppLanguage)
         case server(status: Int, code: String?, message: String)
-        case invalidResponse
+        case invalidResponse(AppLanguage)
 
         var errorDescription: String? {
             switch self {
-            case .unsupported:
-                "This device cannot verify the app installation."
+            case let .unsupported(language):
+                localized("ai.app-verification-unsupported", language: language)
             case let .server(_, _, message):
                 message
-            case .invalidResponse:
-                "Invalid response from the app verification service."
+            case let .invalidResponse(language):
+                localized("ai.app-verification-invalid-response", language: language)
             }
         }
 
@@ -776,35 +784,41 @@ private actor AppAttestAuthorizer {
         installationToken = nil
     }
 
-   func headers(for body: Data, baseURL: URL, forceTokenRefresh: Bool) async throws -> [String: String] {
+   func headers(
+        for body: Data,
+        baseURL: URL,
+        forceTokenRefresh: Bool,
+        language: AppLanguage
+    ) async throws -> [String: String] {
         // Temporary: skip App Attest in Debug builds while the Apple Developer Program is not purchased.
         #if DEBUG || targetEnvironment(simulator)
             return ["X-App-Attest-Development-Bypass": "1"]
         #else
-            guard service.isSupported else { throw AuthorizationError.unsupported }
+            guard service.isSupported else { throw AuthorizationError.unsupported(language) }
             if forceTokenRefresh {
                 installationToken = nil
             }
-            let keyID = try await ensureKeyAndToken(baseURL: baseURL)
+            let keyID = try await ensureKeyAndToken(baseURL: baseURL, language: language)
             guard let token = installationToken, token.isUsable else {
-                throw AuthorizationError.invalidResponse
+                throw AuthorizationError.invalidResponse(language)
             }
             return try await assertionHeaders(
                 body: body,
                 keyID: keyID,
                 token: token.value,
-                baseURL: baseURL
+                baseURL: baseURL,
+                language: language
             )
         #endif
     }
 
-    private func ensureKeyAndToken(baseURL: URL) async throws -> String {
+    private func ensureKeyAndToken(baseURL: URL, language: AppLanguage) async throws -> String {
         if let keyID = keyIdentifier(), installationToken?.isUsable == true {
             return keyID
         }
         if let keyID = keyIdentifier() {
             do {
-                installationToken = try await refreshToken(keyID: keyID, baseURL: baseURL)
+                installationToken = try await refreshToken(keyID: keyID, baseURL: baseURL, language: language)
                 return keyID
             } catch let error as AuthorizationError where error.requiresNewKey {
                 removeKeyIdentifier()
@@ -812,7 +826,7 @@ private actor AppAttestAuthorizer {
         }
         let keyID = try await service.generateKey()
         do {
-            installationToken = try await attestNewKey(keyID: keyID, baseURL: baseURL)
+            installationToken = try await attestNewKey(keyID: keyID, baseURL: baseURL, language: language)
             saveKeyIdentifier(keyID)
             return keyID
         } catch {
@@ -821,12 +835,12 @@ private actor AppAttestAuthorizer {
         }
     }
 
-    private func attestNewKey(keyID: String, baseURL: URL) async throws -> InstallationToken {
+    private func attestNewKey(keyID: String, baseURL: URL, language: AppLanguage) async throws -> InstallationToken {
         let challenge = try await fetchChallenge(
-            purpose: "attest", keyID: keyID, bodyHash: "", baseURL: baseURL
+            purpose: "attest", keyID: keyID, bodyHash: "", baseURL: baseURL, language: language
         )
         guard let challengeData = Data(base64Encoded: challenge.challenge) else {
-            throw AuthorizationError.invalidResponse
+            throw AuthorizationError.invalidResponse(language)
         }
         let attestation = try await service.attestKey(keyID, clientDataHash: digest(challengeData))
         let request = AttestationRequest(
@@ -839,26 +853,34 @@ private actor AppAttestAuthorizer {
         let response: TokenResponse = try await post(
             body: body,
             to: baseURL.appendingPathComponent("v1/app-attest/attest"),
-            headers: [:]
+            headers: [:],
+            language: language
         )
         return InstallationToken(value: response.token, expiresAt: response.expiresAt)
     }
 
-    private func refreshToken(keyID: String, baseURL: URL) async throws -> InstallationToken {
+    private func refreshToken(keyID: String, baseURL: URL, language: AppLanguage) async throws -> InstallationToken {
         let body = try encoded(TokenRequest(installationID: InstallationIdentity.value, keyID: keyID))
-        let headers = try await assertionHeaders(body: body, keyID: keyID, token: nil, baseURL: baseURL)
+        let headers = try await assertionHeaders(body: body, keyID: keyID, token: nil, baseURL: baseURL, language: language)
         let response: TokenResponse = try await post(
             body: body,
             to: baseURL.appendingPathComponent("v1/app-attest/token"),
-            headers: headers
+            headers: headers,
+            language: language
         )
         return InstallationToken(value: response.token, expiresAt: response.expiresAt)
     }
 
-    private func assertionHeaders(body: Data, keyID: String, token: String?, baseURL: URL) async throws -> [String: String] {
+    private func assertionHeaders(
+        body: Data,
+        keyID: String,
+        token: String?,
+        baseURL: URL,
+        language: AppLanguage
+    ) async throws -> [String: String] {
         let bodyHash = digest(body).base64EncodedString()
         let challenge = try await fetchChallenge(
-            purpose: "assertion", keyID: keyID, bodyHash: bodyHash, baseURL: baseURL
+            purpose: "assertion", keyID: keyID, bodyHash: bodyHash, baseURL: baseURL, language: language
         )
         let clientData = try encoded(ClientData(
             challengeID: challenge.challengeID,
@@ -878,7 +900,13 @@ private actor AppAttestAuthorizer {
         return headers
     }
 
-    private func fetchChallenge(purpose: String, keyID: String, bodyHash: String, baseURL: URL) async throws -> ChallengeResponse {
+    private func fetchChallenge(
+        purpose: String,
+        keyID: String,
+        bodyHash: String,
+        baseURL: URL,
+        language: AppLanguage
+    ) async throws -> ChallengeResponse {
         let body = try encoded(ChallengeRequest(
             installationID: InstallationIdentity.value,
             keyID: keyID,
@@ -888,11 +916,17 @@ private actor AppAttestAuthorizer {
         return try await post(
             body: body,
             to: baseURL.appendingPathComponent("v1/app-attest/challenge"),
-            headers: [:]
+            headers: [:],
+            language: language
         )
     }
 
-    private func post<Response: Decodable>(body: Data, to url: URL, headers: [String: String]) async throws -> Response {
+    private func post<Response: Decodable>(
+        body: Data,
+        to url: URL,
+        headers: [String: String],
+        language: AppLanguage
+    ) async throws -> Response {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.httpBody = body
@@ -904,14 +938,18 @@ private actor AppAttestAuthorizer {
         }
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse else {
-            throw AuthorizationError.invalidResponse
+            throw AuthorizationError.invalidResponse(language)
         }
         guard (200 ..< 300).contains(http.statusCode) else {
             let server = try? JSONDecoder().decode(ServerError.self, from: data)
             throw AuthorizationError.server(
                 status: http.statusCode,
                 code: server?.code,
-                message: server?.error ?? "App verification failed (HTTP \(http.statusCode))."
+                message: server?.error ?? localizedTemplate(
+                    "ai.app-verification-failed-http",
+                    substitutions: ["statusCode": String(http.statusCode)],
+                    language: language
+                )
             )
         }
         let decoder = JSONDecoder()

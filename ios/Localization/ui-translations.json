@@ -1,99 +1,4694 @@
 {
-  "Add": { "es": "Añadir", "fr": "Ajouter" },
-  "Active window": { "es": "Ventana activa", "fr": "Fenêtre active" },
-  "Allow": { "es": "Permitir", "fr": "Autoriser" },
-  "Applying": { "es": "Aplicativo", "fr": "Appliquant" },
-  "Appearance": { "es": "Apariencia", "fr": "Apparence" },
-  "Ask": { "es": "Consultar", "fr": "Question" },
-  "Astrology wheel": { "es": "Rueda astrológica", "fr": "Roue astrologique" },
-  "Ask about one specific outcome.": { "es": "Pregunta por un resultado concreto.", "fr": "Posez une question sur un résultat précis." },
-  "Ask something else": { "es": "Hacer otra pregunta", "fr": "Poser une autre question" },
-  "Aspects": { "es": "Aspectos", "fr": "Aspects" },
-  "Back": { "es": "Atrás", "fr": "Retour" },
-  "Birth": { "es": "Nacimiento", "fr": "Naissance" },
-  "Birth data": { "es": "Datos de nacimiento", "fr": "Données de naissance" },
-  "Birth date & time": { "es": "Fecha y hora de nacimiento", "fr": "Date et heure de naissance" },
-  "Birth details": { "es": "Datos de nacimiento", "fr": "Informations de naissance" },
-  "Birth place": { "es": "Lugar de nacimiento", "fr": "Lieu de naissance" },
-  "Calculating chart locally…": { "es": "Calculando la carta en el dispositivo…", "fr": "Calcul de la carte sur l’appareil…" },
-  "Calculating locally…": { "es": "Calculando en el dispositivo…", "fr": "Calcul sur l’appareil…" },
-  "Cancel": { "es": "Cancelar", "fr": "Annuler" },
-  "Charts": { "es": "Cartas", "fr": "Cartes" },
-  "Choose a location": { "es": "Elige un lugar", "fr": "Choisissez un lieu" },
-  "Choose a saved person": { "es": "Elige una persona guardada", "fr": "Choisissez une personne enregistrée" },
-  "Choose location": { "es": "Elegir lugar", "fr": "Choisir un lieu" },
-  "Classical": { "es": "Clásico", "fr": "Classique" },
-  "Clear": { "es": "Borrar", "fr": "Effacer" },
-  "Close": { "es": "Cerrar", "fr": "Fermer" },
-  "Complete filtered list": { "es": "Lista filtrada completa", "fr": "Liste filtrée complète" },
-  "Current Location": { "es": "Ubicación actual", "fr": "Position actuelle" },
-  "Dark": { "es": "Oscuro", "fr": "Sombre" },
-  "Date & time": { "es": "Fecha y hora", "fr": "Date et heure" },
-  "Delete": { "es": "Eliminar", "fr": "Supprimer" },
-  "Delete person": { "es": "Eliminar persona", "fr": "Supprimer la personne" },
-  "Difference from Active Transits": { "es": "Diferencia con Tránsitos activos", "fr": "Différence avec les transits actifs" },
-  "Direct": { "es": "Directo", "fr": "Direct" },
-  "DISRUPTING": { "es": "RUPTURA", "fr": "RUPTURE" },
-  "Done": { "es": "Listo", "fr": "Terminé" },
-  "Edit birth details": { "es": "Editar datos de nacimiento", "fr": "Modifier les informations de naissance" },
-  "EXPANDING": { "es": "EXPANSIÓN", "fr": "EXPANSION" },
-  "Generate": { "es": "Generar", "fr": "Générer" },
-  "History": { "es": "Historial", "fr": "Historique" },
-  "How it works": { "es": "Cómo funciona", "fr": "Fonctionnement" },
-  "Ingress": { "es": "Ingreso", "fr": "Entrée" },
-  "Language": { "es": "Idioma", "fr": "Langue" },
-  "Light": { "es": "Claro", "fr": "Clair" },
-  "Location": { "es": "Lugar", "fr": "Lieu" },
-  "Modern": { "es": "Moderno", "fr": "Moderne" },
-  "Natal": { "es": "Natal", "fr": "Natal" },
-  "Next": { "es": "Siguiente", "fr": "Suivant" },
-  "No questions yet.": { "es": "Aún no hay preguntas.", "fr": "Aucune question pour le moment." },
-  "No reports yet. Chart reports are generated automatically once available.": { "es": "Aún no hay informes. Se generarán automáticamente cuando estén disponibles.", "fr": "Aucun rapport pour le moment. Ils seront générés automatiquement dès qu’ils seront disponibles." },
-  "Not now": { "es": "Ahora no", "fr": "Pas maintenant" },
-  "Parameters": { "es": "Parámetros", "fr": "Paramètres" },
-  "Person": { "es": "Persona", "fr": "Personne" },
-  "Person details": { "es": "Datos personales", "fr": "Informations personnelles" },
-  "Profile": { "es": "Profil", "fr": "Profil" },
-  "Progressed": { "es": "Progresiones", "fr": "Progressions" },
-  "Range": { "es": "Intervalo", "fr": "Période" },
-  "Report": { "es": "Informe", "fr": "Rapport" },
-  "Reports": { "es": "Informes", "fr": "Rapports" },
-  "Retrograde": { "es": "Retrógrado", "fr": "Rétrograde" },
-  "Returning": { "es": "Retorno", "fr": "Retour exact" },
-  "Save": { "es": "Guardar", "fr": "Enregistrer" },
-  "Saved": { "es": "Guardado", "fr": "Enregistré" },
-  "Search a city or address": { "es": "Buscar una ciudad o dirección", "fr": "Rechercher une ville ou une adresse" },
-  "Separating": { "es": "Separativo", "fr": "Séparant" },
-  "Settings": { "es": "Ajustes", "fr": "Réglages" },
-  "Solar Return": { "es": "Revolución solar", "fr": "Révolution solaire" },
-  "STABILIZING": { "es": "ESTABILIZACIÓN", "fr": "STABILISATION" },
-  "STRUCTURING": { "es": "ESTRUCTURACIÓN", "fr": "STRUCTURATION" },
-  "SUPPORTING": { "es": "APOYO", "fr": "SOUTIEN" },
-  "Technical basis": { "es": "Base técnica", "fr": "Base technique" },
-  "Synastry": { "es": "Sinastría", "fr": "Synastrie" },
-  "System": { "es": "Sistema", "fr": "Système" },
-  "Time zone": { "es": "Zona horaria", "fr": "Fuseau horaire" },
-  "Today": { "es": "Hoy", "fr": "Aujourd’hui" },
-  "Transiting houses & motion": { "es": "Casas en tránsito y movimiento", "fr": "Maisons transitées et mouvement" },
-  "Transits": { "es": "Tránsitos", "fr": "Transits" },
-  "Wheel": { "es": "Rueda", "fr": "Roue" },
-  "Why separate it": { "es": "Por qué se muestra aparte", "fr": "Pourquoi le séparer" },
-  "ai.network-consent.title": { "es": "¿Permitir la generación en línea?", "fr": "Autoriser la génération en ligne ?" },
-  "card.sky-overview.eyebrow": { "es": "CIELO ACTUAL", "fr": "CIEL ACTUEL" },
-  "chart-kind.current-sky.eyebrow": { "es": "CIELO ACTUAL", "fr": "CIEL ACTUEL" },
-  "chart-kind.current-sky.short": { "es": "Cielo", "fr": "Ciel" },
-  "chart.tone.tension": { "es": "Tensión", "fr": "Tension" },
-  "charts.ai.network-consent.title": { "es": "¿Permitir la interpretación en línea?", "fr": "Autoriser l’interprétation en ligne ?" },
-  "charts.event.back-to-now": { "es": "Volver a ahora", "fr": "Revenir à maintenant" },
-  "charts.parameters.back-to-now": { "es": "Volver a ahora", "fr": "Revenir à maintenant" },
-  "charts.parameters.button": { "es": "Parámetros", "fr": "Paramètres" },
-  "charts.parameters.sheet-title": { "es": "Parámetros", "fr": "Paramètres" },
-  "common.details": { "es": "Detalles", "fr": "Détails" },
-  "feedback.details.section": { "es": "Contenido", "fr": "Contenu" },
-  "insight.progressed-moon.fact": { "es": "Luna progresada", "fr": "Lune progressée" },
-  "insight.progressed-moon.title": { "es": "Luna a largo plazo", "fr": "Lune à long terme" },
-  "insight.reviewing.status": { "es": "En revisión", "fr": "En révision" },
-  "today.reviewing.status": { "es": "En revisión", "fr": "En révision" },
-  "today.source.current-sky": { "es": "Cielo actual", "fr": "Ciel actuel" },
-  "today.tone.tension": { "es": "Con tensión", "fr": "Sous tension" }
+  "ai.app-verification-failed-http": {
+    "en": "App verification failed (HTTP {{statusCode}}).",
+    "zh": "App 验证失败（HTTP {{statusCode}}）。",
+    "es": "La verificación de la app falló (HTTP {{statusCode}}).",
+    "fr": "La vérification de l’app a échoué (HTTP {{statusCode}})."
+  },
+  "ai.app-verification-invalid-response": {
+    "en": "Invalid response from the app verification service.",
+    "zh": "App 验证服务返回了无效响应。",
+    "es": "Respuesta no válida del servicio de verificación de la app.",
+    "fr": "Réponse non valide du service de vérification de l’app."
+  },
+  "ai.app-verification-unsupported": {
+    "en": "This device cannot verify the app installation.",
+    "zh": "此设备无法验证 App 安装。",
+    "es": "Este dispositivo no puede verificar la instalación de la app.",
+    "fr": "Cet appareil ne peut pas vérifier l’installation de l’app."
+  },
+  "ai.authorization-failed": {
+    "en": "App verification authorization failed.",
+    "zh": "App 验证授权失败。",
+    "es": "Falló la autorización de verificación de la app.",
+    "fr": "Échec de l’autorisation de vérification de l’app."
+  },
+  "ai.interpretation-invalid-response": {
+    "en": "Invalid response from the interpretation service.",
+    "zh": "解读服务返回了无效响应。",
+    "es": "Respuesta no válida del servicio de interpretación.",
+    "fr": "Réponse non valide du service d’interprétation."
+  },
+  "ai.interpretation-response-unverified": {
+    "en": "The generated report could not be verified. Try again.",
+    "zh": "生成的报告未能通过校验，请重试。",
+    "es": "No se pudo verificar el informe generado. Inténtalo de nuevo.",
+    "fr": "Le rapport généré n’a pas pu être vérifié. Réessayez."
+  },
+  "ai.interpretation-server-http": {
+    "en": "The interpretation service returned HTTP {{statusCode}}.",
+    "zh": "解读服务返回 HTTP {{statusCode}}。",
+    "es": "El servicio de interpretación devolvió HTTP {{statusCode}}.",
+    "fr": "Le service d’interprétation a renvoyé HTTP {{statusCode}}."
+  },
+  "ai.network-consent.chart-message": {
+    "en": "Interstellar sends the selected chart's calculated facts to the configured AI service only after you tap Generate. The relay may keep an encrypted idempotency result for up to 24 hours; your device keeps the long-term report until you delete it in Settings. You can revoke future network generation at any time.",
+    "zh": "只有在你点击生成后，Interstellar 才会把所选星盘的计算事实发送给配置的 AI 服务。中继服务最多保留 24 小时的加密幂等结果；长期报告只保存在本机，直到你在设置中删除。你可以随时撤回后续联网生成授权。",
+    "es": "Interstellar envía los datos calculados de la carta seleccionada al servicio de IA configurado solo después de que pulses Generar. El relay puede conservar un resultado de idempotencia cifrado durante un máximo de 24 horas; tu dispositivo conserva el informe a largo plazo hasta que lo elimines en Ajustes. Puedes revocar en cualquier momento el permiso para futuras generaciones en línea.",
+    "fr": "Interstellar envoie les données calculées de la carte sélectionnée au service d’IA configuré uniquement après que vous avez touché Générer. Le relais peut conserver un résultat d’idempotence chiffré pendant 24 heures au maximum ; votre appareil conserve le rapport à long terme jusqu’à sa suppression dans Réglages. Vous pouvez à tout moment révoquer l’autorisation des futures générations en ligne."
+  },
+  "ai.network-consent.chart-title": {
+    "en": "Allow network generation?",
+    "zh": "允许联网生成？",
+    "es": "¿Permitir la generación en línea?",
+    "fr": "Autoriser la génération en ligne ?"
+  },
+  "ai.network-consent.title": {
+    "en": "Allow network generation?",
+    "zh": "允许联网生成？",
+    "es": "¿Permitir la generación en línea?",
+    "fr": "Autoriser la génération en ligne ?"
+  },
+  "app.interpretation-content-is-incomplete-for-this-chart": {
+    "en": "Interpretation content is incomplete for this chart.",
+    "zh": "当前星盘的解读内容尚未完整加载。",
+    "es": "El contenido de interpretación de esta carta está incompleto.",
+    "fr": "Le contenu d’interprétation de cette carte est incomplet."
+  },
+  "brand.interstellar": {
+    "en": "INTERSTELLAR",
+    "zh": "INTERSTELLAR",
+    "es": "INTERSTELLAR",
+    "fr": "INTERSTELLAR"
+  },
+  "language.english": {
+    "en": "English",
+    "zh": "英语",
+    "es": "Inglés",
+    "fr": "Anglais"
+  },
+  "language.french": {
+    "en": "French",
+    "zh": "法语",
+    "es": "Francés",
+    "fr": "Français"
+  },
+  "language.simplified-chinese": {
+    "en": "Simplified Chinese",
+    "zh": "简体中文",
+    "es": "Chino simplificado",
+    "fr": "Chinois simplifié"
+  },
+  "language.spanish": {
+    "en": "Spanish",
+    "zh": "西班牙语",
+    "es": "Español",
+    "fr": "Espagnol"
+  },
+  "license.gnu-agpl-3-0": {
+    "en": "GNU AGPL 3.0",
+    "zh": "GNU AGPL 3.0",
+    "es": "GNU AGPL 3.0",
+    "fr": "GNU AGPL 3.0"
+  },
+  "license.swiss-ephemeris": {
+    "en": "Swiss Ephemeris",
+    "zh": "Swiss Ephemeris",
+    "es": "Swiss Ephemeris",
+    "fr": "Swiss Ephemeris"
+  },
+  "app.error.local-chart-calculation": {
+    "en": "Local chart calculation failed. Check the birth data and try again.",
+    "zh": "本地星盘计算失败，请检查出生资料后重试。",
+    "es": "El cálculo local de la carta falló. Comprueba los datos de nacimiento e inténtalo de nuevo.",
+    "fr": "Le calcul local de la carte a échoué. Vérifiez les données de naissance et réessayez."
+  },
+  "app.error.selected-event-chart-calculation": {
+    "en": "Unable to calculate the chart for the selected event time.",
+    "zh": "无法计算所选事件时刻的星盘。",
+    "es": "No se pudo calcular la carta para la hora del evento seleccionada.",
+    "fr": "Impossible de calculer la carte pour l’heure de l’événement sélectionnée."
+  },
+  "ask.house-area.1": { "en": "Self & action", "zh": "自我与行动", "es": "Identidad y acción", "fr": "Identité et action" },
+  "ask.house-area.2": { "en": "Money & resources", "zh": "金钱与资源", "es": "Dinero y recursos", "fr": "Argent et ressources" },
+  "ask.house-area.3": { "en": "Learning & short travel", "zh": "学习、沟通与短途旅行", "es": "Aprendizaje y viajes cortos", "fr": "Apprentissage et courts voyages" },
+  "ask.house-area.4": { "en": "Home & family", "zh": "家庭与居所", "es": "Hogar y familia", "fr": "Foyer et famille" },
+  "ask.house-area.5": { "en": "Romance & creativity", "zh": "恋爱、创造与子女", "es": "Romance y creatividad", "fr": "Romance et créativité" },
+  "ask.house-area.6": { "en": "Work, health & routine", "zh": "日常工作、健康与习惯", "es": "Trabajo, salud y rutina", "fr": "Travail, santé et routine" },
+  "ask.house-area.7": { "en": "Partners & agreements", "zh": "伴侣、合作与契约", "es": "Parejas y acuerdos", "fr": "Partenaires et accords" },
+  "ask.house-area.8": { "en": "Shared money & change", "zh": "共同财务与改变", "es": "Dinero compartido y cambios", "fr": "Finances partagées et changement" },
+  "ask.house-area.9": { "en": "Travel & higher learning", "zh": "远行、深造与信念", "es": "Viajes y estudios superiores", "fr": "Voyages et études supérieures" },
+  "ask.house-area.10": { "en": "Career & public role", "zh": "事业与社会位置", "es": "Carrera y papel público", "fr": "Carrière et rôle public" },
+  "ask.house-area.11": { "en": "Friends, community & goals", "zh": "朋友、社群与目标", "es": "Amistades, comunidad y metas", "fr": "Amis, communauté et objectifs" },
+  "ask.house-area.12": { "en": "Rest & private matters", "zh": "休息与隐秘事务", "es": "Descanso y asuntos privados", "fr": "Repos et affaires privées" },
+  "ask.fact.significator-relationship": { "en": "Significator relationship", "zh": "代表星关系", "es": "Relación entre significadores", "fr": "Relation entre significateurs" },
+  "ask.fact.moon-condition": { "en": "Moon condition", "zh": "月亮状态", "es": "Condición de la Luna", "fr": "Condition de la Lune" },
+  "ask.fact.planet-strength": { "en": "Planet strength", "zh": "行星力量", "es": "Fuerza del planeta", "fr": "Force de la planète" },
+  "ask.fact.obstructions": { "en": "Obstructions", "zh": "阻碍", "es": "Obstáculos", "fr": "Obstacles" },
+  "ask.fact.target-ruler-strength": { "en": "Target ruler strength", "zh": "目标主星力量", "es": "Fuerza del regente objetivo", "fr": "Force du maître ciblé" },
+  "ask.fact.ascendant-ruler": { "en": "Ascendant ruler", "zh": "上升主星", "es": "Regente del Ascendente", "fr": "Maître de l’Ascendant" },
+  "ask.fact.benefic-support": { "en": "Benefic support", "zh": "吉星支持", "es": "Apoyo benéfico", "fr": "Soutien bénéfique" },
+  "ask.fact.applying-connection": { "en": "Applying connection", "zh": "入相联系", "es": "Conexión aplicativa", "fr": "Lien appliquant" },
+  "ask.fact.risk": { "en": "Risk", "zh": "风险", "es": "Riesgo", "fr": "Risque" },
+  "ask.add-another-option": {
+    "en": "Add another option",
+    "zh": "增加一个选项",
+    "es": "Añadir otra opción",
+    "fr": "Ajouter une autre option"
+  },
+  "ask.answer": {
+    "en": "Answer",
+    "zh": "结果",
+    "es": "Resultado",
+    "fr": "Résultat"
+  },
+  "ask.ask-about-one-specific-outcome": {
+    "en": "Ask about one specific outcome.",
+    "zh": "询问一个具体结果是否更有可能发生。",
+    "es": "Pregunta por un resultado concreto.",
+    "fr": "Posez une question sur un résultat précis."
+  },
+  "ask.ask-history": {
+    "en": "ASK HISTORY",
+    "zh": "问事历史",
+    "es": "HISTORIAL DE CONSULTAS",
+    "fr": "HISTORIQUE DES QUESTIONS"
+  },
+  "ask.ask-the-chart": {
+    "en": "ASK THE CHART",
+    "zh": "问事盘",
+    "es": "CONSULTAR LA CARTA",
+    "fr": "INTERROGER LA CARTE"
+  },
+  "ask.ask-the-chart.22f1126": {
+    "en": "Ask the chart",
+    "zh": "生成问事盘",
+    "es": "Consultar la carta",
+    "fr": "Interroger la carte"
+  },
+  "ask.best-timing": {
+    "en": "Best timing",
+    "zh": "推荐时间",
+    "es": "Mejor momento",
+    "fr": "Meilleur moment"
+  },
+  "ask.calculating-the-horary-chart": {
+    "en": "Calculating the horary chart…",
+    "zh": "正在计算问事盘…",
+    "es": "Calculando la carta horaria…",
+    "fr": "Calcul de la carte horaire…"
+  },
+  "ask.chart-analysis": {
+    "en": "Chart analysis",
+    "zh": "专业分析",
+    "es": "Análisis de la carta",
+    "fr": "Analyse de la carte"
+  },
+  "ask.chart-moment": {
+    "en": "Chart moment",
+    "zh": "起盘时间",
+    "es": "Momento de la carta",
+    "fr": "Moment de la carte"
+  },
+  "ask.choose-a-location": {
+    "en": "Choose a location",
+    "zh": "选择地点",
+    "es": "Elige un lugar",
+    "fr": "Choisissez un lieu"
+  },
+  "ask.choose-an-area": {
+    "en": "Choose an area",
+    "zh": "选择对应领域",
+    "es": "Elige un ámbito",
+    "fr": "Choisissez un domaine"
+  },
+  "ask.choose-one-path-your-question-is-calculated-privately-on-this-device": {
+    "en": "Choose one path. Your question is calculated privately on this device.",
+    "zh": "选择一种方式，问题会在这台设备上完成计算。",
+    "es": "Elige una opción. Tu pregunta se calcula de forma privada en este dispositivo.",
+    "fr": "Choisissez une option. Votre question est calculée de façon privée sur cet appareil."
+  },
+  "ask.choose-what-matters-how-far-to-search-and-the-precision-you-need": {
+    "en": "Choose what matters, how far to search, and the precision you need.",
+    "zh": "选择目标领域、搜索范围和所需精度。",
+    "es": "Elige qué importa, hasta dónde buscar y la precisión que necesitas.",
+    "fr": "Choisissez ce qui compte, l’étendue de la recherche et la précision souhaitée."
+  },
+  "ask.close-call": {
+    "en": "Close call",
+    "zh": "结果接近",
+    "es": "Resultado muy ajustado",
+    "fr": "Résultat serré"
+  },
+  "ask.compare-two-to-five-real-options": {
+    "en": "Compare two to five real options.",
+    "zh": "比较两个到五个实际选项。",
+    "es": "Compara entre dos y cinco opciones reales.",
+    "fr": "Comparez deux à cinq options réelles."
+  },
+  "ask.connection": {
+    "en": "Connection",
+    "zh": "代表星联系",
+    "es": "Conexión",
+    "fr": "Lien"
+  },
+  "ask.custom": {
+    "en": "Custom",
+    "zh": "自定义",
+    "es": "Personalizado",
+    "fr": "Personnalisé"
+  },
+  "ask.day": {
+    "en": "Day",
+    "zh": "天",
+    "es": "Día",
+    "fr": "Jour"
+  },
+  "ask.end-date": {
+    "en": "End date",
+    "zh": "结束日期",
+    "es": "Fecha de fin",
+    "fr": "Date de fin"
+  },
+  "ask.find-the-best-time": {
+    "en": "Find the Best Time",
+    "zh": "什么时候做最好？",
+    "es": "Encuentra el mejor momento",
+    "fr": "Trouver le meilleur moment"
+  },
+  "ask.find-the-best-time.9e18bc9": {
+    "en": "Find the best time",
+    "zh": "开始择时",
+    "es": "Encontrar el mejor momento",
+    "fr": "Trouver le meilleur moment"
+  },
+  "ask.for-example-will-this-application-move-forward": {
+    "en": "For example: Will this application move forward?",
+    "zh": "例如：这次申请会顺利推进吗？",
+    "es": "Por ejemplo: ¿Seguirá adelante esta solicitud?",
+    "fr": "Par exemple : cette demande va-t-elle avancer ?"
+  },
+  "ask.goal": {
+    "en": "Goal",
+    "zh": "目标",
+    "es": "Objetivo",
+    "fr": "Objectif"
+  },
+  "ask.history": {
+    "en": "History",
+    "zh": "历史",
+    "es": "Historial",
+    "fr": "Historique"
+  },
+  "ask.keep-the-question-specific-and-choose-the-area-it-belongs-to": {
+    "en": "Keep the question specific and choose the area it belongs to.",
+    "zh": "问题尽量具体，并选择它所属的生活领域。",
+    "es": "Formula una pregunta concreta y elige el ámbito al que pertenece.",
+    "fr": "Posez une question précise et choisissez le domaine auquel elle appartient."
+  },
+  "ask.leaning-no": {
+    "en": "Leaning no",
+    "zh": "倾向不行",
+    "es": "Tiende a no",
+    "fr": "Plutôt non"
+  },
+  "ask.leaning-yes": {
+    "en": "Leaning yes",
+    "zh": "倾向可以",
+    "es": "Tiende a sí",
+    "fr": "Plutôt oui"
+  },
+  "ask.life-area": {
+    "en": "Life area",
+    "zh": "生活领域",
+    "es": "Área de vida",
+    "fr": "Domaine de vie"
+  },
+  "ask.likelihood": {
+    "en": "Likelihood",
+    "zh": "可能性",
+    "es": "Probabilidad",
+    "fr": "Probabilité"
+  },
+  "ask.likelihood-and-suitability-describe-support-within-this-chart-model-they": {
+    "en": "Likelihood and suitability describe support within this chart model. They are not statistical probabilities.",
+    "zh": "可能性和适合度表示当前盘面模型中的支持程度，并非统计学概率。",
+    "es": "La probabilidad y la idoneidad describen el grado de apoyo dentro de este modelo de carta. No son probabilidades estadísticas.",
+    "fr": "La probabilité et l’adéquation décrivent le degré de soutien dans ce modèle de carte. Ce ne sont pas des probabilités statistiques."
+  },
+  "ask.likelihood.4683602": {
+    "en": "likelihood",
+    "zh": "可能性",
+    "es": "probabilidad",
+    "fr": "probabilité"
+  },
+  "ask.likely-no": {
+    "en": "Likely no",
+    "zh": "可能性较低",
+    "es": "Probablemente no",
+    "fr": "Probablement non"
+  },
+  "ask.likely-yes": {
+    "en": "Likely yes",
+    "zh": "比较可能",
+    "es": "Probablemente sí",
+    "fr": "Probablement oui"
+  },
+  "ask.local-results-only": {
+    "en": "Local results only",
+    "zh": "仅保存在本机",
+    "es": "Solo resultados locales",
+    "fr": "Résultats locaux uniquement"
+  },
+  "ask.location": {
+    "en": "Location",
+    "zh": "地点",
+    "es": "Lugar",
+    "fr": "Lieu"
+  },
+  "ask.month": {
+    "en": "Month",
+    "zh": "月",
+    "es": "Mes",
+    "fr": "Mois"
+  },
+  "ask.mutual-reception": {
+    "en": "Mutual reception",
+    "zh": "互相接纳",
+    "es": "Recepción mutua",
+    "fr": "Réception mutuelle"
+  },
+  "ask.name-each-option": {
+    "en": "Name each option",
+    "zh": "填写每个选项",
+    "es": "Nombra cada opción",
+    "fr": "Nommez chaque option"
+  },
+  "ask.name-the-real-options-and-give-each-one-a-different-area": {
+    "en": "Name the real options and give each one a different area.",
+    "zh": "填写真实选项，并为每项选择不同的对应领域。",
+    "es": "Nombra las opciones reales y asigna a cada una un ámbito diferente.",
+    "fr": "Nommez les options réelles et attribuez à chacune un domaine différent."
+  },
+  "ask.no-clear-option": {
+    "en": "No clear option",
+    "zh": "暂无明确选项",
+    "es": "Ninguna opción clara",
+    "fr": "Aucune option claire"
+  },
+  "ask.no-major-aspect-in-orb": {
+    "en": "No major aspect in orb",
+    "zh": "容许度内没有主要相位",
+    "es": "Ningún aspecto mayor dentro del orbe",
+    "fr": "Aucun aspect majeur dans l’orbe"
+  },
+  "ask.no-major-reception": {
+    "en": "No major reception",
+    "zh": "没有主要接纳",
+    "es": "Ninguna recepción mayor",
+    "fr": "Aucune réception majeure"
+  },
+  "ask.no-next-major-aspect": {
+    "en": "No next major aspect",
+    "zh": "没有后续主要相位",
+    "es": "Ningún aspecto mayor siguiente",
+    "fr": "Aucun prochain aspect majeur"
+  },
+  "ask.no-questions-yet": {
+    "en": "No questions yet.",
+    "zh": "还没有问过问题。",
+    "es": "Aún no hay preguntas.",
+    "fr": "Aucune question pour le moment."
+  },
+  "ask.no-saved-questions-yet": {
+    "en": "No saved questions yet",
+    "zh": "还没有保存的问题",
+    "es": "Aún no hay preguntas guardadas",
+    "fr": "Aucune question enregistrée pour le moment"
+  },
+  "ask.no-timing-found": {
+    "en": "No timing found",
+    "zh": "暂无推荐时间",
+    "es": "No se encontró un momento recomendado",
+    "fr": "Aucun moment recommandé trouvé"
+  },
+  "ask.one-way-reception": {
+    "en": "One-way reception",
+    "zh": "单向接纳",
+    "es": "Recepción unilateral",
+    "fr": "Réception à sens unique"
+  },
+  "ask.option": {
+    "en": "Option",
+    "zh": "选项",
+    "es": "Opción",
+    "fr": "Option"
+  },
+  "ask.option-ranking": {
+    "en": "Option ranking",
+    "zh": "选项排名",
+    "es": "Clasificación de opciones",
+    "fr": "Classement des options"
+  },
+  "ask.optional-description": {
+    "en": "Optional description",
+    "zh": "行动名称（可选）",
+    "es": "Descripción opcional",
+    "fr": "Description facultative"
+  },
+  "ask.peak": {
+    "en": "Peak: ",
+    "zh": "峰值日：",
+    "es": "Pico: ",
+    "fr": "Pic : "
+  },
+  "ask.precision": {
+    "en": "Precision",
+    "zh": "精度",
+    "es": "Precisión",
+    "fr": "Précision"
+  },
+  "ask.querent-ruler": {
+    "en": "Querent ruler",
+    "zh": "提问者主星",
+    "es": "Regente del consultante",
+    "fr": "Maître du consultant"
+  },
+  "ask.reception": {
+    "en": "Reception",
+    "zh": "接纳",
+    "es": "Recepción",
+    "fr": "Réception"
+  },
+  "ask.recommended-window": {
+    "en": "Recommended window",
+    "zh": "推荐窗口",
+    "es": "Ventana recomendada",
+    "fr": "Fenêtre recommandée"
+  },
+  "ask.result": {
+    "en": "Result",
+    "zh": "结果",
+    "es": "Resultado",
+    "fr": "Résultat"
+  },
+  "ask.result-explanations-are-unavailable": {
+    "en": "Result explanations are unavailable.",
+    "zh": "结果解读内容暂不可用。",
+    "es": "Las explicaciones del resultado no están disponibles.",
+    "fr": "Les explications du résultat ne sont pas disponibles."
+  },
+  "ask.search-by-day-week-or-month": {
+    "en": "Search by day, week, or month.",
+    "zh": "按天、周或月寻找更合适的行动时间。",
+    "es": "Busca por día, semana o mes.",
+    "fr": "Recherchez par jour, semaine ou mois."
+  },
+  "ask.search-range": {
+    "en": "Search range",
+    "zh": "搜索范围",
+    "es": "Rango de búsqueda",
+    "fr": "Période de recherche"
+  },
+  "ask.search-starts": {
+    "en": "Search starts",
+    "zh": "搜索开始时间",
+    "es": "Inicio de la búsqueda",
+    "fr": "Début de la recherche"
+  },
+  "ask.search-within": {
+    "en": "Search within",
+    "zh": "搜索范围",
+    "es": "Buscar dentro de",
+    "fr": "Rechercher sur"
+  },
+  "ask.searching-the-selected-range": {
+    "en": "Searching the selected range…",
+    "zh": "正在扫描所选时间范围…",
+    "es": "Buscando en el rango seleccionado…",
+    "fr": "Recherche dans la période sélectionnée…"
+  },
+  "ask.still-unclear": {
+    "en": "Still unclear",
+    "zh": "尚不明确",
+    "es": "Aún no está claro",
+    "fr": "Toujours incertain"
+  },
+  "ask.suitable": {
+    "en": "Suitable",
+    "zh": "适合度",
+    "es": "Idoneidad",
+    "fr": "Adéquation"
+  },
+  "ask.target-ruler": {
+    "en": "Target ruler",
+    "zh": "目标主星",
+    "es": "Regente del objetivo",
+    "fr": "Maître de la cible"
+  },
+  "ask.the-chart-could-not-be-calculated-check-the-time-and-location-then-try-a": {
+    "en": "The chart could not be calculated. Check the time and location, then try again.",
+    "zh": "暂时无法完成计算，请检查时间和地点后重试。",
+    "es": "No se pudo calcular la carta. Comprueba la hora y el lugar e inténtalo de nuevo.",
+    "fr": "La carte n’a pas pu être calculée. Vérifiez l’heure et le lieu, puis réessayez."
+  },
+  "ask.total": {
+    "en": "Total",
+    "zh": "总分",
+    "es": "Total",
+    "fr": "Total"
+  },
+  "ask.very-likely": {
+    "en": "Very likely",
+    "zh": "很可能",
+    "es": "Muy probable",
+    "fr": "Très probable"
+  },
+  "ask.very-unlikely": {
+    "en": "Very unlikely",
+    "zh": "很不可能",
+    "es": "Muy improbable",
+    "fr": "Très improbable"
+  },
+  "ask.view-chart-analysis": {
+    "en": "View chart analysis",
+    "zh": "查看专业分析",
+    "es": "Ver análisis de la carta",
+    "fr": "Voir l’analyse de la carte"
+  },
+  "ask.void-of-course": {
+    "en": "Void of course",
+    "zh": "空亡",
+    "es": "Vacía de curso",
+    "fr": "Vide de course"
+  },
+  "ask.week": {
+    "en": "Week",
+    "zh": "周",
+    "es": "Semana",
+    "fr": "Semaine"
+  },
+  "ask.what-are-you-planning": {
+    "en": "What are you planning?",
+    "zh": "你准备做什么？",
+    "es": "¿Qué estás planeando?",
+    "fr": "Que prévoyez-vous ?"
+  },
+  "ask.what-do-you-want-to-ask": {
+    "en": "What do you want to ask?",
+    "zh": "你想问什么？",
+    "es": "¿Qué quieres preguntar?",
+    "fr": "Que voulez-vous demander ?"
+  },
+  "ask.what-is-this-option": {
+    "en": "What is this option?",
+    "zh": "这个选项是什么？",
+    "es": "¿Qué es esta opción?",
+    "fr": "Qu’est-ce que cette option ?"
+  },
+  "ask.which-one": {
+    "en": "Which One?",
+    "zh": "选哪个？",
+    "es": "¿Cuál?",
+    "fr": "Laquelle ?"
+  },
+  "ask.will-it-happen": {
+    "en": "Will It Happen?",
+    "zh": "会发生吗？",
+    "es": "¿Sucederá?",
+    "fr": "Cela va-t-il arriver ?"
+  },
+  "ask.you": {
+    "en": "You",
+    "zh": "你",
+    "es": "Tú",
+    "fr": "Vous"
+  },
+  "ask.your-answer": {
+    "en": "Your answer",
+    "zh": "问事结果",
+    "es": "Tu resultado",
+    "fr": "Votre résultat"
+  },
+  "ask.your-question": {
+    "en": "Your question",
+    "zh": "你的问题",
+    "es": "Tu pregunta",
+    "fr": "Votre question"
+  },
+  "card.sky-overview.eyebrow": {
+    "en": "SKY NOW",
+    "zh": "当前天空",
+    "es": "CIELO ACTUAL",
+    "fr": "CIEL ACTUEL"
+  },
+  "chart-kind.current-sky.eyebrow": {
+    "en": "SKY NOW",
+    "zh": "当前天象",
+    "es": "CIELO ACTUAL",
+    "fr": "CIEL ACTUEL"
+  },
+  "chart-kind.current-sky.short": {
+    "en": "Current Sky",
+    "zh": "天象",
+    "es": "Cielo",
+    "fr": "Ciel"
+  },
+  "chart.aspect-matrix": {
+    "en": "Aspect matrix",
+    "zh": "相位矩阵",
+    "es": "Matriz de aspectos",
+    "fr": "Matrice des aspects"
+  },
+  "chart.astrology-wheel": {
+    "en": "Astrology wheel",
+    "zh": "星盘轮盘",
+    "es": "Rueda astrológica",
+    "fr": "Roue astrologique"
+  },
+  "chart.change": {
+    "en": "Change",
+    "zh": "转换",
+    "es": "Cambio",
+    "fr": "Changement"
+  },
+  "chart.double-astrology-wheel": {
+    "en": "Double astrology wheel",
+    "zh": "双层星盘轮盘",
+    "es": "Rueda astrológica doble",
+    "fr": "Roue astrologique double"
+  },
+  "chart.flow": {
+    "en": "Flow",
+    "zh": "顺畅",
+    "es": "Fluidez",
+    "fr": "Fluidité"
+  },
+  "chart.retrograde-marker": { "en": " R", "zh": "逆", "es": " R", "fr": " R" },
+  "chart.lower-triangle": {
+    "en": "Lower triangle",
+    "zh": "下三角矩阵",
+    "es": "Triángulo inferior",
+    "fr": "Triangle inférieur"
+  },
+  "chart.midheaven": {
+    "en": "Midheaven",
+    "zh": "天顶",
+    "es": "Medio Cielo",
+    "fr": "Milieu du Ciel"
+  },
+  "chart.moving-natal": {
+    "en": "Moving × Natal",
+    "zh": "移动点 × 本命点",
+    "es": "Móvil × Natal",
+    "fr": "Mobile × Natal"
+  },
+  "chart.nadir": {
+    "en": "Nadir",
+    "zh": "天底",
+    "es": "Fondo del Cielo",
+    "fr": "Fond du Ciel"
+  },
+  "chart.orb": {
+    "en": "Orb",
+    "zh": "容许度",
+    "es": "Orbe",
+    "fr": "Orbe"
+  },
+  "chart.rising": {
+    "en": "Rising",
+    "zh": "上升",
+    "es": "Ascendente",
+    "fr": "Ascendant"
+  },
+  "chart.rows-move": {
+    "en": "Rows move",
+    "zh": "纵轴为移动点",
+    "es": "Las filas se mueven",
+    "fr": "Les lignes sont mobiles"
+  },
+  "chart.setting": {
+    "en": "Setting",
+    "zh": "下降",
+    "es": "Descendente",
+    "fr": "Descendant"
+  },
+  "chart.single-chart-aspects": {
+    "en": "Single-chart aspects",
+    "zh": "单盘相位",
+    "es": "Aspectos de una sola carta",
+    "fr": "Aspects d’une seule carte"
+  },
+  "chart.tone.tension": {
+    "en": "Tension",
+    "zh": "张力",
+    "es": "Tensión",
+    "fr": "Tension"
+  },
+  "charts.12-months": {
+    "en": "12 months",
+    "zh": "12 个月",
+    "es": "12 meses",
+    "fr": "12 mois"
+  },
+  "charts.30-days": {
+    "en": "30 days",
+    "zh": "30 天",
+    "es": "30 días",
+    "fr": "30 jours"
+  },
+  "charts.7-days": {
+    "en": "7 days",
+    "zh": "7 天",
+    "es": "7 días",
+    "fr": "7 jours"
+  },
+  "charts.active-transits": {
+    "en": "Active Transits",
+    "zh": "进行中的行运",
+    "es": "Tránsitos activos",
+    "fr": "Transits actifs"
+  },
+  "charts.activity-not-fortune": {
+    "en": "Activity, not fortune",
+    "zh": "活跃度，不是运气",
+    "es": "Actividad, no fortuna",
+    "fr": "Activité, pas chance"
+  },
+  "charts.add-person-in-profile": {
+    "en": "Add person in Profile",
+    "zh": "去个人资料添加人物",
+    "es": "Añadir persona en Perfil",
+    "fr": "Ajouter une personne dans Profil"
+  },
+  "charts.allow": {
+    "en": "Allow",
+    "zh": "允许",
+    "es": "Permitir",
+    "fr": "Autoriser"
+  },
+  "charts.aspects": {
+    "en": "Aspects",
+    "zh": "相位矩阵",
+    "es": "Aspectos",
+    "fr": "Aspects"
+  },
+  "charts.back-to-today": {
+    "en": "Back to today",
+    "zh": "回到今天",
+    "es": "Volver a hoy",
+    "fr": "Revenir à aujourd’hui"
+  },
+  "charts.birth-data": {
+    "en": "Birth data",
+    "zh": "出生资料",
+    "es": "Datos de nacimiento",
+    "fr": "Données de naissance"
+  },
+  "charts.calculating-chart-locally": {
+    "en": "Calculating chart locally…",
+    "zh": "正在本机计算星盘…",
+    "es": "Calculando la carta en el dispositivo…",
+    "fr": "Calcul de la carte sur l’appareil…"
+  },
+  "charts.calculating-the-relationship-locally": {
+    "en": "Calculating the relationship locally…",
+    "zh": "正在本机计算双方合盘…",
+    "es": "Calculando la relación en el dispositivo…",
+    "fr": "Calcul de la relation sur l’appareil…"
+  },
+  "charts.chart-parameters": {
+    "en": "Chart parameters",
+    "zh": "星盘参数",
+    "es": "Parámetros de la carta",
+    "fr": "Paramètres de la carte"
+  },
+  "charts.charts": {
+    "en": "Charts",
+    "zh": "星盘",
+    "es": "Cartas",
+    "fr": "Cartes"
+  },
+  "charts.choose-the-other-person-to-calculate-this-synastry-chart": {
+    "en": "Choose the other person to calculate this Synastry chart.",
+    "zh": "请选择另一位人物以计算合盘。",
+    "es": "Elige a la otra persona para calcular esta carta de sinastría.",
+    "fr": "Choisissez l’autre personne pour calculer cette carte de synastrie."
+  },
+  "charts.choose-the-pair-on-the-synastry-page": {
+    "en": "Choose the pair on the Synastry page",
+    "zh": "请在合盘页面选择双方",
+    "es": "Elige la pareja en la página de Sinastría",
+    "fr": "Choisissez le duo sur la page Synastrie"
+  },
+  "charts.complete-filtered-list": {
+    "en": "Complete filtered list",
+    "zh": "完整筛选列表",
+    "es": "Lista filtrada completa",
+    "fr": "Liste filtrée complète"
+  },
+  "charts.current-cycles": {
+    "en": "Current Cycles",
+    "zh": "当前周期",
+    "es": "Ciclos actuales",
+    "fr": "Cycles actuels"
+  },
+  "charts.current-return-year": {
+    "en": "Current return year",
+    "zh": "当前日返年度",
+    "es": "Año de retorno actual",
+    "fr": "Année de retour actuelle"
+  },
+  "charts.current-sky-compared-with-the-natal-chart": {
+    "en": "Current sky compared with the natal chart",
+    "zh": "当前天空与本命盘的比较",
+    "es": "Cielo actual comparado con la carta natal",
+    "fr": "Ciel actuel comparé à la carte natale"
+  },
+  "charts.current-story": {
+    "en": "Current Story",
+    "zh": "当前主线",
+    "es": "Historia actual",
+    "fr": "Thème actuel"
+  },
+  "charts.date-time": {
+    "en": "Date & time",
+    "zh": "日期与时间",
+    "es": "Fecha y hora",
+    "fr": "Date et heure"
+  },
+  "charts.day-for-a-year-secondary-progressions": {
+    "en": "Day-for-a-year secondary progressions",
+    "zh": "一日一年法次限推运",
+    "es": "Progresiones secundarias de un día por año",
+    "fr": "Progressions secondaires d’un jour par an"
+  },
+  "charts.done": {
+    "en": "Done",
+    "zh": "完成",
+    "es": "Listo",
+    "fr": "Terminé"
+  },
+  "charts.event-time-chart": {
+    "en": "Event-time chart",
+    "zh": "事件时刻星盘",
+    "es": "Carta del momento del evento",
+    "fr": "Carte du moment de l’événement"
+  },
+  "charts.event.back-to-now": {
+    "en": "Back to now",
+    "zh": "返回现在",
+    "es": "Volver a ahora",
+    "fr": "Revenir à maintenant"
+  },
+  "charts.how-ideas-are-exchanged": {
+    "en": "How ideas are exchanged",
+    "zh": "想法如何交流",
+    "es": "Cómo se intercambian las ideas",
+    "fr": "Comment les idées s’échangent"
+  },
+  "charts.how-the-strongest-cycles-combine": {
+    "en": "How the strongest cycles combine",
+    "zh": "最强周期如何共同作用",
+    "es": "Cómo se combinan los ciclos más fuertes",
+    "fr": "Comment les cycles les plus forts se combinent"
+  },
+  "charts.how-two-charts-affect-each-other": {
+    "en": "How two charts affect each other",
+    "zh": "两张星盘如何彼此影响",
+    "es": "Cómo se afectan dos cartas entre sí",
+    "fr": "Comment deux cartes s’influencent"
+  },
+  "charts.how-two-natal-charts-meet": {
+    "en": "How two natal charts meet",
+    "zh": "两张本命盘如何相遇",
+    "es": "Cómo se encuentran dos cartas natales",
+    "fr": "Comment deux cartes natales se rencontrent"
+  },
+  "charts.life-areas": {
+    "en": "Life Areas",
+    "zh": "生活领域",
+    "es": "Áreas de vida",
+    "fr": "Domaines de vie"
+  },
+  "charts.live-sky-at-the-saved-location": {
+    "en": "Live sky at the saved location",
+    "zh": "保存地点的当前天空",
+    "es": "Cielo en tiempo real en la ubicación guardada",
+    "fr": "Ciel en direct à l’emplacement enregistré"
+  },
+  "charts.moon-contacts-and-emotional-house-overlays": {
+    "en": "Moon contacts and emotional house overlays",
+    "zh": "月亮联系与情感落宫",
+    "es": "Contactos lunares y superposiciones emocionales de casas",
+    "fr": "Contacts lunaires et superpositions émotionnelles de maisons"
+  },
+  "charts.not-now": {
+    "en": "Not now",
+    "zh": "暂不",
+    "es": "Ahora no",
+    "fr": "Pas maintenant"
+  },
+  "charts.one-theme-per-time-scale": {
+    "en": "One theme per time scale",
+    "zh": "每个时间尺度一个主题",
+    "es": "Un tema por escala temporal",
+    "fr": "Un thème par échelle de temps"
+  },
+  "charts.parameters.back-to-now": {
+    "en": "Back to now",
+    "zh": "回到现在",
+    "es": "Volver a ahora",
+    "fr": "Revenir à maintenant"
+  },
+  "charts.parameters.button": {
+    "en": "Parameters",
+    "zh": "参数",
+    "es": "Parámetros",
+    "fr": "Paramètres"
+  },
+  "charts.parameters.sheet-title": {
+    "en": "Parameters",
+    "zh": "参数设置",
+    "es": "Parámetros",
+    "fr": "Paramètres"
+  },
+  "charts.people": {
+    "en": "People",
+    "zh": "人物",
+    "es": "Personas",
+    "fr": "Personnes"
+  },
+  "charts.person": {
+    "en": "Person",
+    "zh": "人物",
+    "es": "Persona",
+    "fr": "Personne"
+  },
+  "charts.planet-paths": {
+    "en": "Planet Paths",
+    "zh": "行星路径",
+    "es": "Trayectorias planetarias",
+    "fr": "Trajectoires planétaires"
+  },
+  "charts.preset": {
+    "en": "Preset",
+    "zh": "参数预设",
+    "es": "Preajuste",
+    "fr": "Préréglage"
+  },
+  "charts.range": {
+    "en": "Range",
+    "zh": "范围",
+    "es": "Intervalo",
+    "fr": "Période"
+  },
+  "charts.reference-location": {
+    "en": "Reference location",
+    "zh": "参考地点",
+    "es": "Ubicación de referencia",
+    "fr": "Lieu de référence"
+  },
+  "charts.reports": {
+    "en": "Reports",
+    "zh": "报告",
+    "es": "Informes",
+    "fr": "Rapports"
+  },
+  "charts.return-year": {
+    "en": "Return year",
+    "zh": "日返年度",
+    "es": "Año de retorno",
+    "fr": "Année de retour"
+  },
+  "charts.saturn-jupiter-and-angle-contacts": {
+    "en": "Saturn, Jupiter and angle contacts",
+    "zh": "土星、木星与长期结构",
+    "es": "Contactos de Saturno, Júpiter y los ángulos",
+    "fr": "Contacts de Saturne, Jupiter et des angles"
+  },
+  "charts.secondary-progressions-use-the-birth-place-and-do-not-relocate-in-this-v": {
+    "en": "Secondary progressions use the birth place and do not relocate in this version.",
+    "zh": "本版次限盘沿用出生地点，不提供独立迁移地点。",
+    "es": "Las progresiones secundarias usan el lugar de nacimiento y no se relocalizan en esta versión.",
+    "fr": "Les progressions secondaires utilisent le lieu de naissance et ne sont pas relocalisées dans cette version."
+  },
+  "charts.select": {
+    "en": "Select",
+    "zh": "选择",
+    "es": "Seleccionar",
+    "fr": "Sélectionner"
+  },
+  "charts.sorted-by-relevance-not-positivity": {
+    "en": "Sorted by relevance, not positivity",
+    "zh": "按相关性排序，而非按正负排序",
+    "es": "Ordenado por relevancia, no por positividad",
+    "fr": "Trié par pertinence, pas par positivité"
+  },
+  "charts.start-exact-return-end": {
+    "en": "Start · Exact · Return · End",
+    "zh": "开始 · 精确 · 回返 · 结束",
+    "es": "Inicio · Exacto · Retorno · Fin",
+    "fr": "Début · Exact · Retour · Fin"
+  },
+  "charts.synastry.chemistry-subtitle.classical": {
+    "en": "Venus and Mars contacts",
+    "zh": "金星、火星与吸引结构",
+    "es": "Contactos de Venus y Marte",
+    "fr": "Contacts de Vénus et Mars"
+  },
+  "charts.synastry.chemistry-subtitle.modern": {
+    "en": "Venus, Mars and Pluto contacts",
+    "zh": "金星、火星与吸引结构",
+    "es": "Contactos de Venus, Marte y Plutón",
+    "fr": "Contacts de Vénus, Mars et Pluton"
+  },
+  "charts.target-date": {
+    "en": "Target date",
+    "zh": "目标日期",
+    "es": "Fecha objetivo",
+    "fr": "Date cible"
+  },
+  "charts.target-time": {
+    "en": "Target time",
+    "zh": "目标时间",
+    "es": "Hora objetivo",
+    "fr": "Heure cible"
+  },
+  "charts.the-year-that-begins-at-your-next-solar-return": {
+    "en": "The year that begins at your next solar return",
+    "zh": "下一个日返时刻开启的年度盘",
+    "es": "El año que comienza en tu próximo retorno solar",
+    "fr": "L’année qui commence à votre prochain retour solaire"
+  },
+  "charts.transit-timeline": {
+    "en": "Transit Timeline",
+    "zh": "行运时间线",
+    "es": "Cronología de tránsitos",
+    "fr": "Chronologie des transits"
+  },
+  "charts.two-directions-not-one-shared-score": {
+    "en": "Two directions, not one shared score",
+    "zh": "两个方向，而非一个共同评分",
+    "es": "Dos direcciones, no una puntuación compartida",
+    "fr": "Deux directions, pas un score commun"
+  },
+  "charts.use-current-defaults": {
+    "en": "Use current defaults",
+    "zh": "恢复当前默认值",
+    "es": "Usar valores predeterminados actuales",
+    "fr": "Utiliser les valeurs actuelles par défaut"
+  },
+  "charts.wheel": {
+    "en": "Wheel",
+    "zh": "轮盘",
+    "es": "Rueda",
+    "fr": "Roue"
+  },
+  "charts.where-each-person-lands-in-the-others-life": {
+    "en": "Where each person lands in the other’s life",
+    "zh": "彼此进入对方生活的领域",
+    "es": "Dónde cae cada persona en la vida de la otra",
+    "fr": "Où chacun se place dans la vie de l’autre"
+  },
+  "charts.where-the-current-planets-are-moving": {
+    "en": "Where the current planets are moving",
+    "zh": "当前行星正在经过哪里",
+    "es": "Por dónde se mueven los planetas actuales",
+    "fr": "Où se déplacent les planètes actuelles"
+  },
+  "common.details": {
+    "en": "Details",
+    "zh": "详情",
+    "es": "Detalles",
+    "fr": "Détails"
+  },
+  "consumer.body-theme.sun": { "en": "self-direction", "zh": "自我方向", "es": "dirección personal", "fr": "orientation personnelle" },
+  "consumer.body-theme.moon": { "en": "emotional needs", "zh": "情绪需要", "es": "necesidades emocionales", "fr": "besoins émotionnels" },
+  "consumer.body-theme.mercury": { "en": "thinking and communication", "zh": "思考与沟通", "es": "pensamiento y comunicación", "fr": "réflexion et communication" },
+  "consumer.body-theme.venus": { "en": "closeness and values", "zh": "亲密感与价值选择", "es": "cercanía y valores", "fr": "proximité et valeurs" },
+  "consumer.body-theme.mars": { "en": "drive and boundaries", "zh": "行动力与边界", "es": "impulso y límites", "fr": "élan et limites" },
+  "consumer.body-theme.jupiter": { "en": "growth and confidence", "zh": "成长与信心", "es": "crecimiento y confianza", "fr": "croissance et confiance" },
+  "consumer.body-theme.saturn": { "en": "responsibility and limits", "zh": "责任与限制", "es": "responsabilidad y límites", "fr": "responsabilité et limites" },
+  "consumer.body-theme.uranus": { "en": "freedom and change", "zh": "自由与改变", "es": "libertad y cambio", "fr": "liberté et changement" },
+  "consumer.body-theme.neptune": { "en": "imagination and sensitivity", "zh": "想象力与敏感度", "es": "imaginación y sensibilidad", "fr": "imagination et sensibilité" },
+  "consumer.body-theme.pluto": { "en": "control and renewal", "zh": "掌控感与更新", "es": "control y renovación", "fr": "contrôle et renouveau" },
+  "consumer.body-theme.true-node": { "en": "future direction", "zh": "未来方向", "es": "dirección futura", "fr": "orientation future" },
+  "consumer.life-area.1": { "en": "identity and first impressions", "zh": "自我表达与第一印象", "es": "identidad y primeras impresiones", "fr": "identité et premières impressions" },
+  "consumer.life-area.2": { "en": "money and personal resources", "zh": "金钱与个人资源", "es": "dinero y recursos personales", "fr": "argent et ressources personnelles" },
+  "consumer.life-area.3": { "en": "learning and communication", "zh": "学习与沟通", "es": "aprendizaje y comunicación", "fr": "apprentissage et communication" },
+  "consumer.life-area.4": { "en": "home and emotional security", "zh": "家庭与安全感", "es": "hogar y seguridad emocional", "fr": "foyer et sécurité émotionnelle" },
+  "consumer.life-area.5": { "en": "creativity and romance", "zh": "创造力与恋爱", "es": "creatividad y romance", "fr": "créativité et romance" },
+  "consumer.life-area.6": { "en": "work, habits, and health", "zh": "工作、习惯与健康", "es": "trabajo, hábitos y salud", "fr": "travail, habitudes et santé" },
+  "consumer.life-area.7": { "en": "close relationships", "zh": "亲密关系与合作", "es": "relaciones cercanas", "fr": "relations proches" },
+  "consumer.life-area.8": { "en": "trust and shared resources", "zh": "信任与共同资源", "es": "confianza y recursos compartidos", "fr": "confiance et ressources partagées" },
+  "consumer.life-area.9": { "en": "beliefs and exploration", "zh": "信念、学习与远行", "es": "creencias y exploración", "fr": "croyances et exploration" },
+  "consumer.life-area.10": { "en": "career and public role", "zh": "事业与社会角色", "es": "carrera y papel público", "fr": "carrière et rôle public" },
+  "consumer.life-area.11": { "en": "friends and long-term goals", "zh": "朋友与长期目标", "es": "amistades y metas a largo plazo", "fr": "amis et objectifs à long terme" },
+  "consumer.life-area.12": { "en": "rest and inner life", "zh": "休息与内在感受", "es": "descanso y vida interior", "fr": "repos et vie intérieure" },
+  "consumer.style.aries": { "en": "direct and decisive", "zh": "直接果断", "es": "directo y decidido", "fr": "direct et décidé" },
+  "consumer.style.taurus": { "en": "steady and practical", "zh": "稳定务实", "es": "constante y práctico", "fr": "stable et pragmatique" },
+  "consumer.style.gemini": { "en": "curious and flexible", "zh": "好奇灵活", "es": "curioso y flexible", "fr": "curieux et flexible" },
+  "consumer.style.cancer": { "en": "protective and intuitive", "zh": "重视保护与感受", "es": "protector e intuitivo", "fr": "protecteur et intuitif" },
+  "consumer.style.leo": { "en": "expressive and warm", "zh": "热情且愿意表达", "es": "expresivo y cálido", "fr": "expressif et chaleureux" },
+  "consumer.style.virgo": { "en": "careful and precise", "zh": "谨慎细致", "es": "cuidadoso y preciso", "fr": "soigneux et précis" },
+  "consumer.style.libra": { "en": "cooperative and balanced", "zh": "重视合作与平衡", "es": "cooperativo y equilibrado", "fr": "coopératif et équilibré" },
+  "consumer.style.scorpio": { "en": "private and intense", "zh": "深入而有分寸", "es": "reservado e intenso", "fr": "réservé et intense" },
+  "consumer.style.sagittarius": { "en": "open and exploratory", "zh": "开放且愿意探索", "es": "abierto y explorador", "fr": "ouvert et explorateur" },
+  "consumer.style.capricorn": { "en": "disciplined and deliberate", "zh": "自律而审慎", "es": "disciplinado y deliberado", "fr": "discipliné et réfléchi" },
+  "consumer.style.aquarius": { "en": "independent and original", "zh": "独立且有新意", "es": "independiente y original", "fr": "indépendant et original" },
+  "consumer.style.pisces": { "en": "sensitive and imaginative", "zh": "敏感而富有想象力", "es": "sensible e imaginativo", "fr": "sensible et imaginatif" },
+  "consumer.a-beginning-and-building-stage": {
+    "en": "a beginning-and-building stage",
+    "zh": "开始并逐步积累的阶段",
+    "es": "una etapa de inicio y construcción",
+    "fr": "une phase de démarrage et de construction"
+  },
+  "consumer.a-completion-and-reset-stage": {
+    "en": "a completion-and-reset stage",
+    "zh": "收尾并准备更新的阶段",
+    "es": "una etapa de cierre y reinicio",
+    "fr": "une phase d’achèvement et de renouveau"
+  },
+  "consumer.a-review-and-adjust-period": {
+    "en": "A review-and-adjust period",
+    "zh": "适合回顾和调整",
+    "es": "Un período de revisión y ajuste",
+    "fr": "Une période de révision et d’ajustement"
+  },
+  "consumer.a-visibility-and-review-stage": {
+    "en": "a visibility-and-review stage",
+    "zh": "成果显现并重新评估的阶段",
+    "es": "una etapa de visibilidad y revisión",
+    "fr": "une phase de visibilité et de réévaluation"
+  },
+  "consumer.an-active-development-stage": {
+    "en": "an active development stage",
+    "zh": "主动推进和发展的阶段",
+    "es": "una etapa de desarrollo activo",
+    "fr": "une phase de développement actif"
+  },
+  "consumer.an-important-need": {
+    "en": "an important need",
+    "zh": "一项重要需要",
+    "es": "una necesidad importante",
+    "fr": "un besoin important"
+  },
+  "consumer.become-active-together": {
+    "en": "become active together",
+    "zh": "同时变得活跃",
+    "es": "se activan a la vez",
+    "fr": "deviennent actifs ensemble"
+  },
+  "consumer.everyday-choices": {
+    "en": "everyday choices",
+    "zh": "日常选择",
+    "es": "decisiones cotidianas",
+    "fr": "choix du quotidien"
+  },
+  "consumer.moving-forward-steadily": {
+    "en": "Moving forward steadily",
+    "zh": "正在稳定向前推进",
+    "es": "Avanzando con constancia",
+    "fr": "Progression régulière"
+  },
+  "consumer.need-active-balancing": {
+    "en": "need active balancing",
+    "zh": "需要主动协调",
+    "es": "necesitan un equilibrio activo",
+    "fr": "nécessitent un équilibre actif"
+  },
+  "consumer.noticeable": {
+    "en": "noticeable",
+    "zh": "比较明显",
+    "es": "perceptible",
+    "fr": "perceptible"
+  },
+  "consumer.subtle-but-present": {
+    "en": "subtle but present",
+    "zh": "较轻但仍可感受到",
+    "es": "sutil pero presente",
+    "fr": "subtil mais présent"
+  },
+  "consumer.the-influence-is-building": {
+    "en": "The influence is building",
+    "zh": "影响正在增强",
+    "es": "La influencia está aumentando",
+    "fr": "L’influence se renforce"
+  },
+  "consumer.the-influence-is-clearest-now": {
+    "en": "The influence is clearest now",
+    "zh": "此刻表现最明显",
+    "es": "La influencia es más clara ahora",
+    "fr": "L’influence est la plus nette maintenant"
+  },
+  "consumer.the-influence-is-easing": {
+    "en": "The influence is easing",
+    "zh": "影响正在缓和",
+    "es": "La influencia se está suavizando",
+    "fr": "L’influence s’atténue"
+  },
+  "consumer.very-noticeable": {
+    "en": "very noticeable",
+    "zh": "非常明显",
+    "es": "muy perceptible",
+    "fr": "très perceptible"
+  },
+  "consumer.work-together-smoothly": {
+    "en": "work together smoothly",
+    "zh": "彼此支持",
+    "es": "funcionan bien juntos",
+    "fr": "fonctionnent bien ensemble"
+  },
+  "dynamic.0097683c1c": {
+    "en": "Relationship connection between {{value1}} and {{value2}}",
+    "zh": "{{value1}} 与 {{value2}} 的关系连接",
+    "es": "Conexión de relación entre {{value1}} y {{value2}}",
+    "fr": "Lien relationnel entre {{value1}} et {{value2}}"
+  },
+  "dynamic.030ed20d4e": {
+    "en": "{{value1}} and {{value2}} work well together",
+    "zh": "{{value1}}与{{value2}}彼此支持",
+    "es": "{{value1}} y {{value2}} funcionan bien juntos",
+    "fr": "{{value1}} et {{value2}} fonctionnent bien ensemble"
+  },
+  "dynamic.0782a0ed98": {
+    "en": "{{value1}} {{value2}} natal {{value3}}",
+    "zh": "{{value1}} {{value2}} 本命{{value3}}",
+    "es": "{{value1}} {{value2}} natal {{value3}}",
+    "fr": "{{value1}} {{value2}} natal {{value3}}"
+  },
+  "dynamic.14eb9f09f8": {
+    "en": "{{value1}} hours",
+    "zh": "{{value1}}小时",
+    "es": "{{value1}} horas",
+    "fr": "{{value1}} heures"
+  },
+  "dynamic.161a609089": {
+    "en": "{{value1}} rising",
+    "zh": "{{value1}}上升",
+    "es": "Ascendente en {{value1}}",
+    "fr": "Ascendant en {{value1}}"
+  },
+  "dynamic.24d4dfe3ce": {
+    "en": "{{value1}}",
+    "zh": "{{value1}}",
+    "es": "{{value1}}",
+    "fr": "{{value1}}"
+  },
+  "dynamic.259fa5e386": {
+    "en": "Moon in {{value1}} · House {{value2}} · {{value3}}",
+    "zh": "月亮在{{value1}} · 第{{value2}}宫 · {{value3}}",
+    "es": "Luna en {{value1}} · Casa {{value2}} · {{value3}}",
+    "fr": "Lune en {{value1}} · Maison {{value2}} · {{value3}}"
+  },
+  "dynamic.2772c7af82": {
+    "en": "{{value1}} stations direct",
+    "zh": "{{value1}} 转顺",
+    "es": "{{value1}} se estaciona directo",
+    "fr": "{{value1}} stationne direct"
+  },
+  "dynamic.359e37f1d5": {
+    "en": "{{value1}} enters {{value2}}",
+    "zh": "{{value1}}进入{{value2}}",
+    "es": "{{value1}} entra en {{value2}}",
+    "fr": "{{value1}} entre en {{value2}}"
+  },
+  "dynamic.3abdfb89d0": {
+    "en": "Until {{value1}}",
+    "zh": "持续到{{value1}}",
+    "es": "Hasta {{value1}}",
+    "fr": "Jusqu’au {{value1}}"
+  },
+  "dynamic.49908102ba": {
+    "en": "Exact again {{value1}}",
+    "zh": "{{value1}}再次精确",
+    "es": "Exacto de nuevo {{value1}}",
+    "fr": "De nouveau exact {{value1}}"
+  },
+  "dynamic.4cbf796387": {
+    "en": "{{value1}} enters {{value2}}",
+    "zh": "{{value1}} 进入{{value2}}",
+    "es": "{{value1}} entra en {{value2}}",
+    "fr": "{{value1}} entre en {{value2}}"
+  },
+  "dynamic.56daa0b4f7": {
+    "en": "{{value1}} feels",
+    "zh": "{{value1}} 的感受",
+    "es": "{{value1}} siente",
+    "fr": "{{value1}} ressent"
+  },
+  "dynamic.57e8687897": {
+    "en": "Relevance {{value1}} percent",
+    "zh": "相关性 {{value1}}%",
+    "es": "Relevancia {{value1}} por ciento",
+    "fr": "Pertinence {{value1}} pour cent"
+  },
+  "dynamic.58e31d7654": {
+    "en": "Exact again {{value1}}",
+    "zh": "{{value1}}再次精确",
+    "es": "Exacto de nuevo {{value1}}",
+    "fr": "De nouveau exact {{value1}}"
+  },
+  "dynamic.5b39501d54": {
+    "en": "{{value1}} in your {{value2}}",
+    "zh": "{{value1}}落在你的{{value2}}",
+    "es": "{{value1}} en tu {{value2}}",
+    "fr": "{{value1}} dans votre {{value2}}"
+  },
+  "dynamic.5f0315225b": {
+    "en": "in {{value1}}",
+    "zh": "还有{{value1}}",
+    "es": "en {{value1}}",
+    "fr": "dans {{value1}}"
+  },
+  "dynamic.5f03886cd2": {
+    "en": "Peaks {{value1}}",
+    "zh": "{{value1}}达到峰值",
+    "es": "Pico {{value1}}",
+    "fr": "Pic {{value1}}"
+  },
+  "dynamic.64a1051533": {
+    "en": "House overlays between {{value1}} and {{value2}}",
+    "zh": "{{value1}} 与 {{value2}} 的双向落宫",
+    "es": "Superposiciones de casas entre {{value1}} y {{value2}}",
+    "fr": "Superpositions de maisons entre {{value1}} et {{value2}}"
+  },
+  "dynamic.65a2a86bf4": {
+    "en": "{{value1}} weeks",
+    "zh": "{{value1}}周",
+    "es": "{{value1}} semanas",
+    "fr": "{{value1}} semaines"
+  },
+  "dynamic.68196d8f57": {
+    "en": "This removes locally generated reports linked to {{value1}}.",
+    "zh": "这会删除与{{value1}}关联的本机生成报告。",
+    "es": "Esto elimina los informes generados localmente vinculados a {{value1}}.",
+    "fr": "Cela supprime les rapports générés localement liés à {{value1}}."
+  },
+  "dynamic.7f1e2d8a22": {
+    "en": "Ends {{value1}}",
+    "zh": "{{value1}}结束",
+    "es": "Termina {{value1}}",
+    "fr": "Se termine {{value1}}"
+  },
+  "dynamic.873dc1682a": {
+    "en": "{{value1}} · ingress {{value2}}",
+    "zh": "{{value1}} · {{value2}}进入",
+    "es": "{{value1}} · ingreso {{value2}}",
+    "fr": "{{value1}} · entrée {{value2}}"
+  },
+  "dynamic.8b817d9a14": {
+    "en": "Contact {{value1}}",
+    "zh": "联系 {{value1}}",
+    "es": "Contacto {{value1}}",
+    "fr": "Contact {{value1}}"
+  },
+  "dynamic.8d7de7deab": {
+    "en": "{{value1}} stations retrograde",
+    "zh": "{{value1}}开始逆行",
+    "es": "{{value1}} se estaciona retrógrado",
+    "fr": "{{value1}} stationne rétrograde"
+  },
+  "dynamic.909e84449b": {
+    "en": "{{value1}} and {{value2}} become important together",
+    "zh": "{{value1}}与{{value2}}会同时变得重要",
+    "es": "{{value1}} y {{value2}} cobran importancia juntos",
+    "fr": "{{value1}} et {{value2}} deviennent importants ensemble"
+  },
+  "dynamic.983c1afebb": {
+    "en": "{{value1}} months",
+    "zh": "{{value1}}个月",
+    "es": "{{value1}} meses",
+    "fr": "{{value1}} mois"
+  },
+  "dynamic.9c8150aeca": {
+    "en": "Synastry compares how {{value1}} and {{value2}} affect each other through inter-aspects and house overlays.",
+    "zh": "合盘通过跨盘相位与双向落宫，比较 {{value1}} 和 {{value2}} 如何彼此影响。",
+    "es": "La sinastría compara cómo {{value1}} y {{value2}} se influyen mutuamente mediante aspectos entre cartas y superposiciones de casas.",
+    "fr": "La synastrie compare la manière dont {{value1}} et {{value2}} s’influencent à travers les aspects croisés et les superpositions de maisons."
+  },
+  "dynamic.a254895f81": {
+    "en": "This removes locally generated reports for {{value1}}.",
+    "zh": "这会删除本机的{{value1}}生成报告。",
+    "es": "Esto elimina los informes generados localmente de {{value1}}.",
+    "fr": "Cela supprime les rapports générés localement pour {{value1}}."
+  },
+  "dynamic.a34989f3f0": {
+    "en": "{{value1}} · no exact hit",
+    "zh": "{{value1}} · 无精确触发",
+    "es": "{{value1}} · sin contacto exacto",
+    "fr": "{{value1}} · aucun contact exact"
+  },
+  "dynamic.a8b71d51e5": {
+    "en": "Return {{value1}}",
+    "zh": "返照{{value1}}",
+    "es": "Retorno de {{value1}}",
+    "fr": "Retour de {{value1}}"
+  },
+  "dynamic.a99aafc649": {
+    "en": "{{value1}} months",
+    "zh": "{{value1}}个月",
+    "es": "{{value1}} meses",
+    "fr": "{{value1}} mois"
+  },
+  "dynamic.a9c7b4e126": {
+    "en": "No major aspect between {{value1}} and {{value2}}",
+    "zh": "{{value1}}与{{value2}}没有主要相位",
+    "es": "No hay ningún aspecto mayor entre {{value1}} y {{value2}}",
+    "fr": "Aucun aspect majeur entre {{value1}} et {{value2}}"
+  },
+  "dynamic.aa92844e1f": {
+    "en": "{{value1}} stations retrograde",
+    "zh": "{{value1}} 转逆",
+    "es": "{{value1}} se estaciona retrógrado",
+    "fr": "{{value1}} stationne rétrograde"
+  },
+  "dynamic.b40cc6b6fc": {
+    "en": "{{value1}} stations direct",
+    "zh": "{{value1}}恢复顺行",
+    "es": "{{value1}} se estaciona directo",
+    "fr": "{{value1}} stationne direct"
+  },
+  "dynamic.b54a646b70": {
+    "en": "until {{value1}}",
+    "zh": "至{{value1}}",
+    "es": "hasta {{value1}}",
+    "fr": "jusqu’à {{value1}}"
+  },
+  "dynamic.b57a7b3fa7": {
+    "en": "{{value1}} and {{value2}} can pull in different directions",
+    "zh": "{{value1}}与{{value2}}容易互相拉扯",
+    "es": "{{value1}} y {{value2}} pueden tirar en direcciones distintas",
+    "fr": "{{value1}} et {{value2}} peuvent tirer dans des directions différentes"
+  },
+  "dynamic.bade3ca07d": {
+    "en": "{{value1}}",
+    "zh": "{{value1}}",
+    "es": "{{value1}}",
+    "fr": "{{value1}}"
+  },
+  "dynamic.c7aa5a5c6b": {
+    "en": "{{value1}} {{value2}} natal {{value3}}",
+    "zh": "行运{{value1}} {{value2}} 本命{{value3}}",
+    "es": "{{value1}} {{value2}} natal {{value3}}",
+    "fr": "{{value1}} {{value2}} natal {{value3}}"
+  },
+  "dynamic.c8a2ff4904": {
+    "en": "{{value1}} · {{value2}} · {{value3}} orb",
+    "zh": "{{value1}} · {{value2}} · 容许度 {{value3}}",
+    "es": "{{value1}} · {{value2}} · orbe {{value3}}",
+    "fr": "{{value1}} · {{value2}} · orbe {{value3}}"
+  },
+  "dynamic.c986511590": {
+    "en": "Direct {{value1}}",
+    "zh": "{{value1}} 转顺",
+    "es": "Directo {{value1}}",
+    "fr": "Direct {{value1}}"
+  },
+  "dynamic.ca5d9a507f": {
+    "en": "Key inter-aspects between {{value1}} and {{value2}}",
+    "zh": "{{value1}} 与 {{value2}} 的关键跨盘相位",
+    "es": "Aspectos entre cartas clave entre {{value1}} y {{value2}}",
+    "fr": "Aspects croisés clés entre {{value1}} et {{value2}}"
+  },
+  "dynamic.cbb6cc5a06": {
+    "en": "{{value1}} · {{value2}} · {{value3}}",
+    "zh": "{{value1}} · {{value2}} · {{value3}}",
+    "es": "{{value1}} · {{value2}} · {{value3}}",
+    "fr": "{{value1}} · {{value2}} · {{value3}}"
+  },
+  "dynamic.ccf2313c4f": {
+    "en": "Exact {{value1}}",
+    "zh": "{{value1}}精确",
+    "es": "Exacto {{value1}}",
+    "fr": "Exact {{value1}}"
+  },
+  "dynamic.ce5ddbd118": {
+    "en": "Moon through {{value1}}",
+    "zh": "月亮行经{{value1}}",
+    "es": "Luna pasando por {{value1}}",
+    "fr": "Lune en {{value1}}"
+  },
+  "dynamic.d2a685052e": {
+    "en": "{{value1}} crosses into {{value2}}",
+    "zh": "{{value1}}进入{{value2}}",
+    "es": "{{value1}} entra en {{value2}}",
+    "fr": "{{value1}} entre dans {{value2}}"
+  },
+  "dynamic.d9e7f60cb4": {
+    "en": "House {{value1}} analysis",
+    "zh": "第{{value1}}宫分析",
+    "es": "Análisis de la casa {{value1}}",
+    "fr": "Analyse de la maison {{value1}}"
+  },
+  "dynamic.da283ac4d3": {
+    "en": "{{value1}} entering your {{value2}}",
+    "zh": "{{value1}}即将进入你的{{value2}}",
+    "es": "{{value1}} entrando en tu {{value2}}",
+    "fr": "{{value1}} entre dans votre {{value2}}"
+  },
+  "dynamic.e2ccdb4ffa": {
+    "en": "{{value1}} enters {{value2}}",
+    "zh": "{{value1}}进入{{value2}}",
+    "es": "{{value1}} entra en {{value2}}",
+    "fr": "{{value1}} entre en {{value2}}"
+  },
+  "dynamic.e59f8c38f4": {
+    "en": "Exact {{value1}}",
+    "zh": "{{value1}}精确",
+    "es": "Exacto {{value1}}",
+    "fr": "Exact {{value1}}"
+  },
+  "dynamic.e62646a1cc": {
+    "en": "{{value1}}’s {{value2}} in {{value3}}’s {{value4}}",
+    "zh": "{{value1}}的{{value2}}落入{{value3}}的{{value4}}",
+    "es": "{{value2}} de {{value1}} en la {{value4}} de {{value3}}",
+    "fr": "{{value2}} de {{value1}} dans la {{value4}} de {{value3}}"
+  },
+  "dynamic.ee6f12f5bb": {
+    "en": "{{value1}} planned cross-chart aspects",
+    "zh": "{{value1}} 个已规划的跨盘相位",
+    "es": "{{value1}} aspectos entre cartas planificados",
+    "fr": "{{value1}} aspects croisés planifiés"
+  },
+  "dynamic.f8a781fce8": {
+    "en": "{{value1}} · {{value2}}",
+    "zh": "{{value1}} · {{value2}}",
+    "es": "{{value1}} · {{value2}}",
+    "fr": "{{value1}} · {{value2}}"
+  },
+  "dynamic.fa9464bed5": {
+    "en": "{{value1}} days",
+    "zh": "{{value1}}天",
+    "es": "{{value1}} días",
+    "fr": "{{value1}} jours"
+  },
+  "dynamic.fd4ae99568": {
+    "en": "{{value1}} · {{value2}} {{value3}}",
+    "zh": "{{value1}} · {{value2}} {{value3}}",
+    "es": "{{value1}} · {{value2}} {{value3}}",
+    "fr": "{{value1}} · {{value2}} {{value3}}"
+  },
+  "dynamic.fe7c54d6dc": {
+    "en": "Ends {{value1}}",
+    "zh": "{{value1}}结束",
+    "es": "Termina {{value1}}",
+    "fr": "Se termine {{value1}}"
+  },
+  "enrichment.active-now": {
+    "en": "Active now",
+    "zh": "当前活跃",
+    "es": "Activo ahora",
+    "fr": "Actif maintenant"
+  },
+  "enrichment.long-term-background": {
+    "en": "Long-term background",
+    "zh": "长期背景",
+    "es": "Contexto a largo plazo",
+    "fr": "Contexte à long terme"
+  },
+  "enrichment.progressed": {
+    "en": "Progressed ",
+    "zh": "次限",
+    "es": "Progresado ",
+    "fr": "Progressé "
+  },
+  "enrichment.transit": {
+    "en": "Transit ",
+    "zh": "行运",
+    "es": "Tránsito ",
+    "fr": "Transit "
+  },
+  "feedback.details.section": {
+    "en": "Details",
+    "zh": "反馈内容",
+    "es": "Contenido",
+    "fr": "Contenu"
+  },
+  "format.calendar-day": { "en": "Day {{value}}", "zh": "{{value}}日", "es": "Día {{value}}", "fr": "Jour {{value}}" },
+  "format.day": { "en": "Day {{value}}", "zh": "第{{value}}天", "es": "Día {{value}}", "fr": "Jour {{value}}" },
+  "format.exact-again": { "en": "Exact again {{value}}", "zh": "再次精确 {{value}}", "es": "Exacto de nuevo el {{value}}", "fr": "À nouveau exact le {{value}}" },
+  "format.hours-duration": { "en": " · about {{value}}h", "zh": " · 约{{value}}小时", "es": " · unas {{value}} h", "fr": " · environ {{value}} h" },
+  "format.next-days.one": { "en": "Next day", "zh": "未来1天", "es": "Próximo día", "fr": "Jour suivant" },
+  "format.next-days.other": { "en": "Next {{value}} days", "zh": "未来{{value}}天", "es": "Próximos {{value}} días", "fr": "{{value}} prochains jours" },
+  "format.next-months.one": { "en": "Next month", "zh": "未来1个月", "es": "Próximo mes", "fr": "Mois suivant" },
+  "format.next-months.other": { "en": "Next {{value}} months", "zh": "未来{{value}}个月", "es": "Próximos {{value}} meses", "fr": "{{value}} prochains mois" },
+  "format.quarter": { "en": "Quarter {{value}}", "zh": "第{{value}}阶段", "es": "Trimestre {{value}}", "fr": "Trimestre {{value}}" },
+  "format.remaining-days.one": { "en": "1d left", "zh": "剩 1 天", "es": "Queda 1 día", "fr": "Encore 1 jour" },
+  "format.remaining-days.other": { "en": "{{value}}d left", "zh": "剩 {{value}} 天", "es": "Quedan {{value}} días", "fr": "Encore {{value}} jours" },
+  "format.remaining-hours.one": { "en": "1h left", "zh": "剩 1 小时", "es": "Queda 1 hora", "fr": "Encore 1 heure" },
+  "format.remaining-hours.other": { "en": "{{value}}h left", "zh": "剩 {{value}} 小时", "es": "Quedan {{value}} horas", "fr": "Encore {{value}} heures" },
+  "format.retrograde-planets.one": { "en": "1 planet retrograde", "zh": "1颗行星处于逆行", "es": "1 planeta retrógrado", "fr": "1 planète rétrograde" },
+  "format.retrograde-planets.other": { "en": "{{value}} planets retrograde", "zh": "{{value}}颗行星处于逆行", "es": "{{value}} planetas retrógrados", "fr": "{{value}} planètes rétrogrades" },
+  "format.saved-questions.one": { "en": "1 saved locally", "zh": "本机已保存 1 条", "es": "1 pregunta guardada en el dispositivo", "fr": "1 question enregistrée sur l’appareil" },
+  "format.saved-questions.other": { "en": "{{value}} saved locally", "zh": "本机已保存 {{value}} 条", "es": "{{value}} preguntas guardadas en el dispositivo", "fr": "{{value}} questions enregistrées sur l’appareil" },
+  "format.view-all-areas": { "en": "View all {{value}} areas", "zh": "查看全部{{value}}个领域", "es": "Ver las {{value}} áreas", "fr": "Voir les {{value}} domaines" },
+  "insight.current-sky.activity": {
+    "en": "Activity",
+    "zh": "活跃度",
+    "es": "Actividad",
+    "fr": "Activité"
+  },
+  "insight.current-sky.domain.action": { "en": "Action", "zh": "行动竞争", "es": "Acción", "fr": "Action" },
+  "insight.current-sky.domain.culture": { "en": "Culture", "zh": "文化价值", "es": "Cultura", "fr": "Culture" },
+  "insight.current-sky.domain.information": { "en": "Information", "zh": "信息传播", "es": "Información", "fr": "Information" },
+  "insight.current-sky.domain.institutions": { "en": "Institutions", "zh": "制度结构", "es": "Instituciones", "fr": "Institutions" },
+  "insight.current-sky.domain.public-mood": { "en": "Public mood", "zh": "公共情绪", "es": "Ánimo público", "fr": "Humeur publique" },
+  "insight.current-sky.domain.relationships": { "en": "Relationships", "zh": "关系合作", "es": "Relaciones", "fr": "Relations" },
+  "insight.current-sky.domain.resources": { "en": "Resources", "zh": "资源经济", "es": "Recursos", "fr": "Ressources" },
+  "insight.current-sky.domain.technology": { "en": "Technology", "zh": "技术创新", "es": "Tecnología", "fr": "Technologie" },
+  "insight.shared.level.high": { "en": "High", "zh": "高", "es": "Alto", "fr": "Élevé" },
+  "insight.shared.level.strong": { "en": "Strong", "zh": "强", "es": "Fuerte", "fr": "Fort" },
+  "insight.shared.level.light": { "en": "Light", "zh": "轻", "es": "Ligero", "fr": "Léger" },
+  "insight.current-sky.atmosphere": {
+    "en": "Atmosphere",
+    "zh": "整体氛围",
+    "es": "Atmósfera",
+    "fr": "Atmosphère"
+  },
+  "insight.current-sky.dominant-pattern": {
+    "en": "Dominant pattern",
+    "zh": "主导结构",
+    "es": "Patrón dominante",
+    "fr": "Schéma dominant"
+  },
+  "insight.current-sky.element-mode-climate": {
+    "en": "Element & mode climate",
+    "zh": "元素与模式气质",
+    "es": "Clima de elementos y modalidades",
+    "fr": "Climat des éléments et des modes"
+  },
+  "insight.current-sky.focus": {
+    "en": "Focus",
+    "zh": "焦点",
+    "es": "Enfoque",
+    "fr": "Focus"
+  },
+  "insight.current-sky.full-moon": {
+    "en": "Full Moon",
+    "zh": "满月",
+    "es": "Luna llena",
+    "fr": "Pleine Lune"
+  },
+  "insight.current-sky.high": {
+    "en": "High",
+    "zh": "高",
+    "es": "Alto",
+    "fr": "Élevé"
+  },
+  "insight.current-sky.illuminated": {
+    "en": "illuminated",
+    "zh": "照亮",
+    "es": "iluminado",
+    "fr": "éclairé"
+  },
+  "insight.current-sky.long-cycle": {
+    "en": "Long cycle",
+    "zh": "长期周期",
+    "es": "Ciclo largo",
+    "fr": "Cycle long"
+  },
+  "insight.current-sky.low": {
+    "en": "Low",
+    "zh": "低",
+    "es": "Bajo",
+    "fr": "Faible"
+  },
+  "insight.current-sky.lunar-phase": {
+    "en": "Lunar phase",
+    "zh": "月相",
+    "es": "Fase lunar",
+    "fr": "Phase lunaire"
+  },
+  "insight.current-sky.major-aspect-pattern": {
+    "en": "Major aspect pattern",
+    "zh": "主要连接结构",
+    "es": "Patrón de aspectos principales",
+    "fr": "Configuration d’aspects majeurs"
+  },
+  "insight.current-sky.moderate": {
+    "en": "Moderate",
+    "zh": "中等",
+    "es": "Moderado",
+    "fr": "Modéré"
+  },
+  "insight.current-sky.moon-area": {
+    "en": "Moon area",
+    "zh": "月亮领域",
+    "es": "Área lunar",
+    "fr": "Domaine lunaire"
+  },
+  "insight.current-sky.moon-now": {
+    "en": "Moon now",
+    "zh": "此刻的月亮",
+    "es": "La Luna ahora",
+    "fr": "La Lune maintenant"
+  },
+  "insight.current-sky.moon-sign": {
+    "en": "Moon sign",
+    "zh": "月亮落座",
+    "es": "Signo lunar",
+    "fr": "Signe lunaire"
+  },
+  "insight.current-sky.new-moon": {
+    "en": "New Moon",
+    "zh": "新月",
+    "es": "Luna nueva",
+    "fr": "Nouvelle Lune"
+  },
+  "insight.current-sky.phase": {
+    "en": "phase",
+    "zh": "月相",
+    "es": "fase",
+    "fr": "phase"
+  },
+  "insight.current-sky.planetary-motion": {
+    "en": "Planetary motion",
+    "zh": "行星运动",
+    "es": "Movimiento planetario",
+    "fr": "Mouvement planétaire"
+  },
+  "insight.current-sky.pressure": {
+    "en": "Pressure",
+    "zh": "压力",
+    "es": "Presión",
+    "fr": "Pression"
+  },
+  "insight.current-sky.review-cycles": {
+    "en": "Review cycles",
+    "zh": "回顾调整中的主题",
+    "es": "Ciclos de revisión",
+    "fr": "Cycles de révision"
+  },
+  "insight.current-sky.short-cycle": {
+    "en": "Short cycle",
+    "zh": "短期周期",
+    "es": "Ciclo corto",
+    "fr": "Cycle court"
+  },
+  "insight.current-sky.sign-changes": {
+    "en": "Sign changes",
+    "zh": "换座信号",
+    "es": "Cambios de signo",
+    "fr": "Changements de signe"
+  },
+  "insight.current-sky.sky-at-a-glance": {
+    "en": "Sky at a glance",
+    "zh": "当前天空总览",
+    "es": "El cielo de un vistazo",
+    "fr": "Le ciel en un coup d’œil"
+  },
+  "insight.current-sky.support": {
+    "en": "Support",
+    "zh": "支持",
+    "es": "Apoyo",
+    "fr": "Soutien"
+  },
+  "insight.current-sky.upcoming-7-days": {
+    "en": "Upcoming 7 days",
+    "zh": "未来七天",
+    "es": "Próximos 7 días",
+    "fr": "7 prochains jours"
+  },
+  "insight.current-sky.very-high": {
+    "en": "Very high",
+    "zh": "极高",
+    "es": "Muy alto",
+    "fr": "Très élevé"
+  },
+  "insight.natal.category.core-self": { "en": "Core/self", "zh": "核心/自我", "es": "Núcleo/yo", "fr": "Noyau/soi" },
+  "insight.natal.category.mind-voice": { "en": "Mind/voice", "zh": "思维/表达", "es": "Mente/voz", "fr": "Esprit/voix" },
+  "insight.natal.category.heart-values": { "en": "Heart/values", "zh": "情感/价值", "es": "Corazón/valores", "fr": "Cœur/valeurs" },
+  "insight.natal.category.drive-action": { "en": "Drive/action", "zh": "行动/驱动", "es": "Impulso/acción", "fr": "Élan/action" },
+  "insight.natal.category.growth-belief": { "en": "Growth/belief", "zh": "成长/信念", "es": "Crecimiento/creencias", "fr": "Croissance/croyances" },
+  "insight.natal.category.structure-limits": { "en": "Structure/limits", "zh": "结构/边界", "es": "Estructura/límites", "fr": "Structure/limites" },
+  "insight.natal.category.change-innovation": { "en": "Change/innovation", "zh": "改变/创新", "es": "Cambio/innovación", "fr": "Changement/innovation" },
+  "insight.natal.category.vision-intuition": { "en": "Vision/intuition", "zh": "想象/直觉", "es": "Visión/intuición", "fr": "Vision/intuition" },
+  "insight.natal.category.transformation-power": { "en": "Transformation/power", "zh": "转化/力量", "es": "Transformación/poder", "fr": "Transformation/pouvoir" },
+  "insight.natal.category.direction-fate": { "en": "Direction/fate", "zh": "方向/命运", "es": "Dirección/destino", "fr": "Direction/destin" },
+  "insight.natal.calculated-pattern": {
+    "en": "Calculated pattern",
+    "zh": "计算结果",
+    "es": "Patrón calculado",
+    "fr": "Schéma calculé"
+  },
+  "insight.natal.career-direction": {
+    "en": "Career & direction",
+    "zh": "事业与方向",
+    "es": "Carrera y dirección",
+    "fr": "Carrière et orientation"
+  },
+  "insight.natal.chart-ruler": {
+    "en": "Chart ruler",
+    "zh": "命主星",
+    "es": "Regente de la carta",
+    "fr": "Maître de la carte"
+  },
+  "insight.natal.chart-signature": {
+    "en": "Chart signature",
+    "zh": "星盘签名",
+    "es": "Firma de la carta",
+    "fr": "Signature de la carte"
+  },
+  "insight.natal.contribution-arena": {
+    "en": "Contribution arena",
+    "zh": "贡献领域",
+    "es": "Área de contribución",
+    "fr": "Domaine de contribution"
+  },
+  "insight.natal.core-strength": {
+    "en": "Core strength",
+    "zh": "核心优势",
+    "es": "Fortaleza principal",
+    "fr": "Force principale"
+  },
+  "insight.natal.core-strength.8f039a7": {
+    "en": "CORE STRENGTH",
+    "zh": "核心优势",
+    "es": "FORTALEZA PRINCIPAL",
+    "fr": "FORCE PRINCIPALE"
+  },
+  "insight.natal.direction-ruler": {
+    "en": "Direction ruler",
+    "zh": "方向主星",
+    "es": "Regente de la dirección",
+    "fr": "Maître de l’orientation"
+  },
+  "insight.natal.dominant": {
+    "en": "Dominant",
+    "zh": "主导星体",
+    "es": "Dominante",
+    "fr": "Dominante"
+  },
+  "insight.natal.element-mode-balance": {
+    "en": "Element & mode balance",
+    "zh": "元素与模式",
+    "es": "Equilibrio de elementos y modalidades",
+    "fr": "Équilibre des éléments et des modes"
+  },
+  "insight.natal.emotional-needs": {
+    "en": "Emotional needs",
+    "zh": "情绪需要",
+    "es": "Necesidades emocionales",
+    "fr": "Besoins émotionnels"
+  },
+  "insight.natal.growth-edge": {
+    "en": "Growth edge",
+    "zh": "成长面",
+    "es": "Área de crecimiento",
+    "fr": "Axe de progression"
+  },
+  "insight.natal.growth-edge.7132b9f": {
+    "en": "GROWTH EDGE",
+    "zh": "成长面",
+    "es": "ÁREA DE CRECIMIENTO",
+    "fr": "AXE DE PROGRESSION"
+  },
+  "insight.natal.house-emphasis": {
+    "en": "House emphasis",
+    "zh": "宫位侧重",
+    "es": "Énfasis por casas",
+    "fr": "Accent sur les maisons"
+  },
+  "insight.natal.key-aspects": {
+    "en": "Key aspects",
+    "zh": "关键连接",
+    "es": "Aspectos clave",
+    "fr": "Aspects clés"
+  },
+  "insight.natal.love-connection": {
+    "en": "Love & Connection",
+    "zh": "爱与连接",
+    "es": "Amor y conexión",
+    "fr": "Amour et lien"
+  },
+  "insight.natal.moon": {
+    "en": "Moon",
+    "zh": "月亮",
+    "es": "Luna",
+    "fr": "Lune"
+  },
+  "insight.natal.natal-interpretation": {
+    "en": "Natal interpretation",
+    "zh": "本命解读",
+    "es": "Interpretación natal",
+    "fr": "Interprétation natale"
+  },
+  "insight.natal.orientation": {
+    "en": "Orientation",
+    "zh": "总体取向",
+    "es": "Orientación",
+    "fr": "Orientation"
+  },
+  "insight.natal.planet-placements": {
+    "en": "Planet placements",
+    "zh": "行星落座",
+    "es": "Posiciones planetarias",
+    "fr": "Positions planétaires"
+  },
+  "insight.natal.public-style": {
+    "en": "Public style",
+    "zh": "公众风格",
+    "es": "Estilo público",
+    "fr": "Style public"
+  },
+  "insight.natal.strengths-growth-edges": {
+    "en": "Strengths & growth edges",
+    "zh": "优势与成长面",
+    "es": "Fortalezas y áreas de crecimiento",
+    "fr": "Forces et axes de progression"
+  },
+  "insight.natal.sun": {
+    "en": "Sun",
+    "zh": "太阳",
+    "es": "Sol",
+    "fr": "Soleil"
+  },
+  "insight.natal.you-give": {
+    "en": "You give",
+    "zh": "你给予",
+    "es": "Lo que aportas",
+    "fr": "Ce que vous apportez"
+  },
+  "insight.natal.you-give.f5b2fe5": {
+    "en": "YOU GIVE",
+    "zh": "你给予",
+    "es": "LO QUE APORTAS",
+    "fr": "CE QUE VOUS APPORTEZ"
+  },
+  "insight.natal.you-need": {
+    "en": "You need",
+    "zh": "你需要",
+    "es": "Lo que necesitas",
+    "fr": "Ce dont vous avez besoin"
+  },
+  "insight.natal.you-need.b0c8f29": {
+    "en": "YOU NEED",
+    "zh": "你需要",
+    "es": "LO QUE NECESITAS",
+    "fr": "CE DONT VOUS AVEZ BESOIN"
+  },
+  "insight.progressed-moon.fact": {
+    "en": "Progressed moon",
+    "zh": "次限月亮",
+    "es": "Luna progresada",
+    "fr": "Lune progressée"
+  },
+  "insight.progressed-moon.title": {
+    "en": "Progressed moon",
+    "zh": "长期月亮",
+    "es": "Luna a largo plazo",
+    "fr": "Lune à long terme"
+  },
+  "insight.reviewing.status": {
+    "en": "Reviewing",
+    "zh": "回顾调整中",
+    "es": "En revisión",
+    "fr": "En révision"
+  },
+  "insight.secondary.24-month-timeline": {
+    "en": "24-month timeline",
+    "zh": "长期时间线",
+    "es": "Cronología de 24 meses",
+    "fr": "Chronologie sur 24 mois"
+  },
+  "insight.secondary.areas-maturing": {
+    "en": "Areas maturing",
+    "zh": "成熟领域",
+    "es": "Áreas en maduración",
+    "fr": "Domaines en maturation"
+  },
+  "insight.secondary.building": {
+    "en": "Building",
+    "zh": "形成中",
+    "es": "En desarrollo",
+    "fr": "En construction"
+  },
+  "insight.secondary.building-phase": {
+    "en": "Building phase",
+    "zh": "上弦阶段",
+    "es": "Fase de construcción",
+    "fr": "Phase de construction"
+  },
+  "insight.secondary.developmental-chapter": {
+    "en": "Developmental chapter",
+    "zh": "发展阶段",
+    "es": "Etapa de desarrollo",
+    "fr": "Étape de développement"
+  },
+  "insight.secondary.emerging": {
+    "en": "EMERGING",
+    "zh": "浮现",
+    "es": "EMERGENTE",
+    "fr": "ÉMERGENT"
+  },
+  "insight.secondary.exact": {
+    "en": "Exact",
+    "zh": "精确",
+    "es": "Exacto",
+    "fr": "Exact"
+  },
+  "insight.secondary.identity-development": {
+    "en": "Identity development",
+    "zh": "身份发展",
+    "es": "Desarrollo de la identidad",
+    "fr": "Développement de l’identité"
+  },
+  "insight.secondary.in-sign": {
+    "en": "In sign",
+    "zh": "在座时长",
+    "es": "En el signo",
+    "fr": "Dans le signe"
+  },
+  "insight.secondary.ingress": {
+    "en": "Ingress",
+    "zh": "下次换座",
+    "es": "Ingreso",
+    "fr": "Entrée"
+  },
+  "insight.secondary.integration-phase": {
+    "en": "Integration phase",
+    "zh": "下弦阶段",
+    "es": "Fase de integración",
+    "fr": "Phase d’intégration"
+  },
+  "insight.secondary.natal": {
+    "en": "Natal",
+    "zh": "本命",
+    "es": "Natal",
+    "fr": "Natal"
+  },
+  "insight.secondary.natal-sun": {
+    "en": "Natal sun",
+    "zh": "本命太阳",
+    "es": "Sol natal",
+    "fr": "Soleil natal"
+  },
+  "insight.secondary.new-phase": {
+    "en": "New phase",
+    "zh": "新月阶段",
+    "es": "Nueva fase",
+    "fr": "Nouvelle phase"
+  },
+  "insight.secondary.now": {
+    "en": "Now",
+    "zh": "现在",
+    "es": "Ahora",
+    "fr": "Maintenant"
+  },
+  "insight.secondary.old": {
+    "en": "OLD",
+    "zh": "过去",
+    "es": "ANTERIOR",
+    "fr": "ANCIEN"
+  },
+  "insight.secondary.phase": {
+    "en": "Phase",
+    "zh": "月相",
+    "es": "Fase",
+    "fr": "Phase"
+  },
+  "insight.secondary.progressed-sun": {
+    "en": "Progressed sun",
+    "zh": "次限太阳",
+    "es": "Sol progresado",
+    "fr": "Soleil progressé"
+  },
+  "insight.secondary.review-phase": {
+    "en": "Review phase",
+    "zh": "满月阶段",
+    "es": "Fase de revisión",
+    "fr": "Phase de révision"
+  },
+  "insight.secondary.stage": {
+    "en": "Stage",
+    "zh": "阶段",
+    "es": "Etapa",
+    "fr": "Étape"
+  },
+  "insight.secondary.transition": {
+    "en": "TRANSITION",
+    "zh": "转变",
+    "es": "TRANSICIÓN",
+    "fr": "TRANSITION"
+  },
+  "insight.secondary.turning-points": {
+    "en": "Turning points",
+    "zh": "转折点",
+    "es": "Puntos de inflexión",
+    "fr": "Tournants"
+  },
+  "insight.shared.24-month-timeline": {
+    "en": "24-MONTH TIMELINE",
+    "zh": "长期时间线",
+    "es": "CRONOLOGÍA DE 24 MESES",
+    "fr": "CHRONOLOGIE SUR 24 MOIS"
+  },
+  "insight.shared.active-transits": {
+    "en": "ACTIVE TRANSITS",
+    "zh": "进行中的变化",
+    "es": "TRÁNSITOS ACTIVOS",
+    "fr": "TRANSITS ACTIFS"
+  },
+  "insight.shared.activity-reflects-the-current-signals-not-a-fortune-score": {
+    "en": "Activity reflects the current signals, not a fortune score.",
+    "zh": "这里反映当前的活跃程度，不是运势分数。",
+    "es": "La actividad refleja las señales actuales, no una puntuación de fortuna.",
+    "fr": "L’activité reflète les signaux actuels, pas un score de chance."
+  },
+  "insight.shared.air-emphasis": {
+    "en": "Air emphasis",
+    "zh": "风象主导",
+    "es": "Énfasis en aire",
+    "fr": "Dominante Air"
+  },
+  "insight.shared.all": {
+    "en": "All",
+    "zh": "全部",
+    "es": "Todo",
+    "fr": "Tout"
+  },
+  "insight.shared.aspect-pattern": {
+    "en": "ASPECT PATTERN",
+    "zh": "连接结构",
+    "es": "PATRÓN DE ASPECTOS",
+    "fr": "CONFIGURATION D’ASPECTS"
+  },
+  "insight.shared.balanced": {
+    "en": "Balanced",
+    "zh": "均衡",
+    "es": "Equilibrado",
+    "fr": "Équilibré"
+  },
+  "insight.shared.chemistry": {
+    "en": "CHEMISTRY",
+    "zh": "化学反应",
+    "es": "QUÍMICA",
+    "fr": "ALCHIMIE"
+  },
+  "insight.shared.commitment": {
+    "en": "COMMITMENT",
+    "zh": "承诺",
+    "es": "COMPROMISO",
+    "fr": "ENGAGEMENT"
+  },
+  "insight.shared.communication": {
+    "en": "COMMUNICATION",
+    "zh": "沟通",
+    "es": "COMUNICACIÓN",
+    "fr": "COMMUNICATION"
+  },
+  "insight.shared.concentration": {
+    "en": "CONCENTRATION",
+    "zh": "侧重",
+    "es": "CONCENTRACIÓN",
+    "fr": "CONCENTRATION"
+  },
+  "insight.shared.contacts": {
+    "en": "contacts",
+    "zh": "连接",
+    "es": "contactos",
+    "fr": "contacts"
+  },
+  "insight.shared.core-personality": {
+    "en": "CORE PERSONALITY",
+    "zh": "核心性格",
+    "es": "PERSONALIDAD CENTRAL",
+    "fr": "PERSONNALITÉ CENTRALE"
+  },
+  "insight.shared.core-tension": {
+    "en": "Core tension",
+    "zh": "核心张力",
+    "es": "Tensión central",
+    "fr": "Tension centrale"
+  },
+  "insight.shared.current": {
+    "en": "Current",
+    "zh": "当前",
+    "es": "Actual",
+    "fr": "Actuel"
+  },
+  "insight.shared.current-development": {
+    "en": "CURRENT DEVELOPMENT",
+    "zh": "当前发展",
+    "es": "DESARROLLO ACTUAL",
+    "fr": "DÉVELOPPEMENT ACTUEL"
+  },
+  "insight.shared.cycles": {
+    "en": "CYCLES",
+    "zh": "周期",
+    "es": "CICLOS",
+    "fr": "CYCLES"
+  },
+  "insight.shared.daily": {
+    "en": "Daily",
+    "zh": "每日",
+    "es": "Diario",
+    "fr": "Quotidien"
+  },
+  "insight.shared.earth-emphasis": {
+    "en": "Earth emphasis",
+    "zh": "土象主导",
+    "es": "Énfasis en tierra",
+    "fr": "Dominante Terre"
+  },
+  "insight.shared.element-climate": {
+    "en": "ELEMENT CLIMATE",
+    "zh": "元素气候",
+    "es": "CLIMA DE ELEMENTOS",
+    "fr": "CLIMAT DES ÉLÉMENTS"
+  },
+  "insight.shared.emotional-connection": {
+    "en": "EMOTIONAL CONNECTION",
+    "zh": "情感连接",
+    "es": "CONEXIÓN EMOCIONAL",
+    "fr": "CONNEXION ÉMOTIONNELLE"
+  },
+  "insight.shared.emotional-needs": {
+    "en": "EMOTIONAL NEEDS",
+    "zh": "情绪需要",
+    "es": "NECESIDADES EMOCIONALES",
+    "fr": "BESOINS ÉMOTIONNELS"
+  },
+  "insight.shared.emphasis": {
+    "en": "Emphasis",
+    "zh": "主导",
+    "es": "Énfasis",
+    "fr": "Dominante"
+  },
+  "insight.shared.fire-emphasis": {
+    "en": "Fire emphasis",
+    "zh": "火象主导",
+    "es": "Énfasis en fuego",
+    "fr": "Dominante Feu"
+  },
+  "insight.shared.growth-path": {
+    "en": "Growth path",
+    "zh": "成长路径",
+    "es": "Camino de crecimiento",
+    "fr": "Chemin de progression"
+  },
+  "insight.shared.house-overlays": {
+    "en": "HOUSE OVERLAYS",
+    "zh": "落宫叠加",
+    "es": "SUPERPOSICIONES DE CASAS",
+    "fr": "SUPERPOSITIONS DE MAISONS"
+  },
+  "insight.shared.how-it-flows": {
+    "en": "How it flows",
+    "zh": "流动方式",
+    "es": "Cómo fluye",
+    "fr": "Comment cela circule"
+  },
+  "insight.shared.identity": {
+    "en": "IDENTITY",
+    "zh": "身份",
+    "es": "IDENTIDAD",
+    "fr": "IDENTITÉ"
+  },
+  "insight.shared.just-passed": {
+    "en": "Just passed",
+    "zh": "刚刚经过",
+    "es": "Recién pasado",
+    "fr": "Tout juste passé"
+  },
+  "insight.shared.key-aspects": {
+    "en": "KEY ASPECTS",
+    "zh": "关键连接",
+    "es": "ASPECTOS CLAVE",
+    "fr": "ASPECTS CLÉS"
+  },
+  "insight.shared.key-inter-aspects": {
+    "en": "KEY INTER-ASPECTS",
+    "zh": "主要相互连接",
+    "es": "ASPECTOS ENTRE CARTAS CLAVE",
+    "fr": "ASPECTS CROISÉS CLÉS"
+  },
+  "insight.shared.life-areas": {
+    "en": "LIFE AREAS",
+    "zh": "生活领域",
+    "es": "ÁREAS DE VIDA",
+    "fr": "DOMAINES DE VIE"
+  },
+  "insight.shared.long-term": {
+    "en": "Long-term",
+    "zh": "长期",
+    "es": "A largo plazo",
+    "fr": "Long terme"
+  },
+  "insight.shared.love-connection": {
+    "en": "LOVE & CONNECTION",
+    "zh": "爱与连接",
+    "es": "AMOR Y CONEXIÓN",
+    "fr": "AMOUR ET LIEN"
+  },
+  "insight.shared.maturing": {
+    "en": "MATURING",
+    "zh": "成熟领域",
+    "es": "MADURACIÓN",
+    "fr": "MATURATION"
+  },
+  "insight.shared.moon-now": {
+    "en": "MOON NOW",
+    "zh": "此刻月亮",
+    "es": "LA LUNA AHORA",
+    "fr": "LA LUNE MAINTENANT"
+  },
+  "insight.shared.moving-forward": {
+    "en": "Moving forward",
+    "zh": "稳定向前",
+    "es": "Avanzando",
+    "fr": "En progression"
+  },
+  "insight.shared.natal-overlay": {
+    "en": "NATAL OVERLAY",
+    "zh": "与本命叠加",
+    "es": "SUPERPOSICIÓN NATAL",
+    "fr": "SUPERPOSITION NATALE"
+  },
+  "insight.shared.neutral": {
+    "en": "Neutral",
+    "zh": "中性",
+    "es": "Neutro",
+    "fr": "Neutre"
+  },
+  "insight.shared.next": {
+    "en": "Next",
+    "zh": "接下来",
+    "es": "Siguiente",
+    "fr": "Suivant"
+  },
+  "insight.shared.not-enough-calculated-facts-for-this-card": {
+    "en": "Not enough calculated facts for this card",
+    "zh": "当前计算事实不足，暂不展示这张卡片的内容",
+    "es": "No hay suficientes datos calculados para esta tarjeta",
+    "fr": "Pas assez de données calculées pour cette carte"
+  },
+  "insight.shared.perspectives": {
+    "en": "PERSPECTIVES",
+    "zh": "彼此的体验",
+    "es": "PERSPECTIVAS",
+    "fr": "PERSPECTIVES"
+  },
+  "insight.shared.placements": {
+    "en": "PLACEMENTS",
+    "zh": "落座",
+    "es": "POSICIONES",
+    "fr": "POSITIONS"
+  },
+  "insight.shared.planet-paths": {
+    "en": "PLANET PATHS",
+    "zh": "行星路径",
+    "es": "TRAYECTORIAS PLANETARIAS",
+    "fr": "TRAJECTOIRES PLANÉTAIRES"
+  },
+  "insight.shared.planetary-motion": {
+    "en": "PLANETARY MOTION",
+    "zh": "行星运动",
+    "es": "MOVIMIENTO PLANETARIO",
+    "fr": "MOUVEMENT PLANÉTAIRE"
+  },
+  "insight.shared.priority-areas": {
+    "en": "PRIORITY AREAS",
+    "zh": "优先领域",
+    "es": "ÁREAS PRIORITARIAS",
+    "fr": "DOMAINES PRIORITAIRES"
+  },
+  "insight.shared.progressed-moon": {
+    "en": "PROGRESSED MOON",
+    "zh": "长期月亮",
+    "es": "LUNA PROGRESADA",
+    "fr": "LUNE PROGRESSÉE"
+  },
+  "insight.shared.public-direction": {
+    "en": "PUBLIC DIRECTION",
+    "zh": "公共方向",
+    "es": "DIRECCIÓN PÚBLICA",
+    "fr": "ORIENTATION PUBLIQUE"
+  },
+  "insight.shared.relational-pattern": {
+    "en": "Relational pattern",
+    "zh": "关系结构",
+    "es": "Patrón relacional",
+    "fr": "Schéma relationnel"
+  },
+  "insight.shared.reviewed-interpretation-unavailable": {
+    "en": "Reviewed interpretation unavailable",
+    "zh": "已审核解读暂不可用",
+    "es": "Interpretación revisada no disponible",
+    "fr": "Interprétation validée indisponible"
+  },
+  "insight.shared.show-fewer-areas": {
+    "en": "Show fewer areas",
+    "zh": "收起领域",
+    "es": "Mostrar menos áreas",
+    "fr": "Afficher moins de domaines"
+  },
+  "insight.shared.sign-changes": {
+    "en": "SIGN CHANGES",
+    "zh": "换座",
+    "es": "CAMBIOS DE SIGNO",
+    "fr": "CHANGEMENTS DE SIGNE"
+  },
+  "insight.shared.signature": {
+    "en": "SIGNATURE",
+    "zh": "签名",
+    "es": "FIRMA",
+    "fr": "SIGNATURE"
+  },
+  "insight.shared.supportive-pattern": {
+    "en": "Supportive pattern",
+    "zh": "支持性结构",
+    "es": "Patrón de apoyo",
+    "fr": "Schéma de soutien"
+  },
+  "insight.shared.temperament": {
+    "en": "TEMPERAMENT",
+    "zh": "气质",
+    "es": "TEMPERAMENTO",
+    "fr": "TEMPÉRAMENT"
+  },
+  "insight.shared.the-big-picture": {
+    "en": "THE BIG PICTURE",
+    "zh": "大局",
+    "es": "VISIÓN GENERAL",
+    "fr": "VUE D’ENSEMBLE"
+  },
+  "insight.shared.the-bond": {
+    "en": "THE BOND",
+    "zh": "这段关系",
+    "es": "EL VÍNCULO",
+    "fr": "LE LIEN"
+  },
+  "insight.shared.this-year": {
+    "en": "This year",
+    "zh": "今年",
+    "es": "Este año",
+    "fr": "Cette année"
+  },
+  "insight.shared.timeline": {
+    "en": "TIMELINE",
+    "zh": "时间线",
+    "es": "CRONOLOGÍA",
+    "fr": "CHRONOLOGIE"
+  },
+  "insight.shared.turning-points": {
+    "en": "TURNING POINTS",
+    "zh": "转折点",
+    "es": "PUNTOS DE INFLEXIÓN",
+    "fr": "TOURNANTS"
+  },
+  "insight.shared.upcoming-7-days": {
+    "en": "UPCOMING 7 DAYS",
+    "zh": "未来七天",
+    "es": "PRÓXIMOS 7 DÍAS",
+    "fr": "7 PROCHAINS JOURS"
+  },
+  "insight.shared.water-emphasis": {
+    "en": "Water emphasis",
+    "zh": "水象主导",
+    "es": "Énfasis en agua",
+    "fr": "Dominante Eau"
+  },
+  "insight.shared.year-anchors": {
+    "en": "YEAR ANCHORS",
+    "zh": "年度锚点",
+    "es": "HITOS DEL AÑO",
+    "fr": "REPÈRES DE L’ANNÉE"
+  },
+  "insight.shared.year-aspects": {
+    "en": "YEAR ASPECTS",
+    "zh": "年度连接",
+    "es": "ASPECTOS DEL AÑO",
+    "fr": "ASPECTS DE L’ANNÉE"
+  },
+  "insight.shared.year-dynamics": {
+    "en": "YEAR DYNAMICS",
+    "zh": "年度动态",
+    "es": "DINÁMICA DEL AÑO",
+    "fr": "DYNAMIQUE DE L’ANNÉE"
+  },
+  "insight.shared.year-theme": {
+    "en": "YEAR THEME",
+    "zh": "年度主题",
+    "es": "TEMA DEL AÑO",
+    "fr": "THÈME DE L’ANNÉE"
+  },
+  "insight.shared.year-timeline": {
+    "en": "YEAR TIMELINE",
+    "zh": "年度时间线",
+    "es": "CRONOLOGÍA DEL AÑO",
+    "fr": "CHRONOLOGIE DE L’ANNÉE"
+  },
+  "insight.shared.your-edges": {
+    "en": "YOUR EDGES",
+    "zh": "你的优势与成长面",
+    "es": "TUS FORTALEZAS Y RETOS",
+    "fr": "VOS FORCES ET DÉFIS"
+  },
+  "insight.solar-return.angular-planet": {
+    "en": "Angular planet",
+    "zh": "角宫行星",
+    "es": "Planeta angular",
+    "fr": "Planète angulaire"
+  },
+  "insight.solar-return.at-natal-ic": {
+    "en": "At natal IC",
+    "zh": "落在本命天底",
+    "es": "En el IC natal",
+    "fr": "Sur le FC natal"
+  },
+  "insight.solar-return.challenging-aspect": {
+    "en": "Challenging aspect",
+    "zh": "张力相位",
+    "es": "Aspecto desafiante",
+    "fr": "Aspect tendu"
+  },
+  "insight.solar-return.demand": {
+    "en": "DEMAND",
+    "zh": "要求",
+    "es": "EXIGENCIA",
+    "fr": "EXIGENCE"
+  },
+  "insight.solar-return.natal-overlay": {
+    "en": "Natal overlay",
+    "zh": "与本命叠加",
+    "es": "Superposición natal",
+    "fr": "Superposition natale"
+  },
+  "insight.solar-return.near-natal-asc": {
+    "en": "Near natal ASC",
+    "zh": "靠近本命上升",
+    "es": "Cerca del ASC natal",
+    "fr": "Près de l’ASC natal"
+  },
+  "insight.solar-return.near-natal-dsc": {
+    "en": "Near natal DSC",
+    "zh": "靠近本命下降",
+    "es": "Cerca del DSC natal",
+    "fr": "Près du DSC natal"
+  },
+  "insight.solar-return.near-natal-mc": {
+    "en": "Near natal MC",
+    "zh": "靠近本命天顶",
+    "es": "Cerca del MC natal",
+    "fr": "Près du MC natal"
+  },
+  "insight.solar-return.opening": {
+    "en": "OPENING",
+    "zh": "展开",
+    "es": "APERTURA",
+    "fr": "OUVERTURE"
+  },
+  "insight.solar-return.priority-areas": {
+    "en": "Priority areas",
+    "zh": "优先领域",
+    "es": "Áreas prioritarias",
+    "fr": "Domaines prioritaires"
+  },
+  "insight.solar-return.return-ascendant": {
+    "en": "Return ascendant",
+    "zh": "返照上升",
+    "es": "Ascendente del retorno",
+    "fr": "Ascendant du retour"
+  },
+  "insight.solar-return.solar-return-sun": {
+    "en": "Solar return sun",
+    "zh": "返照太阳",
+    "es": "Sol del retorno solar",
+    "fr": "Soleil du retour solaire"
+  },
+  "insight.solar-return.sun-house": {
+    "en": "Sun house",
+    "zh": "太阳落宫",
+    "es": "Casa del Sol",
+    "fr": "Maison du Soleil"
+  },
+  "insight.solar-return.supportive-aspect": {
+    "en": "Supportive aspect",
+    "zh": "支持相位",
+    "es": "Aspecto de apoyo",
+    "fr": "Aspect de soutien"
+  },
+  "insight.solar-return.year-anchors": {
+    "en": "Year anchors",
+    "zh": "年度锚点",
+    "es": "Hitos del año",
+    "fr": "Repères de l’année"
+  },
+  "insight.solar-return.year-aspects": {
+    "en": "Year aspects",
+    "zh": "年度连接",
+    "es": "Aspectos del año",
+    "fr": "Aspects de l’année"
+  },
+  "insight.solar-return.year-dynamics": {
+    "en": "Year dynamics",
+    "zh": "年度动态",
+    "es": "Dinámica del año",
+    "fr": "Dynamique de l’année"
+  },
+  "insight.solar-return.year-timeline": {
+    "en": "Year timeline",
+    "zh": "年度时间线",
+    "es": "Cronología del año",
+    "fr": "Chronologie de l’année"
+  },
+  "insight.solar-return.your-birthday-year": {
+    "en": "Your birthday year",
+    "zh": "你的生日年",
+    "es": "Tu año de cumpleaños",
+    "fr": "Votre année anniversaire"
+  },
+  "insight.synastry.a-cross-chart-contact-showing-how-one-persons-planet-meets-the-other-per": {
+    "en": "A cross-chart contact showing how one person’s planet meets the other person’s natal pattern.",
+    "zh": "这是一条跨盘联系，显示一方行星如何触及另一方的本命结构。",
+    "es": "Un contacto entre cartas que muestra cómo el planeta de una persona se encuentra con el patrón natal de la otra.",
+    "fr": "Un contact entre deux cartes montrant comment la planète d’une personne rencontre le schéma natal de l’autre."
+  },
+  "insight.synastry.active": {
+    "en": "active",
+    "zh": "活跃",
+    "es": "activo",
+    "fr": "actif"
+  },
+  "insight.synastry.active-friction": {
+    "en": "Active friction",
+    "zh": "活跃摩擦",
+    "es": "Fricción activa",
+    "fr": "Friction active"
+  },
+  "insight.synastry.aspect": {
+    "en": "Aspect",
+    "zh": "相位",
+    "es": "Aspecto",
+    "fr": "Aspect"
+  },
+  "insight.synastry.calculated-details": {
+    "en": "Calculated details",
+    "zh": "计算详情",
+    "es": "Detalles calculados",
+    "fr": "Détails calculés"
+  },
+  "insight.synastry.attraction": {
+    "en": "ATTRACTION",
+    "zh": "吸引",
+    "es": "ATRACCIÓN",
+    "fr": "ATTRACTION"
+  },
+  "insight.synastry.attraction.96f0c62": {
+    "en": "Attraction",
+    "zh": "吸引",
+    "es": "Atracción",
+    "fr": "Attraction"
+  },
+  "insight.synastry.chemistry": {
+    "en": "Chemistry",
+    "zh": "吸引力",
+    "es": "Química",
+    "fr": "Alchimie"
+  },
+  "insight.synastry.communication": {
+    "en": "Communication",
+    "zh": "沟通",
+    "es": "Comunicación",
+    "fr": "Communication"
+  },
+  "insight.synastry.core-support": {
+    "en": "Core support",
+    "zh": "核心支持",
+    "es": "Apoyo central",
+    "fr": "Soutien central"
+  },
+  "insight.synastry.different": {
+    "en": "different",
+    "zh": "不同",
+    "es": "diferente",
+    "fr": "différent"
+  },
+  "insight.synastry.direction": {
+    "en": "Direction",
+    "zh": "方向",
+    "es": "Dirección",
+    "fr": "Direction"
+  },
+  "insight.synastry.emotional-pace": {
+    "en": "Emotional pace",
+    "zh": "情感节奏",
+    "es": "Ritmo emocional",
+    "fr": "Rythme émotionnel"
+  },
+  "insight.synastry.friction": {
+    "en": "Friction",
+    "zh": "差异",
+    "es": "Fricción",
+    "fr": "Friction"
+  },
+  "insight.synastry.friction.1fd3acf": {
+    "en": "Friction",
+    "zh": "摩擦",
+    "es": "Fricción",
+    "fr": "Friction"
+  },
+  "insight.synastry.function": {
+    "en": "Function",
+    "zh": "作用",
+    "es": "Función",
+    "fr": "Fonction"
+  },
+  "insight.synastry.growth": {
+    "en": "GROWTH",
+    "zh": "成长性",
+    "es": "CRECIMIENTO",
+    "fr": "CROISSANCE"
+  },
+  "insight.synastry.growth.7216182": {
+    "en": "Growth",
+    "zh": "成长",
+    "es": "Crecimiento",
+    "fr": "Croissance"
+  },
+  "insight.synastry.how-to-read-this": {
+    "en": "How to read this",
+    "zh": "如何理解",
+    "es": "Cómo leer esto",
+    "fr": "Comment lire ceci"
+  },
+  "insight.synastry.intensity": {
+    "en": "INTENSITY",
+    "zh": "强度",
+    "es": "INTENSIDAD",
+    "fr": "INTENSITÉ"
+  },
+  "insight.synastry.intensity.8edbde8": {
+    "en": "Intensity",
+    "zh": "强度",
+    "es": "Intensidad",
+    "fr": "Intensité"
+  },
+  "insight.synastry.interpretation": {
+    "en": "Interpretation",
+    "zh": "解读",
+    "es": "Interpretación",
+    "fr": "Interprétation"
+  },
+  "insight.synastry.long-term-bond": {
+    "en": "Long-term bond",
+    "zh": "长期联系",
+    "es": "Vínculo a largo plazo",
+    "fr": "Lien à long terme"
+  },
+  "insight.synastry.main-pattern": {
+    "en": "Main pattern",
+    "zh": "主要结构",
+    "es": "Patrón principal",
+    "fr": "Schéma principal"
+  },
+  "insight.synastry.mercury-contacts-describe-comprehension-pace-and-conflict-style": {
+    "en": "Mercury contacts describe comprehension, pace and conflict style.",
+    "zh": "水星联系描述理解方式、交流速度与冲突风格。",
+    "es": "Los contactos de Mercurio describen la comprensión, el ritmo y el estilo de conflicto.",
+    "fr": "Les contacts de Mercure décrivent la compréhension, le rythme et la manière de gérer les conflits."
+  },
+  "insight.synastry.mixed": {
+    "en": "mixed",
+    "zh": "交错",
+    "es": "mixto",
+    "fr": "mixte"
+  },
+  "insight.synastry.moon-contacts-show-emotional-recognition-regulation-and-pacing": {
+    "en": "Moon contacts show emotional recognition, regulation and pacing.",
+    "zh": "月亮联系显示彼此如何识别、调节与同步情绪。",
+    "es": "Los contactos de la Luna muestran el reconocimiento emocional, la regulación y el ritmo.",
+    "fr": "Les contacts de la Lune montrent la reconnaissance émotionnelle, la régulation et le rythme."
+  },
+  "insight.synastry.no-distinct-signal": {
+    "en": "No distinct signal",
+    "zh": "暂无独立信号",
+    "es": "Sin señal clara",
+    "fr": "Aucun signal distinct"
+  },
+  "insight.synastry.no-separate-contrasting-moon-contact-met-the-current-threshold": {
+    "en": "No separate contrasting Moon contact met the current threshold.",
+    "zh": "当前没有另一条达到门槛的月亮差异相位。",
+    "es": "Ningún otro contacto lunar de contraste alcanzó el umbral actual.",
+    "fr": "Aucun autre contact lunaire contrasté n’a atteint le seuil actuel."
+  },
+  "insight.synastry.no-separate-jupiter-contact-met-the-current-threshold": {
+    "en": "No separate Jupiter contact met the current threshold.",
+    "zh": "当前没有另一条达到门槛的木星相位。",
+    "es": "Ningún otro contacto de Júpiter alcanzó el umbral actual.",
+    "fr": "Aucun autre contact de Jupiter n’a atteint le seuil actuel."
+  },
+  "insight.synastry.no-separate-qualifying-contact-was-found": {
+    "en": "No separate qualifying contact was found.",
+    "zh": "当前没有另一条符合条件的相位。",
+    "es": "No se encontró ningún otro contacto que cumpliera los criterios.",
+    "fr": "Aucun autre contact répondant aux critères n’a été trouvé."
+  },
+  "insight.synastry.no-separate-saturn-contact-met-the-current-threshold": {
+    "en": "No separate Saturn contact met the current threshold.",
+    "zh": "当前没有另一条达到门槛的土星相位。",
+    "es": "Ningún otro contacto de Saturno alcanzó el umbral actual.",
+    "fr": "Aucun autre contact de Saturne n’a atteint le seuil actuel."
+  },
+  "insight.synastry.no-separate-supportive-moon-contact-met-the-current-threshold": {
+    "en": "No separate supportive Moon contact met the current threshold.",
+    "zh": "当前没有另一条达到门槛的月亮支持相位。",
+    "es": "Ningún otro contacto lunar de apoyo alcanzó el umbral actual.",
+    "fr": "Aucun autre contact lunaire favorable n’a atteint le seuil actuel."
+  },
+  "insight.synastry.no-signal": {
+    "en": "No signal",
+    "zh": "暂无信号",
+    "es": "Sin señal",
+    "fr": "Aucun signal"
+  },
+  "insight.synastry.orb-phase": {
+    "en": "Orb & phase",
+    "zh": "容许度与阶段",
+    "es": "Orbe y fase",
+    "fr": "Orbe et phase"
+  },
+  "insight.synastry.people-accessibility": {
+    "en": "{{firstName}} and {{secondName}}",
+    "zh": "{{firstName}}与{{secondName}}",
+    "es": "{{firstName}} y {{secondName}}",
+    "fr": "{{firstName}} et {{secondName}}"
+  },
+  "insight.synastry.primary-contrast": {
+    "en": "Primary contrast",
+    "zh": "主要差异",
+    "es": "Contraste principal",
+    "fr": "Contraste principal"
+  },
+  "insight.synastry.quiet": {
+    "en": "quiet",
+    "zh": "平静",
+    "es": "tranquilo",
+    "fr": "calme"
+  },
+  "insight.synastry.relationship-overview": {
+    "en": "Relationship Overview",
+    "zh": "关系总览",
+    "es": "Resumen de la relación",
+    "fr": "Vue d’ensemble de la relation"
+  },
+  "insight.synastry.saturn-jupiter-and-angle-contacts-show-reliability-growth-and-structural": {
+    "en": "Saturn, Jupiter and angle contacts show reliability, growth and structural pressure.",
+    "zh": "土星、木星与角点联系显示可靠性、成长空间与结构压力。",
+    "es": "Los contactos de Saturno, Júpiter y los ángulos muestran fiabilidad, crecimiento y presión estructural.",
+    "fr": "Les contacts de Saturne, Jupiter et des angles montrent la fiabilité, le potentiel de croissance et la pression structurelle."
+  },
+  "insight.synastry.stability": {
+    "en": "STABILITY",
+    "zh": "稳定性",
+    "es": "ESTABILIDAD",
+    "fr": "STABILITÉ"
+  },
+  "insight.synastry.stability.295101c": {
+    "en": "Stability",
+    "zh": "稳定",
+    "es": "Estabilidad",
+    "fr": "Stabilité"
+  },
+  "insight.synastry.steady": {
+    "en": "steady",
+    "zh": "稳定",
+    "es": "estable",
+    "fr": "stable"
+  },
+  "insight.synastry.strong": {
+    "en": "strong",
+    "zh": "强",
+    "es": "fuerte",
+    "fr": "fort"
+  },
+  "insight.synastry.strongest-link": {
+    "en": "Strongest link",
+    "zh": "最强连接",
+    "es": "Vínculo más fuerte",
+    "fr": "Lien le plus fort"
+  },
+  "insight.synastry.supporting-context": {
+    "en": "Supporting context",
+    "zh": "辅助背景",
+    "es": "Contexto de apoyo",
+    "fr": "Contexte complémentaire"
+  },
+  "insight.synastry.this-detail-uses-only-the-calculated-evidence-selected-for-this-card": {
+    "en": "This detail uses only the calculated evidence selected for this card.",
+    "zh": "本详情只使用这张卡片已选中的计算证据。",
+    "es": "Este detalle utiliza únicamente la evidencia calculada seleccionada para esta tarjeta.",
+    "fr": "Ce détail utilise uniquement les éléments calculés sélectionnés pour cette carte."
+  },
+  "insight.synastry.this-overview-separates-relationship-functions-because-the-same-connecti": {
+    "en": "This overview separates relationship functions because the same connection can flow easily in one area and require adjustment in another.",
+    "zh": "这张总览会分别呈现不同关系功能，因为同一段连接可能在一个领域自然顺畅，在另一个领域需要磨合。",
+    "es": "Este resumen separa las funciones de la relación porque una misma conexión puede fluir con facilidad en un área y requerir ajustes en otra.",
+    "fr": "Cette vue d’ensemble distingue les fonctions de la relation, car un même lien peut être fluide dans un domaine et demander des ajustements dans un autre."
+  },
+  "insight.synastry.title.chemistry": {
+    "en": "Attraction & chemistry",
+    "zh": "吸引与化学反应",
+    "es": "Atracción y química",
+    "fr": "Attraction et alchimie"
+  },
+  "insight.synastry.title.commitment": {
+    "en": "Commitment & longevity",
+    "zh": "承诺与长久",
+    "es": "Compromiso y duración",
+    "fr": "Engagement et longévité"
+  },
+  "insight.synastry.title.communication": {
+    "en": "Communication",
+    "zh": "沟通",
+    "es": "Comunicación",
+    "fr": "Communication"
+  },
+  "insight.synastry.title.emotional-connection": {
+    "en": "Emotional connection",
+    "zh": "情感连接",
+    "es": "Conexión emocional",
+    "fr": "Connexion émotionnelle"
+  },
+  "insight.synastry.title.house-overlays": {
+    "en": "House overlays",
+    "zh": "落宫叠加",
+    "es": "Superposiciones de casas",
+    "fr": "Superpositions de maisons"
+  },
+  "insight.synastry.title.key-inter-aspects": {
+    "en": "Key inter-aspects",
+    "zh": "主要相互连接",
+    "es": "Aspectos entre cartas clave",
+    "fr": "Aspects croisés clés"
+  },
+  "insight.synastry.title.perspectives": {
+    "en": "How you experience each other",
+    "zh": "彼此的体验",
+    "es": "Cómo os vivís mutuamente",
+    "fr": "Comment vous vous vivez l’un l’autre"
+  },
+  "insight.synastry.title.relationship-overview": {
+    "en": "Relationship overview",
+    "zh": "关系总览",
+    "es": "Resumen de la relación",
+    "fr": "Vue d’ensemble de la relation"
+  },
+  "insight.synastry.venus-and-mars-contacts-describe-attraction-and-pursuit-other-major-cont": {
+    "en": "Venus and Mars contacts describe attraction and pursuit; other major contacts can add intensity.",
+    "zh": "金星与火星联系描述吸引和追求，其他重要联系会增加强度。",
+    "es": "Los contactos de Venus y Marte describen la atracción y la iniciativa; otros contactos importantes pueden añadir intensidad.",
+    "fr": "Les contacts de Vénus et Mars décrivent l’attraction et l’élan ; d’autres contacts majeurs peuvent ajouter de l’intensité."
+  },
+  "insight.synastry.what-differs": {
+    "en": "WHAT DIFFERS",
+    "zh": "差异之处",
+    "es": "LO QUE DIFIERE",
+    "fr": "CE QUI DIFFÈRE"
+  },
+  "insight.synastry.what-flows": {
+    "en": "WHAT FLOWS",
+    "zh": "顺畅之处",
+    "es": "LO QUE FLUYE",
+    "fr": "CE QUI EST FLUIDE"
+  },
+  "insight.transit.a-planet-can-matter-because-of-the-house-it-occupies-even-when-no-exact": {
+    "en": "A planet can matter because of the house it occupies even when no exact natal aspect is active.",
+    "zh": "即使没有正在生效的精确本命相位，行星也会因所处宫位而具有明确的领域重点。",
+    "es": "Un planeta puede ser importante por la casa que ocupa incluso cuando no hay ningún aspecto natal exacto activo.",
+    "fr": "Une planète peut compter en raison de la maison qu’elle occupe, même lorsqu’aucun aspect natal exact n’est actif."
+  },
+  "insight.transit.active-transits": {
+    "en": "Active transits",
+    "zh": "进行中的变化",
+    "es": "Tránsitos activos",
+    "fr": "Transits actifs"
+  },
+  "insight.transit.active-window": {
+    "en": "Active window",
+    "zh": "生效窗口",
+    "es": "Ventana activa",
+    "fr": "Fenêtre active"
+  },
+  "insight.transit.activity": {
+    "en": "activity",
+    "zh": "活跃度",
+    "es": "actividad",
+    "fr": "activité"
+  },
+  "insight.transit.activity-reflects-transiting-houses-activated-natal-planets-and-overlapp": {
+    "en": "Activity reflects transiting houses, activated natal planets and overlapping exact contacts. It is not a fortune or success score.",
+    "zh": "活动度反映行运行星落宫、被触发的本命星体与重叠的精确接触；它不是运气或成功评分。",
+    "es": "La actividad refleja las casas transitadas, los planetas natales activados y los contactos exactos superpuestos. No es una puntuación de fortuna ni de éxito.",
+    "fr": "L’activité reflète les maisons transitées, les planètes natales activées et les contacts exacts qui se chevauchent. Ce n’est pas un score de chance ou de réussite."
+  },
+  "insight.transit.adjust": {
+    "en": "Adjust",
+    "zh": "调整",
+    "es": "Ajustar",
+    "fr": "Ajuster"
+  },
+  "insight.transit.applying": {
+    "en": "Applying",
+    "zh": "入相",
+    "es": "Aplicativo",
+    "fr": "Appliquant"
+  },
+  "insight.transit.calendar": {
+    "en": "Calendar",
+    "zh": "日历",
+    "es": "Calendario",
+    "fr": "Calendrier"
+  },
+  "insight.transit.current-cycles": {
+    "en": "Current cycles",
+    "zh": "当前周期",
+    "es": "Ciclos actuales",
+    "fr": "Cycles actuels"
+  },
+  "insight.transit.current-period": {
+    "en": "CURRENT PERIOD",
+    "zh": "当前阶段",
+    "es": "PERÍODO ACTUAL",
+    "fr": "PÉRIODE ACTUELLE"
+  },
+  "insight.transit.current-story": {
+    "en": "Current story",
+    "zh": "当前主线",
+    "es": "Historia actual",
+    "fr": "Thème actuel"
+  },
+  "insight.transit.daily-movement": {
+    "en": "DAILY MOVEMENT",
+    "zh": "每日变化",
+    "es": "MOVIMIENTO DIARIO",
+    "fr": "MOUVEMENT QUOTIDIEN"
+  },
+  "insight.transit.difference-from-active-transits": {
+    "en": "Difference from Active Transits",
+    "zh": "与进行中的变化有何不同",
+    "es": "Diferencia con Tránsitos activos",
+    "fr": "Différence avec les transits actifs"
+  },
+  "insight.transit.direct": {
+    "en": "Direct",
+    "zh": "顺行",
+    "es": "Directo",
+    "fr": "Direct"
+  },
+  "insight.transit.disrupting": {
+    "en": "DISRUPTING",
+    "zh": "重塑",
+    "es": "RUPTURA",
+    "fr": "RUPTURE"
+  },
+  "insight.transit.end": {
+    "en": "End",
+    "zh": "结束",
+    "es": "Fin",
+    "fr": "Fin"
+  },
+  "insight.transit.ends-today": {
+    "en": "Ends today",
+    "zh": "今天结束",
+    "es": "Termina hoy",
+    "fr": "Se termine aujourd’hui"
+  },
+  "insight.transit.ends-tomorrow": {
+    "en": "Ends tomorrow",
+    "zh": "明天结束",
+    "es": "Termina mañana",
+    "fr": "Se termine demain"
+  },
+  "insight.transit.event": {
+    "en": "Event",
+    "zh": "事件",
+    "es": "Evento",
+    "fr": "Événement"
+  },
+  "insight.transit.expanding": {
+    "en": "EXPANDING",
+    "zh": "扩展",
+    "es": "EXPANSIÓN",
+    "fr": "EXPANSION"
+  },
+  "insight.transit.expanding.5e50de8": {
+    "en": "EXPANDING",
+    "zh": "展开",
+    "es": "EXPANSIÓN",
+    "fr": "EXPANSION"
+  },
+  "insight.transit.fortified": {
+    "en": "FORTIFIED",
+    "zh": "得助",
+    "es": "FORTALECIDO",
+    "fr": "RENFORCÉ"
+  },
+  "insight.transit.house": {
+    "en": "House",
+    "zh": "宫位",
+    "es": "Casa",
+    "fr": "Maison"
+  },
+  "insight.transit.how-it-works": {
+    "en": "How it works",
+    "zh": "原理说明",
+    "es": "Cómo funciona",
+    "fr": "Fonctionnement"
+  },
+  "insight.transit.impaired": {
+    "en": "IMPAIRED",
+    "zh": "受损",
+    "es": "DEBILITADO",
+    "fr": "AFFAIBLI"
+  },
+  "insight.transit.ingress": {
+    "en": "Ingress",
+    "zh": "进入",
+    "es": "Ingreso",
+    "fr": "Entrée"
+  },
+  "insight.transit.life-areas": {
+    "en": "Life areas",
+    "zh": "生活领域",
+    "es": "Áreas de vida",
+    "fr": "Domaines de vie"
+  },
+  "insight.transit.long-term": {
+    "en": "long-term",
+    "zh": "长期",
+    "es": "a largo plazo",
+    "fr": "à long terme"
+  },
+  "insight.transit.long-term-chapter": {
+    "en": "LONG-TERM CHAPTER",
+    "zh": "长期篇章",
+    "es": "CAPÍTULO A LARGO PLAZO",
+    "fr": "CHAPITRE À LONG TERME"
+  },
+  "insight.transit.no-active-cycle-at-this-time-scale": {
+    "en": "No active cycle at this time scale.",
+    "zh": "当前没有这个时间尺度的生效周期。",
+    "es": "No hay ningún ciclo activo en esta escala temporal.",
+    "fr": "Aucun cycle actif à cette échelle de temps."
+  },
+  "insight.transit.no-transits-enter-this-window": {
+    "en": "No transits enter this window.",
+    "zh": "这个时间范围内没有新的行运进入。",
+    "es": "No entran nuevos tránsitos en este período.",
+    "fr": "Aucun nouveau transit n’entre dans cette période."
+  },
+  "insight.transit.personal-focus": {
+    "en": "Personal focus",
+    "zh": "个人重心",
+    "es": "Enfoque personal",
+    "fr": "Focus personnel"
+  },
+  "insight.transit.planet-paths": {
+    "en": "Planet paths",
+    "zh": "行星路径",
+    "es": "Trayectorias planetarias",
+    "fr": "Trajectoires planétaires"
+  },
+  "insight.transit.planet-paths-shows-location-and-motion-active-transits-shows-exact-relat": {
+    "en": "Planet Paths shows location and motion. Active Transits shows exact relationships to natal planets and points.",
+    "zh": "行星路径显示位置与运动；进行中的变化显示行运行星与本命星体或点位之间的精确关系。",
+    "es": "Trayectorias planetarias muestra la ubicación y el movimiento. Tránsitos activos muestra las relaciones exactas con planetas y puntos natales.",
+    "fr": "Trajectoires planétaires montre la position et le mouvement. Transits actifs montre les relations exactes avec les planètes et points natals."
+  },
+  "insight.transit.pressure": {
+    "en": "PRESSURE",
+    "zh": "压力",
+    "es": "PRESIÓN",
+    "fr": "PRESSION"
+  },
+  "insight.transit.push": {
+    "en": "Push",
+    "zh": "推动",
+    "es": "Impulso",
+    "fr": "Impulsion"
+  },
+  "insight.transit.received": {
+    "en": "RECEIVED",
+    "zh": "接纳",
+    "es": "RECIBIDO",
+    "fr": "REÇU"
+  },
+  "insight.transit.retrograde": {
+    "en": "Retrograde",
+    "zh": "逆行",
+    "es": "Retrógrado",
+    "fr": "Rétrograde"
+  },
+  "insight.transit.return": {
+    "en": "Return",
+    "zh": "回返",
+    "es": "Retorno",
+    "fr": "Retour"
+  },
+  "insight.transit.returning": {
+    "en": "Returning",
+    "zh": "回返中",
+    "es": "Retorno",
+    "fr": "Retour exact"
+  },
+  "insight.transit.separating": {
+    "en": "Separating",
+    "zh": "离相",
+    "es": "Separativo",
+    "fr": "Séparant"
+  },
+  "insight.transit.show-fewer-areas": {
+    "en": "Show fewer areas",
+    "zh": "收起部分领域",
+    "es": "Mostrar menos áreas",
+    "fr": "Afficher moins de domaines"
+  },
+  "insight.transit.show-key-transits": {
+    "en": "Show key transits",
+    "zh": "只看重点行运",
+    "es": "Mostrar tránsitos clave",
+    "fr": "Afficher les transits clés"
+  },
+  "insight.transit.stabilizing": {
+    "en": "STABILIZING",
+    "zh": "稳固",
+    "es": "ESTABILIZACIÓN",
+    "fr": "STABILISATION"
+  },
+  "insight.transit.start": {
+    "en": "Start",
+    "zh": "开始",
+    "es": "Inicio",
+    "fr": "Début"
+  },
+  "insight.transit.structuring": {
+    "en": "STRUCTURING",
+    "zh": "构建",
+    "es": "ESTRUCTURACIÓN",
+    "fr": "STRUCTURATION"
+  },
+  "insight.transit.structuring.b1a7c26": {
+    "en": "STRUCTURING",
+    "zh": "定型",
+    "es": "ESTRUCTURACIÓN",
+    "fr": "STRUCTURATION"
+  },
+  "insight.transit.support": {
+    "en": "SUPPORT",
+    "zh": "助益",
+    "es": "APOYO",
+    "fr": "SOUTIEN"
+  },
+  "insight.transit.supporting": {
+    "en": "SUPPORTING",
+    "zh": "助力",
+    "es": "APOYO",
+    "fr": "SOUTIEN"
+  },
+  "insight.transit.target": {
+    "en": "Target",
+    "zh": "目标位置",
+    "es": "Objetivo",
+    "fr": "Cible"
+  },
+  "insight.transit.trigger-summary.one": {
+    "en": "{{activity}} · {{count}} trigger",
+    "zh": "{{activity}} · {{count}} 个触发",
+    "es": "{{activity}} · {{count}} activación",
+    "fr": "{{activity}} · {{count}} déclenchement"
+  },
+  "insight.transit.trigger-summary.other": {
+    "en": "{{activity}} · {{count}} triggers",
+    "zh": "{{activity}} · {{count}} 个触发",
+    "es": "{{activity}} · {{count}} activaciones",
+    "fr": "{{activity}} · {{count}} déclenchements"
+  },
+  "insight.transit.technical-basis": {
+    "en": "Technical basis",
+    "zh": "技术依据",
+    "es": "Base técnica",
+    "fr": "Base technique"
+  },
+  "insight.transit.this-module-shows-each-transiting-planets-sign-natal-house-direction-and": {
+    "en": "This module shows each transiting planet's sign, natal house, direction and next calculated ingress or station.",
+    "zh": "这里显示每颗行运行星的星座、本命宫位、运动方向，以及下一次已计算的换座、换宫或转向。",
+    "es": "Este módulo muestra el signo, la casa natal, la dirección y el próximo ingreso o estacionamiento calculado de cada planeta en tránsito.",
+    "fr": "Ce module affiche, pour chaque planète en transit, son signe, sa maison natale, sa direction et sa prochaine entrée ou station calculée."
+  },
+  "insight.transit.this-separates-planetary-location-from-aspect-interpretation": {
+    "en": "This separates planetary location from aspect interpretation.",
+    "zh": "这里将行星位置与相位解读分开呈现。",
+    "es": "Esto separa la posición planetaria de la interpretación de aspectos.",
+    "fr": "Cela sépare la position planétaire de l’interprétation des aspects."
+  },
+  "insight.transit.this-weeks-intensity": {
+    "en": "This week's intensity",
+    "zh": "本周变化强度",
+    "es": "Intensidad de esta semana",
+    "fr": "Intensité de cette semaine"
+  },
+  "insight.transit.time": {
+    "en": "Time",
+    "zh": "时间",
+    "es": "Hora",
+    "fr": "Heure"
+  },
+  "insight.transit.timeline": {
+    "en": "Timeline",
+    "zh": "时间线",
+    "es": "Cronología",
+    "fr": "Chronologie"
+  },
+  "insight.transit.timing-orb-house-and-motion-are-calculated-for-the-selected-chart-moment": {
+    "en": "Timing, orb, house and motion are calculated for the selected chart moment and time zone.",
+    "zh": "时间、容许度、宫位和运动状态均按当前选择的星盘时刻与时区计算。",
+    "es": "La hora, el orbe, la casa y el movimiento se calculan para el momento y la zona horaria seleccionados.",
+    "fr": "L’heure, l’orbe, la maison et le mouvement sont calculés pour le moment et le fuseau horaire sélectionnés."
+  },
+  "insight.transit.transit-timeline": {
+    "en": "Transit timeline",
+    "zh": "变化时间线",
+    "es": "Cronología de tránsitos",
+    "fr": "Chronologie des transits"
+  },
+  "insight.transit.transiting-houses-motion": {
+    "en": "Transiting houses & motion",
+    "zh": "行运宫位与运动状态",
+    "es": "Casas en tránsito y movimiento",
+    "fr": "Maisons transitées et mouvement"
+  },
+  "insight.transit.unknown": {
+    "en": "Unknown",
+    "zh": "未知",
+    "es": "Desconocido",
+    "fr": "Inconnu"
+  },
+  "insight.transit.unknown-house": {
+    "en": "Unknown house",
+    "zh": "宫位未知",
+    "es": "Casa desconocida",
+    "fr": "Maison inconnue"
+  },
+  "insight.transit.view-all-active-transits": {
+    "en": "View all active transits",
+    "zh": "查看全部进行中行运",
+    "es": "Ver todos los tránsitos activos",
+    "fr": "Voir tous les transits actifs"
+  },
+  "insight.transit.why-separate-it": {
+    "en": "Why separate it",
+    "zh": "为什么单独呈现",
+    "es": "Por qué se muestra aparte",
+    "fr": "Pourquoi le séparer"
+  },
+  "interpretation.direct": {
+    "en": "direct",
+    "zh": "顺行",
+    "es": "directo",
+    "fr": "direct"
+  },
+  "interpretation.high": {
+    "en": "high",
+    "zh": "较高",
+    "es": "alto",
+    "fr": "élevé"
+  },
+  "interpretation.low": {
+    "en": "low",
+    "zh": "较低",
+    "es": "bajo",
+    "fr": "faible"
+  },
+  "interpretation.moderate": {
+    "en": "moderate",
+    "zh": "中等",
+    "es": "moderado",
+    "fr": "modéré"
+  },
+  "interpretation.retrograde": {
+    "en": "retrograde",
+    "zh": "逆行",
+    "es": "retrógrado",
+    "fr": "rétrograde"
+  },
+  "interpretation.stations-direct": {
+    "en": "stations direct",
+    "zh": "恢复顺行",
+    "es": "se estaciona directo",
+    "fr": "stationne direct"
+  },
+  "interpretation.stations-retrograde": {
+    "en": "stations retrograde",
+    "zh": "开始逆行",
+    "es": "se estaciona retrógrado",
+    "fr": "stationne rétrograde"
+  },
+  "interpretation.very-high": {
+    "en": "very high",
+    "zh": "很高",
+    "es": "muy alto",
+    "fr": "très élevé"
+  },
+  "location.cancel": {
+    "en": "Cancel",
+    "zh": "取消",
+    "es": "Cancelar",
+    "fr": "Annuler"
+  },
+  "location.choose-location": {
+    "en": "Choose location",
+    "zh": "选择地点",
+    "es": "Elegir lugar",
+    "fr": "Choisir un lieu"
+  },
+  "location.my-location": {
+    "en": "My location",
+    "zh": "我的位置",
+    "es": "Mi ubicación",
+    "fr": "Ma position"
+  },
+  "location.search-a-city-or-address": {
+    "en": "Search a city or address",
+    "zh": "搜索城市或地址",
+    "es": "Buscar una ciudad o dirección",
+    "fr": "Rechercher une ville ou une adresse"
+  },
+  "location.tap-the-map-to-choose": {
+    "en": "Tap the map to choose",
+    "zh": "点击地图选择位置",
+    "es": "Toca el mapa para elegir",
+    "fr": "Touchez la carte pour choisir"
+  },
+  "location.unavailable-error": {
+    "en": "Unable to get location information. Check location permission or your network, then try again.",
+    "zh": "无法获取地点信息，请检查定位权限或网络后重试。",
+    "es": "No se pudo obtener la ubicación. Comprueba el permiso de localización o la red e inténtalo de nuevo.",
+    "fr": "Impossible d’obtenir la position. Vérifiez l’autorisation de localisation ou le réseau, puis réessayez."
+  },
+  "navigation.ask": {
+    "en": "Ask",
+    "zh": "问事",
+    "es": "Consultar",
+    "fr": "Question"
+  },
+  "navigation.today": {
+    "en": "Today",
+    "zh": "今日",
+    "es": "Hoy",
+    "fr": "Aujourd’hui"
+  },
+  "profile.about": {
+    "en": "About",
+    "zh": "关于",
+    "es": "Acerca de",
+    "fr": "À propos"
+  },
+  "profile.add": {
+    "en": "Add",
+    "zh": "添加",
+    "es": "Añadir",
+    "fr": "Ajouter"
+  },
+  "profile.add-someone-once-then-reuse-their-birth-details-in-future-relationship-c": {
+    "en": "Add someone once, then reuse their birth details in future relationship charts.",
+    "zh": "人物资料只需添加一次，后续合盘可以直接选择使用。",
+    "es": "Añade a una persona una sola vez y reutiliza sus datos de nacimiento en futuras cartas de relación.",
+    "fr": "Ajoutez une personne une seule fois, puis réutilisez ses données de naissance dans de futures cartes relationnelles."
+  },
+  "profile.allow-new-ai-generation": {
+    "en": "Allow new AI generation",
+    "zh": "允许新的 AI 生成",
+    "es": "Permitir nuevas generaciones con IA",
+    "fr": "Autoriser de nouvelles générations par IA"
+  },
+  "profile.app-language": {
+    "en": "App language",
+    "zh": "应用语言",
+    "es": "Idioma de la app",
+    "fr": "Langue de l’app"
+  },
+  "profile.appearance": {
+    "en": "Appearance",
+    "zh": "外观",
+    "es": "Apariencia",
+    "fr": "Apparence"
+  },
+  "profile.birth": {
+    "en": "Birth",
+    "zh": "出生资料",
+    "es": "Nacimiento",
+    "fr": "Naissance"
+  },
+  "profile.birth-date-time": {
+    "en": "Birth date & time",
+    "zh": "出生日期与时间",
+    "es": "Fecha y hora de nacimiento",
+    "fr": "Date et heure de naissance"
+  },
+  "profile.birth-details": {
+    "en": "Birth details",
+    "zh": "出生资料",
+    "es": "Datos de nacimiento",
+    "fr": "Informations de naissance"
+  },
+  "profile.birth-place": {
+    "en": "Birth place",
+    "zh": "出生地点",
+    "es": "Lugar de nacimiento",
+    "fr": "Lieu de naissance"
+  },
+  "profile.bug": {
+    "en": "Bug",
+    "zh": "问题",
+    "es": "Error",
+    "fr": "Bug"
+  },
+  "profile.calculation": {
+    "en": "Calculation",
+    "zh": "计算引擎",
+    "es": "Cálculo",
+    "fr": "Calcul"
+  },
+  "profile.change-photo": {
+    "en": "Change photo",
+    "zh": "更换头像",
+    "es": "Cambiar foto",
+    "fr": "Changer la photo"
+  },
+  "profile.choose-on-apple-maps": {
+    "en": "Choose on Apple Maps",
+    "zh": "在 Apple 地图中选址",
+    "es": "Elegir en Apple Maps",
+    "fr": "Choisir dans Plans"
+  },
+  "profile.clear": {
+    "en": "Clear",
+    "zh": "清除",
+    "es": "Borrar",
+    "fr": "Effacer"
+  },
+  "profile.clear-ask-history": {
+    "en": "Clear ask history",
+    "zh": "清除问事历史",
+    "es": "Borrar historial de consultas",
+    "fr": "Effacer l’historique des questions"
+  },
+  "profile.clear-by-chart-type": {
+    "en": "Clear by chart type",
+    "zh": "按盘型清除",
+    "es": "Borrar por tipo de carta",
+    "fr": "Effacer par type de carte"
+  },
+  "profile.clear-by-person": {
+    "en": "Clear by person",
+    "zh": "按人物清除",
+    "es": "Borrar por persona",
+    "fr": "Effacer par personne"
+  },
+  "profile.clear-data": {
+    "en": "Clear data?",
+    "zh": "确认清除？",
+    "es": "¿Borrar datos?",
+    "fr": "Effacer les données ?"
+  },
+  "profile.clear-generated-content-cache": {
+    "en": "Clear generated content cache",
+    "zh": "清除生成内容缓存",
+    "es": "Borrar caché de contenido generado",
+    "fr": "Effacer le cache du contenu généré"
+  },
+  "profile.clear-saved-reports": {
+    "en": "Clear saved reports",
+    "zh": "清除已保存报告",
+    "es": "Borrar informes guardados",
+    "fr": "Effacer les rapports enregistrés"
+  },
+  "profile.clearing-removes-data-stored-on-this-device-only": {
+    "en": "Clearing removes data stored on this device only.",
+    "zh": "清除只会删除保存在本机的数据。",
+    "es": "Al borrar, solo se eliminan los datos almacenados en este dispositivo.",
+    "fr": "L’effacement supprime uniquement les données stockées sur cet appareil."
+  },
+  "profile.contact-optional": {
+    "en": "Contact (optional)",
+    "zh": "联系方式（可选）",
+    "es": "Contacto (opcional)",
+    "fr": "Contact (facultatif)"
+  },
+  "profile.content-rights": {
+    "en": "Content rights",
+    "zh": "内容权利",
+    "es": "Derechos sobre el contenido",
+    "fr": "Droits sur le contenu"
+  },
+  "profile.coordinates": {
+    "en": "Coordinates",
+    "zh": "经纬度",
+    "es": "Coordenadas",
+    "fr": "Coordonnées"
+  },
+  "profile.copy-feedback-text": {
+    "en": "Copy feedback text",
+    "zh": "复制反馈文字",
+    "es": "Copiar texto de comentarios",
+    "fr": "Copier le texte du retour"
+  },
+  "profile.could-not-send-feedback-you-can-copy-it-and-try-again-later": {
+    "en": "Could not send feedback. You can copy it and try again later.",
+    "zh": "反馈暂时无法提交，你可以复制内容后稍后重试。",
+    "es": "No se pudieron enviar los comentarios. Puedes copiarlos e intentarlo de nuevo más tarde.",
+    "fr": "Impossible d’envoyer le retour. Vous pouvez le copier et réessayer plus tard."
+  },
+  "profile.current-location": {
+    "en": "Current Location",
+    "zh": "当前位置",
+    "es": "Ubicación actual",
+    "fr": "Position actuelle"
+  },
+  "profile.delete": {
+    "en": "Delete",
+    "zh": "删除",
+    "es": "Eliminar",
+    "fr": "Supprimer"
+  },
+  "profile.delete-person": {
+    "en": "Delete person",
+    "zh": "删除人物",
+    "es": "Eliminar persona",
+    "fr": "Supprimer la personne"
+  },
+  "profile.edit-birth-details": {
+    "en": "Edit birth details",
+    "zh": "编辑出生资料",
+    "es": "Editar datos de nacimiento",
+    "fr": "Modifier les informations de naissance"
+  },
+  "profile.editorial-content": {
+    "en": "Editorial content",
+    "zh": "原创解读内容",
+    "es": "Contenido editorial",
+    "fr": "Contenu éditorial"
+  },
+  "profile.feature": {
+    "en": "Feature",
+    "zh": "功能建议",
+    "es": "Función",
+    "fr": "Fonctionnalité"
+  },
+  "profile.feedback-sent-thank-you": {
+    "en": "Feedback sent. Thank you.",
+    "zh": "反馈已提交，谢谢。",
+    "es": "Comentarios enviados. Gracias.",
+    "fr": "Retour envoyé. Merci."
+  },
+  "profile.feedback-text-copied": {
+    "en": "Feedback text copied.",
+    "zh": "反馈文字已复制。",
+    "es": "Texto de comentarios copiado.",
+    "fr": "Texte du retour copié."
+  },
+  "profile.feedback-type": {
+    "en": "Feedback type",
+    "zh": "反馈类型",
+    "es": "Tipo de comentario",
+    "fr": "Type de retour"
+  },
+  "profile.feedback-uses-the-network-and-includes-the-app-version-and-device-model": {
+    "en": "Feedback uses the network and includes the app version and device model, but never chart or birth data. AI interpretation uses the network only after separate consent in Settings.",
+    "zh": "反馈会联网并附带应用版本和设备型号，但不会附带星盘或出生资料。AI 解读只有在你另行授权后才会联网。",
+    "es": "Los comentarios usan la red e incluyen la versión de la app y el modelo del dispositivo, pero nunca datos de cartas ni de nacimiento. La interpretación con IA usa la red solo tras un consentimiento independiente en Ajustes.",
+    "fr": "Les retours utilisent le réseau et incluent la version de l’app et le modèle de l’appareil, mais jamais les données de carte ou de naissance. L’interprétation par IA utilise le réseau uniquement après un consentement séparé dans Réglages."
+  },
+  "profile.generated-interpretations-will-be-regenerated-next-time-you-open-them": {
+    "en": "Generated interpretations will be regenerated next time you open them.",
+    "zh": "下次打开时，生成内容会重新请求。",
+    "es": "Las interpretaciones generadas se volverán a generar la próxima vez que las abras.",
+    "fr": "Les interprétations générées seront régénérées lors de leur prochaine ouverture."
+  },
+  "profile.gnu-agpl-3-0": {
+    "en": "GNU AGPL 3.0",
+    "zh": "GNU AGPL 3.0 全文",
+    "es": "GNU AGPL 3.0",
+    "fr": "GNU AGPL 3.0"
+  },
+  "profile.identity": {
+    "en": "Identity",
+    "zh": "人物",
+    "es": "Identidad",
+    "fr": "Identité"
+  },
+  "profile.interpretation-defaults": {
+    "en": "Interpretation Defaults",
+    "zh": "解读预设",
+    "es": "Valores predeterminados de interpretación",
+    "fr": "Réglages d’interprétation par défaut"
+  },
+  "profile.interstellar-does-not-require-an-account-for-chart-calculation": {
+    "en": "Interstellar does not require an account for chart calculation.",
+    "zh": "Interstellar 的星盘计算不要求注册账户。",
+    "es": "Interstellar no requiere una cuenta para calcular cartas.",
+    "fr": "Interstellar ne nécessite pas de compte pour calculer les cartes."
+  },
+  "profile.language": {
+    "en": "Language",
+    "zh": "语言",
+    "es": "Idioma",
+    "fr": "Langue"
+  },
+  "profile.latitude": {
+    "en": "Latitude",
+    "zh": "纬度",
+    "es": "Latitud",
+    "fr": "Latitude"
+  },
+  "profile.license-text-is-unavailable": {
+    "en": "License text is unavailable.",
+    "zh": "许可证全文暂不可用。",
+    "es": "El texto de la licencia no está disponible.",
+    "fr": "Le texte de la licence n’est pas disponible."
+  },
+  "profile.licenses": {
+    "en": "Licenses",
+    "zh": "许可证",
+    "es": "Licencias",
+    "fr": "Licences"
+  },
+  "profile.local-data": {
+    "en": "Local Data",
+    "zh": "本地数据",
+    "es": "Datos locales",
+    "fr": "Données locales"
+  },
+  "profile.local-first-calculations": {
+    "en": "Local-first calculations",
+    "zh": "本地优先计算",
+    "es": "Cálculos locales por defecto",
+    "fr": "Calculs locaux en priorité"
+  },
+  "profile.longitude": {
+    "en": "Longitude",
+    "zh": "经度",
+    "es": "Longitud",
+    "fr": "Longitude"
+  },
+  "profile.modern-and-classical-change-how-each-chart-is-calculated": {
+    "en": "Modern and Classical change how each chart is calculated.",
+    "zh": "现代与古典会改变每张盘的计算方式。",
+    "es": "Moderno y Clásico cambian la forma en que se calcula cada carta.",
+    "fr": "Moderne et Classique modifient la façon dont chaque carte est calculée."
+  },
+  "profile.name": {
+    "en": "Name",
+    "zh": "姓名",
+    "es": "Nombre",
+    "fr": "Nom"
+  },
+  "profile.open-source-licenses": {
+    "en": "Open-source licenses",
+    "zh": "开源许可证",
+    "es": "Licencias de código abierto",
+    "fr": "Licences open source"
+  },
+  "profile.original-interpretations-translations-editorial-selection-and-arrangemen": {
+    "en": "Original interpretations, translations, editorial selection, and arrangement are separately copyrighted content and are not licensed under the AGPL merely because the application can load them.",
+    "zh": "原创解读、翻译、编辑选择与编排属于单独享有版权的内容；应用能够加载这些内容，不表示其自动依据 AGPL 授权。",
+    "es": "Las interpretaciones originales, las traducciones, la selección editorial y la organización son contenido protegido por derechos de autor de forma independiente y no se licencian bajo la AGPL por el mero hecho de que la aplicación pueda cargarlos.",
+    "fr": "Les interprétations originales, traductions, choix éditoriaux et l’organisation sont des contenus protégés séparément par le droit d’auteur et ne sont pas placés sous licence AGPL du seul fait que l’application peut les charger."
+  },
+  "profile.people": {
+    "en": "PEOPLE",
+    "zh": "人物档案",
+    "es": "PERSONAS",
+    "fr": "PERSONNES"
+  },
+  "profile.people-you-know": {
+    "en": "People you know",
+    "zh": "我认识的人",
+    "es": "Personas que conoces",
+    "fr": "Personnes que vous connaissez"
+  },
+  "profile.person-details": {
+    "en": "Person details",
+    "zh": "人物资料",
+    "es": "Datos personales",
+    "fr": "Informations personnelles"
+  },
+  "profile.place": {
+    "en": "Place",
+    "zh": "地点",
+    "es": "Lugar",
+    "fr": "Lieu"
+  },
+  "profile.profile": {
+    "en": "Profile",
+    "zh": "我的",
+    "es": "Profil",
+    "fr": "Profil"
+  },
+  "profile.relationship-to-me": {
+    "en": "Relationship to me",
+    "zh": "与我的关系",
+    "es": "Relación conmigo",
+    "fr": "Lien avec moi"
+  },
+  "profile.remove": {
+    "en": "Remove",
+    "zh": "移除",
+    "es": "Eliminar",
+    "fr": "Retirer"
+  },
+  "profile.report": {
+    "en": "Report",
+    "zh": "反馈",
+    "es": "Informe",
+    "fr": "Rapport"
+  },
+  "profile.report-or-suggest-a-feature": {
+    "en": "Report or suggest a feature",
+    "zh": "问题反馈与功能建议",
+    "es": "Informar de un problema o sugerir una función",
+    "fr": "Signaler un problème ou suggérer une fonctionnalité"
+  },
+  "profile.save": {
+    "en": "Save",
+    "zh": "保存",
+    "es": "Guardar",
+    "fr": "Enregistrer"
+  },
+  "profile.send-feedback": {
+    "en": "Send feedback",
+    "zh": "提交反馈",
+    "es": "Enviar comentarios",
+    "fr": "Envoyer le retour"
+  },
+  "profile.sending": {
+    "en": "Sending…",
+    "zh": "正在提交…",
+    "es": "Enviando…",
+    "fr": "Envoi…"
+  },
+  "profile.settings": {
+    "en": "Settings",
+    "zh": "设置",
+    "es": "Ajustes",
+    "fr": "Réglages"
+  },
+  "profile.short-title": {
+    "en": "Short title",
+    "zh": "简短标题",
+    "es": "Título breve",
+    "fr": "Titre court"
+  },
+  "profile.swiss-ephemeris-2-10-3-is-used-under-the-gnu-affero-general-public-licen": {
+    "en": "Swiss Ephemeris 2.10.3 is used under the GNU Affero General Public License. Copyright notices are preserved below.",
+    "zh": "Swiss Ephemeris 2.10.3 依据 GNU Affero 通用公共许可证使用，版权声明完整保留如下。",
+    "es": "Swiss Ephemeris 2.10.3 se utiliza bajo la Licencia Pública General GNU Affero. Los avisos de copyright se conservan a continuación.",
+    "fr": "Swiss Ephemeris 2.10.3 est utilisé sous la licence publique générale GNU Affero. Les mentions de droit d’auteur sont conservées ci-dessous."
+  },
+  "profile.swiss-ephemeris-license-notice": {
+    "en": "Swiss Ephemeris license notice",
+    "zh": "Swiss Ephemeris 许可声明",
+    "es": "Aviso de licencia de Swiss Ephemeris",
+    "fr": "Avis de licence Swiss Ephemeris"
+  },
+  "profile.text-size": {
+    "en": "Text size",
+    "zh": "字体大小",
+    "es": "Tamaño del texto",
+    "fr": "Taille du texte"
+  },
+  "profile.theme": {
+    "en": "Theme",
+    "zh": "主题",
+    "es": "Tema",
+    "fr": "Thème"
+  },
+  "profile.this-removes-all-saved-chart-reports-from-this-device": {
+    "en": "This removes all saved chart reports from this device.",
+    "zh": "这会删除本机保存的全部星盘报告。",
+    "es": "Esto elimina de este dispositivo todos los informes de cartas guardados.",
+    "fr": "Cela supprime de cet appareil tous les rapports de cartes enregistrés."
+  },
+  "profile.this-removes-locally-generated-chart-reports-linked-to-your-current-birt": {
+    "en": "This removes locally generated chart reports linked to your current birth profile.",
+    "zh": "这会删除与当前本人出生资料关联的本机生成报告。",
+    "es": "Esto elimina los informes de cartas generados localmente vinculados a tu perfil de nacimiento actual.",
+    "fr": "Cela supprime les rapports de cartes générés localement et liés à votre profil de naissance actuel."
+  },
+  "profile.this-removes-your-saved-horary-questions": {
+    "en": "This removes your saved horary questions.",
+    "zh": "这会删除你保存的问事记录。",
+    "es": "Esto elimina tus preguntas horarias guardadas.",
+    "fr": "Cela supprime vos questions horaires enregistrées."
+  },
+  "profile.time-zone": {
+    "en": "Time zone",
+    "zh": "时区",
+    "es": "Zona horaria",
+    "fr": "Fuseau horaire"
+  },
+  "profile.turning-this-off-stops-future-network-requests-reports-already-stored-on": {
+    "en": "Turning this off stops future network requests. Reports already stored on this device remain readable.",
+    "zh": "关闭后不再发送新的联网请求；已经保存在本机的报告仍可阅读。",
+    "es": "Desactivar esta opción detiene las futuras solicitudes de red. Los informes ya almacenados en este dispositivo seguirán siendo legibles.",
+    "fr": "La désactivation arrête les futures requêtes réseau. Les rapports déjà stockés sur cet appareil restent lisibles."
+  },
+  "profile.type": {
+    "en": "Type",
+    "zh": "类型",
+    "es": "Tipo",
+    "fr": "Type"
+  },
+  "profile.version": {
+    "en": "Version",
+    "zh": "版本",
+    "es": "Versión",
+    "fr": "Version"
+  },
+  "profile.what-happened-or-what-would-you-like-us-to-add": {
+    "en": "What happened, or what would you like us to add?",
+    "zh": "请描述遇到的问题，或希望增加的功能。",
+    "es": "¿Qué ocurrió o qué te gustaría que añadiéramos?",
+    "fr": "Que s’est-il passé, ou que souhaitez-vous que nous ajoutions ?"
+  },
+  "profile.your-profile": {
+    "en": "YOUR PROFILE",
+    "zh": "个人资料",
+    "es": "TU PERFIL",
+    "fr": "VOTRE PROFIL"
+  },
+  "reports.calculate-this-chart-first": {
+    "en": "Calculate this chart first",
+    "zh": "请先完成该盘计算",
+    "es": "Calcula primero esta carta",
+    "fr": "Calculez d’abord cette carte"
+  },
+  "reports.chart": {
+    "en": "Chart",
+    "zh": "星盘",
+    "es": "Carta",
+    "fr": "Carte"
+  },
+  "reports.chart-reports": {
+    "en": "Chart Reports",
+    "zh": "星盘报告",
+    "es": "Informes de cartas",
+    "fr": "Rapports de cartes"
+  },
+  "reports.contents": {
+    "en": "Contents",
+    "zh": "目录",
+    "es": "Contenido",
+    "fr": "Sommaire"
+  },
+  "reports.current-information-confirmation": {
+    "en": "Generate this report from the current information?",
+    "zh": "是否根据以下当前信息生成报告？",
+    "es": "¿Generar este informe con la información actual?",
+    "fr": "Générer ce rapport à partir des informations actuelles ?"
+  },
+  "reports.current-information-will-replace": {
+    "en": "Generate from the current information and replace the saved report?",
+    "zh": "是否根据以下当前信息生成，并覆盖已保存的报告？",
+    "es": "¿Generar con la información actual y reemplazar el informe guardado?",
+    "fr": "Générer à partir des informations actuelles et remplacer le rapport enregistré ?"
+  },
+  "reports.current-sky-report": {
+    "en": "Current Sky Report",
+    "zh": "天象报告",
+    "es": "Informe del cielo actual",
+    "fr": "Rapport du ciel actuel"
+  },
+  "reports.daily-report": {
+    "en": "Daily Report",
+    "zh": "日报告",
+    "es": "Informe diario",
+    "fr": "Rapport quotidien"
+  },
+  "reports.each-completed-report-is-stored-on-device-read-it-again-without-regenera": {
+    "en": "Each completed report is stored on device. Read it again without regenerating the same chart or period.",
+    "zh": "每份完成的报告都保存在本机，随时可重读，无需重新生成。",
+    "es": "Cada informe completado se guarda en el dispositivo. Puedes volver a leerlo sin regenerar la misma carta o período.",
+    "fr": "Chaque rapport terminé est stocké sur l’appareil. Vous pouvez le relire sans régénérer la même carte ou période."
+  },
+  "reports.edit": {
+    "en": "Edit",
+    "zh": "编辑",
+    "es": "Editar",
+    "fr": "Modifier"
+  },
+  "reports.generate": {
+    "en": "Generate",
+    "zh": "生成",
+    "es": "Generar",
+    "fr": "Générer"
+  },
+  "reports.generate-report": {
+    "en": "Generate Report",
+    "zh": "生成报告",
+    "es": "Generar informe",
+    "fr": "Générer le rapport"
+  },
+  "reports.generated-once-kept-permanently": {
+    "en": "Generated once. Kept permanently.",
+    "zh": "生成一次，永久保留。",
+    "es": "Generado una vez. Conservado permanentemente.",
+    "fr": "Généré une fois. Conservé durablement."
+  },
+  "reports.generated-only-when-you-ask": {
+    "en": "Generated only when you ask",
+    "zh": "仅在你点击后生成",
+    "es": "Se genera solo cuando lo solicitas",
+    "fr": "Généré uniquement à votre demande"
+  },
+  "reports.generating": {
+    "en": "Generating…",
+    "zh": "正在生成…",
+    "es": "Generando…",
+    "fr": "Génération…"
+  },
+  "reports.generation-failed-you-can-try-again": {
+    "en": "Generation failed. You can try again.",
+    "zh": "生成失败，可以重试。",
+    "es": "La generación falló. Puedes intentarlo de nuevo.",
+    "fr": "La génération a échoué. Vous pouvez réessayer."
+  },
+  "reports.label": {
+    "en": "—",
+    "zh": "—",
+    "es": "—",
+    "fr": "—"
+  },
+  "reports.library": {
+    "en": "LIBRARY",
+    "zh": "报告库",
+    "es": "BIBLIOTECA",
+    "fr": "BIBLIOTHÈQUE"
+  },
+  "reports.locked": {
+    "en": "Locked",
+    "zh": "未到日期",
+    "es": "Bloqueado",
+    "fr": "Verrouillé"
+  },
+  "reports.monthly-report": {
+    "en": "Monthly Report",
+    "zh": "月报告",
+    "es": "Informe mensual",
+    "fr": "Rapport mensuel"
+  },
+  "reports.natal-report": {
+    "en": "Natal Report",
+    "zh": "本命报告",
+    "es": "Informe natal",
+    "fr": "Rapport natal"
+  },
+  "reports.no-reports-yet-choose-a-chart-above-and-generate-its-report-when-you-are": {
+    "en": "No reports yet. Choose a chart above and generate its report when you are ready.",
+    "zh": "暂无报告。请在上方选择一个星盘，并在需要时生成报告。",
+    "es": "Aún no hay informes. Elige una carta arriba y genera su informe cuando quieras.",
+    "fr": "Aucun rapport pour le moment. Choisissez une carte ci-dessus et générez son rapport quand vous le souhaitez."
+  },
+  "reports.preset": {
+    "en": "Preset",
+    "zh": "预设",
+    "es": "Preajuste",
+    "fr": "Préréglage"
+  },
+  "reports.progressed-report": {
+    "en": "Progressed Report",
+    "zh": "次限报告",
+    "es": "Informe de progresiones",
+    "fr": "Rapport de progressions"
+  },
+  "reports.ready": {
+    "en": "Ready",
+    "zh": "已就绪",
+    "es": "Listo",
+    "fr": "Prêt"
+  },
+  "reports.ready-to-generate": {
+    "en": "Ready to generate",
+    "zh": "可以生成",
+    "es": "Listo para generar",
+    "fr": "Prêt à générer"
+  },
+  "reports.regenerate": {
+    "en": "Regenerate",
+    "zh": "重新生成",
+    "es": "Regenerar",
+    "fr": "Régénérer"
+  },
+  "reports.regeneration-failed-your-saved-report-is-unchanged": {
+    "en": "Regeneration failed; your saved report is unchanged",
+    "zh": "重新生成失败；原报告仍保留",
+    "es": "La regeneración falló; tu informe guardado no ha cambiado",
+    "fr": "La régénération a échoué ; votre rapport enregistré reste inchangé"
+  },
+  "reports.relationship": {
+    "en": "Relationship",
+    "zh": "关系",
+    "es": "Relación",
+    "fr": "Relation"
+  },
+  "reports.replace-saved-report": {
+    "en": "Replace saved report?",
+    "zh": "覆盖已保存的报告？",
+    "es": "¿Reemplazar el informe guardado?",
+    "fr": "Remplacer le rapport enregistré ?"
+  },
+  "reports.saved": {
+    "en": "Saved",
+    "zh": "已保存",
+    "es": "Guardado",
+    "fr": "Enregistré"
+  },
+  "reports.saved-on-this-device": {
+    "en": "Saved on this device",
+    "zh": "已保存在本机",
+    "es": "Guardado en este dispositivo",
+    "fr": "Enregistré sur cet appareil"
+  },
+  "reports.solar-return-report": {
+    "en": "Solar Return Report",
+    "zh": "日返盘报告",
+    "es": "Informe de retorno solar",
+    "fr": "Rapport de retour solaire"
+  },
+  "reports.stored-on-device": {
+    "en": "Stored on device",
+    "zh": "保存在本机",
+    "es": "Almacenado en el dispositivo",
+    "fr": "Stocké sur l’appareil"
+  },
+  "reports.synastry-report": {
+    "en": "Synastry Report",
+    "zh": "合盘报告",
+    "es": "Informe de sinastría",
+    "fr": "Rapport de synastrie"
+  },
+  "reports.the-months-transits-once-the-month-closes": {
+    "en": "The month's transits, once the month closes.",
+    "zh": "本月行运变化，等月份结束后可生成。",
+    "es": "Los tránsitos del mes, una vez cerrado el mes.",
+    "fr": "Les transits du mois, une fois le mois terminé."
+  },
+  "reports.the-new-report-will-replace-the-report-currently-saved-on-this-device": {
+    "en": "The new report will replace the report currently saved on this device.",
+    "zh": "新报告会覆盖当前保存在本机的报告。",
+    "es": "El nuevo informe sustituirá al informe guardado actualmente en este dispositivo.",
+    "fr": "Le nouveau rapport remplacera celui actuellement enregistré sur cet appareil."
+  },
+  "reports.the-year-that-opens-at-the-next-solar-return": {
+    "en": "The year that opens at the next solar return.",
+    "zh": "下一个日返时刻开启的年度解读。",
+    "es": "El año que comienza en el próximo retorno solar.",
+    "fr": "L’année qui commence au prochain retour solaire."
+  },
+  "reports.this-may-take-a-little-while-you-can-leave-this-page-and-come-back-later": {
+    "en": "This may take a little while. You can leave this page and come back later.",
+    "zh": "生成可能需要一点时间，你可以先离开，稍后再回来查看。",
+    "es": "Esto puede tardar un poco. Puedes salir de esta página y volver más tarde.",
+    "fr": "Cela peut prendre un peu de temps. Vous pouvez quitter cette page et revenir plus tard."
+  },
+  "reports.todays-changes-once-the-day-is-complete": {
+    "en": "Today's changes, once the day is complete.",
+    "zh": "当天变化，等一天结束后可生成。",
+    "es": "Los cambios de hoy, una vez terminado el día.",
+    "fr": "Les changements du jour, une fois la journée terminée."
+  },
+  "reports.transit-report": {
+    "en": "Transit Report",
+    "zh": "行运报告",
+    "es": "Informe de tránsitos",
+    "fr": "Rapport de transits"
+  },
+  "reports.view-report": {
+    "en": "View Report",
+    "zh": "查看报告",
+    "es": "Ver informe",
+    "fr": "Voir le rapport"
+  },
+  "settings.birth-chart": {
+    "en": "BIRTH CHART",
+    "zh": "本命盘",
+    "es": "CARTA NATAL",
+    "fr": "CARTE NATALE"
+  },
+  "settings.classical": {
+    "en": "Classical",
+    "zh": "古典",
+    "es": "Clásico",
+    "fr": "Classique"
+  },
+  "settings.colleague": {
+    "en": "Colleague",
+    "zh": "同事",
+    "es": "Compañero de trabajo",
+    "fr": "Collègue"
+  },
+  "settings.dark": {
+    "en": "Dark",
+    "zh": "深色",
+    "es": "Oscuro",
+    "fr": "Sombre"
+  },
+  "settings.extra-large": {
+    "en": "Extra Large",
+    "zh": "特大",
+    "es": "Extra grande",
+    "fr": "Très grand"
+  },
+  "settings.family": {
+    "en": "Family",
+    "zh": "家人",
+    "es": "Familia",
+    "fr": "Famille"
+  },
+  "settings.friend": {
+    "en": "Friend",
+    "zh": "朋友",
+    "es": "Amigo",
+    "fr": "Ami"
+  },
+  "settings.large": {
+    "en": "Large",
+    "zh": "大",
+    "es": "Grande",
+    "fr": "Grand"
+  },
+  "settings.light": {
+    "en": "Light",
+    "zh": "浅色",
+    "es": "Claro",
+    "fr": "Clair"
+  },
+  "settings.modern": {
+    "en": "Modern",
+    "zh": "现代",
+    "es": "Moderno",
+    "fr": "Moderne"
+  },
+  "settings.natal-current-sky": {
+    "en": "NATAL + CURRENT SKY",
+    "zh": "本命与当前天空",
+    "es": "NATAL + CIELO ACTUAL",
+    "fr": "NATAL + CIEL ACTUEL"
+  },
+  "settings.other": {
+    "en": "Other",
+    "zh": "其他",
+    "es": "Otro",
+    "fr": "Autre"
+  },
+  "settings.partner": {
+    "en": "Partner",
+    "zh": "伴侣",
+    "es": "Pareja",
+    "fr": "Partenaire"
+  },
+  "settings.progressed": {
+    "en": "Progressed",
+    "zh": "次限",
+    "es": "Progresiones",
+    "fr": "Progressions"
+  },
+  "settings.secondary-progressions": {
+    "en": "SECONDARY PROGRESSIONS",
+    "zh": "次限推运",
+    "es": "PROGRESIONES SECUNDARIAS",
+    "fr": "PROGRESSIONS SECONDAIRES"
+  },
+  "settings.small": {
+    "en": "Small",
+    "zh": "小",
+    "es": "Pequeño",
+    "fr": "Petit"
+  },
+  "settings.solar-return": {
+    "en": "Solar Return",
+    "zh": "日返盘",
+    "es": "Revolución solar",
+    "fr": "Révolution solaire"
+  },
+  "settings.solar-return.8f89f6c": {
+    "en": "SOLAR RETURN",
+    "zh": "日返盘",
+    "es": "RETORNO SOLAR",
+    "fr": "RETOUR SOLAIRE"
+  },
+  "settings.special": {
+    "en": "Special",
+    "zh": "特殊",
+    "es": "Especial",
+    "fr": "Spécial"
+  },
+  "settings.standard": {
+    "en": "Standard",
+    "zh": "标准",
+    "es": "Estándar",
+    "fr": "Standard"
+  },
+  "settings.synastry": {
+    "en": "Synastry",
+    "zh": "合盘",
+    "es": "Sinastría",
+    "fr": "Synastrie"
+  },
+  "settings.synastry.b8a5a20": {
+    "en": "SYNASTRY",
+    "zh": "合盘",
+    "es": "SINASTRÍA",
+    "fr": "SYNASTRIE"
+  },
+  "settings.system": {
+    "en": "System",
+    "zh": "跟随系统",
+    "es": "Sistema",
+    "fr": "Système"
+  },
+  "settings.traditional-alcabitius": {
+    "en": "Traditional · Alcabitius",
+    "zh": "传统七曜 · 阿卡比特",
+    "es": "Tradicional · Alcabitius",
+    "fr": "Traditionnel · Alcabitius"
+  },
+  "settings.transits": {
+    "en": "Transits",
+    "zh": "行运",
+    "es": "Tránsitos",
+    "fr": "Transits"
+  },
+  "settings.tropical-placidus": {
+    "en": "Tropical · Placidus",
+    "zh": "回归黄道 · 普拉西德",
+    "es": "Tropical · Placidus",
+    "fr": "Tropical · Placidus"
+  },
+  "settings.whole-sign": {
+    "en": "Whole Sign",
+    "zh": "整宫制",
+    "es": "Signos enteros",
+    "fr": "Maisons en signes entiers"
+  },
+  "today.active": {
+    "en": "Active",
+    "zh": "活跃",
+    "es": "Activo",
+    "fr": "Actif"
+  },
+  "today.active-today": {
+    "en": "ACTIVE TODAY",
+    "zh": "今天活跃",
+    "es": "ACTIVO HOY",
+    "fr": "ACTIF AUJOURD’HUI"
+  },
+  "today.afternoon": {
+    "en": "Afternoon",
+    "zh": "下午",
+    "es": "Tarde",
+    "fr": "Après-midi"
+  },
+  "today.calculating-locally": {
+    "en": "Calculating locally…",
+    "zh": "正在本机计算…",
+    "es": "Calculando en el dispositivo…",
+    "fr": "Calcul sur l’appareil…"
+  },
+  "today.changes-quickly": {
+    "en": "Changes quickly",
+    "zh": "变化很快",
+    "es": "Cambia rápido",
+    "fr": "Change rapidement"
+  },
+  "today.coming-next": {
+    "en": "COMING NEXT",
+    "zh": "接下来",
+    "es": "A CONTINUACIÓN",
+    "fr": "À VENIR"
+  },
+  "today.content-unavailable": {
+    "en": "Content unavailable",
+    "zh": "内容暂不可用",
+    "es": "Contenido no disponible",
+    "fr": "Contenu indisponible"
+  },
+  "today.current-chapter": {
+    "en": "Current Chapter",
+    "zh": "当前章节",
+    "es": "Capítulo actual",
+    "fr": "Chapitre actuel"
+  },
+  "today.current-chapter.cf27f20": {
+    "en": "CURRENT CHAPTER",
+    "zh": "当前章节",
+    "es": "CAPÍTULO ACTUAL",
+    "fr": "CHAPITRE ACTUEL"
+  },
+  "today.energy-wellbeing": {
+    "en": "Energy & Wellbeing",
+    "zh": "精力与状态",
+    "es": "Energía y bienestar",
+    "fr": "Énergie et bien-être"
+  },
+  "today.evening": {
+    "en": "Evening",
+    "zh": "晚间",
+    "es": "Noche",
+    "fr": "Soir"
+  },
+  "today.first-quarter": {
+    "en": "First quarter",
+    "zh": "上弦月",
+    "es": "Cuarto creciente",
+    "fr": "Premier quartier"
+  },
+  "today.flowing": {
+    "en": "Flowing",
+    "zh": "顺畅",
+    "es": "Fluido",
+    "fr": "Fluide"
+  },
+  "today.last-quarter": {
+    "en": "Last quarter",
+    "zh": "下弦月",
+    "es": "Cuarto menguante",
+    "fr": "Dernier quartier"
+  },
+  "today.local-time": {
+    "en": "Local time",
+    "zh": "本地时间",
+    "es": "Hora local",
+    "fr": "Heure locale"
+  },
+  "today.long-term-shift": {
+    "en": "Long-term shift",
+    "zh": "长期变化",
+    "es": "Cambio a largo plazo",
+    "fr": "Évolution à long terme"
+  },
+  "today.love-relationships": {
+    "en": "Love & Relationships",
+    "zh": "感情与关系",
+    "es": "Amor y relaciones",
+    "fr": "Amour et relations"
+  },
+  "today.money-resources": {
+    "en": "Money & Resources",
+    "zh": "财富与资源",
+    "es": "Dinero y recursos",
+    "fr": "Argent et ressources"
+  },
+  "today.moon-in": {
+    "en": "Moon in",
+    "zh": "月亮在",
+    "es": "Luna en",
+    "fr": "Lune en"
+  },
+  "today.moon-today": {
+    "en": "Moon Today",
+    "zh": "今日月亮",
+    "es": "La Luna hoy",
+    "fr": "La Lune aujourd’hui"
+  },
+  "today.morning": {
+    "en": "Morning",
+    "zh": "上午",
+    "es": "Mañana",
+    "fr": "Matin"
+  },
+  "today.moving-through-your": {
+    "en": "Moving through your",
+    "zh": "正经过你的",
+    "es": "Transitando por tu",
+    "fr": "Traverse votre"
+  },
+  "today.next-7-days": {
+    "en": "Next 7 days",
+    "zh": "接下来 7 天",
+    "es": "Próximos 7 días",
+    "fr": "7 prochains jours"
+  },
+  "today.no-calculated-sky-events-in-the-next-seven-days": {
+    "en": "No calculated sky events in the next seven days.",
+    "zh": "未来七天没有进入显示范围的已计算天象事件。",
+    "es": "No hay eventos celestes calculados para los próximos siete días.",
+    "fr": "Aucun événement céleste calculé pour les sept prochains jours."
+  },
+  "today.no-exact-events-today-a-quieter-day": {
+    "en": "No exact events today. A quieter day.",
+    "zh": "今天没有精确事件，相对平静。",
+    "es": "No hay eventos exactos hoy. Un día más tranquilo.",
+    "fr": "Aucun événement exact aujourd’hui. Une journée plus calme."
+  },
+  "today.no-planets-are-in-review-right-now": {
+    "en": "No planets are in review right now.",
+    "zh": "目前没有行星处于回顾调整。",
+    "es": "Ningún planeta está en fase de revisión ahora mismo.",
+    "fr": "Aucune planète n’est actuellement en phase de révision."
+  },
+  "today.ongoing": {
+    "en": "Ongoing",
+    "zh": "持续影响",
+    "es": "En curso",
+    "fr": "En cours"
+  },
+  "today.peaks": {
+    "en": "Peaks",
+    "zh": "峰值",
+    "es": "Picos",
+    "fr": "Pics"
+  },
+  "today.personal-timing": {
+    "en": "Personal timing",
+    "zh": "个人节奏",
+    "es": "Timing personal",
+    "fr": "Timing personnel"
+  },
+  "today.planet-positions-aspects-houses-motion": {
+    "en": "Planet positions · Aspects · Houses · Motion",
+    "zh": "行星位置 · 连接 · 宫位 · 运动",
+    "es": "Posiciones planetarias · Aspectos · Casas · Movimiento",
+    "fr": "Positions planétaires · Aspects · Maisons · Mouvement"
+  },
+  "today.retrogrades": {
+    "en": "Retrogrades",
+    "zh": "回顾调整",
+    "es": "Retrogradaciones",
+    "fr": "Rétrogradations"
+  },
+  "today.review-window": {
+    "en": "Review window",
+    "zh": "回顾窗口",
+    "es": "Período de revisión",
+    "fr": "Période de révision"
+  },
+  "today.reviewing": {
+    "en": "reviewing",
+    "zh": "回顾调整中",
+    "es": "en revisión",
+    "fr": "en révision"
+  },
+  "today.reviewing.status": {
+    "en": "Reviewing",
+    "zh": "回顾中",
+    "es": "En revisión",
+    "fr": "En révision"
+  },
+  "today.shared-atmosphere": {
+    "en": "Shared atmosphere",
+    "zh": "整体氛围",
+    "es": "Atmósfera compartida",
+    "fr": "Atmosphère partagée"
+  },
+  "today.sign-change": {
+    "en": "Sign change",
+    "zh": "换座",
+    "es": "Cambio de signo",
+    "fr": "Changement de signe"
+  },
+  "today.source.current-sky": {
+    "en": "Current Sky",
+    "zh": "当前天象",
+    "es": "Cielo actual",
+    "fr": "Ciel actuel"
+  },
+  "today.stations-direct": {
+    "en": "Stations direct",
+    "zh": "恢复顺行",
+    "es": "Se estaciona directo",
+    "fr": "Stationne direct"
+  },
+  "today.stations-retrograde": {
+    "en": "Stations retrograde",
+    "zh": "开始逆行",
+    "es": "Se estaciona retrógrado",
+    "fr": "Stationne rétrograde"
+  },
+  "today.steady": {
+    "en": "Steady",
+    "zh": "平稳",
+    "es": "Estable",
+    "fr": "Stable"
+  },
+  "today.the-required-reviewed-content-is-missing": {
+    "en": "The required reviewed content is missing.",
+    "zh": "缺少对应的已审核内容。",
+    "es": "Falta el contenido revisado requerido.",
+    "fr": "Le contenu validé requis est manquant."
+  },
+  "today.today-timeline": {
+    "en": "Today Timeline",
+    "zh": "今日时间线",
+    "es": "Cronología de hoy",
+    "fr": "Chronologie du jour"
+  },
+  "today.tone.tension": {
+    "en": "Tension",
+    "zh": "有拉扯",
+    "es": "Con tensión",
+    "fr": "Sous tension"
+  },
+  "today.upcoming-sky-events": {
+    "en": "Upcoming Sky Events",
+    "zh": "未来七天天象",
+    "es": "Próximos eventos celestes",
+    "fr": "Prochains événements célestes"
+  },
+  "today.view-all": {
+    "en": "View all",
+    "zh": "查看全部",
+    "es": "Ver todo",
+    "fr": "Tout voir"
+  },
+  "today.view-current-sky-chart": {
+    "en": "View Current Sky Chart",
+    "zh": "查看当前天象",
+    "es": "Ver carta del cielo actual",
+    "fr": "Voir la carte du ciel actuel"
+  },
+  "today.waning-crescent": {
+    "en": "Waning crescent",
+    "zh": "残月",
+    "es": "Luna menguante",
+    "fr": "Dernier croissant"
+  },
+  "today.waning-gibbous": {
+    "en": "Waning gibbous",
+    "zh": "亏凸月",
+    "es": "Gibosa menguante",
+    "fr": "Gibbeuse décroissante"
+  },
+  "today.waxing-crescent": {
+    "en": "Waxing crescent",
+    "zh": "娥眉月",
+    "es": "Luna creciente",
+    "fr": "Premier croissant"
+  },
+  "today.waxing-gibbous": {
+    "en": "Waxing gibbous",
+    "zh": "盈凸月",
+    "es": "Gibosa creciente",
+    "fr": "Gibbeuse croissante"
+  },
+  "today.work-direction": {
+    "en": "Work & Direction",
+    "zh": "事业与方向",
+    "es": "Trabajo y dirección",
+    "fr": "Travail et orientation"
+  }
 }

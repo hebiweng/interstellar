@@ -3,13 +3,67 @@ import XCTest
 @testable import Interstellar
 
 final class TransitContentPlannerTests: XCTestCase {
-    func testExportSynastryPlannerObservationsFromSyntheticPairs() async throws {
+    func testSynastryUnobservedExactFactUsesReviewedBaseSelector() throws {
+        let factID = "synastry.test.aspect.personA.jupiter.conjunction.personB.jupiter"
+        let fact = SynastryFact.aspect(
+            SynastryAspectFact(
+                factID: factID,
+                firstBody: .jupiter,
+                secondBody: .jupiter,
+                kind: .conjunction,
+                orbDegrees: 0.5,
+                phase: .applying,
+                strength: 0.95,
+                firstLongitude: 10,
+                secondLongitude: 10.5,
+                firstBodyInSecondHouse: 1,
+                secondBodyInFirstHouse: 1,
+                classicalReception: nil
+            )
+        )
+        let plan = SynastryCardEvidencePlan(
+            cardID: "relationship-overview",
+            preset: CalculationPreset.modern.rawValue,
+            scopeID: "test",
+            themeID: .balanced,
+            evidence: [fact],
+            overviewDimensions: [],
+            evidenceRoles: [:],
+            perspectives: []
+        )
+        let exactPath = "modern.synastry.fact.relationship-overview.general.aspect.jupiter.conjunction.jupiter.interpretation"
+
+        for language in AppLanguage.allCases {
+            let matcher = try CopyCatalogMatcher(language: language)
+            XCTAssertThrowsError(try matcher.value(at: exactPath))
+            XCTAssertFalse(
+                try matcher.synastryFactInterpretation(fact: fact, plan: plan)
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                    .isEmpty,
+                language.rawValue
+            )
+            for body in [
+                "sun", "moon", "mercury", "venus", "mars", "jupiter",
+                "saturn", "uranus", "neptune", "pluto", "trueNode",
+            ] {
+                XCTAssertFalse(try matcher.value(at: "shared.synastryRoles.\(body)").isEmpty, "\(language.rawValue): \(body)")
+            }
+            for house in 1 ... 12 {
+                XCTAssertFalse(try matcher.value(at: "shared.synastry.houseOverlay.\(house)").isEmpty, "\(language.rawValue): house \(house)")
+            }
+        }
+    }
+
+    func testExportSynastryPlannerObservationsFromRealCalculatedPairs() async throws {
         struct PersonInput {
             let date: Date
             let latitude: Double
             let longitude: Double
         }
         let calculator = try SwissEphemerisCalculator(ephemerisDirectory: ephemerisDirectory)
+        let factMatchers = try AppLanguage.allCases.map { language in
+            (language, try CopyCatalogMatcher(language: language))
+        }
         let pairs: [(String, PersonInput, PersonInput)] = [
             ("france-canada", .init(date: utcDate(1992, 5, 14, 6), latitude: 48.8566, longitude: 2.3522), .init(date: utcDate(1988, 10, 3, 2), latitude: 45.5019, longitude: -73.5674)),
             ("britain-italy", .init(date: utcDate(1984, 2, 19, 6), latitude: 51.5074, longitude: -0.1278), .init(date: utcDate(1991, 7, 28, 12), latitude: 41.9028, longitude: 12.4964)),
@@ -27,6 +81,40 @@ final class TransitContentPlannerTests: XCTestCase {
             ("newzealand-egypt", .init(date: utcDate(1991, 4, 22, 0), latitude: -36.8485, longitude: 174.7633), .init(date: utcDate(1975, 8, 6, 6), latitude: 30.0444, longitude: 31.2357)),
         ]
         var observations: [[String: Any]] = []
+        func factObservation(_ fact: SynastryFact, role: String?) -> [String: Any] {
+            switch fact {
+            case let .aspect(value):
+                return [
+                    "factID": value.factID,
+                    "kind": "aspect",
+                    "role": role ?? "",
+                    "firstBody": value.firstBody.rawValue,
+                    "aspectKind": value.kind.rawValue,
+                    "secondBody": value.secondBody.rawValue,
+                    "orbDegrees": value.orbDegrees,
+                    "phase": value.phase.rawValue,
+                ]
+            case let .overlay(value):
+                return [
+                    "factID": value.factID,
+                    "kind": "overlay",
+                    "role": role ?? "",
+                    "direction": value.direction.rawValue,
+                    "body": value.body.rawValue,
+                    "house": value.receivingHouse,
+                    "signIndex": value.signIndex,
+                ]
+            case let .planetCondition(value):
+                return [
+                    "factID": value.factID,
+                    "kind": "planet-condition",
+                    "role": role ?? "",
+                    "person": value.person.rawValue,
+                    "body": value.assessment.body.rawValue,
+                    "score": value.assessment.score,
+                ]
+            }
+        }
         for preset in [CalculationPreset.modern, .classical] {
             for (scenarioID, first, second) in pairs {
                 let comparison = try await calculator.calculateSynastry(
@@ -38,6 +126,26 @@ final class TransitContentPlannerTests: XCTestCase {
                 let plan = SynastryContentPlanner.plan(bundle)
                 XCTAssertEqual(plan.cards.map(\.cardID), SynastryContentPlanner.cardIDs)
                 XCTAssertEqual(plan, SynastryContentPlanner.plan(bundle))
+                for card in plan.cards {
+                    XCTAssertFalse(
+                        card.evidence.isEmpty,
+                        "Empty calculated evidence in \(scenarioID) / \(preset.rawValue) / \(card.cardID)"
+                    )
+                    XCTAssertEqual(
+                        card.sourceFactIDs.count,
+                        Set(card.sourceFactIDs).count,
+                        "Duplicate fact in \(scenarioID) / \(preset.rawValue) / \(card.cardID)"
+                    )
+                    for (language, matcher) in factMatchers {
+                        for fact in card.evidence {
+                            let interpretation = try matcher.synastryFactInterpretation(fact: fact, plan: card)
+                            XCTAssertFalse(
+                                interpretation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                                "Missing \(language.rawValue) fact copy in \(scenarioID) / \(preset.rawValue) / \(card.cardID) / \(fact.factID)"
+                            )
+                        }
+                    }
+                }
                 let overview = try XCTUnwrap(plan.card("relationship-overview"))
                 XCTAssertEqual(overview.overviewDimensions.map(\.id), [.communication, .emotionalPace, .chemistry])
                 XCTAssertTrue(overview.overviewDimensions.flatMap(\.sourceFactIDs).allSatisfy {
@@ -64,6 +172,19 @@ final class TransitContentPlannerTests: XCTestCase {
                 XCTAssertEqual(Set(emotional.evidenceRoles.values), Set(["flow", "difference"]))
                 XCTAssertEqual(emotional.sourceFactIDs.count, 2)
                 XCTAssertEqual(Set(emotional.sourceFactIDs).count, 2)
+                let domainFactIDs = Set(
+                    ["emotional-connection", "communication", "chemistry", "commitment"]
+                        .compactMap(plan.card)
+                        .flatMap(\.sourceFactIDs)
+                )
+                let keyInterAspects = try XCTUnwrap(plan.card("key-inter-aspects"))
+                let unusedAspectCount = bundle.aspects.filter { !domainFactIDs.contains($0.factID) }.count
+                if unusedAspectCount >= 3 {
+                    XCTAssertTrue(
+                        Set(keyInterAspects.sourceFactIDs).isDisjoint(with: domainFactIDs),
+                        "Key aspects repeat domain facts despite enough alternatives in \(scenarioID) / \(preset.rawValue)"
+                    )
+                }
                 if preset == .classical {
                     XCTAssertTrue(bundle.first.points.allSatisfy { ClassicalSynastryMVPCapability.traditionalBodies.contains($0.body) })
                     XCTAssertTrue(bundle.second.points.allSatisfy { ClassicalSynastryMVPCapability.traditionalBodies.contains($0.body) })
@@ -77,6 +198,15 @@ final class TransitContentPlannerTests: XCTestCase {
                     "conditionCount": bundle.planetConditions.count,
                     "copyKeys": plan.cards.map(\.copyKey),
                     "themes": Dictionary(uniqueKeysWithValues: plan.cards.map { ($0.cardID, $0.themeID.rawValue) }),
+                    "cards": plan.cards.map { card in
+                        [
+                            "cardID": card.cardID,
+                            "themeID": card.themeID.rawValue,
+                            "facts": card.evidence.map {
+                                factObservation($0, role: card.evidenceRoles[$0.factID])
+                            },
+                        ] as [String: Any]
+                    },
                     "overviewDimensions": overview.overviewDimensions.map {
                         ["id": $0.id.rawValue, "state": $0.state.rawValue, "sourceFactIDs": $0.sourceFactIDs]
                     },
@@ -86,6 +216,15 @@ final class TransitContentPlannerTests: XCTestCase {
         let payload: [String: Any] = ["schemaVersion": 1, "observations": observations]
         let data = try JSONSerialization.data(withJSONObject: payload, options: [.sortedKeys])
         print("SYNASTRY_PLANNER_OBSERVATIONS_BASE64:\(data.base64EncodedString())")
+    }
+
+    func testLunarPhaseGeometryUsesSunMoonElongation() {
+        XCTAssertEqual(LunarPhaseGeometry.elongation(sunLongitude: 350, moonLongitude: 10), 20, accuracy: 0.000_001)
+        XCTAssertEqual(LunarPhaseGeometry.elongation(sunLongitude: 10, moonLongitude: 350), 340, accuracy: 0.000_001)
+        XCTAssertEqual(LunarPhaseGeometry.illuminationFraction(elongation: 0), 0, accuracy: 0.000_001)
+        XCTAssertEqual(LunarPhaseGeometry.illuminationFraction(elongation: 90), 0.5, accuracy: 0.000_001)
+        XCTAssertEqual(LunarPhaseGeometry.illuminationFraction(elongation: 180), 1, accuracy: 0.000_001)
+        XCTAssertEqual(LunarPhaseGeometry.illuminationFraction(elongation: 270), 0.5, accuracy: 0.000_001)
     }
 
     func testSynastryAIRequestIsPresetSpecificNamedAndBounded() async throws {
@@ -1063,7 +1202,16 @@ final class TransitContentPlannerTests: XCTestCase {
     }
 
     private var ephemerisDirectory: URL {
-        URL(fileURLWithPath: #filePath)
+        let bundledCandidates = [
+            Bundle.main.url(forResource: "ephe", withExtension: nil),
+            Bundle.main.resourceURL?.appendingPathComponent("ephe", isDirectory: true),
+        ].compactMap { $0 }
+        if let bundled = bundledCandidates.first(where: {
+            FileManager.default.fileExists(atPath: $0.path)
+        }) {
+            return bundled
+        }
+        return URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()

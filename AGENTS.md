@@ -23,11 +23,48 @@ AIGC:
 4. `docs/agent-handoff.md` — 当前分支状态、验证证据和下一步
 5. 当前代码、测试、Schema 与私有内容构建说明
 
-权威优先级：真实计算和不可变 Snapshot → v6 合同 → 卡片矩阵 → 当前代码与测试 → 原型视觉参考。`docs/ios-v1-development-plan.md` 和交接历史只作背景，不能覆盖 v6 决策。
+权威优先级：真实计算和不可变 Snapshot → v6 合同 → 卡片矩阵 → 当前代码与测试 → 原型视觉参考。已删除的 iOS V1 计划和交接历史只存在于 Git 历史，不能覆盖 v6 决策。
 
 `docs/chart-insight-design-standard.md` 仅在维护旧 Web 跨盘型架构时阅读。现阶段不得默认遍历 Obsidian。
 
-## 2. 冻结产品范围
+## 2. 目录职责与内容交付边界
+
+接手任何任务先按下表定位，禁止凭目录名猜用途：
+
+| 路径 | 职责 | Git / 安全边界 |
+|---|---|---|
+| `ios/App/` | iOS 应用源码、固定 UI 运行时资源与生成后的 Xcode String Catalog | 代码与固定 UI 可公开；`Resources/CopyCatalog*.json` 等私有运行时包被忽略 |
+| `ios/Localization/ui-translations.json` | 固定 UI 的 en / zh-Hans / es / fr 唯一源 | 可公开；不得放消费者解释正文 |
+| `ios/ContentSchema/` | Copy Catalog、卡片和变量的公开 Schema / 构建说明 | 可公开；不含正式原创正文 |
+| `artifacts/<preset>-<chart>/` | **拿去生成语料的标准公开合同包** | 每个盘型固定为 registry、requirements、missing、planner observations、observed、unobserved、unknown、unreachable、fixtures、validation 共 10 个 JSON；只含键、结构、事实覆盖与缺口，不含正式私有正文 |
+| `ios/TranslationExports/` | 旧流程或一次性中间导出 | 被 Git 忽略；不是新的标准交付目录，生成正式 10 文件合同包后应清理可再生中间文件 |
+| `ios/PrivateContent/copy-catalog-v2/` | 审核后的四语 Copy Catalog 私有源 | 被 Git 忽略；不得复制进 `artifacts/`、日志或公开附件 |
+| `ios/App/Resources/CopyCatalog-<locale>.json` | 从私有源编译出的 iOS 运行时 Copy Catalog | 被 Git 忽略；可重建，不是编辑源 |
+| `ios/PrivateRules/`、`ios/App/Resources/Private*` | 旧 Ask / Week 私有语料与规则及其运行时包 | 被 Git 忽略；迁移完成前保留，不得公开 |
+| `ios/Packages/AstroCore/` | iOS 权威占星计算 | 源码可公开；`.build/` 是可删除缓存 |
+| `ios/Packages/ContentKit/` | 内容模型、匹配与结构校验 | 源码可公开；`.build/` 是可删除缓存 |
+| `relay/` | Go Relay、内嵌管理端、缓存、反馈、鉴权与审计 | 当前生产主线；不得记录密钥、提示词或正文 |
+| `infra/deploy/` | 生产、Relay-only、Caddy 与镜像构建合同 | 当前部署权威；本地旧 Compose 不能覆盖生产合同 |
+| `app/`、`apps/`、`python/`、`worker/`、`packages/`、`tests/` | 延期的旧 Web/API/Worker 与跨语言平台实现 | 仍是受版本控制的保留源码；未完成正式退役审计前不得因 iOS 未引用而删除 |
+| `algorithm-cards/`、`data-manifests/`、`vendor/`、`openapi/`、`reports/`、`rules/` | 算法说明、锁定数据、第三方数据、契约与报告规则 | 按锁文件/许可证保留；不得当缓存清理 |
+| `obsidian/` | 项目内历史知识库快照 | 非运行时；只定向查询，未获明确授权不得批量改写或删除 |
+| `dist/`、`output/`、`.playwright-cli/`、`.pytest_cache/`、`.ruff_cache/`、`.vinext/`、`.wrangler/`、`**/.build/`、`**/__pycache__/` | 构建、测试和工具缓存 | 被 Git 忽略，可在确认无进程使用后删除并按需重建 |
+| `.env*`、`Interstellar-Relay-管理员凭据.txt`、本地数据库与设备日志 | 本机凭据和运行状态 | 永不进入 Git、artifact 合同包、聊天输出或截图；不是普通垃圾文件 |
+
+语料链路固定为：
+
+```text
+代码 / Planner / 真实计算测试
+→ artifacts/<preset>-<chart>/ 十文件公开合同包
+→ 外部生成并人工审核的英中 patch（不进公开 Git）
+→ ios/PrivateContent/copy-catalog-v2/ 四语私有源
+→ scripts/build-ios-copy-catalog.mjs
+→ ios/App/Resources/CopyCatalog-<locale>.json 私有运行时包
+```
+
+新语料任务不得只交付一个自创 worklist，也不得把待生成合同放进 `PrivateContent`。`TranslationExports` 仅兼容旧流程；当前标准是 `artifacts/` 下每个 preset / chart 一套 10 文件合同包。
+
+## 3. 冻结产品范围
 
 - 六盘固定为：本命 10、天象 7、行运 6、次限 6、日返 7、合盘 8 张卡；Composite 延期。
 - Today 固定为：`Current Chapter / Active Today / Coming Next / Moon Today / Timeline / Upcoming Sky / Retrogrades / Current Sky`。
@@ -37,7 +74,7 @@ AIGC:
 - 支持 System / Light / Dark；所有关键页面必须在 iPhone 12 mini、长文本和 Dynamic Type 下可用。
 - 跨设备报告同步、Web 消费端改造和旧 `/admin` 迁移均延期。
 
-## 3. 消费者体验红线
+## 4. 消费者体验红线
 
 1. **先给结论，再给参数**：首屏先回答生活问题，精确度数、容许度和技术参数进入事实层或展开层。
 2. **单语且自然**：同一界面只显示当前语言；禁止研究报告口吻、内部设计说明、AI 套话和机械拼句。
@@ -47,7 +84,7 @@ AIGC:
 6. **相位使用矩阵**：单盘用三角矩阵；比较盘用移动点 × 本命点交叉矩阵。节点网络不能作为正式 `Aspects` 主视图。
 7. **完成不等于能运行**：骨架、占位卡、通用图表和临时文案只能算接线完成；视觉、内容、真实数据、小屏、无障碍与空状态均需验收。
 
-## 4. 事实、展示与 AI 边界
+## 5. 事实、展示与 AI 边界
 
 权威事实链路：
 
@@ -75,7 +112,7 @@ ChartSnapshot / Aspect / Event
 → GeneratedChartArtifact
 ```
 
-## 5. 卡片、内容与本地化
+## 6. 卡片、内容与本地化
 
 - 每个可见事实固定呈现“计算结果 + 一句自然解读”。短解读只能来自私有、已审核 Copy Catalog，Swift 不得拼解释句。
 - 技术事实模板最多 3 个已声明的强类型变量且只陈述事实；消费者标题、正文和建议原则上 0 个、确有必要最多 2 个变量。
@@ -87,14 +124,14 @@ ChartSnapshot / Aspect / Event
 - 固定 UI 使用 `Localizable.xcstrings`；占星术语使用四语 `AstroTerms`；消费者正文只进 Copy Catalog；日期、时间、数量和语序使用 Locale-aware formatter。
 - 内容键缺失必须明确失败，不能在 Swift 中加入解释性降级句。
 
-## 6. 人物、地点与上下文
+## 7. 人物、地点与上下文
 
 - Profile 必须支持本人和其他人物、关系、头像、出生时间、地点、时区和可编辑经纬度。
 - 地点流程必须支持当前位置、Apple 地图、搜索/点选、反向地理编码和自动匹配时区。
 - 参数变化先重算权威 Snapshot，再按新指纹读取或生成 Artifact。
 - Today 始终使用当前实际上下文，不受 Charts 中探索日期、地点或人物参数污染。
 
-## 7. Obsidian 与旧 Web
+## 8. Obsidian 与旧 Web
 
 Obsidian 只允许在项目内合同、Schema、代码、测试和私有内容都无法解决明确缺口时定向查询。候选内容必须筛选、重写并进入项目内私有 corpus/rules 或正式文档；运行时不得读取 Obsidian，原文不得直接进入消费者 UI。
 
@@ -108,7 +145,7 @@ Obsidian 只允许在项目内合同、Schema、代码、测试和私有内容�
 
 `page.tsx` 必须保持薄入口：不能加入 `"use client"`、持有 React state 或直接 fetch。
 
-## 8. 实现与验收
+## 9. 实现与验收
 
 重要任务按以下顺序完成：
 
@@ -134,7 +171,7 @@ git diff --check
 
 8. 只在有证据时更新计划完成项；随后更新 `docs/agent-handoff.md`，记录完成内容、验证、未完成项和下一步。
 
-## 9. 部署与安全
+## 10. 部署与安全
 
 - 开发环境：`compose.yaml` + `compose.app.yaml`。
 - 生产环境：`infra/deploy/compose.production.yaml`、`infra/deploy/Dockerfile.web`、`infra/deploy/Caddyfile.fate`。

@@ -426,8 +426,8 @@ final class VisualRegressionTests: XCTestCase {
         XCTAssertTrue(spanishApp.tabBars.buttons["Consultar"].exists)
         XCTAssertTrue(spanishApp.tabBars.buttons["Profil"].exists)
         spanishApp.tabBars.buttons["Cartas"].tap()
-        XCTAssertTrue(spanishApp.buttons["Parámetros"].waitForExistence(timeout: 8))
-        XCTAssertTrue(spanishApp.otherElements["Rueda astrológica"].waitForExistence(timeout: 8))
+        XCTAssertTrue(spanishApp.buttons["charts-parameters-button"].waitForExistence(timeout: 8))
+        XCTAssertTrue(spanishApp.otherElements["astrology-wheel"].waitForExistence(timeout: 8))
         spanishApp.terminate()
 
         let frenchApp = XCUIApplication()
@@ -439,8 +439,8 @@ final class VisualRegressionTests: XCTestCase {
         XCTAssertTrue(frenchApp.tabBars.buttons["Question"].exists)
         XCTAssertTrue(frenchApp.tabBars.buttons["Profil"].exists)
         frenchApp.tabBars.buttons["Cartes"].tap()
-        XCTAssertTrue(frenchApp.buttons["Paramètres"].waitForExistence(timeout: 8))
-        XCTAssertTrue(frenchApp.otherElements["Roue astrologique"].waitForExistence(timeout: 8))
+        XCTAssertTrue(frenchApp.buttons["charts-parameters-button"].waitForExistence(timeout: 8))
+        XCTAssertTrue(frenchApp.otherElements["astrology-wheel"].waitForExistence(timeout: 8))
     }
 
     @MainActor
@@ -515,7 +515,9 @@ final class VisualRegressionTests: XCTestCase {
     @MainActor
     private func assertNoCardError(_ app: XCUIApplication) {
         let error = app.staticTexts.matching(
-            NSPredicate(format: "label BEGINSWITH 'Rule ' OR label CONTAINS 'produced' OR label CONTAINS 'incomplete'")
+            NSPredicate(
+                format: "label BEGINSWITH 'Rule ' OR label CONTAINS 'produced' OR label CONTAINS 'incomplete' OR label CONTAINS[c] 'missingCopy' OR label CONTAINS[c] 'Reviewed copy is missing'"
+            )
         ).firstMatch
         if error.exists {
             XCTFail("Card loading error visible: \(error.label)")

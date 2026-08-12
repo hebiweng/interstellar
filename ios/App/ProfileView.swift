@@ -16,8 +16,8 @@ struct ProfileView: View {
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 18) {
                         ScreenTitle(
-                            eyebrow: localized("YOUR PROFILE", "个人资料", language: model.language),
-                            title: localized("Profile", "我的", language: model.language)
+                            eyebrow: localized("profile.your-profile", language: model.language),
+                            title: localized("profile.profile", language: model.language)
                         )
                         profileHero
                         birthDetails
@@ -25,7 +25,7 @@ struct ProfileView: View {
                             showsEditor = true
                         } label: {
                             Label(
-                                localized("Edit birth details", "编辑出生资料", language: model.language),
+                                localized("profile.edit-birth-details", language: model.language),
                                 systemImage: "pencil"
                             )
                             .font(.subheadline.weight(.semibold))
@@ -51,7 +51,7 @@ struct ProfileView: View {
                         Image(systemName: "gearshape")
                             .foregroundStyle(AppTheme.text)
                     }
-                    .accessibilityLabel(localized("Settings", "设置", language: model.language))
+                    .accessibilityLabel(localized("profile.settings", language: model.language))
                 }
             }
             .navigationDestination(isPresented: $showsSettings) {
@@ -95,25 +95,25 @@ struct ProfileView: View {
         VStack(spacing: 0) {
             detailRow(
                 icon: "calendar",
-                title: localized("Birth date & time", "出生日期与时间", language: model.language),
+                title: localized("profile.birth-date-time", language: model.language),
                 value: formattedBirthDate
             )
             Divider().overlay(AppTheme.line)
             detailRow(
                 icon: "mappin.and.ellipse",
-                title: localized("Birth place", "出生地点", language: model.language),
+                title: localized("profile.birth-place", language: model.language),
                 value: model.profile.placeName
             )
             Divider().overlay(AppTheme.line)
             detailRow(
                 icon: "clock",
-                title: localized("Time zone", "时区", language: model.language),
+                title: localized("profile.time-zone", language: model.language),
                 value: model.profile.timezoneID
             )
             Divider().overlay(AppTheme.line)
             detailRow(
                 icon: "location",
-                title: localized("Coordinates", "经纬度", language: model.language),
+                title: localized("profile.coordinates", language: model.language),
                 value: String(format: "%.4f, %.4f", model.profile.latitude, model.profile.longitude)
             )
         }
@@ -147,11 +147,11 @@ struct ProfileView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(localized("PEOPLE", "人物档案", language: model.language))
+                    Text(localized("profile.people", language: model.language))
                         .font(.footnote.weight(.bold))
                         .tracking(1.2)
                         .foregroundStyle(AppTheme.violet)
-                    Text(localized("People you know", "我认识的人", language: model.language))
+                    Text(localized("profile.people-you-know", language: model.language))
                         .font(.title3.weight(.bold))
                         .foregroundStyle(AppTheme.text)
                 }
@@ -160,7 +160,7 @@ struct ProfileView: View {
                     editingPerson = SavedPerson.new(using: model.profile)
                 } label: {
                     Label(
-                        localized("Add", "添加", language: model.language),
+                        localized("profile.add", language: model.language),
                         systemImage: "plus"
                     )
                     .font(.caption.weight(.semibold))
@@ -177,11 +177,7 @@ struct ProfileView: View {
                     Image(systemName: "person.2")
                         .foregroundStyle(AppTheme.violet)
                     Text(
-                        localized(
-                            "Add someone once, then reuse their birth details in future relationship charts.",
-                            "人物资料只需添加一次，后续合盘可以直接选择使用。",
-                            language: model.language
-                        )
+                        localized("profile.add-someone-once-then-reuse-their-birth-details-in-future-relationship-c", language: model.language)
                     )
                     .font(.footnote)
                     .foregroundStyle(AppTheme.muted)
@@ -221,7 +217,7 @@ struct ProfileView: View {
                                 model.deletePeople(at: IndexSet(integer: index))
                             } label: {
                                 Label(
-                                    localized("Delete", "删除", language: model.language),
+                                    localized("profile.delete", language: model.language),
                                     systemImage: "trash"
                                 )
                             }
@@ -294,27 +290,27 @@ private struct SavedPersonEditorView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section(localized("Person", "人物", language: language)) {
+                Section(localized("charts.person", language: language)) {
                     HStack {
                         ProfileAvatarView(profile: draft.profile, size: 58)
                         PhotosPicker(selection: $avatarItem, matching: .images) {
                             Label(
-                                localized("Change photo", "更换头像", language: language),
+                                localized("profile.change-photo", language: language),
                                 systemImage: "photo"
                             )
                         }
                         if draft.profile.avatarData != nil {
-                            Button(localized("Remove", "移除", language: language), role: .destructive) {
+                            Button(localized("profile.remove", language: language), role: .destructive) {
                                 draft.profile.avatarData = nil
                             }
                         }
                     }
                     TextField(
-                        localized("Name", "姓名", language: language),
+                        localized("profile.name", language: language),
                         text: $draft.profile.name
                     )
                     Picker(
-                        localized("Relationship to me", "与我的关系", language: language),
+                        localized("profile.relationship-to-me", language: language),
                         selection: $draft.relationship
                     ) {
                         ForEach(PersonRelationship.allCases) { relationship in
@@ -323,18 +319,18 @@ private struct SavedPersonEditorView: View {
                     }
                 }
 
-                Section(localized("Birth", "出生资料", language: language)) {
+                Section(localized("profile.birth", language: language)) {
                     DatePicker(
-                        localized("Date & time", "日期与时间", language: language),
+                        localized("charts.date-time", language: language),
                         selection: $draft.profile.birthDateUTC,
                         displayedComponents: [.date, .hourAndMinute]
                     )
                     TextField(
-                        localized("Place", "地点", language: language),
+                        localized("profile.place", language: language),
                         text: $draft.profile.placeName
                     )
                     TextField(
-                        localized("Time zone", "时区", language: language),
+                        localized("profile.time-zone", language: language),
                         text: $draft.profile.timezoneID
                     )
                     .textInputAutocapitalization(.never)
@@ -343,18 +339,18 @@ private struct SavedPersonEditorView: View {
                         showsLocationSearch = true
                     } label: {
                         Label(
-                            localized("Choose on Apple Maps", "在 Apple 地图中选址", language: language),
+                            localized("profile.choose-on-apple-maps", language: language),
                             systemImage: "map"
                         )
                     }
                     TextField(
-                        localized("Latitude", "纬度", language: language),
+                        localized("profile.latitude", language: language),
                         value: $draft.profile.latitude,
                         format: .number.precision(.fractionLength(0 ... 6))
                     )
                     .keyboardType(.numbersAndPunctuation)
                     TextField(
-                        localized("Longitude", "经度", language: language),
+                        localized("profile.longitude", language: language),
                         value: $draft.profile.longitude,
                         format: .number.precision(.fractionLength(0 ... 6))
                     )
@@ -367,7 +363,7 @@ private struct SavedPersonEditorView: View {
                         dismiss()
                     } label: {
                         Label(
-                            localized("Delete person", "删除人物", language: language),
+                            localized("profile.delete-person", language: language),
                             systemImage: "trash"
                         )
                     }
@@ -377,14 +373,14 @@ private struct SavedPersonEditorView: View {
                 \.timeZone,
                 TimeZone(identifier: draft.profile.timezoneID) ?? .current
             )
-            .navigationTitle(localized("Person details", "人物资料", language: language))
+            .navigationTitle(localized("profile.person-details", language: language))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(localized("Cancel", "取消", language: language)) { dismiss() }
+                    Button(localized("location.cancel", language: language)) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(localized("Save", "保存", language: language)) {
+                    Button(localized("profile.save", language: language)) {
                         draft.profile.latitude = min(90, max(-90, draft.profile.latitude))
                         draft.profile.longitude = min(180, max(-180, draft.profile.longitude))
                         onSave(draft)
@@ -413,7 +409,7 @@ private struct SavedPersonEditorView: View {
 
     private func apply(_ selection: LocationSelection) {
         draft.profile.placeName = selection.name == "Current Location"
-            ? localized("Current Location", "当前位置", language: language)
+            ? localized("profile.current-location", language: language)
             : selection.name
         draft.profile.latitude = selection.latitude
         draft.profile.longitude = selection.longitude
@@ -443,25 +439,17 @@ private enum LocalDataClear: Identifiable {
     func message(language: AppLanguage) -> String {
         switch self {
         case .reports:
-            localized("This removes all saved chart reports from this device.", "这会删除本机保存的全部星盘报告。", language: language)
+            localized("profile.this-removes-all-saved-chart-reports-from-this-device", language: language)
         case .askHistory:
-            localized("This removes your saved horary questions.", "这会删除你保存的问事记录。", language: language)
+            localized("profile.this-removes-your-saved-horary-questions", language: language)
         case .aiCache:
-            localized("Generated interpretations will be regenerated next time you open them.", "下次打开时，生成内容会重新请求。", language: language)
+            localized("profile.generated-interpretations-will-be-regenerated-next-time-you-open-them", language: language)
         case .currentPersonArtifacts:
-            localized("This removes locally generated chart reports linked to your current birth profile.", "这会删除与当前本人出生资料关联的本机生成报告。", language: language)
+            localized("profile.this-removes-locally-generated-chart-reports-linked-to-your-current-birt", language: language)
         case let .chartArtifacts(chart):
-            localized(
-                "This removes locally generated reports for \(chart.title(language: .english)).",
-                "这会删除本机的\(chart.title(language: .simplifiedChinese))生成报告。",
-                language: language
-            )
+            localizedTemplate("dynamic.a254895f81", substitutions: ["value1": String(describing: chart.title(language: language))], language: language)
         case let .personArtifacts(person):
-            localized(
-                "This removes locally generated reports linked to \(person.profile.name).",
-                "这会删除与\(person.profile.name)关联的本机生成报告。",
-                language: language
-            )
+            localizedTemplate("dynamic.68196d8f57", substitutions: ["value1": String(describing: person.profile.name)], language: language)
         }
     }
 }
@@ -474,37 +462,37 @@ private struct SettingsView: View {
             NavigationLink {
                 AppearanceSettingsView()
             } label: {
-                Label(localized("Appearance", "外观", language: model.language), systemImage: "circle.lefthalf.filled")
+                Label(localized("profile.appearance", language: model.language), systemImage: "circle.lefthalf.filled")
             }
             NavigationLink {
                 InterpretationDefaultsSettingsView()
             } label: {
-                Label(localized("Interpretation Defaults", "解读预设", language: model.language), systemImage: "slider.horizontal.3")
+                Label(localized("profile.interpretation-defaults", language: model.language), systemImage: "slider.horizontal.3")
             }
             NavigationLink {
                 LanguageSettingsView()
             } label: {
-                Label(localized("Language", "语言", language: model.language), systemImage: "globe")
+                Label(localized("profile.language", language: model.language), systemImage: "globe")
             }
             NavigationLink {
                 LocalDataSettingsView()
             } label: {
-                Label(localized("Local Data", "本地数据", language: model.language), systemImage: "internaldrive")
+                Label(localized("profile.local-data", language: model.language), systemImage: "internaldrive")
             }
             NavigationLink {
                 SupportSettingsView()
             } label: {
-                Label(localized("Support", "支持", language: model.language), systemImage: "questionmark.bubble")
+                Label(localized("insight.current-sky.support", language: model.language), systemImage: "questionmark.bubble")
             }
             NavigationLink {
                 AboutSettingsView()
             } label: {
-                Label(localized("About", "关于", language: model.language), systemImage: "info.circle")
+                Label(localized("profile.about", language: model.language), systemImage: "info.circle")
             }
         }
         .scrollContentBackground(.hidden)
         .background(AppTheme.background)
-        .navigationTitle(localized("Settings", "设置", language: model.language))
+        .navigationTitle(localized("profile.settings", language: model.language))
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -514,21 +502,21 @@ private struct AppearanceSettingsView: View {
 
     var body: some View {
         Form {
-            Picker(localized("Theme", "主题", language: model.language), selection: $model.appearance) {
+            Picker(localized("profile.theme", language: model.language), selection: $model.appearance) {
                 ForEach(AppAppearance.allCases) { appearance in
                     Text(appearance.title(language: model.language)).tag(appearance)
                 }
             }
             .pickerStyle(.segmented)
 
-            Picker(localized("Text size", "字体大小", language: model.language), selection: $model.fontSize) {
+            Picker(localized("profile.text-size", language: model.language), selection: $model.fontSize) {
                 ForEach(AppFontSize.allCases) { size in
                     Text(size.title(language: model.language)).tag(size)
                 }
             }
             .pickerStyle(.navigationLink)
         }
-        .settingsDetailStyle(title: localized("Appearance", "外观", language: model.language))
+        .settingsDetailStyle(title: localized("profile.appearance", language: model.language))
     }
 }
 
@@ -552,14 +540,10 @@ private struct InterpretationDefaultsSettingsView: View {
                     }
                 }
             } footer: {
-                Text(localized(
-                    "Modern and Classical change how each chart is calculated.",
-                    "现代与古典会改变每张盘的计算方式。",
-                    language: model.language
-                ))
+                Text(localized("profile.modern-and-classical-change-how-each-chart-is-calculated", language: model.language))
             }
         }
-        .settingsDetailStyle(title: localized("Interpretation Defaults", "解读预设", language: model.language))
+        .settingsDetailStyle(title: localized("profile.interpretation-defaults", language: model.language))
     }
 }
 
@@ -568,14 +552,14 @@ private struct LanguageSettingsView: View {
 
     var body: some View {
         Form {
-            Picker(localized("App language", "应用语言", language: model.language), selection: $model.language) {
+            Picker(localized("profile.app-language", language: model.language), selection: $model.language) {
                 ForEach(AppLanguage.allCases) { language in
                     Text(language.title).tag(language)
                 }
             }
             .pickerStyle(.inline)
         }
-        .settingsDetailStyle(title: localized("Language", "语言", language: model.language))
+        .settingsDetailStyle(title: localized("profile.language", language: model.language))
     }
 }
 
@@ -586,39 +570,31 @@ private struct LocalDataSettingsView: View {
     var body: some View {
         Form {
             Section {
-                Label(localized("Local-first calculations", "本地优先计算", language: model.language), systemImage: "lock.shield")
-                Text(localized(
-                    "Interstellar does not require an account for chart calculation.",
-                    "Interstellar 的星盘计算不要求注册账户。",
-                    language: model.language
-                ))
+                Label(localized("profile.local-first-calculations", language: model.language), systemImage: "lock.shield")
+                Text(localized("profile.interstellar-does-not-require-an-account-for-chart-calculation", language: model.language))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 Toggle(
-                    localized("Allow new AI generation", "允许新的 AI 生成", language: model.language),
+                    localized("profile.allow-new-ai-generation", language: model.language),
                     isOn: Binding(
                         get: { model.aiConsentGranted },
                         set: { $0 ? model.grantAIConsent() : model.revokeAIConsent() }
                     )
                 )
-                Text(localized(
-                    "Turning this off stops future network requests. Reports already stored on this device remain readable.",
-                    "关闭后不再发送新的联网请求；已经保存在本机的报告仍可阅读。",
-                    language: model.language
-                ))
+                Text(localized("profile.turning-this-off-stops-future-network-requests-reports-already-stored-on", language: model.language))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
             }
 
             Section {
                 Button { pendingClear = .reports } label: {
-                    Label(localized("Clear saved reports", "清除已保存报告", language: model.language), systemImage: "doc.text")
+                    Label(localized("profile.clear-saved-reports", language: model.language), systemImage: "doc.text")
                 }
                 Button { pendingClear = .askHistory } label: {
-                    Label(localized("Clear ask history", "清除问事历史", language: model.language), systemImage: "questionmark.circle")
+                    Label(localized("profile.clear-ask-history", language: model.language), systemImage: "questionmark.circle")
                 }
                 Button { pendingClear = .aiCache } label: {
-                    Label(localized("Clear generated content cache", "清除生成内容缓存", language: model.language), systemImage: "sparkles")
+                    Label(localized("profile.clear-generated-content-cache", language: model.language), systemImage: "sparkles")
                 }
                 Menu {
                     Button(model.profile.name) { pendingClear = .currentPersonArtifacts }
@@ -626,33 +602,29 @@ private struct LocalDataSettingsView: View {
                         Button(person.profile.name) { pendingClear = .personArtifacts(person) }
                     }
                 } label: {
-                    Label(localized("Clear by person", "按人物清除", language: model.language), systemImage: "person.crop.circle.badge.minus")
+                    Label(localized("profile.clear-by-person", language: model.language), systemImage: "person.crop.circle.badge.minus")
                 }
                 Menu {
                     ForEach(ChartKind.allCases) { chart in
                         Button(chart.title(language: model.language)) { pendingClear = .chartArtifacts(chart) }
                     }
                 } label: {
-                    Label(localized("Clear by chart type", "按盘型清除", language: model.language), systemImage: "square.stack.3d.up.slash")
+                    Label(localized("profile.clear-by-chart-type", language: model.language), systemImage: "square.stack.3d.up.slash")
                 }
             } footer: {
-                Text(localized(
-                    "Clearing removes data stored on this device only.",
-                    "清除只会删除保存在本机的数据。",
-                    language: model.language
-                ))
+                Text(localized("profile.clearing-removes-data-stored-on-this-device-only", language: model.language))
             }
         }
-        .settingsDetailStyle(title: localized("Local Data", "本地数据", language: model.language))
+        .settingsDetailStyle(title: localized("profile.local-data", language: model.language))
         .confirmationDialog(
-            localized("Clear data?", "确认清除？", language: model.language),
+            localized("profile.clear-data", language: model.language),
             isPresented: Binding(
                 get: { pendingClear != nil },
                 set: { if !$0 { pendingClear = nil } }
             ),
             presenting: pendingClear
         ) { item in
-            Button(localized("Clear", "清除", language: model.language), role: .destructive) {
+            Button(localized("profile.clear", language: model.language), role: .destructive) {
                 switch item {
                 case .reports: model.clearReports()
                 case .askHistory: model.clearAskHistory()
@@ -663,7 +635,7 @@ private struct LocalDataSettingsView: View {
                 }
                 pendingClear = nil
             }
-            Button(localized("Cancel", "取消", language: model.language), role: .cancel) {
+            Button(localized("location.cancel", language: model.language), role: .cancel) {
                 pendingClear = nil
             }
         } message: { item in
@@ -681,12 +653,12 @@ private struct SupportSettingsView: View {
                 FeedbackView(language: model.language)
             } label: {
                 Label(
-                    localized("Report or suggest a feature", "问题反馈与功能建议", language: model.language),
+                    localized("profile.report-or-suggest-a-feature", language: model.language),
                     systemImage: "exclamationmark.bubble"
                 )
             }
         }
-        .settingsDetailStyle(title: localized("Support", "支持", language: model.language))
+        .settingsDetailStyle(title: localized("insight.current-sky.support", language: model.language))
     }
 }
 
@@ -695,14 +667,14 @@ private struct AboutSettingsView: View {
 
     var body: some View {
         Form {
-            LabeledContent(localized("Version", "版本", language: model.language), value: "0.1.0")
-            LabeledContent(localized("Calculation", "计算引擎", language: model.language), value: "Swiss Ephemeris")
-            LabeledContent(localized("Editorial content", "原创解读内容", language: model.language), value: "© 2026 Interstellar")
-            NavigationLink(localized("Open-source licenses", "开源许可证", language: model.language)) {
+            LabeledContent(localized("profile.version", language: model.language), value: "0.1.0")
+            LabeledContent(localized("profile.calculation", language: model.language), value: "Swiss Ephemeris")
+            LabeledContent(localized("profile.editorial-content", language: model.language), value: "© 2026 Interstellar")
+            NavigationLink(localized("profile.open-source-licenses", language: model.language)) {
                 LicenseView(language: model.language)
             }
         }
-        .settingsDetailStyle(title: localized("About", "关于", language: model.language))
+        .settingsDetailStyle(title: localized("profile.about", language: model.language))
     }
 }
 
@@ -724,9 +696,9 @@ private enum FeedbackCategory: String, CaseIterable, Identifiable, Codable {
 
     func title(language: AppLanguage) -> String {
         switch self {
-        case .bug: localized("Bug", "问题", language: language)
-        case .feature: localized("Feature", "功能建议", language: language)
-        case .other: localized("Other", "其他", language: language)
+        case .bug: localized("profile.bug", language: language)
+        case .feature: localized("profile.feature", language: language)
+        case .other: localized("settings.other", language: language)
         }
     }
 }
@@ -751,7 +723,7 @@ private enum FeedbackSubmissionError: LocalizedError {
 
 private enum FeedbackService {
     private static let endpoint = URL(
-        string: "https://fate.xiaoguiwk.top/api/v1/feedback"
+        string: "https://aaadmin.xiaoguiwk.top/v1/feedback"
     )!
 
     static func submit(
@@ -792,9 +764,9 @@ private struct FeedbackView: View {
 
     var body: some View {
         Form {
-            Section(localized("Feedback type", "反馈类型", language: language)) {
+            Section(localized("profile.feedback-type", language: language)) {
                 Picker(
-                    localized("Type", "类型", language: language),
+                    localized("profile.type", language: language),
                     selection: $category
                 ) {
                     ForEach(FeedbackCategory.allCases) { item in
@@ -804,23 +776,19 @@ private struct FeedbackView: View {
                 .pickerStyle(.segmented)
             }
 
-            Section(localized("feedback.details.section", default: "Details", chinese: "反馈内容", language: language)) {
+            Section(localized("feedback.details.section", language: language)) {
                 TextField(
-                    localized("Short title", "简短标题", language: language),
+                    localized("profile.short-title", language: language),
                     text: $subject
                 )
                 TextField(
-                    localized(
-                        "What happened, or what would you like us to add?",
-                        "请描述遇到的问题，或希望增加的功能。",
-                        language: language
-                    ),
+                    localized("profile.what-happened-or-what-would-you-like-us-to-add", language: language),
                     text: $message,
                     axis: .vertical
                 )
                 .lineLimit(5 ... 12)
                 TextField(
-                    localized("Contact (optional)", "联系方式（可选）", language: language),
+                    localized("profile.contact-optional", language: language),
                     text: $contact
                 )
                 .textInputAutocapitalization(.never)
@@ -838,8 +806,8 @@ private struct FeedbackView: View {
                         }
                         Text(
                             isSubmitting
-                                ? localized("Sending…", "正在提交…", language: language)
-                                : localized("Send feedback", "提交反馈", language: language)
+                                ? localized("profile.sending", language: language)
+                                : localized("profile.send-feedback", language: language)
                         )
                         .font(AppTypography.label)
                         Spacer()
@@ -849,11 +817,7 @@ private struct FeedbackView: View {
                 .disabled(isSubmitting || subject.trimmed.isEmpty || message.trimmed.isEmpty)
             } footer: {
                 Text(
-                    localized(
-                        "Feedback uses the network and includes the app version and device model, but never chart or birth data. AI interpretation uses the network only after separate consent in Settings.",
-                        "反馈会联网并附带应用版本和设备型号，但不会附带星盘或出生资料。AI 解读只有在你另行授权后才会联网。",
-                        language: language
-                    )
+                    localized("profile.feedback-uses-the-network-and-includes-the-app-version-and-device-model", language: language)
                 )
                 .font(AppTypography.supporting)
             }
@@ -870,15 +834,11 @@ private struct FeedbackView: View {
                     if let lastSubmission {
                         Button {
                             UIPasteboard.general.string = lastSubmission
-                            self.resultMessage = localized(
-                                "Feedback text copied.",
-                                "反馈文字已复制。",
-                                language: language
-                            )
+                            self.resultMessage = localized("profile.feedback-text-copied", language: language)
                             self.lastSubmission = nil
                         } label: {
                             Label(
-                                localized("Copy feedback text", "复制反馈文字", language: language),
+                                localized("profile.copy-feedback-text", language: language),
                                 systemImage: "doc.on.doc"
                             )
                             .frame(minHeight: 44)
@@ -887,7 +847,7 @@ private struct FeedbackView: View {
                 }
             }
         }
-        .navigationTitle(localized("Report", "反馈", language: language))
+        .navigationTitle(localized("profile.report", language: language))
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -908,21 +868,13 @@ private struct FeedbackView: View {
                     subject = ""
                     message = ""
                     contact = ""
-                    resultMessage = localized(
-                        "Feedback sent. Thank you.",
-                        "反馈已提交，谢谢。",
-                        language: language
-                    )
+                    resultMessage = localized("profile.feedback-sent-thank-you", language: language)
                 }
             } catch {
                 await MainActor.run {
                     isSubmitting = false
                     lastSubmission = payload
-                    resultMessage = localized(
-                        "Could not send feedback. You can copy it and try again later.",
-                        "反馈暂时无法提交，你可以复制内容后稍后重试。",
-                        language: language
-                    )
+                    resultMessage = localized("profile.could-not-send-feedback-you-can-copy-it-and-try-again-later", language: language)
                 }
             }
         }
@@ -947,28 +899,24 @@ private struct LicenseView: View {
 
     var body: some View {
         List {
-            Section("Swiss Ephemeris") {
+            Section(localized("license.swiss-ephemeris", language: language)) {
                 Text(
-                    localized(
-                        "Swiss Ephemeris 2.10.3 is used under the GNU Affero General Public License. Copyright notices are preserved below.",
-                        "Swiss Ephemeris 2.10.3 依据 GNU Affero 通用公共许可证使用，版权声明完整保留如下。",
-                        language: language
-                    )
+                    localized("profile.swiss-ephemeris-2-10-3-is-used-under-the-gnu-affero-general-public-licen", language: language)
                 )
                 .font(.footnote)
                 NavigationLink(
-                    localized("Swiss Ephemeris license notice", "Swiss Ephemeris 许可声明", language: language)
+                    localized("profile.swiss-ephemeris-license-notice", language: language)
                 ) {
                     LicenseTextView(
-                        title: "Swiss Ephemeris",
+                        title: localized("license.swiss-ephemeris", language: language),
                         resource: "LICENSE",
                         extension: nil,
                         language: language
                     )
                 }
-                NavigationLink(localized("GNU AGPL 3.0", "GNU AGPL 3.0 全文", language: language)) {
+                NavigationLink(localized("profile.gnu-agpl-3-0", language: language)) {
                     LicenseTextView(
-                        title: "GNU AGPL 3.0",
+                        title: localized("license.gnu-agpl-3-0", language: language),
                         resource: "agpl-3.0",
                         extension: "txt",
                         language: language
@@ -976,18 +924,14 @@ private struct LicenseView: View {
                 }
             }
 
-            Section(localized("Content rights", "内容权利", language: language)) {
+            Section(localized("profile.content-rights", language: language)) {
                 Text(
-                    localized(
-                        "Original interpretations, translations, editorial selection, and arrangement are separately copyrighted content and are not licensed under the AGPL merely because the application can load them.",
-                        "原创解读、翻译、编辑选择与编排属于单独享有版权的内容；应用能够加载这些内容，不表示其自动依据 AGPL 授权。",
-                        language: language
-                    )
+                    localized("profile.original-interpretations-translations-editorial-selection-and-arrangemen", language: language)
                 )
                 .font(.footnote)
             }
         }
-        .navigationTitle(localized("Licenses", "许可证", language: language))
+        .navigationTitle(localized("profile.licenses", language: language))
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -1014,11 +958,7 @@ private struct LicenseTextView: View {
         guard let url = Bundle.main.url(forResource: resource, withExtension: `extension`),
               let text = try? String(contentsOf: url, encoding: .utf8)
         else {
-            return localized(
-                "License text is unavailable.",
-                "许可证全文暂不可用。",
-                language: language
-            )
+            return localized("profile.license-text-is-unavailable", language: language)
         }
         return text
     }
@@ -1041,56 +981,56 @@ private struct ProfileEditorView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section(localized("Identity", "人物", language: language)) {
+                Section(localized("profile.identity", language: language)) {
                     HStack {
                         ProfileAvatarView(profile: draft, size: 58)
                         PhotosPicker(selection: $avatarItem, matching: .images) {
                             Label(
-                                localized("Change photo", "更换头像", language: language),
+                                localized("profile.change-photo", language: language),
                                 systemImage: "photo"
                             )
                         }
                         if draft.avatarData != nil {
-                            Button(localized("Remove", "移除", language: language), role: .destructive) {
+                            Button(localized("profile.remove", language: language), role: .destructive) {
                                 draft.avatarData = nil
                             }
                         }
                     }
-                    TextField(localized("Name", "姓名", language: language), text: $draft.name)
+                    TextField(localized("profile.name", language: language), text: $draft.name)
                 }
-                Section(localized("Birth", "出生资料", language: language)) {
+                Section(localized("profile.birth", language: language)) {
                     DatePicker(
-                        localized("Date & time", "日期与时间", language: language),
+                        localized("charts.date-time", language: language),
                         selection: $draft.birthDateUTC,
                         displayedComponents: [.date, .hourAndMinute]
                     )
-                    TextField(localized("Place", "地点", language: language), text: $draft.placeName)
-                    TextField(localized("Time zone", "时区", language: language), text: $draft.timezoneID)
+                    TextField(localized("profile.place", language: language), text: $draft.placeName)
+                    TextField(localized("profile.time-zone", language: language), text: $draft.timezoneID)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                     Button {
                         showsLocationSearch = true
                     } label: {
                         Label(
-                            localized("Choose on Apple Maps", "在 Apple 地图中选址", language: language),
+                            localized("profile.choose-on-apple-maps", language: language),
                             systemImage: "map"
                         )
                     }
-                    TextField(localized("Latitude", "纬度", language: language), value: $draft.latitude, format: .number.precision(.fractionLength(0 ... 6)))
+                    TextField(localized("profile.latitude", language: language), value: $draft.latitude, format: .number.precision(.fractionLength(0 ... 6)))
                         .keyboardType(.numbersAndPunctuation)
-                    TextField(localized("Longitude", "经度", language: language), value: $draft.longitude, format: .number.precision(.fractionLength(0 ... 6)))
+                    TextField(localized("profile.longitude", language: language), value: $draft.longitude, format: .number.precision(.fractionLength(0 ... 6)))
                         .keyboardType(.numbersAndPunctuation)
                 }
             }
             .environment(\.timeZone, TimeZone(identifier: draft.timezoneID) ?? .current)
-            .navigationTitle(localized("Birth details", "出生资料", language: language))
+            .navigationTitle(localized("profile.birth-details", language: language))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(localized("Cancel", "取消", language: language)) { dismiss() }
+                    Button(localized("location.cancel", language: language)) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(localized("Save", "保存", language: language)) {
+                    Button(localized("profile.save", language: language)) {
                         draft.latitude = min(90, max(-90, draft.latitude))
                         draft.longitude = min(180, max(-180, draft.longitude))
                         onSave(draft)
@@ -1121,7 +1061,7 @@ private struct ProfileEditorView: View {
 
     private func apply(_ selection: LocationSelection) {
         draft.placeName = selection.name == "Current Location"
-            ? localized("Current Location", "当前位置", language: language)
+            ? localized("profile.current-location", language: language)
             : selection.name
         draft.latitude = selection.latitude
         draft.longitude = selection.longitude

@@ -10,7 +10,7 @@ the result so identical parameters never call the LLM twice.
 - Consumer API and the standalone administrator are served from
   `https://aaadmin.xiaoguiwk.top`.
 - Open `https://aaadmin.xiaoguiwk.top/xiaoguiwk` (or the site root) to manage
-  DeepSeek, prompts and usage. The administrator is embedded in the Relay and
+  DeepSeek, prompts, usage and user feedback. The administrator is embedded in the Relay and
   does not depend on the paused Web application.
 - DeepSeek is seeded with `https://api.deepseek.com` and
   `deepseek-v4-flash`; after deployment the administrator normally only needs
@@ -22,6 +22,9 @@ the result so identical parameters never call the LLM twice.
   Body: `{mode, chartKind|periodType, preset, profileHash, params, facts, locale, clientVersion, forceRegenerate?}`.
   Response: `{report: {title, subtitle, sections[]}, model, cached}`. Chart report sections cite only IDs from `facts.evidenceFacts`; no per-card content is generated.
 - `GET /v1/health`
+- `POST /v1/feedback` — accepts only the user-entered category, feedback text
+  and optional contact. Content and contact are encrypted at rest; request and
+  field sizes are bounded and the endpoint is rate-limited.
 - Admin API (revocable secure cookie from `POST /admin/login`):
   - `GET|POST|PUT /admin/providers` · `DELETE /admin/providers/{id}`
   - `GET /admin/providers/{id}/models` — pulls the model list from the upstream with the stored key
@@ -29,6 +32,7 @@ the result so identical parameters never call the LLM twice.
   - `PUT /admin/models` — enable or disable a discovered provider model
   - `GET|PUT /admin/prompts` · `POST /admin/prompts/{scope}/{locale}/restore`
   - `GET /admin/usage`
+  - `GET /admin/feedback?status=&type=` · `PATCH /admin/feedback/{id}`
 
 ## Environment
 

@@ -50,6 +50,7 @@ DerivedData/
 /ios/PrivateRules/
 /ios/App/Resources/PrivateRules*.json
 /ios/Artifacts/
+/artifacts/*-generation-package.zip
 
 # debug
 npm-debug.log*
@@ -76,10 +77,9 @@ apps/**/dist/
 /var/
 /work/
 
-# Local Obsidian vault. It contains proprietary corpus and must never gain new
-# tracked files in the application repository, even while GitHub is private.
-# Some legacy files are already tracked and require a separate index migration.
-/obsidian/interstellar/
+# Local Obsidian vault and backups. They contain proprietary research/corpus
+# and must never be tracked, even while the remote repository is private.
+/obsidian/interstellar*/
 
 # JPL validation kernels exceed ordinary Git hosting file limits. The exact
 # official URL, size and SHA-256 remain locked in data-manifests; bootstrap with

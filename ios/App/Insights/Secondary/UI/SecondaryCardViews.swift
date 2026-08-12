@@ -6,10 +6,10 @@ extension InsightVisualView {
             ForEach(Array(facts.prefix(4).enumerated()), id: \.offset) { _, fact in
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
-                        Text(fact.label).font(.system(size: 12, weight: .semibold)).foregroundStyle(AppTheme.text)
+                        Text(fact.label).font(AppTypography.scaled(12, weight: .semibold)).foregroundStyle(AppTheme.text)
                         Spacer()
                         if let note = fact.note {
-                            Text(note).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
+                            Text(note).font(AppTypography.scaled(10)).foregroundStyle(AppTheme.muted)
                         }
                     }
                     GeometryReader { proxy in
@@ -50,30 +50,30 @@ extension InsightVisualView {
                     .stroke(AppTheme.violet, style: StrokeStyle(lineWidth: 8, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                 VStack(spacing: 0) {
-                    Text(progressedPhaseName(phase)).font(.system(size: 12, weight: .bold)).foregroundStyle(AppTheme.text)
-                    Text("\(Int(phase))°").font(.system(size: 10)).foregroundStyle(AppTheme.muted)
+                    Text(progressedPhaseName(phase)).font(AppTypography.scaled(12, weight: .bold)).foregroundStyle(AppTheme.text)
+                    Text("\(Int(phase))°").font(AppTypography.scaled(10)).foregroundStyle(AppTheme.muted)
                 }
             }
             .frame(width: 108, height: 108)
-            progressTrack(label: localized("Moon", "月亮", language: language), value: moonProgress, tone: .transition)
-            progressTrack(label: localized("Sun", "太阳", language: language), value: sunProgress, tone: .supportive)
+            progressTrack(label: localized("insight.natal.moon", language: language), value: moonProgress, tone: .transition)
+            progressTrack(label: localized("insight.natal.sun", language: language), value: sunProgress, tone: .supportive)
         }
     }
 
     func progressTrack(label: String, value: Double, tone: InsightTone) -> some View {
         HStack(spacing: 9) {
-            Text(label).font(.system(size: 11, weight: .semibold)).foregroundStyle(AppTheme.muted).frame(width: 44, alignment: .leading)
+            Text(label).font(AppTypography.scaled(11, weight: .semibold)).foregroundStyle(AppTheme.muted).frame(width: 44, alignment: .leading)
             ProgressView(value: max(0, min(1, value))).tint(AppTheme.tone(tone))
-            Text("\(Int(value * 30))°/30").font(.system(size: 10).monospacedDigit()).foregroundStyle(AppTheme.muted).frame(width: 52, alignment: .trailing)
+            Text("\(Int(value * 30))°/30").font(AppTypography.scaled(10).monospacedDigit()).foregroundStyle(AppTheme.muted).frame(width: 52, alignment: .trailing)
         }
     }
 
     func progressedPhaseName(_ angle: Double) -> String {
         switch angle {
-        case 0 ..< 90: localized("New phase", "新月阶段", language: language)
-        case 90 ..< 180: localized("Building phase", "上弦阶段", language: language)
-        case 180 ..< 270: localized("Review phase", "满月阶段", language: language)
-        default: localized("Integration phase", "下弦阶段", language: language)
+        case 0 ..< 90: localized("insight.secondary.new-phase", language: language)
+        case 90 ..< 180: localized("insight.secondary.building-phase", language: language)
+        case 180 ..< 270: localized("insight.secondary.review-phase", language: language)
+        default: localized("insight.secondary.integration-phase", language: language)
         }
     }
 
@@ -87,7 +87,7 @@ extension InsightVisualView {
                     .trim(from: 0, to: max(0.02, min(1, progress)))
                     .stroke(AppTheme.violet, style: StrokeStyle(lineWidth: 8, lineCap: .round))
                     .rotationEffect(.degrees(-90))
-                Text("☽").font(.system(size: 24, weight: .semibold)).foregroundStyle(AppTheme.text)
+                Text("☽").font(AppTypography.scaled(24, weight: .semibold)).foregroundStyle(AppTheme.text)
             }
             .frame(width: 88, height: 88)
             factGrid(columns: 3)
@@ -99,16 +99,16 @@ extension InsightVisualView {
     func compareStrip(natal: String, progressed: String) -> some View {
         HStack(spacing: 8) {
             VStack(spacing: 4) {
-                Text(localized("Natal", "本命", language: language)).font(.system(size: 9, weight: .bold)).foregroundStyle(AppTheme.muted)
-                Text(natal).font(.system(size: 11.5, weight: .semibold)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
+                Text(localized("insight.secondary.natal", language: language)).font(AppTypography.scaled(9, weight: .bold)).foregroundStyle(AppTheme.muted)
+                Text(natal).font(AppTypography.scaled(11.5, weight: .semibold)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
             .padding(10)
             .background(AppTheme.background.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
-            Image(systemName: "arrow.right").font(.system(size: 11)).foregroundStyle(AppTheme.muted)
+            Image(systemName: "arrow.right").font(AppTypography.scaled(11)).foregroundStyle(AppTheme.muted)
             VStack(spacing: 4) {
-                Text(localized("Now", "现在", language: language)).font(.system(size: 9, weight: .bold)).foregroundStyle(AppTheme.muted)
-                Text(progressed).font(.system(size: 11.5, weight: .semibold)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
+                Text(localized("insight.secondary.now", language: language)).font(AppTypography.scaled(9, weight: .bold)).foregroundStyle(AppTheme.muted)
+                Text(progressed).font(AppTypography.scaled(11.5, weight: .semibold)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
             .padding(10)
@@ -120,18 +120,18 @@ extension InsightVisualView {
 
     func stageFlow(old: String, transition: String, emerging: String) -> some View {
         HStack(spacing: 6) {
-            stageNode(label: localized("OLD", "过去", language: language), value: old, active: false)
-            Image(systemName: "arrow.right").font(.system(size: 10)).foregroundStyle(AppTheme.muted)
-            stageNode(label: localized("TRANSITION", "转变", language: language), value: transition, active: true)
-            Image(systemName: "arrow.right").font(.system(size: 10)).foregroundStyle(AppTheme.muted)
-            stageNode(label: localized("EMERGING", "浮现", language: language), value: emerging, active: false)
+            stageNode(label: localized("insight.secondary.old", language: language), value: old, active: false)
+            Image(systemName: "arrow.right").font(AppTypography.scaled(10)).foregroundStyle(AppTheme.muted)
+            stageNode(label: localized("insight.secondary.transition", language: language), value: transition, active: true)
+            Image(systemName: "arrow.right").font(AppTypography.scaled(10)).foregroundStyle(AppTheme.muted)
+            stageNode(label: localized("insight.secondary.emerging", language: language), value: emerging, active: false)
         }
     }
 
     func stageNode(label: String, value: String, active: Bool) -> some View {
         VStack(spacing: 4) {
-            Text(label).font(.system(size: 8.5, weight: .bold)).foregroundStyle(active ? AppTheme.violet : AppTheme.muted)
-            Text(value).font(.system(size: 10, weight: .medium)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
+            Text(label).font(AppTypography.scaled(8.5, weight: .bold)).foregroundStyle(active ? AppTheme.violet : AppTheme.muted)
+            Text(value).font(AppTypography.scaled(10, weight: .medium)).foregroundStyle(AppTheme.text).multilineTextAlignment(.center)
                 .lineLimit(3)
         }
         .frame(maxWidth: .infinity)

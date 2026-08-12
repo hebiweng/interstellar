@@ -254,10 +254,17 @@ enum SynastryContentPlanner {
         let chemistry = involving([.venus, .mars, .pluto], bundle.aspects)
         let commitment = involving([.saturn, .jupiter], bundle.aspects)
         let emotionalSelection = emotionalEvidence(moon, bundle: bundle)
-        let chemistrySelection = chemistryEvidence(chemistry, modern: modern)
+        let communicationSelection = communicationEvidence(communication, bundle: bundle)
+        let chemistrySelection = chemistryEvidence(chemistry, modern: modern, bundle: bundle)
         let commitmentSelection = commitmentEvidence(commitment, bundle: bundle)
         let perspectiveSelection = perspectiveEvidence(bundle)
         let overlaySelection = importantOverlays(bundle)
+        let domainFactIDs = Set(
+                emotionalSelection.map(\.fact.factID)
+                + communicationSelection.map(\.factID)
+                + chemistrySelection.map(\.fact.factID)
+                + commitmentSelection.map(\.fact.factID)
+        )
         let cards = [
             make(
                 "relationship-overview",
@@ -278,7 +285,7 @@ enum SynastryContentPlanner {
             ),
             make(
                 "communication", bundle, domainTheme(communication, quiet: .quiet),
-                aspects(communication, count: 3)
+                communicationSelection
             ),
             make(
                 "chemistry", bundle, domainTheme(chemistry, quiet: .quiet),
@@ -291,7 +298,12 @@ enum SynastryContentPlanner {
                 evidenceRoles: Dictionary(uniqueKeysWithValues: commitmentSelection.map { ($0.fact.factID, $0.role) })
             ),
             make("house-overlays", bundle, .mixed, overlaySelection.map(SynastryFact.overlay)),
-            make("key-inter-aspects", bundle, domainTheme(Array(bundle.aspects.prefix(6)), quiet: .quiet), aspects(bundle.aspects, count: 6)),
+            make(
+                "key-inter-aspects",
+                bundle,
+                domainTheme(Array(bundle.aspects.prefix(6)), quiet: .quiet),
+                keyInterAspectEvidence(bundle.aspects, excluding: domainFactIDs)
+            ),
         ]
         return SynastryContentPlan(
             scopeID: bundle.scopeID,
@@ -360,8 +372,28 @@ enum SynastryContentPlanner {
         return result
     }
 
-    private static func chemistryEvidence(_ values: [SynastryAspectFact], modern: Bool) -> [RoleFact] {
-        guard !values.isEmpty else { return [] }
+    private static func communicationEvidence(
+        _ values: [SynastryAspectFact],
+        bundle: SynastryFactBundle
+    ) -> [SynastryFact] {
+        let contacts = aspects(values, count: 3)
+        if !contacts.isEmpty { return contacts }
+        return rankedOverlays(bundle.overlays.filter { $0.body == .mercury }, count: 3)
+            .map(SynastryFact.overlay)
+    }
+
+    private static func chemistryEvidence(
+        _ values: [SynastryAspectFact],
+        modern: Bool,
+        bundle: SynastryFactBundle
+    ) -> [RoleFact] {
+        guard !values.isEmpty else {
+            let allowedBodies: Set<CelestialBody> = modern ? [.venus, .mars, .pluto] : [.venus, .mars]
+            let overlays = rankedOverlays(bundle.overlays.filter { allowedBodies.contains($0.body) }, count: 2)
+            return overlays.enumerated().map { index, overlay in
+                RoleFact(role: index == 0 ? "attraction" : "intensity", fact: .overlay(overlay))
+            }
+        }
         let attraction = values.first(where: {
             $0.kind.supportive && ([.venus, .mars].contains($0.firstBody) || [.venus, .mars].contains($0.secondBody))
         }) ?? values[0]
@@ -532,6 +564,21 @@ enum SynastryContentPlanner {
 
     private static func aspects(_ values: [SynastryAspectFact], count: Int) -> [SynastryFact] {
         values.prefix(count).map(SynastryFact.aspect)
+    }
+
+    private static func keyInterAspectEvidence(
+        _ values: [SynastryAspectFact],
+        excluding usedFactIDs: Set<String>
+    ) -> [SynastryFact] {
+        var selected = values.filter { !usedFactIDs.contains($0.factID) }.prefix(6).map(SynastryFact.aspect)
+        if selected.count < min(3, values.count) {
+            let selectedIDs = Set(selected.map(\.factID))
+            selected.append(contentsOf: values
+                .filter { !selectedIDs.contains($0.factID) }
+                .prefix(min(3, values.count) - selected.count)
+                .map(SynastryFact.aspect))
+        }
+        return selected
     }
 
     private static func overlayEvidence(_ bundle: SynastryFactBundle, count: Int) -> [SynastryFact] {
@@ -743,49 +790,38 @@ extension InsightFactory {
             let sourceName = value.direction == .personAToB ? firstName : secondName
             let receiverName = value.direction == .personAToB ? secondName : firstName
             let body = bodyName(value.body, language: language)
-            let label = localized(
-                "\(possessive(sourceName)) \(body) in \(possessive(receiverName)) \(ordinalHouse(value.receivingHouse))",
-                "\(sourceName) 的\(body)落入 \(receiverName) 的第 \(value.receivingHouse) 宫",
+            let label = localizedTemplate(
+                "dynamic.e62646a1cc",
+                substitutions: [
+                    "value1": sourceName,
+                    "value2": body,
+                    "value3": receiverName,
+                    "value4": AstroTerms.house(value.receivingHouse, language: language),
+                ],
                 language: language
             )
-            return fact(label, ConsumerCopy.lifeArea(value.receivingHouse, language: language), .transition, stableID: value.factID, sourceFactIDs: [value.factID], visualRole: visualRole, note: "\(Zodiac.name(index: value.signIndex, language: language)) \(Zodiac.formatDegree(value.degreeInSign))", progress: Double(SynastryContentPlanner.overlayRelevanceForPresentation(value)) / 15.0, symbol: value.body.symbol, category: value.direction.rawValue)
+            return fact(label, ConsumerCopy.lifeArea(value.receivingHouse, language: language), .transition, stableID: value.factID, sourceFactIDs: [value.factID], visualRole: visualRole, technicalDetail: "\(Zodiac.name(index: value.signIndex, language: language)) \(Zodiac.formatDegree(value.degreeInSign))", progress: Double(SynastryContentPlanner.overlayRelevanceForPresentation(value)) / 15.0, symbol: value.body.symbol, category: value.direction.rawValue)
         case let .planetCondition(value):
-            return fact(bodyName(value.assessment.body, language: language), String(format: "%+.0f", value.assessment.score), value.assessment.score >= 0 ? .supportive : .challenging, stableID: value.factID, sourceFactIDs: [value.factID], note: value.assessment.conditions.map(\.rawValue).joined(separator: " · "), symbol: value.assessment.body.symbol, category: value.person.rawValue)
+            return fact(bodyName(value.assessment.body, language: language), String(format: "%+.0f", value.assessment.score), value.assessment.score >= 0 ? .supportive : .challenging, stableID: value.factID, sourceFactIDs: [value.factID], technicalDetail: value.assessment.conditions.map(\.rawValue).joined(separator: " · "), symbol: value.assessment.body.symbol, category: value.person.rawValue)
         }
-    }
-
-    private static func possessive(_ name: String) -> String {
-        name.hasSuffix("s") ? "\(name)’" : "\(name)’s"
-    }
-
-    private static func ordinalHouse(_ house: Int) -> String {
-        let suffix: String
-        switch house % 100 {
-        case 11, 12, 13: suffix = "th"
-        default:
-            suffix = switch house % 10 {
-            case 1: "st"
-            case 2: "nd"
-            case 3: "rd"
-            default: "th"
-            }
-        }
-        return "\(house)\(suffix)"
     }
 
     private static func synastryTitle(_ id: String, language: AppLanguage) -> String {
-        let values: [String: (String, String)] = [
-            "relationship-overview": ("Relationship overview", "关系总览"),
-            "perspectives": ("How you experience each other", "彼此的体验"),
-            "emotional-connection": ("Emotional connection", "情感连接"),
-            "communication": ("Communication", "沟通"),
-            "chemistry": ("Attraction & chemistry", "吸引与化学反应"),
-            "commitment": ("Commitment & longevity", "承诺与长久"),
-            "house-overlays": ("House overlays", "落宫叠加"),
-            "key-inter-aspects": ("Key inter-aspects", "主要相互连接"),
+        let keys: [String: String] = [
+            "relationship-overview": "insight.synastry.title.relationship-overview",
+            "perspectives": "insight.synastry.title.perspectives",
+            "emotional-connection": "insight.synastry.title.emotional-connection",
+            "communication": "insight.synastry.title.communication",
+            "chemistry": "insight.synastry.title.chemistry",
+            "commitment": "insight.synastry.title.commitment",
+            "house-overlays": "insight.synastry.title.house-overlays",
+            "key-inter-aspects": "insight.synastry.title.key-inter-aspects",
         ]
-        let value = values[id] ?? (id, id)
-        return localized(value.0, value.1, language: language)
+        guard let key = keys[id] else {
+            assertionFailure("Unknown synastry card title: \(id)")
+            return id
+        }
+        return localized(key, language: language)
     }
 
     private static func synastryIcon(_ id: String) -> String {

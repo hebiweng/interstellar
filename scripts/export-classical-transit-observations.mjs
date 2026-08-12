@@ -5,8 +5,10 @@ import { fileURLToPath } from "node:url";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outputDirectory = path.join(repositoryRoot, "artifacts", "classical-transit");
-const destination = process.env.TRANSIT_COPY_TEST_DESTINATION
-  ?? "platform=iOS Simulator,name=iPhone 12 mini";
+const destination = process.env.TRANSIT_COPY_TEST_DESTINATION?.trim();
+if (!destination || /simulator/i.test(destination)) {
+  throw new Error("Set TRANSIT_COPY_TEST_DESTINATION to a connected physical iPhone destination; Simulator is not allowed.");
+}
 const result = spawnSync(
   "xcodebuild",
   [

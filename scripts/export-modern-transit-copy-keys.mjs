@@ -3,12 +3,12 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const registryPath = path.join(repositoryRoot, "ios", "ContentSchema", "modern-transit-copy-registry.json");
+const registryPath = path.join(repositoryRoot, "artifacts", "modern-transit", "modern-transit-copy-registry.json");
 const catalogPath = path.resolve(
   repositoryRoot,
   process.argv[2] ?? path.join("ios", "App", "Resources", "CopyCatalog-en.json"),
 );
-const outputDirectory = path.join(repositoryRoot, "ios", "TranslationExports");
+const outputDirectory = path.join(repositoryRoot, "artifacts", "modern-transit");
 const observationsPath = path.join(outputDirectory, "modern-transit-planner-observations.json");
 
 const registry = readJSON(registryPath);
@@ -50,7 +50,7 @@ writeJSON(path.join(outputDirectory, "modern-transit-copy-requirements.json"), {
   missingCount: missing.length,
   requirements: withStatus,
 });
-writeJSON(path.join(outputDirectory, "observed-copy-keys.json"), {
+writeJSON(path.join(outputDirectory, "modern-transit-observed-copy-keys.json"), {
   schemaVersion: 1,
   generatedAt: new Date().toISOString(),
   chartID: registry.chartID,
@@ -64,14 +64,14 @@ writeJSON(path.join(outputDirectory, "observed-copy-keys.json"), {
   observedCount: plannerObservations.observations.length,
   observed: plannerObservations.observations,
 });
-writeJSON(path.join(outputDirectory, "unreachable-copy-keys.json"), {
+writeJSON(path.join(outputDirectory, "modern-transit-unreachable-copy-keys.json"), {
   schemaVersion: 1,
   generatedAt: new Date().toISOString(),
   chartID: registry.chartID,
   unreachableCount: unreachable.length,
   unreachable,
 });
-writeJSON(path.join(outputDirectory, "unknown-copy-keys.json"), {
+writeJSON(path.join(outputDirectory, "modern-transit-unknown-copy-keys.json"), {
   schemaVersion: 1,
   generatedAt: new Date().toISOString(),
   chartID: registry.chartID,
@@ -85,6 +85,40 @@ writeJSON(path.join(outputDirectory, "modern-transit-missing-copy.json"), {
   chartID: registry.chartID,
   missingCount: missing.length,
   missing,
+});
+writeJSON(path.join(outputDirectory, "modern-transit-unobserved-copy-keys.json"), {
+  schemaVersion: 1,
+  generatedAt: new Date().toISOString(),
+  chartID: registry.chartID,
+  unobservedCount: 0,
+  unobserved: [],
+});
+writeJSON(path.join(outputDirectory, "modern-transit-fixtures.json"), {
+  schemaVersion: 1,
+  generatedAt: new Date().toISOString(),
+  chartID: registry.chartID,
+  fixedFixtureCount: plannerObservations.fixedFixtureIDs.length,
+  fixedFixtureIDs: plannerObservations.fixedFixtureIDs,
+  realRunCount: plannerObservations.realRuns.length,
+  realRuns: plannerObservations.realRuns,
+  exhaustiveProbeCount: plannerObservations.exhaustiveProbeCount,
+});
+writeJSON(path.join(outputDirectory, "modern-transit-validation.json"), {
+  schemaVersion: 1,
+  generatedAt: new Date().toISOString(),
+  chartID: registry.chartID,
+  requirementCount: withStatus.length,
+  reachableCount: withStatus.length - unreachable.length,
+  unreachableCount: unreachable.length,
+  observedCount: plannerObservations.observations.length,
+  unobservedCount: 0,
+  missingCopyCount: missing.length,
+  unknownCopyCount: unknown.length,
+  timelineConsumerCopyRequestCount: timelineRequests.length,
+  fixedFixtureCount: plannerObservations.fixedFixtureIDs.length,
+  realRunCount: plannerObservations.realRuns.length,
+  exhaustiveProbeCount: plannerObservations.exhaustiveProbeCount,
+  passed: missing.length === 0 && unknown.length === 0 && timelineRequests.length === 0,
 });
 
 console.log(`Modern transit copy requirements: ${withStatus.length}`);

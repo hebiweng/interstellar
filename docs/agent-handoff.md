@@ -11,61 +11,75 @@ AIGC:
 
 # Interstellar — 当前交接
 
-> 更新时间：2026-08-10。这里只记录当前有效状态、证据和下一步；历史决策以 Git 记录为准。
-
-## 当前会话状态（2026-08-10）
-
-- 修复了 `ios/App/ChartsView.swift` 中新增的 `ai.network-consent.title` 与 `ReportsView` 的重复 localization key，改为 `ai.network-consent.chart-title` / `ai.network-consent.chart-message`；重新生成 `ios/App/Localizable.xcstrings`。
-- 模拟器与真机构建均通过；签名使用 `Apple Development: 15296729699@163.com (M2A7RHP7MT)` 与免费 Personal Team。
-- 已通过 `xcrun devicectl` 将 Debug 构建安装到已连接设备 `00008101-0001701A1180001E`（设备名 `HUAWEI PURA 70`，实际 iPhone 12 mini）。
-- 以下任务未在本次会话完成，原因按用户指示停止或尚未推进：
-  1. 报告 UI 细节：去掉 `%read`、目录右侧的“约几分钟”、标签单行避免换行、卡片字号过小、合盘相位矩阵过小。
-  2. 生成并补充合盘测试语料，修复重复/空/fallback/what differs 结构问题。
-  3. 全项目 dark/light 硬编码检查。
-  4. 系统按钮文案（Allow/Not now/Cancel/Regenerate 等）的集中管理——用户明确指示本次不继续。
-  5. AppModel AI 编排方法迁移——用户明确指示项目架构已合理，本次不继续。
-  6. 剩余盘型迁移（天象/本命/日返/次限）——用户明确指示本次不做。
-
-## 0. 2026-08-09 合盘八卡 v3 收口状态
-
-- Synastry 已走专属 `FactBundle → ContentPlanner → EvidencePlan → CopyMatcher → CardFactory`；Modern/Classical 共用卡片容器但选择与 Copy key 按 preset 隔离。
-- 八张卡已按 v6 原型重构。`perspectives` 的两页分别绑定 B→A / A→B 落宫证据，标签为真实姓名 `feels`，语料正文合同使用第二人称 `you/your + {{otherName}}`。House Overlay 与 Key Inter-Aspects 强制保留 source/receiver 和 personA/personB 的有序姓名。
-- Emotional / Communication / Chemistry / Commitment / House Overlays / Key Inter-Aspects 均使用动态筛选，不固定原型示例信号。Classical Chemistry 不含 Pluto；Classical Bundle 继续严格七曜且排除 Node。
-- 2026-08-09 真机视觉反馈已收口：Synastry 专属视图不再使用固定深色 RGB，Relationship Overview 与抽屉跟随 Light/Dark；Emotional 与 Commitment 固定保留双栏，缺少合法角色事实时显示明确空信号而非删除整格；Commitment 会优先用 Saturn/Jupiter 跨盘相位，并允许回退到对应真实宫位落入。
-- Communication 三节点已恢复原型合同：仅使用双方共同、无方向人称的短流程词；Modern/Classical 各四主题的英中 `step1/step2/step3` 已重写，英文最多 3 词、中文最多 4 字，均不含 `you/你`。导入脚本新增长度与人称阻断，后续不合格语料包会直接失败。
-- 原型标记 clickable 的 Relationship Overview、Emotional、Communication、Chemistry、Commitment 已有卡片抽屉；Key Inter-Aspects 为逐行事实抽屉。第一张抽屉固定使用 `How to read this`。
-- 最新语料合同位于 `artifacts/modern-synastry/` 与 `artifacts/classical-synastry/`。用户交付的 `synastry-bilingual-copy-v3.zip` 已接入正式私有 Copy Catalog：Modern 30/30、Classical 33/33，英中 missing/unknown/unobserved/unreachable/cross-preset fallback 均为 0，两套 validation passed。西法按合同使用英文回退。Perspectives 的 `{{otherName}}` 已升级为 Copy Schema 强类型 `personName`；旧 Synastry contract 已换成 v3 preset-specific source，古典旧合同中的 trueNode 已移除。
-- 已完成的 Modern Transit 语料成品已从旧的 `ios/ContentSchema` + `ios/TranslationExports` 无重算整理到 `artifacts/modern-transit/`，与其他 preset/盘型统一为 10 文件结构。原 7 个成品保持字节一致；fixtures/validation/unobserved 仅从既有元数据拆分汇总。现有门禁为 requirements 219、reachable/observed 216、unreachable 3、missing/unknown/unobserved 0，validation passed。
-- Synastry AI 请求已核对：传两人真实姓名、双方本命点/四轴、双向落宫、跨盘相位及当前 preset；Classical 额外传七曜 condition 与明确 cross-chart reception。证据按 ID 排序、有限且无重复根字段。Relay 合盘专用提示词要求双方视角、姓名、情绪/沟通/吸引/长期结构/摩擦/落宫/跨盘相位，并禁止评分、裁决、结局预测和跨 preset 推导；本轮增加了 4–8 节及中英篇幅上限，尚未部署该提示词增量。
-- 验证：四语 Copy Catalog build/validate 通过；Modern/Classical Synastry validation passed；最新 Simulator Debug 与真机 Debug build 均通过；Relay `go test ./...` 通过；`git diff --check` 通过。视觉修复已覆盖安装到当前连接设备；首次启动需在设备的“VPN与设备管理”中信任免费开发者签名。当前 Xcode 免费 Personal Team 的实际 Team ID 为 `YD3FY9ZB52`；旧 `M2A7RHP7MT` 不是可选 Team，已从工程配置移除。
+> 更新时间：2026-08-12。本文件只记录当前有效状态、验证证据、风险和下一步；历史过程查 Git，不在这里重复。
 
 ## 1. 接手快照
 
 | 项目 | 当前值 |
 |---|---|
-| 开发分支 | `codex/ios-v6-rebuild` |
-| 当前提交 | `f679a87 feat(ios): modularize insights and migrate classical transit` |
-| 远端差异 | 清理前相对 `origin/dev` 超前 9 个提交 |
+| 分支 | `codex/ios-v6-rebuild` |
+| 当前提交 | `68fca47` |
+| 相对 `origin/dev` | 超前 15，落后 0 |
 | 产品合同 | `docs/ios-v6-rebuild-plan.md` |
 | 卡片合同 | `docs/ios-card-implementation-matrix.md` |
-| Relay 域名 | `https://aaadmin.xiaoguiwk.top` |
-| 当前主线 | iOS 六盘 v6、Today、Copy Catalog v2、AI Artifact、Go Relay |
-| 明确延期 | Composite、跨设备报告同步、Web 消费端、旧 `/admin` 迁移 |
+| iOS 测试设备 | 已连接的 iPhone 12 mini；后续不使用模拟器 |
+| Relay 权威域名 | `https://aaadmin.xiaoguiwk.top` |
+| 当前生产 Relay | `interstellar-relay:v6-20260811-feedback-admin` |
 
-DeepSeek 原始实现保存在 `codex/deepseek-v6-snapshot`（提交 `a42f1d6`），v6 重构基线为 `7d5b115`。当前工作区包含 Transit report-only、Reports 按需生成、Relay、提示词和合同文档的未提交改造；不得丢弃或覆盖这些改动。
+工作区有大量未提交的 iOS、本地化、Relay 和文档改动，属于当前用户任务，不得重置或覆盖。另有与当前任务来源不明的 `vendor/timezone-boundary-builder/timezones-2026b.geojson.zip` 删除，尚未处理。
 
-接手时先读 `AGENTS.md`、v6 执行合同和卡片矩阵。不要按本文旧版本中的 iOS V1、四盘、固定 `summary + detail + note`、Web 次限样板或 Obsidian 默认流程继续开发。
+## 2. 当前产品与实现状态
 
-## 2. 当前产品与架构
+### iOS 固定合同
 
-### 2.1 冻结范围
+- 六盘保持本命 10、天象 7、行运 6、次限 6、日返 7、合盘 8；Composite 延期。
+- Today 保持 8 模块；Ask 与 Profile 均为正式能力。
+- Modern / Classical、en / zh-Hans / es / fr、System / Light / Dark 已接线。
+- 默认语言为英文；默认字号为 Standard。用户已保存的字号选择优先，卡片与普通 UI 使用 Dynamic Type 字体。
+- 后续 Xcode 构建和 UI 测试只使用已连接真机，不创建、启动或下载模拟器。
 
-- 六盘 44 卡：本命 10、天象 7、行运 6、次限 6、日返 7、合盘 8；Composite 不在本轮。
-- Today 八模块：`Current Chapter / Active Today / Coming Next / Moon Today / Timeline / Upcoming Sky / Retrogrades / Current Sky`。
-- Ask 保留三流程、历史和专业事实；Profile 保留多人物、关系、头像、地图、时区、经纬度、预设、主题、字体、AI 授权和本地数据管理。
-- Modern / Classical、en / zh-Hans / es / fr、System / Light / Dark 已接线。英文为默认；西法未审核消费者正文按合同回退英文。
+### 本地化与内容
 
-### 2.2 权威链路
+- `ios/Localization/ui-translations.json` 是固定 UI 的四语唯一源，当前 862 条；Swift 只写 stable key。
+- `scripts/build-ios-localization.mjs` 由上述 JSON 生成并校验 `Localizable.xcstrings`。
+- 消费者正文仍来自私有 Copy Catalog；西法未审核正文按合同回退英文。
+- 语料生成的标准输入是 `artifacts/<preset>-<chart>/` 下每套 10 个公开合同 JSON，不是 `PrivateContent` 或单一 worklist。
+- 合盘事实级 v4 已完成导入：Modern 306 条、Classical 380 条，英中正文来自已审核交付；西法按当前合同使用英文回退。
+- `scripts/import-synastry-fact-copy-v4.mjs` 会校验 Registry 精确键集、双语文件一致性、审核状态、占位符、重复与禁用确定性表述，再写入被 Git 忽略的私有 Catalog；公开目录只保留键、Schema 与不含正文的 validation。
+- `artifacts/modern-synastry-fact-copy-v4/` 与 `artifacts/classical-synastry-fact-copy-v4/` 当前 validation 均为 passed，missing / extra 均为 0。
+- v4 精确事实语料来自真实样本，但样本不等于所有可能组合。运行时先匹配 v4 精确键；合法但未观察过的组合明确映射到已审核的 shared planet-role / house-overlay 私有语料，所有基础选择器在四语 Catalog 中必须齐全，不能再以 `missingCopy` 清空整盘。
+
+### 本轮 UI 与事实修复
+
+- 报告页删除 `% read`、阅读分钟估算；标签保持单行。
+- 合盘相位矩阵已增大并响应 Dynamic Type。
+- 卡片、Charts、Today 和普通 UI 的固定点字号已迁为 semantic / scaled Dynamic Type；架构门禁阻止重新引入。
+- Moon Today 与 Current Sky 共用真实 Sun–Moon 黄经差；亮暗均为月面，终止线和照明按真实月相绘制。
+- Elements 为 Fire / Earth / Air / Water；另显示 Cardinal / Fixed / Mutable 三模式，权重来自真实点位占比。
+- 合盘 Communication / Chemistry 无对应相位时使用真实 Mercury / Venus-Mars（Modern 可含 Pluto）落宫，不再产生空卡。
+- Key Inter-Aspects 在候选足够时排除情绪、沟通、吸引、承诺已使用的事实。
+- `relationship-overview` 卡片合同门禁已识别动态 `make(...)` 构造方式。
+- Light / Dark 架构检查阻止普通 Swift UI 使用原始 RGB 或 `Color.black`。
+- 西班牙语、法语核心导航测试使用稳定 accessibility identifier，不依赖可见译文定位。
+
+### Reports、Profile 与 Relay
+
+- 六盘生成报告时不再让用户选择人物或参数；确认弹窗按盘型仅展示当前适用信息，例如人物、时间、地点和 Modern / Classical，不适用的字段不显示。
+- 已存在报告时弹窗明确提示将覆盖原报告；“编辑”会返回对应 Charts 盘型并打开参数页。合盘只确认双方人物，AI `params.relationship` 读取 Profile 已保存关系。
+- 六盘 AI 仅在 Reports 明确点击后生成 4–8 节整盘报告；本机同语义 Artifact 命中禁止联网。
+- Relay 六盘中英文分盘提示词已部署；管理端提示词页可按盘型和语言筛选。
+- iOS 反馈发送到 `https://aaadmin.xiaoguiwk.top/v1/feedback`；Relay 管理端有平级“用户反馈”菜单。
+- 反馈内容使用 AES-GCM 存储并具有限流、字段校验、状态筛选、处理与重新打开能力。
+
+### 仓库结构与清理
+
+- `AGENTS.md` 已加入权威目录地图和固定语料链路，明确 `artifacts/` 十文件合同包、私有源、运行时包和可删除缓存的边界。
+- 已删除会误导当前实现的 iOS V1 计划、9 卡审计、旧跨盘 Agent handoff、Transit 阶段收口计划、旧 Web 阿里云部署说明和两个已完成的一次性迁移脚本；历史仍可从 Git 查询。
+- 已删除约 231 MB 可再生成缓存与旧产物，包括 Swift Package `.build`、前端 dist/output、Playwright/Python/Ruff/Wrangler 缓存、旧 IPA、旧 TranslationExports 和 Xcode 用户状态；`node_modules` 因当前构建仍在使用而保留。
+- 326 个私有 Obsidian Vault 文件已从 Git 索引移除但完整保留在本地；`.gitignore`、CI 和 `scripts/check-private-content.sh` 已阻止 Vault、私有 Catalog、TranslationExports 与私有规则重新进入公开 Git。
+- 旧 Web/API/Worker、Obsidian 本地资料、vendor 锁定数据、本地数据库和凭据未作为垃圾删除。
+
+## 3. 当前架构边界
 
 ```text
 AstroCore Snapshot / Aspect / Event
@@ -75,172 +89,68 @@ AstroCore Snapshot / Aspect / Event
 → CopyCatalogMatcher
 → CardTextModel
 → InsightCard / Today
-→ GeneratedChartArtifact
 ```
 
-iOS 由本地 AstroCore 计算权威事实；展示层不能补算或伪造。AI 只解释请求中的事实，并通过 `evidenceFactIDs` 受限引用。
+- iOS 权威事实来自本地 AstroCore；展示层不补算或伪造。
+- AI 只解释请求中的已计算事实，不新增事实、日期、相位或结局。
+- 行运 Modern / Classical 已迁入独立 Planner/Factory/Copy/Validation。
+- 合盘已有专属 FactBundle / Planner / Copy / Factory / Validator；`Legacy` 只是尚未更名的物理路径。
+- 天象、本命、日返、次限已按模块归位，但仍通过 Legacy factory，后续迁移必须行为不变。
+- 旧 Web/API/Worker 源码仍保留但消费者改造延期；未完成正式退役审计前不得删除。
 
-### 2.3 六盘迁移状态
+## 4. 最新验证证据
 
-| 盘型 | 卡片 | 当前实现状态 | 下一步 |
-|---|---:|---|---|
-| 行运 | 6 | Modern 与 Classical 均已迁入独立 Planner/Factory/Copy/Validation 链路 | 保持冻结，先修测试和性能问题 |
-| 天象 | 7 | 已按模块归位，业务仍由 `Legacy` factory 转发 | 下一个迁移目标 |
-| 本命 | 10 | 已按模块归位，业务仍由 `Legacy` factory 转发 | 天象之后迁移 |
-| 日返 | 7 | 已按模块归位，业务仍由 `Legacy` factory 转发 | 本命之后迁移 |
-| 次限 | 6 | 已按模块归位，业务仍由 `Legacy` factory 转发 | 日返之后迁移；不得退化六模块 |
-| 合盘 | 8 | Modern/Classical 已迁入专属 FactBundle/Planner/Copy/Factory/Validator；`Legacy` 文件名仅为待清理的物理路径 | 完成真机视觉验收后冻结 |
+- iPhoneOS arm64 Debug 真机构建通过，并已覆盖安装、启动到 iPhone 12 mini。
+- 真机月相数学与 14 对人物 × Modern/Classical 共 28 份合盘计划测试通过：8 卡顺序正确、空卡 0、卡内重复 0、事实引用与角色方向合法；所有实际选中事实在 en / zh-Hans / es / fr 均能命中非空解读。
+- 已用真机当前保存人物复现并修复合盘 `missingCopy`：未观察过的 `modern / relationship-overview / Jupiter conjunction Jupiter` 现命中已审核基础选择器；修复后同一真机页面正常显示 Relationship Overview。永久单元测试覆盖该键以及四语全部 planet-role / 12 宫 house-overlay 基础选择器。
+- 私有运行时 Catalog 构建与校验通过：en / zh-Hans 各 2506 条，es / fr 各 2399 条，51 份合同。
+- 西班牙语 / 法语核心导航真机 UI 测试通过。
+- `scripts/check-ios-card-contract.sh` 通过。
+- `npm run ios:copy:validate` 通过。
+- `npm run ios:localization:validate` 通过。
+- `npm run architecture:check` 通过。
+- `npm run lint -- --quiet` 通过。
+- `scripts/check-private-content.sh` 通过。
+- `git diff --check` 通过。
+- Relay `go test ./...`、反馈接口校验和生产健康检查通过。
+- 本轮完成后已删除临时 Xcode DerivedData 和测试日志；没有使用模拟器。
 
-共享路由位于 `ios/App/Insights/Shared/Routing/InsightFactory.swift`。非行运盘的 `Legacy` 目录是迁移过渡层，不代表旧合同重新成为权威。
+## 5. 当前未完成事项
 
-## 3. 已完成的关键能力
+### 正在处理
 
-### 3.1 Modern Transit
+1. 核对当前大量未提交改动的最终提交范围；Obsidian 索引移除已经暂存，其余改动尚未统一暂存或提交。
 
-- 唯一决策链路为 `TransitFactBundle → TransitContentPlanner → TransitContentPlan → UI / Copy / GeneratedChartArtifact`。
-- 六卡 UI 与 Copy 使用同一 scope 的证据计划；AI 报告直接消费同 preset 的完整合法 Bundle facts，不受六卡容量限制。Timeline 只消费技术事实，不请求消费者正文。
-- 支持真实相位窗口、重复精确、换座、换宫、转逆/转顺、完整路径、十二宫聚合，以及 7/30/365 天 Timeline。
-- Modern Copy 合同共 219 条 requirement：216 条可达、3 条因周期行星约束结构不可达；unknown 0、reachable missing 0。
-- 14 组 fixture、20 个真实盘日期和 4623 个系统探针已用于可达性门禁。
+### 发布前仍需完成
 
-### 3.2 Classical Transit
+1. 在 iPhone 12 mini 上人工逐屏验收英中/西法、浅深色、标准/大字体、VoiceOver、长文本与空状态。
+2. 人工走通 Reports：逐盘核对确认弹窗只显示适用字段，“编辑”准确返回对应参数页；并验证首次生成、离开后返回、同语义本地命中、重新生成覆盖、失败保留旧报告、Modern/Classical 隔离。
+3. 决定 Transit Horizon 使用 90 天还是 calendar year，并统一合同和性能基准。
+4. 完成 Classical trueNode policy 与 validator；不得在展示层猜测。
+5. 迁移 Ask / Week 旧私有内容结构，以及天象、本命、日返、次限 Legacy factory。
+6. 验证飞行模式、本地 Artifact 零网络、授权撤回后只读、人物删除清理和损坏文件恢复。
 
-- `preset == classical` 明确进入 `ClassicalTransitPlanningStrategy`，无 Legacy/Modern runtime fallback。
-- 只使用七曜尊贵/失势、角续果宫、逆行、燃烧/日光下、真实接纳、相位阶段、窗口和行星事件；外行星不进入古典证据选择。
-- 有限语义域共 71 条静态可达 requirement：reachable/observed 71，missing/unknown/unobserved/unreachable 0，Classical → Modern fallback 0。
-- 24 个固定 fixture、68 个有限域探针和 9 个真实盘/日期组合已通过。
-- AstroCore 尚未提供 Transit 可用的昼夜 sect、prohibition、frustration 或 prevented-perfection；当前 Planner 与文案均未猜测这些事实。
+### App Attest 阻断
 
-### 3.3 内容、本地化与 UI
-
-- Copy Catalog 已迁移到 schemaVersion 2，按 `shared / modern / classical` 和 preset 管理；运行时读取 Git 忽略的 `CopyCatalog-<locale>.json`。
-- 正式 Schema 校验卡片合同、selector、factRefs/evidence、变量类型与上限、重复路径和引用完整性。
-- `Localizable.xcstrings`、四语 `AstroTerms` 和 `LocalizedFormatters` 已接入；消费者正文与固定 UI/术语分层。
-- 六盘统一使用外置卡片标题；Charts 卡片不显示单卡 AI 详情箭头或状态区。整盘 Artifact 仍保留给 Reports 等明确入口。
-- 轮盘、三角/交叉相位矩阵、Charts 紧凑参数入口、Today、Ask、Reports 和 Profile 均已有可构建实现。
-
-### 3.4 AI Artifact 与 Relay
-
-- 单卡 AI 已永久退出请求、响应、Artifact 和 Relay 合同；`GeneratedChartArtifact` 只保存整盘报告，并以语义指纹、语言、预设和事实哈希为缓存依据。
-- 六盘均改为 Reports 内明确点击后按需生成；盘计算和 Charts 打开不联网。同语义报告直接打开，重新生成成功后覆盖，失败时保留旧报告；生成任务可在用户离开 Reports 页面后继续。
-- Transit AI 直接序列化 preset-specific `TransitFactBundle` 的 aspect、window、event、placement、life area 与 calendar facts；已补齐已有 Classical score、conditions、reception、cycle band 和 Current Story 一致性评估，不以六卡计划作为证据边界。
-- Relay 提示词已改为 4–8 节整盘综合报告：按 strength、orb、phase、score、窗口、motion 和已有 Modern/Classical assessment 判断轻重，禁止重新计算或编造事实。Relay 仅校验 report Schema、语言和本次 evidence ID，并保留一次非法 JSON 修复。
-- Go Relay 已实现 24 小时 AES-GCM 缓存和 `forceRegenerate` 同键覆盖，以及 Provider/模型启停、bcrypt 管理员、可撤销 SameSite 会话、无正文审计、安装配额和 App Attest 断言。
-- Relay 内嵌管理端可从根路径和 `/xiaoguiwk` 访问，支持 DeepSeek Key、模型、提示词、连接测试和用量。
-- 旧 Web/API 容器保持停止但不删除；Relay-only 使用 `infra/deploy/compose.relay-only.yaml`。
-- 当前生产 Relay 镜像为 `interstellar-relay:v6-20260809-report-only`，发布目录为 `/opt/interstellar/releases/v6-relay-v6-20260809-report-only`，切换前数据库备份为 `/opt/interstellar/backups/relay-20260809-1243.db`。只重建了 Relay 容器，Caddy、旧 Web/API 和数据卷未改动。
-
-## 4. 最近验证证据
-
-以下包含本轮 report-only 改造的最新证据和此前已记录证据：
-
-- Relay `go test ./...` 通过；新增测试覆盖首次生成、同键缓存命中和 `forceRegenerate` 绕过读取后覆盖同键。
-- 生产 Relay 健康检查通过。真实合成请求已完成 Relay → DeepSeek：HTTP 200、5 节报告、合法 `evidenceFactIDs`；第二次同请求返回 `cached:true` 且未调用上游。
-- 生产曾因大小写不同的重复 Provider 导致默认项指向无密钥 `deepseek` 而返回 503；现已将默认项修正为有 Key 的 `DeepSeek`，并收口重复根因：生产 `RELAY_SEED_DEEPSEEK=0`，无 Key 的小写 `deepseek` 已删除。重建 Relay 后数据库仅保留有 Key 且默认的 `DeepSeek`，期间未读取或修改密钥。生产 `.env` 的镜像标签也已持久化为 `v6-20260809-report-only`。操作前备份为 `/opt/interstellar/backups/relay-before-provider-cleanup-20260809-131614.db`、`/opt/interstellar/backups/compose.relay-only-before-seed-off-20260809-131614.yaml` 和 `/opt/interstellar/backups/env-before-image-tag-fix-20260809-131614`。
-- `scripts/check-ios-card-contract.sh`、Copy、Localization、Architecture、Lint、Private Content 和 `git diff --check` 均通过。
-- 最新 iPhoneOS Debug 在 `CODE_SIGNING_ALLOWED=NO` 下完整编译、链接、资源校验并 `BUILD SUCCEEDED`；签名构建仅阻塞在 macOS Keychain 的 codesign 私钥授权。授权后仍需增量签名、安装并完成真机 App → Relay → DeepSeek → 本地 Artifact 验收。
-
-- Simulator Debug build 通过；Swift 6 warnings-as-errors 构建曾通过。
-- iOS 单元测试 29 项通过，包含 Modern 和 Classical Transit 规划与英/简中实际组装门禁。
-- Modern 导出：requirements 219、reachable 216、unreachable 3、unknown 0、missing 0。
-- Classical 导出：requirements/reachable/observed 71，missing/unknown/fallback/invalid sourceFactID 均为 0。
-- 卡片合同、四语 Copy Catalog、四语 Localization、私有内容边界、架构检查、lint、Xcode project plist 和 `git diff --check` 通过。
-- 完整 UI 套件记录为 8 项通过、1 项因生产 App Attest 只支持真机而跳过。
-- 独立西/法核心本地化 UI 流程仍在西语 `Parámetros` 按钮导航处失败，尚未形成修复证据。
-- Debug 签名包曾覆盖安装并启动到 iPhone 12 mini（设备名 `HUAWEI PURA 70`）。
-
-## 5. 当前未完成与风险
-
-### P0 — 继续开发前优先处理
-
-1. **完成真机报告闭环**：先在 Mac Keychain 放行当前个人开发证书签名，再安装到已连接的 iPhone 12 mini；验证明确点击才生成、等待后返回、同语义直接展示、重新生成覆盖、失败保留旧报告，以及 Modern/Classical 隔离。
-2. **保持开发绕过**：当前未购买 Apple Developer Program，本轮不得恢复 App Attest entitlement 或关闭 `RELAY_ALLOW_DEV_BYPASS="1"`。
-3. **保持行运六卡冻结**：除修复确定缺陷或性能问题外，不改变 6 卡 ID、顺序、证据范围和 Copy request 集合。
-
-### P1 — 发布前必须完成
-
-1. iPhone 12 mini 的英中/西法、浅深色、标准/大字体、Dynamic Type、VoiceOver、空状态和长文本逐屏验收。
-2. 正式决定 Horizon 采用 90 天还是 calendar year，并统一代码、合同和真机性能基准；只能优化计算，不得删减事实合同。
-3. Ask 与 Week 仍使用 legacy 私有内容结构；迁移时必须保持私有边界和稳定 ID。
-4. 飞行模式、本地 Artifact 零网络命中、授权撤回后只读、人物删除清理和损坏文件恢复测试。
-5. 确定并实现 Classical trueNode 的 Snapshot/Aggregation/Selection/Presentation policy，加强 Classical contract validator，并覆盖 life-area/calendar 聚合来源。
-6. focused Transit 当前有意保持 events/calendar 为空；产品确认后决定是否补完整扫描。
-7. 分支尚未合入 `origin/dev`；推送或 PR 前复跑完整门禁并核对生成 artifacts 是否应进入提交。
-
-### 发布阻断项 — App Attest
-
-当前没有 Apple Developer Program：
+当前没有 Apple Developer Program，开发期保持：
 
 - `RELAY_ALLOW_DEV_BYPASS="1"`；
-- Debug/Simulator 发送 `X-App-Attest-Development-Bypass: 1`；
-- 当前免费 Personal Team 为 `YD3FY9ZB52`；正式 App Attest entitlement 未启用。
+- Debug 构建发送开发绕过头；
+- 免费 Personal Team 为 `YD3FY9ZB52`，正式 App Attest entitlement 未启用。
 
-上线前必须购买/恢复 Apple Developer Program，从 Developer Portal 重新确认届时的正式 Team ID，恢复 App Attest entitlement 和 `RELAY_ALLOW_DEV_BYPASS="0"`，然后完成生产 App Attest、限流与配额链路验证。
+发布前必须恢复 Apple Developer Program，重新确认届时正式 Team ID，恢复 App Attest entitlement，将 `RELAY_ALLOW_DEV_BYPASS` 改为 `"0"`，再做生产端到端验证。
 
-## 6. 推荐推进顺序
+## 6. 推荐下一步
 
 ```text
-完成 iPhone 12 mini 按需报告端到端验收
-→ Node Policy / Classical Validator / Horizon 收口
-→ 修复西/法 UI 测试导航
-→ Current Sky
-→ Natal
-→ Solar Return
-→ Secondary Progressions
-→ Synastry
-→ 六盘/Today/Ask/Profile 全量真机与无障碍验收
+核对并提交当前工作区改动
+→ 真机逐屏与 Reports 确认弹窗闭环验收
+→ Node policy / Horizon / Classical validator
+→ 其余盘型 Legacy 迁移
 → 恢复生产 App Attest
 → 发布准备
 ```
 
-迁移单个盘型时先做行为不变的归位，再建立盘型专属事实 bundle、planner、有限语义 registry、Copy 可达性导出、factory 和 validator。错误旧 Copy key 只能通过构建期 alias/deprecated manifest 审计，不能成为运行时降级路径。
-
-## 7. 常用入口与门禁
-
-关键路径：
-
-```text
-ios/App/Insights/                    六盘模块与共享路由
-ios/App/Insights/Transit/            Modern/Classical Transit 当前样板
-ios/ContentSchema/                   卡片与 Copy 合同
-ios/Packages/AstroCore/              本地权威计算
-ios/Packages/ContentKit/             内容匹配模型
-ios/App/AIGeneration.swift           Artifact 与生成客户端
-relay/                               Relay、管理端、App Attest、缓存与审计
-infra/deploy/                        生产与 Relay-only 部署
-artifacts/classical-transit/         Classical 可达性和验证证据
-```
-
-适用门禁：
-
-```sh
-scripts/check-ios-card-contract.sh
-npm run ios:copy:validate
-npm run ios:localization:validate
-npm run ios:transit-copy:export
-npm run ios:classical-transit-copy:export
-npm run architecture:check
-npm run lint -- --quiet
-scripts/check-private-content.sh
-git diff --check
-
-(cd relay && go test ./...)
-(cd relay && go vet ./...)
-```
-
-另外运行相关 Xcode build、AstroCore/ContentKit/iOS 单元测试和 iPhone 12 mini UI 流程。私有 Catalog 不存在时，`ios:copy:validate` 会失败，这是预期门禁，不得用公开临时文案绕过。
-
-## 8. 最近提交
-
-| 提交 | 内容 |
-|---|---|
-| `a5a757e` | 修复 chart report consent 的重复 localization key 并重新生成 Localizable.xcstrings |
-| `f679a87` | 六盘 Insights 模块化并迁移 Classical Transit |
-| `66d9880` | 完成 Modern Transit 卡片体验 |
-| `4a606b2` | 完成 Transit Copy 规划与可达性链路 |
-| `f8ba1ef` | 建立 Modern Transit 卡片证据计划 |
-| `4b403f5` | Copy Catalog 迁移至 v2 |
-| `5f200a3` | 临时关闭 App Attest、Relay 部署、真机签名与构建 PATH 修复 |
-| `7d5b115` | 保存 DeepSeek v6 实现快照并建立重构基线 |
+适用门禁见 `AGENTS.md`。私有 Catalog 缺失导致 Copy validate 失败时应恢复私有源，不能用公开临时文案绕过。
 
 > AI生成

@@ -17,7 +17,7 @@ struct RootView: View {
                 .tag(RootTab.today)
                 .tabItem {
                     Label(
-                        localized("Today", "今日", language: model.language),
+                        localized("navigation.today", language: model.language),
                         systemImage: "sparkles"
                     )
                 }
@@ -26,7 +26,7 @@ struct RootView: View {
                 .tag(RootTab.charts)
                 .tabItem {
                     Label(
-                        localized("Charts", "星盘", language: model.language),
+                        localized("charts.charts", language: model.language),
                         systemImage: "circle.hexagongrid"
                     )
                 }
@@ -35,7 +35,7 @@ struct RootView: View {
                 .tag(RootTab.ask)
                 .tabItem {
                     Label(
-                        localized("Ask", "问事", language: model.language),
+                        localized("navigation.ask", language: model.language),
                         systemImage: "sparkle.magnifyingglass"
                     )
                 }
@@ -44,7 +44,7 @@ struct RootView: View {
                 .tag(RootTab.profile)
                 .tabItem {
                     Label(
-                        localized("Profile", "我的", language: model.language),
+                        localized("profile.profile", language: model.language),
                         systemImage: "person.crop.circle"
                     )
                 }

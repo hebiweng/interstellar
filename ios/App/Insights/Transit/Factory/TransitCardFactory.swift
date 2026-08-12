@@ -77,23 +77,19 @@ extension InsightFactory {
         return [
             card(
                 id: "current-story",
-                title: localized("Current story", "当前主线", language: language),
+                title: localized("insight.transit.current-story", language: language),
                 icon: "◎",
                 visual: .storyWeave(
                     expanding: expanding,
                     structuring: structuring,
-                    result: localized(
-                        "\(storyAspects.count) planned cross-chart aspects",
-                        "\(storyAspects.count) 个已规划的跨盘相位",
-                        language: language
-                    )
+                    result: localizedTemplate("dynamic.ee6f12f5bb", substitutions: ["value1": String(describing: storyAspects.count)], language: language)
                 ),
                 facts: plannedAspectFacts(storyPlan, language: language, timeZone: timeZone),
                 language: language
             ),
             card(
                 id: "current-cycles",
-                title: localized("Current cycles", "当前周期", language: language),
+                title: localized("insight.transit.current-cycles", language: language),
                 icon: "◔",
                 visual: .cycleTabs(
                     long: longCycle,
@@ -114,7 +110,7 @@ extension InsightFactory {
             ),
             card(
                 id: "transit-timeline",
-                title: localized("Transit timeline", "变化时间线", language: language),
+                title: localized("insight.transit.transit-timeline", language: language),
                 icon: "⇢",
                 visual: .transitTimeline(
                     entries: TransitTimelineProjection.entries(from: timelinePlan.evidence),
@@ -135,7 +131,7 @@ extension InsightFactory {
             ),
             card(
                 id: "planet-paths",
-                title: localized("Planet paths", "行星路径", language: language),
+                title: localized("insight.transit.planet-paths", language: language),
                 icon: "⊛",
                 visual: .transitPlanetPaths(pathRows),
                 facts: pathPlan.evidence.compactMap {
@@ -150,7 +146,7 @@ extension InsightFactory {
             ),
             card(
                 id: "life-areas",
-                title: localized("Life areas", "生活领域", language: language),
+                title: localized("insight.transit.life-areas", language: language),
                 icon: "⌂",
                 visual: .transitLifeAreas(lifeAreaRows),
                 facts: areaPlan.evidence.compactMap {
@@ -165,7 +161,7 @@ extension InsightFactory {
             ),
             card(
                 id: "active-transits",
-                title: localized("Active transits", "进行中的变化", language: language),
+                title: localized("insight.transit.active-transits", language: language),
                 icon: "⌗",
                 visual: .transitActiveRows(activeRows),
                 facts: plannedActiveFacts(
@@ -306,22 +302,14 @@ extension InsightFactory {
 
             if let ingress = imminentHouseIngress, let house = ingress.toIndex, (1 ... 12).contains(house) {
                 title = transitEnteringHouseTitle(placement.body, house: house, language: language)
-                detail = localized(
-                    "\(ConsumerCopy.lifeArea(house, language: .english)) · ingress \(ingress.timestamp.shortEventDate(language: .english, timeZone: timeZone))",
-                    "\(ConsumerCopy.lifeArea(house, language: .simplifiedChinese)) · \(ingress.timestamp.shortEventDate(language: .simplifiedChinese, timeZone: timeZone))进入",
-                    language: language
-                )
+                detail = localizedTemplate("dynamic.873dc1682a", substitutions: ["value1": String(describing: ConsumerCopy.lifeArea(house, language: language)), "value2": String(describing: ingress.timestamp.shortEventDate(language: language, timeZone: timeZone))], language: language)
                 state = .next
                 timing = relativeTransitTime(from: anchorDate, to: ingress.timestamp, language: language, includesPrefix: true)
                 linkedEvent = ingress
                 displayHouse = house
             } else {
                 title = transitInHouseTitle(placement.body, house: placement.natalHouse, language: language)
-                detail = localized(
-                    "\(ConsumerCopy.lifeArea(placement.natalHouse, language: .english)) · \(Zodiac.name(index: placement.signIndex, language: .english)) \(Zodiac.formatDegree(placement.degreeInSign))",
-                    "\(ConsumerCopy.lifeArea(placement.natalHouse, language: .simplifiedChinese)) · \(Zodiac.name(index: placement.signIndex, language: .simplifiedChinese)) \(Zodiac.formatDegree(placement.degreeInSign))",
-                    language: language
-                )
+                detail = localizedTemplate("dynamic.fd4ae99568", substitutions: ["value1": String(describing: ConsumerCopy.lifeArea(placement.natalHouse, language: language)), "value2": String(describing: Zodiac.name(index: placement.signIndex, language: language)), "value3": String(describing: Zodiac.formatDegree(placement.degreeInSign))], language: language)
                 state = placement.retrograde ? .retrograde : .direct
                 if placement.retrograde, let station = nextDirectStation {
                     timing = transitUntilMonth(station.timestamp, language: language, timeZone: timeZone)
@@ -330,7 +318,7 @@ extension InsightFactory {
                     timing = relativeTransitTime(from: anchorDate, to: nextEvent.timestamp, language: language, includesPrefix: false)
                     linkedEvent = nextEvent
                 } else {
-                    timing = localized("long-term", "长期", language: language)
+                    timing = localized("insight.transit.long-term", language: language)
                     linkedEvent = nil
                 }
                 displayHouse = placement.natalHouse
@@ -360,7 +348,7 @@ extension InsightFactory {
                 id: area.factID,
                 sourceFactIDs: evidence.fact.sourceFactIDs,
                 title: area.house == 1
-                    ? localized("Personal focus", "个人重心", language: language)
+                    ? localized("insight.transit.personal-focus", language: language)
                     : ConsumerCopy.lifeArea(area.house, language: language),
                 activity: activityLabel(percent, language: language),
                 triggerCount: Set(area.contributingFactIDs).count,
@@ -405,15 +393,15 @@ extension InsightFactory {
                 activeAspectTiming(status: status, window: primaryWindow, anchorDate: anchorDate, language: language, timeZone: timeZone),
             ].compactMap { $0 }
             var fields = [
-                TransitTechnicalField(id: "stage", label: localized("Stage", "阶段", language: language), value: activeStatusLabel(status, language: language)),
-                TransitTechnicalField(id: "orb", label: localized("Orb", "容许度", language: language), value: formatOrb(aspect.orbDegrees)),
-                TransitTechnicalField(id: "house", label: localized("House", "宫位", language: language), value: transitHouseLabel(aspect.natalHouse, language: language)),
+                TransitTechnicalField(id: "stage", label: localized("insight.secondary.stage", language: language), value: activeStatusLabel(status, language: language)),
+                TransitTechnicalField(id: "orb", label: localized("chart.orb", language: language), value: formatOrb(aspect.orbDegrees)),
+                TransitTechnicalField(id: "house", label: localized("insight.transit.house", language: language), value: transitHouseLabel(aspect.natalHouse, language: language)),
             ]
             if let primaryWindow {
                 fields.append(
                     TransitTechnicalField(
                         id: "window",
-                        label: localized("Active window", "生效窗口", language: language),
+                        label: localized("insight.transit.active-window", language: language),
                         value: primaryWindow.start.shortEventRange(to: primaryWindow.end, language: language, timeZone: timeZone)
                     )
                 )
@@ -444,9 +432,9 @@ extension InsightFactory {
                 event.timestamp.shortEventDate(language: language, timeZone: timeZone),
             ].compactMap { $0 }
             let fields = [
-                TransitTechnicalField(id: "event", label: localized("Event", "事件", language: language), value: activeStatusLabel(status, language: language)),
-                TransitTechnicalField(id: "time", label: localized("Time", "时间", language: language), value: transitTimestamp(event.timestamp, language: language, timeZone: timeZone)),
-                TransitTechnicalField(id: "target", label: localized("Target", "目标位置", language: language), value: planetEventValue(event, language: language)),
+                TransitTechnicalField(id: "event", label: localized("insight.transit.event", language: language), value: activeStatusLabel(status, language: language)),
+                TransitTechnicalField(id: "time", label: localized("insight.transit.time", language: language), value: transitTimestamp(event.timestamp, language: language, timeZone: timeZone)),
+                TransitTechnicalField(id: "target", label: localized("insight.transit.target", language: language), value: planetEventValue(event, language: language)),
             ]
             return TransitActiveRow(
                 id: event.factID,
@@ -464,29 +452,17 @@ extension InsightFactory {
     }
 
     static func transitInHouseTitle(_ body: CelestialBody, house: Int, language: AppLanguage) -> String {
-        localized(
-            "\(bodyName(body, language: .english)) in your \(ordinal(house)) house",
-            "\(bodyName(body, language: .simplifiedChinese))落在你的第\(house)宫",
-            language: language
-        )
+        localizedTemplate("dynamic.5b39501d54", substitutions: ["value1": bodyName(body, language: language), "value2": AstroTerms.house(house, language: language)], language: language)
     }
 
     static func transitEnteringHouseTitle(_ body: CelestialBody, house: Int, language: AppLanguage) -> String {
-        localized(
-            "\(bodyName(body, language: .english)) entering your \(ordinal(house)) house",
-            "\(bodyName(body, language: .simplifiedChinese))即将进入你的第\(house)宫",
-            language: language
-        )
+        localizedTemplate("dynamic.da283ac4d3", substitutions: ["value1": bodyName(body, language: language), "value2": AstroTerms.house(house, language: language)], language: language)
     }
 
     static func transitActiveAspectTitle(_ aspect: TransitAspectFact, language: AppLanguage) -> String {
         let moving = CelestialBody(rawValue: aspect.movingID).map { bodyName($0, language: language) } ?? aspect.movingID
         let reference = CelestialBody(rawValue: aspect.referenceID).map { bodyName($0, language: language) } ?? aspect.referenceID
-        return localized(
-            "\(moving) \(aspect.kind.symbol) natal \(reference)",
-            "\(moving) \(aspect.kind.symbol) 本命\(reference)",
-            language: language
-        )
+        return localizedTemplate("dynamic.0782a0ed98", substitutions: ["value1": String(describing: moving), "value2": String(describing: aspect.kind.symbol), "value3": String(describing: reference)], language: language)
     }
 
     static func transitActiveEventTitle(_ event: TransitPlanetEventFact, language: AppLanguage) -> String {
@@ -494,18 +470,14 @@ extension InsightFactory {
         switch event.kind {
         case .signIngress:
             guard let sign = event.toIndex else { return body }
-            return localized(
-                "\(body) enters \(Zodiac.name(index: sign, language: .english))",
-                "\(body)进入\(Zodiac.name(index: sign, language: .simplifiedChinese))",
-                language: language
-            )
+            return localizedTemplate("dynamic.359e37f1d5", substitutions: ["value1": String(describing: body), "value2": String(describing: Zodiac.name(index: sign, language: language))], language: language)
         case .houseIngress:
             guard let house = event.toIndex else { return body }
             return transitEnteringHouseTitle(event.body, house: house, language: language)
         case .stationRetrograde:
-            return localized("\(body) stations retrograde", "\(body)开始逆行", language: language)
+            return localizedTemplate("dynamic.8d7de7deab", substitutions: ["value1": String(describing: body)], language: language)
         case .stationDirect:
-            return localized("\(body) stations direct", "\(body)恢复顺行", language: language)
+            return localizedTemplate("dynamic.b40cc6b6fc", substitutions: ["value1": String(describing: body)], language: language)
         }
     }
 
@@ -520,23 +492,11 @@ extension InsightFactory {
         switch status {
         case .returning:
             let next = window.exactDates.first { $0 >= anchorDate } ?? window.exact
-            return localized(
-                "Exact again \(next.shortEventDate(language: .english, timeZone: timeZone))",
-                "\(next.shortEventDate(language: .simplifiedChinese, timeZone: timeZone))再次精确",
-                language: language
-            )
+            return localizedTemplate("dynamic.49908102ba", substitutions: ["value1": String(describing: next.shortEventDate(language: language, timeZone: timeZone))], language: language)
         case .separating:
-            return localized(
-                "Ends \(relativeTransitTime(from: anchorDate, to: window.end, language: .english, includesPrefix: true))",
-                "\(relativeTransitTime(from: anchorDate, to: window.end, language: .simplifiedChinese, includesPrefix: true))结束",
-                language: language
-            )
+            return localizedTemplate("dynamic.fe7c54d6dc", substitutions: ["value1": String(describing: relativeTransitTime(from: anchorDate, to: window.end, language: language, includesPrefix: true))], language: language)
         case .applying, .exact:
-            return localized(
-                "Exact \(transitTimestamp(window.exact, language: .english, timeZone: timeZone))",
-                "\(transitTimestamp(window.exact, language: .simplifiedChinese, timeZone: timeZone))精确",
-                language: language
-            )
+            return localizedTemplate("dynamic.e59f8c38f4", substitutions: ["value1": String(describing: transitTimestamp(window.exact, language: language, timeZone: timeZone))], language: language)
         case .ingress, .retrograde, .direct:
             return nil
         }
@@ -544,19 +504,19 @@ extension InsightFactory {
 
     static func activeStatusLabel(_ status: TransitActiveStatus, language: AppLanguage) -> String {
         switch status {
-        case .applying: localized("Applying", "入相", language: language)
-        case .returning: localized("Returning", "回返中", language: language)
-        case .ingress: localized("Ingress", "进入", language: language)
-        case .separating: localized("Separating", "离相", language: language)
-        case .exact: localized("Exact", "精确", language: language)
-        case .retrograde: localized("Retrograde", "逆行", language: language)
-        case .direct: localized("Direct", "顺行", language: language)
+        case .applying: localized("insight.transit.applying", language: language)
+        case .returning: localized("insight.transit.returning", language: language)
+        case .ingress: localized("insight.transit.ingress", language: language)
+        case .separating: localized("insight.transit.separating", language: language)
+        case .exact: localized("insight.secondary.exact", language: language)
+        case .retrograde: localized("insight.transit.retrograde", language: language)
+        case .direct: localized("insight.transit.direct", language: language)
         }
     }
 
     static func transitHouseLabel(_ house: Int, language: AppLanguage) -> String {
-        guard (1 ... 12).contains(house) else { return localized("Unknown", "未知", language: language) }
-        return localized("\(ordinal(house)) house", "第\(house)宫", language: language)
+        guard (1 ... 12).contains(house) else { return localized("insight.transit.unknown", language: language) }
+        return localizedTemplate("dynamic.bade3ca07d", substitutions: ["value1": AstroTerms.house(house, language: language)], language: language)
     }
 
     static func transitTimestamp(_ date: Date, language: AppLanguage, timeZone: TimeZone) -> String {
@@ -574,7 +534,7 @@ extension InsightFactory {
         formatter.timeZone = timeZone
         formatter.setLocalizedDateFormatFromTemplate("MMM")
         let month = formatter.string(from: date)
-        return localized("until \(month)", "至\(month)", language: language)
+        return localizedTemplate("dynamic.b54a646b70", substitutions: ["value1": String(describing: month)], language: language)
     }
 
     static func relativeTransitTime(
@@ -587,18 +547,18 @@ extension InsightFactory {
         let hours = max(1, Int(ceil(seconds / 3_600)))
         let value: String
         if hours < 24 {
-            value = localized("\(hours) hours", "\(hours)小时", language: language)
+            value = localizedTemplate("dynamic.14eb9f09f8", substitutions: ["value1": String(describing: hours)], language: language)
         } else {
             let days = max(1, Int(ceil(seconds / 86_400)))
             if days < 60 {
-                value = localized("\(days) days", "\(days)天", language: language)
+                value = localizedTemplate("dynamic.fa9464bed5", substitutions: ["value1": String(describing: days)], language: language)
             } else {
                 let months = max(1, Int((Double(days) / 30).rounded()))
-                value = localized("\(months) months", "\(months)个月", language: language)
+                value = localizedTemplate("dynamic.a99aafc649", substitutions: ["value1": String(describing: months)], language: language)
             }
         }
         guard includesPrefix else { return value }
-        return localized("in \(value)", "还有\(value)", language: language)
+        return localizedTemplate("dynamic.5f0315225b", substitutions: ["value1": String(describing: value)], language: language)
     }
 
     static func planetEventValue(
@@ -735,17 +695,9 @@ extension InsightFactory {
             let futureExact = window.exactDates.first { $0 >= anchorDate }
             let exactLabel = futureExact.map { date in
                 if window.returning || window.passIndex > 1 {
-                    return localized(
-                        "Exact again \(date.shortEventDate(language: .english, timeZone: timeZone))",
-                        "\(date.shortEventDate(language: .simplifiedChinese, timeZone: timeZone))再次精确",
-                        language: language
-                    )
+                    return localizedTemplate("dynamic.58e31d7654", substitutions: ["value1": String(describing: date.shortEventDate(language: language, timeZone: timeZone))], language: language)
                 }
-                return localized(
-                    "Exact \(date.shortEventDate(language: .english, timeZone: timeZone))",
-                    "\(date.shortEventDate(language: .simplifiedChinese, timeZone: timeZone))精确",
-                    language: language
-                )
+                return localizedTemplate("dynamic.ccf2313c4f", substitutions: ["value1": String(describing: date.shortEventDate(language: language, timeZone: timeZone))], language: language)
             }
             return [
                 cycleDateRange(window.start, window.end, anchorDate: anchorDate, language: language, timeZone: timeZone),
@@ -780,14 +732,14 @@ extension InsightFactory {
     static func cycleDuration(_ start: Date, _ end: Date, language: AppLanguage) -> String {
         let days = max(1, Int(ceil(end.timeIntervalSince(start) / 86_400)))
         if days < 14 {
-            return localized("\(days) days", "\(days)天", language: language)
+            return localizedTemplate("dynamic.fa9464bed5", substitutions: ["value1": String(describing: days)], language: language)
         }
         if days < 60 {
             let weeks = max(1, Int((Double(days) / 7).rounded()))
-            return localized("\(weeks) weeks", "\(weeks)周", language: language)
+            return localizedTemplate("dynamic.65a2a86bf4", substitutions: ["value1": String(describing: weeks)], language: language)
         }
         let months = max(2, Int((Double(days) / 30).rounded()))
-        return localized("\(months) months", "\(months)个月", language: language)
+        return localizedTemplate("dynamic.a99aafc649", substitutions: ["value1": String(describing: months)], language: language)
     }
 
     static func cyclePeak(
@@ -804,7 +756,7 @@ extension InsightFactory {
         formatter.timeZone = timeZone
         formatter.dateFormat = "HH:mm"
         let time = formatter.string(from: peak)
-        return localized("Peaks \(time)", "\(time)达到峰值", language: language)
+        return localizedTemplate("dynamic.5f03886cd2", substitutions: ["value1": String(describing: time)], language: language)
     }
 
     static func cycleEnd(
@@ -819,16 +771,12 @@ extension InsightFactory {
         let endDay = calendar.startOfDay(for: end)
         let dayDistance = calendar.dateComponents([.day], from: anchorDay, to: endDay).day ?? 0
         if dayDistance == 0 {
-            return localized("Ends today", "今天结束", language: language)
+            return localized("insight.transit.ends-today", language: language)
         }
         if dayDistance == 1 {
-            return localized("Ends tomorrow", "明天结束", language: language)
+            return localized("insight.transit.ends-tomorrow", language: language)
         }
-        return localized(
-            "Ends \(end.shortEventDate(language: .english, timeZone: timeZone))",
-            "\(end.shortEventDate(language: .simplifiedChinese, timeZone: timeZone))结束",
-            language: language
-        )
+        return localizedTemplate("dynamic.7f1e2d8a22", substitutions: ["value1": String(describing: end.shortEventDate(language: language, timeZone: timeZone))], language: language)
     }
 
     static func cycleDateRange(

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-11T14:10:04.013Z",
+  "chartID": "modern.synastry",
+  "cardIDs": [
+    "relationship-overview",
+    "perspectives",
+    "emotional-connection",
+    "communication",
+    "chemistry",
+    "commitment",
+    "house-overlays",
+    "key-inter-aspects"
+  ],
+  "cardStructureRevision": "synastry-fact-copy-v4",
+  "requirementCount": 306,
+  "reachableCount": 306,
+  "unreachableCount": 0,
+  "observedCount": 306,
+  "unobservedCount": 0,
+  "missingCopyCount": 0,
+  "unknownCopyCount": 0,
+  "crossPresetFallbackCount": 0,
+  "duplicateFullClaimCount": 0,
+  "invalidSourceFactIDCount": 0,
+  "unstableScopeIDCount": 0,
+  "placeholderContractErrorCount": 0,
+  "cardContractErrorCount": 0,
+  "emptyStateContractErrorCount": 0,
+  "realCalculationSampleCount": 14,
+  "calculatedPlanCount": 14,
+  "capabilityBoundary": null,
+  "passed": true,
+  "blockingReason": null,
+  "privateRuntimeEntryCount": 306,
+  "localePolicy": {
+    "en": "reviewed",
+    "zh-Hans": "reviewed",
+    "es": "reviewed-en-fallback",
+    "fr": "reviewed-en-fallback"
+  },
+  "runtimeCoveragePolicy": "Use reviewed v4 exact fact copy when present; otherwise use the declared reviewed shared planet-role or house-overlay selector."
+}

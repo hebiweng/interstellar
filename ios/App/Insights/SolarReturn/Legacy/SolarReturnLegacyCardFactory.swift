@@ -33,57 +33,57 @@ extension InsightFactory {
         let strongestChallenge = snapshot.aspects.first { $0.kind.challenging } ?? snapshot.aspects.first
         let overlayAnchors = natalOverlayAnchors(snapshot: snapshot, natal: natal, language: language)
         let yearThemeFacts: [InsightFact] = [
-            fact(localized("Return ascendant", "返照上升", language: language), ascSign, .transition, symbol: "ASC"),
-            fact(localized("Chart ruler", "命主星", language: language), bodyName(ruler, language: language), .supportive, symbol: ruler.symbol),
+            fact(localized("insight.solar-return.return-ascendant", language: language), ascSign, .transition, symbol: "ASC"),
+            fact(localized("insight.natal.chart-ruler", language: language), bodyName(ruler, language: language), .supportive, symbol: ruler.symbol),
             sunHouseLabel(sun, snapshot: snapshot, language: language).map {
-                fact(localized("Sun house", "太阳落宫", language: language), $0, .neutral, symbol: "☉")
+                fact(localized("insight.solar-return.sun-house", language: language), $0, .neutral, symbol: "☉")
             },
         ].compactMap { $0 }
         let dynamicFacts: [InsightFact] = [
-            strongestSupport.map { fact(localized("Supportive aspect", "支持相位", language: language), aspectTitle($0, language: language), .supportive) },
-            strongestChallenge.map { fact(localized("Challenging aspect", "张力相位", language: language), aspectTitle($0, language: language), .challenging) },
+            strongestSupport.map { fact(localized("insight.solar-return.supportive-aspect", language: language), aspectTitle($0, language: language), .supportive) },
+            strongestChallenge.map { fact(localized("insight.solar-return.challenging-aspect", language: language), aspectTitle($0, language: language), .challenging) },
         ].compactMap { $0 }
         let firstOverlay = overlayAnchors.first
         let secondOverlay = overlayAnchors.dropFirst().first
 
         return [
             card( id: "year-theme",
-                title: localized("Your birthday year", "你的生日年", language: language),
+                title: localized("insight.solar-return.your-birthday-year", language: language),
                 icon: "☉", visual: .yearOrbit,
                 facts: yearThemeFacts,
                 language: language
             ),
             card( id: "year-anchors",
-                title: localized("Year anchors", "年度锚点", language: language),
+                title: localized("insight.solar-return.year-anchors", language: language),
                 icon: "⚓", visual: .connectionGrid,
                 facts: yearAnchorFacts(snapshot: snapshot, sun: sun, ruler: ruler, language: language),
                 language: language
             ),
             card( id: "priority-areas",
-                title: localized("Priority areas", "优先领域", language: language),
+                title: localized("insight.solar-return.priority-areas", language: language),
                 icon: "⌂", visual: .areaRows,
                 facts: Array(activeHouses.prefix(4)),
                 language: language
             ),
             card( id: "year-dynamics",
-                title: localized("Year dynamics", "年度动态", language: language),
+                title: localized("insight.solar-return.year-dynamics", language: language),
                 icon: "◈", visual: .dualInsight(
                     opening: strongestSupport.map { aspectTitle($0, language: language) } ?? "",
                     demand: strongestChallenge.map { aspectTitle($0, language: language) } ?? "",
-                    openingLabel: localized("OPENING", "展开", language: language),
-                    demandLabel: localized("DEMAND", "要求", language: language)
+                    openingLabel: localized("insight.solar-return.opening", language: language),
+                    demandLabel: localized("insight.solar-return.demand", language: language)
                 ),
                 facts: dynamicFacts,
                 language: language
             ),
             card( id: "year-timeline",
-                title: localized("Year timeline", "年度时间线", language: language),
+                title: localized("insight.solar-return.year-timeline", language: language),
                 icon: "⇢", visual: .quarterTabs,
                 facts: solarSeasonFacts(events, fallback: top, language: language, timeZone: timeZone),
                 language: language
             ),
             card( id: "natal-overlay",
-                title: localized("Natal overlay", "与本命叠加", language: language),
+                title: localized("insight.solar-return.natal-overlay", language: language),
                 icon: "∞", visual: .natalOverlay(
                     firstLabel: firstOverlay?.label ?? "",
                     firstValue: firstOverlay?.value ?? "",
@@ -94,7 +94,7 @@ extension InsightFactory {
                 language: language
             ),
             card( id: "year-aspects",
-                title: localized("Year aspects", "年度连接", language: language),
+                title: localized("insight.solar-return.year-aspects", language: language),
                 icon: "⌗", visual: .aspectList,
                 facts: top.map {
                     fact(
@@ -116,7 +116,7 @@ extension InsightFactory {
         guard let sun else { return nil }
         let house = snapshot.house(containing: sun.longitudeDegrees)
         guard house > 0 else { return nil }
-        return language == .english ? ordinal(house) : "第\(house)宫"
+        return AstroTerms.house(house, language: language)
     }
 
     static func yearAnchorFacts(
@@ -126,17 +126,13 @@ extension InsightFactory {
         language: AppLanguage
     ) -> [InsightFact] {
         let ascIndex = Int(snapshot.angles.ascendantDegrees / 30) % 12
-        let ascValue = localized(
-            "\(Zodiac.englishNames[ascIndex]) rising",
-            "\(Zodiac.chineseNames[ascIndex])上升",
-            language: language
-        )
+        let ascValue = localizedTemplate("dynamic.161a609089", substitutions: ["value1": String(describing: Zodiac.name(index: ascIndex, language: language))], language: language)
         let rulerPoint = snapshot.point(ruler)
         let rulerHouse = rulerPoint.map { snapshot.house(containing: $0.longitudeDegrees) }
         let sunHouse = sun.map { snapshot.house(containing: $0.longitudeDegrees) }
         var facts: [InsightFact] = [
             fact(
-                localized("Return ascendant", "返照上升", language: language),
+                localized("insight.solar-return.return-ascendant", language: language),
                 ascValue,
                 .transition
             ),
@@ -144,12 +140,8 @@ extension InsightFactory {
         if let rulerPoint, let rulerHouse, rulerHouse > 0 {
             facts.append(
                 fact(
-                    localized("Chart ruler", "命主星", language: language),
-                    localized(
-                        "\(bodyName(ruler, language: .english)) · \(Zodiac.position(rulerPoint, language: .english)) · \(ordinal(rulerHouse)) house",
-                        "\(bodyName(ruler, language: .simplifiedChinese)) · \(Zodiac.position(rulerPoint, language: .simplifiedChinese)) · 第\(rulerHouse)宫",
-                        language: language
-                    ),
+                    localized("insight.natal.chart-ruler", language: language),
+                    localizedTemplate("dynamic.cbb6cc5a06", substitutions: ["value1": bodyName(ruler, language: language), "value2": Zodiac.position(rulerPoint, language: language), "value3": AstroTerms.house(rulerHouse, language: language)], language: language),
                     .supportive
                 )
             )
@@ -157,12 +149,8 @@ extension InsightFactory {
         if let sun, let sunHouse, sunHouse > 0 {
             facts.append(
                 fact(
-                    localized("Solar return sun", "返照太阳", language: language),
-                    localized(
-                        "\(Zodiac.position(sun, language: .english)) · \(ordinal(sunHouse)) house",
-                        "\(Zodiac.position(sun, language: .simplifiedChinese)) · 第\(sunHouse)宫",
-                        language: language
-                    ),
+                    localized("insight.solar-return.solar-return-sun", language: language),
+                    localizedTemplate("dynamic.f8a781fce8", substitutions: ["value1": Zodiac.position(sun, language: language), "value2": AstroTerms.house(sunHouse, language: language)], language: language),
                     .neutral
                 )
             )
@@ -170,12 +158,8 @@ extension InsightFactory {
         if let angular = angularPlanetInfo(snapshot), angular.distance <= 5 {
             facts.append(
                 fact(
-                    localized("Angular planet", "角宫行星", language: language),
-                    localized(
-                        "\(bodyName(angular.body, language: .english)) · \(angular.axis) · \(Zodiac.formatDegree(angular.distance)) orb",
-                        "\(bodyName(angular.body, language: .simplifiedChinese)) · \(angular.axis) · 容许度 \(Zodiac.formatDegree(angular.distance))",
-                        language: language
-                    ),
+                    localized("insight.solar-return.angular-planet", language: language),
+                    localizedTemplate("dynamic.c8a2ff4904", substitutions: ["value1": String(describing: bodyName(angular.body, language: language)), "value2": String(describing: angular.axis), "value3": String(describing: Zodiac.formatDegree(angular.distance))], language: language),
                     .transition
                 )
             )
@@ -221,19 +205,15 @@ extension InsightFactory {
         let value: String
         switch item.axis {
         case "MC":
-            value = localized("Near natal MC", "靠近本命天顶", language: language)
+            value = localized("insight.solar-return.near-natal-mc", language: language)
         case "IC":
-            value = localized("At natal IC", "落在本命天底", language: language)
+            value = localized("insight.solar-return.at-natal-ic", language: language)
         case "ASC":
-            value = localized("Near natal ASC", "靠近本命上升", language: language)
+            value = localized("insight.solar-return.near-natal-asc", language: language)
         default:
-            value = localized("Near natal DSC", "靠近本命下降", language: language)
+            value = localized("insight.solar-return.near-natal-dsc", language: language)
         }
-        let label = localized(
-            "Return \(bodyName(item.body, language: .english))",
-            "返照\(bodyName(item.body, language: .simplifiedChinese))",
-            language: language
-        )
+        let label = localizedTemplate("dynamic.a8b71d51e5", substitutions: ["value1": String(describing: bodyName(item.body, language: language))], language: language)
         return fact(
             label,
             "\(value) · \(Zodiac.formatDegree(item.distance))",

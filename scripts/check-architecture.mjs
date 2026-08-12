@@ -108,11 +108,40 @@ async function assertCssIsMovingOutOfGlobals() {
   );
 }
 
+async function assertIOSColorsStaySemantic() {
+  const files = (await listFiles("ios/App")).filter(
+    (file) => file.endsWith(".swift") && file !== "ios/App/Theme.swift",
+  );
+  for (const file of files) {
+    const source = await read(file);
+    assert.equal(source.includes("Color(red:"), false, `${file} must use adaptive AppTheme colors.`);
+    assert.equal(source.includes("Color.black"), false, `${file} must use adaptive AppTheme colors.`);
+  }
+}
+
+async function assertIOSCardTypographyScales() {
+  const files = (await listFiles("ios/App")).filter(
+    (file) => file.endsWith(".swift")
+      && file !== "ios/App/ChartRenderer.swift"
+      && file !== "ios/App/ProfileView.swift",
+  );
+  for (const file of files) {
+    const source = await read(file);
+    assert.equal(
+      source.includes(".font(.system(size:"),
+      false,
+      `${file} must use semantic or scaled Dynamic Type fonts instead of a fixed point size.`,
+    );
+  }
+}
+
 await assertRouteEntrypointsStayThin();
 await assertFileBudgetsAreRoleBased();
 await assertApiRetryPolicy();
 await assertProductionApiBaseIsSameOrigin();
 await assertSecondaryInsightUsesCorpus();
 await assertCssIsMovingOutOfGlobals();
+await assertIOSColorsStaySemantic();
+await assertIOSCardTypographyScales();
 
 console.log("[architecture] route, retry, corpus, CSS, and production API guards passed");

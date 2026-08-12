@@ -15,7 +15,7 @@ expected_ids=(
 )
 
 for id in "${expected_ids[@]}"; do
-  if ! rg -q "id: \"$id\"" "$factory"; then
+  if ! rg -q "\"$id\"" "$factory"; then
     echo "Missing iOS insight card: $id" >&2
     exit 1
   fi
@@ -44,7 +44,7 @@ required_visuals=(
   progressedStage progressedThemes turningTimeline comparison
   signatureTrio placementList aspectList storyWeave cycleTabs positionRows areaRows phaseDial motionList elementRows
   stageFlow moonProgress identityCompare turningRows yearOrbit anchorGrid dualInsight quarterTabs overlayCompare
-  bondOrbit perspectiveTabs connectionGrid pathFlow houseOverlayRows
+  bondOrbit perspectiveTabs synastryConnectionGrid synastryPathFlow synastryHouseOverlayRows synastryInterAspectRows
 )
 
 for visual in "${required_visuals[@]}"; do

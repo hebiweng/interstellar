@@ -16,7 +16,7 @@ final class AppEnrichmentService {
                 source: .transit,
                 title: aspectTitle(
                     $0,
-                    prefix: localized("Transit ", "行运", language: language),
+                    prefix: localized("enrichment.transit", language: language),
                     language: language
                 ),
                 subtitle: "\(phaseLabel($0.phase, language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
@@ -31,7 +31,7 @@ final class AppEnrichmentService {
                 category: .activeNow,
                 source: .sky,
                 title: aspectTitle($0, language: language),
-                subtitle: "\(localized("Active now", "当前活跃", language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
+                subtitle: "\(localized("enrichment.active-now", language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
                 tone: tone($0.kind),
                 strength: Int($0.strength * 100),
                 eventDate: nil
@@ -44,10 +44,10 @@ final class AppEnrichmentService {
                 source: .secondary,
                 title: aspectTitle(
                     $0,
-                    prefix: localized("Progressed ", "次限", language: language),
+                    prefix: localized("enrichment.progressed", language: language),
                     language: language
                 ),
-                subtitle: "\(localized("Long-term background", "长期背景", language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
+                subtitle: "\(localized("enrichment.long-term-background", language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",
                 tone: tone($0.kind),
                 strength: Int($0.strength * 100),
                 eventDate: nil

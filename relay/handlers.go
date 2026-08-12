@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"database/sql"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -12,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -37,6 +39,37 @@ type relayConfig struct {
 	dailyQuota     int
 	allowDevBypass bool
 	appAttest      *appAttestConfig
+}
+
+type feedbackSubmitRequest struct {
+	Type    string `json:"type"`
+	Content string `json:"content"`
+	Contact string `json:"contact"`
+}
+
+func (c *relayConfig) handleFeedback(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "POST required", false)
+		return
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, 16<<10)
+	var req feedbackSubmitRequest
+	if err := readJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_feedback", "invalid feedback payload", false)
+		return
+	}
+	feedback, err := c.store.SaveFeedback(req.Type, req.Content, req.Contact)
+	if err != nil {
+		writeError(w, http.StatusUnprocessableEntity, "invalid_feedback", err.Error(), false)
+		return
+	}
+	writeJSON(w, http.StatusCreated, map[string]any{
+		"ok": true,
+		"feedback": map[string]any{
+			"id": feedback.ID, "type": feedback.Type, "status": feedback.Status,
+			"createdAt": feedback.CreatedAt,
+		},
+	})
 }
 
 type generateRequest struct {
@@ -685,6 +718,52 @@ func (c *relayConfig) handleUsage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"days": days, "usage": usage})
+}
+
+func (c *relayConfig) handleAdminFeedback(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "GET required", false)
+		return
+	}
+	status := strings.TrimSpace(r.URL.Query().Get("status"))
+	feedbackType := strings.TrimSpace(r.URL.Query().Get("type"))
+	items, err := c.store.ListFeedback(status, feedbackType, 200)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "feedback_unavailable", "could not load feedback", true)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"total": len(items), "items": items})
+}
+
+func (c *relayConfig) handleAdminFeedbackItem(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPatch {
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "PATCH required", false)
+		return
+	}
+	rawID := strings.Trim(strings.TrimPrefix(r.URL.Path, "/admin/feedback/"), "/")
+	id, err := strconv.ParseInt(rawID, 10, 64)
+	if err != nil || id < 1 {
+		writeError(w, http.StatusBadRequest, "invalid_feedback_id", "invalid feedback id", false)
+		return
+	}
+	var req struct {
+		Status string `json:"status"`
+	}
+	if err := readJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_feedback_status", "invalid feedback status", false)
+		return
+	}
+	item, err := c.store.UpdateFeedbackStatus(id, strings.TrimSpace(req.Status))
+	if errors.Is(err, sql.ErrNoRows) {
+		writeError(w, http.StatusNotFound, "feedback_not_found", "feedback not found", false)
+		return
+	}
+	if err != nil {
+		writeError(w, http.StatusUnprocessableEntity, "invalid_feedback_status", err.Error(), false)
+		return
+	}
+	_ = c.store.RecordAudit(adminUsername(r), "feedback.status", rawID, map[string]any{"status": item.Status})
+	writeJSON(w, http.StatusOK, map[string]any{"ok": true, "feedback": item})
 }
 
 func (c *relayConfig) handleHealth(w http.ResponseWriter, _ *http.Request) {

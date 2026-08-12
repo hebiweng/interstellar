@@ -8,7 +8,7 @@
 | 范围 | iOS 六盘、v6 Today、AI Artifact、Go Relay、`/xiaoguiwk` |
 | 延期 | Composite、跨设备报告同步、Web 消费端、旧 `/admin` 迁移 |
 
-本文件取代 `docs/ios-v1-development-plan.md` 中与 Today、卡片详情、盘型数量和 AI 缓存冲突的旧规则。旧文件只保留历史背景。
+本文件取代旧 iOS V1 计划；旧计划已从当前工作树删除，只能从 Git 历史查阅，不再作为任何实现依据。
 
 ## 1. 决策优先级
 

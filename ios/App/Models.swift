@@ -10,12 +10,13 @@ enum AppLanguage: String, CaseIterable, Identifiable, Codable {
 
     var id: String { rawValue }
     var title: String {
-        switch self {
-        case .english: "English"
-        case .simplifiedChinese: "简体中文"
-        case .spanish: "Español"
-        case .french: "Français"
+        let key = switch self {
+        case .english: "language.english"
+        case .simplifiedChinese: "language.simplified-chinese"
+        case .spanish: "language.spanish"
+        case .french: "language.french"
         }
+        return localized(key, language: self)
     }
 
     /// The reviewed runtime corpus is now delivered for all four consumer locales.
@@ -31,9 +32,9 @@ enum AppAppearance: String, CaseIterable, Identifiable, Codable {
 
     func title(language: AppLanguage) -> String {
         switch self {
-        case .system: localized("System", "跟随系统", language: language)
-        case .light: localized("Light", "浅色", language: language)
-        case .dark: localized("Dark", "深色", language: language)
+        case .system: localized("settings.system", language: language)
+        case .light: localized("settings.light", language: language)
+        case .dark: localized("settings.dark", language: language)
         }
     }
 
@@ -56,10 +57,10 @@ enum AppFontSize: String, CaseIterable, Identifiable, Codable {
 
     func title(language: AppLanguage) -> String {
         switch self {
-        case .small: localized("Small", "小", language: language)
-        case .standard: localized("Standard", "标准", language: language)
-        case .large: localized("Large", "大", language: language)
-        case .extraLarge: localized("Extra Large", "特大", language: language)
+        case .small: localized("settings.small", language: language)
+        case .standard: localized("settings.standard", language: language)
+        case .large: localized("settings.large", language: language)
+        case .extraLarge: localized("settings.extra-large", language: language)
         }
     }
 
@@ -73,44 +74,45 @@ enum AppFontSize: String, CaseIterable, Identifiable, Codable {
     }
 }
 
-func localized(_ english: String, _ chinese: String, language: AppLanguage) -> String {
-    let fallback = language == .simplifiedChinese ? chinese : english
-    guard let localizationPath = Bundle.main.path(forResource: language.rawValue, ofType: "lproj"),
-          let localizationBundle = Bundle(path: localizationPath)
-    else { return fallback }
-    return localizationBundle.localizedString(forKey: english, value: fallback, table: "Localizable")
-}
-
-func localized(
-    _ key: String,
-    default english: String,
-    chinese: String,
-    language: AppLanguage
-) -> String {
-    let fallback = language == .simplifiedChinese ? chinese : english
-    guard let localizationPath = Bundle.main.path(forResource: language.rawValue, ofType: "lproj"),
-          let localizationBundle = Bundle(path: localizationPath)
-    else { return fallback }
-    return localizationBundle.localizedString(forKey: key, value: fallback, table: "Localizable")
-}
-
-func localized(
-    _ english: String,
-    _ chinese: String,
-    spanish: String,
-    french: String,
-    language: AppLanguage
-) -> String {
-    let fallback = switch language {
-    case .english: english
-    case .simplifiedChinese: chinese
-    case .spanish: spanish
-    case .french: french
+enum LunarPhaseGeometry {
+    static func elongation(sunLongitude: Double, moonLongitude: Double) -> Double {
+        let raw = (moonLongitude - sunLongitude).truncatingRemainder(dividingBy: 360)
+        return raw >= 0 ? raw : raw + 360
     }
+
+    static func illuminationFraction(elongation: Double) -> Double {
+        let normalized = elongation.truncatingRemainder(dividingBy: 360)
+        return (1 - cos(normalized * .pi / 180)) / 2
+    }
+}
+
+func localized(_ key: String, language: AppLanguage) -> String {
     guard let localizationPath = Bundle.main.path(forResource: language.rawValue, ofType: "lproj"),
           let localizationBundle = Bundle(path: localizationPath)
-    else { return fallback }
-    return localizationBundle.localizedString(forKey: english, value: fallback, table: "Localizable")
+    else {
+        assertionFailure("Missing localization bundle for \(language.rawValue)")
+        return key
+    }
+    let value = localizationBundle.localizedString(forKey: key, value: nil, table: "Localizable")
+    if value == key {
+        assertionFailure("Missing localization key: \(key) [\(language.rawValue)]")
+    }
+    return value
+}
+
+func localizedTemplate(
+    _ key: String,
+    substitutions: [String: String],
+    language: AppLanguage
+) -> String {
+    let template = localized(key, language: language)
+    let rendered = substitutions.reduce(template) { result, substitution in
+        result.replacingOccurrences(of: "{{\(substitution.key)}}", with: substitution.value)
+    }
+    if rendered.range(of: #"\{\{[A-Za-z][A-Za-z0-9]*\}\}"#, options: .regularExpression) != nil {
+        assertionFailure("Missing localization substitution for key: \(key)")
+    }
+    return rendered
 }
 
 extension String {
@@ -131,23 +133,23 @@ enum ChartKind: String, CaseIterable, Identifiable, Codable {
 
     func title(language: AppLanguage) -> String {
         switch self {
-        case .natal: localized("Natal", "本命", language: language)
-        case .currentSky: localized("chart-kind.current-sky.short", default: "Current Sky", chinese: "天象", language: language)
-        case .transit: localized("Transits", "行运", language: language)
-        case .secondary: localized("Progressed", "次限", language: language)
-        case .solarReturn: localized("Solar Return", "日返盘", language: language)
-        case .synastry: localized("Synastry", "合盘", language: language)
+        case .natal: localized("insight.secondary.natal", language: language)
+        case .currentSky: localized("chart-kind.current-sky.short", language: language)
+        case .transit: localized("settings.transits", language: language)
+        case .secondary: localized("settings.progressed", language: language)
+        case .solarReturn: localized("settings.solar-return", language: language)
+        case .synastry: localized("settings.synastry", language: language)
         }
     }
 
     func eyebrow(language: AppLanguage) -> String {
         switch self {
-        case .natal: localized("BIRTH CHART", "本命盘", language: language)
-        case .currentSky: localized("chart-kind.current-sky.eyebrow", default: "SKY NOW", chinese: "当前天象", language: language)
-        case .transit: localized("NATAL + CURRENT SKY", "本命与当前天空", language: language)
-        case .secondary: localized("SECONDARY PROGRESSIONS", "次限推运", language: language)
-        case .solarReturn: localized("SOLAR RETURN", "日返盘", language: language)
-        case .synastry: localized("SYNASTRY", "合盘", language: language)
+        case .natal: localized("settings.birth-chart", language: language)
+        case .currentSky: localized("chart-kind.current-sky.eyebrow", language: language)
+        case .transit: localized("settings.natal-current-sky", language: language)
+        case .secondary: localized("settings.secondary-progressions", language: language)
+        case .solarReturn: localized("settings.solar-return.8f89f6c", language: language)
+        case .synastry: localized("settings.synastry.b8a5a20", language: language)
         }
     }
 
@@ -176,17 +178,17 @@ extension CalculationPreset {
 
     func title(language: AppLanguage) -> String {
         switch self {
-        case .modern: localized("Modern", "现代", language: language)
-        case .classical: localized("Classical", "古典", language: language)
-        case .special: localized("Special", "特殊", language: language)
+        case .modern: localized("settings.modern", language: language)
+        case .classical: localized("settings.classical", language: language)
+        case .special: localized("settings.special", language: language)
         }
     }
 
     func subtitle(language: AppLanguage) -> String {
         switch self {
-        case .modern: localized("Tropical · Placidus", "回归黄道 · 普拉西德", language: language)
-        case .classical: localized("Traditional · Alcabitius", "传统七曜 · 阿卡比特", language: language)
-        case .special: localized("Whole Sign", "整宫制", language: language)
+        case .modern: localized("settings.tropical-placidus", language: language)
+        case .classical: localized("settings.traditional-alcabitius", language: language)
+        case .special: localized("settings.whole-sign", language: language)
         }
     }
 }
@@ -234,11 +236,11 @@ enum PersonRelationship: String, CaseIterable, Codable, Identifiable {
 
     func title(language: AppLanguage) -> String {
         switch self {
-        case .partner: localized("Partner", "伴侣", language: language)
-        case .family: localized("Family", "家人", language: language)
-        case .friend: localized("Friend", "朋友", language: language)
-        case .colleague: localized("Colleague", "同事", language: language)
-        case .other: localized("Other", "其他", language: language)
+        case .partner: localized("settings.partner", language: language)
+        case .family: localized("settings.family", language: language)
+        case .friend: localized("settings.friend", language: language)
+        case .colleague: localized("settings.colleague", language: language)
+        case .other: localized("settings.other", language: language)
         }
     }
 }
@@ -307,6 +309,7 @@ struct InsightFact: Identifiable, Equatable {
     let interpretationVariables: [String: String]
     let sourceFactIDs: [String]
     let visualRole: String?
+    let technicalDetail: String?
     let interpretation: String?
     var emphasis: InsightTone = .neutral
     var progress: Double? = nil
@@ -322,6 +325,7 @@ struct InsightFact: Identifiable, Equatable {
         interpretationVariables: [String: String] = [:],
         sourceFactIDs: [String] = [],
         visualRole: String? = nil,
+        technicalDetail: String? = nil,
         interpretation: String? = nil,
         emphasis: InsightTone = .neutral,
         progress: Double? = nil,
@@ -336,6 +340,7 @@ struct InsightFact: Identifiable, Equatable {
         self.interpretationVariables = interpretationVariables
         self.sourceFactIDs = sourceFactIDs.isEmpty ? [id] : sourceFactIDs
         self.visualRole = visualRole
+        self.technicalDetail = technicalDetail
         self.interpretation = interpretation
         self.emphasis = emphasis
         self.progress = progress

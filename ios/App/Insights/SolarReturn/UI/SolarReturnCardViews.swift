@@ -7,12 +7,12 @@ extension InsightVisualView {
                 Circle().stroke(AppTheme.violet.opacity(0.35), lineWidth: 1).frame(width: 118, height: 118)
                 Circle().stroke(AppTheme.line, style: StrokeStyle(lineWidth: 1, dash: [4, 4])).frame(width: 88, height: 88)
                 Circle().fill(AppTheme.violet.opacity(0.12)).frame(width: 40, height: 40)
-                Text("☉").font(.system(size: 18, weight: .bold)).foregroundStyle(AppTheme.text)
-                Text("↑").font(.system(size: 13, weight: .bold)).foregroundStyle(AppTheme.mint)
+                Text("☉").font(AppTypography.scaled(18, weight: .bold)).foregroundStyle(AppTheme.text)
+                Text("↑").font(AppTypography.scaled(13, weight: .bold)).foregroundStyle(AppTheme.mint)
                     .offset(x: 0, y: -64)
-                Text("♄").font(.system(size: 12, weight: .semibold)).foregroundStyle(AppTheme.amber)
+                Text("♄").font(AppTypography.scaled(12, weight: .semibold)).foregroundStyle(AppTheme.amber)
                     .offset(x: 55, y: 26)
-                Text("♃").font(.system(size: 12, weight: .semibold)).foregroundStyle(AppTheme.blue)
+                Text("♃").font(AppTypography.scaled(12, weight: .semibold)).foregroundStyle(AppTheme.blue)
                     .offset(x: -52, y: 34)
             }
             .frame(width: 128, height: 128)
@@ -32,10 +32,10 @@ extension InsightVisualView {
                 ForEach(Array(facts.prefix(4).enumerated()), id: \.offset) { index, fact in
                     VStack(alignment: .leading, spacing: 2) {
                         Text(fact.label)
-                            .font(.system(size: 10, weight: .bold))
+                            .font(AppTypography.scaled(10, weight: .bold))
                             .foregroundStyle(index == 0 ? AppTheme.violet : AppTheme.muted)
                         Text(fact.value)
-                            .font(.system(size: 10))
+                            .font(AppTypography.scaled(10))
                             .foregroundStyle(AppTheme.muted)
                             .lineLimit(2)
                     }
@@ -47,11 +47,11 @@ extension InsightVisualView {
             if let opening = facts.first, !opening.value.isEmpty {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(opening.value)
-                        .font(.system(size: 13, weight: .bold))
+                        .font(AppTypography.scaled(13, weight: .bold))
                         .foregroundStyle(AppTheme.text)
                     if let note = opening.note {
                         Text(note)
-                            .font(.system(size: 11))
+                            .font(AppTypography.scaled(11))
                             .foregroundStyle(AppTheme.muted)
                             .lineSpacing(3)
                             .fixedSize(horizontal: false, vertical: true)
@@ -67,7 +67,7 @@ extension InsightVisualView {
     func natalOverlay(firstLabel: String, firstValue: String, secondLabel: String, secondValue: String) -> some View {
         HStack(spacing: 8) {
             compareNode(label: firstLabel, value: firstValue, tone: .supportive)
-            Text("↔").font(.system(size: 15, weight: .bold)).foregroundStyle(AppTheme.muted)
+            Text("↔").font(AppTypography.scaled(15, weight: .bold)).foregroundStyle(AppTheme.muted)
             compareNode(label: secondLabel, value: secondValue, tone: .challenging)
         }
     }
@@ -75,11 +75,11 @@ extension InsightVisualView {
     func compareNode(label: String, value: String, tone: InsightTone) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
-                .font(.system(size: 8.5, weight: .bold))
+                .font(AppTypography.scaled(8.5, weight: .bold))
                 .tracking(1.1)
                 .foregroundStyle(AppTheme.tone(tone))
             Text(value)
-                .font(.system(size: 11.5, weight: .semibold))
+                .font(AppTypography.scaled(11.5, weight: .semibold))
                 .foregroundStyle(AppTheme.text)
                 .fixedSize(horizontal: false, vertical: true)
         }

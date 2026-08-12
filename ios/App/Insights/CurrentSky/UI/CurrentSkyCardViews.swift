@@ -13,15 +13,15 @@ extension InsightVisualView {
                     .stroke(AppTheme.violet, style: StrokeStyle(lineWidth: 7, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                 VStack(spacing: 0) {
-                    Text("\(Int(phase))°").font(.system(size: 12, weight: .bold)).foregroundStyle(AppTheme.text)
-                    Text(localized("phase", "月相", language: language)).font(.system(size: 9)).foregroundStyle(AppTheme.muted)
+                    Text("\(Int(phase))°").font(AppTypography.scaled(12, weight: .bold)).foregroundStyle(AppTheme.text)
+                    Text(localized("insight.current-sky.phase", language: language)).font(AppTypography.scaled(9)).foregroundStyle(AppTheme.muted)
                 }
             }
             .frame(width: 84, height: 84)
             VStack(alignment: .leading, spacing: 8) {
-                metric("\(activity)%", localized("Activity", "活跃度", language: language), .transition)
-                metric("\(Int((cycles.first ?? 0) * 100))%", localized("Long cycle", "长期周期", language: language), .supportive)
-                metric("\(Int((cycles.last ?? 0) * 100))%", localized("Short cycle", "短期周期", language: language), .neutral)
+                metric("\(activity)%", localized("insight.current-sky.activity", language: language), .transition)
+                metric("\(Int((cycles.first ?? 0) * 100))%", localized("insight.current-sky.long-cycle", language: language), .supportive)
+                metric("\(Int((cycles.last ?? 0) * 100))%", localized("insight.current-sky.short-cycle", language: language), .neutral)
             }
             .frame(maxWidth: .infinity)
         }
@@ -33,16 +33,16 @@ extension InsightVisualView {
                 VStack(alignment: .leading, spacing: 5) {
                     HStack {
                         Text(fact.symbol ?? "✦").foregroundStyle(AppTheme.tone(fact.emphasis))
-                        Text(fact.label).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
+                        Text(fact.label).font(AppTypography.scaled(12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
                         Spacer()
-                        Text(fact.value).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
+                        Text(fact.value).font(AppTypography.scaled(10)).foregroundStyle(AppTheme.muted)
                     }
                     if let progress = fact.progress {
                         ProgressView(value: max(0, min(1, progress)))
                             .tint(AppTheme.tone(fact.emphasis))
                     }
                     if let note = fact.note {
-                        Text(note).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
+                        Text(note).font(AppTypography.scaled(10)).foregroundStyle(AppTheme.muted)
                     }
                 }
                 .padding(12)
@@ -58,7 +58,7 @@ extension InsightVisualView {
             ForEach(Array(facts.prefix(4).enumerated()), id: \.offset) { index, fact in
                 HStack(alignment: .top, spacing: 12) {
                     Text(fact.label)
-                        .font(.system(size: 11, weight: .semibold).monospacedDigit())
+                        .font(AppTypography.scaled(11, weight: .semibold).monospacedDigit())
                         .foregroundStyle(AppTheme.muted)
                         .frame(width: 42, alignment: .leading)
                     VStack(spacing: 0) {
@@ -70,9 +70,9 @@ extension InsightVisualView {
                         }
                     }
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(fact.value).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
+                        Text(fact.value).font(AppTypography.scaled(12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
                         if let note = fact.note {
-                            Text(note).font(.system(size: 10.5)).foregroundStyle(AppTheme.muted)
+                            Text(note).font(AppTypography.scaled(10.5)).foregroundStyle(AppTheme.muted)
                         }
                     }
                     Spacer()
@@ -89,11 +89,11 @@ extension InsightVisualView {
                     let parts = dateParts(fact.label)
                     VStack(spacing: 1) {
                         Text(parts.0)
-                            .font(.system(size: 9, weight: .bold))
+                            .font(AppTypography.scaled(9, weight: .bold))
                             .tracking(0.8)
                             .foregroundStyle(AppTheme.muted)
                         Text(parts.1)
-                            .font(.system(size: 16, weight: .bold).monospacedDigit())
+                            .font(AppTypography.scaled(16, weight: .bold).monospacedDigit())
                             .foregroundStyle(AppTheme.text)
                     }
                     .frame(width: 54)
@@ -102,12 +102,12 @@ extension InsightVisualView {
                     .overlay(RoundedRectangle(cornerRadius: 14).stroke(AppTheme.line, lineWidth: 1))
                     VStack(alignment: .leading, spacing: 3) {
                         Text(fact.value)
-                            .font(.system(size: 13, weight: .semibold))
+                            .font(AppTypography.scaled(13, weight: .semibold))
                             .foregroundStyle(AppTheme.text)
                             .fixedSize(horizontal: false, vertical: true)
                         if let note = fact.note {
                             Text(note)
-                                .font(.system(size: 10))
+                                .font(AppTypography.scaled(10))
                                 .foregroundStyle(AppTheme.muted)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
@@ -140,13 +140,20 @@ extension InsightVisualView {
     // MARK: - Domain bars
 
     func domainBars(_ values: [Double]) -> some View {
-        let labels = language == .english
-            ? ["Information", "Relationships", "Action", "Institutions", "Technology", "Resources", "Public mood", "Culture"]
-            : ["信息传播", "关系合作", "行动竞争", "制度结构", "技术创新", "资源经济", "公共情绪", "文化价值"]
+        let labels = [
+            localized("insight.current-sky.domain.information", language: language),
+            localized("insight.current-sky.domain.relationships", language: language),
+            localized("insight.current-sky.domain.action", language: language),
+            localized("insight.current-sky.domain.institutions", language: language),
+            localized("insight.current-sky.domain.technology", language: language),
+            localized("insight.current-sky.domain.resources", language: language),
+            localized("insight.current-sky.domain.public-mood", language: language),
+            localized("insight.current-sky.domain.culture", language: language),
+        ]
         return VStack(spacing: 8) {
             ForEach(Array(zip(labels, values).enumerated()), id: \.offset) { index, item in
                 HStack(spacing: 9) {
-                    Text(item.0).font(.system(size: 10.5)).foregroundStyle(AppTheme.muted).frame(width: 76, alignment: .leading)
+                    Text(item.0).font(AppTypography.scaled(10.5)).foregroundStyle(AppTheme.muted).frame(width: 76, alignment: .leading)
                     GeometryReader { proxy in
                         ZStack(alignment: .leading) {
                             Capsule().fill(AppTheme.line.opacity(0.6))
@@ -155,7 +162,7 @@ extension InsightVisualView {
                         }
                     }
                     .frame(height: 7)
-                    Text("\(Int(item.1 * 100))%").font(.system(size: 10).monospacedDigit()).foregroundStyle(AppTheme.muted)
+                    Text("\(Int(item.1 * 100))%").font(AppTypography.scaled(10).monospacedDigit()).foregroundStyle(AppTheme.muted)
                         .frame(width: 34, alignment: .trailing)
                 }
             }
@@ -171,14 +178,14 @@ extension InsightVisualView {
             ForEach(Array(facts.prefix(10).enumerated()), id: \.offset) { _, fact in
                 HStack(spacing: 9) {
                     Text(fact.symbol ?? "✦")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(AppTypography.scaled(14, weight: .semibold))
                         .foregroundStyle(AppTheme.tone(fact.emphasis))
                         .frame(width: 24)
-                    Text(fact.label).font(.system(size: 12, weight: .semibold)).foregroundStyle(AppTheme.text)
+                    Text(fact.label).font(AppTypography.scaled(12, weight: .semibold)).foregroundStyle(AppTheme.text)
                     Spacer()
-                    Text(fact.value).font(.system(size: 10.5)).foregroundStyle(AppTheme.muted)
+                    Text(fact.value).font(AppTypography.scaled(10.5)).foregroundStyle(AppTheme.muted)
                     if let note = fact.note {
-                        Text(note).font(.system(size: 9.5)).foregroundStyle(AppTheme.muted.opacity(0.8))
+                        Text(note).font(AppTypography.scaled(9.5)).foregroundStyle(AppTheme.muted.opacity(0.8))
                             .frame(width: 84, alignment: .trailing)
                     }
                 }
@@ -190,17 +197,10 @@ extension InsightVisualView {
 
     func phaseDial(phase: Double, illumination: Double) -> some View {
         HStack(spacing: 14) {
-            ZStack {
-                Circle().fill(AppTheme.panel).overlay(Circle().stroke(AppTheme.line))
-                Circle().trim(from: 0, to: max(0.01, illumination))
-                    .stroke(AppTheme.violet, style: StrokeStyle(lineWidth: 9, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
-                Text("☽").font(.system(size: 22)).foregroundStyle(AppTheme.text)
-            }
-            .frame(width: 92, height: 92)
+            LunarPhaseDisk(phaseAngle: phase, size: 92)
             VStack(alignment: .leading, spacing: 8) {
-                metric("\(Int(illumination * 100))%", localized("illuminated", "照亮", language: language), .transition)
-                metric(progressedPhaseName(phase), localized("phase", "月相", language: language), .neutral)
+                metric("\(Int((illumination * 100).rounded()))%", localized("insight.current-sky.illuminated", language: language), .transition)
+                metric(progressedPhaseName(phase), localized("insight.current-sky.phase", language: language), .neutral)
             }
             .frame(maxWidth: .infinity)
         }

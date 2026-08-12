@@ -19,17 +19,17 @@ extension InsightCardView {
             ForEach(Array(roleTexts.enumerated()), id: \.offset) { index, roleText in
                 if index > 0 {
                     Image(systemName: "plus")
-                        .font(.system(size: 11, weight: .bold))
+                        .font(AppTypography.scaled(11, weight: .bold))
                         .foregroundStyle(AppTheme.muted)
                 }
                 HStack(alignment: .top, spacing: 10) {
                     let presentation = storyRolePresentation(roleText.roleID)
                     Label(presentation.label, systemImage: presentation.systemImage)
-                        .font(.system(size: 9, weight: .bold))
+                        .font(AppTypography.scaled(9, weight: .bold))
                         .foregroundStyle(AppTheme.tone(presentation.tone))
                         .accessibilityLabel(presentation.label)
                     Text(roleText.text)
-                        .font(.system(size: 11.5, weight: .medium))
+                        .font(AppTypography.scaled(11.5, weight: .medium))
                         .foregroundStyle(AppTheme.text)
                     Spacer()
                 }
@@ -41,7 +41,7 @@ extension InsightCardView {
             }
             if let result, !result.isEmpty {
                 Text(result)
-                    .font(.system(size: 10.5))
+                    .font(AppTypography.scaled(10.5))
                     .lineSpacing(3)
                     .foregroundStyle(AppTheme.text.opacity(0.95))
                     .padding(12)
@@ -62,25 +62,25 @@ extension InsightCardView {
     private func storyRolePresentation(_ roleID: String) -> (label: String, tone: InsightTone, systemImage: String) {
         switch roleID {
         case TransitStorySignalRoleID.expanding.rawValue:
-            (localized("EXPANDING", "扩展", language: language), .supportive, "arrow.up.right")
+            (localized("insight.transit.expanding", language: language), .supportive, "arrow.up.right")
         case TransitStorySignalRoleID.structuring.rawValue:
-            (localized("STRUCTURING", "构建", language: language), .transition, "square.3.layers.3d")
+            (localized("insight.transit.structuring", language: language), .transition, "square.3.layers.3d")
         case TransitStorySignalRoleID.disrupting.rawValue:
-            (localized("DISRUPTING", "重塑", language: language), .challenging, "bolt")
+            (localized("insight.transit.disrupting", language: language), .challenging, "bolt")
         case TransitStorySignalRoleID.stabilizing.rawValue:
-            (localized("STABILIZING", "稳固", language: language), .transition, "shield")
+            (localized("insight.transit.stabilizing", language: language), .transition, "shield")
         case TransitStorySignalRoleID.supporting.rawValue:
-            (localized("SUPPORTING", "助力", language: language), .supportive, "plus.circle")
+            (localized("insight.transit.supporting", language: language), .supportive, "plus.circle")
         case ClassicalTransitSignalRoleID.beneficSupport.rawValue:
-            (localized("SUPPORT", "助益", language: language), .supportive, "plus.circle")
+            (localized("insight.transit.support", language: language), .supportive, "plus.circle")
         case ClassicalTransitSignalRoleID.maleficPressure.rawValue:
-            (localized("PRESSURE", "压力", language: language), .challenging, "exclamationmark.triangle")
+            (localized("insight.transit.pressure", language: language), .challenging, "exclamationmark.triangle")
         case ClassicalTransitSignalRoleID.fortified.rawValue:
-            (localized("FORTIFIED", "得助", language: language), .supportive, "shield.checkered")
+            (localized("insight.transit.fortified", language: language), .supportive, "shield.checkered")
         case ClassicalTransitSignalRoleID.impaired.rawValue:
-            (localized("IMPAIRED", "受损", language: language), .challenging, "shield.slash")
+            (localized("insight.transit.impaired", language: language), .challenging, "shield.slash")
         case ClassicalTransitSignalRoleID.received.rawValue:
-            (localized("RECEIVED", "接纳", language: language), .transition, "arrow.left.arrow.right")
+            (localized("insight.transit.received", language: language), .transition, "arrow.left.arrow.right")
         default:
             (roleID.uppercased(), .neutral, "circle")
         }
@@ -101,22 +101,22 @@ extension InsightVisualView {
                 .stroke(AppTheme.violet, style: StrokeStyle(lineWidth: 12, lineCap: .round))
                 .rotationEffect(.degrees(180), anchor: .center)
                 VStack(spacing: 2) {
-                    Text("\(value)").font(.system(size: 22, weight: .bold).monospacedDigit()).foregroundStyle(AppTheme.text)
-                    Text(localized("activity", "活跃度", language: language)).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
+                    Text("\(value)").font(AppTypography.scaled(22, weight: .bold).monospacedDigit()).foregroundStyle(AppTheme.text)
+                    Text(localized("insight.transit.activity", language: language)).font(AppTypography.scaled(10)).foregroundStyle(AppTheme.muted)
                 }
                 .offset(y: 8)
             }
             .frame(height: 96)
             HStack(spacing: 12) {
-                metric("\(supportive)", localized("Push", "推动", language: language), .supportive)
-                metric("\(adjustment)", localized("Adjust", "调整", language: language), .challenging)
+                metric("\(supportive)", localized("insight.transit.push", language: language), .supportive)
+                metric("\(adjustment)", localized("insight.transit.adjust", language: language), .challenging)
             }
         }
     }
 
     func transitOverview(intensity: Int, rhythm: [Double]) -> some View {
         VStack(spacing: 10) {
-            metric("\(intensity)%", localized("Intensity", "强度", language: language), .transition)
+            metric("\(intensity)%", localized("insight.synastry.intensity.8edbde8", language: language), .transition)
             rhythmWave(rhythm)
         }
     }
@@ -161,7 +161,7 @@ extension InsightVisualView {
             HStack {
                 ForEach(Array(values.enumerated()), id: \.offset) { index, _ in
                     Text("\(index + 1)")
-                        .font(.system(size: 9).monospacedDigit())
+                        .font(AppTypography.scaled(9).monospacedDigit())
                         .foregroundStyle(AppTheme.muted)
                         .frame(maxWidth: .infinity)
                 }
@@ -176,27 +176,27 @@ extension InsightVisualView {
             HStack(spacing: 6) {
                 ForEach(Array(values.enumerated()), id: \.offset) { index, value in
                     VStack(spacing: 3) {
-                        Text(shortDay(index + 1)).font(.system(size: 9.5)).foregroundStyle(AppTheme.muted)
+                        Text(shortDay(index + 1)).font(AppTypography.scaled(9.5)).foregroundStyle(AppTheme.muted)
                         RoundedRectangle(cornerRadius: 6)
                             .fill(AppTheme.tone(value > 66 ? .challenging : value > 35 ? .transition : .neutral).opacity(0.16 + Double(value) / 100 * 0.7))
                             .frame(height: 46)
                             .overlay(
                                 Text("\(value)")
-                                    .font(.system(size: 10, weight: .bold).monospacedDigit())
+                                    .font(AppTypography.scaled(10, weight: .bold).monospacedDigit())
                                     .foregroundStyle(AppTheme.text)
                             )
                     }
                     .frame(maxWidth: .infinity)
                 }
             }
-            Text(localized("This week's intensity", "本周变化强度", language: language))
-                .font(.system(size: 9.5))
+            Text(localized("insight.transit.this-weeks-intensity", language: language))
+                .font(AppTypography.scaled(9.5))
                 .foregroundStyle(AppTheme.muted)
         }
     }
 
     func shortDay(_ index: Int) -> String {
-        let days = language == .english ? ["M", "T", "W", "T", "F", "S", "S"] : ["一", "二", "三", "四", "五", "六", "日"]
+        let days = LocalizedFormatters.weekdayLabelsStartingMonday(language: language)
         return days[min(max(0, index - 1), 6)]
     }
 
@@ -204,15 +204,11 @@ extension InsightVisualView {
         VStack(spacing: 0) {
             HStack(alignment: .top, spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(localized("Transiting houses & motion", "行运宫位与运动状态", language: language))
-                        .font(.system(size: 14, weight: .semibold))
+                    Text(localized("insight.transit.transiting-houses-motion", language: language))
+                        .font(AppTypography.scaled(14, weight: .semibold))
                         .foregroundStyle(AppTheme.text)
-                    Text(localized(
-                        "This separates planetary location from aspect interpretation.",
-                        "这里将行星位置与相位解读分开呈现。",
-                        language: language
-                    ))
-                    .font(.system(size: 9.5))
+                    Text(localized("insight.transit.this-separates-planetary-location-from-aspect-interpretation", language: language))
+                    .font(AppTypography.scaled(9.5))
                     .lineSpacing(2)
                     .foregroundStyle(AppTheme.muted)
                 }
@@ -220,8 +216,8 @@ extension InsightVisualView {
                 Button {
                     transitDetailDrawer = .planetPaths(rows)
                 } label: {
-                    Text(localized("How it works", "原理说明", language: language))
-                        .font(.system(size: 9.5, weight: .semibold))
+                    Text(localized("insight.transit.how-it-works", language: language))
+                        .font(AppTypography.scaled(9.5, weight: .semibold))
                         .foregroundStyle(AppTheme.violet)
                         .frame(minHeight: 44, alignment: .topTrailing)
                 }
@@ -236,18 +232,18 @@ extension InsightVisualView {
                 }
                 HStack(spacing: 10) {
                     Text(row.symbol)
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(AppTypography.scaled(17, weight: .semibold))
                         .foregroundStyle(AppTheme.text)
                         .frame(width: 36, height: 36)
                         .background(AppTheme.background.opacity(0.6), in: RoundedRectangle(cornerRadius: 12))
                         .overlay(RoundedRectangle(cornerRadius: 12).stroke(AppTheme.line, lineWidth: 1))
                     VStack(alignment: .leading, spacing: 3) {
                         Text(row.title)
-                            .font(.system(size: 11, weight: .semibold))
+                            .font(AppTypography.scaled(11, weight: .semibold))
                             .foregroundStyle(AppTheme.text)
                             .fixedSize(horizontal: false, vertical: true)
                         Text(row.detail)
-                            .font(.system(size: 9))
+                            .font(AppTypography.scaled(9))
                             .lineSpacing(2)
                             .foregroundStyle(AppTheme.muted)
                             .fixedSize(horizontal: false, vertical: true)
@@ -255,10 +251,10 @@ extension InsightVisualView {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     VStack(alignment: .trailing, spacing: 3) {
                         Text(transitPathStateLabel(row.state))
-                            .font(.system(size: 9, weight: .medium))
+                            .font(AppTypography.scaled(9, weight: .medium))
                             .foregroundStyle(AppTheme.text.opacity(0.86))
                         Text(row.timing)
-                            .font(.system(size: 9))
+                            .font(AppTypography.scaled(9))
                             .foregroundStyle(AppTheme.muted)
                             .multilineTextAlignment(.trailing)
                     }
@@ -274,12 +270,8 @@ extension InsightVisualView {
     func transitLifeAreas(_ rows: [TransitLifeAreaRow]) -> some View {
         let shown = showAllAreas ? rows : Array(rows.prefix(4))
         return VStack(spacing: 0) {
-            Text(localized(
-                "Activity reflects transiting houses, activated natal planets and overlapping exact contacts. It is not a fortune or success score.",
-                "活动度反映行运行星落宫、被触发的本命星体与重叠的精确接触；它不是运气或成功评分。",
-                language: language
-            ))
-            .font(.system(size: 9.5))
+            Text(localized("insight.transit.activity-reflects-transiting-houses-activated-natal-planets-and-overlapp", language: language))
+            .font(AppTypography.scaled(9.5))
             .lineSpacing(3)
             .foregroundStyle(AppTheme.muted)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -292,12 +284,12 @@ extension InsightVisualView {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 8) {
                         Text(row.title)
-                            .font(.system(size: 10.5, weight: .semibold))
+                            .font(AppTypography.scaled(10.5, weight: .semibold))
                             .foregroundStyle(AppTheme.text)
                             .fixedSize(horizontal: false, vertical: true)
                         Spacer(minLength: 8)
                         Text(transitTriggerSummary(row))
-                            .font(.system(size: 9))
+                            .font(AppTypography.scaled(9))
                             .foregroundStyle(AppTheme.muted)
                             .multilineTextAlignment(.trailing)
                     }
@@ -321,9 +313,9 @@ extension InsightVisualView {
                     withAnimation(.easeInOut(duration: 0.2)) { showAllAreas.toggle() }
                 } label: {
                     Text(showAllAreas
-                         ? localized("Show fewer areas", "收起部分领域", language: language)
+                         ? localized("insight.transit.show-fewer-areas", language: language)
                          : LocalizedFormatters.viewAllAreas(rows.count, language: language))
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(AppTypography.scaled(10, weight: .semibold))
                         .foregroundStyle(AppTheme.text)
                         .frame(maxWidth: .infinity, minHeight: 44)
                         .background(AppTheme.background.opacity(0.55), in: RoundedRectangle(cornerRadius: 8))
@@ -341,10 +333,10 @@ extension InsightVisualView {
         let shown = showAllActiveTransits ? prioritized : Array(prioritized.prefix(5))
         return VStack(spacing: 0) {
             HStack(spacing: 6) {
-                aspectFilterChip(nil, localized("All", "全部", language: language))
-                aspectFilterChip("long-term", localized("Long-term", "长期", language: language))
-                aspectFilterChip("current", localized("Current", "当前", language: language))
-                aspectFilterChip("daily", localized("Daily", "每日", language: language))
+                aspectFilterChip(nil, localized("insight.shared.all", language: language))
+                aspectFilterChip("long-term", localized("insight.shared.long-term", language: language))
+                aspectFilterChip("current", localized("insight.shared.current", language: language))
+                aspectFilterChip("daily", localized("insight.shared.daily", language: language))
                 Spacer(minLength: 0)
             }
             .padding(.bottom, 1)
@@ -358,18 +350,18 @@ extension InsightVisualView {
                 } label: {
                     HStack(alignment: .top, spacing: 10) {
                         Text(row.symbol)
-                            .font(.system(size: 15, weight: .semibold))
+                            .font(AppTypography.scaled(15, weight: .semibold))
                             .foregroundStyle(AppTheme.text)
                             .frame(width: 34, height: 34)
                             .background(AppTheme.violet.opacity(0.13), in: RoundedRectangle(cornerRadius: 12))
                         VStack(alignment: .leading, spacing: 4) {
                             Text(row.title)
-                                .font(.system(size: 11, weight: .semibold))
+                                .font(AppTypography.scaled(11, weight: .semibold))
                                 .foregroundStyle(AppTheme.text)
                                 .fixedSize(horizontal: false, vertical: true)
                             if !row.detail.isEmpty {
                                 Text(row.detail)
-                                    .font(.system(size: 9))
+                                    .font(AppTypography.scaled(9))
                                     .lineSpacing(2)
                                     .foregroundStyle(AppTheme.muted)
                                     .fixedSize(horizontal: false, vertical: true)
@@ -378,14 +370,14 @@ extension InsightVisualView {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         VStack(alignment: .trailing, spacing: 3) {
                             Text(transitActiveStatusLabel(row.status))
-                                .font(.system(size: 8.5, weight: .semibold))
+                                .font(AppTypography.scaled(8.5, weight: .semibold))
                                 .foregroundStyle(AppTheme.text.opacity(0.85))
                                 .padding(.horizontal, 7)
                                 .padding(.vertical, 4)
                                 .background(AppTheme.background.opacity(0.65), in: Capsule())
                                 .overlay(Capsule().stroke(AppTheme.line, lineWidth: 1))
                             Text(row.technicalValue)
-                                .font(.system(size: 8.5, weight: .medium))
+                                .font(AppTypography.scaled(8.5, weight: .medium))
                                 .foregroundStyle(AppTheme.muted)
                                 .padding(.horizontal, 7)
                                 .padding(.vertical, 4)
@@ -407,9 +399,9 @@ extension InsightVisualView {
                     }
                 } label: {
                     Text(showAllActiveTransits
-                         ? localized("Show key transits", "只看重点行运", language: language)
-                         : localized("View all active transits", "查看全部进行中行运", language: language))
-                        .font(.system(size: 10, weight: .semibold))
+                         ? localized("insight.transit.show-key-transits", language: language)
+                         : localized("insight.transit.view-all-active-transits", language: language))
+                        .font(AppTypography.scaled(10, weight: .semibold))
                         .foregroundStyle(AppTheme.text)
                         .frame(maxWidth: .infinity, minHeight: 44)
                         .background(AppTheme.background.opacity(0.55), in: RoundedRectangle(cornerRadius: 8))
@@ -449,14 +441,10 @@ extension InsightVisualView {
             VStack(alignment: .leading, spacing: 16) {
                 switch drawer {
                 case let .planetPaths(rows):
-                    Text(localized("Planet Paths", "行星路径", language: language))
-                        .font(.system(size: 23, weight: .bold))
+                    Text(localized("charts.planet-paths", language: language))
+                        .font(AppTypography.scaled(23, weight: .bold))
                         .foregroundStyle(AppTheme.text)
-                    Text(localized(
-                        "This module shows each transiting planet's sign, natal house, direction and next calculated ingress or station.",
-                        "这里显示每颗行运行星的星座、本命宫位、运动方向，以及下一次已计算的换座、换宫或转向。",
-                        language: language
-                    ))
+                    Text(localized("insight.transit.this-module-shows-each-transiting-planets-sign-natal-house-direction-and", language: language))
                     .font(AppTypography.supporting)
                     .lineSpacing(4)
                     .foregroundStyle(AppTheme.muted)
@@ -470,7 +458,7 @@ extension InsightVisualView {
                                     .font(AppTypography.metadata)
                                     .foregroundStyle(AppTheme.muted)
                                 Text(transitDrawerHouse(row.house))
-                                    .font(.system(size: 12, weight: .semibold))
+                                    .font(AppTypography.scaled(12, weight: .semibold))
                                     .foregroundStyle(AppTheme.text)
                             }
                             .frame(maxWidth: .infinity, minHeight: 62, alignment: .leading)
@@ -480,24 +468,16 @@ extension InsightVisualView {
                         }
                     }
                     transitDrawerSection(
-                        title: localized("Why separate it", "为什么单独呈现", language: language),
-                        body: localized(
-                            "A planet can matter because of the house it occupies even when no exact natal aspect is active.",
-                            "即使没有正在生效的精确本命相位，行星也会因所处宫位而具有明确的领域重点。",
-                            language: language
-                        )
+                        title: localized("insight.transit.why-separate-it", language: language),
+                        body: localized("insight.transit.a-planet-can-matter-because-of-the-house-it-occupies-even-when-no-exact", language: language)
                     )
                     transitDrawerSection(
-                        title: localized("Difference from Active Transits", "与进行中的变化有何不同", language: language),
-                        body: localized(
-                            "Planet Paths shows location and motion. Active Transits shows exact relationships to natal planets and points.",
-                            "行星路径显示位置与运动；进行中的变化显示行运行星与本命星体或点位之间的精确关系。",
-                            language: language
-                        )
+                        title: localized("insight.transit.difference-from-active-transits", language: language),
+                        body: localized("insight.transit.planet-paths-shows-location-and-motion-active-transits-shows-exact-relat", language: language)
                     )
                 case let .activeTransit(row):
                     Text(row.title)
-                        .font(.system(size: 23, weight: .bold))
+                        .font(AppTypography.scaled(23, weight: .bold))
                         .foregroundStyle(AppTheme.text)
                         .fixedSize(horizontal: false, vertical: true)
                     if !row.detail.isEmpty {
@@ -513,7 +493,7 @@ extension InsightVisualView {
                                     .font(AppTypography.metadata)
                                     .foregroundStyle(AppTheme.muted)
                                 Text(field.value)
-                                    .font(.system(size: 12, weight: .semibold))
+                                    .font(AppTypography.scaled(12, weight: .semibold))
                                     .foregroundStyle(AppTheme.text)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
@@ -524,19 +504,15 @@ extension InsightVisualView {
                         }
                     }
                     transitDrawerSection(
-                        title: localized("Technical basis", "技术依据", language: language),
-                        body: localized(
-                            "Timing, orb, house and motion are calculated for the selected chart moment and time zone.",
-                            "时间、容许度、宫位和运动状态均按当前选择的星盘时刻与时区计算。",
-                            language: language
-                        )
+                        title: localized("insight.transit.technical-basis", language: language),
+                        body: localized("insight.transit.timing-orb-house-and-motion-are-calculated-for-the-selected-chart-moment", language: language)
                     )
                 }
                 Button {
                     transitDetailDrawer = nil
                 } label: {
-                    Text(localized("Done", "完成", language: language))
-                        .font(.system(size: 12, weight: .bold))
+                    Text(localized("charts.done", language: language))
+                        .font(AppTypography.scaled(12, weight: .bold))
                         .foregroundStyle(Color.white)
                         .frame(maxWidth: .infinity, minHeight: 44)
                         .background(AppTheme.violet, in: RoundedRectangle(cornerRadius: 8))
@@ -565,8 +541,8 @@ extension InsightVisualView {
     }
 
     func transitDrawerHouse(_ house: Int) -> String {
-        guard (1 ... 12).contains(house) else { return localized("Unknown house", "宫位未知", language: language) }
-        return localized("\(ordinalLabel(house)) house", "第\(house)宫", language: language)
+        guard (1 ... 12).contains(house) else { return localized("insight.transit.unknown-house", language: language) }
+        return localizedTemplate("dynamic.24d4dfe3ce", substitutions: ["value1": AstroTerms.house(house, language: language)], language: language)
     }
 
     func ordinalLabel(_ value: Int) -> String {
@@ -582,31 +558,37 @@ extension InsightVisualView {
 
     func transitPathStateLabel(_ state: TransitPathState) -> String {
         switch state {
-        case .direct: localized("Direct", "顺行", language: language)
-        case .retrograde: localized("Retrograde", "逆行", language: language)
-        case .next: localized("Next", "接下来", language: language)
+        case .direct: localized("insight.transit.direct", language: language)
+        case .retrograde: localized("insight.transit.retrograde", language: language)
+        case .next: localized("insight.shared.next", language: language)
         }
     }
 
     func transitActiveStatusLabel(_ status: TransitActiveStatus) -> String {
         switch status {
-        case .applying: localized("Applying", "入相", language: language)
-        case .returning: localized("Returning", "回返中", language: language)
-        case .ingress: localized("Ingress", "进入", language: language)
-        case .separating: localized("Separating", "离相", language: language)
-        case .exact: localized("Exact", "精确", language: language)
-        case .retrograde: localized("Retrograde", "逆行", language: language)
-        case .direct: localized("Direct", "顺行", language: language)
+        case .applying: localized("insight.transit.applying", language: language)
+        case .returning: localized("insight.transit.returning", language: language)
+        case .ingress: localized("insight.transit.ingress", language: language)
+        case .separating: localized("insight.transit.separating", language: language)
+        case .exact: localized("insight.secondary.exact", language: language)
+        case .retrograde: localized("insight.transit.retrograde", language: language)
+        case .direct: localized("insight.transit.direct", language: language)
         }
     }
 
     func transitTriggerSummary(_ row: TransitLifeAreaRow) -> String {
         if row.triggerCount == 0 {
-            return localized("\(row.activity) · no exact hit", "\(row.activity) · 无精确触发", language: language)
+            return localizedTemplate("dynamic.a34989f3f0", substitutions: ["value1": String(describing: row.activity)], language: language)
         }
-        return localized(
-            "\(row.activity) · \(row.triggerCount) \(row.triggerCount == 1 ? "trigger" : "triggers")",
-            "\(row.activity) · \(row.triggerCount) 个触发",
+        let key = row.triggerCount == 1
+            ? "insight.transit.trigger-summary.one"
+            : "insight.transit.trigger-summary.other"
+        return localizedTemplate(
+            key,
+            substitutions: [
+                "activity": row.activity,
+                "count": String(row.triggerCount),
+            ],
             language: language
         )
     }
@@ -633,11 +615,11 @@ extension InsightVisualView {
 
     func storyWeave(expanding: String, structuring: String, result: String) -> some View {
         VStack(spacing: 8) {
-            storyThread(label: localized("EXPANDING", "展开", language: language), value: expanding, tone: .supportive)
-            Image(systemName: "plus").font(.system(size: 11, weight: .bold)).foregroundStyle(AppTheme.muted)
-            storyThread(label: localized("STRUCTURING", "定型", language: language), value: structuring, tone: .challenging)
+            storyThread(label: localized("insight.transit.expanding.5e50de8", language: language), value: expanding, tone: .supportive)
+            Image(systemName: "plus").font(AppTypography.scaled(11, weight: .bold)).foregroundStyle(AppTheme.muted)
+            storyThread(label: localized("insight.transit.structuring.b1a7c26", language: language), value: structuring, tone: .challenging)
             Text(result)
-                .font(.system(size: 10.5))
+                .font(AppTypography.scaled(10.5))
                 .lineSpacing(3)
                 .foregroundStyle(AppTheme.text.opacity(0.95))
                 .padding(12)
@@ -648,8 +630,8 @@ extension InsightVisualView {
 
     func storyThread(label: String, value: String, tone: InsightTone) -> some View {
         HStack(alignment: .top, spacing: 10) {
-            Text(label).font(.system(size: 9, weight: .bold)).foregroundStyle(AppTheme.tone(tone))
-            Text(value).font(.system(size: 11.5, weight: .medium)).foregroundStyle(AppTheme.text)
+            Text(label).font(AppTypography.scaled(9, weight: .bold)).foregroundStyle(AppTheme.tone(tone))
+            Text(value).font(AppTypography.scaled(11.5, weight: .medium)).foregroundStyle(AppTheme.text)
             Spacer()
         }
         .padding(12)
@@ -665,20 +647,20 @@ extension InsightVisualView {
     ) -> some View {
         let options = [
             (
-                localized("Long-term", "长期", language: language),
-                localized("LONG-TERM CHAPTER", "长期篇章", language: language),
+                localized("insight.shared.long-term", language: language),
+                localized("insight.transit.long-term-chapter", language: language),
                 long,
                 InsightTone.supportive
             ),
             (
-                localized("Current", "当前", language: language),
-                localized("CURRENT PERIOD", "当前阶段", language: language),
+                localized("insight.shared.current", language: language),
+                localized("insight.transit.current-period", language: language),
                 current,
                 InsightTone.transition
             ),
             (
-                localized("Daily", "每日", language: language),
-                localized("DAILY MOVEMENT", "每日变化", language: language),
+                localized("insight.shared.daily", language: language),
+                localized("insight.transit.daily-movement", language: language),
                 daily,
                 InsightTone.neutral
             ),
@@ -699,7 +681,7 @@ extension InsightVisualView {
             withAnimation(.easeInOut(duration: 0.18)) { selectedCycleIndex = index }
         } label: {
             Text(label)
-                .font(.system(size: 11, weight: .semibold))
+                .font(AppTypography.scaled(11, weight: .semibold))
                 .foregroundStyle(selectedCycleIndex == index ? Color.white : AppTheme.muted)
                 .frame(maxWidth: .infinity, minHeight: 34)
                 .background(
@@ -720,17 +702,17 @@ extension InsightVisualView {
         }
         return VStack(alignment: .leading, spacing: 7) {
             Text(kicker.uppercased())
-                .font(.system(size: 9, weight: .bold))
+                .font(AppTypography.scaled(9, weight: .bold))
                 .tracking(1.1)
                 .foregroundStyle(AppTheme.tone(tone))
             if let presentation {
                 Text(copy?.headline ?? presentation.fallbackTitle)
-                    .font(.system(size: 17, weight: .bold))
+                    .font(AppTypography.scaled(17, weight: .bold))
                     .foregroundStyle(AppTheme.text)
                     .fixedSize(horizontal: false, vertical: true)
                 if let body = copy?.body, !body.isEmpty {
                     Text(body)
-                        .font(.system(size: 10))
+                        .font(AppTypography.scaled(10))
                         .lineSpacing(3)
                         .foregroundStyle(AppTheme.muted)
                         .fixedSize(horizontal: false, vertical: true)
@@ -738,7 +720,7 @@ extension InsightVisualView {
                 VStack(alignment: .leading, spacing: 6) {
                     ForEach(Array(presentation.tags.enumerated()), id: \.offset) { _, tag in
                         Text(tag)
-                            .font(.system(size: 9, weight: .medium))
+                            .font(AppTypography.scaled(9, weight: .medium))
                             .foregroundStyle(AppTheme.text.opacity(0.82))
                             .fixedSize(horizontal: false, vertical: true)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -750,8 +732,8 @@ extension InsightVisualView {
                 }
                 .padding(.top, 2)
             } else {
-                Text(localized("No active cycle at this time scale.", "当前没有这个时间尺度的生效周期。", language: language))
-                    .font(.system(size: 10))
+                Text(localized("insight.transit.no-active-cycle-at-this-time-scale", language: language))
+                    .font(AppTypography.scaled(10))
                     .foregroundStyle(AppTheme.muted)
             }
         }
@@ -808,14 +790,14 @@ extension InsightVisualView {
         var body: some View {
             VStack(alignment: .leading, spacing: 11) {
                 HStack(spacing: 6) {
-                    rangeButton(30, localized("30 days", "30 天", language: language))
-                    rangeButton(7, localized("7 days", "7 天", language: language))
-                    rangeButton(365, localized("12 months", "12 个月", language: language))
+                    rangeButton(30, localized("charts.30-days", language: language))
+                    rangeButton(7, localized("charts.7-days", language: language))
+                    rangeButton(365, localized("charts.12-months", language: language))
                     Spacer()
                 }
                 HStack(spacing: 6) {
-                    viewButton(false, localized("Timeline", "时间线", language: language))
-                    viewButton(true, localized("Calendar", "日历", language: language))
+                    viewButton(false, localized("insight.transit.timeline", language: language))
+                    viewButton(true, localized("insight.transit.calendar", language: language))
                     Spacer()
                 }
                 if showCalendar {
@@ -834,7 +816,7 @@ extension InsightVisualView {
                 }
             } label: {
                 Text(label)
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(AppTypography.scaled(10, weight: .semibold))
                     .foregroundStyle(selectedDays == days ? Color.white : AppTheme.muted)
                     .padding(.horizontal, 11)
                     .padding(.vertical, 6)
@@ -848,7 +830,7 @@ extension InsightVisualView {
                 withAnimation(.easeInOut(duration: 0.18)) { showCalendar = calendar }
             } label: {
                 Text(label)
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(AppTypography.scaled(10, weight: .semibold))
                     .foregroundStyle(showCalendar == calendar ? AppTheme.violet : AppTheme.muted)
                     .padding(.horizontal, 11)
                     .padding(.vertical, 6)
@@ -864,8 +846,8 @@ extension InsightVisualView {
             }
             if visible.isEmpty {
                 return AnyView(
-                    Text(localized("No transits enter this window.", "这个时间范围内没有新的行运进入。", language: language))
-                        .font(.system(size: 11))
+                    Text(localized("insight.transit.no-transits-enter-this-window", language: language))
+                        .font(AppTypography.scaled(11))
                         .foregroundStyle(AppTheme.muted)
                         .padding(.vertical, 8)
                 )
@@ -882,17 +864,17 @@ extension InsightVisualView {
 
         var markerLegend: some View {
             HStack(spacing: 4) {
-                markerLegendItem(localized("Start", "开始", language: language), color: AppTheme.blue)
-                markerLegendItem(localized("Exact", "精确", language: language), color: AppTheme.violet)
-                markerLegendItem(localized("Return", "回返", language: language), color: AppTheme.amber)
-                markerLegendItem(localized("End", "结束", language: language), color: AppTheme.muted)
+                markerLegendItem(localized("insight.transit.start", language: language), color: AppTheme.blue)
+                markerLegendItem(localized("insight.secondary.exact", language: language), color: AppTheme.violet)
+                markerLegendItem(localized("insight.transit.return", language: language), color: AppTheme.amber)
+                markerLegendItem(localized("insight.transit.end", language: language), color: AppTheme.muted)
             }
         }
 
         func markerLegendItem(_ label: String, color: Color) -> some View {
             HStack(spacing: 4) {
                 Circle().fill(color).frame(width: 5, height: 5)
-                Text(label).font(.system(size: 8.5, weight: .medium)).foregroundStyle(AppTheme.muted)
+                Text(label).font(AppTypography.scaled(8.5, weight: .medium)).foregroundStyle(AppTheme.muted)
             }
             .frame(maxWidth: .infinity)
         }
@@ -904,12 +886,12 @@ extension InsightVisualView {
             return VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Text(entryTitle(entry))
-                        .font(.system(size: 11.5, weight: .semibold))
+                        .font(AppTypography.scaled(11.5, weight: .semibold))
                         .foregroundStyle(AppTheme.text)
                         .lineLimit(2)
                     Spacer(minLength: 6)
                     Text(entryDateRange(entry))
-                        .font(.system(size: 9.5))
+                        .font(AppTypography.scaled(9.5))
                         .foregroundStyle(AppTheme.muted)
                         .multilineTextAlignment(.trailing)
                 }
@@ -962,17 +944,13 @@ extension InsightVisualView {
                 let reference = entry.referenceBody.map { bodyName($0, language: language) } ?? ""
                 return "\(body) \(kind.symbol) \(reference)"
             case let .houseResidence(house):
-                return localized("\(body) crosses \(ordinal(house)) house", "\(body) 进入第\(house)宫", language: language)
+                return localizedTemplate("dynamic.d2a685052e", substitutions: ["value1": body, "value2": AstroTerms.house(house, language: language)], language: language)
             case let .signIngress(sign):
-                return localized(
-                    "\(body) enters \(Zodiac.name(index: sign, language: language))",
-                    "\(body) 进入\(Zodiac.name(index: sign, language: language))",
-                    language: language
-                )
+                return localizedTemplate("dynamic.4cbf796387", substitutions: ["value1": String(describing: body), "value2": String(describing: Zodiac.name(index: sign, language: language))], language: language)
             case .stationRetrograde:
-                return localized("\(body) stations retrograde", "\(body) 转逆", language: language)
+                return localizedTemplate("dynamic.aa92844e1f", substitutions: ["value1": String(describing: body)], language: language)
             case .stationDirect:
-                return localized("\(body) stations direct", "\(body) 转顺", language: language)
+                return localizedTemplate("dynamic.2772c7af82", substitutions: ["value1": String(describing: body)], language: language)
             }
         }
 
@@ -1002,7 +980,7 @@ extension InsightVisualView {
             let firstWeekday = calendar.component(.weekday, from: first)
             let daysInMonth = calendar.range(of: .day, in: .month, for: first)?.count ?? 30
             let leading = (firstWeekday + 5) % 7
-            let weekdayLabels = language == .english ? ["M", "T", "W", "T", "F", "S", "S"] : ["一", "二", "三", "四", "五", "六", "日"]
+            let weekdayLabels = LocalizedFormatters.weekdayLabelsStartingMonday(language: language)
             let columns = Array(repeating: GridItem(.flexible(), spacing: 5), count: 7)
             let factsByDay = Dictionary(
                 uniqueKeysWithValues: calendarFacts.map { (calendar.startOfDay(for: $0.date), $0) }
@@ -1020,14 +998,14 @@ extension InsightVisualView {
                     monthButton(systemName: "chevron.left", delta: -1, enabled: canMoveMonth(-1))
                     Spacer()
                     Text(displayedMonth.shortEventMonthYear(language: language, timeZone: timeZone))
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(AppTypography.scaled(11, weight: .semibold))
                         .foregroundStyle(AppTheme.text)
                     Spacer()
                     monthButton(systemName: "chevron.right", delta: 1, enabled: canMoveMonth(1))
                 }
                 HStack(spacing: 5) {
                     ForEach(weekdayLabels, id: \.self) { label in
-                        Text(label).font(.system(size: 9)).foregroundStyle(AppTheme.muted).frame(maxWidth: .infinity)
+                        Text(label).font(AppTypography.scaled(9)).foregroundStyle(AppTheme.muted).frame(maxWidth: .infinity)
                     }
                 }
                 LazyVGrid(columns: columns, spacing: 5) {
@@ -1042,10 +1020,10 @@ extension InsightVisualView {
                         VStack(spacing: 3) {
                             HStack(spacing: 2) {
                                 Text("\(day)")
-                                    .font(.system(size: 10, weight: fact == nil ? .medium : .bold))
+                                    .font(AppTypography.scaled(10, weight: fact == nil ? .medium : .bold))
                                 if let fact, !fact.sourceFactIDs.isEmpty {
                                     Text("\(fact.sourceFactIDs.count)")
-                                        .font(.system(size: 7.5, weight: .bold))
+                                        .font(AppTypography.scaled(7.5, weight: .bold))
                                         .foregroundStyle(AppTheme.violet)
                                 }
                             }
@@ -1087,7 +1065,7 @@ extension InsightVisualView {
                 displayedMonth = calendar.date(byAdding: .month, value: delta, to: displayedMonth) ?? displayedMonth
             } label: {
                 Image(systemName: systemName)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(AppTypography.scaled(11, weight: .semibold))
                     .frame(width: 30, height: 30)
             }
             .buttonStyle(.plain)

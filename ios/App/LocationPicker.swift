@@ -200,7 +200,7 @@ struct LocationSearchView: View {
                         Image(systemName: "magnifyingglass")
                             .foregroundStyle(AppTheme.muted)
                         TextField(
-                            localized("Search a city or address", "搜索城市或地址", language: language),
+                            localized("location.search-a-city-or-address", language: language),
                             text: $service.query
                         )
                         .textInputAutocapitalization(.words)
@@ -276,7 +276,7 @@ struct LocationSearchView: View {
                             currentLocation.request()
                         } label: {
                             Label(
-                                localized("My location", "我的位置", language: language),
+                                localized("location.my-location", language: language),
                                 systemImage: "location.fill"
                             )
                             .font(.caption.weight(.semibold))
@@ -286,7 +286,7 @@ struct LocationSearchView: View {
                         }
                         .buttonStyle(.plain)
                         Spacer()
-                        Text(localized("Tap the map to choose", "点击地图选择位置", language: language))
+                        Text(localized("location.tap-the-map-to-choose", language: language))
                             .font(.caption.weight(.medium))
                             .foregroundStyle(AppTheme.muted)
                             .padding(.horizontal, 13)
@@ -296,12 +296,8 @@ struct LocationSearchView: View {
                     .padding(14)
                 }
 
-                if let message = service.errorMessage ?? currentLocation.errorMessage {
-                    Text(
-                        language == .english
-                            ? message
-                            : "无法获取地点信息，请检查定位权限或网络后重试。"
-                    )
+                if service.errorMessage != nil || currentLocation.errorMessage != nil {
+                    Text(localized("location.unavailable-error", language: language))
                     .font(.footnote)
                     .foregroundStyle(.red)
                     .padding(10)
@@ -309,16 +305,16 @@ struct LocationSearchView: View {
                     .padding(.top, 340)
                 }
             }
-            .navigationTitle(localized("Choose location", "选择地点", language: language))
+            .navigationTitle(localized("location.choose-location", language: language))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(localized("Cancel", "取消", language: language)) {
+                    Button(localized("location.cancel", language: language)) {
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(localized("Done", "完成", language: language)) {
+                    Button(localized("charts.done", language: language)) {
                         if let selection {
                             onSelect(selection)
                             dismiss()

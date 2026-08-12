@@ -4,35 +4,20 @@ import Foundation
 enum ConsumerCopy {
     static func bodyTheme(_ body: CelestialBody?, language: AppLanguage) -> String {
         guard let body else {
-            return localized("an important need", "一项重要需要", language: language)
-        }
-        if language == .simplifiedChinese {
-            return switch body {
-            case .sun: "自我方向"
-            case .moon: "情绪需要"
-            case .mercury: "思考与沟通"
-            case .venus: "亲密感与价值选择"
-            case .mars: "行动力与边界"
-            case .jupiter: "成长与信心"
-            case .saturn: "责任与限制"
-            case .uranus: "自由与改变"
-            case .neptune: "想象力与敏感度"
-            case .pluto: "掌控感与更新"
-            case .trueNode: "未来方向"
-            }
+            return localized("consumer.an-important-need", language: language)
         }
         return switch body {
-        case .sun: "self-direction"
-        case .moon: "emotional needs"
-        case .mercury: "thinking and communication"
-        case .venus: "closeness and values"
-        case .mars: "drive and boundaries"
-        case .jupiter: "growth and confidence"
-        case .saturn: "responsibility and limits"
-        case .uranus: "freedom and change"
-        case .neptune: "imagination and sensitivity"
-        case .pluto: "control and renewal"
-        case .trueNode: "future direction"
+        case .sun: localized("consumer.body-theme.sun", language: language)
+        case .moon: localized("consumer.body-theme.moon", language: language)
+        case .mercury: localized("consumer.body-theme.mercury", language: language)
+        case .venus: localized("consumer.body-theme.venus", language: language)
+        case .mars: localized("consumer.body-theme.mars", language: language)
+        case .jupiter: localized("consumer.body-theme.jupiter", language: language)
+        case .saturn: localized("consumer.body-theme.saturn", language: language)
+        case .uranus: localized("consumer.body-theme.uranus", language: language)
+        case .neptune: localized("consumer.body-theme.neptune", language: language)
+        case .pluto: localized("consumer.body-theme.pluto", language: language)
+        case .trueNode: localized("consumer.body-theme.true-node", language: language)
         }
     }
 
@@ -40,141 +25,100 @@ enum ConsumerCopy {
         let first = bodyName(CelestialBody(rawValue: aspect.firstID) ?? .sun, language: language)
         let second = bodyName(CelestialBody(rawValue: aspect.secondID) ?? .moon, language: language)
         if aspect.kind.supportive {
-            return localized(
-                "\(first) and \(second) work well together",
-                "\(first)与\(second)彼此支持",
-                language: language
-            )
+            return localizedTemplate("dynamic.030ed20d4e", substitutions: ["value1": String(describing: first), "value2": String(describing: second)], language: language)
         }
         if aspect.kind.challenging {
-            return localized(
-                "\(first) and \(second) can pull in different directions",
-                "\(first)与\(second)容易互相拉扯",
-                language: language
-            )
+            return localizedTemplate("dynamic.b57a7b3fa7", substitutions: ["value1": String(describing: first), "value2": String(describing: second)], language: language)
         }
-        return localized(
-            "\(first) and \(second) become important together",
-            "\(first)与\(second)会同时变得重要",
-            language: language
-        )
+        return localizedTemplate("dynamic.909e84449b", substitutions: ["value1": String(describing: first), "value2": String(describing: second)], language: language)
     }
 
     static func connectionLabel(_ kind: AspectKind, language: AppLanguage) -> String {
         if kind.supportive {
-            return localized("work together smoothly", "彼此支持", language: language)
+            return localized("consumer.work-together-smoothly", language: language)
         }
         if kind.challenging {
-            return localized("need active balancing", "需要主动协调", language: language)
+            return localized("consumer.need-active-balancing", language: language)
         }
-        return localized("become active together", "同时变得活跃", language: language)
+        return localized("consumer.become-active-together", language: language)
     }
 
     static func timing(_ phase: AspectPhase, language: AppLanguage) -> String {
         switch phase {
         case .applying:
-            localized("The influence is building", "影响正在增强", language: language)
+            localized("consumer.the-influence-is-building", language: language)
         case .exact:
-            localized("The influence is clearest now", "此刻表现最明显", language: language)
+            localized("consumer.the-influence-is-clearest-now", language: language)
         case .separating:
-            localized("The influence is easing", "影响正在缓和", language: language)
+            localized("consumer.the-influence-is-easing", language: language)
         }
     }
 
     static func intensity(_ strength: Double, language: AppLanguage) -> String {
         if strength >= 0.78 {
-            return localized("very noticeable", "非常明显", language: language)
+            return localized("consumer.very-noticeable", language: language)
         }
         if strength >= 0.52 {
-            return localized("noticeable", "比较明显", language: language)
+            return localized("consumer.noticeable", language: language)
         }
-        return localized("subtle but present", "较轻但仍可感受到", language: language)
+        return localized("consumer.subtle-but-present", language: language)
     }
 
     static func lifeArea(_ house: Int?, language: AppLanguage) -> String {
         guard let house, (1 ... 12).contains(house) else {
-            return localized("everyday choices", "日常选择", language: language)
+            return localized("consumer.everyday-choices", language: language)
         }
-        let english = [
-            "identity and first impressions",
-            "money and personal resources",
-            "learning and communication",
-            "home and emotional security",
-            "creativity and romance",
-            "work, habits, and health",
-            "close relationships",
-            "trust and shared resources",
-            "beliefs and exploration",
-            "career and public role",
-            "friends and long-term goals",
-            "rest and inner life",
-        ]
-        let chinese = [
-            "自我表达与第一印象",
-            "金钱与个人资源",
-            "学习与沟通",
-            "家庭与安全感",
-            "创造力与恋爱",
-            "工作、习惯与健康",
-            "亲密关系与合作",
-            "信任与共同资源",
-            "信念、学习与远行",
-            "事业与社会角色",
-            "朋友与长期目标",
-            "休息与内在感受",
-        ]
-        return language == .english ? english[house - 1] : chinese[house - 1]
+        return switch house {
+        case 1: localized("consumer.life-area.1", language: language)
+        case 2: localized("consumer.life-area.2", language: language)
+        case 3: localized("consumer.life-area.3", language: language)
+        case 4: localized("consumer.life-area.4", language: language)
+        case 5: localized("consumer.life-area.5", language: language)
+        case 6: localized("consumer.life-area.6", language: language)
+        case 7: localized("consumer.life-area.7", language: language)
+        case 8: localized("consumer.life-area.8", language: language)
+        case 9: localized("consumer.life-area.9", language: language)
+        case 10: localized("consumer.life-area.10", language: language)
+        case 11: localized("consumer.life-area.11", language: language)
+        case 12: localized("consumer.life-area.12", language: language)
+        default: localized("consumer.everyday-choices", language: language)
+        }
     }
 
     static func style(signIndex: Int, language: AppLanguage) -> String {
-        let english = [
-            "direct and decisive",
-            "steady and practical",
-            "curious and flexible",
-            "protective and intuitive",
-            "expressive and warm",
-            "careful and precise",
-            "cooperative and balanced",
-            "private and intense",
-            "open and exploratory",
-            "disciplined and deliberate",
-            "independent and original",
-            "sensitive and imaginative",
-        ]
-        let chinese = [
-            "直接果断",
-            "稳定务实",
-            "好奇灵活",
-            "重视保护与感受",
-            "热情且愿意表达",
-            "谨慎细致",
-            "重视合作与平衡",
-            "深入而有分寸",
-            "开放且愿意探索",
-            "自律而审慎",
-            "独立且有新意",
-            "敏感而富有想象力",
-        ]
         let index = max(0, min(11, signIndex))
-        return language == .english ? english[index] : chinese[index]
+        return switch index {
+        case 0: localized("consumer.style.aries", language: language)
+        case 1: localized("consumer.style.taurus", language: language)
+        case 2: localized("consumer.style.gemini", language: language)
+        case 3: localized("consumer.style.cancer", language: language)
+        case 4: localized("consumer.style.leo", language: language)
+        case 5: localized("consumer.style.virgo", language: language)
+        case 6: localized("consumer.style.libra", language: language)
+        case 7: localized("consumer.style.scorpio", language: language)
+        case 8: localized("consumer.style.sagittarius", language: language)
+        case 9: localized("consumer.style.capricorn", language: language)
+        case 10: localized("consumer.style.aquarius", language: language)
+        default: localized("consumer.style.pisces", language: language)
+        }
     }
 
     static func motion(isRetrograde: Bool, language: AppLanguage) -> String {
         isRetrograde
-            ? localized("A review-and-adjust period", "适合回顾和调整", language: language)
-            : localized("Moving forward steadily", "正在稳定向前推进", language: language)
+            ? localized("consumer.a-review-and-adjust-period", language: language)
+            : localized("consumer.moving-forward-steadily", language: language)
     }
 
     static func cycleStage(angle: Double, language: AppLanguage) -> String {
         switch angle {
         case 0 ..< 90:
-            localized("a beginning-and-building stage", "开始并逐步积累的阶段", language: language)
+            localized("consumer.a-beginning-and-building-stage", language: language)
         case 90 ..< 180:
-            localized("an active development stage", "主动推进和发展的阶段", language: language)
+            localized("consumer.an-active-development-stage", language: language)
         case 180 ..< 270:
-            localized("a visibility-and-review stage", "成果显现并重新评估的阶段", language: language)
+            localized("consumer.a-visibility-and-review-stage", language: language)
         default:
-            localized("a completion-and-reset stage", "收尾并准备更新的阶段", language: language)
+            localized("consumer.a-completion-and-reset-stage", language: language)
         }
     }
 }

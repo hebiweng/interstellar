@@ -50,6 +50,14 @@ enum AppTheme {
         light: UIColor(red: 0.78, green: 0.25, blue: 0.32, alpha: 1),
         dark: UIColor(red: 0.961, green: 0.604, blue: 0.671, alpha: 1)
     )
+    static let moonLit = adaptive(
+        light: UIColor(red: 0.97, green: 0.93, blue: 0.79, alpha: 1),
+        dark: UIColor(red: 1.0, green: 0.96, blue: 0.82, alpha: 1)
+    )
+    static let moonShadow = adaptive(
+        light: UIColor(red: 0.19, green: 0.22, blue: 0.30, alpha: 1),
+        dark: UIColor(red: 0.08, green: 0.10, blue: 0.16, alpha: 1)
+    )
 
     static func tone(_ tone: InsightTone) -> Color {
         switch tone {
@@ -78,6 +86,24 @@ enum AppTypography {
     static let compactLabel = Font.caption.weight(.semibold)
     static let metadata = Font.caption
     static let factValue = Font.subheadline.weight(.semibold)
+
+    /// Maps the prototype's point-size hierarchy onto Dynamic Type styles.
+    /// Fixed `.system(size:)` fonts ignore the app's text-size preference.
+    static func scaled(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
+        let base: Font = switch size {
+        case ..<9.5: .caption2
+        case ..<11.5: .caption
+        case ..<12.5: .footnote
+        case ..<14: .subheadline
+        case ..<16: .callout
+        case ..<18: .body
+        case ..<20: .title3
+        case ..<23: .title2
+        case ..<28: .title
+        default: .largeTitle
+        }
+        return base.weight(weight)
+    }
 }
 
 struct CardSurface: ViewModifier {

@@ -122,51 +122,35 @@ struct AskView: View {
         .toolbar(.visible, for: .navigationBar)
         .navigationTitle(session == nil
             ? modeTitle(mode)
-            : localized("Your answer", "问事结果", language: model.language))
+            : localized("ask.your-answer", language: model.language))
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private var modeSelection: some View {
         VStack(alignment: .leading, spacing: 18) {
             ScreenTitle(
-                eyebrow: localized("ASK THE CHART", "问事盘", language: model.language),
-                title: localized("What do you want to ask?", "你想问什么？", language: model.language),
-                subtitle: localized(
-                    "Choose one path. Your question is calculated privately on this device.",
-                    "选择一种方式，问题会在这台设备上完成计算。",
-                    language: model.language
-                )
+                eyebrow: localized("ask.ask-the-chart", language: model.language),
+                title: localized("ask.what-do-you-want-to-ask", language: model.language),
+                subtitle: localized("ask.choose-one-path-your-question-is-calculated-privately-on-this-device", language: model.language)
             )
 
             askModeCard(
                 mode: .yesNo,
                 icon: "questionmark.circle",
-                title: localized("Will It Happen?", "会发生吗？", language: model.language),
-                detail: localized(
-                    "Ask about one specific outcome.",
-                    "询问一个具体结果是否更有可能发生。",
-                    language: model.language
-                )
+                title: localized("ask.will-it-happen", language: model.language),
+                detail: localized("ask.ask-about-one-specific-outcome", language: model.language)
             )
             askModeCard(
                 mode: .choice,
                 icon: "arrow.triangle.branch",
-                title: localized("Which One?", "选哪个？", language: model.language),
-                detail: localized(
-                    "Compare two to five real options.",
-                    "比较两个到五个实际选项。",
-                    language: model.language
-                )
+                title: localized("ask.which-one", language: model.language),
+                detail: localized("ask.compare-two-to-five-real-options", language: model.language)
             )
             askModeCard(
                 mode: .timing,
                 icon: "calendar.badge.clock",
-                title: localized("Find the Best Time", "什么时候做最好？", language: model.language),
-                detail: localized(
-                    "Search by day, week, or month.",
-                    "按天、周或月寻找更合适的行动时间。",
-                    language: model.language
-                )
+                title: localized("ask.find-the-best-time", language: model.language),
+                detail: localized("ask.search-by-day-week-or-month", language: model.language)
             )
 
             historySection
@@ -182,11 +166,11 @@ struct AskView: View {
                     Image(systemName: "clock.arrow.circlepath")
                         .foregroundStyle(AppTheme.violet)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(localized("History", "历史", language: model.language))
+                        Text(localized("ask.history", language: model.language))
                             .font(.headline)
                             .foregroundStyle(AppTheme.text)
                         Text(askHistory.isEmpty
-                             ? localized("No saved questions yet", "还没有保存的问题", language: model.language)
+                             ? localized("ask.no-saved-questions-yet", language: model.language)
                              : LocalizedFormatters.savedQuestions(askHistory.count, language: model.language))
                             .font(.caption)
                             .foregroundStyle(AppTheme.muted)
@@ -200,7 +184,7 @@ struct AskView: View {
                 .cardSurface()
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(localized("History", "历史", language: model.language))
+            .accessibilityLabel(localized("ask.history", language: model.language))
 
             ForEach(askHistory.prefix(3)) { entry in
                 VStack(alignment: .leading, spacing: 3) {
@@ -253,7 +237,7 @@ struct AskView: View {
     private func configurationView(_ mode: HoraryQuestionMode) -> some View {
         VStack(alignment: .leading, spacing: 18) {
             ScreenTitle(
-                eyebrow: localized("ASK THE CHART", "问事盘", language: model.language),
+                eyebrow: localized("ask.ask-the-chart", language: model.language),
                 title: modeTitle(mode),
                 subtitle: modeSubtitle(mode)
             )
@@ -284,13 +268,13 @@ struct AskView: View {
                     HStack {
                         Text(
                             mode == .timing
-                                ? localized("Searching the selected range…", "正在扫描所选时间范围…", language: model.language)
-                                : localized("Calculating the horary chart…", "正在计算问事盘…", language: model.language)
+                                ? localized("ask.searching-the-selected-range", language: model.language)
+                                : localized("ask.calculating-the-horary-chart", language: model.language)
                         )
                         .font(AppTypography.supporting)
                         .foregroundStyle(AppTheme.muted)
                         Spacer()
-                        Button(localized("Cancel", "取消", language: model.language)) {
+                        Button(localized("location.cancel", language: model.language)) {
                             calculationTask?.cancel()
                         }
                         .font(AppTypography.label)
@@ -303,8 +287,8 @@ struct AskView: View {
                 } label: {
                     Label(
                         mode == .timing
-                            ? localized("Find the best time", "开始择时", language: model.language)
-                            : localized("Ask the chart", "生成问事盘", language: model.language),
+                            ? localized("ask.find-the-best-time.9e18bc9", language: model.language)
+                            : localized("ask.ask-the-chart.22f1126", language: model.language),
                         systemImage: "sparkles"
                     )
                     .font(.headline)
@@ -323,13 +307,9 @@ struct AskView: View {
 
     private var yesNoFields: some View {
         VStack(alignment: .leading, spacing: 14) {
-            fieldTitle(localized("Your question", "你的问题", language: model.language))
+            fieldTitle(localized("ask.your-question", language: model.language))
             TextField(
-                localized(
-                    "For example: Will this application move forward?",
-                    "例如：这次申请会顺利推进吗？",
-                    language: model.language
-                ),
+                localized("ask.for-example-will-this-application-move-forward", language: model.language),
                 text: $question
             )
             .focused($focusedInputID, equals: "question")
@@ -346,13 +326,13 @@ struct AskView: View {
 
     private var choiceFields: some View {
         VStack(alignment: .leading, spacing: 14) {
-            fieldTitle(localized("Name each option", "填写每个选项", language: model.language))
+            fieldTitle(localized("ask.name-each-option", language: model.language))
 
             ForEach($options) { $option in
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
                         Text(
-                            localized("Option", "选项", language: model.language)
+                            localized("ask.option", language: model.language)
                                 + " \(optionLetter(option.id))"
                         )
                         .font(AppTypography.label)
@@ -372,7 +352,7 @@ struct AskView: View {
                         }
                     }
                     TextField(
-                        localized("What is this option?", "这个选项是什么？", language: model.language),
+                        localized("ask.what-is-this-option", language: model.language),
                         text: $option.label
                     )
                     .focused($focusedInputID, equals: option.id.uuidString)
@@ -400,7 +380,7 @@ struct AskView: View {
                     options.append(AskOptionDraft())
                 } label: {
                     Label(
-                        localized("Add another option", "增加一个选项", language: model.language),
+                        localized("ask.add-another-option", language: model.language),
                         systemImage: "plus.circle.fill"
                     )
                     .font(AppTypography.label)
@@ -416,9 +396,9 @@ struct AskView: View {
 
     private var timingFields: some View {
         VStack(alignment: .leading, spacing: 16) {
-            fieldTitle(localized("What are you planning?", "你准备做什么？", language: model.language))
+            fieldTitle(localized("ask.what-are-you-planning", language: model.language))
             TextField(
-                localized("Optional description", "行动名称（可选）", language: model.language),
+                localized("ask.optional-description", language: model.language),
                 text: $question
             )
             .focused($focusedInputID, equals: "question")
@@ -430,14 +410,14 @@ struct AskView: View {
 
             housePicker(selection: $targetHouse, excluding: [])
 
-            fieldTitle(localized("Precision", "精度", language: model.language))
+            fieldTitle(localized("ask.precision", language: model.language))
             Picker(
-                localized("Precision", "精度", language: model.language),
+                localized("ask.precision", language: model.language),
                 selection: $timingPrecision
             ) {
-                Text(localized("Day", "天", language: model.language)).tag(TimingPrecision.day)
-                Text(localized("Week", "周", language: model.language)).tag(TimingPrecision.week)
-                Text(localized("Month", "月", language: model.language)).tag(TimingPrecision.month)
+                Text(localized("ask.day", language: model.language)).tag(TimingPrecision.day)
+                Text(localized("ask.week", language: model.language)).tag(TimingPrecision.week)
+                Text(localized("ask.month", language: model.language)).tag(TimingPrecision.month)
             }
             .pickerStyle(.segmented)
             .onChange(of: timingPrecision) { _, _ in
@@ -445,9 +425,9 @@ struct AskView: View {
                 customEndDate = defaultEndDate
             }
 
-            fieldTitle(localized("Search within", "搜索范围", language: model.language))
+            fieldTitle(localized("ask.search-within", language: model.language))
             Picker(
-                localized("Search range", "搜索范围", language: model.language),
+                localized("ask.search-range", language: model.language),
                 selection: $timingRange
             ) {
                 ForEach(TimingRangeSelection.allCases) { range in
@@ -458,7 +438,7 @@ struct AskView: View {
 
             if timingRange == .custom {
                 DatePicker(
-                    localized("End date", "结束日期", language: model.language),
+                    localized("ask.end-date", language: model.language),
                     selection: $customEndDate,
                     in: startDate ... maximumEndDate,
                     displayedComponents: [.date]
@@ -472,8 +452,8 @@ struct AskView: View {
         VStack(alignment: .leading, spacing: 13) {
             fieldTitle(
                 mode == .timing
-                    ? localized("Search starts", "搜索开始时间", language: model.language)
-                    : localized("Chart moment", "起盘时间", language: model.language)
+                    ? localized("ask.search-starts", language: model.language)
+                    : localized("ask.chart-moment", language: model.language)
             )
             DatePicker(
                 "",
@@ -483,7 +463,7 @@ struct AskView: View {
             .labelsHidden()
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            fieldTitle(localized("Location", "地点", language: model.language))
+            fieldTitle(localized("ask.location", language: model.language))
             Button {
                 showsLocationPicker = true
             } label: {
@@ -491,7 +471,7 @@ struct AskView: View {
                     Image(systemName: "map.fill")
                         .foregroundStyle(AppTheme.violet)
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(location?.name ?? localized("Choose a location", "选择地点", language: model.language))
+                        Text(location?.name ?? localized("ask.choose-a-location", language: model.language))
                             .font(AppTypography.label)
                             .foregroundStyle(AppTheme.text)
                         if let location {
@@ -512,7 +492,7 @@ struct AskView: View {
             if let current = location {
                 HStack(spacing: 10) {
                     coordinateField(
-                        localized("Latitude", "纬度", language: model.language),
+                        localized("profile.latitude", language: model.language),
                         id: "latitude",
                         value: Binding(
                             get: { current.latitude },
@@ -520,7 +500,7 @@ struct AskView: View {
                         )
                     )
                     coordinateField(
-                        localized("Longitude", "经度", language: model.language),
+                        localized("profile.longitude", language: model.language),
                         id: "longitude",
                         value: Binding(
                             get: { current.longitude },
@@ -537,8 +517,8 @@ struct AskView: View {
         let overlay = overlay(for: session)
         return VStack(alignment: .leading, spacing: 18) {
             ScreenTitle(
-                eyebrow: localized("ASK THE CHART", "问事盘", language: model.language),
-                title: localized("Your answer", "问事结果", language: model.language),
+                eyebrow: localized("ask.ask-the-chart", language: model.language),
+                title: localized("ask.your-answer", language: model.language),
                 subtitle: formattedSessionDate(session)
             )
 
@@ -567,7 +547,7 @@ struct AskView: View {
                 HoraryProfessionalView(session: session, overlay: overlay, language: model.language)
             } label: {
                 Label(
-                    localized("View chart analysis", "查看专业分析", language: model.language),
+                    localized("ask.view-chart-analysis", language: model.language),
                     systemImage: "chart.xyaxis.line"
                 )
                 .font(.headline)
@@ -579,11 +559,7 @@ struct AskView: View {
             .buttonStyle(.plain)
 
             Text(
-                localized(
-                    "Likelihood and suitability describe support within this chart model. They are not statistical probabilities.",
-                    "可能性和适合度表示当前盘面模型中的支持程度，并非统计学概率。",
-                    language: model.language
-                )
+                localized("ask.likelihood-and-suitability-describe-support-within-this-chart-model-they", language: model.language)
             )
             .font(AppTypography.supporting)
             .foregroundStyle(AppTheme.muted)
@@ -610,8 +586,8 @@ struct AskView: View {
                         .font(.title2.bold().monospacedDigit())
                         .foregroundStyle(AppTheme.text)
                     Text(session.mode == .timing
-                        ? localized("Suitable", "适合度", language: model.language)
-                        : localized("Likelihood", "可能性", language: model.language))
+                        ? localized("ask.suitable", language: model.language)
+                        : localized("ask.likelihood", language: model.language))
                         .font(AppTypography.supporting)
                         .foregroundStyle(AppTheme.muted)
                 }
@@ -639,12 +615,12 @@ struct AskView: View {
         let close = choices.count > 1 && choices[0].likelihood - choices[1].likelihood <= 8
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(localized("Option ranking", "选项排名", language: model.language))
+                Text(localized("ask.option-ranking", language: model.language))
                     .font(.headline)
                     .foregroundStyle(AppTheme.text)
                 Spacer()
                 if close {
-                    Text(localized("Close call", "结果接近", language: model.language))
+                    Text(localized("ask.close-call", language: model.language))
                         .font(AppTypography.label)
                         .foregroundStyle(AppTheme.amber)
                 }
@@ -676,7 +652,7 @@ struct AskView: View {
 
     private func timingRanking(_ candidates: [ElectionTimingCandidate]) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(localized("Best timing", "推荐时间", language: model.language))
+            Text(localized("ask.best-timing", language: model.language))
                 .font(.headline)
                 .foregroundStyle(AppTheme.text)
             ForEach(Array(candidates.enumerated()), id: \.element.id) { index, candidate in
@@ -690,7 +666,7 @@ struct AskView: View {
                             .foregroundStyle(AppTheme.text)
                         if timingPrecision != .day {
                             Text(
-                                localized("Peak: ", "峰值日：", language: model.language)
+                                localized("ask.peak", language: model.language)
                                     + formattedDate(candidate.peakDate, includesTime: false)
                             )
                             .font(AppTypography.supporting)
@@ -718,11 +694,7 @@ struct AskView: View {
         } catch {
             return AnyView(
                 Label(
-                    localized(
-                        "Result explanations are unavailable.",
-                        "结果解读内容暂不可用。",
-                        language: model.language
-                    ),
+                    localized("ask.result-explanations-are-unavailable", language: model.language),
                     systemImage: "exclamationmark.triangle"
                 )
                 .font(AppTypography.summary)
@@ -773,11 +745,11 @@ struct AskView: View {
         includesPrompt: Bool = false
     ) -> some View {
         Picker(
-            localized("Life area", "生活领域", language: model.language),
+            localized("ask.life-area", language: model.language),
             selection: selection
         ) {
             if includesPrompt {
-                Text(localized("Choose an area", "选择对应领域", language: model.language))
+                Text(localized("ask.choose-an-area", language: model.language))
                     .tag(0)
             }
             ForEach(1 ... 12, id: \.self) { house in
@@ -924,11 +896,7 @@ struct AskView: View {
                 }
             } catch {
                 await MainActor.run {
-                    errorMessage = localized(
-                        "The chart could not be calculated. Check the time and location, then try again.",
-                        "暂时无法完成计算，请检查时间和地点后重试。",
-                        language: model.language
-                    )
+                    errorMessage = localized("ask.the-chart-could-not-be-calculated-check-the-time-and-location-then-try-a", language: model.language)
                     isCalculating = false
                 }
             }
@@ -993,19 +961,19 @@ struct AskView: View {
         let text: String
         switch session.mode {
         case .yesNo:
-            title = session.analysis.map { $0.score >= 55 ? localized("Leaning yes", "倾向可以", language: model.language) : localized("Leaning no", "倾向不行", language: model.language) } ?? localized("Result", "结果", language: model.language)
-            text = session.analysis.map { "\(Int($0.score))% " + localized("likelihood", "可能性", language: model.language) } ?? ""
+            title = session.analysis.map { $0.score >= 55 ? localized("ask.leaning-yes", language: model.language) : localized("ask.leaning-no", language: model.language) } ?? localized("ask.result", language: model.language)
+            text = session.analysis.map { "\(Int($0.score))% " + localized("ask.likelihood.4683602", language: model.language) } ?? ""
         case .choice:
             if let first = session.choices.first {
                 title = first.label
                 text = "\(Int(first.likelihood * 100))%"
             } else {
-                title = localized("Result", "结果", language: model.language)
+                title = localized("ask.result", language: model.language)
                 text = ""
             }
         case .timing:
-            title = session.timingCandidates.first.map { formatDateRange($0.interval) } ?? localized("Result", "结果", language: model.language)
-            text = localized("Recommended window", "推荐窗口", language: model.language)
+            title = session.timingCandidates.first.map { formatDateRange($0.interval) } ?? localized("ask.result", language: model.language)
+            text = localized("ask.recommended-window", language: model.language)
         }
         return AskHistoryEntry(
             id: session.snapshot.utcDate.timeIntervalSince1970.description + session.question,
@@ -1089,7 +1057,7 @@ struct AskView: View {
 
     private func rangeTitle(_ range: TimingRangeSelection) -> String {
         if range == .custom {
-            return localized("Custom", "自定义", language: model.language)
+            return localized("ask.custom", language: model.language)
         }
         let values: [Int]
         switch timingPrecision {
@@ -1109,49 +1077,38 @@ struct AskView: View {
 
     private func modeTitle(_ mode: HoraryQuestionMode) -> String {
         switch mode {
-        case .yesNo: localized("Will It Happen?", "会发生吗？", language: model.language)
-        case .choice: localized("Which One?", "选哪个？", language: model.language)
-        case .timing: localized("Find the Best Time", "什么时候做最好？", language: model.language)
+        case .yesNo: localized("ask.will-it-happen", language: model.language)
+        case .choice: localized("ask.which-one", language: model.language)
+        case .timing: localized("ask.find-the-best-time", language: model.language)
         }
     }
 
     private func modeSubtitle(_ mode: HoraryQuestionMode) -> String {
         switch mode {
         case .yesNo:
-            localized(
-                "Keep the question specific and choose the area it belongs to.",
-                "问题尽量具体，并选择它所属的生活领域。",
-                language: model.language
-            )
+            localized("ask.keep-the-question-specific-and-choose-the-area-it-belongs-to", language: model.language)
         case .choice:
-            localized(
-                "Name the real options and give each one a different area.",
-                "填写真实选项，并为每项选择不同的对应领域。",
-                language: model.language
-            )
+            localized("ask.name-the-real-options-and-give-each-one-a-different-area", language: model.language)
         case .timing:
-            localized(
-                "Choose what matters, how far to search, and the precision you need.",
-                "选择目标领域、搜索范围和所需精度。",
-                language: model.language
-            )
+            localized("ask.choose-what-matters-how-far-to-search-and-the-precision-you-need", language: model.language)
         }
     }
 
     private func houseTitle(_ house: Int) -> String {
-        let english = [
-            "Self & action", "Money & resources", "Learning & short travel",
-            "Home & family", "Romance & creativity", "Work, health & routine",
-            "Partners & agreements", "Shared money & change", "Travel & higher learning",
-            "Career & public role", "Friends, community & goals", "Rest & private matters",
-        ]
-        let chinese = [
-            "自我与行动", "金钱与资源", "学习、沟通与短途旅行",
-            "家庭与居所", "恋爱、创造与子女", "日常工作、健康与习惯",
-            "伴侣、合作与契约", "共同财务与改变", "远行、深造与信念",
-            "事业与社会位置", "朋友、社群与目标", "休息与隐秘事务",
-        ]
-        return model.language == .english ? english[house - 1] : chinese[house - 1]
+        switch house {
+        case 1: localized("ask.house-area.1", language: model.language)
+        case 2: localized("ask.house-area.2", language: model.language)
+        case 3: localized("ask.house-area.3", language: model.language)
+        case 4: localized("ask.house-area.4", language: model.language)
+        case 5: localized("ask.house-area.5", language: model.language)
+        case 6: localized("ask.house-area.6", language: model.language)
+        case 7: localized("ask.house-area.7", language: model.language)
+        case 8: localized("ask.house-area.8", language: model.language)
+        case 9: localized("ask.house-area.9", language: model.language)
+        case 10: localized("ask.house-area.10", language: model.language)
+        case 11: localized("ask.house-area.11", language: model.language)
+        default: localized("ask.house-area.12", language: model.language)
+        }
     }
 
     private func primaryScore(_ session: HorarySession) -> Double {
@@ -1166,17 +1123,17 @@ struct AskView: View {
         let score = primaryScore(session)
         switch session.mode {
         case .yesNo:
-            if score >= 80 { return localized("Very likely", "很可能", language: model.language) }
-            if score >= 65 { return localized("Likely yes", "比较可能", language: model.language) }
-            if score >= 45 { return localized("Still unclear", "尚不明确", language: model.language) }
-            if score >= 30 { return localized("Likely no", "可能性较低", language: model.language) }
-            return localized("Very unlikely", "很不可能", language: model.language)
+            if score >= 80 { return localized("ask.very-likely", language: model.language) }
+            if score >= 65 { return localized("ask.likely-yes", language: model.language) }
+            if score >= 45 { return localized("ask.still-unclear", language: model.language) }
+            if score >= 30 { return localized("ask.likely-no", language: model.language) }
+            return localized("ask.very-unlikely", language: model.language)
         case .choice:
             return session.choices.first?.label
-                ?? localized("No clear option", "暂无明确选项", language: model.language)
+                ?? localized("ask.no-clear-option", language: model.language)
         case .timing:
             guard let first = session.timingCandidates.first else {
-                return localized("No timing found", "暂无推荐时间", language: model.language)
+                return localized("ask.no-timing-found", language: model.language)
             }
             return formattedInterval(first)
         }
@@ -1220,11 +1177,11 @@ struct AskView: View {
         case .yesNo, .timing:
             if let analysis = session.analysis {
                 houses.insert(analysis.targetHouse)
-                append(localized("You", "你", language: model.language), for: analysis.querentRuler)
+                append(localized("ask.you", language: model.language), for: analysis.querentRuler)
                 append(
                     session.mode == .timing
-                        ? localized("Goal", "目标", language: model.language)
-                        : localized("Answer", "结果", language: model.language),
+                        ? localized("ask.goal", language: model.language)
+                        : localized("ask.answer", language: model.language),
                     for: analysis.targetRuler
                 )
                 if let relationship = analysis.relationship {
@@ -1233,7 +1190,7 @@ struct AskView: View {
             }
         case .choice:
             if let first = session.choices.first {
-                append(localized("You", "你", language: model.language), for: first.analysis.querentRuler)
+                append(localized("ask.you", language: model.language), for: first.analysis.querentRuler)
             }
             for (index, choice) in session.choices.enumerated() {
                 houses.insert(choice.house)
@@ -1449,7 +1406,7 @@ private struct HoraryProfessionalView: View {
             .padding(18)
         }
         .background(ScreenBackground())
-        .navigationTitle(localized("Chart analysis", "专业分析", language: language))
+        .navigationTitle(localized("ask.chart-analysis", language: language))
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -1463,37 +1420,33 @@ private struct HoraryProfessionalView: View {
     private func analysisBlock(_ analysis: HoraryAnalysis) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(
-                localized(
-                    "House \(analysis.targetHouse) analysis",
-                    "第\(analysis.targetHouse)宫分析",
-                    language: language
-                )
+                localizedTemplate("dynamic.d9e7f60cb4", substitutions: ["value1": String(describing: analysis.targetHouse)], language: language)
             )
             .font(.headline)
             .foregroundStyle(AppTheme.text)
 
             professionalRow(
-                localized("Querent ruler", "提问者主星", language: language),
+                localized("ask.querent-ruler", language: language),
                 bodyName(analysis.querentRuler, language: language)
             )
             professionalRow(
-                localized("Target ruler", "目标主星", language: language),
+                localized("ask.target-ruler", language: language),
                 bodyName(analysis.targetRuler, language: language)
             )
             professionalRow(
-                localized("Connection", "代表星联系", language: language),
+                localized("ask.connection", language: language),
                 analysis.relationship.map {
                     "\(aspectKindName($0.kind, language: language)) · \(phaseLabel($0.phase, language: language)) · \(formatOrb($0.orbDegrees))"
-                } ?? localized("No major aspect in orb", "容许度内没有主要相位", language: language)
+                } ?? localized("ask.no-major-aspect-in-orb", language: language)
             )
             professionalRow(
-                localized("Reception", "接纳", language: language),
+                localized("ask.reception", language: language),
                 receptionLabel(analysis)
             )
             professionalRow(
-                localized("Moon", "月亮", language: language),
+                localized("insight.natal.moon", language: language),
                 analysis.moon.isVoidOfCourse
-                    ? localized("Void of course", "空亡", language: language)
+                    ? localized("ask.void-of-course", language: language)
                     : nextMoonAspect(analysis)
             )
 
@@ -1510,7 +1463,7 @@ private struct HoraryProfessionalView: View {
                 }
             }
             HStack {
-                Text(localized("Total", "总分", language: language))
+                Text(localized("ask.total", language: language))
                     .font(.headline)
                 Spacer()
                 Text("\(Int(analysis.score.rounded()))")
@@ -1536,17 +1489,17 @@ private struct HoraryProfessionalView: View {
 
     private func receptionLabel(_ analysis: HoraryAnalysis) -> String {
         if analysis.receptionFromQuerent.isPresent, analysis.receptionFromTarget.isPresent {
-            return localized("Mutual reception", "互相接纳", language: language)
+            return localized("ask.mutual-reception", language: language)
         }
         if analysis.receptionFromQuerent.isPresent || analysis.receptionFromTarget.isPresent {
-            return localized("One-way reception", "单向接纳", language: language)
+            return localized("ask.one-way-reception", language: language)
         }
-        return localized("No major reception", "没有主要接纳", language: language)
+        return localized("ask.no-major-reception", language: language)
     }
 
     private func nextMoonAspect(_ analysis: HoraryAnalysis) -> String {
         guard let aspect = analysis.moon.nextAspect else {
-            return localized("No next major aspect", "没有后续主要相位", language: language)
+            return localized("ask.no-next-major-aspect", language: language)
         }
         let target = CelestialBody(rawValue: aspect.secondID)
             .map { bodyName($0, language: language) } ?? aspect.secondID
@@ -1556,33 +1509,19 @@ private struct HoraryProfessionalView: View {
     }
 
     private func componentLabel(_ id: String) -> String {
-        let english: [String: String] = [
-            "significator-relationship": "Significator relationship",
-            "reception": "Reception",
-            "moon": "Moon condition",
-            "strength": "Planet strength",
-            "obstruction": "Obstructions",
-            "target-strength": "Target ruler strength",
-            "moon-condition": "Moon condition",
-            "ascendant-strength": "Ascendant ruler",
-            "benefic-support": "Benefic support",
-            "applying-connection": "Applying connection",
-            "risk": "Risk",
-        ]
-        let chinese: [String: String] = [
-            "significator-relationship": "代表星关系",
-            "reception": "接纳",
-            "moon": "月亮状态",
-            "strength": "行星力量",
-            "obstruction": "阻碍",
-            "target-strength": "目标主星力量",
-            "moon-condition": "月亮状态",
-            "ascendant-strength": "上升主星",
-            "benefic-support": "吉星支持",
-            "applying-connection": "入相联系",
-            "risk": "风险",
-        ]
-        return language == .english ? english[id, default: id] : chinese[id, default: id]
+        switch id {
+        case "significator-relationship": localized("ask.fact.significator-relationship", language: language)
+        case "reception": localized("ask.reception", language: language)
+        case "moon", "moon-condition": localized("ask.fact.moon-condition", language: language)
+        case "strength": localized("ask.fact.planet-strength", language: language)
+        case "obstruction": localized("ask.fact.obstructions", language: language)
+        case "target-strength": localized("ask.fact.target-ruler-strength", language: language)
+        case "ascendant-strength": localized("ask.fact.ascendant-ruler", language: language)
+        case "benefic-support": localized("ask.fact.benefic-support", language: language)
+        case "applying-connection": localized("ask.fact.applying-connection", language: language)
+        case "risk": localized("ask.fact.risk", language: language)
+        default: id
+        }
     }
 }
 
@@ -1596,12 +1535,12 @@ struct AskHistoryView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 LazyVStack(alignment: .leading, spacing: 12) {
                     ScreenTitle(
-                        eyebrow: localized("ASK HISTORY", "问事历史", language: language),
-                        title: localized("History", "历史", language: language),
-                        subtitle: localized("Local results only", "仅保存在本机", language: language)
+                        eyebrow: localized("ask.ask-history", language: language),
+                        title: localized("ask.history", language: language),
+                        subtitle: localized("ask.local-results-only", language: language)
                     )
                     if entries.isEmpty {
-                        Text(localized("No questions yet.", "还没有问过问题。", language: language))
+                        Text(localized("ask.no-questions-yet", language: language))
                             .font(.footnote)
                             .foregroundStyle(AppTheme.muted)
                             .cardSurface()
@@ -1636,7 +1575,7 @@ struct AskHistoryView: View {
             }
         }
         .toolbar(.visible, for: .navigationBar)
-        .navigationTitle(localized("History", "历史", language: language))
+        .navigationTitle(localized("ask.history", language: language))
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -1673,7 +1612,7 @@ struct AskHistoryDetailView: View {
             }
         }
         .toolbar(.visible, for: .navigationBar)
-        .navigationTitle(localized("History", "历史", language: language))
+        .navigationTitle(localized("ask.history", language: language))
         .navigationBarTitleDisplayMode(.inline)
     }
 }

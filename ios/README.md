@@ -23,7 +23,7 @@ The current implementation is the V1 offline-first vertical slice:
 The current full application still requires physical-device installation,
 offline regression, small-screen/accessibility checks, and release licensing
 review before it can be treated as a release candidate. See
-[`../docs/ios-v1-development-plan.md`](../docs/ios-v1-development-plan.md).
+[`../docs/ios-v6-rebuild-plan.md`](../docs/ios-v6-rebuild-plan.md).
 
 ## Generate and verify
 

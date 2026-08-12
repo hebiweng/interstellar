@@ -29,6 +29,7 @@ extension InsightFactory {
         interpretationKey: String? = nil,
         sourceFactIDs: [String] = [],
         visualRole: String? = nil,
+        technicalDetail: String? = nil,
         note: String? = nil,
         progress: Double? = nil,
         symbol: String? = nil,
@@ -45,6 +46,7 @@ extension InsightFactory {
             interpretationVariables: ["metric": label, "value": value],
             sourceFactIDs: sourceFactIDs.isEmpty ? [resolvedID] : sourceFactIDs,
             visualRole: visualRole ?? category,
+            technicalDetail: technicalDetail,
             interpretation: note,
             emphasis: emphasis,
             progress: progress,
@@ -60,8 +62,10 @@ extension InsightFactory {
 
     static func phaseAngle(_ snapshot: ChartSnapshot) -> Double {
         guard let sun = snapshot.point(.sun), let moon = snapshot.point(.moon) else { return 0 }
-        let raw = (moon.longitudeDegrees - sun.longitudeDegrees).truncatingRemainder(dividingBy: 360)
-        return raw >= 0 ? raw : raw + 360
+        return LunarPhaseGeometry.elongation(
+            sunLongitude: sun.longitudeDegrees,
+            moonLongitude: moon.longitudeDegrees
+        )
     }
 
     static func dominantBodies(_ aspects: [ChartAspect], language: AppLanguage) -> String? {
@@ -83,8 +87,8 @@ extension InsightFactory {
 
     static func motionLabel(retrograde: Bool, language: AppLanguage) -> String {
         retrograde
-            ? localized("insight.reviewing.status", default: "Reviewing", chinese: "回顾调整中", language: language)
-            : localized("Moving forward", "稳定向前", language: language)
+            ? localized("insight.reviewing.status", language: language)
+            : localized("insight.shared.moving-forward", language: language)
     }
 
     static func elementBalance(_ snapshot: ChartSnapshot) -> [Double] {
@@ -99,51 +103,86 @@ extension InsightFactory {
             let sign = Zodiac.englishNames[point.signIndex].lowercased()
             counts[elementBySign[sign] ?? 0] += 1
         }
-        guard let maximum = counts.max(), maximum > 0 else {
+        let total = counts.reduce(0, +)
+        guard total > 0 else {
             return [Double](repeating: 0, count: 4)
         }
-        return counts.map { $0 / maximum }
+        return counts.map { $0 / total }
     }
 
-    static func elementFacts(_ scores: [Double], orientation: String, language: AppLanguage) -> [InsightFact] {
+    static func modalityBalance(_ snapshot: ChartSnapshot) -> [Double] {
+        let modalityBySign = [0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2]
+        var counts = [Double](repeating: 0, count: 3)
+        for point in snapshot.points {
+            counts[modalityBySign[point.signIndex % 12]] += 1
+        }
+        let total = counts.reduce(0, +)
+        guard total > 0 else { return [Double](repeating: 0, count: 3) }
+        return counts.map { $0 / total }
+    }
+
+    static func elementFacts(
+        _ scores: [Double],
+        modalityScores: [Double],
+        language: AppLanguage
+    ) -> [InsightFact] {
         // Prototype order: Air, Earth, Fire, Water. scores = [fire, earth, air, water].
         let order = [2, 1, 0, 3]
-        let labels = language == .english
-            ? ["Air", "Earth", "Fire", "Water"]
-            : ["风", "土", "火", "水"]
+        let labels = ["air", "earth", "fire", "water"].map {
+            AstroTerms.value("elements", $0, language: language)
+        }
         return order.enumerated().map { index, sourceIndex in
             let score = scores[min(max(0, sourceIndex), scores.count - 1)]
             let percent = Int(score * 100)
             let value: String
-            if percent > 66 {
-                value = language == .english ? "High" : "高"
-            } else if percent > 35 {
-                value = language == .english ? "Strong" : "强"
+            if percent >= 33 {
+                value = localized("insight.shared.level.high", language: language)
+            } else if percent >= 22 {
+                value = localized("insight.shared.level.strong", language: language)
             } else {
-                value = language == .english ? "Light" : "轻"
+                value = localized("insight.shared.level.light", language: language)
             }
             return fact(
                 labels[index],
                 value,
-                percent > 66 ? .challenging : percent > 35 ? .transition : .neutral,
+                percent >= 33 ? .challenging : percent >= 22 ? .transition : .neutral,
                 progress: score
             )
-        } + [
-            fact(localized("Emphasis", "主导", language: language), orientation, .transition)
-        ]
+        } + modalityFacts(modalityScores, language: language)
+    }
+
+    static func modalityFacts(_ scores: [Double], language: AppLanguage) -> [InsightFact] {
+        let keys = ["cardinal", "fixed", "mutable"]
+        return keys.enumerated().map { index, key in
+            let score = scores.indices.contains(index) ? scores[index] : 0
+            return fact(
+                AstroTerms.value("modalities", key, language: language),
+                "\(Int((score * 100).rounded()))%",
+                .transition,
+                progress: score
+            )
+        }
     }
 
     static func elementOrientation(_ scores: [Double], language: AppLanguage) -> String {
         guard let maximum = scores.max(), maximum > 0 else {
-            return localized("Balanced", "均衡", language: language)
+            return localized("insight.shared.balanced", language: language)
         }
         let index = scores.firstIndex(of: maximum) ?? 0
         return [
-            localized("Fire emphasis", "火象主导", language: language),
-            localized("Earth emphasis", "土象主导", language: language),
-            localized("Air emphasis", "风象主导", language: language),
-            localized("Water emphasis", "水象主导", language: language),
+            localized("insight.shared.fire-emphasis", language: language),
+            localized("insight.shared.earth-emphasis", language: language),
+            localized("insight.shared.air-emphasis", language: language),
+            localized("insight.shared.water-emphasis", language: language),
         ][index]
+    }
+
+    static func modalityOrientation(_ scores: [Double], language: AppLanguage) -> String {
+        guard let maximum = scores.max(), maximum > 0 else {
+            return localized("insight.shared.balanced", language: language)
+        }
+        let index = scores.firstIndex(of: maximum) ?? 0
+        return AstroTerms.value("modalities", ["cardinal", "fixed", "mutable"][index], language: language)
     }
 
     static func houseValues(
@@ -206,21 +245,21 @@ extension InsightFactory {
         let applying = aspects.first { $0.phase == .applying }
         return [
             separating.map { aspect in fact(
-                localized("Just passed", "刚刚经过", language: language),
+                localized("insight.shared.just-passed", language: language),
                 aspectTitle(aspect, language: language),
                 tone(aspect.kind),
                 progress: aspect.strength,
                 symbol: "✓"
             ) },
             current.map { aspect in fact(
-                localized("Current", "当前", language: language),
+                localized("insight.shared.current", language: language),
                 aspectTitle(aspect, language: language),
                 .transition,
                 progress: aspect.strength,
                 symbol: "●"
             ) },
             applying.map { aspect in fact(
-                localized("Next", "接下来", language: language),
+                localized("insight.shared.next", language: language),
                 aspectTitle(aspect, language: language),
                 tone(aspect.kind),
                 progress: aspect.strength,
@@ -231,10 +270,10 @@ extension InsightFactory {
 
     static func progressedPhaseName(_ angle: Double, language: AppLanguage) -> String {
         switch angle {
-        case 0 ..< 90: localized("New phase", "新月阶段", language: language)
-        case 90 ..< 180: localized("Building phase", "上弦阶段", language: language)
-        case 180 ..< 270: localized("Review phase", "满月阶段", language: language)
-        default: localized("Integration phase", "下弦阶段", language: language)
+        case 0 ..< 90: localized("insight.secondary.new-phase", language: language)
+        case 90 ..< 180: localized("insight.secondary.building-phase", language: language)
+        case 180 ..< 270: localized("insight.secondary.review-phase", language: language)
+        default: localized("insight.secondary.integration-phase", language: language)
         }
     }
 

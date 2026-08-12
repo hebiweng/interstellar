@@ -24,55 +24,56 @@ extension InsightFactory {
         let strongestSupport = snapshot.aspects.first { $0.kind.supportive } ?? snapshot.aspects.first
         let strongestChallenge = snapshot.aspects.first { $0.kind.challenging } ?? snapshot.aspects.first
         let elementScores = elementBalance(snapshot)
+        let modalityScores = modalityBalance(snapshot)
         let houseScores = houseValues(snapshot, natal: nil, aspects: snapshot.aspects)
         let activeHouses = activeHouseFacts(houseScores, language: language)
         let dominant = dominantBodies(snapshot.aspects, language: language)
-        let orientation = elementOrientation(elementScores, language: language)
+        let orientation = "\(elementOrientation(elementScores, language: language)) · \(modalityOrientation(modalityScores, language: language))"
         let coreFacts: [InsightFact] = [
-            sun.map { fact(localized("Sun", "太阳", language: language), Zodiac.position($0, language: language), .supportive, symbol: "☉") },
-            moon.map { fact(localized("Moon", "月亮", language: language), Zodiac.position($0, language: language), .neutral, symbol: "☽") },
-            fact(localized("Rising", "上升", language: language), ascSign, .transition, symbol: "ASC"),
+            sun.map { fact(localized("insight.natal.sun", language: language), Zodiac.position($0, language: language), .supportive, symbol: "☉") },
+            moon.map { fact(localized("insight.natal.moon", language: language), Zodiac.position($0, language: language), .neutral, symbol: "☽") },
+            fact(localized("chart.rising", language: language), ascSign, .transition, symbol: "ASC"),
         ].compactMap { $0 }
         let loveFacts: [InsightFact] = [
-            venus.map { fact(localized("You give", "你给予", language: language), Zodiac.position($0, language: language), .supportive, symbol: "♀") },
-            moon.map { fact(localized("You need", "你需要", language: language), Zodiac.position($0, language: language), .neutral, symbol: "☽") },
+            venus.map { fact(localized("insight.natal.you-give", language: language), Zodiac.position($0, language: language), .supportive, symbol: "♀") },
+            moon.map { fact(localized("insight.natal.you-need", language: language), Zodiac.position($0, language: language), .neutral, symbol: "☽") },
         ].compactMap { $0 }
         let edgeFacts: [InsightFact] = [
-            strongestSupport.map { fact(localized("Core strength", "核心优势", language: language), aspectTitle($0, language: language), .supportive) },
-            strongestChallenge.map { fact(localized("Growth edge", "成长面", language: language), aspectTitle($0, language: language), .challenging) },
+            strongestSupport.map { fact(localized("insight.natal.core-strength", language: language), aspectTitle($0, language: language), .supportive) },
+            strongestChallenge.map { fact(localized("insight.natal.growth-edge", language: language), aspectTitle($0, language: language), .challenging) },
         ].compactMap { $0 }
         let signatureFacts: [InsightFact] = [
-            fact(localized("Chart ruler", "命主星", language: language), bodyName(mcRuler, language: language), .supportive, symbol: mcRuler.symbol),
-            dominant.map { fact(localized("Dominant", "主导星体", language: language), $0, .transition) },
-            fact(localized("Orientation", "总体取向", language: language), orientation, .neutral),
+            fact(localized("insight.natal.chart-ruler", language: language), bodyName(mcRuler, language: language), .supportive, symbol: mcRuler.symbol),
+            dominant.map { fact(localized("insight.natal.dominant", language: language), $0, .transition) },
+            fact(localized("insight.natal.orientation", language: language), orientation, .neutral),
         ].compactMap { $0 }
 
         return [
             card( id: "natal-interpretation",
-                title: localized("Natal interpretation", "本命解读", language: language),
+                title: localized("insight.natal.natal-interpretation", language: language),
                 icon: "✦", visual: .natalCore,
                 facts: coreFacts,
                 language: language
             ),
             card( id: "emotional-needs",
-                title: localized("Emotional needs", "情绪需要", language: language),
+                title: localized("insight.natal.emotional-needs", language: language),
                 icon: "☽", visual: .needsCard,
                 facts: emotionalNeedsFacts(snapshot, language: language),
                 language: language
             ),
             card( id: "love-connection",
-                title: localized("Love & Connection", "爱与连接", language: language),
+                title: localized("insight.natal.love-connection", language: language),
                 icon: "♡", visual: .dualInsight(
                     opening: venus.map { Zodiac.position($0, language: language) } ?? "",
                     demand: moon.map { Zodiac.position($0, language: language) } ?? "",
-                    openingLabel: localized("YOU GIVE", "你给予", language: language),
-                    demandLabel: localized("YOU NEED", "你需要", language: language)
+                    openingLabel: localized("insight.natal.you-give.f5b2fe5", language: language),
+                    demandLabel: localized("insight.natal.you-need.b0c8f29", language: language)
                 ),
                 facts: loveFacts,
                 language: language
             ),
             card( id: "career-direction",
-                title: localized("Career & direction", "事业与方向", language: language),
+                title: localized("insight.natal.career-direction", language: language),
                 icon: "↗", visual: .growthPath,
                 facts: careerDirectionFacts(
                     snapshot: snapshot,
@@ -85,7 +86,7 @@ extension InsightFactory {
                 language: language
             ),
             card( id: "strengths-growth",
-                title: localized("Strengths & growth edges", "优势与成长面", language: language),
+                title: localized("insight.natal.strengths-growth-edges", language: language),
                 icon: "✚", visual: .edgeDual(
                     opening: strongestSupport.map { aspectTitle($0, language: language) } ?? "",
                     demand: strongestChallenge.map { aspectTitle($0, language: language) } ?? ""
@@ -94,19 +95,19 @@ extension InsightFactory {
                 language: language
             ),
             card( id: "element-balance",
-                title: localized("Element & mode balance", "元素与模式", language: language),
+                title: localized("insight.natal.element-mode-balance", language: language),
                 icon: "◪", visual: .elementRows,
-                facts: elementFacts(elementScores, orientation: elementOrientation(elementScores, language: language), language: language),
+                facts: elementFacts(elementScores, modalityScores: modalityScores, language: language),
                 language: language
             ),
             card( id: "house-emphasis",
-                title: localized("House emphasis", "宫位侧重", language: language),
+                title: localized("insight.natal.house-emphasis", language: language),
                 icon: "⌂", visual: .areaRows,
                 facts: Array(activeHouses.prefix(4)),
                 language: language
             ),
             card( id: "chart-signature",
-                title: localized("Chart signature", "星盘签名", language: language),
+                title: localized("insight.natal.chart-signature", language: language),
                 icon: "✶", visual: .signatureTrio(
                     ruler: mcRuler.symbol,
                     dominant: dominant ?? "",
@@ -116,7 +117,7 @@ extension InsightFactory {
                 language: language
             ),
             card( id: "planet-placements",
-                title: localized("Planet placements", "行星落座", language: language),
+                title: localized("insight.natal.planet-placements", language: language),
                 icon: "⊛", visual: .placementList,
                 facts: snapshot.points.map { point in
                     let house = snapshot.house(containing: point.longitudeDegrees)
@@ -137,7 +138,7 @@ extension InsightFactory {
                 language: language
             ),
             card( id: "key-aspects",
-                title: localized("Key aspects", "关键连接", language: language),
+                title: localized("insight.natal.key-aspects", language: language),
                 icon: "⌗", visual: .aspectList,
                 facts: top.map {
                     fact(
@@ -160,14 +161,10 @@ extension InsightFactory {
         guard let moon = snapshot.point(.moon) else { return [] }
         let house = snapshot.house(containing: moon.longitudeDegrees)
         guard house > 0 else { return [] }
-        let technical = localized(
-            "Moon in \(Zodiac.englishNames[moon.signIndex]) · House \(house) · \(ConsumerCopy.lifeArea(house, language: .english))",
-            "月亮在\(Zodiac.chineseNames[moon.signIndex]) · 第\(house)宫 · \(ConsumerCopy.lifeArea(house, language: .simplifiedChinese))",
-            language: language
-        )
+        let technical = localizedTemplate("dynamic.259fa5e386", substitutions: ["value1": String(describing: Zodiac.name(index: moon.signIndex, language: language)), "value2": String(describing: house), "value3": String(describing: ConsumerCopy.lifeArea(house, language: language))], language: language)
         return [
             fact(
-                localized("Calculated pattern", "计算结果", language: language),
+                localized("insight.natal.calculated-pattern", language: language),
                 technical,
                 .neutral,
                 stableID: "natal.emotional-needs.moon",
@@ -188,7 +185,7 @@ extension InsightFactory {
     ) -> [InsightFact] {
         var facts = [
             fact(
-                localized("Public style", "公众风格", language: language),
+                localized("insight.natal.public-style", language: language),
                 Zodiac.name(index: mcSignIndex, language: language),
                 .neutral,
                 stableID: "natal.career-direction.midheaven",
@@ -200,7 +197,7 @@ extension InsightFactory {
         if let rulerPoint, let rulerHouse, rulerHouse > 0 {
             facts.append(
                 fact(
-                    localized("Direction ruler", "方向主星", language: language),
+                    localized("insight.natal.direction-ruler", language: language),
                     "\(bodyName(ruler, language: language)) · \(Zodiac.position(rulerPoint, language: language))",
                     .transition,
                     stableID: "natal.career-direction.ruler",
@@ -211,7 +208,7 @@ extension InsightFactory {
             )
             facts.append(
                 fact(
-                    localized("Contribution arena", "贡献领域", language: language),
+                    localized("insight.natal.contribution-arena", language: language),
                     ConsumerCopy.lifeArea(rulerHouse, language: language),
                     .supportive,
                     stableID: "natal.career-direction.ruler-house",
@@ -227,33 +224,17 @@ extension InsightFactory {
     // MARK: - Solar return anchors (prototype .connection-grid / .compare-strip)
 
     static func semanticCategory(_ body: CelestialBody, language: AppLanguage) -> String {
-        switch language {
-        case .english, .spanish, .french:
-            return switch body {
-            case .sun, .moon: "Core/self"
-            case .mercury: "Mind/voice"
-            case .venus: "Heart/values"
-            case .mars: "Drive/action"
-            case .jupiter: "Growth/belief"
-            case .saturn: "Structure/limits"
-            case .uranus: "Change/innovation"
-            case .neptune: "Vision/intuition"
-            case .pluto: "Transformation/power"
-            case .trueNode: "Direction/fate"
-            }
-        case .simplifiedChinese:
-            return switch body {
-            case .sun, .moon: "核心/自我"
-            case .mercury: "思维/表达"
-            case .venus: "情感/价值"
-            case .mars: "行动/驱动"
-            case .jupiter: "成长/信念"
-            case .saturn: "结构/边界"
-            case .uranus: "改变/创新"
-            case .neptune: "想象/直觉"
-            case .pluto: "转化/力量"
-            case .trueNode: "方向/命运"
-            }
+        switch body {
+        case .sun, .moon: localized("insight.natal.category.core-self", language: language)
+        case .mercury: localized("insight.natal.category.mind-voice", language: language)
+        case .venus: localized("insight.natal.category.heart-values", language: language)
+        case .mars: localized("insight.natal.category.drive-action", language: language)
+        case .jupiter: localized("insight.natal.category.growth-belief", language: language)
+        case .saturn: localized("insight.natal.category.structure-limits", language: language)
+        case .uranus: localized("insight.natal.category.change-innovation", language: language)
+        case .neptune: localized("insight.natal.category.vision-intuition", language: language)
+        case .pluto: localized("insight.natal.category.transformation-power", language: language)
+        case .trueNode: localized("insight.natal.category.direction-fate", language: language)
         }
     }
 

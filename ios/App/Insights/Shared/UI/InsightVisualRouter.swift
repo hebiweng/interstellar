@@ -24,7 +24,7 @@ struct InsightVisualView: View {
             case let .strengthOrbit(supportive, challenging, neutral):
                 ringMetric(supportive: supportive, challenging: challenging, neutral: neutral)
             case .blindSpot: factGrid(columns: 2)
-            case .growthPath: pathFlow(title: localized("Growth path", "成长路径", language: language))
+            case .growthPath: pathFlow(title: localized("insight.shared.growth-path", language: language))
             case let .skyOverview(phase, activity, cycles): skyOverview(phase: phase, activity: activity, cycles: cycles)
             case .themeCards: themeCards
             case .needsCard: needsCard
@@ -88,13 +88,13 @@ struct InsightVisualView: View {
             case let .dualInsight(opening, demand, openingLabel, demandLabel): dualInsight(opening: opening, demand: demand, openingLabel: openingLabel, demandLabel: demandLabel)
             case let .edgeDual(opening, demand): edgeDual(opening: opening, demand: demand)
             case .quarterTabs: quarterTabs
-            case .overlayCompare: compareStrip(natal: localized("Natal", "本命", language: language), progressed: localized("This year", "今年", language: language))
+            case .overlayCompare: compareStrip(natal: localized("insight.secondary.natal", language: language), progressed: localized("insight.shared.this-year", language: language))
             case let .natalOverlay(firstLabel, firstValue, secondLabel, secondValue):
                 natalOverlay(firstLabel: firstLabel, firstValue: firstValue, secondLabel: secondLabel, secondValue: secondValue)
             case let .bondOrbit(presentation): bondOrbit(presentation)
             case let .perspectiveTabs(presentation): perspectiveTabs(presentation)
             case .connectionGrid: connectionGrid
-            case .pathFlow: pathFlow(title: localized("How it flows", "流动方式", language: language))
+            case .pathFlow: pathFlow(title: localized("insight.shared.how-it-flows", language: language))
             case let .synastryConnectionGrid(kind): synastryConnectionGrid(kind)
             case .synastryPathFlow: synastryPathFlow
             case .synastryChemistry: synastryChemistry
@@ -110,7 +110,7 @@ struct InsightVisualView: View {
                 .presentationBackground(AppTheme.panel)
         }
         .sheet(item: $synastryFactDrawer) { fact in
-            SynastryFactDetailSheet(fact: fact, interpretation: text?.body, language: language)
+            SynastryFactDetailSheet(fact: fact, interpretation: fact.note ?? text?.body, language: language)
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.hidden)
                 .presentationBackground(AppTheme.panel)
@@ -120,11 +120,7 @@ struct InsightVisualView: View {
 
     var emptyState: some View {
         Label(
-            localized(
-                "Not enough calculated facts for this card",
-                "当前计算事实不足，暂不展示这张卡片的内容",
-                language: language
-            ),
+            localized("insight.shared.not-enough-calculated-facts-for-this-card", language: language),
             systemImage: "circle.dashed"
         )
         .font(AppTypography.supporting.weight(.medium))
@@ -141,7 +137,7 @@ struct InsightVisualView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 5) {
                         if let symbol = fact.symbol {
-                            Text(symbol).font(.system(size: 12, weight: .bold)).foregroundStyle(AppTheme.tone(fact.emphasis))
+                            Text(symbol).font(AppTypography.scaled(12, weight: .bold)).foregroundStyle(AppTheme.tone(fact.emphasis))
                         }
                         Text(fact.label)
                             .font(AppTypography.compactLabel)
@@ -173,7 +169,7 @@ struct InsightVisualView: View {
                 HStack(alignment: .top, spacing: 10) {
                     if let symbol = fact.symbol {
                         Text(symbol)
-                            .font(.system(size: 13, weight: .semibold))
+                            .font(AppTypography.scaled(13, weight: .semibold))
                             .foregroundStyle(AppTheme.tone(fact.emphasis))
                             .frame(width: 26, height: 26)
                             .background(AppTheme.tone(fact.emphasis).opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
@@ -212,15 +208,15 @@ struct InsightVisualView: View {
                     .stroke(AppTheme.coral, style: StrokeStyle(lineWidth: 12, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                 VStack(spacing: 0) {
-                    Text("\(total)").font(.system(size: 20, weight: .bold).monospacedDigit()).foregroundStyle(AppTheme.text)
-                    Text(localized("contacts", "连接", language: language)).font(.system(size: 10)).foregroundStyle(AppTheme.muted)
+                    Text("\(total)").font(AppTypography.scaled(20, weight: .bold).monospacedDigit()).foregroundStyle(AppTheme.text)
+                    Text(localized("insight.shared.contacts", language: language)).font(AppTypography.scaled(10)).foregroundStyle(AppTheme.muted)
                 }
             }
             .frame(width: 92, height: 92)
             VStack(alignment: .leading, spacing: 8) {
-                metric("\(supportive)", localized("Support", "支持", language: language), .supportive)
-                metric("\(challenging)", localized("Pressure", "压力", language: language), .challenging)
-                metric("\(neutral)", localized("Neutral", "中性", language: language), .transition)
+                metric("\(supportive)", localized("insight.current-sky.support", language: language), .supportive)
+                metric("\(challenging)", localized("insight.current-sky.pressure", language: language), .challenging)
+                metric("\(neutral)", localized("insight.shared.neutral", language: language), .transition)
             }
             .frame(maxWidth: .infinity)
         }
@@ -228,7 +224,7 @@ struct InsightVisualView: View {
 
     func metric(_ value: String, _ title: String, _ tone: InsightTone) -> some View {
         HStack {
-            Text(value).font(.system(size: 15, weight: .bold).monospacedDigit()).foregroundStyle(AppTheme.tone(tone))
+            Text(value).font(AppTypography.scaled(15, weight: .bold).monospacedDigit()).foregroundStyle(AppTheme.tone(tone))
             Text(title).font(AppTypography.supporting).foregroundStyle(AppTheme.muted)
             Spacer()
         }
@@ -260,12 +256,12 @@ struct InsightVisualView: View {
             ForEach(Array(facts.prefix(6).enumerated()), id: \.offset) { _, fact in
                 HStack(spacing: 10) {
                     Text(fact.symbol ?? "✦")
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(AppTypography.scaled(15, weight: .semibold))
                         .foregroundStyle(AppTheme.violet)
                         .frame(width: 34, height: 34)
                         .background(AppTheme.violet.opacity(0.1), in: RoundedRectangle(cornerRadius: 11))
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(fact.label).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
+                        Text(fact.label).font(AppTypography.scaled(12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
                         if let note = fact.note {
                             Text(note).font(AppTypography.supporting).foregroundStyle(AppTheme.muted)
                         }
@@ -287,22 +283,22 @@ struct InsightVisualView: View {
         return VStack(spacing: 9) {
             if hasCategories {
                 HStack(spacing: 6) {
-                    aspectFilterChip(nil, localized("All", "全部", language: language))
-                    aspectFilterChip("long-term", localized("Long-term", "长期", language: language))
-                    aspectFilterChip("current", localized("Current", "当前", language: language))
-                    aspectFilterChip("daily", localized("Daily", "每日", language: language))
+                    aspectFilterChip(nil, localized("insight.shared.all", language: language))
+                    aspectFilterChip("long-term", localized("insight.shared.long-term", language: language))
+                    aspectFilterChip("current", localized("insight.shared.current", language: language))
+                    aspectFilterChip("daily", localized("insight.shared.daily", language: language))
                     Spacer()
                 }
             }
             ForEach(Array(filtered.prefix(6).enumerated()), id: \.offset) { _, fact in
                 HStack(spacing: 10) {
                     Text(fact.symbol ?? "⌗")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(AppTypography.scaled(13, weight: .semibold))
                         .foregroundStyle(AppTheme.tone(fact.emphasis))
                         .frame(width: 26, height: 26)
                         .background(AppTheme.tone(fact.emphasis).opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(fact.label).font(.system(size: 12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
+                        Text(fact.label).font(AppTypography.scaled(12.5, weight: .semibold)).foregroundStyle(AppTheme.text)
                         if let note = fact.note {
                             Text(note).font(AppTypography.supporting).foregroundStyle(AppTheme.muted)
                         }
@@ -331,9 +327,9 @@ struct InsightVisualView: View {
             ForEach(Array(shown.enumerated()), id: \.offset) { _, fact in
                 VStack(alignment: .leading, spacing: 5) {
                     HStack {
-                        Text(fact.label).font(.system(size: 12, weight: .semibold)).foregroundStyle(AppTheme.text)
+                        Text(fact.label).font(AppTypography.scaled(12, weight: .semibold)).foregroundStyle(AppTheme.text)
                         Spacer()
-                        Text(fact.value).font(.system(size: 10, weight: .semibold)).foregroundStyle(AppTheme.muted)
+                        Text(fact.value).font(AppTypography.scaled(10, weight: .semibold)).foregroundStyle(AppTheme.muted)
                     }
                     if let progress = fact.progress {
                         GeometryReader { proxy in
@@ -355,16 +351,16 @@ struct InsightVisualView: View {
                     }
                 } label: {
                     Text(showAllAreas
-                         ? localized("Show fewer areas", "收起领域", language: language)
+                         ? localized("insight.shared.show-fewer-areas", language: language)
                          : LocalizedFormatters.viewAllAreas(facts.count, language: language))
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(AppTypography.scaled(11, weight: .semibold))
                         .foregroundStyle(AppTheme.violet)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 2)
                 }
                 .buttonStyle(.plain)
             }
-            Text(localized("Activity reflects the current signals, not a fortune score.", "这里反映当前的活跃程度，不是运势分数。", language: language))
+            Text(localized("insight.shared.activity-reflects-the-current-signals-not-a-fortune-score", language: language))
                 .font(AppTypography.supporting)
                 .foregroundStyle(AppTheme.muted)
                 .padding(.top, 2)
@@ -375,7 +371,7 @@ struct InsightVisualView: View {
         VStack(spacing: 11) {
             ForEach(Array(facts.prefix(4).enumerated()), id: \.offset) { _, fact in
                 HStack(spacing: 9) {
-                    Text(fact.label).font(.system(size: 12, weight: .semibold)).foregroundStyle(AppTheme.text).frame(width: 44, alignment: .leading)
+                    Text(fact.label).font(AppTypography.scaled(12, weight: .semibold)).foregroundStyle(AppTheme.text).frame(width: 44, alignment: .leading)
                     GeometryReader { proxy in
                         ZStack(alignment: .leading) {
                             Capsule().fill(AppTheme.line.opacity(0.6))
@@ -385,7 +381,7 @@ struct InsightVisualView: View {
                         }
                     }
                     .frame(height: 6)
-                    Text(fact.value).font(.system(size: 10)).foregroundStyle(AppTheme.muted).frame(width: 44, alignment: .trailing)
+                    Text(fact.value).font(AppTypography.scaled(10)).foregroundStyle(AppTheme.muted).frame(width: 44, alignment: .trailing)
                 }
             }
             if facts.count > 4 {
@@ -462,7 +458,7 @@ struct InsightVisualView: View {
                 ForEach(Array(facts.prefix(3).enumerated()), id: \.offset) { index, fact in
                     VStack(spacing: 4) {
                         Text(fact.symbol ?? "\(index + 1)")
-                            .font(.system(size: 13, weight: .semibold))
+                            .font(AppTypography.scaled(13, weight: .semibold))
                             .foregroundStyle(AppTheme.tone(fact.emphasis))
                             .frame(width: 30, height: 30)
                             .background(AppTheme.tone(fact.emphasis).opacity(0.12), in: Circle())
@@ -470,7 +466,7 @@ struct InsightVisualView: View {
                     }
                     .frame(maxWidth: .infinity)
                     if index < min(3, facts.count) - 1 {
-                        Image(systemName: "arrow.right").font(.system(size: 10)).foregroundStyle(AppTheme.muted)
+                        Image(systemName: "arrow.right").font(AppTypography.scaled(10)).foregroundStyle(AppTheme.muted)
                     }
                 }
             }
@@ -481,9 +477,9 @@ struct InsightVisualView: View {
 
     func technicalTag(_ tone: InsightTone) -> String {
         switch tone {
-        case .supportive: localized("Supportive pattern", "支持性结构", language: language)
-        case .challenging: localized("Core tension", "核心张力", language: language)
-        case .transition, .neutral: localized("Relational pattern", "关系结构", language: language)
+        case .supportive: localized("insight.shared.supportive-pattern", language: language)
+        case .challenging: localized("insight.shared.core-tension", language: language)
+        case .transition, .neutral: localized("insight.shared.relational-pattern", language: language)
         }
     }
 }
