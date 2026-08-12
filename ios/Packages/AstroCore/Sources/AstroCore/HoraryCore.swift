@@ -55,6 +55,63 @@ public struct HoraryMoonCondition: Sendable, Equatable {
     public let hoursUntilNextAspect: Double?
 }
 
+public enum HoraryPerfectionKind: String, Sendable, Equatable, Codable {
+    case direct
+    case translation
+    case collection
+}
+
+public enum HoraryPerfectionStatus: String, Sendable, Equatable, Codable {
+    case completes
+    case prevented
+    case delayed
+    case none
+    case ambiguous
+}
+
+public enum HoraryInterruptionKind: String, Sendable, Equatable, Codable {
+    case signChange
+    case refranation
+    case prohibition
+}
+
+public struct HoraryPerfectionPath: Sendable, Equatable, Codable {
+    public let kind: HoraryPerfectionKind
+    public let exactDate: Date
+    public let aspectKind: AspectKind
+    public let distanceDegrees: Double
+    public let mediator: CelestialBody?
+}
+
+public struct HoraryPerfectionInterruption: Sendable, Equatable, Codable {
+    public let kind: HoraryInterruptionKind
+    public let date: Date
+    public let body: CelestialBody
+}
+
+public struct HoraryPerfectionAssessment: Sendable, Equatable, Codable {
+    public let status: HoraryPerfectionStatus
+    public let primaryPath: HoraryPerfectionPath?
+    public let interruptions: [HoraryPerfectionInterruption]
+
+    public static let none = HoraryPerfectionAssessment(
+        status: .none,
+        primaryPath: nil,
+        interruptions: []
+    )
+}
+
+public enum HoraryJudgmentVerdict: String, Sendable, Equatable, Codable {
+    case yes
+    case no
+    case noClearJudgment
+}
+
+public struct HoraryJudgment: Sendable, Equatable, Codable {
+    public let verdict: HoraryJudgmentVerdict
+    public let perfection: HoraryPerfectionAssessment
+}
+
 public struct HoraryAnalysis: Sendable, Equatable {
     public let querentHouse: Int
     public let targetHouse: Int
@@ -68,6 +125,37 @@ public struct HoraryAnalysis: Sendable, Equatable {
     public let moon: HoraryMoonCondition
     public let score: Double
     public let components: [HoraryScoreComponent]
+    public let judgment: HoraryJudgment?
+
+    public init(
+        querentHouse: Int,
+        targetHouse: Int,
+        querentRuler: CelestialBody,
+        targetRuler: CelestialBody,
+        querent: HoraryPlanetAssessment,
+        target: HoraryPlanetAssessment,
+        relationship: ChartAspect?,
+        receptionFromQuerent: HoraryReception,
+        receptionFromTarget: HoraryReception,
+        moon: HoraryMoonCondition,
+        score: Double,
+        components: [HoraryScoreComponent],
+        judgment: HoraryJudgment? = nil
+    ) {
+        self.querentHouse = querentHouse
+        self.targetHouse = targetHouse
+        self.querentRuler = querentRuler
+        self.targetRuler = targetRuler
+        self.querent = querent
+        self.target = target
+        self.relationship = relationship
+        self.receptionFromQuerent = receptionFromQuerent
+        self.receptionFromTarget = receptionFromTarget
+        self.moon = moon
+        self.score = score
+        self.components = components
+        self.judgment = judgment
+    }
 }
 
 public struct HoraryChoiceCandidate: Sendable, Equatable, Identifiable {
@@ -75,12 +163,20 @@ public struct HoraryChoiceCandidate: Sendable, Equatable, Identifiable {
     public let label: String
     public let house: Int
     public let relatedHouses: [Int]
+    public let originalIndex: Int
 
-    public init(id: UUID = UUID(), label: String, house: Int, relatedHouses: [Int] = []) {
+    public init(
+        id: UUID = UUID(),
+        label: String,
+        house: Int,
+        relatedHouses: [Int] = [],
+        originalIndex: Int = 0
+    ) {
         self.id = id
         self.label = label
         self.house = house
         self.relatedHouses = relatedHouses.filter { $0 != house }
+        self.originalIndex = originalIndex
     }
 }
 
@@ -90,9 +186,10 @@ public struct HoraryChoiceResult: Sendable, Equatable, Identifiable {
     public let house: Int
     public let relatedHouses: [Int]
     public let ruler: CelestialBody
-    public let rawScore: Double
-    public let likelihood: Double
+    public let supportScore: Double
     public let analysis: HoraryAnalysis
+    public let originalIndex: Int
+    public let isTiedForLead: Bool
 
     public init(
         id: UUID,
@@ -100,19 +197,26 @@ public struct HoraryChoiceResult: Sendable, Equatable, Identifiable {
         house: Int,
         relatedHouses: [Int],
         ruler: CelestialBody,
-        rawScore: Double,
-        likelihood: Double,
-        analysis: HoraryAnalysis
+        supportScore: Double,
+        analysis: HoraryAnalysis,
+        originalIndex: Int,
+        isTiedForLead: Bool = false
     ) {
         self.id = id
         self.label = label
         self.house = house
         self.relatedHouses = relatedHouses
         self.ruler = ruler
-        self.rawScore = rawScore
-        self.likelihood = likelihood
+        self.supportScore = supportScore
         self.analysis = analysis
+        self.originalIndex = originalIndex
+        self.isTiedForLead = isTiedForLead
     }
+}
+
+public enum HoraryChoiceSignificatorMode: Sendable, Equatable {
+    case sharedPrimary(house: Int)
+    case independentPrimary
 }
 
 public enum TimingPrecision: String, Sendable, Codable, CaseIterable {
@@ -372,19 +476,7 @@ public enum HoraryEngine {
             )
         }
 
-        var obstruction = 0.0
-        if relationship?.phase == .separating { obstruction -= 8 }
-        if relationship?.kind.challenging == true { obstruction -= 7 }
-        if querent.conditions.contains(.combust) || target.conditions.contains(.combust) {
-            obstruction -= 10
-        }
-        if querent.conditions.contains(.retrograde) || target.conditions.contains(.retrograde) {
-            obstruction -= 5
-        }
-        obstruction = max(-20, obstruction)
-        components.append(.init(id: "obstruction", value: obstruction))
-
-        let raw = 35 + components.reduce(0) { $0 + $1.value }
+        let raw = 50 + components.reduce(0) { $0 + $1.value }
         return HoraryAnalysis(
             querentHouse: 1,
             targetHouse: targetHouse,
@@ -401,26 +493,62 @@ public enum HoraryEngine {
         )
     }
 
+    public static func judgedAnalysis(
+        snapshot: ChartSnapshot,
+        targetHouse: Int,
+        targetRuler override: CelestialBody? = nil,
+        relatedHouses: [Int] = [],
+        calculator: SwissEphemerisCalculator
+    ) async throws -> HoraryAnalysis {
+        let base = analyze(
+            snapshot: snapshot,
+            targetHouse: targetHouse,
+            targetRuler: override,
+            relatedHouses: relatedHouses
+        )
+        let perfection = try await calculator.resolveHoraryPerfection(
+            snapshot: snapshot,
+            querentRuler: base.querentRuler,
+            targetRuler: base.targetRuler
+        )
+        let verdict: HoraryJudgmentVerdict
+        switch perfection.status {
+        case .completes: verdict = .yes
+        case .prevented: verdict = .no
+        case .delayed, .none, .ambiguous: verdict = .noClearJudgment
+        }
+        return HoraryAnalysis(
+            querentHouse: base.querentHouse,
+            targetHouse: base.targetHouse,
+            querentRuler: base.querentRuler,
+            targetRuler: base.targetRuler,
+            querent: base.querent,
+            target: base.target,
+            relationship: base.relationship,
+            receptionFromQuerent: base.receptionFromQuerent,
+            receptionFromTarget: base.receptionFromTarget,
+            moon: base.moon,
+            score: base.score,
+            components: base.components,
+            judgment: HoraryJudgment(verdict: verdict, perfection: perfection)
+        )
+    }
+
     public static func analyzeChoices(
         snapshot: ChartSnapshot,
-        candidates: [HoraryChoiceCandidate]
+        candidates: [HoraryChoiceCandidate],
+        mode: HoraryChoiceSignificatorMode = .independentPrimary
     ) -> [HoraryChoiceResult] {
-        var occurrenceByHouse: [Int: Int] = [:]
-        let duplicateHouses = Set(
-            Dictionary(grouping: candidates, by: \.house)
-                .filter { $0.value.count > 1 }
-                .keys
-        )
         let analyses = candidates.map { candidate in
-            let occurrence = occurrenceByHouse[candidate.house, default: 0]
-            occurrenceByHouse[candidate.house] = occurrence + 1
             let assignedRuler: CelestialBody?
-            if duplicateHouses.contains(candidate.house),
-               let cusp = snapshot.houses.first(where: { $0.number == candidate.house })
+            if case let .sharedPrimary(house) = mode,
+               let cusp = snapshot.houses.first(where: { $0.number == house })
             {
                 let signIndex = Int(normalizeDegrees(cusp.cuspDegrees) / 30)
                 let rulers = triplicityRulers(ofSign: signIndex, isDayChart: isDayChart(snapshot))
-                assignedRuler = occurrence < rulers.count ? rulers[occurrence] : nil
+                assignedRuler = candidate.originalIndex < rulers.count
+                    ? rulers[candidate.originalIndex]
+                    : nil
             } else {
                 assignedRuler = nil
             }
@@ -434,9 +562,7 @@ public enum HoraryEngine {
                 )
             )
         }
-        let weights = analyses.map { max(1, $0.1.score) }
-        let total = max(1, weights.reduce(0, +))
-        return analyses.enumerated().map { index, item in
+        return analyses.map { item in
             let candidate = item.0
             let analysis = item.1
             return HoraryChoiceResult(
@@ -445,17 +571,123 @@ public enum HoraryEngine {
                 house: candidate.house,
                 relatedHouses: candidate.relatedHouses,
                 ruler: analysis.targetRuler,
-                rawScore: analysis.score,
-                likelihood: weights[index] / total * 100,
-                analysis: analysis
+                supportScore: analysis.score,
+                analysis: analysis,
+                originalIndex: candidate.originalIndex
             )
         }
         .sorted {
-            if abs($0.likelihood - $1.likelihood) > 0.000_001 {
-                return $0.likelihood > $1.likelihood
+            if abs($0.supportScore - $1.supportScore) > 0.000_001 {
+                return $0.supportScore > $1.supportScore
             }
             return $0.label.localizedStandardCompare($1.label) == .orderedAscending
         }
+    }
+
+    public static func judgedChoices(
+        snapshot: ChartSnapshot,
+        candidates: [HoraryChoiceCandidate],
+        mode: HoraryChoiceSignificatorMode,
+        calculator: SwissEphemerisCalculator
+    ) async throws -> [HoraryChoiceResult] {
+        let assigned = analyzeChoices(snapshot: snapshot, candidates: candidates, mode: mode)
+        var judged: [HoraryChoiceResult] = []
+        for result in assigned {
+            let analysis = try await judgedAnalysis(
+                snapshot: snapshot,
+                targetHouse: result.house,
+                targetRuler: result.ruler,
+                relatedHouses: result.relatedHouses,
+                calculator: calculator
+            )
+            judged.append(
+                HoraryChoiceResult(
+                    id: result.id,
+                    label: result.label,
+                    house: result.house,
+                    relatedHouses: result.relatedHouses,
+                    ruler: result.ruler,
+                    supportScore: analysis.score,
+                    analysis: analysis,
+                    originalIndex: result.originalIndex
+                )
+            )
+        }
+        let sorted = judged.sorted(by: choicePrecedes)
+        guard sorted.count > 1 else { return sorted }
+        let leader = sorted[0]
+        return sorted.map { result in
+            let tiedWithLeader = result.id != leader.id
+                && !choicePrecedes(leader, result)
+                && !choicePrecedes(result, leader)
+            return HoraryChoiceResult(
+                id: result.id,
+                label: result.label,
+                house: result.house,
+                relatedHouses: result.relatedHouses,
+                ruler: result.ruler,
+                supportScore: result.supportScore,
+                analysis: result.analysis,
+                originalIndex: result.originalIndex,
+                isTiedForLead: tiedWithLeader
+                    || (result.id == leader.id && sorted.dropFirst().contains {
+                        !choicePrecedes(leader, $0) && !choicePrecedes($0, leader)
+                    })
+            )
+        }
+    }
+
+    private static func choicePrecedes(_ lhs: HoraryChoiceResult, _ rhs: HoraryChoiceResult) -> Bool {
+        let lhsJudgment = lhs.analysis.judgment
+        let rhsJudgment = rhs.analysis.judgment
+        let lhsRank = judgmentRank(lhsJudgment?.verdict)
+        let rhsRank = judgmentRank(rhsJudgment?.verdict)
+        if lhsRank != rhsRank { return lhsRank > rhsRank }
+
+        let lhsPath = lhsJudgment?.perfection.primaryPath
+        let rhsPath = rhsJudgment?.perfection.primaryPath
+        if let lhsPath, let rhsPath {
+            let lhsConjunction = lhsPath.aspectKind == .conjunction
+            let rhsConjunction = rhsPath.aspectKind == .conjunction
+            if lhsConjunction != rhsConjunction { return lhsConjunction }
+            if abs(lhsPath.exactDate.timeIntervalSince(rhsPath.exactDate)) > 60 {
+                return lhsPath.exactDate < rhsPath.exactDate
+            }
+        } else if lhsPath != nil || rhsPath != nil {
+            return lhsPath != nil
+        }
+
+        let lhsReception = receptionRank(lhs.analysis)
+        let rhsReception = receptionRank(rhs.analysis)
+        if lhsReception != rhsReception { return lhsReception > rhsReception }
+        if abs(lhs.analysis.target.score - rhs.analysis.target.score) > 0.001 {
+            return lhs.analysis.target.score > rhs.analysis.target.score
+        }
+        let lhsMoon = moonTestimonyRank(lhs.analysis)
+        let rhsMoon = moonTestimonyRank(rhs.analysis)
+        if lhsMoon != rhsMoon { return lhsMoon > rhsMoon }
+        return false
+    }
+
+    private static func judgmentRank(_ verdict: HoraryJudgmentVerdict?) -> Int {
+        switch verdict {
+        case .yes: 2
+        case .noClearJudgment: 1
+        case .no: 0
+        case nil: -1
+        }
+    }
+
+    private static func receptionRank(_ analysis: HoraryAnalysis) -> Int {
+        if analysis.receptionFromQuerent.isPresent, analysis.receptionFromTarget.isPresent { return 2 }
+        return analysis.receptionFromQuerent.isPresent || analysis.receptionFromTarget.isPresent ? 1 : 0
+    }
+
+    private static func moonTestimonyRank(_ analysis: HoraryAnalysis) -> Int {
+        guard !analysis.moon.isVoidOfCourse else { return 0 }
+        guard let next = analysis.moon.nextAspect else { return 1 }
+        let ids = [next.firstID, next.secondID]
+        return ids.contains(analysis.targetRuler.id) ? 3 : 2
     }
 
     public static func timingAnalysis(
@@ -632,16 +864,16 @@ public enum HoraryEngine {
 
     private static func scoreRelationship(_ aspect: ChartAspect?) -> Double {
         guard let aspect else { return 0 }
-        let phaseFactor = aspect.phase == .separating ? 0.35 : 1
+        guard aspect.phase != .separating else { return 0 }
         let base: Double
         switch aspect.kind {
-        case .conjunction: base = 40
-        case .trine: base = 35
-        case .sextile: base = 30
-        case .square: base = 18
-        case .opposition: base = 12
+        case .conjunction: base = 20
+        case .trine: base = 15
+        case .sextile: base = 12
+        case .square: base = 6
+        case .opposition: base = 2
         }
-        return base * phaseFactor
+        return base
     }
 
     private static func exaltationRuler(ofSign signIndex: Int) -> CelestialBody? {
@@ -709,6 +941,244 @@ public enum HoraryEngine {
         return destination.lowerBound
             + progress * (destination.upperBound - destination.lowerBound)
     }
+}
+
+extension SwissEphemerisCalculator {
+    public func resolveHoraryPerfection(
+        snapshot: ChartSnapshot,
+        querentRuler: CelestialBody,
+        targetRuler: CelestialBody
+    ) throws -> HoraryPerfectionAssessment {
+        let effectiveQuerent = querentRuler == targetRuler ? CelestialBody.moon : querentRuler
+        if effectiveQuerent == targetRuler {
+            return HoraryPerfectionAssessment(
+                status: .ambiguous,
+                primaryPath: nil,
+                interruptions: []
+            )
+        }
+
+        let aspects = HoraryEngine.validTraditionalAspects(in: snapshot)
+        let direct = aspects.first {
+            Set([$0.firstID, $0.secondID]) == Set([effectiveQuerent.id, targetRuler.id])
+                && ($0.phase == .applying || $0.phase == .exact)
+        }
+        var directInterruptions: [HoraryPerfectionInterruption] = []
+        if let direct,
+           let path = try perfectionPath(
+               kind: .direct,
+               aspect: direct,
+               moving: effectiveQuerent,
+               reference: targetRuler,
+               mediator: nil,
+               after: snapshot.utcDate
+           )
+        {
+            directInterruptions = try interruptions(
+                before: path.exactDate,
+                bodies: [effectiveQuerent, targetRuler],
+                after: snapshot.utcDate
+            )
+            if directInterruptions.isEmpty,
+               let prohibition = try prohibition(
+                   of: targetRuler,
+                   before: path.exactDate,
+                   excluding: [effectiveQuerent, targetRuler],
+                   aspects: aspects,
+                   after: snapshot.utcDate
+               )
+            {
+                directInterruptions.append(prohibition)
+            }
+            if directInterruptions.isEmpty {
+                return HoraryPerfectionAssessment(
+                    status: .completes,
+                    primaryPath: path,
+                    interruptions: []
+                )
+            }
+        }
+
+        let alternatives = try alternativePerfections(
+            snapshot: snapshot,
+            querentRuler: effectiveQuerent,
+            targetRuler: targetRuler,
+            aspects: aspects
+        )
+        if let alternative = alternatives.min(by: { $0.exactDate < $1.exactDate }) {
+            return HoraryPerfectionAssessment(
+                status: .completes,
+                primaryPath: alternative,
+                interruptions: directInterruptions
+            )
+        }
+        if let direct {
+            let delayed = directInterruptions.contains { $0.kind == .prohibition }
+            return HoraryPerfectionAssessment(
+                status: delayed ? .delayed : .prevented,
+                primaryPath: try perfectionPath(
+                    kind: .direct,
+                    aspect: direct,
+                    moving: effectiveQuerent,
+                    reference: targetRuler,
+                    mediator: nil,
+                    after: snapshot.utcDate
+                ),
+                interruptions: directInterruptions
+            )
+        }
+        return .none
+    }
+
+    private func alternativePerfections(
+        snapshot: ChartSnapshot,
+        querentRuler: CelestialBody,
+        targetRuler: CelestialBody,
+        aspects: [ChartAspect]
+    ) throws -> [HoraryPerfectionPath] {
+        var paths: [HoraryPerfectionPath] = []
+        for mediator in HoraryEngine.traditionalPlanets
+            where mediator != querentRuler && mediator != targetRuler
+        {
+            let withQuerent = aspect(between: mediator, and: querentRuler, in: aspects)
+            let withTarget = aspect(between: mediator, and: targetRuler, in: aspects)
+            guard let first = withQuerent, let second = withTarget else { continue }
+            let mediatorSpeed = abs(snapshot.point(mediator)?.position.longitudeSpeedDegreesPerDay ?? 0)
+            let querentSpeed = abs(snapshot.point(querentRuler)?.position.longitudeSpeedDegreesPerDay ?? 0)
+            let targetSpeed = abs(snapshot.point(targetRuler)?.position.longitudeSpeedDegreesPerDay ?? 0)
+
+            let translationApplying: (ChartAspect, CelestialBody)?
+            if first.phase == .separating, second.phase == .applying {
+                translationApplying = (second, targetRuler)
+            } else if second.phase == .separating, first.phase == .applying {
+                translationApplying = (first, querentRuler)
+            } else {
+                translationApplying = nil
+            }
+            if let (applying, reference) = translationApplying,
+               mediatorSpeed > min(querentSpeed, targetSpeed),
+               let path = try perfectionPath(
+                   kind: .translation,
+                   aspect: applying,
+                   moving: mediator,
+                   reference: reference,
+                   mediator: mediator,
+                   after: snapshot.utcDate
+               ),
+               try interruptions(
+                   before: path.exactDate,
+                   bodies: [mediator, reference],
+                   after: snapshot.utcDate
+               ).isEmpty
+            {
+                paths.append(path)
+            }
+
+            if first.phase == .applying, second.phase == .applying,
+               mediatorSpeed < querentSpeed, mediatorSpeed < targetSpeed,
+               let firstPath = try perfectionPath(
+                   kind: .collection,
+                   aspect: first,
+                   moving: querentRuler,
+                   reference: mediator,
+                   mediator: mediator,
+                   after: snapshot.utcDate
+               ),
+               let secondPath = try perfectionPath(
+                   kind: .collection,
+                   aspect: second,
+                   moving: targetRuler,
+                   reference: mediator,
+                   mediator: mediator,
+                   after: snapshot.utcDate
+               )
+            {
+                let completion = firstPath.exactDate > secondPath.exactDate ? firstPath : secondPath
+                if try interruptions(
+                    before: completion.exactDate,
+                    bodies: [querentRuler, targetRuler, mediator],
+                    after: snapshot.utcDate
+                ).isEmpty {
+                    paths.append(completion)
+                }
+            }
+        }
+        return paths
+    }
+
+    private func perfectionPath(
+        kind: HoraryPerfectionKind,
+        aspect: ChartAspect,
+        moving: CelestialBody,
+        reference: CelestialBody,
+        mediator: CelestialBody?,
+        after date: Date
+    ) throws -> HoraryPerfectionPath? {
+        guard aspect.phase == .applying || aspect.phase == .exact else { return nil }
+        let exactDate = aspect.phase == .exact
+            ? date
+            : try nextExactAspectDate(moving: moving, reference: reference, kind: aspect.kind, after: date)
+        return HoraryPerfectionPath(
+            kind: kind,
+            exactDate: exactDate,
+            aspectKind: aspect.kind,
+            distanceDegrees: aspect.orbDegrees,
+            mediator: mediator
+        )
+    }
+
+    private func interruptions(
+        before deadline: Date,
+        bodies: [CelestialBody],
+        after start: Date
+    ) throws -> [HoraryPerfectionInterruption] {
+        var result: [HoraryPerfectionInterruption] = []
+        for body in Set(bodies) {
+            if let ingress = try nextSignIngress(for: body, after: start, before: deadline) {
+                result.append(.init(kind: .signChange, date: ingress, body: body))
+            }
+            if let station = try nextStation(for: body, after: start, before: deadline) {
+                result.append(.init(kind: .refranation, date: station.date, body: body))
+            }
+        }
+        return result.sorted { $0.date < $1.date }
+    }
+
+    private func prohibition(
+        of receiving: CelestialBody,
+        before deadline: Date,
+        excluding: Set<CelestialBody>,
+        aspects: [ChartAspect],
+        after start: Date
+    ) throws -> HoraryPerfectionInterruption? {
+        var candidates: [HoraryPerfectionInterruption] = []
+        for body in HoraryEngine.traditionalPlanets where !excluding.contains(body) {
+            guard let candidate = aspect(between: body, and: receiving, in: aspects),
+                  candidate.phase == .applying
+            else { continue }
+            let exact = try nextExactAspectDate(
+                moving: body,
+                reference: receiving,
+                kind: candidate.kind,
+                after: start
+            )
+            if exact < deadline,
+               try interruptions(before: exact, bodies: [body, receiving], after: start).isEmpty
+            {
+                candidates.append(.init(kind: .prohibition, date: exact, body: body))
+            }
+        }
+        return candidates.min { $0.date < $1.date }
+    }
+
+    private func aspect(
+        between first: CelestialBody,
+        and second: CelestialBody,
+        in aspects: [ChartAspect]
+    ) -> ChartAspect? {
+        aspects.first { Set([$0.firstID, $0.secondID]) == Set([first.id, second.id]) }
+    }
+
 }
 
 public struct ElectionTimingEngine: Sendable {

@@ -387,6 +387,24 @@ final class VisualRegressionTests: XCTestCase {
         XCTAssertTrue(keyboardDone.waitForExistence(timeout: 5), "The keyboard return key should be Done")
         keyboardDone.tap()
         XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5))
+
+        app.buttons["ask-life-area-picker"].tap()
+        let identity = app.buttons["ask-life-area-toggle-1"]
+        let money = app.buttons["ask-life-area-toggle-2"]
+        XCTAssertTrue(identity.waitForExistence(timeout: 5))
+        identity.tap()
+        money.tap()
+        let setMoneyPrimary = app.buttons["ask-life-area-set-primary-2"]
+        XCTAssertTrue(setMoneyPrimary.waitForExistence(timeout: 5))
+        setMoneyPrimary.tap()
+        XCTAssertTrue(app.buttons["ask-life-area-set-primary-1"].waitForExistence(timeout: 5))
+        app.buttons["Done"].tap()
+
+        let askChart = app.buttons["Ask the chart"]
+        scrollTo(askChart, in: app)
+        XCTAssertTrue(askChart.isEnabled)
+        askChart.tap()
+        XCTAssertTrue(app.staticTexts["Your answer"].waitForExistence(timeout: 30))
     }
 
     @MainActor

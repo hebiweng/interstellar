@@ -62,7 +62,9 @@ ChartSnapshot / Aspect / Event
 
 地点参数只能来自 Apple 地图当前位置、搜索或点选；消费者 UI 不显示或编辑经纬度，时区由地点自动确定并只读展示。
 
-Ask Life Areas 默认空且必须显式选择。一个 Primary Area 决定核心 significator，Related Areas 只提供辅助证据。A/B/C 可使用 Shared Primary + Shared Related + Option Additional，或无 Shared Primary 时由每个 Option 显式选择 Primary；禁止 option-level Primary override。同一 Primary 的候选按盘的 sect 使用 triplicity rulers 分配独立 significator。
+Ask Life Areas 默认空且必须显式选择。一个 Primary Area 决定核心 significator，Related Areas 只提供辅助证据；每个 Related 项必须提供明确的“设为 Primary”操作。A/B/C 可使用 Shared Primary + Shared Related + Option Additional，或无 Shared Primary 时由每个 Option 显式选择 Primary；禁止 option-level Primary override。只有显式 Shared Primary 的 A/B/C 才按盘的 sect 使用 triplicity rulers 分配独立 significator，混合 Primary 不得因局部宫位重复触发。
+
+Ask 的 Judgment 与 Support 必须分离。Judgment 消费真实 direct perfection、换座、station/refranation、基础 prohibition、translation 与 collection 事件证据；Support 只描述 reception、行星状态、Moon 与 Related Areas，不得决定 Judgment，也不得在 A/B/C 间归一化成合计 100%。同领域选择依次比较有效完成、合相、完成先后、reception、condition 与 Moon；证据相同必须保留无明确领先结果，不能继续增加无传统依据的 tie-break。`Find the Best Time` 继续使用独立 Electional Timing 合同，不得被 Horary Judgment 改造污染。
 
 | 盘型 | 参数 |
 |---|---|

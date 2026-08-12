@@ -616,7 +616,9 @@ struct AskView: View {
             .buttonStyle(.plain)
 
             Text(
-                localized("ask.likelihood-and-suitability-describe-support-within-this-chart-model-they", language: model.language)
+                session.mode == .timing
+                    ? localized("ask.likelihood-and-suitability-describe-support-within-this-chart-model-they", language: model.language)
+                    : localized("ask.support-note", language: model.language)
             )
             .font(AppTypography.supporting)
             .foregroundStyle(AppTheme.muted)
@@ -644,7 +646,7 @@ struct AskView: View {
                         .foregroundStyle(AppTheme.text)
                     Text(session.mode == .timing
                         ? localized("ask.suitable", language: model.language)
-                        : localized("ask.likelihood", language: model.language))
+                        : localized("ask.support", language: model.language))
                         .font(AppTypography.supporting)
                         .foregroundStyle(AppTheme.muted)
                 }
@@ -668,8 +670,7 @@ struct AskView: View {
     }
 
     private func choiceRanking(_ choices: [HoraryChoiceResult]) -> some View {
-        let display = displayPercentages(choices)
-        let close = choices.count > 1 && choices[0].likelihood - choices[1].likelihood <= 8
+        let close = choices.first?.isTiedForLead == true
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(localized("ask.option-ranking", language: model.language))
@@ -685,7 +686,7 @@ struct AskView: View {
             ForEach(Array(choices.enumerated()), id: \.element.id) { index, item in
                 VStack(spacing: 6) {
                     HStack {
-                        Text("\(index + 1)")
+                        Text(String(UnicodeScalar(65 + item.originalIndex)!))
                             .font(AppTypography.label)
                             .foregroundStyle(AppTheme.violet)
                             .frame(width: 24, height: 24)
@@ -694,11 +695,11 @@ struct AskView: View {
                             .font(AppTypography.label)
                             .foregroundStyle(AppTheme.text)
                         Spacer()
-                        Text("\(display[item.id, default: 0])%")
+                        Text("\(Int(item.supportScore.rounded()))%")
                             .font(.headline.monospacedDigit())
                             .foregroundStyle(AppTheme.text)
                     }
-                    ProgressView(value: item.likelihood, total: 100)
+                    ProgressView(value: item.supportScore, total: 100)
                         .tint(index == 0 ? AppTheme.violet : AppTheme.blue.opacity(0.6))
                 }
                 .padding(.vertical, 4)
@@ -824,7 +825,7 @@ struct AskView: View {
                         locationName: location.name,
                         timezoneID: location.timezoneID,
                         snapshot: snapshot,
-                        analysis: HoraryEngine.analyze(
+                        analysis: try await model.calculateHoraryJudgment(
                             snapshot: snapshot,
                             targetHouse: primaryHouse,
                             relatedHouses: Array(relatedHouses).sorted()
@@ -838,14 +839,21 @@ struct AskView: View {
                         at: moment,
                         location: requestLocation
                     )
-                    let candidates = options.compactMap { option -> HoraryChoiceCandidate? in
+                    let candidates = options.enumerated().compactMap { index, option -> HoraryChoiceCandidate? in
                         guard let house = effectivePrimaryHouse(for: option) else { return nil }
                         return HoraryChoiceCandidate(
                             id: option.id,
                             label: option.label.trimmed,
                             house: house,
-                            relatedHouses: Array(effectiveRelatedHouses(for: option)).sorted()
+                            relatedHouses: Array(effectiveRelatedHouses(for: option)).sorted(),
+                            originalIndex: index
                         )
+                    }
+                    let choiceMode: HoraryChoiceSignificatorMode = if let sharedPrimaryHouse,
+                                                                     sharedSamePrimary == true {
+                        .sharedPrimary(house: sharedPrimaryHouse)
+                    } else {
+                        .independentPrimary
                     }
                     newSession = HorarySession(
                         mode: mode,
@@ -855,9 +863,10 @@ struct AskView: View {
                         timezoneID: location.timezoneID,
                         snapshot: snapshot,
                         analysis: nil,
-                        choices: HoraryEngine.analyzeChoices(
+                        choices: try await model.calculateHoraryChoices(
                             snapshot: snapshot,
-                            candidates: candidates
+                            candidates: candidates,
+                            mode: choiceMode
                         ),
                         timingCandidates: []
                     )
@@ -1012,12 +1021,14 @@ struct AskView: View {
         let text: String
         switch session.mode {
         case .yesNo:
-            title = session.analysis.map { $0.score >= 55 ? localized("ask.leaning-yes", language: model.language) : localized("ask.leaning-no", language: model.language) } ?? localized("ask.result", language: model.language)
-            text = session.analysis.map { "\(Int($0.score))% " + localized("ask.likelihood.4683602", language: model.language) } ?? ""
+            title = session.analysis.map { judgmentLabel($0) } ?? localized("ask.result", language: model.language)
+            text = session.analysis.map { "\(Int($0.score.rounded()))% " + localized("ask.support", language: model.language) } ?? ""
         case .choice:
             if let first = session.choices.first {
-                title = first.label
-                text = "\(Int(first.likelihood * 100))%"
+                title = first.isTiedForLead
+                    ? localized("ask.no-clear-option", language: model.language)
+                    : first.label
+                text = "\(Int(first.supportScore.rounded()))% " + localized("ask.support", language: model.language)
             } else {
                 title = localized("ask.result", language: model.language)
                 text = ""
@@ -1138,23 +1149,23 @@ struct AskView: View {
     private func primaryScore(_ session: HorarySession) -> Double {
         switch session.mode {
         case .yesNo: session.analysis?.score ?? 0
-        case .choice: session.choices.first?.likelihood ?? 0
+        case .choice: session.choices.first?.supportScore ?? 0
         case .timing: session.timingCandidates.first?.score ?? 0
         }
     }
 
     private func primaryLabel(_ session: HorarySession) -> String {
-        let score = primaryScore(session)
         switch session.mode {
         case .yesNo:
-            if score >= 80 { return localized("ask.very-likely", language: model.language) }
-            if score >= 65 { return localized("ask.likely-yes", language: model.language) }
-            if score >= 45 { return localized("ask.still-unclear", language: model.language) }
-            if score >= 30 { return localized("ask.likely-no", language: model.language) }
-            return localized("ask.very-unlikely", language: model.language)
+            guard let analysis = session.analysis else {
+                return localized("ask.still-unclear", language: model.language)
+            }
+            return judgmentLabel(analysis)
         case .choice:
-            return session.choices.first?.label
-                ?? localized("ask.no-clear-option", language: model.language)
+            guard let first = session.choices.first, !first.isTiedForLead else {
+                return localized("ask.no-clear-option", language: model.language)
+            }
+            return first.label
         case .timing:
             guard let first = session.timingCandidates.first else {
                 return localized("ask.no-timing-found", language: model.language)
@@ -1169,21 +1180,12 @@ struct AskView: View {
         return AppTheme.coral
     }
 
-    private func displayPercentages(_ choices: [HoraryChoiceResult]) -> [UUID: Int] {
-        let floors = choices.map { Int(floor($0.likelihood)) }
-        var remainder = max(0, 100 - floors.reduce(0, +))
-        let fractionalOrder = choices.indices.sorted {
-            choices[$0].likelihood - floor(choices[$0].likelihood)
-                > choices[$1].likelihood - floor(choices[$1].likelihood)
+    private func judgmentLabel(_ analysis: HoraryAnalysis) -> String {
+        switch analysis.judgment?.verdict {
+        case .yes: localized("common.yes", language: model.language)
+        case .no: localized("common.no", language: model.language)
+        case .noClearJudgment, nil: localized("ask.no-clear-judgment", language: model.language)
         }
-        var values = floors
-        for index in fractionalOrder where remainder > 0 {
-            values[index] += 1
-            remainder -= 1
-        }
-        return Dictionary(
-            uniqueKeysWithValues: zip(choices, values).map { ($0.0.id, $0.1) }
-        )
     }
 
     private func overlay(for session: HorarySession) -> HoraryOverlay {
@@ -1216,10 +1218,10 @@ struct AskView: View {
             if let first = session.choices.first {
                 append(localized("ask.you", language: model.language), for: first.analysis.querentRuler)
             }
-            for (index, choice) in session.choices.enumerated() {
+            for choice in session.choices {
                 houses.insert(choice.house)
                 append(
-                    "\(String(UnicodeScalar(65 + index)!)) · \(choice.label)",
+                    "\(String(UnicodeScalar(65 + choice.originalIndex)!)) · \(choice.label)",
                     for: choice.ruler
                 )
                 if let relationship = choice.analysis.relationship {
@@ -1288,6 +1290,7 @@ private struct LifeAreaPickerButton: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("ask-life-area-picker")
         .sheet(isPresented: $isPresented) {
             LifeAreaPickerSheet(
                 title: title,
@@ -1377,42 +1380,56 @@ private struct LifeAreaPickerSheet: View {
             List(1 ... 12, id: \.self) { house in
                 let selected = primary == house || related.contains(house)
                 let disabled = excluding.contains(house) && !selected
-                HStack(alignment: .center, spacing: 12) {
-                    Button { toggle(house) } label: {
-                        Image(systemName: selected ? "checkmark.circle.fill" : "circle")
-                            .font(.title3)
-                            .foregroundStyle(selected ? AppTheme.violet : AppTheme.muted)
-                            .frame(width: 32, height: 44)
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(disabled)
-
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(askLifeAreaTitle(house, language: language))
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(disabled ? AppTheme.muted : AppTheme.text)
-                        Text(askLifeAreaDescription(house, language: language))
-                            .font(.caption)
-                            .foregroundStyle(AppTheme.muted)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-
-                    Spacer(minLength: 4)
-                    if allowsPrimary, selected {
-                        Button { makePrimary(house) } label: {
-                            Text(primary == house
-                                ? localized("ask.primary", language: language)
-                                : localized("ask.related", language: language))
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(primary == house ? Color.white : AppTheme.violet)
-                                .padding(.horizontal, 9)
-                                .frame(minHeight: 32)
-                                .background(
-                                    primary == house ? AppTheme.violet : AppTheme.violet.opacity(0.1),
-                                    in: Capsule()
-                                )
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(alignment: .center, spacing: 12) {
+                        Button { toggle(house) } label: {
+                            Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                                .font(.title3)
+                                .foregroundStyle(selected ? AppTheme.violet : AppTheme.muted)
+                                .frame(width: 32, height: 44)
                         }
                         .buttonStyle(.plain)
+                        .disabled(disabled)
+                        .accessibilityIdentifier("ask-life-area-toggle-\(house)")
+
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(askLifeAreaTitle(house, language: language))
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(disabled ? AppTheme.muted : AppTheme.text)
+                            Text(askLifeAreaDescription(house, language: language))
+                                .font(.caption)
+                                .foregroundStyle(AppTheme.muted)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                        Spacer(minLength: 4)
+                        if allowsPrimary, primary == house {
+                            Text(localized("ask.primary", language: language))
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(Color.white)
+                                .padding(.horizontal, 9)
+                                .frame(minHeight: 32)
+                                .background(AppTheme.violet, in: Capsule())
+                        } else if allowsPrimary, related.contains(house) {
+                            Text(localized("ask.related", language: language))
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(AppTheme.violet)
+                        }
+                    }
+
+                    if allowsPrimary, related.contains(house) {
+                        Button { makePrimary(house) } label: {
+                            Label(
+                                localized("ask.set-as-primary", language: language),
+                                systemImage: "arrow.up.circle"
+                            )
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(AppTheme.violet)
+                            .frame(maxWidth: .infinity, minHeight: 36, alignment: .leading)
+                            .padding(.leading, 44)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("ask-life-area-set-primary-\(house)")
                     }
                 }
                 .contentShape(Rectangle())
@@ -1533,18 +1550,18 @@ private enum AskContentComposer {
         switch session.mode {
         case .yesNo:
             guard let analysis = session.analysis else { return [] }
-            let band: String
-            if analysis.score >= 80 { band = "very-likely" }
-            else if analysis.score >= 65 { band = "likely" }
-            else if analysis.score >= 45 { band = "mixed" }
-            else if analysis.score >= 30 { band = "unlikely" }
-            else { band = "very-unlikely" }
+            let verdict = analysis.judgment?.verdict ?? .noClearJudgment
+            let verdictKey: String = switch verdict {
+            case .yes: "ask.judgment.yes"
+            case .no: "ask.judgment.no"
+            case .noClearJudgment: "ask.judgment.no-clear"
+            }
             return try [
                 card(
                     id: "answer",
                     icon: "checkmark.seal",
                     copy: content.requiredCopy(
-                        key: "ask.verdict.\(band)",
+                        key: verdictKey,
                         variables: ["score": "\(Int(analysis.score.rounded()))"]
                     )
                 ),
@@ -1554,17 +1571,15 @@ private enum AskContentComposer {
             ]
         case .choice:
             guard let first = session.choices.first else { return [] }
-            let close = session.choices.count > 1
-                && first.likelihood - session.choices[1].likelihood <= 8
             return try [
                 card(
                     id: "choice-result",
                     icon: "list.number",
                     copy: content.requiredCopy(
-                        key: close ? "ask.choice.close" : "ask.choice.leading",
+                        key: first.isTiedForLead ? "ask.choice.no-clear" : "ask.choice.leading",
                         variables: [
                             "option": first.label,
-                            "score": "\(Int(first.likelihood.rounded()))",
+                            "score": "\(Int(first.supportScore.rounded()))",
                         ]
                     )
                 ),
@@ -1595,7 +1610,27 @@ private enum AskContentComposer {
         content: ContentProvider
     ) throws -> AskResultCard {
         let key: String
-        if let relationship = analysis.relationship {
+        if let perfection = analysis.judgment?.perfection {
+            if perfection.status == .completes, perfection.primaryPath?.kind == .translation {
+                key = "ask.connection.translation"
+            } else if perfection.status == .completes, perfection.primaryPath?.kind == .collection {
+                key = "ask.connection.collection"
+            } else if perfection.status == .prevented {
+                key = "ask.connection.prevented"
+            } else if perfection.status == .delayed {
+                key = "ask.connection.delayed"
+            } else if let relationship = analysis.relationship {
+                if relationship.phase == .separating {
+                    key = "ask.connection.separating"
+                } else if relationship.kind.supportive || relationship.kind == .conjunction {
+                    key = "ask.connection.supportive"
+                } else {
+                    key = "ask.connection.challenging"
+                }
+            } else {
+                key = "ask.connection.none"
+            }
+        } else if let relationship = analysis.relationship {
             if relationship.phase == .separating {
                 key = "ask.connection.separating"
             } else if relationship.kind.supportive || relationship.kind == .conjunction {
@@ -1632,12 +1667,16 @@ private enum AskContentComposer {
         _ analysis: HoraryAnalysis,
         content: ContentProvider
     ) throws -> AskResultCard {
-        let risk = analysis.components.first { $0.id == "risk" || $0.id == "obstruction" }?.value ?? 0
+        let hasInterruption = !(analysis.judgment?.perfection.interruptions.isEmpty ?? true)
+        let hasConditionRisk = analysis.querent.conditions.contains(.combust)
+            || analysis.querent.conditions.contains(.retrograde)
+            || analysis.target.conditions.contains(.combust)
+            || analysis.target.conditions.contains(.retrograde)
         return card(
             id: "obstacle",
-            icon: risk <= -10 ? "exclamationmark.triangle" : "shield.checkered",
+            icon: hasInterruption || hasConditionRisk ? "exclamationmark.triangle" : "shield.checkered",
             copy: try content.requiredCopy(
-                key: risk <= -10 ? "ask.risk.present" : "ask.risk.limited"
+                key: hasInterruption || hasConditionRisk ? "ask.risk.present" : "ask.risk.limited"
             )
         )
     }
@@ -1717,6 +1756,16 @@ private struct HoraryProfessionalView: View {
                 localized("ask.target-ruler", language: language),
                 bodyName(analysis.targetRuler, language: language)
             )
+            if let judgment = analysis.judgment {
+                professionalRow(
+                    localized("ask.judgment", language: language),
+                    judgmentLabel(judgment.verdict)
+                )
+                professionalRow(
+                    localized("ask.perfection", language: language),
+                    perfectionLabel(judgment.perfection)
+                )
+            }
             professionalRow(
                 localized("ask.connection", language: language),
                 analysis.relationship.map {
@@ -1747,7 +1796,7 @@ private struct HoraryProfessionalView: View {
                 }
             }
             HStack {
-                Text(localized("ask.total", language: language))
+                Text(localized(analysis.judgment == nil ? "ask.total" : "ask.support", language: language))
                     .font(.headline)
                 Spacer()
                 Text("\(Int(analysis.score.rounded()))")
@@ -1779,6 +1828,35 @@ private struct HoraryProfessionalView: View {
             return localized("ask.one-way-reception", language: language)
         }
         return localized("ask.no-major-reception", language: language)
+    }
+
+    private func judgmentLabel(_ verdict: HoraryJudgmentVerdict) -> String {
+        switch verdict {
+        case .yes: localized("common.yes", language: language)
+        case .no: localized("common.no", language: language)
+        case .noClearJudgment: localized("ask.no-clear-judgment", language: language)
+        }
+    }
+
+    private func perfectionLabel(_ assessment: HoraryPerfectionAssessment) -> String {
+        if let path = assessment.primaryPath, assessment.status == .completes {
+            let distance = " · " + formatOrb(path.distanceDegrees)
+            let mediator = path.mediator.map { " · " + bodyName($0, language: language) } ?? ""
+            switch path.kind {
+            case .direct:
+                return localized("ask.perfection.direct", language: language) + distance
+            case .translation:
+                return localized("ask.perfection.translation", language: language) + mediator + distance
+            case .collection:
+                return localized("ask.perfection.collection", language: language) + mediator + distance
+            }
+        }
+        switch assessment.status {
+        case .prevented: return localized("ask.perfection.prevented", language: language)
+        case .delayed: return localized("ask.perfection.delayed", language: language)
+        case .none, .ambiguous: return localized("ask.perfection.none", language: language)
+        case .completes: return localized("ask.perfection.direct", language: language)
+        }
     }
 
     private func nextMoonAspect(_ analysis: HoraryAnalysis) -> String {

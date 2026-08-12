@@ -202,8 +202,8 @@ struct AstroCoreTests {
         #expect(analysis.moon.isVoidOfCourse == (analysis.moon.nextAspect == nil))
     }
 
-    @Test("Traditional rulers and choice likelihoods are deterministic")
-    func rulersAndChoiceLikelihoods() async throws {
+    @Test("Traditional rulers and choice support are deterministic")
+    func rulersAndChoiceSupport() async throws {
         let expected: [CelestialBody] = [
             .mars, .venus, .mercury, .moon, .sun, .mercury,
             .venus, .mars, .jupiter, .saturn, .saturn, .jupiter,
@@ -228,8 +228,8 @@ struct AstroCoreTests {
         )
 
         #expect(choices.count == 3)
-        #expect(abs(choices.reduce(0) { $0 + $1.likelihood } - 100) < 0.000_001)
-        #expect(choices == choices.sorted { $0.likelihood > $1.likelihood })
+        #expect(choices.allSatisfy { (0 ... 100).contains($0.supportScore) })
+        #expect(choices == choices.sorted { $0.supportScore > $1.supportScore })
     }
 
     @Test("Same-area choices receive distinct sect-aware triplicity rulers")
@@ -247,7 +247,19 @@ struct AstroCoreTests {
             HoraryChoiceCandidate(label: "B", house: 10, relatedHouses: [2]),
             HoraryChoiceCandidate(label: "C", house: 10),
         ]
-        let results = HoraryEngine.analyzeChoices(snapshot: snapshot, candidates: original)
+        let results = HoraryEngine.analyzeChoices(
+            snapshot: snapshot,
+            candidates: original.enumerated().map {
+                HoraryChoiceCandidate(
+                    id: $0.element.id,
+                    label: $0.element.label,
+                    house: $0.element.house,
+                    relatedHouses: $0.element.relatedHouses,
+                    originalIndex: $0.offset
+                )
+            },
+            mode: .sharedPrimary(house: 10)
+        )
         let byID = Dictionary(uniqueKeysWithValues: results.map { ($0.id, $0) })
         let cusp = try #require(snapshot.houses.first { $0.number == 10 })
         let sign = Int(cusp.cuspDegrees / 30)
@@ -259,6 +271,68 @@ struct AstroCoreTests {
         #expect(original.enumerated().allSatisfy { byID[$0.element.id]?.ruler == expected[$0.offset] })
         #expect(byID[original[0].id]?.relatedHouses == [2, 9])
         #expect(Set(results.map(\.ruler)).count == 3)
+    }
+
+    @Test("Independent repeated areas keep their house ruler")
+    func independentRepeatedAreas() async throws {
+        let calculator = try SwissEphemerisCalculator(ephemerisDirectory: ephemerisDirectory)
+        let snapshot = try await calculator.calculateSnapshot(
+            NatalInput(
+                utcDate: Date(timeIntervalSince1970: 1_775_000_000),
+                location: GeographicLocation(latitudeDegrees: 35.0263, longitudeDegrees: 111.0073)
+            ),
+            configuration: .horary
+        )
+        let expected = HoraryEngine.ruler(ofHouse: 10, in: snapshot)
+        let results = HoraryEngine.analyzeChoices(
+            snapshot: snapshot,
+            candidates: [
+                HoraryChoiceCandidate(label: "A", house: 10, originalIndex: 0),
+                HoraryChoiceCandidate(label: "B", house: 10, originalIndex: 1),
+                HoraryChoiceCandidate(label: "C", house: 9, originalIndex: 2),
+            ],
+            mode: .independentPrimary
+        )
+
+        #expect(results.filter { $0.house == 10 }.allSatisfy { $0.ruler == expected })
+    }
+
+    @Test("Horary judgment resolves bounded ephemeris evidence")
+    func horaryJudgmentEvidence() async throws {
+        let calculator = try SwissEphemerisCalculator(ephemerisDirectory: ephemerisDirectory)
+        let snapshot = try await calculator.calculateSnapshot(
+            NatalInput(
+                utcDate: Date(timeIntervalSince1970: 1_775_000_000),
+                location: GeographicLocation(latitudeDegrees: 35.0263, longitudeDegrees: 111.0073)
+            ),
+            configuration: .horary
+        )
+        let analysis = try await HoraryEngine.judgedAnalysis(
+            snapshot: snapshot,
+            targetHouse: 10,
+            calculator: calculator
+        )
+        let judgment = try #require(analysis.judgment)
+
+        #expect((0 ... 100).contains(analysis.score))
+        if let path = judgment.perfection.primaryPath {
+            #expect(path.exactDate >= snapshot.utcDate)
+            #expect(judgment.perfection.interruptions.allSatisfy { $0.date <= path.exactDate })
+        }
+
+        let choices = try await HoraryEngine.judgedChoices(
+            snapshot: snapshot,
+            candidates: [
+                HoraryChoiceCandidate(label: "A", house: 10, originalIndex: 0),
+                HoraryChoiceCandidate(label: "B", house: 10, originalIndex: 1),
+                HoraryChoiceCandidate(label: "C", house: 10, originalIndex: 2),
+            ],
+            mode: .sharedPrimary(house: 10),
+            calculator: calculator
+        )
+        #expect(Set(choices.map(\.originalIndex)) == Set([0, 1, 2]))
+        #expect(choices.allSatisfy { $0.analysis.judgment != nil })
+        #expect(choices.allSatisfy { (0 ... 100).contains($0.supportScore) })
     }
 
     @Test("Election timing returns ranked non-overlapping days")

@@ -951,6 +951,36 @@ final class AppModel: ObservableObject {
         )
     }
 
+    func calculateHoraryJudgment(
+        snapshot: ChartSnapshot,
+        targetHouse: Int,
+        targetRuler: CelestialBody? = nil,
+        relatedHouses: [Int] = []
+    ) async throws -> HoraryAnalysis {
+        let calculator = try calculatorInstance()
+        return try await HoraryEngine.judgedAnalysis(
+            snapshot: snapshot,
+            targetHouse: targetHouse,
+            targetRuler: targetRuler,
+            relatedHouses: relatedHouses,
+            calculator: calculator
+        )
+    }
+
+    func calculateHoraryChoices(
+        snapshot: ChartSnapshot,
+        candidates: [HoraryChoiceCandidate],
+        mode: HoraryChoiceSignificatorMode
+    ) async throws -> [HoraryChoiceResult] {
+        let calculator = try calculatorInstance()
+        return try await HoraryEngine.judgedChoices(
+            snapshot: snapshot,
+            candidates: candidates,
+            mode: mode,
+            calculator: calculator
+        )
+    }
+
     func searchElectionTiming(
         _ request: ElectionTimingRequest,
         progress: @escaping @Sendable (Double) -> Void

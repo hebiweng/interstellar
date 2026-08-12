@@ -4763,6 +4763,78 @@
     "es": "Áreas relacionadas compartidas · Opcional",
     "fr": "Domaines associés partagés · Facultatif"
   },
+  "ask.set-as-primary": {
+    "en": "Set as Primary",
+    "zh": "设为主要领域",
+    "es": "Definir como principal",
+    "fr": "Définir comme principal"
+  },
+  "ask.support": {
+    "en": "support",
+    "zh": "支持度",
+    "es": "apoyo",
+    "fr": "soutien"
+  },
+  "ask.support-note": {
+    "en": "Support reflects reception, planetary condition, the Moon, and related life areas in this chart.",
+    "zh": "支持度综合当前盘面的接纳、行星状态、月亮和相关生活领域。",
+    "es": "El apoyo refleja la recepción, el estado planetario, la Luna y las áreas de vida relacionadas de esta carta.",
+    "fr": "Le soutien reflète la réception, l’état des planètes, la Lune et les domaines de vie associés dans cette carte."
+  },
+  "ask.judgment": {
+    "en": "Judgment",
+    "zh": "判断",
+    "es": "Juicio",
+    "fr": "Jugement"
+  },
+  "ask.perfection": {
+    "en": "Completion path",
+    "zh": "完成路径",
+    "es": "Vía de culminación",
+    "fr": "Voie d’accomplissement"
+  },
+  "ask.perfection.direct": {
+    "en": "Direct connection",
+    "zh": "直接联系",
+    "es": "Conexión directa",
+    "fr": "Lien direct"
+  },
+  "ask.perfection.translation": {
+    "en": "Carried by another planet",
+    "zh": "由另一颗行星传递",
+    "es": "Transmitida por otro planeta",
+    "fr": "Transmise par une autre planète"
+  },
+  "ask.perfection.collection": {
+    "en": "Brought together by another planet",
+    "zh": "由另一颗行星汇集",
+    "es": "Reunida por otro planeta",
+    "fr": "Réunie par une autre planète"
+  },
+  "ask.perfection.prevented": {
+    "en": "Interrupted before completion",
+    "zh": "完成前被打断",
+    "es": "Interrumpida antes de culminar",
+    "fr": "Interrompue avant l’accomplissement"
+  },
+  "ask.perfection.delayed": {
+    "en": "Delayed by an earlier contact",
+    "zh": "被更早的联系延迟",
+    "es": "Retrasada por un contacto anterior",
+    "fr": "Retardée par un contact antérieur"
+  },
+  "ask.perfection.none": {
+    "en": "No decisive path",
+    "zh": "没有决定性路径",
+    "es": "Sin vía decisiva",
+    "fr": "Aucune voie décisive"
+  },
+  "ask.no-clear-judgment": {
+    "en": "No clear judgment",
+    "zh": "暂无明确判断",
+    "es": "Sin juicio claro",
+    "fr": "Pas de jugement clair"
+  },
   "common.no": {
     "en": "No",
     "zh": "否",

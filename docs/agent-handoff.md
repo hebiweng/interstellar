@@ -40,7 +40,7 @@ AIGC:
 
 ### 本地化与内容
 
-- `ios/Localization/ui-translations.json` 是固定 UI 的四语唯一源，当前 862 条；Swift 只写 stable key。
+- `ios/Localization/ui-translations.json` 是固定 UI 的四语唯一源，当前 900 条；Swift 只写 stable key。
 - `scripts/build-ios-localization.mjs` 由上述 JSON 生成并校验 `Localizable.xcstrings`。
 - 消费者正文仍来自私有 Copy Catalog；西法未审核正文按合同回退英文。
 - 语料生成的标准输入是 `artifacts/<preset>-<chart>/` 下每套 10 个公开合同 JSON，不是 `PrivateContent` 或单一 worklist。
@@ -55,6 +55,8 @@ AIGC:
 - Profile、其他人物与 Ask 的地点入口统一为 Apple Maps；不再展示或编辑经纬度，地点和时区不能手填，时区随地图结果自动更新并只读显示。
 - Ask 三流程的 Life Areas 默认均为空，改为显式 Primary + Related 多选；未选 Primary 时不能计算，列表提供四语生活场景说明。
 - A/B/C 只支持 2–3 个选项；可选择共同 Primary/Related，也可为不同类型选项分别选择 Primary，共同 Primary 下 Option Additional 永远只作为 Related。相同 Primary 的候选由 AstroCore 按日夜盘 triplicity rulers 分配独立主星，普通 UI 不显示专业术语。
+- Ask Judgment 已从 Support 分数中拆出：AstroCore 使用有截止时刻的 Swiss Ephemeris 事件查询解析 direct perfection、换座、station/refranation、基础 prohibition、translation 与 collection；Support 仅保留 reception、行星状态、Moon 与 Related Areas。A/B/C 不再归一化为合计 100%，只有显式 Shared Primary 才启用三分主星，证据相同时返回无明确领先。
+- Life Areas 的每个 Related 项下提供四语“设为 Primary”操作；A/B/C History 的重复 ×100 和排序后字母身份错位已修复。消费者结果文案只描述当前情况，不输出算法辩护或内部设计说明。Electional `Find the Best Time` 未改动。
 - A/B/C 页面已加入问号入口，长帮助正文按 en / zh-Hans / es / fr 四个 Markdown 运行时资源独立维护。
 - 报告页删除 `% read`、阅读分钟估算；标签保持单行。
 - 合盘相位矩阵已增大并响应 Dynamic Type。
@@ -105,9 +107,10 @@ AstroCore Snapshot / Aspect / Event
 
 ## 4. 最新验证证据
 
-- AstroCore 23 项测试通过，包含同领域 A/B/C 的 sect-aware triplicity 分配、三个独立主星和 Related Areas 传递测试。
-- iPhoneOS arm64 Debug 无签名构建通过；四语帮助 Markdown 已进入 App Resources，固定 UI 888 条四语本地化生成与构建期校验通过。
+- AstroCore 25 项测试通过，包含有界 Horary Judgment 事件证据、同领域 A/B/C 的 sect-aware triplicity 分配、独立模式重复宫位不误触发，以及原始 Option 身份稳定性。
+- iPhoneOS arm64 Debug 无签名构建通过；四语帮助 Markdown 已进入 App Resources，固定 UI 900 条四语本地化生成与构建期校验通过。
 - iPhoneOS arm64 Debug 真机构建通过，并已覆盖安装、启动到 iPhone 12 mini。
+- iPhone 12 mini 上 Ask 端到端 UI 测试通过：输入问题、关闭键盘、选择 Primary / Related、将 Related 设为 Primary、提交并进入 Judgment 结果页。
 - 真机月相数学与 14 对人物 × Modern/Classical 共 28 份合盘计划测试通过：8 卡顺序正确、空卡 0、卡内重复 0、事实引用与角色方向合法；所有实际选中事实在 en / zh-Hans / es / fr 均能命中非空解读。
 - 已用真机当前保存人物复现并修复合盘 `missingCopy`：未观察过的 `modern / relationship-overview / Jupiter conjunction Jupiter` 现命中已审核基础选择器；修复后同一真机页面正常显示 Relationship Overview。永久单元测试覆盖该键以及四语全部 planet-role / 12 宫 house-overlay 基础选择器。
 - 私有运行时 Catalog 构建与校验通过：en / zh-Hans 各 2506 条，es / fr 各 2399 条，51 份合同。

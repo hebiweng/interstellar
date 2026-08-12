@@ -78,6 +78,48 @@ extension SwissEphemerisCalculator {
         throw AstroCoreError.eventNotFound("No station for \(body.displayName) within two years.")
     }
 
+    /// Returns a station only when it occurs inside the supplied Horary event window.
+    public func nextStation(
+        for body: CelestialBody,
+        after date: Date,
+        before deadline: Date
+    ) throws -> AstroStation? {
+        guard deadline > date else { return nil }
+        let start = julianDay(for: date)
+        let end = julianDay(for: deadline)
+        var lower = start
+        var lowerSpeed = try bodyPosition(body, julianDayUT: lower).speed
+        var upper = min(end, lower + 1)
+        while upper <= end, upper > lower {
+            let upperSpeed = try bodyPosition(body, julianDayUT: upper).speed
+            if lowerSpeed == 0 || upperSpeed == 0 || (lowerSpeed < 0) != (upperSpeed < 0) {
+                var lo = lower
+                var hi = upper
+                var loSpeed = lowerSpeed
+                for _ in 0 ..< 30 {
+                    let mid = (lo + hi) / 2
+                    let midSpeed = try bodyPosition(body, julianDayUT: mid).speed
+                    if (loSpeed < 0) == (midSpeed < 0) {
+                        lo = mid
+                        loSpeed = midSpeed
+                    } else {
+                        hi = mid
+                    }
+                }
+                let stationJD = (lo + hi) / 2
+                return AstroStation(
+                    body: body,
+                    date: dateFromJulianDay(stationJD),
+                    retrogradeAfter: try bodyPosition(body, julianDayUT: stationJD + 0.01).speed < 0
+                )
+            }
+            lower = upper
+            lowerSpeed = upperSpeed
+            upper = min(end, upper + 1)
+        }
+        return nil
+    }
+
     // MARK: - Sign ingress
 
     /// The next moment at or after `after` when `body` crosses a sign boundary
@@ -113,6 +155,36 @@ extension SwissEphemerisCalculator {
             upper += step
         }
         throw AstroCoreError.eventNotFound("No sign ingress for \(body.displayName) within twelve years.")
+    }
+
+    /// Returns a sign change only when it occurs before the supplied Horary deadline.
+    public func nextSignIngress(
+        for body: CelestialBody,
+        after date: Date,
+        before deadline: Date
+    ) throws -> Date? {
+        guard deadline > date else { return nil }
+        let start = julianDay(for: date)
+        let end = julianDay(for: deadline)
+        let position = try bodyPosition(body, julianDayUT: start)
+        let startSign = Int(position.longitude / 30)
+        let step = min(5.0, max(0.02, 5.0 / max(abs(position.speed), 0.05)))
+        var lower = start
+        var upper = min(end, start + step)
+        while upper <= end, upper > lower {
+            let upperSign = Int(try bodyPosition(body, julianDayUT: upper).longitude / 30)
+            if upperSign != startSign {
+                for _ in 0 ..< 28 {
+                    let mid = (lower + upper) / 2
+                    let midSign = Int(try bodyPosition(body, julianDayUT: mid).longitude / 30)
+                    if midSign == startSign { lower = mid } else { upper = mid }
+                }
+                return dateFromJulianDay(upper)
+            }
+            lower = upper
+            upper = min(end, upper + step)
+        }
+        return nil
     }
 
     // MARK: - Exact aspect
