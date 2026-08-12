@@ -47,4 +47,14 @@ final class AskHistoryStore: @unchecked Sendable {
             try? data.write(to: url, options: .atomic)
         }
     }
+
+    func remove(id: String) {
+        var entries = load()
+        entries.removeAll { $0.id == id }
+        if entries.isEmpty {
+            removeAll()
+        } else if let data = try? JSONEncoder().encode(entries) {
+            try? data.write(to: url, options: .atomic)
+        }
+    }
 }

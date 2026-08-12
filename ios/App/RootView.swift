@@ -11,46 +11,55 @@ struct RootView: View {
     @EnvironmentObject private var model: AppModel
 	@ObservedObject private var commerce = CommerceStore.shared
     @State private var selection: RootTab = .today
+    @AppStorage("onboarding.completed.v1") private var onboardingCompleted = false
 
     var body: some View {
-        TabView(selection: $selection) {
-            TodayView(selectedTab: $selection)
-                .tag(RootTab.today)
-                .tabItem {
-                    Label(
-                        localized("navigation.today", language: model.language),
-                        systemImage: "sparkles"
-                    )
-                }
+        Group {
+            if onboardingCompleted {
+                TabView(selection: $selection) {
+                    TodayView(selectedTab: $selection)
+                        .tag(RootTab.today)
+                        .tabItem {
+                            Label(
+                                localized("navigation.today", language: model.language),
+                                systemImage: "sparkles"
+                            )
+                        }
 
-            ChartsView(selectedTab: $selection)
-                .tag(RootTab.charts)
-                .tabItem {
-                    Label(
-                        localized("charts.charts", language: model.language),
-                        systemImage: "circle.hexagongrid"
-                    )
-                }
+                    ChartsView(selectedTab: $selection)
+                        .tag(RootTab.charts)
+                        .tabItem {
+                            Label(
+                                localized("charts.charts", language: model.language),
+                                systemImage: "circle.hexagongrid"
+                            )
+                        }
 
-            AskView()
-                .tag(RootTab.ask)
-                .tabItem {
-                    Label(
-                        localized("navigation.ask", language: model.language),
-                        systemImage: "sparkle.magnifyingglass"
-                    )
-                }
+                    AskView()
+                        .tag(RootTab.ask)
+                        .tabItem {
+                            Label(
+                                localized("navigation.ask", language: model.language),
+                                systemImage: "sparkle.magnifyingglass"
+                            )
+                        }
 
-            ProfileView()
-                .tag(RootTab.profile)
-                .tabItem {
-                    Label(
-                        localized("profile.profile", language: model.language),
-                        systemImage: "person.crop.circle"
-                    )
+                    ProfileView()
+                        .tag(RootTab.profile)
+                        .tabItem {
+                            Label(
+                                localized("profile.profile", language: model.language),
+                                systemImage: "person.crop.circle"
+                            )
+                        }
                 }
+                .tint(AppTheme.violet)
+            } else {
+                OnboardingView(language: model.language) {
+                    onboardingCompleted = true
+                }
+            }
         }
-        .tint(AppTheme.violet)
         .dynamicTypeSize(model.fontSize.dynamicTypeSize)
         .task {
             await model.refresh()

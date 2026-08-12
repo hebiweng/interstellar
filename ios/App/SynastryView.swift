@@ -109,7 +109,9 @@ struct AskView: View {
                 }
             }
             .navigationDestination(isPresented: $showAskHistory) {
-                AskHistoryView(entries: askHistory, language: model.language)
+                AskHistoryView(entries: $askHistory, language: model.language) { entry in
+                    askHistoryStore.remove(id: entry.id)
+                }
             }
         }
         .onDisappear {
@@ -201,15 +203,6 @@ struct AskView: View {
             .buttonStyle(.plain)
             .accessibilityLabel(localized("ask.history", language: model.language))
 
-            ForEach(askHistory.prefix(3)) { entry in
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(entry.question).font(.footnote.weight(.semibold)).foregroundStyle(AppTheme.text)
-                    Text(entry.answerTitle).font(.caption2).foregroundStyle(AppTheme.muted)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(12)
-                .cardSurface()
-            }
         }
     }
 
@@ -1888,8 +1881,10 @@ private struct HoraryProfessionalView: View {
 }
 
 struct AskHistoryView: View {
-    let entries: [AskHistoryEntry]
+    @Binding var entries: [AskHistoryEntry]
     let language: AppLanguage
+    let onDelete: (AskHistoryEntry) -> Void
+    @State private var pendingDelete: AskHistoryEntry?
 
     var body: some View {
         ZStack {
@@ -1908,26 +1903,38 @@ struct AskHistoryView: View {
                             .cardSurface()
                     } else {
                         ForEach(entries) { entry in
-                            NavigationLink {
-                                AskHistoryDetailView(entry: entry, language: language)
-                            } label: {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(entry.question)
-                                        .font(.footnote.weight(.semibold))
-                                        .foregroundStyle(AppTheme.text)
-                                    Text("\(entry.answerTitle) · \(entry.answerText)")
-                                        .font(.caption2)
-                                        .foregroundStyle(AppTheme.muted)
-                                    Text(shortDate(entry.createdAt))
-                                        .font(.caption2)
-                                        .foregroundStyle(AppTheme.muted.opacity(0.8))
+                            HStack(spacing: 8) {
+                                NavigationLink {
+                                    AskHistoryDetailView(entry: entry, language: language)
+                                } label: {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(entry.question)
+                                            .font(.footnote.weight(.semibold))
+                                            .foregroundStyle(AppTheme.text)
+                                        Text(entry.answerTitle)
+                                            .font(.caption2)
+                                            .foregroundStyle(AppTheme.muted)
+                                        Text(shortDate(entry.createdAt))
+                                            .font(.caption2)
+                                            .foregroundStyle(AppTheme.muted.opacity(0.8))
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .contentShape(Rectangle())
                                 }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(13)
-                                .cardSurface()
-                                .contentShape(Rectangle())
+                                .buttonStyle(.plain)
+
+                                Button(role: .destructive) {
+                                    pendingDelete = entry
+                                } label: {
+                                    Image(systemName: "trash")
+                                        .frame(width: 44, height: 44)
+                                }
+                                .buttonStyle(.plain)
+                                .foregroundStyle(AppTheme.coral)
+                                .accessibilityLabel(localized("profile.delete", language: language))
                             }
-                            .buttonStyle(.plain)
+                            .padding(13)
+                            .cardSurface()
                         }
                     }
                 }
@@ -1939,6 +1946,25 @@ struct AskHistoryView: View {
         .toolbar(.visible, for: .navigationBar)
         .navigationTitle(localized("ask.history", language: language))
         .navigationBarTitleDisplayMode(.inline)
+        .alert(
+            localized("ask.delete-history-title", language: language),
+            isPresented: Binding(
+                get: { pendingDelete != nil },
+                set: { if !$0 { pendingDelete = nil } }
+            ),
+            presenting: pendingDelete
+        ) { entry in
+            Button(localized("profile.delete", language: language), role: .destructive) {
+                onDelete(entry)
+                entries.removeAll { $0.id == entry.id }
+                pendingDelete = nil
+            }
+            Button(localized("location.cancel", language: language), role: .cancel) {
+                pendingDelete = nil
+            }
+        } message: { _ in
+            Text(localized("ask.delete-history-message", language: language))
+        }
     }
 
     private func shortDate(_ date: Date) -> String {

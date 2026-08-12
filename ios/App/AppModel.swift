@@ -1126,8 +1126,17 @@ final class AppModel: ObservableObject {
     }
 
     func currentSavedReport(for chart: ChartKind) -> SavedReport? {
-        guard let key = aiContent[chart]?.cacheKey, !key.isEmpty else { return nil }
-        return savedReports.first { $0.id == key }
+        let scope = "chart.\(chart.contentPrefix)"
+        if let key = aiContent[chart]?.cacheKey,
+           !key.isEmpty,
+           let exact = savedReports.first(where: { $0.id == key })
+        {
+            return exact
+        }
+        // The report library must remain able to open the latest locally saved
+        // report even when the current chart parameters now produce a different
+        // semantic fingerprint. Regeneration will use the current parameters.
+        return savedReports.first { $0.scope == scope }
     }
 
     func aiReportStatus(for chart: ChartKind) -> AIReportGenerationStatus {

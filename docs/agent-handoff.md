@@ -88,6 +88,11 @@ AIGC:
 - 管理端新增 Reports 与 Users：Reports 有 User/盘型/语言/状态/日期筛选、Tokens、耗时、错误、Credit 成本与状态；Users 有 Apple/Admin Premium、到期、分钱包余额、Grant 明细、报告数、跳转 Reports，以及带审计的 Grant/Revoke Premium 和 Grant Credits。
 - Profile 设置新增 Premium & Credits 权威余额页及 iCloud Backup。私人 iCloud container 备份本人/其他人物、语言、外观、字号、预设、六盘报告和周期报告；恢复时抑制中间自动覆盖。Relay 不参与 iCloud 报告存储。
 - 设置中的 Required Notices 已提供 en / zh-Hans / es / fr Swiss Ephemeris / AGPL 说明和完整随包许可证；Paywall 有四语 Terms/Privacy 入口，Relay 提供四语公开页面。App Icon 已替换为用户提供的 1024×1024 Leo 图标，无 alpha、无预烘焙圆角。
+- 测试可见性修复已完成代码实现：Profile 首屏展示 Relay 权威 Free/Premium、Credits、额度刷新日、Premium 到期和可复制 User ID；设置页不再单独使用本地 StoreKit 状态冒充权威 Plan，并提供账户刷新。
+- 行运、次限、日返、合盘在 Free 下首屏显示 Premium 预览提示，第 1 张 Interpretation Card 可见，第 2 张起继续使用不泄露正文的锁定卡。所有 Charts/Reports 生成确认页显示余额、固定成本 1 Credit 和成功后的预计余额。
+- 本机已有报告按盘型保留 View / Regenerate，即使当前参数产生了新语义指纹；重新生成仍使用当前参数并原子覆盖。Ask 首页只显示 History 入口和数量，详细条目只在 History 页面展示，并支持逐条确认删除。
+- Relay Users 管理端新增按 User ID 查找、用户明细、Free/Premium/Apple Auto 强制切换、Credits 赠送；Reports 新增单条元数据流水明细。强制 Plan 覆盖可优先于本地 StoreKit 测试交易，切换会刷新对应 2/10 allowance 并写审计。
+- 首次启动新增四语两页向导，说明 Today/Charts/Ask/Profile 与 Free/Premium 差异；设置中可再次打开，不需要删除 App。
 
 ### 仓库结构与清理
 
@@ -143,7 +148,7 @@ AstroCore Snapshot / Aspect / Event
 
 ### 正在处理
 
-1. 提交本轮 Premium / Credits / iCloud / Relay 管理改动；不得包含来源不明的 timezone vendor ZIP 删除。
+1. 将测试可见性修复部署到生产 Relay，再覆盖安装到 iPhone 12 mini；不得包含来源不明的 timezone vendor ZIP 删除。
 
 ### 发布前仍需完成
 

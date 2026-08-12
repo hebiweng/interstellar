@@ -39,6 +39,9 @@ private struct PendingGeneration: Identifiable {
                         }
 
                         chartControlBar
+                        if showsPremiumPreview {
+                            premiumPreviewBanner
+                        }
                         chartContent
 
                         if !insightState.cards.isEmpty {
@@ -176,6 +179,36 @@ private struct PendingGeneration: Identifiable {
 	private func shouldLockCard(at index: Int) -> Bool {
 		index > 0 && !commerce.isPremium && ![.natal, .currentSky].contains(model.selectedChart)
 	}
+
+    private var showsPremiumPreview: Bool {
+        !commerce.isPremium && ![.natal, .currentSky].contains(model.selectedChart)
+    }
+
+    private var premiumPreviewBanner: some View {
+        Button {
+            commerce.showsPaywall = true
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "lock.fill")
+                    .foregroundStyle(AppTheme.violet)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(localized("premium.preview-title", language: model.language))
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(AppTheme.text)
+                    Text(localized("premium.preview-message", language: model.language))
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.muted)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundStyle(AppTheme.violet)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .cardSurface()
+        }
+        .buttonStyle(.plain)
+    }
 
     @ViewBuilder
     private func insightCardRow(index: Int, card: InsightCardModel) -> some View {

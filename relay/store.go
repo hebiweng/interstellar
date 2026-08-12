@@ -150,6 +150,7 @@ func (s *Store) migrate() error {
 			user_id TEXT PRIMARY KEY,
 			created_at TEXT NOT NULL,
 			last_active_at TEXT NOT NULL,
+			admin_plan_override TEXT,
 			admin_premium_started_at TEXT,
 			admin_premium_expires_at TEXT
 		)`,
@@ -260,6 +261,9 @@ func (s *Store) migrate() error {
 	}
 	if err := ensureSQLiteColumn(s.db, "report_requests", "credit_cost", "INTEGER NOT NULL DEFAULT 1"); err != nil {
 		return fmt.Errorf("migrate report credit cost: %w", err)
+	}
+	if err := ensureSQLiteColumn(s.db, "commerce_users", "admin_plan_override", "TEXT"); err != nil {
+		return fmt.Errorf("migrate admin plan override: %w", err)
 	}
 	// Report bodies are client-only. Remove the legacy cache table entirely so
 	// no current code path can retain a generated report on Relay.

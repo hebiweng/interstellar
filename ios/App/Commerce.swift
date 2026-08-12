@@ -13,7 +13,10 @@ struct CommerceAccount: Codable, Sendable {
     }
     let userID: String
     let plan: String
+    let planSource: String?
+    let adminPlanOverride: String?
     let premiumExpiresAt: String?
+    let creditsRenewAt: String?
     let credits: Credits
 }
 
@@ -27,14 +30,21 @@ final class CommerceStore: ObservableObject {
     @Published private(set) var products: [Product] = []
     @Published private(set) var account: CommerceAccount?
     @Published private(set) var isApplePremium = false
+    @Published private(set) var accountError: String?
     @Published var showsPaywall = false
     @Published var showsCredits = false
 
 	@Published private(set) var userID: UUID
     private var updatesTask: Task<Void, Never>?
 
-    var isPremium: Bool { isApplePremium || account?.plan != "free" }
+    var isPremium: Bool {
+        if account?.adminPlanOverride != nil {
+            return account?.plan == "premium"
+        }
+        return isApplePremium || account?.plan == "premium"
+    }
     var totalCredits: Int { account?.credits.total ?? 0 }
+    var planTitle: String { isPremium ? "Premium" : "Free" }
 
     private init() {
         userID = CommerceIdentity.userID
@@ -91,7 +101,10 @@ final class CommerceStore: ObservableObject {
             let data = try JSONEncoder().encode(Body(userID: userID.uuidString.lowercased()))
             let response = try await CommerceRelay.post(path: "v1/account/sync", body: data)
             account = try JSONDecoder().decode(CommerceAccount.self, from: response)
-        } catch {}
+            accountError = nil
+        } catch {
+            accountError = error.localizedDescription
+        }
     }
 
     func acknowledgeReport(requestID: String) async {
@@ -116,7 +129,7 @@ final class CommerceStore: ObservableObject {
         do {
             _ = try await CommerceRelay.post(path: "v1/reports/ack", body: data)
             PendingReportAcknowledgements.remove(pending)
-        } catch CommerceRelayError.httpStatus(let status) where [404, 409, 410].contains(status) {
+        } catch CommerceRelayError.httpStatus(let status, _) where [404, 409, 410].contains(status) {
             // Relay has already released or finalized this reservation. It can
             // no longer be acknowledged and must not remain in the retry queue.
             PendingReportAcknowledgements.remove(pending)
@@ -205,13 +218,23 @@ enum CommerceRelay {
         headers.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
-        guard (200..<300).contains(http.statusCode) else { throw CommerceRelayError.httpStatus(http.statusCode) }
+        guard (200..<300).contains(http.statusCode) else {
+            let message = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["error"] as? String
+            throw CommerceRelayError.httpStatus(http.statusCode, message)
+        }
         return data
     }
 }
 
-enum CommerceRelayError: Error {
-    case httpStatus(Int)
+enum CommerceRelayError: LocalizedError {
+    case httpStatus(Int, String?)
+
+    var errorDescription: String? {
+        switch self {
+        case let .httpStatus(status, message):
+            return message ?? "HTTP \(status)"
+        }
+    }
 }
 
 struct PremiumPaywallView: View {
@@ -228,6 +251,13 @@ struct PremiumPaywallView: View {
                     Label(localized("premium.all-insights", language: language), systemImage: "checkmark.circle")
                     Label(localized("premium.unlimited-people", language: language), systemImage: "checkmark.circle")
                     Label(localized("premium.ten-reports", language: language), systemImage: "checkmark.circle")
+                }
+                if commerce.products.isEmpty {
+                    Section {
+                        Text(localized("premium.storekit-testing-note", language: language))
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 Section {
                     ForEach(commerce.products.filter { $0.id != CommerceStore.creditsID }.sorted { $0.id == CommerceStore.annualID && $1.id != CommerceStore.annualID }, id: \.id) { product in
@@ -280,6 +310,11 @@ struct CreditsPurchaseView: View {
                     HStack { Text("10 Credits"); Spacer(); Text(product.displayPrice) }
                     Button(localized("credits.buy", language: language)) { Task { await commerce.purchase(product) } }
                         .buttonStyle(.borderedProminent)
+                }
+                if commerce.products.first(where: { $0.id == CommerceStore.creditsID }) == nil {
+                    Text(localized("premium.storekit-testing-note", language: language))
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 }
                 Text(localized("credits.never-expire", language: language)).foregroundStyle(.secondary)
             }

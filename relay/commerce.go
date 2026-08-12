@@ -33,7 +33,10 @@ type CommerceUser struct {
 	CreatedAt               string               `json:"createdAt"`
 	LastActiveAt            string               `json:"lastActiveAt"`
 	Plan                    string               `json:"plan"`
+	PlanSource              string               `json:"planSource"`
+	AdminPlanOverride       string               `json:"adminPlanOverride,omitempty"`
 	PremiumExpiresAt        string               `json:"premiumExpiresAt,omitempty"`
+	CreditsRenewAt          string               `json:"creditsRenewAt"`
 	AdminPremiumExpiresAt   string               `json:"adminPremiumExpiresAt,omitempty"`
 	AppleProductID          string               `json:"appleProductID,omitempty"`
 	AppleSubscriptionStatus string               `json:"appleSubscriptionStatus,omitempty"`
@@ -156,6 +159,21 @@ func refillAllowanceTx(tx *sql.Tx, userID string, now time.Time) (string, error)
 }
 
 func entitlementTx(tx *sql.Tx, userID string, now time.Time) (string, time.Time, string, error) {
+	var override, adminStart, adminExpires sql.NullString
+	if err := tx.QueryRow(`SELECT admin_plan_override,admin_premium_started_at,admin_premium_expires_at FROM commerce_users WHERE user_id=?`, userID).
+		Scan(&override, &adminStart, &adminExpires); err != nil {
+		return "", time.Time{}, "", err
+	}
+	if override.String == "free" {
+		return "free", now, "", nil
+	}
+	if override.String == "premium" && adminStart.Valid && adminExpires.Valid {
+		start, e1 := time.Parse(time.RFC3339, adminStart.String)
+		expiry, e2 := time.Parse(time.RFC3339, adminExpires.String)
+		if e1 == nil && e2 == nil && now.Before(expiry) {
+			return "admin", start, adminExpires.String, nil
+		}
+	}
 	var product, status, started, expires string
 	err := tx.QueryRow(`SELECT product_id,status,started_at,expires_at FROM subscriptions WHERE user_id=?`, userID).
 		Scan(&product, &status, &started, &expires)
@@ -168,12 +186,9 @@ func entitlementTx(tx *sql.Tx, userID string, now time.Time) (string, time.Time,
 	} else if !errors.Is(err, sql.ErrNoRows) {
 		return "", time.Time{}, "", err
 	}
-	var adminStart, adminExpires sql.NullString
-	if err := tx.QueryRow(`SELECT admin_premium_started_at,admin_premium_expires_at FROM commerce_users WHERE user_id=?`, userID).
-		Scan(&adminStart, &adminExpires); err != nil {
-		return "", time.Time{}, "", err
-	}
-	if adminStart.Valid && adminExpires.Valid {
+	// Preserve compatibility with administrator grants created before explicit
+	// free/premium/auto overrides were introduced.
+	if !override.Valid && adminStart.Valid && adminExpires.Valid {
 		start, e1 := time.Parse(time.RFC3339, adminStart.String)
 		expiry, e2 := time.Parse(time.RFC3339, adminExpires.String)
 		if e1 == nil && e2 == nil && now.Before(expiry) {
@@ -206,22 +221,35 @@ func addCalendarMonthsClamped(anchor time.Time, months int) time.Time {
 
 func (s *Store) GetCommerceUser(userID string) (CommerceUser, error) {
 	var user CommerceUser
-	var adminExpiry sql.NullString
-	if err := s.db.QueryRow(`SELECT user_id,created_at,last_active_at,admin_premium_expires_at FROM commerce_users WHERE user_id=?`, userID).
-		Scan(&user.UserID, &user.CreatedAt, &user.LastActiveAt, &adminExpiry); err != nil {
+	var adminExpiry, adminOverride sql.NullString
+	if err := s.db.QueryRow(`SELECT user_id,created_at,last_active_at,admin_plan_override,admin_premium_expires_at FROM commerce_users WHERE user_id=?`, userID).
+		Scan(&user.UserID, &user.CreatedAt, &user.LastActiveAt, &adminOverride, &adminExpiry); err != nil {
 		return user, err
 	}
+	user.AdminPlanOverride = adminOverride.String
 	user.AdminPremiumExpiresAt = adminExpiry.String
 	tx, err := s.db.Begin()
 	if err != nil {
 		return user, err
 	}
-	plan, _, premiumExpiry, err := entitlementTx(tx, userID, time.Now().UTC())
+	now := time.Now().UTC()
+	planSource, anchor, premiumExpiry, err := entitlementTx(tx, userID, now)
 	_ = tx.Rollback()
 	if err != nil {
 		return user, err
 	}
-	user.Plan, user.PremiumExpiresAt = plan, premiumExpiry
+	user.PlanSource = planSource
+	user.Plan = "free"
+	if planSource != "free" {
+		user.Plan = "premium"
+	}
+	user.PremiumExpiresAt = premiumExpiry
+	if planSource == "free" {
+		user.CreditsRenewAt = time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, time.UTC).Format(time.RFC3339)
+	} else {
+		index := calendarMonthIndex(anchor, now)
+		user.CreditsRenewAt = addCalendarMonthsClamped(anchor, index+1).Format(time.RFC3339)
+	}
 	_ = s.db.QueryRow(`SELECT product_id,status,expires_at FROM subscriptions WHERE user_id=?`, userID).
 		Scan(&user.AppleProductID, &user.AppleSubscriptionStatus, &user.ApplePremiumExpiresAt)
 	user.Credits, err = s.CreditBalance(userID)
@@ -523,25 +551,66 @@ func (s *Store) GrantAdminCredits(userID string, amount int, expiresAt *time.Tim
 }
 
 func (s *Store) SetAdminPremium(userID string, expiresAt *time.Time, operator, reason string) error {
-	now := time.Now().UTC()
-	var expiry any
-	action := "premium.revoke"
+	plan := "auto"
 	if expiresAt != nil {
-		if !expiresAt.After(now) {
-			return errors.New("expiration must be in the future")
-		}
-		expiry = expiresAt.UTC().Format(time.RFC3339)
-		action = "premium.grant"
+		plan = "premium"
 	}
-	res, err := s.db.Exec(`UPDATE commerce_users SET admin_premium_started_at=CASE WHEN ? IS NULL THEN NULL ELSE COALESCE(admin_premium_started_at,?) END,admin_premium_expires_at=? WHERE user_id=?`, expiry, now.Format(time.RFC3339), expiry, userID)
+	return s.SetAdminPlan(userID, plan, expiresAt, operator, reason)
+}
+
+func (s *Store) SetAdminPlan(userID, plan string, expiresAt *time.Time, operator, reason string) error {
+	if plan != "auto" && plan != "free" && plan != "premium" {
+		return errors.New("plan must be auto, free or premium")
+	}
+	now := time.Now().UTC()
+	var override, start, expiry any
+	if plan != "auto" {
+		override = plan
+	}
+	if plan == "premium" {
+		if expiresAt == nil || !expiresAt.After(now) {
+			return errors.New("premium expiration must be in the future")
+		}
+		start = now.Format(time.RFC3339)
+		expiry = expiresAt.UTC().Format(time.RFC3339)
+	}
+	tx, err := s.db.Begin()
 	if err != nil {
 		return err
 	}
-	changed, _ := res.RowsAffected()
-	if changed == 0 {
+	defer tx.Rollback()
+	res, err := tx.Exec(`UPDATE commerce_users SET admin_plan_override=?,admin_premium_started_at=?,admin_premium_expires_at=? WHERE user_id=?`, override, start, expiry, userID)
+	if err != nil {
+		return err
+	}
+	if changed, _ := res.RowsAffected(); changed == 0 {
 		return sql.ErrNoRows
 	}
-	return s.RecordAudit(operator, action, userID, map[string]any{"expiresAt": expiry, "reason": safeErrorMessage(reason)})
+	periodKey, err := refillAllowanceTx(tx, userID, now)
+	if err != nil {
+		return err
+	}
+	allowance := freeAllowance
+	if plan == "premium" {
+		allowance = premiumAllowance
+	} else if plan == "auto" {
+		currentPlan, _, _, entitlementErr := entitlementTx(tx, userID, now)
+		if entitlementErr != nil {
+			return entitlementErr
+		}
+		if currentPlan != "free" {
+			allowance = premiumAllowance
+		}
+	}
+	if _, err = tx.Exec(`UPDATE credit_grants SET original_amount=?,remaining_amount=?,granted_at=? WHERE user_id=? AND source='allowance' AND period_key=?`, allowance, allowance, now.Format(time.RFC3339), userID, periodKey); err != nil {
+		return err
+	}
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+	return s.RecordAudit(operator, "plan.override", userID, map[string]any{
+		"plan": plan, "expiresAt": expiry, "reason": safeErrorMessage(reason),
+	})
 }
 
 func (s *Store) ListCommerceUsers(limit int) ([]CommerceUser, error) {

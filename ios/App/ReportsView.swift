@@ -14,6 +14,7 @@ struct ReportsView: View {
    @State private var hasHandledInitialChart = false
     @State private var generationSheetChart: ChartKind?
     @State private var generationWillReplace = false
+    @State private var generationSheetScope: ReportScope?
 
     init(initialChart: ChartKind? = nil, selectedTab: Binding<RootTab>) {
         self.initialChart = initialChart
@@ -113,6 +114,22 @@ struct ReportsView: View {
                 }
             )
         }
+        .sheet(item: $generationSheetScope) { scope in
+            PeriodReportGenerationSheet(
+                scope: scope,
+                onGenerate: {
+                    generationSheetScope = nil
+                    if !model.aiConsentGranted {
+                        pendingChart = nil
+                        pendingScope = scope
+                        showConsent = true
+                    } else {
+                        generate(scope)
+                    }
+                },
+                onCancel: { generationSheetScope = nil }
+            )
+        }
        .navigationDestination(
             isPresented: Binding(
                 get: { selectedReport != nil },
@@ -164,13 +181,7 @@ struct ReportsView: View {
             Spacer()
             if unlocked {
                 Button {
-                    if !model.aiConsentGranted {
-                        pendingChart = nil
-                        pendingScope = report.scope
-                        showConsent = true
-                    } else {
-                        generate(report.scope)
-                    }
+                    generationSheetScope = report.scope
                 } label: {
                     if generatingScope == report.scope {
                         ProgressView().controlSize(.small).tint(.white)
@@ -278,7 +289,9 @@ struct ReportsView: View {
         }
         switch status {
         case .idle:
-            return localized("reports.ready-to-generate", language: model.language)
+            return hasSavedReport
+                ? localized("reports.saved-on-this-device", language: model.language)
+                : localized("reports.ready-to-generate", language: model.language)
         case .generating:
             return localized("reports.generating", language: model.language)
         case .ready:
@@ -520,6 +533,7 @@ struct ReportGenerationSheet: View {
     let onEdit: () -> Void
     let onCancel: () -> Void
     @EnvironmentObject private var model: AppModel
+    @ObservedObject private var commerce = CommerceStore.shared
 
     var body: some View {
         NavigationStack {
@@ -556,6 +570,8 @@ struct ReportGenerationSheet: View {
                     .padding(.horizontal, 16)
                     .cardSurface()
 
+                    ReportCreditSummary(language: model.language)
+
                     HStack(spacing: 12) {
                         Button(localized("reports.edit", language: model.language)) {
                             onEdit()
@@ -563,8 +579,15 @@ struct ReportGenerationSheet: View {
                         .buttonStyle(.bordered)
                         .tint(AppTheme.muted)
 
-                        Button(localized("reports.generate", language: model.language)) {
-                            onGenerate()
+                        Button(commerce.totalCredits > 0
+                               ? localized("reports.generate", language: model.language)
+                               : localized("credits.buy", language: model.language)) {
+                            if commerce.totalCredits > 0 {
+                                onGenerate()
+                            } else {
+                                onCancel()
+                                DispatchQueue.main.async { commerce.showsCredits = true }
+                            }
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(AppTheme.violet)
@@ -633,6 +656,91 @@ struct ReportGenerationSheet: View {
         case 7: localized("charts.7-days", language: model.language)
         case 365: localized("charts.12-months", language: model.language)
         default: localized("charts.30-days", language: model.language)
+        }
+    }
+}
+
+private struct ReportCreditSummary: View {
+    @ObservedObject private var commerce = CommerceStore.shared
+    let language: AppLanguage
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Label(localized("credits.balance", language: language), systemImage: "sparkles")
+                    .foregroundStyle(AppTheme.muted)
+                Spacer()
+                Text(String(commerce.totalCredits))
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(AppTheme.text)
+            }
+            HStack {
+                Text(localized("credits.report-cost", language: language))
+                    .foregroundStyle(AppTheme.muted)
+                Spacer()
+                Text(localized("credits.one-credit", language: language))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(AppTheme.violet)
+            }
+            if commerce.totalCredits > 0 {
+                Text(localizedTemplate(
+                    "credits.after-generation",
+                    substitutions: ["count": String(max(0, commerce.totalCredits - 1))],
+                    language: language
+                ))
+                .font(.caption)
+                .foregroundStyle(AppTheme.muted)
+            } else {
+                Text(localized("credits.none-available", language: language))
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.coral)
+            }
+        }
+        .cardSurface()
+    }
+}
+
+private struct PeriodReportGenerationSheet: View {
+    @EnvironmentObject private var model: AppModel
+    @ObservedObject private var commerce = CommerceStore.shared
+    let scope: ReportScope
+    let onGenerate: () -> Void
+    let onCancel: () -> Void
+
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 20) {
+                Text(scope.title(language: model.language))
+                    .font(.title2.weight(.bold))
+                    .foregroundStyle(AppTheme.text)
+                Text(localized("reports.current-information-confirmation", language: model.language))
+                    .font(.subheadline)
+                    .foregroundStyle(AppTheme.muted)
+                ReportCreditSummary(language: model.language)
+                Button(commerce.totalCredits > 0
+                       ? localized("reports.generate", language: model.language)
+                       : localized("credits.buy", language: model.language)) {
+                    if commerce.totalCredits > 0 {
+                        onGenerate()
+                    } else {
+                        onCancel()
+                        DispatchQueue.main.async { commerce.showsCredits = true }
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(AppTheme.violet)
+                .frame(maxWidth: .infinity)
+                Spacer()
+            }
+            .padding(18)
+            .background(AppTheme.background)
+            .navigationTitle(localized("reports.generate-report", language: model.language))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(localized("location.cancel", language: model.language)) { onCancel() }
+                }
+            }
         }
     }
 }

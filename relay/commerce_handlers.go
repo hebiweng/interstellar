@@ -300,6 +300,29 @@ func (c *relayConfig) handleAdminUserItem(w http.ResponseWriter, r *http.Request
 			writeError(w, http.StatusUnprocessableEntity, "premium_update_failed", err.Error(), false)
 			return
 		}
+	case "plan":
+		var req struct {
+			Plan      string `json:"plan"`
+			ExpiresAt string `json:"expiresAt"`
+			Reason    string `json:"reason"`
+		}
+		if readJSON(r, &req) != nil {
+			writeError(w, http.StatusBadRequest, "invalid_plan", "invalid plan override", false)
+			return
+		}
+		var expiry *time.Time
+		if req.ExpiresAt != "" {
+			value, err := time.Parse(time.RFC3339, req.ExpiresAt)
+			if err != nil {
+				writeError(w, http.StatusBadRequest, "invalid_expiration", "expiresAt must be ISO-8601", false)
+				return
+			}
+			expiry = &value
+		}
+		if err := c.store.SetAdminPlan(userID, req.Plan, expiry, adminUsername(r), req.Reason); err != nil {
+			writeError(w, http.StatusUnprocessableEntity, "plan_update_failed", err.Error(), false)
+			return
+		}
 	default:
 		writeError(w, http.StatusNotFound, "not_found", "unknown user operation", false)
 		return

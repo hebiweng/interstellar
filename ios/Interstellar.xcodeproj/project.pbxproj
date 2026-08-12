@@ -72,6 +72,7 @@
 		9724D9A3584084D69C4A0CFC /* AstroTerms-zh-Hans.json in Resources */ = {isa = PBXBuildFile; fileRef = C5445403CDC1A5A53F3CA7BE /* AstroTerms-zh-Hans.json */; };
 		9DFD0DFF988B807727C7E222 /* abc-life-areas-help-fr.md in Resources */ = {isa = PBXBuildFile; fileRef = 14356E98A5D38BD641396766 /* abc-life-areas-help-fr.md */; };
 		A3239AD8EAACA0ACDAB0DD80 /* CurrentSkyLegacyCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3611EB071ABBD875FD657E40 /* CurrentSkyLegacyCardFactory.swift */; };
+		A415657BEBB15DDC2970BF62 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBA16A86F74493A35A7A74AE /* OnboardingView.swift */; };
 		A67DFAE27B65045744E93553 /* TransitCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 981F4C2821CFBF67FAAA0AD8 /* TransitCardFactory.swift */; };
 		A863BE485A3BF7AE893CF28F /* ContentKit in Frameworks */ = {isa = PBXBuildFile; productRef = 5B9BE7BBBE9923D7E31A58CA /* ContentKit */; };
 		A97623F0AAAF05AA48DDE9C2 /* Commerce.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56BC8AFFCB4F85EB79AA6B5B /* Commerce.swift */; };
@@ -199,6 +200,7 @@
 		B4A3A93914F96ADD04BCE584 /* CurrentSkyCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentSkyCardViews.swift; sourceTree = "<group>"; };
 		BA31C8B1C13F10113F10E112 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
 		BB5BCE81BEF6F479DD875A36 /* LICENSE */ = {isa = PBXFileReference; path = LICENSE; sourceTree = "<group>"; };
+		BBA16A86F74493A35A7A74AE /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		BD387F6A83026B674CCD09BF /* InterstellarTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = InterstellarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDBF1C8DDAF72951EAEA6DCF /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		C18C0A36185173B04800EC00 /* SynastryChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynastryChartCardFactory.swift; sourceTree = "<group>"; };
@@ -528,6 +530,7 @@
 				28B5FB5FF8C581EAA64A6F58 /* LocalizedFormatters.swift */,
 				5A1C4311E86E866790B89BEA /* LocationPicker.swift */,
 				A2A9B7F6653E3B21A74DFFF2 /* Models.swift */,
+				BBA16A86F74493A35A7A74AE /* OnboardingView.swift */,
 				45FCBC91108D8B597D89E39C /* ProfileView.swift */,
 				3989AA7077B4B8CF57C56610 /* Reports.swift */,
 				5E55B957F3B40BB06BDBB4DE /* ReportsView.swift */,
@@ -992,6 +995,7 @@
 				1D9909C647E496C423149F54 /* NatalCardViews.swift in Sources */,
 				832EEE8C722945D95B952F99 /* NatalChartCardFactory.swift in Sources */,
 				C5F5F67D0BA780D9C8C43E5F /* NatalLegacyCardFactory.swift in Sources */,
+				A415657BEBB15DDC2970BF62 /* OnboardingView.swift in Sources */,
 				CD7C5811C4C499E2E242E0D1 /* ProfileView.swift in Sources */,
 				7146C73C4FBB984FB0E84E57 /* Reports.swift in Sources */,
 				3FF959A490BE10D499C12683 /* ReportsView.swift in Sources */,

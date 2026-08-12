@@ -274,8 +274,38 @@ func TestVerifiedSubscriptionGracePeriodKeepsPremiumActive(t *testing.T) {
 		t.Fatal(err)
 	}
 	user, err := s.GetCommerceUser(userID)
-	if err != nil || user.Plan != "premium_monthly" || user.AppleSubscriptionStatus != "grace" {
+	if err != nil || user.Plan != "premium" || user.PlanSource != "premium_monthly" || user.AppleSubscriptionStatus != "grace" {
 		t.Fatalf("billing grace should preserve Premium: user=%+v err=%v", user, err)
+	}
+}
+
+func TestAdminPlanOverrideSwitchesFreePremiumAndAuto(t *testing.T) {
+	s := openTestStore(t)
+	userID := "12121212-1212-4121-8121-121212121212"
+	if _, err := s.SyncCommerceUser(userID, "plan-test-installation"); err != nil {
+		t.Fatal(err)
+	}
+	expires := time.Now().UTC().Add(30 * 24 * time.Hour)
+	if err := s.SetAdminPlan(userID, "premium", &expires, "test-admin", "test premium"); err != nil {
+		t.Fatal(err)
+	}
+	premium, err := s.GetCommerceUser(userID)
+	if err != nil || premium.Plan != "premium" || premium.AdminPlanOverride != "premium" || premium.Credits.Allowance != premiumAllowance {
+		t.Fatalf("premium override not applied: user=%+v err=%v", premium, err)
+	}
+	if err := s.SetAdminPlan(userID, "free", nil, "test-admin", "test free"); err != nil {
+		t.Fatal(err)
+	}
+	free, err := s.GetCommerceUser(userID)
+	if err != nil || free.Plan != "free" || free.AdminPlanOverride != "free" || free.Credits.Allowance != freeAllowance {
+		t.Fatalf("free override not applied: user=%+v err=%v", free, err)
+	}
+	if err := s.SetAdminPlan(userID, "auto", nil, "test-admin", "test auto"); err != nil {
+		t.Fatal(err)
+	}
+	automatic, err := s.GetCommerceUser(userID)
+	if err != nil || automatic.AdminPlanOverride != "" || automatic.Plan != "free" {
+		t.Fatalf("auto override not restored: user=%+v err=%v", automatic, err)
 	}
 }
 

@@ -5,6 +5,7 @@ import UIKit
 
 struct ProfileView: View {
     @EnvironmentObject private var model: AppModel
+    @ObservedObject private var commerce = CommerceStore.shared
     @State private var showsSettings = false
     @State private var showsEditor = false
     @State private var editingPerson: SavedPerson?
@@ -20,6 +21,7 @@ struct ProfileView: View {
                             title: localized("profile.profile", language: model.language)
                         )
                         profileHero
+                        accountSummary
                         birthDetails
                         Button {
                             showsEditor = true
@@ -37,6 +39,11 @@ struct ProfileView: View {
                         .buttonStyle(.plain)
 
                         peopleSection
+                        Text("\(localized("commerce.user-id", language: model.language)): \(commerce.userID.uuidString.lowercased())")
+                            .font(.caption2)
+                            .foregroundStyle(AppTheme.muted)
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.horizontal, 18)
                     .padding(.top, 18)
@@ -72,7 +79,98 @@ struct ProfileView: View {
                     }
                 }
             }
+            .task { await commerce.syncAccount() }
         }
+    }
+
+    private var accountSummary: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(localized("commerce.account", language: model.language))
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(AppTheme.muted)
+                    Text(commerce.planTitle)
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(AppTheme.text)
+                }
+                Spacer()
+                Text(commerce.planTitle)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(commerce.isPremium ? AppTheme.violet : AppTheme.muted)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background((commerce.isPremium ? AppTheme.violet : AppTheme.muted).opacity(0.12), in: Capsule())
+            }
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(String(commerce.totalCredits))
+                        .font(.largeTitle.weight(.bold))
+                        .foregroundStyle(AppTheme.violet)
+                    Text(localized("credits.available", language: model.language))
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.muted)
+                }
+                Spacer()
+                if let renewal = commerce.account?.creditsRenewAt {
+                    VStack(alignment: .trailing, spacing: 3) {
+                        Text(localized("credits.renews", language: model.language))
+                            .font(.caption)
+                            .foregroundStyle(AppTheme.muted)
+                        Text(commerceDate(renewal))
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(AppTheme.text)
+                    }
+                }
+            }
+            if commerce.isPremium, let expiry = commerce.account?.premiumExpiresAt {
+                HStack {
+                    Text(localized("commerce.premium-until", language: model.language))
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.muted)
+                    Spacer()
+                    Text(commerceDate(expiry))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(AppTheme.text)
+                }
+            }
+            HStack {
+                if !commerce.isPremium {
+                    Button(localized("premium.unlock-card", language: model.language)) {
+                        commerce.showsPaywall = true
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(AppTheme.violet)
+                }
+                Button(localized("credits.buy", language: model.language)) {
+                    commerce.showsCredits = true
+                }
+                .buttonStyle(.bordered)
+                .tint(AppTheme.violet)
+                Spacer()
+                Button {
+                    Task { await commerce.syncAccount() }
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                }
+                .buttonStyle(.bordered)
+                .accessibilityLabel(localized("commerce.refresh", language: model.language))
+            }
+            if let error = commerce.accountError {
+                Text(error)
+                    .font(.caption2)
+                    .foregroundStyle(AppTheme.coral)
+            }
+        }
+        .cardSurface()
+    }
+
+    private func commerceDate(_ value: String) -> String {
+        guard let date = ISO8601DateFormatter().date(from: value) else { return value }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: model.language.rawValue)
+        formatter.dateStyle = .medium
+        return formatter.string(from: date)
     }
 
     private var profileHero: some View {
@@ -431,6 +529,7 @@ private enum LocalDataClear: Identifiable {
 
 private struct SettingsView: View {
     @EnvironmentObject private var model: AppModel
+    @AppStorage("onboarding.completed.v1") private var onboardingCompleted = false
 
     var body: some View {
         List {
@@ -469,6 +568,11 @@ private struct SettingsView: View {
             } label: {
                 Label(localized("profile.about", language: model.language), systemImage: "info.circle")
             }
+            Button {
+                onboardingCompleted = false
+            } label: {
+                Label(localized("onboarding.show-again", language: model.language), systemImage: "rectangle.on.rectangle")
+            }
         }
         .scrollContentBackground(.hidden)
         .background(AppTheme.background)
@@ -484,8 +588,18 @@ private struct CommerceSettingsView: View {
     var body: some View {
         Form {
             Section {
-                LabeledContent(localized("commerce.plan", language: model.language), value: commerce.isPremium ? "Premium" : "Free")
+                LabeledContent(localized("commerce.plan", language: model.language), value: commerce.planTitle)
                 LabeledContent(localized("credits.title", language: model.language), value: String(commerce.totalCredits))
+                if let renewal = commerce.account?.creditsRenewAt {
+                    LabeledContent(localized("credits.renews", language: model.language), value: formatted(renewal))
+                }
+                if let expiry = commerce.account?.premiumExpiresAt, commerce.isPremium {
+                    LabeledContent(localized("commerce.premium-until", language: model.language), value: formatted(expiry))
+                }
+                Text("\(localized("commerce.user-id", language: model.language)): \(commerce.userID.uuidString.lowercased())")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
             }
             Section {
                 if !commerce.isPremium {
@@ -493,10 +607,22 @@ private struct CommerceSettingsView: View {
                 }
                 Button(localized("credits.buy", language: model.language)) { commerce.showsCredits = true }
                 Button(localized("premium.restore", language: model.language)) { Task { await commerce.restore() } }
+                Button(localized("commerce.refresh", language: model.language)) { Task { await commerce.syncAccount() } }
+            }
+            if let error = commerce.accountError {
+                Section { Text(error).foregroundStyle(AppTheme.coral) }
             }
         }
         .task { await commerce.syncAccount() }
         .settingsDetailStyle(title: localized("commerce.account", language: model.language))
+    }
+
+    private func formatted(_ value: String) -> String {
+        guard let date = ISO8601DateFormatter().date(from: value) else { return value }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: model.language.rawValue)
+        formatter.dateStyle = .medium
+        return formatter.string(from: date)
     }
 }
 
