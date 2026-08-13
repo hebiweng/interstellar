@@ -210,25 +210,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Interstellar sends the selected chart's calculated facts to the configured AI service only after you tap Generate. The relay never stores the generated report. One Credit is charged only after the report is verified and saved on this device. You can revoke future network generation at any time."
+            "value": "When you tap Generate, the calculated chart facts needed for the report are sent securely. The report stays on this device. One Credit is charged only after the report is verified and saved. You can turn off future online generation at any time."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "只有在你点击生成后，Interstellar 才会把所选星盘的计算事实发送给配置的 AI 服务。中继服务永不保存生成的报告；报告通过校验并成功保存在本机后才扣除 1 Credit。你可以随时撤回后续联网生成授权。"
+            "value": "点击生成后，报告所需的星盘计算事实会被安全发送。报告只保存在这台设备上，并且仅在验证通过并成功保存后扣除 1 Credit。你可以随时关闭后续联网生成。"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Interstellar envía los datos calculados de la carta seleccionada al servicio de IA configurado solo después de que pulses Generar. El relay nunca almacena el informe generado. Solo se cobra un Credit cuando el informe se valida y se guarda en este dispositivo. Puedes revocar futuras generaciones en línea en cualquier momento."
+            "value": "Al pulsar Generar, se envían de forma segura los datos calculados necesarios. El informe permanece en este dispositivo. Solo se cobra 1 Credit después de validarlo y guardarlo. Puedes desactivar futuras generaciones en línea cuando quieras."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Interstellar envoie les données calculées du thème sélectionné au service d’IA configuré uniquement après que vous avez touché Générer. Le relais ne conserve jamais le rapport généré. Un Credit n’est débité qu’après validation et enregistrement sur cet appareil. Vous pouvez révoquer les futures générations en ligne à tout moment."
+            "value": "Lorsque vous touchez Générer, les faits calculés nécessaires sont envoyés de façon sécurisée. Le rapport reste sur cet appareil. Un seul Credit est débité après validation et enregistrement. Vous pouvez désactiver les futures générations en ligne à tout moment."
           }
         }
       }
@@ -9306,6 +9306,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "Permanents"
+          }
+        }
+      }
+    },
+    "credits.permanent-pack": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permanent Credit pack"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "永久有效的 Credits"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paquete de Credits permanentes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lot de Credits permanents"
           }
         }
       }
@@ -22476,6 +22505,64 @@
         }
       }
     },
+    "premium.choose-annual": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Annual"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择年度方案"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegir anual"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir annuel"
+          }
+        }
+      }
+    },
+    "premium.choose-monthly": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Monthly"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择月度方案"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegir mensual"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir mensuel"
+          }
+        }
+      }
+    },
     "premium.continue": {
       "extractionState": "manual",
       "localizations": {
@@ -22621,6 +22708,35 @@
         }
       }
     },
+    "premium.per-month": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "per month"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每月"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "al mes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "par mois"
+          }
+        }
+      }
+    },
     "premium.per-period": {
       "extractionState": "manual",
       "localizations": {
@@ -22646,6 +22762,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "10 / période"
+          }
+        }
+      }
+    },
+    "premium.per-year": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "per year"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每年"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "al año"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "par an"
           }
         }
       }
@@ -22849,35 +22994,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Activer Pro"
-          }
-        }
-      }
-    },
-    "premium.storekit-testing-note": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "StoreKit test products appear when this Debug build is launched from Xcode with the included configuration. You can also switch this User ID between Free and Pro in Relay Admin."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "使用项目内配置从 Xcode 启动此 Debug 版本时会显示 StoreKit 测试商品；也可以在 Relay 后台按本机 User ID 切换 Free 与 Pro。"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Los productos de prueba de StoreKit aparecen al iniciar esta versión Debug desde Xcode con la configuración incluida. También puedes cambiar este ID entre Free y Pro en Relay Admin."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les produits de test StoreKit apparaissent lorsque cette version Debug est lancée depuis Xcode avec la configuration incluse. Vous pouvez aussi basculer cet ID entre Free et Pro dans Relay Admin."
           }
         }
       }

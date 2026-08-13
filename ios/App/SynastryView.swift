@@ -145,11 +145,35 @@ struct AskView: View {
 
     private var modeSelection: some View {
         VStack(alignment: .leading, spacing: 18) {
-            ScreenTitle(
-                eyebrow: localized("ask.ask-the-chart", language: model.language),
-                title: localized("ask.what-do-you-want-to-ask", language: model.language),
-                subtitle: localized("ask.choose-one-path-your-question-is-calculated-privately-on-this-device", language: model.language)
-            )
+            VStack(alignment: .leading, spacing: 7) {
+                Text(localized("ask.ask-the-chart", language: model.language))
+                    .font(.footnote.weight(.bold))
+                    .tracking(1.7)
+                    .foregroundStyle(AppTheme.violet)
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                    Text(localized("ask.what-do-you-want-to-ask", language: model.language))
+                        .font(.largeTitle.weight(.bold))
+                        .foregroundStyle(AppTheme.text)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 0)
+                    VStack(spacing: 1) {
+                        Text(localized("credits.one-credit", language: model.language))
+                            .font(.caption.weight(.bold))
+                        Text(localized("ask.limited-free", language: model.language))
+                            .font(.caption2.weight(.semibold))
+                    }
+                    .foregroundStyle(AppTheme.violet)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 5)
+                    .background(AppTheme.violet.opacity(0.12), in: Capsule())
+                    .fixedSize()
+                }
+                Text(localized("ask.choose-one-path-your-question-is-calculated-privately-on-this-device", language: model.language))
+                    .font(.subheadline)
+                    .foregroundStyle(AppTheme.muted)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             askModeCard(
                 mode: .yesNo,
@@ -1913,24 +1937,18 @@ struct AskHistoryView: View {
                     } else {
                         ForEach(entries) { entry in
                             HStack(spacing: 8) {
-                                NavigationLink {
-                                    AskHistoryDetailView(entry: entry, language: language)
-                                } label: {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(entry.question)
-                                            .font(.footnote.weight(.semibold))
-                                            .foregroundStyle(AppTheme.text)
-                                        Text(entry.answerTitle)
-                                            .font(.caption2)
-                                            .foregroundStyle(AppTheme.muted)
-                                        Text(shortDate(entry.createdAt))
-                                            .font(.caption2)
-                                            .foregroundStyle(AppTheme.muted.opacity(0.8))
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .contentShape(Rectangle())
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(entry.question)
+                                        .font(.body.weight(.semibold))
+                                        .foregroundStyle(AppTheme.text)
+                                    Text(entry.answerTitle)
+                                        .font(.subheadline)
+                                        .foregroundStyle(AppTheme.muted)
+                                    Text(shortDate(entry.createdAt))
+                                        .font(.footnote)
+                                        .foregroundStyle(AppTheme.muted.opacity(0.8))
                                 }
-                                .buttonStyle(.plain)
+                                .frame(maxWidth: .infinity, alignment: .leading)
 
                                 Button(role: .destructive) {
                                     pendingDelete = entry
@@ -1981,35 +1999,5 @@ struct AskHistoryView: View {
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)
-    }
-}
-
-struct AskHistoryDetailView: View {
-    let entry: AskHistoryEntry
-    let language: AppLanguage
-
-    var body: some View {
-        ZStack {
-            ScreenBackground()
-            ScrollView(.vertical, showsIndicators: false) {
-                LazyVStack(alignment: .leading, spacing: 14) {
-                    Text(entry.question)
-                        .font(.title2.weight(.bold))
-                        .foregroundStyle(AppTheme.text)
-                    Text(entry.answerTitle)
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(AppTheme.violet)
-                    if !entry.answerText.isEmpty {
-                        Text(entry.answerText)
-                            .font(.body)
-                            .foregroundStyle(AppTheme.text)
-                    }
-                }
-                .padding(18)
-            }
-        }
-        .toolbar(.visible, for: .navigationBar)
-        .navigationTitle(localized("ask.history", language: language))
-        .navigationBarTitleDisplayMode(.inline)
     }
 }

@@ -227,12 +227,6 @@ struct ProfileView: View {
                 title: localized("profile.birth-place", language: model.language),
                 value: model.profile.placeName
             )
-            Divider().overlay(AppTheme.line)
-            detailRow(
-                icon: "clock",
-                title: localized("profile.time-zone", language: model.language),
-                value: model.profile.timezoneID
-            )
         }
     }
 

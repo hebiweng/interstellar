@@ -105,9 +105,12 @@ final class CommerceStore: ObservableObject {
     }
 
     func syncAccount() async {
-        struct Body: Encodable { let userID: String }
+        struct Body: Encodable { let userID: String; let countryCode: String? }
         do {
-            let data = try JSONEncoder().encode(Body(userID: userID.uuidString.lowercased()))
+            let data = try JSONEncoder().encode(Body(
+                userID: userID.uuidString.lowercased(),
+                countryCode: Locale.current.region?.identifier
+            ))
             let response = try await CommerceRelay.post(path: "v1/account/sync", body: data)
             account = try JSONDecoder().decode(CommerceAccount.self, from: response)
             accountError = nil
@@ -266,9 +269,19 @@ struct PremiumPaywallView: View {
                     Text(localized("premium.pro-description", language: language)).font(.subheadline).foregroundStyle(AppTheme.muted)
 
                     VStack(spacing: 10) {
-                        ForEach(proProducts, id: \.id) { product in
-                            productChoice(product)
-                        }
+                        productChoice(
+                            id: CommerceStore.monthlyID,
+                            titleKey: "premium.monthly",
+                            fallbackPrice: "$4.99",
+                            periodKey: "premium.per-month"
+                        )
+                        productChoice(
+                            id: CommerceStore.annualID,
+                            titleKey: "premium.annual",
+                            fallbackPrice: "$39.99",
+                            periodKey: "premium.per-year",
+                            detailKey: "premium.annual-bonus"
+                        )
                     }
 
                     VStack(spacing: 0) {
@@ -281,14 +294,10 @@ struct PremiumPaywallView: View {
                         benefit("premium.annual-welcome", value: localized("premium.annual-only", language: language), sparkle: true)
                     }
 
-                    if commerce.products.isEmpty {
-                        Text(localized("premium.storekit-testing-note", language: language)).font(.footnote).foregroundStyle(AppTheme.muted)
+                    Button(purchaseButtonTitle) {
+                        guard let product = commerce.products.first(where: { $0.id == selectedProductID }) else { return }
+                        Task { await commerce.purchase(product) }
                     }
-
-                    Button(localized("premium.start-pro", language: language)) {
-                    guard let product = commerce.products.first(where: { $0.id == selectedProductID }) else { return }
-                    Task { await commerce.purchase(product) }
-                }
                     .font(.headline).foregroundStyle(Color.white)
                     .frame(maxWidth: .infinity, minHeight: 52)
                     .background(AppTheme.violet, in: RoundedRectangle(cornerRadius: 16))
@@ -318,28 +327,40 @@ struct PremiumPaywallView: View {
         .presentationDragIndicator(.hidden)
     }
 
-    private var proProducts: [Product] {
-        commerce.products.filter { [CommerceStore.annualID, CommerceStore.monthlyID].contains($0.id) }
-            .sorted { $0.id == CommerceStore.annualID && $1.id != CommerceStore.annualID }
+    private var purchaseButtonTitle: String {
+        selectedProductID == CommerceStore.annualID
+            ? localized("premium.choose-annual", language: language)
+            : localized("premium.choose-monthly", language: language)
     }
 
-    private func productChoice(_ product: Product) -> some View {
-        Button { selectedProductID = product.id } label: {
-            HStack(alignment: .center, spacing: 12) {
-                Image(systemName: selectedProductID == product.id ? "checkmark.circle.fill" : "circle")
+    private func productChoice(
+        id: String,
+        titleKey: String,
+        fallbackPrice: String,
+        periodKey: String,
+        detailKey: String? = nil
+    ) -> some View {
+        let product = commerce.products.first { $0.id == id }
+        return Button { selectedProductID = id } label: {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: selectedProductID == id ? "checkmark.circle.fill" : "circle")
                     .foregroundStyle(AppTheme.violet)
+                    .padding(.top, 2)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(product.id == CommerceStore.annualID ? localized("premium.annual", language: language) : localized("premium.monthly", language: language))
+                    Text(localized(titleKey, language: language))
                         .font(.headline).foregroundStyle(AppTheme.text)
-                    if product.id == CommerceStore.annualID {
-                        Text(localized("premium.annual-bonus", language: language)).font(.caption).foregroundStyle(AppTheme.muted)
+                    if let detailKey {
+                        Text(localized(detailKey, language: language)).font(.caption).foregroundStyle(AppTheme.muted)
                     }
                 }
                 Spacer()
-                Text(product.displayPrice).font(.title3.bold()).foregroundStyle(AppTheme.text)
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(product?.displayPrice ?? fallbackPrice).font(.title3.bold()).foregroundStyle(AppTheme.text)
+                    Text(localized(periodKey, language: language)).font(.caption2).foregroundStyle(AppTheme.muted)
+                }
             }.padding(16)
-            .background(selectedProductID == product.id ? AppTheme.violet.opacity(0.13) : AppTheme.panel, in: RoundedRectangle(cornerRadius: 18))
-            .overlay(RoundedRectangle(cornerRadius: 18).stroke(selectedProductID == product.id ? AppTheme.violet : AppTheme.line))
+            .background(selectedProductID == id ? AppTheme.violet.opacity(0.13) : AppTheme.panel, in: RoundedRectangle(cornerRadius: 18))
+            .overlay(RoundedRectangle(cornerRadius: 18).stroke(selectedProductID == id ? AppTheme.violet : AppTheme.line))
         }.buttonStyle(.plain)
     }
 
@@ -357,32 +378,15 @@ struct CreditsPurchaseView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var commerce = CommerceStore.shared
     let language: AppLanguage
-    @State private var selectedProductID = CommerceStore.credits20ID
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 18) {
                 Capsule().fill(AppTheme.muted.opacity(0.45)).frame(width: 42, height: 5).frame(maxWidth: .infinity)
                 Text(localized("credits.need-more", language: language)).font(.largeTitle.bold()).foregroundStyle(AppTheme.text)
                 Text(localized("credits.purchase-description", language: language)).font(.subheadline).foregroundStyle(AppTheme.muted)
-                ForEach(creditProducts, id: \.id) { product in
-                    Button { selectedProductID = product.id } label: {
-                        HStack {
-                            Image(systemName: selectedProductID == product.id ? "checkmark.circle.fill" : "circle").foregroundStyle(AppTheme.violet)
-                            Text(product.id == CommerceStore.credits20ID ? "20 Credits" : "10 Credits").font(.headline).foregroundStyle(AppTheme.text)
-                            Spacer()
-                            Text(product.displayPrice).font(.title3.bold()).foregroundStyle(AppTheme.text)
-                        }.padding(17)
-                        .background(selectedProductID == product.id ? AppTheme.violet.opacity(0.13) : AppTheme.panel, in: RoundedRectangle(cornerRadius: 18))
-                        .overlay(RoundedRectangle(cornerRadius: 18).stroke(selectedProductID == product.id ? AppTheme.violet : AppTheme.line))
-                    }.buttonStyle(.plain)
-                }
-                if creditProducts.isEmpty { Text(localized("premium.storekit-testing-note", language: language)).font(.footnote).foregroundStyle(AppTheme.muted) }
+                creditPurchaseButton(id: CommerceStore.creditsID, amount: 10, fallbackPrice: "$1.99")
+                creditPurchaseButton(id: CommerceStore.credits20ID, amount: 20, fallbackPrice: "$2.99")
                 Text(localized("credits.never-expire", language: language)).font(.footnote).foregroundStyle(AppTheme.muted)
-                Button(localized("credits.buy", language: language)) {
-                    guard let product = commerce.products.first(where: { $0.id == selectedProductID }) else { return }
-                    Task { await commerce.purchase(product) }
-                }.font(.headline).foregroundStyle(Color.white).frame(maxWidth: .infinity, minHeight: 52)
-                    .background(AppTheme.violet, in: RoundedRectangle(cornerRadius: 16)).buttonStyle(.plain)
                 Button(localized("location.cancel", language: language)) { dismiss() }
                     .font(.headline).foregroundStyle(AppTheme.text).frame(maxWidth: .infinity, minHeight: 48)
                     .background(AppTheme.panel, in: RoundedRectangle(cornerRadius: 16)).overlay(RoundedRectangle(cornerRadius: 16).stroke(AppTheme.line)).buttonStyle(.plain)
@@ -392,9 +396,27 @@ struct CreditsPurchaseView: View {
         .presentationDragIndicator(.hidden)
     }
 
-    private var creditProducts: [Product] {
-        commerce.products.filter { [CommerceStore.creditsID, CommerceStore.credits20ID].contains($0.id) }
-            .sorted { $0.id == CommerceStore.credits20ID && $1.id != CommerceStore.credits20ID }
+    private func creditPurchaseButton(id: String, amount: Int, fallbackPrice: String) -> some View {
+        let product = commerce.products.first { $0.id == id }
+        return Button {
+            guard let product else { return }
+            Task { await commerce.purchase(product) }
+        } label: {
+            HStack(spacing: 14) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("\(amount) Credits").font(.title3.bold()).foregroundStyle(AppTheme.text)
+                    Text(localized("credits.permanent-pack", language: language)).font(.caption).foregroundStyle(AppTheme.muted)
+                }
+                Spacer()
+                Text(product?.displayPrice ?? fallbackPrice).font(.title3.bold()).foregroundStyle(Color.white)
+                    .padding(.horizontal, 16).padding(.vertical, 11)
+                    .background(AppTheme.violet, in: Capsule())
+            }
+            .padding(17)
+            .background(AppTheme.panel, in: RoundedRectangle(cornerRadius: 18))
+            .overlay(RoundedRectangle(cornerRadius: 18).stroke(AppTheme.line))
+        }
+        .buttonStyle(.plain)
     }
 }
 

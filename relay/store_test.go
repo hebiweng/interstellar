@@ -375,6 +375,25 @@ func TestAdminPlanOverrideSwitchesFreePremiumAndAuto(t *testing.T) {
 	}
 }
 
+func TestAccountSyncStoresValidCountryCode(t *testing.T) {
+	s := openTestStore(t)
+	userID := "78787878-7878-4787-8787-787878787878"
+	user, err := s.SyncCommerceUser(userID, "country-test-installation", "cn")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if user.CountryCode != "CN" {
+		t.Fatalf("country code was not normalized: %+v", user)
+	}
+	user, err = s.SyncCommerceUser(userID, "country-test-installation", "invalid")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if user.CountryCode != "CN" {
+		t.Fatalf("invalid country code must not replace the stored value: %+v", user)
+	}
+}
+
 func TestAppAttestChallengeIsBodyBoundAndSingleUse(t *testing.T) {
 	s := openTestStore(t)
 	id, original, _, err := s.CreateAppAttestChallenge("install-a", "key-a", appAttestPurposeAssertion, "body-a", time.Minute)

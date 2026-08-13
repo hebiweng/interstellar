@@ -265,6 +265,9 @@ func (s *Store) migrate() error {
 	if err := ensureSQLiteColumn(s.db, "commerce_users", "admin_plan_override", "TEXT"); err != nil {
 		return fmt.Errorf("migrate admin plan override: %w", err)
 	}
+	if err := ensureSQLiteColumn(s.db, "commerce_users", "country_code", "TEXT NOT NULL DEFAULT ''"); err != nil {
+		return fmt.Errorf("migrate commerce country code: %w", err)
+	}
 	// Report bodies are client-only. Remove the legacy cache table entirely so
 	// no current code path can retain a generated report on Relay.
 	if _, err := s.db.Exec(`DROP TABLE IF EXISTS generation_cache`); err != nil {

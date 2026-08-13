@@ -42,10 +42,10 @@
     "fr": "Le service d’interprétation a renvoyé HTTP {{statusCode}}."
   },
   "ai.network-consent.chart-message": {
-    "en": "Interstellar sends the selected chart's calculated facts to the configured AI service only after you tap Generate. The relay never stores the generated report. One Credit is charged only after the report is verified and saved on this device. You can revoke future network generation at any time.",
-    "zh": "只有在你点击生成后，Interstellar 才会把所选星盘的计算事实发送给配置的 AI 服务。中继服务永不保存生成的报告；报告通过校验并成功保存在本机后才扣除 1 Credit。你可以随时撤回后续联网生成授权。",
-    "es": "Interstellar envía los datos calculados de la carta seleccionada al servicio de IA configurado solo después de que pulses Generar. El relay nunca almacena el informe generado. Solo se cobra un Credit cuando el informe se valida y se guarda en este dispositivo. Puedes revocar futuras generaciones en línea en cualquier momento.",
-    "fr": "Interstellar envoie les données calculées du thème sélectionné au service d’IA configuré uniquement après que vous avez touché Générer. Le relais ne conserve jamais le rapport généré. Un Credit n’est débité qu’après validation et enregistrement sur cet appareil. Vous pouvez révoquer les futures générations en ligne à tout moment."
+    "en": "When you tap Generate, the calculated chart facts needed for the report are sent securely. The report stays on this device. One Credit is charged only after the report is verified and saved. You can turn off future online generation at any time.",
+    "zh": "点击生成后，报告所需的星盘计算事实会被安全发送。报告只保存在这台设备上，并且仅在验证通过并成功保存后扣除 1 Credit。你可以随时关闭后续联网生成。",
+    "es": "Al pulsar Generar, se envían de forma segura los datos calculados necesarios. El informe permanece en este dispositivo. Solo se cobra 1 Credit después de validarlo y guardarlo. Puedes desactivar futuras generaciones en línea cuando quieras.",
+    "fr": "Lorsque vous touchez Générer, les faits calculés nécessaires sont envoyés de façon sécurisée. Le rapport reste sur cet appareil. Un seul Credit est débité après validation et enregistrement. Vous pouvez désactiver les futures générations en ligne à tout moment."
   },
   "ai.network-consent.chart-title": {
     "en": "Allow network generation?",
@@ -4874,6 +4874,10 @@
   "premium.annual-only": {"en":"20 · valid 365 days","zh":"20 · 365 天有效","es":"20 · válido 365 días","fr":"20 · valable 365 jours"},
   "premium.annual": {"en":"Annual · Best Value","zh":"年度 · 最超值","es":"Anual · Mejor opción","fr":"Annuel · Meilleur choix"},
   "premium.monthly": {"en":"Monthly","zh":"月度","es":"Mensual","fr":"Mensuel"},
+  "premium.per-month": {"en":"per month","zh":"每月","es":"al mes","fr":"par mois"},
+  "premium.per-year": {"en":"per year","zh":"每年","es":"al año","fr":"par an"},
+  "premium.choose-monthly": {"en":"Choose Monthly","zh":"选择月度方案","es":"Elegir mensual","fr":"Choisir mensuel"},
+  "premium.choose-annual": {"en":"Choose Annual","zh":"选择年度方案","es":"Elegir anual","fr":"Choisir annuel"},
   "premium.restore": {"en":"Restore Purchases","zh":"恢复购买","es":"Restaurar compras","fr":"Restaurer les achats"},
   "premium.continue": {"en":"Continue","zh":"继续","es":"Continuar","fr":"Continuer"},
   "premium.annual-bonus": {"en":"First annual purchase includes 20 bonus Credits, valid for 365 days","zh":"首次购买年度方案赠送 20 Credits，365 天有效","es":"La primera compra anual incluye 20 Credits extra, válidos durante 365 días","fr":"Le premier achat annuel inclut 20 Credits bonus, valables 365 jours"},
@@ -4885,6 +4889,7 @@
   "credits.need-more": {"en":"Need more reports?","zh":"需要更多报告？","es":"¿Necesitas más informes?","fr":"Besoin de plus de rapports ?"},
   "credits.purchase-description": {"en":"Choose a permanent Credit pack. Each completed report uses 1 Credit.","zh":"选择永久有效的 Credits 套餐。每份成功生成的报告消耗 1 Credit。","es":"Elige un paquete de Credits permanentes. Cada informe completado usa 1 Credit.","fr":"Choisissez un lot de Credits permanents. Chaque rapport terminé utilise 1 Credit."},
   "credits.never-expire": {"en":"Purchased Credits never expire.","zh":"购买的 Credits 永久有效。","es":"Los créditos comprados nunca caducan.","fr":"Les crédits achetés n’expirent jamais."},
+  "credits.permanent-pack": {"en":"Permanent Credit pack","zh":"永久有效的 Credits","es":"Paquete de Credits permanentes","fr":"Lot de Credits permanents"},
   "credits.buy": {"en":"Buy Credits","zh":"购买 Credits","es":"Comprar créditos","fr":"Acheter des crédits"},
   "commerce.account": {"en":"Pro & Credits","zh":"Pro 与 Credits","es":"Pro y Credits","fr":"Pro et Credits"},
   "commerce.your-plan": {"en":"Your Plan","zh":"你的方案","es":"Tu plan","fr":"Votre offre"},
@@ -4937,7 +4942,6 @@
   "reports.no-regenerate-while-generating": {"en":"A second generation cannot start until this one finishes.","zh":"本次生成完成前不能再次生成。","es":"No se puede iniciar otra generación hasta que termine esta.","fr":"Une nouvelle génération ne peut pas démarrer avant la fin de celle-ci."},
   "premium.preview-title": {"en":"Pro chart preview","zh":"Pro 星盘预览","es":"Vista previa de carta Pro","fr":"Aperçu du thème Pro"},
   "premium.preview-message": {"en":"The first insight is free. Pro unlocks every remaining interpretation card.","zh":"第一张解读卡免费预览，Pro 可解锁其余全部解读卡。","es":"El primer análisis es gratuito. Pro desbloquea todas las demás tarjetas de interpretación.","fr":"La première analyse est gratuite. Pro déverrouille toutes les autres cartes d’interprétation."},
-  "premium.storekit-testing-note": {"en":"StoreKit test products appear when this Debug build is launched from Xcode with the included configuration. You can also switch this User ID between Free and Pro in Relay Admin.","zh":"使用项目内配置从 Xcode 启动此 Debug 版本时会显示 StoreKit 测试商品；也可以在 Relay 后台按本机 User ID 切换 Free 与 Pro。","es":"Los productos de prueba de StoreKit aparecen al iniciar esta versión Debug desde Xcode con la configuración incluida. También puedes cambiar este ID entre Free y Pro en Relay Admin.","fr":"Les produits de test StoreKit apparaissent lorsque cette version Debug est lancée depuis Xcode avec la configuration incluse. Vous pouvez aussi basculer cet ID entre Free et Pro dans Relay Admin."},
   "onboarding.next": {"en":"Next","zh":"下一页","es":"Siguiente","fr":"Suivant"},
   "onboarding.get-started": {"en":"Get Started","zh":"开始使用","es":"Comenzar","fr":"Commencer"},
   "onboarding.welcome-title": {"en":"Your sky, in one place","zh":"你的星空，都在这里","es":"Tu cielo, en un solo lugar","fr":"Votre ciel, au même endroit"},

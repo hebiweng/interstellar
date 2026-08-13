@@ -47,7 +47,8 @@ func (c *relayConfig) handleAccountSync(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	var req struct {
-		UserID string `json:"userID"`
+		UserID      string `json:"userID"`
+		CountryCode string `json:"countryCode"`
 	}
 	dec := json.NewDecoder(bytes.NewReader(body))
 	dec.DisallowUnknownFields()
@@ -55,7 +56,7 @@ func (c *relayConfig) handleAccountSync(w http.ResponseWriter, r *http.Request) 
 		writeError(w, http.StatusBadRequest, "invalid_request", "invalid account sync request", false)
 		return
 	}
-	user, err := c.store.SyncCommerceUser(req.UserID, installationID)
+	user, err := c.store.SyncCommerceUser(req.UserID, installationID, req.CountryCode)
 	if err != nil {
 		writeError(w, http.StatusConflict, "account_sync_failed", err.Error(), false)
 		return

@@ -32,6 +32,7 @@ type CommerceUser struct {
 	UserID                  string               `json:"userID"`
 	CreatedAt               string               `json:"createdAt"`
 	LastActiveAt            string               `json:"lastActiveAt"`
+	CountryCode             string               `json:"countryCode,omitempty"`
 	Plan                    string               `json:"plan"`
 	PlanSource              string               `json:"planSource"`
 	AdminPlanOverride       string               `json:"adminPlanOverride,omitempty"`
@@ -101,7 +102,7 @@ func requestDigest(body []byte) string {
 	return hex.EncodeToString(sum[:])
 }
 
-func (s *Store) SyncCommerceUser(userID, installationID string) (CommerceUser, error) {
+func (s *Store) SyncCommerceUser(userID, installationID string, countryCodes ...string) (CommerceUser, error) {
 	if !validCommerceID(userID) || strings.TrimSpace(installationID) == "" {
 		return CommerceUser{}, errors.New("valid userID and installationID are required")
 	}
@@ -113,6 +114,14 @@ func (s *Store) SyncCommerceUser(userID, installationID string) (CommerceUser, e
 	now := time.Now().UTC()
 	if err := ensureCommerceUserTx(tx, userID, installationID, now); err != nil {
 		return CommerceUser{}, err
+	}
+	if len(countryCodes) > 0 {
+		countryCode := strings.ToUpper(strings.TrimSpace(countryCodes[0]))
+		if matched, _ := regexp.MatchString(`^[A-Z]{2}$`, countryCode); matched {
+			if _, err := tx.Exec(`UPDATE commerce_users SET country_code=? WHERE user_id=?`, countryCode, userID); err != nil {
+				return CommerceUser{}, err
+			}
+		}
 	}
 	if _, err := refillAllowanceTx(tx, userID, now); err != nil {
 		return CommerceUser{}, err
@@ -231,8 +240,8 @@ func addCalendarMonthsClamped(anchor time.Time, months int) time.Time {
 func (s *Store) GetCommerceUser(userID string) (CommerceUser, error) {
 	var user CommerceUser
 	var adminExpiry, adminOverride sql.NullString
-	if err := s.db.QueryRow(`SELECT user_id,created_at,last_active_at,admin_plan_override,admin_premium_expires_at FROM commerce_users WHERE user_id=?`, userID).
-		Scan(&user.UserID, &user.CreatedAt, &user.LastActiveAt, &adminOverride, &adminExpiry); err != nil {
+	if err := s.db.QueryRow(`SELECT user_id,created_at,last_active_at,COALESCE(country_code,''),admin_plan_override,admin_premium_expires_at FROM commerce_users WHERE user_id=?`, userID).
+		Scan(&user.UserID, &user.CreatedAt, &user.LastActiveAt, &user.CountryCode, &adminOverride, &adminExpiry); err != nil {
 		return user, err
 	}
 	user.AdminPlanOverride = adminOverride.String
