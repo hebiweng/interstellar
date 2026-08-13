@@ -6,10 +6,13 @@ struct InterstellarApp: App {
 
     init() {
 #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--reset-test-identity") {
+        let freshInstallKey = "debug.identity-initialized-for-install.v1"
+        let isFreshDebugInstall = !UserDefaults.standard.bool(forKey: freshInstallKey)
+        if isFreshDebugInstall || ProcessInfo.processInfo.arguments.contains("--reset-test-identity") {
             CommerceIdentity.resetForTesting()
             InstallationIdentity.resetForTesting()
             UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier ?? "com.xiaoguiwk.interstellar")
+            UserDefaults.standard.set(true, forKey: freshInstallKey)
         }
 #endif
     }
