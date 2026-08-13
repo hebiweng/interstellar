@@ -22,7 +22,7 @@ AIGC:
 | 相对 `origin/dev` | 本轮提交前超前 18、落后 0 |
 | 产品合同 | `docs/ios-v6-rebuild-plan.md` |
 | 卡片合同 | `docs/ios-card-implementation-matrix.md` |
-| iOS 测试设备 | 已连接的 iPhone 12 mini；后续不使用模拟器 |
+| iOS 测试设备 | 当前已配对并安装到 HUAWEI Mate XTs ULTIMATE DESIGN（iPhone 17 Pro Max）；iPhone 12 mini 当前未配对；后续不使用模拟器 |
 | Relay 权威域名 | `https://aaadmin.xiaoguiwk.top` |
 | 当前生产 Relay | 部署完成后以 `docker inspect interstellar-relay` 为准；上一版为 `interstellar-relay:v6-20260812-testability` |
 
@@ -146,6 +146,8 @@ AstroCore Snapshot / Aspect / Event
 - 测试可见性修复后，iPhoneOS arm64 无签名与 iPhone 12 mini 签名 Debug 构建均以 Swift 6 warnings-as-errors 通过；固定 UI 更新为 962 条四语字符串。新包已覆盖安装并成功启动到同一台 iPhone 12 mini，未删除 App 数据。
 - Relay 变更专项测试通过，覆盖后台 Free/Premium/Auto 强制切换、对应 2/10 allowance 刷新、订阅宽限期与交易/报告/Credit 路径；`go vet ./...`、管理端 JavaScript 语法、全部项目门禁和 `git diff --check` 通过。
 - 本轮 Relay `go test ./...` 与 `go vet ./...` 通过，新增覆盖月度 Pro 不赠送、Annual welcome 幂等、20 Credits 购买、后台扣减不足拒绝、恢复默认只清后台赠送及 Ledger/Audit；iPhoneOS arm64 Debug 无签名构建以 Swift 6 warnings-as-errors 通过，固定 UI 996 条四语字符串通过生成和校验。
+- 本轮提交 `db182c4` 已构建为 `linux/amd64` 镜像 `interstellar-relay:v6-20260813-pro-credits`，本机容器 HTTP 健康检查通过；生产切换前停止 Relay 写入并备份数据库到 `/opt/interstellar/backups/relay-20260813-2030-pre-pro-credits.db`，随后只重建 Relay，Caddy 未重启。生产容器与公网 `/v1/health` 均正常，管理页已确认包含上海时间、分行 ID、扣减和恢复默认 Credits。
+- 当前 Pro/Credits Debug 包已用 Personal Team 签名，覆盖安装并成功启动到 HUAWEI Mate XTs ULTIMATE DESIGN；未删除 App 数据。另一台 HUAWEI PURA 70（iPhone 12 mini）仍显示未配对，因此未向该设备安装。
 - 已从提交 `0baacd2` 构建并于 2026-08-13 部署 `linux/amd64` 镜像 `interstellar-relay:v6-20260812-testability`。切换前停止 Relay 写入并备份生产数据库到 `/opt/interstellar/backups/relay-20260813-192548-pre-testability.db`，随后只重建 `interstellar-relay`；Caddy 保持运行，旧 Web/API 容器保持停止且未删除。
 - 部署后 Relay 容器为 healthy，公开 `/v1/health`、`/privacy`、`/terms` 均返回 200；管理端已出现 Reports、Users 与 Credits 测试能力。管理员登录、Users/Reports/Provider 查询、注销及会话撤销均通过，生产现有 Provider 为 1，Users/Reports 暂为空；未携带安装身份的 `/v1/account/sync` 正确返回 401。
 - 本轮没有使用模拟器；当前 DerivedData 保留，用于已连接真机的后续快速覆盖构建。
