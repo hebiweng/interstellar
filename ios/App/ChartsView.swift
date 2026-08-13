@@ -10,6 +10,7 @@ struct ChartsView: View {
     @State private var generationChart: ChartKind?
     @State private var generationWillReplace = false
     @State private var pendingGeneration: PendingGeneration?
+    @State private var generatingChart: ChartKind?
    @State private var showParameters = false
 
 private struct PendingGeneration: Identifiable {
@@ -104,6 +105,9 @@ private struct PendingGeneration: Identifiable {
                         generationChart = nil
                     }
                 )
+            }
+            .sheet(item: $generatingChart) { chart in
+                ReportGeneratingSheet(chart: chart, language: model.language)
             }
             .alert(
                 localized("ai.network-consent.chart-title", language: model.language),
@@ -214,13 +218,25 @@ private struct PendingGeneration: Identifiable {
     private func insightCardRow(index: Int, card: InsightCardModel) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             if shouldLockCard(at: index) {
+                cardSectionHeader(card)
                 Button { commerce.showsPaywall = true } label: {
-                    VStack(spacing: 12) {
-                        Image(systemName: "lock.fill").font(.title2)
-                        Text(localized("premium.unlock-card", language: model.language)).font(.headline)
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(.ultraThinMaterial)
+                        LinearGradient(
+                            colors: [AppTheme.violet.opacity(0.18), AppTheme.panel.opacity(0.5), AppTheme.blue.opacity(0.12)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        VStack(spacing: 10) {
+                            Image(systemName: "lock.fill").font(.title2).foregroundStyle(AppTheme.violet)
+                            Text(localized("premium.explore", language: model.language)).font(.headline).foregroundStyle(AppTheme.text)
+                            Text(localized("premium.locked-card-message", language: model.language)).font(.caption).foregroundStyle(AppTheme.muted)
+                        }
                     }
                     .frame(maxWidth: .infinity, minHeight: 150)
-                    .background(AppTheme.panel, in: RoundedRectangle(cornerRadius: 20))
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.white.opacity(0.16)))
                 }
                 .buttonStyle(.plain)
                 .accessibilityHint(localized("premium.see-full-picture", language: model.language))
@@ -328,6 +344,8 @@ private struct PendingGeneration: Identifiable {
             Button {
                 if let saved = model.currentSavedReport(for: model.selectedChart) {
                     selectedReport = saved
+                } else if case .generating = model.aiReportStatus(for: model.selectedChart) {
+                    generatingChart = model.selectedChart
                 } else {
                     generationChart = model.selectedChart
                     generationWillReplace = false
@@ -852,5 +870,34 @@ private struct PendingGeneration: Identifiable {
                 await MainActor.run { selectedReport = saved }
             }
         }
+    }
+}
+
+private struct ReportGeneratingSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let chart: ChartKind
+    let language: AppLanguage
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 18) {
+                Capsule().fill(AppTheme.muted.opacity(0.45)).frame(width: 42, height: 5)
+                ProgressView().controlSize(.large).tint(AppTheme.violet)
+                Text(localized("reports.generating", language: language)).font(.title2.bold()).foregroundStyle(AppTheme.text)
+                Text(chart.title(language: language)).font(.headline).foregroundStyle(AppTheme.violet)
+                Text(localized("reports.this-may-take-a-little-while-you-can-leave-this-page-and-come-back-later", language: language))
+                    .font(.subheadline).foregroundStyle(AppTheme.muted).multilineTextAlignment(.center)
+                Text(localized("reports.no-regenerate-while-generating", language: language))
+                    .font(.caption).foregroundStyle(AppTheme.muted).multilineTextAlignment(.center)
+                Button(localized("common.done", language: language)) { dismiss() }
+                    .font(.headline).foregroundStyle(Color.white).frame(maxWidth: .infinity, minHeight: 50)
+                    .background(AppTheme.violet, in: RoundedRectangle(cornerRadius: 16)).buttonStyle(.plain)
+            }
+            .padding(22)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(ScreenBackground())
+        }
+        .presentationDetents([.medium])
+        .presentationDragIndicator(.hidden)
     }
 }

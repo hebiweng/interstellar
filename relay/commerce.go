@@ -44,6 +44,7 @@ type CommerceUser struct {
 	Credits                 CreditBalance        `json:"credits"`
 	ReportsGenerated        int                  `json:"reportsGenerated"`
 	CreditGrants            []CreditGrantSummary `json:"creditGrants,omitempty"`
+	CreditLedger            []CreditLedgerEntry  `json:"creditLedger,omitempty"`
 }
 
 type CreditGrantSummary struct {
@@ -53,6 +54,14 @@ type CreditGrantSummary struct {
 	Remaining int    `json:"remaining"`
 	GrantedAt string `json:"grantedAt"`
 	ExpiresAt string `json:"expiresAt,omitempty"`
+}
+
+type CreditLedgerEntry struct {
+	ID        int64  `json:"id"`
+	RequestID string `json:"requestID,omitempty"`
+	Action    string `json:"action"`
+	Delta     int    `json:"delta"`
+	CreatedAt string `json:"createdAt"`
 }
 
 type ReportRequestRecord struct {
@@ -257,6 +266,21 @@ func (s *Store) GetCommerceUser(userID string) (CommerceUser, error) {
 		return user, err
 	}
 	_ = s.db.QueryRow(`SELECT COUNT(*) FROM report_requests WHERE user_id=? AND report_status='success'`, userID).Scan(&user.ReportsGenerated)
+	rows, ledgerErr := s.db.Query(`SELECT id,COALESCE(request_id,''),action,delta,created_at FROM credit_ledger WHERE user_id=? AND delta<>0 ORDER BY created_at DESC,id DESC LIMIT 50`, userID)
+	if ledgerErr != nil {
+		return user, ledgerErr
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var entry CreditLedgerEntry
+		if err := rows.Scan(&entry.ID, &entry.RequestID, &entry.Action, &entry.Delta, &entry.CreatedAt); err != nil {
+			return user, err
+		}
+		user.CreditLedger = append(user.CreditLedger, entry)
+	}
+	if err := rows.Err(); err != nil {
+		return user, err
+	}
 	return user, nil
 }
 
@@ -550,6 +574,103 @@ func (s *Store) GrantAdminCredits(userID string, amount int, expiresAt *time.Tim
 	return s.RecordAudit(operator, "credits.grant", userID, map[string]any{"amount": amount, "expiresAt": expiry})
 }
 
+func (s *Store) DeductAdminCredits(userID string, amount int, operator string) error {
+	if amount < 1 || amount > 10000 {
+		return errors.New("amount must be between 1 and 10000")
+	}
+	now := time.Now().UTC()
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	rows, err := tx.Query(`SELECT id,remaining_amount FROM credit_grants WHERE user_id=? AND remaining_amount>0 AND (expires_at IS NULL OR expires_at>?)
+		ORDER BY CASE source WHEN 'allowance' THEN 0 WHEN 'annual_welcome' THEN 1 WHEN 'admin' THEN 2 WHEN 'purchased' THEN 3 ELSE 2 END,
+		CASE WHEN expires_at IS NULL THEN 1 ELSE 0 END,expires_at,granted_at,id`, userID, now.Format(time.RFC3339))
+	if err != nil {
+		return err
+	}
+	var allocations []creditAllocation
+	available := 0
+	for rows.Next() {
+		var item creditAllocation
+		if err := rows.Scan(&item.GrantID, &item.Amount); err != nil {
+			rows.Close()
+			return err
+		}
+		available += item.Amount
+		allocations = append(allocations, item)
+	}
+	if err := rows.Close(); err != nil {
+		return err
+	}
+	if available < amount {
+		return errors.New("insufficient available Credits")
+	}
+	remaining := amount
+	stamp := now.Format(time.RFC3339)
+	for _, item := range allocations {
+		if remaining == 0 {
+			break
+		}
+		used := item.Amount
+		if used > remaining {
+			used = remaining
+		}
+		if _, err = tx.Exec(`UPDATE credit_grants SET remaining_amount=remaining_amount-? WHERE id=? AND remaining_amount>=?`, used, item.GrantID, used); err != nil {
+			return err
+		}
+		if _, err = tx.Exec(`INSERT INTO credit_ledger(user_id,grant_id,action,delta,created_at) VALUES(?,?,'ADMIN_DEDUCT',?,?)`, userID, item.GrantID, -used, stamp); err != nil {
+			return err
+		}
+		remaining -= used
+	}
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+	return s.RecordAudit(operator, "credits.deduct", userID, map[string]any{"amount": amount})
+}
+
+func (s *Store) ResetAdminCredits(userID, operator string) error {
+	now := time.Now().UTC()
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	rows, err := tx.Query(`SELECT id,remaining_amount FROM credit_grants WHERE user_id=? AND source='admin' AND remaining_amount>0`, userID)
+	if err != nil {
+		return err
+	}
+	var allocations []creditAllocation
+	for rows.Next() {
+		var item creditAllocation
+		if err := rows.Scan(&item.GrantID, &item.Amount); err != nil {
+			rows.Close()
+			return err
+		}
+		allocations = append(allocations, item)
+	}
+	if err := rows.Close(); err != nil {
+		return err
+	}
+	stamp := now.Format(time.RFC3339)
+	removed := 0
+	for _, item := range allocations {
+		if _, err = tx.Exec(`UPDATE credit_grants SET remaining_amount=0,expires_at=? WHERE id=?`, stamp, item.GrantID); err != nil {
+			return err
+		}
+		if _, err = tx.Exec(`INSERT INTO credit_ledger(user_id,grant_id,action,delta,created_at) VALUES(?,?,'ADMIN_RESET',?,?)`, userID, item.GrantID, -item.Amount, stamp); err != nil {
+			return err
+		}
+		removed += item.Amount
+	}
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+	return s.RecordAudit(operator, "credits.reset_admin", userID, map[string]any{"removed": removed})
+}
+
 func (s *Store) SetAdminPremium(userID string, expiresAt *time.Time, operator, reason string) error {
 	plan := "auto"
 	if expiresAt != nil {
@@ -706,7 +827,7 @@ func (s *Store) ApplyVerifiedStoreTransaction(userID string, value AppleTransact
 	if value.TransactionID == "" || value.OriginalTransactionID == "" {
 		return errors.New("transaction identifiers are required")
 	}
-	if value.ProductID != "premium_monthly" && value.ProductID != "premium_annual" && value.ProductID != "credits_10" {
+	if value.ProductID != "premium_monthly" && value.ProductID != "premium_annual" && value.ProductID != "credits_10" && value.ProductID != "credits_20" {
 		return errors.New("unknown product")
 	}
 	now := time.Now().UTC()
@@ -736,7 +857,11 @@ func (s *Store) ApplyVerifiedStoreTransaction(userID string, value AppleTransact
 		return err
 	}
 	inserted := existingTransaction == 0
-	if value.ProductID == "credits_10" {
+	if value.ProductID == "credits_10" || value.ProductID == "credits_20" {
+		creditAmount := 10
+		if value.ProductID == "credits_20" {
+			creditAmount = 20
+		}
 		if value.RevocationDate > 0 {
 			var grantID int64
 			var remaining int
@@ -759,12 +884,12 @@ func (s *Store) ApplyVerifiedStoreTransaction(userID string, value AppleTransact
 		if !inserted {
 			return tx.Commit()
 		}
-		grant, err := tx.Exec(`INSERT INTO credit_grants(user_id,source,original_amount,remaining_amount,granted_at,apple_transaction_id) VALUES(?,'purchased',10,10,?,?)`, userID, now.Format(time.RFC3339), value.TransactionID)
+		grant, err := tx.Exec(`INSERT INTO credit_grants(user_id,source,original_amount,remaining_amount,granted_at,apple_transaction_id) VALUES(?,'purchased',?,?,?,?)`, userID, creditAmount, creditAmount, now.Format(time.RFC3339), value.TransactionID)
 		if err != nil {
 			return err
 		}
 		grantID, _ := grant.LastInsertId()
-		if _, err = tx.Exec(`INSERT INTO credit_ledger(user_id,grant_id,action,delta,created_at) VALUES(?,?,'PURCHASE',10,?)`, userID, grantID, now.Format(time.RFC3339)); err != nil {
+		if _, err = tx.Exec(`INSERT INTO credit_ledger(user_id,grant_id,action,delta,created_at) VALUES(?,?,'PURCHASE',?,?)`, userID, grantID, creditAmount, now.Format(time.RFC3339)); err != nil {
 			return err
 		}
 	} else {
@@ -780,10 +905,19 @@ func (s *Store) ApplyVerifiedStoreTransaction(userID string, value AppleTransact
 		if _, err = tx.Exec(`INSERT INTO subscriptions(user_id,product_id,status,original_transaction_id,started_at,expires_at,updated_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET product_id=excluded.product_id,status=excluded.status,original_transaction_id=excluded.original_transaction_id,started_at=excluded.started_at,expires_at=excluded.expires_at,updated_at=excluded.updated_at`, userID, value.ProductID, status, value.OriginalTransactionID, purchase.Format(time.RFC3339), expires.Format(time.RFC3339), now.Format(time.RFC3339)); err != nil {
 			return err
 		}
-		if value.ProductID == "premium_annual" && status == "active" {
-			_, err = tx.Exec(`INSERT INTO credit_grants(user_id,source,original_amount,remaining_amount,granted_at,expires_at,period_key,apple_transaction_id) VALUES(?,'annual_welcome',20,20,?,?,'once',?) ON CONFLICT(user_id,source,period_key) DO NOTHING`, userID, now.Format(time.RFC3339), purchase.AddDate(1, 0, 0).Format(time.RFC3339), value.TransactionID)
+		if value.ProductID == "premium_annual" && (status == "active" || status == "grace") {
+			result, bonusErr := tx.Exec(`INSERT INTO credit_grants(user_id,source,original_amount,remaining_amount,granted_at,expires_at,period_key,apple_transaction_id)
+				SELECT ?,'annual_welcome',20,20,?,?,'once',?
+				WHERE NOT EXISTS (SELECT 1 FROM credit_grants WHERE user_id=? AND source='annual_welcome')`, userID, now.Format(time.RFC3339), purchase.AddDate(1, 0, 0).Format(time.RFC3339), value.TransactionID, userID)
+			err = bonusErr
 			if err != nil {
 				return err
+			}
+			if affected, _ := result.RowsAffected(); affected == 1 {
+				grantID, _ := result.LastInsertId()
+				if _, err = tx.Exec(`INSERT INTO credit_ledger(user_id,grant_id,action,delta,created_at) VALUES(?,?,'WELCOME_BONUS',20,?)`, userID, grantID, now.Format(time.RFC3339)); err != nil {
+					return err
+				}
 			}
 		}
 		if value.ProductID == "premium_annual" && status == "revoked" {

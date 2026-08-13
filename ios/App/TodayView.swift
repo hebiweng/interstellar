@@ -23,7 +23,6 @@ struct TodayView: View {
                             timelineSection
                             upcomingSection
                             retrogradesSection
-                            skyLinkCard
                         }
 
                         if let message = model.errorMessage {
@@ -616,38 +615,6 @@ struct TodayView: View {
             return localized("today.reviewing.status", language: model.language)
         }
         return localizedTemplate("dynamic.c986511590", substitutions: ["value1": String(describing: shortDate(station.date))], language: model.language)
-    }
-
-    // MARK: - Current Sky link (prototype .sky-link)
-
-    private var skyLinkCard: some View {
-        Button {
-            selectedTab = .charts
-            model.selectChart(.currentSky)
-        } label: {
-            HStack(spacing: 12) {
-                Image(systemName: "circle.hexagongrid")
-                    .font(AppTypography.scaled(18, weight: .semibold))
-                    .foregroundStyle(AppTheme.violet)
-                    .frame(width: 40, height: 40)
-                    .background(AppTheme.violet.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(localized("today.view-current-sky-chart", language: model.language))
-                        .font(AppTypography.scaled(13, weight: .semibold))
-                        .foregroundStyle(AppTheme.text)
-                    Text(localized("today.planet-positions-aspects-houses-motion", language: model.language))
-                        .font(AppTypography.supporting)
-                        .foregroundStyle(AppTheme.muted)
-                }
-                Spacer()
-                Image(systemName: "chevron.right").font(AppTypography.scaled(11)).foregroundStyle(AppTheme.muted)
-            }
-            .contentShape(Rectangle())
-            .padding(15)
-            .cardSurface()
-        }
-        .buttonStyle(.plain)
-        .padding(.top, 18)
     }
 
     // MARK: - Shared

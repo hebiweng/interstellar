@@ -290,6 +290,15 @@ struct AskView: View {
                 }
                 .cardSurface()
             } else {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(localized("ask.credit-cost", language: model.language))
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(AppTheme.muted)
+                    Text(localized("ask.limited-free", language: model.language))
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(AppTheme.violet)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 Button {
                     generate(mode)
                 } label: {

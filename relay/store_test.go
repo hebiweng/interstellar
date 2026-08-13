@@ -277,6 +277,72 @@ func TestVerifiedSubscriptionGracePeriodKeepsPremiumActive(t *testing.T) {
 	if err != nil || user.Plan != "premium" || user.PlanSource != "premium_monthly" || user.AppleSubscriptionStatus != "grace" {
 		t.Fatalf("billing grace should preserve Premium: user=%+v err=%v", user, err)
 	}
+	if user.Credits.Bonus != 0 {
+		t.Fatalf("monthly Pro must not grant the annual welcome Credits: %+v", user.Credits)
+	}
+}
+
+func TestTwentyCreditPurchaseAndAdminResetPreserveNonAdminCredits(t *testing.T) {
+	s := openTestStore(t)
+	userID := "34343434-3434-4343-8343-343434343434"
+	now := time.Now().UTC()
+	value := AppleTransactionPayload{
+		TransactionID: "credits-transaction-20", OriginalTransactionID: "credits-original-20",
+		ProductID: "credits_20", AppAccountToken: userID, BundleID: "com.xiaoguiwk.interstellar", PurchaseDate: now.UnixMilli(),
+	}
+	if err := s.ApplyVerifiedStoreTransaction(userID, value, "credits-20-jws"); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.GrantAdminCredits(userID, 7, nil, "test-admin"); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.ResetAdminCredits(userID, "test-admin"); err != nil {
+		t.Fatal(err)
+	}
+	user, err := s.GetCommerceUser(userID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if user.Credits.Purchased != 20 || user.Credits.Bonus != 0 || user.Credits.Allowance != freeAllowance {
+		t.Fatalf("reset must remove only unused admin Credits: %+v", user.Credits)
+	}
+	if len(user.CreditLedger) < 3 || user.CreditLedger[0].Action != "ADMIN_RESET" || user.CreditLedger[0].Delta != -7 {
+		t.Fatalf("expected visible admin reset ledger entry: %+v", user.CreditLedger)
+	}
+}
+
+func TestAdminCreditDeductionUsesAvailableBalanceAndIsAudited(t *testing.T) {
+	s := openTestStore(t)
+	userID := "56565656-5656-4565-8565-565656565656"
+	if _, err := s.SyncCommerceUser(userID, "deduction-test-installation"); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.GrantAdminCredits(userID, 5, nil, "test-admin"); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.DeductAdminCredits(userID, 3, "test-admin"); err != nil {
+		t.Fatal(err)
+	}
+	balance, err := s.CreditBalance(userID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if balance.Total != 4 || balance.Allowance != 0 || balance.Bonus != 4 {
+		t.Fatalf("unexpected balance after deduction: %+v", balance)
+	}
+	if err := s.DeductAdminCredits(userID, 5, "test-admin"); err == nil {
+		t.Fatal("deduction larger than the available balance must fail")
+	}
+	var ledgerDelta, audits int
+	if err := s.db.QueryRow(`SELECT COALESCE(SUM(delta),0) FROM credit_ledger WHERE user_id=? AND action='ADMIN_DEDUCT'`, userID).Scan(&ledgerDelta); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.db.QueryRow(`SELECT COUNT(*) FROM admin_audit WHERE action='credits.deduct' AND target=?`, userID).Scan(&audits); err != nil {
+		t.Fatal(err)
+	}
+	if ledgerDelta != -3 || audits != 1 {
+		t.Fatalf("deduction audit mismatch: ledger=%d audits=%d", ledgerDelta, audits)
+	}
 }
 
 func TestAdminPlanOverrideSwitchesFreePremiumAndAuto(t *testing.T) {

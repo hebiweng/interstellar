@@ -65,7 +65,7 @@ struct OnboardingView: View {
                     items: ["onboarding.free-core", "onboarding.free-credits", "onboarding.free-people"]
                 )
                 planCard(
-                    title: "Premium",
+                    title: "Pro",
                     symbol: "star.fill",
                     items: ["onboarding.premium-insights", "onboarding.premium-credits", "onboarding.premium-people"]
                 )

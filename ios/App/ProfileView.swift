@@ -22,22 +22,6 @@ struct ProfileView: View {
                         )
                         profileHero
                         accountSummary
-                        birthDetails
-                        Button {
-                            showsEditor = true
-                        } label: {
-                            Label(
-                                localized("profile.edit-birth-details", language: model.language),
-                                systemImage: "pencil"
-                            )
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(Color.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(AppTheme.violet, in: RoundedRectangle(cornerRadius: 15))
-                        }
-                        .buttonStyle(.plain)
-
                         peopleSection
                         Text("\(localized("commerce.user-id", language: model.language)): \(commerce.userID.uuidString.lowercased())")
                             .font(.caption2)
@@ -86,15 +70,14 @@ struct ProfileView: View {
     private var accountSummary: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(localized("commerce.account", language: model.language))
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(AppTheme.muted)
-                    Text(commerce.planTitle)
-                        .font(.title2.weight(.bold))
-                        .foregroundStyle(AppTheme.text)
-                }
+                Text(localized("commerce.your-plan", language: model.language))
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(AppTheme.text)
                 Spacer()
+                Button { Task { await commerce.syncAccount() } } label: { Image(systemName: "arrow.clockwise") }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(AppTheme.violet)
+                    .accessibilityLabel(localized("commerce.refresh", language: model.language))
                 Text(commerce.planTitle)
                     .font(.caption.weight(.bold))
                     .foregroundStyle(commerce.isPremium ? AppTheme.violet : AppTheme.muted)
@@ -102,25 +85,23 @@ struct ProfileView: View {
                     .padding(.vertical, 6)
                     .background((commerce.isPremium ? AppTheme.violet : AppTheme.muted).opacity(0.12), in: Capsule())
             }
-            HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(String(commerce.totalCredits))
-                        .font(.largeTitle.weight(.bold))
-                        .foregroundStyle(AppTheme.violet)
-                    Text(localized("credits.available", language: model.language))
-                        .font(.caption)
-                        .foregroundStyle(AppTheme.muted)
+            if let credits = commerce.account?.credits {
+                HStack(spacing: 10) {
+                    creditBucket(value: credits.allowance, label: "credits.monthly")
+                    creditBucket(value: credits.bonus, label: "credits.bonus")
+                    creditBucket(value: credits.purchased, label: "credits.permanent")
                 }
+            }
+            HStack {
+                Text(localized("credits.total", language: model.language)).font(.caption).foregroundStyle(AppTheme.muted)
                 Spacer()
-                if let renewal = commerce.account?.creditsRenewAt {
-                    VStack(alignment: .trailing, spacing: 3) {
-                        Text(localized("credits.renews", language: model.language))
-                            .font(.caption)
-                            .foregroundStyle(AppTheme.muted)
-                        Text(commerceDate(renewal))
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(AppTheme.text)
-                    }
+                Text(String(commerce.totalCredits)).font(.title2.bold()).foregroundStyle(AppTheme.violet)
+            }
+            if let renewal = commerce.account?.creditsRenewAt {
+                HStack {
+                    Text(localized("credits.renews", language: model.language)).font(.caption).foregroundStyle(AppTheme.muted)
+                    Spacer()
+                    Text(commerceDate(renewal)).font(.caption.weight(.semibold)).foregroundStyle(AppTheme.text)
                 }
             }
             if commerce.isPremium, let expiry = commerce.account?.premiumExpiresAt {
@@ -136,7 +117,7 @@ struct ProfileView: View {
             }
             HStack {
                 if !commerce.isPremium {
-                    Button(localized("premium.unlock-card", language: model.language)) {
+                    Button(localized("premium.explore", language: model.language)) {
                         commerce.showsPaywall = true
                     }
                     .buttonStyle(.borderedProminent)
@@ -148,14 +129,8 @@ struct ProfileView: View {
                 .buttonStyle(.bordered)
                 .tint(AppTheme.violet)
                 Spacer()
-                Button {
-                    Task { await commerce.syncAccount() }
-                } label: {
-                    Image(systemName: "arrow.clockwise")
-                }
-                .buttonStyle(.bordered)
-                .accessibilityLabel(localized("commerce.refresh", language: model.language))
             }
+            creditActivity
             if let error = commerce.accountError {
                 Text(error)
                     .font(.caption2)
@@ -163,6 +138,54 @@ struct ProfileView: View {
             }
         }
         .cardSurface()
+    }
+
+    private func creditBucket(value: Int, label: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(String(value)).font(.title2.bold()).foregroundStyle(AppTheme.text)
+            Text(localized(label, language: model.language)).font(.caption2).foregroundStyle(AppTheme.muted)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 14))
+    }
+
+    @ViewBuilder
+    private var creditActivity: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            Text(localized("credits.activity", language: model.language)).font(.subheadline.weight(.bold)).foregroundStyle(AppTheme.text)
+            if let entries = commerce.account?.creditLedger, !entries.isEmpty {
+                ForEach(entries.prefix(6)) { entry in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(creditAction(entry.action)).font(.caption.weight(.semibold)).foregroundStyle(AppTheme.text)
+                            Text(commerceDate(entry.createdAt)).font(.caption2).foregroundStyle(AppTheme.muted)
+                        }
+                        Spacer()
+                        Text(entry.delta > 0 ? "+\(entry.delta)" : String(entry.delta))
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(entry.delta >= 0 ? AppTheme.violet : AppTheme.coral)
+                    }
+                    Divider().overlay(AppTheme.line)
+                }
+            } else {
+                Text(localized("credits.no-activity", language: model.language)).font(.caption).foregroundStyle(AppTheme.muted)
+            }
+        }
+    }
+
+    private func creditAction(_ action: String) -> String {
+        switch action {
+        case "PURCHASE": localized("credits.activity.purchase", language: model.language)
+        case "WELCOME_BONUS": localized("credits.activity.welcome", language: model.language)
+        case "ADMIN_GRANT": localized("credits.activity.grant", language: model.language)
+        case "ADMIN_DEDUCT": localized("credits.activity.deduct", language: model.language)
+        case "ADMIN_RESET": localized("credits.activity.reset", language: model.language)
+        case "CONSUME": localized("credits.activity.used", language: model.language)
+        case "RELEASE": localized("credits.activity.released", language: model.language)
+        case "REVOCATION": localized("credits.activity.revoked", language: model.language)
+        default: localized("credits.activity.adjustment", language: model.language)
+        }
     }
 
     private func commerceDate(_ value: String) -> String {
@@ -174,17 +197,19 @@ struct ProfileView: View {
     }
 
     private var profileHero: some View {
-        HStack(spacing: 16) {
-            ProfileAvatarView(profile: model.profile, size: 68)
-            VStack(alignment: .leading, spacing: 5) {
-                Text(model.profile.name)
-                    .font(.title2.weight(.bold))
-                    .foregroundStyle(AppTheme.text)
-                Text(model.profile.placeName)
-                    .font(.subheadline)
-                    .foregroundStyle(AppTheme.muted)
+        VStack(spacing: 14) {
+            HStack(spacing: 16) {
+                ProfileAvatarView(profile: model.profile, size: 68)
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(model.profile.name).font(.title2.weight(.bold)).foregroundStyle(AppTheme.text)
+                    Text(model.profile.placeName).font(.subheadline).foregroundStyle(AppTheme.muted)
+                }
+                Spacer()
+                Button(localized("profile.edit", language: model.language)) { showsEditor = true }
+                    .font(.caption.weight(.bold)).foregroundStyle(AppTheme.violet)
             }
-            Spacer()
+            Divider().overlay(AppTheme.line)
+            birthDetails
         }
         .cardSurface()
     }
@@ -209,7 +234,6 @@ struct ProfileView: View {
                 value: model.profile.timezoneID
             )
         }
-        .cardSurface()
     }
 
     private var formattedBirthDate: String {
@@ -603,7 +627,7 @@ private struct CommerceSettingsView: View {
             }
             Section {
                 if !commerce.isPremium {
-                    Button(localized("premium.unlock-card", language: model.language)) { commerce.showsPaywall = true }
+                    Button(localized("premium.explore", language: model.language)) { commerce.showsPaywall = true }
                 }
                 Button(localized("credits.buy", language: model.language)) { commerce.showsCredits = true }
                 Button(localized("premium.restore", language: model.language)) { Task { await commerce.restore() } }

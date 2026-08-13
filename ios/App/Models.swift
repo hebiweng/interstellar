@@ -123,11 +123,11 @@ extension String {
 
 enum ChartKind: String, CaseIterable, Identifiable, Codable {
     case natal
-    case transit
-    case secondary
-    case solarReturn
-    case synastry
     case currentSky
+    case transit
+    case synastry
+    case solarReturn
+    case secondary
 
     var id: String { rawValue }
 

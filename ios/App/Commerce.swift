@@ -11,6 +11,13 @@ struct CommerceAccount: Codable, Sendable {
         let reserved: Int
         let total: Int
     }
+    struct LedgerEntry: Codable, Identifiable, Sendable {
+        let id: Int64
+        let requestID: String?
+        let action: String
+        let delta: Int
+        let createdAt: String
+    }
     let userID: String
     let plan: String
     let planSource: String?
@@ -18,6 +25,7 @@ struct CommerceAccount: Codable, Sendable {
     let premiumExpiresAt: String?
     let creditsRenewAt: String?
     let credits: Credits
+    let creditLedger: [LedgerEntry]?
 }
 
 @MainActor
@@ -26,6 +34,7 @@ final class CommerceStore: ObservableObject {
     static let monthlyID = "premium_monthly"
     static let annualID = "premium_annual"
     static let creditsID = "credits_10"
+    static let credits20ID = "credits_20"
 
     @Published private(set) var products: [Product] = []
     @Published private(set) var account: CommerceAccount?
@@ -44,7 +53,7 @@ final class CommerceStore: ObservableObject {
         return isApplePremium || account?.plan == "premium"
     }
     var totalCredits: Int { account?.credits.total ?? 0 }
-    var planTitle: String { isPremium ? "Premium" : "Free" }
+    var planTitle: String { isPremium ? "Pro" : "Free" }
 
     private init() {
         userID = CommerceIdentity.userID
@@ -59,7 +68,7 @@ final class CommerceStore: ObservableObject {
     deinit { updatesTask?.cancel() }
 
     func start() async {
-        do { products = try await Product.products(for: [Self.monthlyID, Self.annualID, Self.creditsID]) } catch {}
+        do { products = try await Product.products(for: [Self.monthlyID, Self.annualID, Self.creditsID, Self.credits20ID]) } catch {}
         await refreshEntitlements()
         await syncAccount()
         await retryPendingAcknowledgements()
@@ -242,59 +251,105 @@ struct PremiumPaywallView: View {
     @ObservedObject var commerce = CommerceStore.shared
     let language: AppLanguage
     @State private var selectedProductID = CommerceStore.annualID
+    @State private var legalDocument: LocalLegalDocument?
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
-                    Text(localized("premium.see-full-picture", language: language)).font(.title2.bold())
-                    Label(localized("premium.all-insights", language: language), systemImage: "checkmark.circle")
-                    Label(localized("premium.unlimited-people", language: language), systemImage: "checkmark.circle")
-                    Label(localized("premium.ten-reports", language: language), systemImage: "checkmark.circle")
-                }
-                if commerce.products.isEmpty {
-                    Section {
-                        Text(localized("premium.storekit-testing-note", language: language))
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                Section {
-                    ForEach(commerce.products.filter { $0.id != CommerceStore.creditsID }.sorted { $0.id == CommerceStore.annualID && $1.id != CommerceStore.annualID }, id: \.id) { product in
-                        Button { selectedProductID = product.id } label: {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(product.id == CommerceStore.annualID ? localized("premium.annual", language: language) : localized("premium.monthly", language: language))
-                                    if product.id == CommerceStore.annualID {
-                                        Text(localized("premium.annual-bonus", language: language)).font(.caption).foregroundStyle(.secondary)
-                                    }
-                                }
-                                Spacer()
-                                Text(product.displayPrice)
-                                Image(systemName: selectedProductID == product.id ? "checkmark.circle.fill" : "circle")
-                            }
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    Capsule().fill(AppTheme.muted.opacity(0.45)).frame(width: 42, height: 5).frame(maxWidth: .infinity)
+                    Text("INTERSTELLAR PRO")
+                        .font(.caption2.weight(.bold)).tracking(1.2).foregroundStyle(AppTheme.violet)
+                        .padding(.horizontal, 10).padding(.vertical, 6)
+                        .background(AppTheme.violet.opacity(0.12), in: Capsule())
+                    Text(localized("premium.see-full-picture", language: language)).font(.largeTitle.bold()).foregroundStyle(AppTheme.text)
+                    Text(localized("premium.pro-description", language: language)).font(.subheadline).foregroundStyle(AppTheme.muted)
+
+                    VStack(spacing: 10) {
+                        ForEach(proProducts, id: \.id) { product in
+                            productChoice(product)
                         }
-                        .buttonStyle(.plain)
                     }
-                }
-                Button(localized("premium.continue", language: language)) {
+
+                    VStack(spacing: 0) {
+                        benefit("premium.all-insights", value: localized("premium.included", language: language))
+                        Divider().overlay(AppTheme.line)
+                        benefit("premium.unlimited-people", value: localized("premium.unlimited", language: language))
+                        Divider().overlay(AppTheme.line)
+                        benefit("premium.ten-credits", value: localized("premium.per-period", language: language))
+                        Divider().overlay(AppTheme.line)
+                        benefit("premium.annual-welcome", value: localized("premium.annual-only", language: language), sparkle: true)
+                    }
+
+                    if commerce.products.isEmpty {
+                        Text(localized("premium.storekit-testing-note", language: language)).font(.footnote).foregroundStyle(AppTheme.muted)
+                    }
+
+                    Button(localized("premium.start-pro", language: language)) {
                     guard let product = commerce.products.first(where: { $0.id == selectedProductID }) else { return }
                     Task { await commerce.purchase(product) }
                 }
-                .buttonStyle(.borderedProminent)
-                .frame(maxWidth: .infinity)
-                Button(localized("premium.restore", language: language)) { Task { await commerce.restore() } }
-                Section {
-                    Text(localized("premium.renewal-note", language: language))
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                    Link(localized("legal.terms", language: language), destination: URL(string: "https://aaadmin.xiaoguiwk.top/terms")!)
-                    Link(localized("legal.privacy", language: language), destination: URL(string: "https://aaadmin.xiaoguiwk.top/privacy")!)
+                    .font(.headline).foregroundStyle(Color.white)
+                    .frame(maxWidth: .infinity, minHeight: 52)
+                    .background(AppTheme.violet, in: RoundedRectangle(cornerRadius: 16))
+                    .buttonStyle(.plain)
+
+                    Button(localized("location.cancel", language: language)) { dismiss() }
+                        .font(.headline).foregroundStyle(AppTheme.text)
+                        .frame(maxWidth: .infinity, minHeight: 48)
+                        .background(AppTheme.panel, in: RoundedRectangle(cornerRadius: 16))
+                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppTheme.line))
+                        .buttonStyle(.plain)
+
+                    Button(localized("premium.restore", language: language)) { Task { await commerce.restore() } }
+                        .font(.footnote.weight(.semibold)).frame(maxWidth: .infinity)
+                    Text(localized("premium.renewal-note", language: language)).font(.caption2).foregroundStyle(AppTheme.muted)
+                    HStack {
+                        Button(localized("legal.terms", language: language)) { legalDocument = .terms }
+                        Spacer()
+                        Button(localized("legal.privacy", language: language)) { legalDocument = .privacy }
+                    }.font(.caption.weight(.semibold))
                 }
-            }
-            .navigationTitle("Interstellar Premium")
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button(localized("location.cancel", language: language)) { dismiss() } } }
+                .padding(20)
+            }.background(ScreenBackground())
+            .sheet(item: $legalDocument) { LocalLegalView(document: $0, language: language) }
         }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.hidden)
+    }
+
+    private var proProducts: [Product] {
+        commerce.products.filter { [CommerceStore.annualID, CommerceStore.monthlyID].contains($0.id) }
+            .sorted { $0.id == CommerceStore.annualID && $1.id != CommerceStore.annualID }
+    }
+
+    private func productChoice(_ product: Product) -> some View {
+        Button { selectedProductID = product.id } label: {
+            HStack(alignment: .center, spacing: 12) {
+                Image(systemName: selectedProductID == product.id ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(AppTheme.violet)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(product.id == CommerceStore.annualID ? localized("premium.annual", language: language) : localized("premium.monthly", language: language))
+                        .font(.headline).foregroundStyle(AppTheme.text)
+                    if product.id == CommerceStore.annualID {
+                        Text(localized("premium.annual-bonus", language: language)).font(.caption).foregroundStyle(AppTheme.muted)
+                    }
+                }
+                Spacer()
+                Text(product.displayPrice).font(.title3.bold()).foregroundStyle(AppTheme.text)
+            }.padding(16)
+            .background(selectedProductID == product.id ? AppTheme.violet.opacity(0.13) : AppTheme.panel, in: RoundedRectangle(cornerRadius: 18))
+            .overlay(RoundedRectangle(cornerRadius: 18).stroke(selectedProductID == product.id ? AppTheme.violet : AppTheme.line))
+        }.buttonStyle(.plain)
+    }
+
+    private func benefit(_ key: String, value: String, sparkle: Bool = false) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: sparkle ? "sparkles" : "checkmark").foregroundStyle(AppTheme.violet).frame(width: 20)
+            Text(localized(key, language: language)).font(.subheadline.weight(.semibold)).foregroundStyle(AppTheme.text)
+            Spacer()
+            Text(value).font(.caption).foregroundStyle(AppTheme.muted)
+        }.padding(.vertical, 13)
     }
 }
 
@@ -302,24 +357,60 @@ struct CreditsPurchaseView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var commerce = CommerceStore.shared
     let language: AppLanguage
+    @State private var selectedProductID = CommerceStore.credits20ID
     var body: some View {
         NavigationStack {
-            Form {
-                Text(localized("credits.need-more", language: language)).font(.title2.bold())
-                if let product = commerce.products.first(where: { $0.id == CommerceStore.creditsID }) {
-                    HStack { Text("10 Credits"); Spacer(); Text(product.displayPrice) }
-                    Button(localized("credits.buy", language: language)) { Task { await commerce.purchase(product) } }
-                        .buttonStyle(.borderedProminent)
+            VStack(alignment: .leading, spacing: 18) {
+                Capsule().fill(AppTheme.muted.opacity(0.45)).frame(width: 42, height: 5).frame(maxWidth: .infinity)
+                Text(localized("credits.need-more", language: language)).font(.largeTitle.bold()).foregroundStyle(AppTheme.text)
+                Text(localized("credits.purchase-description", language: language)).font(.subheadline).foregroundStyle(AppTheme.muted)
+                ForEach(creditProducts, id: \.id) { product in
+                    Button { selectedProductID = product.id } label: {
+                        HStack {
+                            Image(systemName: selectedProductID == product.id ? "checkmark.circle.fill" : "circle").foregroundStyle(AppTheme.violet)
+                            Text(product.id == CommerceStore.credits20ID ? "20 Credits" : "10 Credits").font(.headline).foregroundStyle(AppTheme.text)
+                            Spacer()
+                            Text(product.displayPrice).font(.title3.bold()).foregroundStyle(AppTheme.text)
+                        }.padding(17)
+                        .background(selectedProductID == product.id ? AppTheme.violet.opacity(0.13) : AppTheme.panel, in: RoundedRectangle(cornerRadius: 18))
+                        .overlay(RoundedRectangle(cornerRadius: 18).stroke(selectedProductID == product.id ? AppTheme.violet : AppTheme.line))
+                    }.buttonStyle(.plain)
                 }
-                if commerce.products.first(where: { $0.id == CommerceStore.creditsID }) == nil {
-                    Text(localized("premium.storekit-testing-note", language: language))
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-                Text(localized("credits.never-expire", language: language)).foregroundStyle(.secondary)
-            }
-            .navigationTitle(localized("credits.title", language: language))
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button(localized("location.cancel", language: language)) { dismiss() } } }
+                if creditProducts.isEmpty { Text(localized("premium.storekit-testing-note", language: language)).font(.footnote).foregroundStyle(AppTheme.muted) }
+                Text(localized("credits.never-expire", language: language)).font(.footnote).foregroundStyle(AppTheme.muted)
+                Button(localized("credits.buy", language: language)) {
+                    guard let product = commerce.products.first(where: { $0.id == selectedProductID }) else { return }
+                    Task { await commerce.purchase(product) }
+                }.font(.headline).foregroundStyle(Color.white).frame(maxWidth: .infinity, minHeight: 52)
+                    .background(AppTheme.violet, in: RoundedRectangle(cornerRadius: 16)).buttonStyle(.plain)
+                Button(localized("location.cancel", language: language)) { dismiss() }
+                    .font(.headline).foregroundStyle(AppTheme.text).frame(maxWidth: .infinity, minHeight: 48)
+                    .background(AppTheme.panel, in: RoundedRectangle(cornerRadius: 16)).overlay(RoundedRectangle(cornerRadius: 16).stroke(AppTheme.line)).buttonStyle(.plain)
+            }.padding(20).background(ScreenBackground())
+        }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.hidden)
+    }
+
+    private var creditProducts: [Product] {
+        commerce.products.filter { [CommerceStore.creditsID, CommerceStore.credits20ID].contains($0.id) }
+            .sorted { $0.id == CommerceStore.credits20ID && $1.id != CommerceStore.credits20ID }
+    }
+}
+
+private enum LocalLegalDocument: String, Identifiable { case terms, privacy; var id: String { rawValue } }
+
+private struct LocalLegalView: View {
+    @Environment(\.dismiss) private var dismiss
+    let document: LocalLegalDocument
+    let language: AppLanguage
+    var body: some View {
+        NavigationStack {
+            ScrollView { Text(localized(document == .terms ? "legal.terms-body" : "legal.privacy-body", language: language)).font(.body).foregroundStyle(AppTheme.text).frame(maxWidth: .infinity, alignment: .leading).padding(20) }
+                .background(ScreenBackground())
+                .navigationTitle(localized(document == .terms ? "legal.terms" : "legal.privacy", language: language))
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button(localized("common.done", language: language)) { dismiss() } } }
         }
     }
 }

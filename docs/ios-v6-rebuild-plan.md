@@ -89,9 +89,9 @@ Ask 的 Judgment 与 Support 必须分离。Judgment 消费真实 direct perfect
 - 文件原子写入并启用 iOS 文件保护；损坏文件视为未命中；
 - 后台提示词变化不主动使本机旧报告失效；手动“重新生成”覆盖当前语义版本。
 
-### Premium、Credits 与 iCloud
+### Pro、Credits 与 iCloud
 
-- 单一 Premium 权益提供 `premium_monthly`（$4.99/月）与 `premium_annual`（$39.99/年）；`credits_10` 为 $1.99 的 10 Credits 消耗型商品；开发 Scheme 固定加载 `Interstellar.storekit`；
+- 消费者名称统一为 Pro，内部兼容 Product ID 保持 `premium_monthly`（$4.99/月）与 `premium_annual`（$39.99/年）；消耗型商品固定为 `credits_10`（10 Credits / $1.99）与 `credits_20`（20 Credits / $2.99）；开发 Scheme 固定加载 `Interstellar.storekit`；
 - Free 完整开放 Today、本命、天象、Ask、Chart Wheel、Aspects、日期、地点、范围与其他参数；Special 仅兼容历史数据，不向消费者提供选择；
 - Free 在行运、合盘、日返、次限只开放第 1 张 Interpretation Card，第 2 张起使用不泄露正文的锁定卡触发 contextual Paywall；Free 允许本人加 2 位其他人物，新增第 3 位时触发 Paywall；
 - Free 进入上述 Premium 盘时必须在首屏明确显示“第 1 张免费预览、其余需 Premium”，不能只在滚动到第 2 张卡后才看到付费提示；
@@ -99,9 +99,9 @@ Ask 的 Judgment 与 Support 必须分离。Judgment 消费真实 direct perfect
 - Credit 消耗顺序固定为 allowance → 有期限的 bonus/admin → purchased；购买的 Credits 永不过期。Relay 是余额、预留、消费、释放与 Ledger 的唯一权威；
 - 匿名 `userID` 由首次启动生成并保存到 Keychain，与 installation ID 分离；Profile 底部以小字展示可复制 User ID，StoreKit 使用 `appAccountToken=userID`，恢复购买只允许经 Apple 签名交易把新安装重新关联到原 UUID；
 - iCloud 备份由用户设置控制，只写用户私人 ubiquity container，包含 Profile、其他人物、语言/外观/字号/预设、六盘报告和周期报告；Relay 不参与跨设备报告存储；
-- Profile 首屏明显展示 Free/Premium、总 Credits、额度刷新日期与 Premium 有效期；内部 allowance/bonus/purchased 钱包只在 Relay 管理端展示；
+- Profile 首屏明显展示 Free/Pro、总 Credits、月度额度、限期赠送、永久购买额度、刷新日期、Pro 有效期与最近 Credit 增减流水；
 - 所有 Charts 与 Reports 生成入口在确认操作前显示当前 Credits、固定成本 1 Credit 和成功生成后的预计余额；
-- Paywall 提供 Annual 默认选中、Monthly、Continue、Restore、Terms 与 Privacy；首次启动使用两页向导说明四个主入口以及 Free/Premium 区别，设置中允许再次打开向导。
+- Pro 与购买 Credits 均使用底部抽屉；Pro 抽屉默认选中 Annual，并提供 Monthly、Continue、Restore、Terms 与 Privacy。Terms / Privacy 正文随 App 本地打包，不依赖服务器请求；首次启动使用两页向导说明四个主入口以及 Free/Pro 区别，设置中允许再次打开向导。
 
 ## 5. Relay 与后台
 
@@ -115,7 +115,7 @@ Ask 的 Judgment 与 Support 必须分离。Judgment 消费真实 direct perfect
 - 密钥加密；审计只记动作与范围，不记出生资料、事实正文、提示词正文或 AI 正文；Relay 数据库不建立报告正文缓存；
 - 生产生成链路需要 App Attest 安装级短期令牌、请求体断言、设备级限流和每日配额；模拟器绕过只允许开发环境。
 - App Store 客户端交易和 Server Notifications V2 均验证 Apple `x5c` / ES256 JWS；续订、到期、撤销、退款和交易重放只更新同一权威权益/Grant，不重复发放；
-- 管理端只新增 Reports 与 Users：Reports 支持 User、盘型、语言、状态、日期筛选并展示 Tokens、耗时、错误、`creditCost/creditStatus` 及单条流水明细；Users 展示 Apple/Admin Premium、到期、分钱包余额、Grant 明细和报告数，并提供带审计的 Free/Premium/Apple Auto 强制切换与 Grant Credits，供未接入 App Store Connect 前的真机测试使用。
+- 管理端 Reports 支持 User、盘型、语言、状态、日期筛选并展示 Tokens、耗时和 `creditCost/creditStatus`，Report ID / Request ID 分行换行展示，不保留无增量信息的详情按钮；所有管理端时间统一按 Asia/Shanghai 的人类可读格式显示。Users 展示 Apple/Admin Pro、到期、分钱包余额、Grant 明细和报告数，并提供带审计的 Free/Pro/Apple Auto 强制切换、赠送 Credits、扣减 Credits，以及只取消未使用后台赠送的“恢复默认 Credits”，供未接入 App Store Connect 前的真机测试使用。
 
 ## 6. 实施阶段
 

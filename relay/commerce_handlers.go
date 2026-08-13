@@ -278,6 +278,23 @@ func (c *relayConfig) handleAdminUserItem(w http.ResponseWriter, r *http.Request
 			writeError(w, http.StatusUnprocessableEntity, "credit_grant_failed", err.Error(), false)
 			return
 		}
+	case "credits-deduct":
+		var req struct {
+			Amount int `json:"amount"`
+		}
+		if readJSON(r, &req) != nil {
+			writeError(w, http.StatusBadRequest, "invalid_credit_deduction", "invalid Credit deduction", false)
+			return
+		}
+		if err := c.store.DeductAdminCredits(userID, req.Amount, adminUsername(r)); err != nil {
+			writeError(w, http.StatusUnprocessableEntity, "credit_deduction_failed", err.Error(), false)
+			return
+		}
+	case "credits-reset":
+		if err := c.store.ResetAdminCredits(userID, adminUsername(r)); err != nil {
+			writeError(w, http.StatusUnprocessableEntity, "credit_reset_failed", err.Error(), false)
+			return
+		}
 	case "premium":
 		var req struct {
 			ExpiresAt string `json:"expiresAt"`

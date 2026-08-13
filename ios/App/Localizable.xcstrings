@@ -900,6 +900,35 @@
         }
       }
     },
+    "ask.credit-cost": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standard price: 1 Credit per Ask"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "标准价格：每次 Ask 消耗 1 Credit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Precio estándar: 1 Credit por Ask"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarif standard : 1 Credit par Ask"
+          }
+        }
+      }
+    },
     "ask.custom": {
       "extractionState": "manual",
       "localizations": {
@@ -2520,6 +2549,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "Probablement oui"
+          }
+        }
+      }
+    },
+    "ask.limited-free": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Free for a limited time"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "限时免费"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gratis por tiempo limitado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gratuit pour une durée limitée"
           }
         }
       }
@@ -6793,25 +6851,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Premium & Credits"
+            "value": "Pro & Credits"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Premium 与 Credits"
+            "value": "Pro 与 Credits"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Premium y créditos"
+            "value": "Pro y Credits"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Premium et crédits"
+            "value": "Pro et Credits"
           }
         }
       }
@@ -6851,25 +6909,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Premium until"
+            "value": "Pro until"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Premium 有效期至"
+            "value": "Pro 有效期至"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Premium hasta"
+            "value": "Pro hasta"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Premium jusqu’au"
+            "value": "Pro jusqu’au"
           }
         }
       }
@@ -6932,6 +6990,35 @@
         }
       }
     },
+    "commerce.your-plan": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Plan"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你的方案"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu plan"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre offre"
+          }
+        }
+      }
+    },
     "common.details": {
       "extractionState": "manual",
       "localizations": {
@@ -6957,6 +7044,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "Détails"
+          }
+        }
+      }
+    },
+    "common.done": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminé"
           }
         }
       }
@@ -8556,6 +8672,296 @@
         }
       }
     },
+    "credits.activity": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credit activity"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits 明细"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actividad de Credits"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Historique des Credits"
+          }
+        }
+      }
+    },
+    "credits.activity.adjustment": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credit adjustment"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits 调整"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajuste de Credits"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajustement de Credits"
+          }
+        }
+      }
+    },
+    "credits.activity.deduct": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits deducted"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "扣减 Credits"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits descontados"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits déduits"
+          }
+        }
+      }
+    },
+    "credits.activity.grant": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits granted"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "赠送 Credits"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits concedidos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits accordés"
+          }
+        }
+      }
+    },
+    "credits.activity.purchase": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits purchased"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "购买 Credits"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits comprados"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits achetés"
+          }
+        }
+      }
+    },
+    "credits.activity.released": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reservation released"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "预留已释放"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reserva liberada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réservation libérée"
+          }
+        }
+      }
+    },
+    "credits.activity.reset": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gift Credits removed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已取消赠送 Credits"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits de regalo retirados"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits offerts retirés"
+          }
+        }
+      }
+    },
+    "credits.activity.revoked": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits revoked"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits 已撤回"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits revocados"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits révoqués"
+          }
+        }
+      }
+    },
+    "credits.activity.used": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Report completed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "报告生成完成"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informe completado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rapport terminé"
+          }
+        }
+      }
+    },
+    "credits.activity.welcome": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annual welcome bonus"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "年度首购奖励"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bono anual de bienvenida"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bonus annuel de bienvenue"
+          }
+        }
+      }
+    },
     "credits.after-generation": {
       "extractionState": "manual",
       "localizations": {
@@ -8643,6 +9049,35 @@
         }
       }
     },
+    "credits.bonus": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bonus"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "奖励"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bonificación"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bonus"
+          }
+        }
+      }
+    },
     "credits.buy": {
       "extractionState": "manual",
       "localizations": {
@@ -8668,6 +9103,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "Acheter des crédits"
+          }
+        }
+      }
+    },
+    "credits.monthly": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monthly"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月度额度"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mensuales"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mensuels"
           }
         }
       }
@@ -8730,6 +9194,35 @@
         }
       }
     },
+    "credits.no-activity": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Credit activity yet."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂无 Credits 变动。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay movimientos."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun mouvement pour le moment."
+          }
+        }
+      }
+    },
     "credits.none-available": {
       "extractionState": "manual",
       "localizations": {
@@ -8784,6 +9277,64 @@
           "stringUnit": {
             "state": "translated",
             "value": "1 crédit"
+          }
+        }
+      }
+    },
+    "credits.permanent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permanent"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "永久 Credits"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permanentes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permanents"
+          }
+        }
+      }
+    },
+    "credits.purchase-description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a permanent Credit pack. Each completed report uses 1 Credit."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择永久有效的 Credits 套餐。每份成功生成的报告消耗 1 Credit。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige un paquete de Credits permanentes. Cada informe completado usa 1 Credit."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez un lot de Credits permanents. Chaque rapport terminé utilise 1 Credit."
           }
         }
       }
@@ -8871,6 +9422,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "Crédits de rapports"
+          }
+        }
+      }
+    },
+    "credits.total": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total available"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用总额"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total disponible"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total disponible"
           }
         }
       }
@@ -20823,6 +21403,35 @@
         }
       }
     },
+    "legal.privacy-body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Astrological facts are calculated on your device. Report facts are sent only when you explicitly request generation.\n\nRelay stores an anonymous User ID, an installation link, plan and Credit records, and report-delivery metadata. It does not store generated report text or birth-profile content. Reports remain on your device.\n\nIf you enable iCloud Backup, profiles, reports and settings are stored in your private iCloud container. You can disable it in Settings."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "占星事实在设备本地计算。只有你明确请求生成报告时，相关事实才会发送。\n\nRelay 保存匿名 User ID、安装关联、方案与 Credit 记录，以及报告交付元数据；不保存报告正文或出生档案内容。报告保存在你的设备上。\n\n如果启用 iCloud 备份，人物、报告和设置会保存到你的私人 iCloud 容器，可在设置中关闭。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los datos astrológicos se calculan en el dispositivo y solo se envían cuando solicitas expresamente un informe.\n\nRelay conserva un User ID anónimo, la vinculación de instalación, el plan, los Credits y metadatos de entrega. No almacena el texto del informe ni el perfil natal.\n\nSi activas iCloud, perfiles, informes y ajustes se guardan en tu contenedor privado."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les faits astrologiques sont calculés sur l’appareil et ne sont envoyés que lorsque vous demandez explicitement un rapport.\n\nRelay conserve un User ID anonyme, le lien d’installation, l’offre, les Credits et les métadonnées de livraison. Il ne stocke ni le texte du rapport ni le profil natal.\n\nSi iCloud est activé, profils, rapports et réglages sont enregistrés dans votre conteneur privé."
+          }
+        }
+      }
+    },
     "legal.terms": {
       "extractionState": "manual",
       "localizations": {
@@ -20848,6 +21457,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "Conditions d’utilisation"
+          }
+        }
+      }
+    },
+    "legal.terms-body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interstellar provides astrological calculations and interpretations for personal reflection and entertainment. It is not medical, legal, financial or emergency advice.\n\nPro Monthly and Pro Annual renew automatically unless cancelled in Apple account settings. Purchased Credits never expire. The 20-Credit welcome bonus is granted once with the first Annual Pro purchase and remains valid for 365 days.\n\nA completed report uses 1 Credit only after validation, successful local saving and delivery acknowledgement. Unconfirmed delivery releases the reservation. Apple’s Standard EULA also applies."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interstellar 提供占星计算和解读，用于个人思考与娱乐，不构成医疗、法律、财务或紧急建议。\n\nPro 月度和年度方案会自动续订，除非你在 Apple 账户设置中取消。购买的 Credits 永久有效。首次购买年度 Pro 赠送 20 Credits，有效期 365 天，且只发放一次。\n\n报告仅在验证通过、成功保存到本机并确认交付后消耗 1 Credit；未确认交付会释放预留。同时适用 Apple 标准最终用户许可协议。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interstellar ofrece cálculos e interpretaciones astrológicas para reflexión personal y entretenimiento. No es asesoramiento médico, jurídico, financiero ni de emergencia.\n\nPro Mensual y Pro Anual se renuevan automáticamente salvo cancelación en los ajustes de Apple. Los Credits comprados no caducan. La primera compra de Pro Anual incluye una sola bonificación de 20 Credits válida durante 365 días.\n\nUn informe usa 1 Credit solo tras validarse, guardarse localmente y confirmarse la entrega. También se aplica el EULA estándar de Apple."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interstellar fournit des calculs et interprétations astrologiques à des fins de réflexion personnelle et de divertissement. Il ne s’agit pas d’un conseil médical, juridique, financier ou d’urgence.\n\nPro mensuel et annuel se renouvellent automatiquement sauf annulation dans les réglages Apple. Les Credits achetés n’expirent pas. Le premier achat de Pro annuel inclut une fois 20 Credits valables 365 jours.\n\nUn rapport utilise 1 Credit uniquement après validation, enregistrement local et confirmation de livraison. Le contrat de licence standard Apple s’applique également."
           }
         }
       }
@@ -21409,25 +22047,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Core astrology stays useful on Free. Premium opens the complete interpretation layer."
+            "value": "Core astrology stays useful on Free. Pro opens the complete interpretation layer."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Free 保留完整的基础占星功能，Premium 解锁全部深度解读。"
+            "value": "Free 保留完整的基础占星功能，Pro 解锁全部深度解读。"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "La astrología esencial sigue siendo útil en Free. Premium abre toda la capa de interpretación."
+            "value": "La astrología esencial sigue siendo útil en Free. Pro abre toda la capa de interpretación."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "L’astrologie essentielle reste utile en Free. Premium ouvre toute la couche d’interprétation."
+            "value": "L’astrologie essentielle reste utile en Free. Pro ouvre toute la couche d’interprétation."
           }
         }
       }
@@ -21438,25 +22076,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Free or Premium"
+            "value": "Free or Pro"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Free 与 Premium"
+            "value": "Free 与 Pro"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Free o Premium"
+            "value": "Free o Pro"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Free ou Premium"
+            "value": "Free ou Pro"
           }
         }
       }
@@ -21757,25 +22395,83 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Includes 20 one-time bonus reports"
+            "value": "First annual purchase includes 20 bonus Credits, valid for 365 days"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "含一次性赠送的 20 份报告"
+            "value": "首次购买年度方案赠送 20 Credits，365 天有效"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Incluye 20 informes extra por única vez"
+            "value": "La primera compra anual incluye 20 Credits extra, válidos durante 365 días"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Inclut 20 rapports bonus uniques"
+            "value": "Le premier achat annuel inclut 20 Credits bonus, valables 365 jours"
+          }
+        }
+      }
+    },
+    "premium.annual-only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "20 · valid 365 days"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "20 · 365 天有效"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "20 · válido 365 días"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "20 · valable 365 jours"
+          }
+        }
+      }
+    },
+    "premium.annual-welcome": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annual first-purchase bonus"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "年度方案首购奖励"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bono de primera compra anual"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bonus de premier achat annuel"
           }
         }
       }
@@ -21809,6 +22505,93 @@
         }
       }
     },
+    "premium.explore": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explore Pro"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "了解 Pro"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explorar Pro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Découvrir Pro"
+          }
+        }
+      }
+    },
+    "premium.included": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Included"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已包含"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incluido"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inclus"
+          }
+        }
+      }
+    },
+    "premium.locked-card-message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open this interpretation with Pro"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用 Pro 查看这张解读卡"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre esta interpretación con Pro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrez cette interprétation avec Pro"
+          }
+        }
+      }
+    },
     "premium.monthly": {
       "extractionState": "manual",
       "localizations": {
@@ -21838,31 +22621,60 @@
         }
       }
     },
+    "premium.per-period": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "10 / period"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每周期 10"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "10 / período"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "10 / période"
+          }
+        }
+      }
+    },
     "premium.preview-message": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The first insight is free. Premium unlocks every remaining interpretation card."
+            "value": "The first insight is free. Pro unlocks every remaining interpretation card."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "第一张解读卡免费预览，Premium 可解锁其余全部解读卡。"
+            "value": "第一张解读卡免费预览，Pro 可解锁其余全部解读卡。"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "El primer análisis es gratuito. Premium desbloquea todas las demás tarjetas de interpretación."
+            "value": "El primer análisis es gratuito. Pro desbloquea todas las demás tarjetas de interpretación."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "La première analyse est gratuite. Premium déverrouille toutes les autres cartes d’interprétation."
+            "value": "La première analyse est gratuite. Pro déverrouille toutes les autres cartes d’interprétation."
           }
         }
       }
@@ -21873,25 +22685,54 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Premium chart preview"
+            "value": "Pro chart preview"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Premium 星盘预览"
+            "value": "Pro 星盘预览"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vista previa de carta Premium"
+            "value": "Vista previa de carta Pro"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aperçu du thème Premium"
+            "value": "Aperçu du thème Pro"
+          }
+        }
+      }
+    },
+    "premium.pro-description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep the essentials free. Pro opens every interpretation card, advanced controls and more room for the people you care about."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "核心功能保持免费。Pro 解锁全部解读卡、高级控制和更多人物空间。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lo esencial sigue siendo gratis. Pro abre todas las interpretaciones, controles avanzados y más espacio para tus personas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’essentiel reste gratuit. Pro ouvre toutes les interprétations, les réglages avancés et plus de profils."
           }
         }
       }
@@ -21983,31 +22824,89 @@
         }
       }
     },
+    "premium.start-pro": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start Pro"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开通 Pro"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empezar Pro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activer Pro"
+          }
+        }
+      }
+    },
     "premium.storekit-testing-note": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "StoreKit test products appear when this Debug build is launched from Xcode with the included configuration. You can also switch this User ID between Free and Premium in Relay Admin."
+            "value": "StoreKit test products appear when this Debug build is launched from Xcode with the included configuration. You can also switch this User ID between Free and Pro in Relay Admin."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "使用项目内配置从 Xcode 启动此 Debug 版本时会显示 StoreKit 测试商品；也可以在 Relay 后台按本机 User ID 切换 Free 与 Premium。"
+            "value": "使用项目内配置从 Xcode 启动此 Debug 版本时会显示 StoreKit 测试商品；也可以在 Relay 后台按本机 User ID 切换 Free 与 Pro。"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los productos de prueba de StoreKit aparecen al iniciar esta versión Debug desde Xcode con la configuración incluida. También puedes cambiar este ID entre Free y Premium en Relay Admin."
+            "value": "Los productos de prueba de StoreKit aparecen al iniciar esta versión Debug desde Xcode con la configuración incluida. También puedes cambiar este ID entre Free y Pro en Relay Admin."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les produits de test StoreKit apparaissent lorsque cette version Debug est lancée depuis Xcode avec la configuration incluse. Vous pouvez aussi basculer cet ID entre Free et Premium dans Relay Admin."
+            "value": "Les produits de test StoreKit apparaissent lorsque cette version Debug est lancée depuis Xcode avec la configuration incluse. Vous pouvez aussi basculer cet ID entre Free et Pro dans Relay Admin."
+          }
+        }
+      }
+    },
+    "premium.ten-credits": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading Credits"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解读 Credits"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits de lectura"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits de lecture"
           }
         }
       }
@@ -22018,25 +22917,54 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "10 AI reports every month"
+            "value": "10 Credits every subscription period"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "每月 10 份 AI 报告"
+            "value": "每个订阅周期 10 Credits"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "10 informes de IA al mes"
+            "value": "10 Credits por período de suscripción"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "10 rapports IA par mois"
+            "value": "10 Credits par période d’abonnement"
+          }
+        }
+      }
+    },
+    "premium.unlimited": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlimited"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不限数量"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ilimitadas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Illimité"
           }
         }
       }
@@ -22076,25 +23004,25 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Unlock with Premium"
+            "value": "Explore Pro"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "使用 Premium 解锁"
+            "value": "了解 Pro"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desbloquear con Premium"
+            "value": "Explorar Pro"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Débloquer avec Premium"
+            "value": "Découvrir Pro"
           }
         }
       }
@@ -22965,6 +23893,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "Supprimer la personne"
+          }
+        }
+      }
+    },
+    "profile.edit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifier"
           }
         }
       }
@@ -25024,6 +25981,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rapport natal"
+          }
+        }
+      }
+    },
+    "reports.no-regenerate-while-generating": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A second generation cannot start until this one finishes."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本次生成完成前不能再次生成。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se puede iniciar otra generación hasta que termine esta."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une nouvelle génération ne peut pas démarrer avant la fin de celle-ci."
           }
         }
       }

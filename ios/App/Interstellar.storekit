@@ -7,13 +7,27 @@
       "familyShareable" : false,
       "internalID" : "B6AB8DA8-DB84-46E4-8857-04582C27634C",
       "localizations" : [
-        { "description" : "10 credits for new AI report generations.", "displayName" : "10 Report Credits", "locale" : "en_US" },
-        { "description" : "用于生成新 AI 报告的 10 个 Credits。", "displayName" : "10 个报告 Credits", "locale" : "zh_Hans" },
-        { "description" : "10 créditos para generar nuevos informes de IA.", "displayName" : "10 créditos de informes", "locale" : "es_ES" },
-        { "description" : "10 crédits pour générer de nouveaux rapports IA.", "displayName" : "10 crédits de rapports", "locale" : "fr_FR" }
+        { "description" : "10 permanent Credits for completed readings.", "displayName" : "10 Credits", "locale" : "en_US" },
+        { "description" : "用于完成解读的 10 个永久 Credits。", "displayName" : "10 Credits", "locale" : "zh_Hans" },
+        { "description" : "10 Credits permanentes para lecturas completadas.", "displayName" : "10 Credits", "locale" : "es_ES" },
+        { "description" : "10 Credits permanents pour les lectures terminées.", "displayName" : "10 Credits", "locale" : "fr_FR" }
       ],
       "productID" : "credits_10",
-      "referenceName" : "10 Report Credits",
+      "referenceName" : "10 Credits",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "2.99",
+      "familyShareable" : false,
+      "internalID" : "A20C7D8E-45B1-4E22-9D5B-20C0ED172299",
+      "localizations" : [
+        { "description" : "20 permanent Credits for completed readings.", "displayName" : "20 Credits", "locale" : "en_US" },
+        { "description" : "用于完成解读的 20 个永久 Credits。", "displayName" : "20 Credits", "locale" : "zh_Hans" },
+        { "description" : "20 Credits permanentes para lecturas completadas.", "displayName" : "20 Credits", "locale" : "es_ES" },
+        { "description" : "20 Credits permanents pour les lectures terminées.", "displayName" : "20 Credits", "locale" : "fr_FR" }
+      ],
+      "productID" : "credits_20",
+      "referenceName" : "20 Credits",
       "type" : "Consumable"
     }
   ],
@@ -26,7 +40,7 @@
     {
       "id" : "5591092C-226A-4B1C-BA25-3D89FF8766FA",
       "localizations" : [],
-      "name" : "Interstellar Premium",
+      "name" : "Interstellar Pro",
       "subscriptions" : [
         {
           "displayPrice" : "4.99",
@@ -34,14 +48,14 @@
           "groupNumber" : 1,
           "internalID" : "058B667B-AC05-4E1D-A555-353892824D28",
           "localizations" : [
-            { "description" : "All chart insights, unlimited people and 10 report credits per period.", "displayName" : "Premium Monthly", "locale" : "en_US" },
-            { "description" : "全部星盘解读、不限人物，以及每周期 10 个报告 Credits。", "displayName" : "Premium 月度", "locale" : "zh_Hans" },
-            { "description" : "Todos los análisis, personas ilimitadas y 10 créditos por período.", "displayName" : "Premium mensual", "locale" : "es_ES" },
-            { "description" : "Toutes les analyses, personnes illimitées et 10 crédits par période.", "displayName" : "Premium mensuel", "locale" : "fr_FR" }
+            { "description" : "All chart insights, unlimited people and 10 Credits per period.", "displayName" : "Pro Monthly", "locale" : "en_US" },
+            { "description" : "全部星盘解读、不限人物，以及每周期 10 Credits。", "displayName" : "Pro 月度", "locale" : "zh_Hans" },
+            { "description" : "Todos los análisis, personas ilimitadas y 10 Credits por período.", "displayName" : "Pro mensual", "locale" : "es_ES" },
+            { "description" : "Toutes les analyses, profils illimités et 10 Credits par période.", "displayName" : "Pro mensuel", "locale" : "fr_FR" }
           ],
           "productID" : "premium_monthly",
           "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "Premium Monthly",
+          "referenceName" : "Pro Monthly",
           "subscriptionGroupID" : "5591092C-226A-4B1C-BA25-3D89FF8766FA",
           "type" : "RecurringSubscription"
         },
@@ -51,14 +65,14 @@
           "groupNumber" : 2,
           "internalID" : "4219A973-4B8B-4167-A3A0-19AC19BF8B44",
           "localizations" : [
-            { "description" : "Annual Premium with a one-time 20-credit welcome bonus.", "displayName" : "Premium Annual", "locale" : "en_US" },
-            { "description" : "年度 Premium，并一次性赠送 20 Credits。", "displayName" : "Premium 年度", "locale" : "zh_Hans" },
-            { "description" : "Premium anual con una bonificación única de 20 créditos.", "displayName" : "Premium anual", "locale" : "es_ES" },
-            { "description" : "Premium annuel avec un bonus unique de 20 crédits.", "displayName" : "Premium annuel", "locale" : "fr_FR" }
+            { "description" : "Annual Pro. First purchase includes 20 bonus Credits valid for 365 days.", "displayName" : "Pro Annual", "locale" : "en_US" },
+            { "description" : "年度 Pro，首次购买赠送 20 Credits，365 天有效。", "displayName" : "Pro 年度", "locale" : "zh_Hans" },
+            { "description" : "Pro anual. La primera compra incluye 20 Credits válidos 365 días.", "displayName" : "Pro anual", "locale" : "es_ES" },
+            { "description" : "Pro annuel. Le premier achat inclut 20 Credits valables 365 jours.", "displayName" : "Pro annuel", "locale" : "fr_FR" }
           ],
           "productID" : "premium_annual",
           "recurringSubscriptionPeriod" : "P1Y",
-          "referenceName" : "Premium Annual",
+          "referenceName" : "Pro Annual",
           "subscriptionGroupID" : "5591092C-226A-4B1C-BA25-3D89FF8766FA",
           "type" : "RecurringSubscription"
         }

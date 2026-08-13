@@ -11,20 +11,20 @@ AIGC:
 
 # Interstellar — 当前交接
 
-> 更新时间：2026-08-12。本文件只记录当前有效状态、验证证据、风险和下一步；历史过程查 Git，不在这里重复。
+> 更新时间：2026-08-13。本文件只记录当前有效状态、验证证据、风险和下一步；历史过程查 Git，不在这里重复。
 
 ## 1. 接手快照
 
 | 项目 | 当前值 |
 |---|---|
 | 分支 | `codex/ios-v6-rebuild` |
-| 当前提交 | 本轮 Premium / Credits / iCloud 提交，以 Git `HEAD` 为准 |
+| 当前提交 | 本轮 Pro / Credits / Relay 管理提交，以 Git `HEAD` 为准 |
 | 相对 `origin/dev` | 本轮提交前超前 18、落后 0 |
 | 产品合同 | `docs/ios-v6-rebuild-plan.md` |
 | 卡片合同 | `docs/ios-card-implementation-matrix.md` |
 | iOS 测试设备 | 已连接的 iPhone 12 mini；后续不使用模拟器 |
 | Relay 权威域名 | `https://aaadmin.xiaoguiwk.top` |
-| 当前生产 Relay | `interstellar-relay:v6-20260811-feedback-admin`；本轮代码尚未部署 |
+| 当前生产 Relay | 部署完成后以 `docker inspect interstellar-relay` 为准；上一版为 `interstellar-relay:v6-20260812-testability` |
 
 工作区有大量未提交的 iOS、本地化、Relay 和文档改动，属于当前用户任务，不得重置或覆盖。另有与当前任务来源不明的 `vendor/timezone-boundary-builder/timezones-2026b.geojson.zip` 删除，尚未处理。
 
@@ -78,20 +78,21 @@ AIGC:
 - iOS 反馈发送到 `https://aaadmin.xiaoguiwk.top/v1/feedback`；Relay 管理端有平级“用户反馈”菜单。
 - 反馈内容使用 AES-GCM 存储并具有限流、字段校验、状态筛选、处理与重新打开能力。
 
-### Premium、Credits、iCloud 与 Relay 管理
+### Pro、Credits、iCloud 与 Relay 管理
 
-- StoreKit 2 已接入 `premium_monthly`、`premium_annual`、`credits_10`，Xcode Scheme 固定加载四语 `Interstellar.storekit`；Annual 在 Paywall 默认选中，购买使用 Keychain 匿名 `userID` 作为 `appAccountToken`，恢复购买只在 Apple 签名交易验证后迁回原 UUID。
+- StoreKit 2 已接入 `premium_monthly`、`premium_annual`、`credits_10` 与 `credits_20`；消费者名称统一为 Pro。10 Credits 为 $1.99，20 Credits 为 $2.99；Annual 首购一次性发 20 个一年期 Credits，Monthly 不赠送，续订/恢复/重放不重复。
 - Free 完整开放 Today、本命、天象、Ask、Wheel、Aspects、日期、地点和参数；Special 只兼容历史值，不可选。行运、合盘、日返、次限的第 2 张及后续 Interpretation Card 完全不渲染正文，使用 contextual Paywall；本人之外可免费保存 2 人。
 - Relay 是 Premium/Credits 权威：Free 自然月 refill 到 2，Premium 按订阅月锚点 refill 到 10；Annual 首购一次性发 20 个一年期 Bonus；购买的 10 Credits 永不过期；消耗顺序 allowance → bonus/admin → purchased。
 - 报告生成前只预留 Credit。Relay 完成 AI、Schema 与 evidence 校验后仅写 `awaiting_ack` 元数据，不保存正文；iOS 必须先原子保存六盘或周期报告，再 ACK。ACK 事务恰好消费一次；生成、校验、本地保存失败或未 ACK 超时均原路释放。iOS 会持久化并重试暂时失败的 ACK。
 - Relay 已删除旧 `generation_cache` 表和所有读写方法，启动迁移会清空并删除任何旧 `payload_enc` 列；当前报告元数据表没有正文列或正文读取路径。App Store 客户端交易及 Server Notifications V2 均验证 ES256/x5c JWS，并处理续订、billing grace、到期、撤销、退款和交易重放。
 - 管理端新增 Reports 与 Users：Reports 有 User/盘型/语言/状态/日期筛选、Tokens、耗时、错误、Credit 成本与状态；Users 有 Apple/Admin Premium、到期、分钱包余额、Grant 明细、报告数、跳转 Reports，以及带审计的 Grant/Revoke Premium 和 Grant Credits。
-- Profile 设置新增 Premium & Credits 权威余额页及 iCloud Backup。私人 iCloud container 备份本人/其他人物、语言、外观、字号、预设、六盘报告和周期报告；恢复时抑制中间自动覆盖。Relay 不参与 iCloud 报告存储。
+- Profile 的 Your Plan 卡片展示 Free/Pro、月度/限期赠送/永久购买额度、总余额、刷新/到期日期和最近增减流水；个人资料与编辑入口合并进顶部卡片。私人 iCloud container 备份本人/其他人物、语言、外观、字号、预设、六盘报告和周期报告；恢复时抑制中间自动覆盖。Relay 不参与 iCloud 报告存储。
 - 设置中的 Required Notices 已提供 en / zh-Hans / es / fr Swiss Ephemeris / AGPL 说明和完整随包许可证；Paywall 有四语 Terms/Privacy 入口，Relay 提供四语公开页面。App Icon 已替换为用户提供的 1024×1024 Leo 图标，无 alpha、无预烘焙圆角。
 - 测试可见性修复已完成代码实现：Profile 首屏展示 Relay 权威 Free/Premium、Credits、额度刷新日、Premium 到期和可复制 User ID；设置页不再单独使用本地 StoreKit 状态冒充权威 Plan，并提供账户刷新。
-- 行运、次限、日返、合盘在 Free 下首屏显示 Premium 预览提示，第 1 张 Interpretation Card 可见，第 2 张起继续使用不泄露正文的锁定卡。所有 Charts/Reports 生成确认页显示余额、固定成本 1 Credit 和成功后的预计余额。
+- Charts 顺序固定为本命、天象、行运、合盘、日返、次限；行运、次限、日返、合盘在 Free 下首屏显示 Pro 预览提示，第 1 张 Interpretation Card 可见，第 2 张起用玻璃锁定卡显示标题但不显示正文。报告生成中再次进入只显示等待状态，不能重复生成。
 - 本机已有报告按盘型保留 View / Regenerate，即使当前参数产生了新语义指纹；重新生成仍使用当前参数并原子覆盖。Ask 首页只显示 History 入口和数量，详细条目只在 History 页面展示，并支持逐条确认删除。
-- Relay Users 管理端新增按 User ID 查找、用户明细、Free/Premium/Apple Auto 强制切换、Credits 赠送；Reports 新增单条元数据流水明细。强制 Plan 覆盖可优先于本地 StoreKit 测试交易，切换会刷新对应 2/10 allowance 并写审计。
+- Relay Users 管理端支持按 User ID 查找、Free/Pro/Apple Auto 强制切换、Credits 赠送、扣减及恢复默认；恢复默认只清除未使用的后台赠送，不动月度额度、年度首购赠送和购买 Credits。Reports 的长 ID 分行换行，移除无增量详情按钮；管理端时间统一显示上海时间且不暴露 ISO `T/Z`。
+- Pro 与 Buy Credits 使用底部抽屉；Terms / Privacy 正文随 App 本地打包，不向 Relay 请求。Today 已移除底部 Current Sky 跳转；Ask 显示每次 1 Credit 与限时免费状态。
 - 首次启动新增四语两页向导，说明 Today/Charts/Ask/Profile 与 Free/Premium 差异；设置中可再次打开，不需要删除 App。
 
 ### 仓库结构与清理
@@ -144,6 +145,7 @@ AstroCore Snapshot / Aspect / Event
 - 本轮 AstroCore 25 项、ContentKit 6 项测试通过；Copy Catalog、四语固定 UI（930 条）、架构、lint、卡片合同、私有内容边界和 `git diff --check` 均通过。
 - 测试可见性修复后，iPhoneOS arm64 无签名与 iPhone 12 mini 签名 Debug 构建均以 Swift 6 warnings-as-errors 通过；固定 UI 更新为 962 条四语字符串。新包已覆盖安装并成功启动到同一台 iPhone 12 mini，未删除 App 数据。
 - Relay 变更专项测试通过，覆盖后台 Free/Premium/Auto 强制切换、对应 2/10 allowance 刷新、订阅宽限期与交易/报告/Credit 路径；`go vet ./...`、管理端 JavaScript 语法、全部项目门禁和 `git diff --check` 通过。
+- 本轮 Relay `go test ./...` 与 `go vet ./...` 通过，新增覆盖月度 Pro 不赠送、Annual welcome 幂等、20 Credits 购买、后台扣减不足拒绝、恢复默认只清后台赠送及 Ledger/Audit；iPhoneOS arm64 Debug 无签名构建以 Swift 6 warnings-as-errors 通过，固定 UI 996 条四语字符串通过生成和校验。
 - 已从提交 `0baacd2` 构建并于 2026-08-13 部署 `linux/amd64` 镜像 `interstellar-relay:v6-20260812-testability`。切换前停止 Relay 写入并备份生产数据库到 `/opt/interstellar/backups/relay-20260813-192548-pre-testability.db`，随后只重建 `interstellar-relay`；Caddy 保持运行，旧 Web/API 容器保持停止且未删除。
 - 部署后 Relay 容器为 healthy，公开 `/v1/health`、`/privacy`、`/terms` 均返回 200；管理端已出现 Reports、Users 与 Credits 测试能力。管理员登录、Users/Reports/Provider 查询、注销及会话撤销均通过，生产现有 Provider 为 1，Users/Reports 暂为空；未携带安装身份的 `/v1/account/sync` 正确返回 401。
 - 本轮没有使用模拟器；当前 DerivedData 保留，用于已连接真机的后续快速覆盖构建。
@@ -176,7 +178,7 @@ AstroCore Snapshot / Aspect / Event
 ### iCloud / App Store 外部配置阻断
 
 - 当前免费 Personal Team 无法创建包含 iCloud container 的 provisioning profile；已确认报错来自 iCloud capability，不是 Swift 编译。为先测试其他功能，`Interstellar.entitlements` 已按用户要求临时置空，iCloud 代码仍完整保留并会显示 unavailable。购买/恢复 Apple Developer Program 后，需恢复 iCloud Documents、`iCloud.com.xiaoguiwk.interstellar` 和 ubiquity kv-store entitlements，在 Developer Portal 启用相同能力并重新生成 profile，再做真机备份/恢复验收。
-- App Store Connect 仍需按同一 Product ID 创建 Monthly、Annual 和 10 Credits 商品，配置价格/四语元数据、订阅组、退款/宽限期策略，并把 Server Notifications V2 URL 指向 `https://aaadmin.xiaoguiwk.top/v1/store/notifications`。
+- App Store Connect 仍需按同一 Product ID 创建 Monthly、Annual、10 Credits 和 20 Credits 商品，配置价格/四语元数据、订阅组、退款/宽限期策略，并把 Server Notifications V2 URL 指向 `https://aaadmin.xiaoguiwk.top/v1/store/notifications`。
 - Relay 数据库迁移与新管理端已部署；后续 StoreKit 真机测试产生用户同步或报告流水后，再从 Users/Reports 核对权威余额、Plan 覆盖、Grant 和 ACK 消费记录。
 
 ## 6. 推荐下一步
