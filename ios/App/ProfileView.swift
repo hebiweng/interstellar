@@ -2,13 +2,16 @@ import PhotosUI
 import AstroCore
 import SwiftUI
 import UIKit
+import Darwin
 
 struct ProfileView: View {
     @EnvironmentObject private var model: AppModel
-    @ObservedObject private var commerce = CommerceStore.shared
+	@ObservedObject private var commerce = CommerceStore.shared
+    @Binding var initialSetupRequested: Bool
     @State private var showsSettings = false
     @State private var showsEditor = false
     @State private var showsCreditActivity = false
+    @State private var isInitialProfileSetup = false
     @State private var editingPerson: SavedPerson?
 
     var body: some View {
@@ -49,7 +52,14 @@ struct ProfileView: View {
                 SettingsView()
             }
             .sheet(isPresented: $showsEditor) {
-                ProfileEditorView(profile: model.profile, language: model.language) { profile in
+                ProfileEditorView(
+                    profile: model.profile,
+                    language: model.language,
+                    onSkip: isInitialProfileSetup ? {
+                        isInitialProfileSetup = false
+                    } : nil
+                ) { profile in
+                    isInitialProfileSetup = false
                     model.profile = profile
                     Task { await model.refresh() }
                 }
@@ -67,6 +77,12 @@ struct ProfileView: View {
                 CreditActivitySheet(entries: commerce.account?.creditLedger ?? [], language: model.language)
             }
             .task { await commerce.syncAccount() }
+            .onAppear {
+                guard initialSetupRequested else { return }
+                initialSetupRequested = false
+                isInitialProfileSetup = true
+                showsEditor = true
+            }
         }
     }
 
@@ -1154,10 +1170,25 @@ private struct FeedbackView: View {
         \(message.trimmed)
 
         App: Interstellar 0.1.0
-        Device: \(UIDevice.current.model)
+        Device: \(DeviceModel.current)
         System: \(UIDevice.current.systemName) \(UIDevice.current.systemVersion)
         Locale: \(language.rawValue)
         """
+    }
+}
+
+private enum DeviceModel {
+    static var current: String {
+        var info = utsname()
+        uname(&info)
+        let identifier = withUnsafePointer(to: &info.machine) {
+            $0.withMemoryRebound(to: CChar.self, capacity: 1) { String(cString: $0) }
+        }
+        let names = [
+            "iPhone13,1": "iPhone 12 mini",
+            "iPhone18,2": "iPhone 17 Pro Max",
+        ]
+        return names[identifier].map { "\($0) (\(identifier))" } ?? identifier
     }
 }
 
@@ -1240,11 +1271,18 @@ private struct ProfileEditorView: View {
     @State private var showsLocationSearch = false
     @State private var avatarItem: PhotosPickerItem?
     let language: AppLanguage
+    let onSkip: (() -> Void)?
     let onSave: (UserProfile) -> Void
 
-    init(profile: UserProfile, language: AppLanguage, onSave: @escaping (UserProfile) -> Void) {
+    init(
+        profile: UserProfile,
+        language: AppLanguage,
+        onSkip: (() -> Void)? = nil,
+        onSave: @escaping (UserProfile) -> Void
+    ) {
         _draft = State(initialValue: profile)
         self.language = language
+        self.onSkip = onSkip
         self.onSave = onSave
     }
 
@@ -1294,7 +1332,12 @@ private struct ProfileEditorView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(localized("location.cancel", language: language)) { dismiss() }
+                    Button(onSkip == nil
+                           ? localized("location.cancel", language: language)
+                           : localized("onboarding.skip", language: language)) {
+                        onSkip?()
+                        dismiss()
+                    }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(localized("profile.save", language: language)) {

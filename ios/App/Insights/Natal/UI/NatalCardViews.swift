@@ -11,7 +11,7 @@ extension InsightVisualView {
                     let angle = Double(index) / 3 * 2 * Double.pi - Double.pi / 2
                     let radius = 44.0
                     Text(symbols[min(index, 2)])
-                        .font(AppTypography.scaled(15, weight: .bold))
+                        .font(AppTypography.scaled(20, weight: .bold))
                         .foregroundStyle(AppTheme.tone(items[index].emphasis))
                         .offset(x: cos(angle) * radius, y: sin(angle) * radius)
                 }
@@ -85,16 +85,24 @@ extension InsightVisualView {
                             Text(note).font(AppTypography.scaled(10)).foregroundStyle(AppTheme.muted)
                         }
                     }
-                    if let category = fact.category {
-                        Text(category)
-                            .font(AppTypography.scaled(8.5, weight: .semibold))
-                            .foregroundStyle(AppTheme.violet)
-                            .padding(.horizontal, 7)
-                            .padding(.vertical, 3)
-                            .background(AppTheme.violet.opacity(0.1), in: Capsule())
+                    Spacer(minLength: 10)
+                    VStack(alignment: .trailing, spacing: 3) {
+                        Text(fact.value)
+                            .font(AppTypography.scaled(10.5, weight: .medium))
+                            .foregroundStyle(AppTheme.muted)
+                            .multilineTextAlignment(.trailing)
+                        if let category = fact.category {
+                            Text(category)
+                                .font(AppTypography.scaled(8.5, weight: .semibold))
+                                .foregroundStyle(AppTheme.violet)
+                                .padding(.horizontal, 7)
+                                .padding(.vertical, 3)
+                                .background(AppTheme.violet.opacity(0.1), in: Capsule())
+                        }
                     }
-                    Text(fact.value).font(AppTypography.scaled(10.5)).foregroundStyle(AppTheme.muted)
+                    .frame(maxWidth: 132, alignment: .trailing)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.vertical, 8)
                 Divider().overlay(AppTheme.line.opacity(0.6))
             }

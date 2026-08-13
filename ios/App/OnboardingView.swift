@@ -15,19 +15,22 @@ struct OnboardingView: View {
                 }
                 .tabViewStyle(.page(indexDisplayMode: .always))
 
-                Button(page == 0
-                       ? localized("onboarding.next", language: language)
-                       : localized("onboarding.get-started", language: language)) {
+                Button {
                     if page == 0 {
                         withAnimation { page = 1 }
                     } else {
                         onFinish()
                     }
+                } label: {
+                    Text(page == 0
+                         ? localized("onboarding.next", language: language)
+                         : localized("onboarding.get-started", language: language))
+                        .font(.headline)
+                        .foregroundStyle(Color.white)
+                        .frame(maxWidth: .infinity, minHeight: 52)
+                        .background(AppTheme.violet, in: RoundedRectangle(cornerRadius: 15))
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(AppTheme.violet)
-                .controlSize(.large)
-                .frame(maxWidth: .infinity)
+                .buttonStyle(.plain)
                 .padding(.horizontal, 24)
                 .padding(.bottom, 20)
             }
@@ -47,6 +50,7 @@ struct OnboardingView: View {
                 featureRow("sparkle.magnifyingglass", "onboarding.ask")
                 featureRow("person.crop.circle", "onboarding.profile")
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
         }
     }
@@ -70,8 +74,10 @@ struct OnboardingView: View {
                     items: ["onboarding.premium-insights", "onboarding.premium-credits", "onboarding.premium-people"]
                 )
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func onboardingHeader(symbol: String, title: String, message: String) -> some View {
@@ -108,6 +114,7 @@ struct OnboardingView: View {
                     .foregroundStyle(AppTheme.text)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .cardSurface()
     }
 }

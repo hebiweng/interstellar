@@ -722,6 +722,15 @@ struct LunarPhaseDisk: View {
     var body: some View {
         ZStack {
             Circle().fill(AppTheme.moonShadow)
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [AppTheme.moonShadow.opacity(0.82), AppTheme.moonShadow],
+                        center: .topLeading,
+                        startRadius: 2,
+                        endRadius: size * 0.75
+                    )
+                )
             LunarIlluminatedShape(phaseAngle: phaseAngle)
                 .fill(
                     RadialGradient(
@@ -731,7 +740,7 @@ struct LunarPhaseDisk: View {
                         endRadius: size * 0.72
                     )
                 )
-            Circle().stroke(AppTheme.line, lineWidth: 1)
+            Circle().stroke(AppTheme.violet.opacity(0.30), lineWidth: 1)
         }
         .frame(width: size, height: size)
         .shadow(color: AppTheme.moonLit.opacity(0.13), radius: 12)

@@ -55,7 +55,7 @@ enum AppTheme {
         dark: UIColor(red: 1.0, green: 0.96, blue: 0.82, alpha: 1)
     )
     static let moonShadow = adaptive(
-        light: UIColor(red: 0.19, green: 0.22, blue: 0.30, alpha: 1),
+        light: UIColor(red: 0.62, green: 0.66, blue: 0.74, alpha: 1),
         dark: UIColor(red: 0.08, green: 0.10, blue: 0.16, alpha: 1)
     )
 

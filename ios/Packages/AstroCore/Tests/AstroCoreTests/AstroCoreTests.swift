@@ -666,6 +666,30 @@ struct AstroCoreTests {
         #expect(window.daysInSign < 365 * 4)
     }
 
+    @Test("Lunar phase is location independent at the same UTC moment")
+    func lunarPhaseLocationIndependence() async throws {
+        let calculator = try SwissEphemerisCalculator(ephemerisDirectory: ephemerisDirectory)
+        let moment = try #require(ISO8601DateFormatter().date(from: "2026-08-13T13:20:54Z"))
+        let beijing = try await calculator.calculateSnapshot(
+            NatalInput(utcDate: moment, location: GeographicLocation(latitudeDegrees: 39.9042, longitudeDegrees: 116.4074)),
+            preset: .modern
+        )
+        let paris = try await calculator.calculateSnapshot(
+            NatalInput(utcDate: moment, location: GeographicLocation(latitudeDegrees: 48.8566, longitudeDegrees: 2.3522)),
+            preset: .modern
+        )
+        let beijingSun = try #require(beijing.point(.sun)?.longitudeDegrees)
+        let beijingMoon = try #require(beijing.point(.moon)?.longitudeDegrees)
+        let parisSun = try #require(paris.point(.sun)?.longitudeDegrees)
+        let parisMoon = try #require(paris.point(.moon)?.longitudeDegrees)
+        let beijingElongation = (beijingMoon - beijingSun + 360).truncatingRemainder(dividingBy: 360)
+        let parisElongation = (parisMoon - parisSun + 360).truncatingRemainder(dividingBy: 360)
+        let illumination = (1 - cos(beijingElongation * .pi / 180)) / 2
+
+        #expect(abs(beijingElongation - parisElongation) < 0.000_001)
+        #expect(Int((illumination * 100).rounded()) == 1)
+    }
+
     private var ephemerisDirectory: URL {
         var url = URL(fileURLWithPath: #filePath)
         for _ in 0 ..< 6 {

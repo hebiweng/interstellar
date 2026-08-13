@@ -4950,6 +4950,7 @@
   "premium.preview-message": {"en":"The first insight is free. Pro unlocks every remaining interpretation card.","zh":"第一张解读卡免费预览，Pro 可解锁其余全部解读卡。","es":"El primer análisis es gratuito. Pro desbloquea todas las demás tarjetas de interpretación.","fr":"La première analyse est gratuite. Pro déverrouille toutes les autres cartes d’interprétation."},
   "onboarding.next": {"en":"Next","zh":"下一页","es":"Siguiente","fr":"Suivant"},
   "onboarding.get-started": {"en":"Get Started","zh":"开始使用","es":"Comenzar","fr":"Commencer"},
+  "onboarding.skip": {"en":"Skip","zh":"跳过","es":"Omitir","fr":"Ignorer"},
   "onboarding.welcome-title": {"en":"Your sky, in one place","zh":"你的星空，都在这里","es":"Tu cielo, en un solo lugar","fr":"Votre ciel, au même endroit"},
   "onboarding.welcome-message": {"en":"Four tabs keep daily timing, charts, questions and personal data easy to find.","zh":"四个页面分别放置每日趋势、星盘、提问和个人资料，打开就能找到。","es":"Cuatro pestañas reúnen el momento diario, las cartas, las preguntas y tus datos personales.","fr":"Quatre onglets regroupent le climat du jour, les thèmes, les questions et vos données personnelles."},
   "onboarding.today": {"en":"Today — current themes and upcoming sky events","zh":"Today — 当前主题与即将发生的天象","es":"Hoy — temas actuales y próximos eventos celestes","fr":"Aujourd’hui — thèmes actuels et prochains événements célestes"},

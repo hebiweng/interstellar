@@ -998,6 +998,13 @@ enum InstallationIdentity {
     fileprivate static let service = "com.xiaoguiwk.interstellar.relay"
     private static let account = "installation-id"
 
+#if DEBUG
+    static func resetForTesting() {
+        KeychainValue.remove(service: service, account: account)
+        KeychainValue.remove(service: service, account: "app-attest-key-id")
+    }
+#endif
+
     static let value: String = {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,

@@ -11,6 +11,7 @@ struct RootView: View {
     @EnvironmentObject private var model: AppModel
 	@ObservedObject private var commerce = CommerceStore.shared
     @State private var selection: RootTab = .today
+    @State private var initialProfileSetupRequested = false
     @AppStorage("onboarding.completed.v1") private var onboardingCompleted = false
 
     var body: some View {
@@ -44,7 +45,7 @@ struct RootView: View {
                             )
                         }
 
-                    ProfileView()
+                    ProfileView(initialSetupRequested: $initialProfileSetupRequested)
                         .tag(RootTab.profile)
                         .tabItem {
                             Label(
@@ -57,6 +58,8 @@ struct RootView: View {
             } else {
                 OnboardingView(language: model.language) {
                     onboardingCompleted = true
+                    selection = .profile
+                    initialProfileSetupRequested = true
                 }
             }
         }

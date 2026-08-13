@@ -192,6 +192,9 @@ enum CommerceIdentity {
         return value
     }()
 	static func save(_ value: UUID) { KeychainValue.replace(Data(value.uuidString.lowercased().utf8), service: service, account: account) }
+#if DEBUG
+    static func resetForTesting() { KeychainValue.remove(service: service, account: account) }
+#endif
 }
 
 private struct PendingReportAcknowledgement: Codable, Hashable {

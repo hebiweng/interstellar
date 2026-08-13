@@ -369,8 +369,12 @@ struct InsightVisualView: View {
 
     var elementRows: some View {
         VStack(spacing: 11) {
-            ForEach(Array(facts.prefix(4).enumerated()), id: \.offset) { _, fact in
+            ForEach(Array(facts.prefix(4).enumerated()), id: \.offset) { index, fact in
                 HStack(spacing: 9) {
+                    Text(["🜁", "🜃", "🜂", "🜄"][index])
+                        .font(AppTypography.scaled(13, weight: .bold))
+                        .foregroundStyle([AppTheme.blue, AppTheme.mint, AppTheme.coral, AppTheme.violet][index])
+                        .frame(width: 16)
                     Text(fact.label).font(AppTypography.scaled(12, weight: .semibold)).foregroundStyle(AppTheme.text).frame(width: 44, alignment: .leading)
                     GeometryReader { proxy in
                         ZStack(alignment: .leading) {
