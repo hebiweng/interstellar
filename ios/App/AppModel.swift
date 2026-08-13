@@ -40,12 +40,6 @@ final class AppModel: ObservableObject {
         }
     }
     @Published private(set) var savedPeople: [SavedPerson] = []
-    @Published var chartSubjectID: String {
-        didSet {
-            defaults.set(chartSubjectID, forKey: "charts.subject.v1")
-            Task { await refresh() }
-        }
-    }
     @Published var presets: [ChartKind: CalculationPreset]
     @Published private(set) var natal: ChartSnapshot?
     @Published private(set) var transitReference: ChartSnapshot?
@@ -119,7 +113,7 @@ final class AppModel: ObservableObject {
 		iCloudBackupEnabled = defaults.object(forKey: "icloud.backup.enabled.v1") as? Bool ?? true
         aiConsentGranted = defaults.bool(forKey: "ai.network.consent.v1")
         synastryPartnerID = defaults.string(forKey: "synastry.partner.v1")
-        chartSubjectID = defaults.string(forKey: "charts.subject.v1") ?? "self"
+        defaults.removeObject(forKey: "charts.subject.v1")
         let testEnvironment = ProcessInfo.processInfo.environment
         if let data = defaults.data(forKey: "profile.v1"),
            let decoded = try? JSONDecoder().decode(UserProfile.self, from: data)
@@ -207,7 +201,7 @@ final class AppModel: ObservableObject {
     }
 
     var chartSubjectProfile: UserProfile {
-        profileForPersonID(chartSubjectID) ?? profile
+        profile
     }
 
     func profileForPersonID(_ id: String) -> UserProfile? {
@@ -271,7 +265,6 @@ final class AppModel: ObservableObject {
             let deletedID = savedPeople[index].id.uuidString
             artifactStore.remove(subjectHash: profileHash(savedPeople[index].profile))
             savedPeople.remove(at: index)
-            if chartSubjectID == deletedID { chartSubjectID = "self" }
             if synastryPartnerID == deletedID { synastryPartnerID = nil }
         }
         persistPeople()
@@ -322,7 +315,7 @@ final class AppModel: ObservableObject {
                     currentSkyLocationOverride: currentSkyLocationOverride,
                     transitLocationOverride: transitLocationOverride,
                     solarReturnLocationOverride: solarReturnLocationOverride,
-                    chartsUseOwner: chartSubjectID == "self"
+                    chartsUseOwner: true
                 ),
                 calculator: calculator
             )
@@ -1140,11 +1133,13 @@ final class AppModel: ObservableObject {
     }
 
     func aiReportStatus(for chart: ChartKind) -> AIReportGenerationStatus {
-        aiContent[chart]?.status ?? .idle
+        if generatingCharts.contains(chart) { return .generating }
+        return aiContent[chart]?.status ?? .idle
     }
 
     func refreshAIReportStates() {
         for chart in ChartKind.allCases where snapshot(for: chart) != nil {
+            if generatingCharts.contains(chart) { continue }
             guard let context = try? aiReportRequestContext(for: chart) else { continue }
             if let artifact = artifactStore.load(key: context.key) {
                 applyArtifact(artifact, chart: chart)
@@ -1267,10 +1262,11 @@ final class AppModel: ObservableObject {
 				throw AIGenerationError.contract(requestLanguage)
 			}
 			scheduleICloudBackup()
-            if let requestID = response.requestID {
-                await CommerceStore.shared.acknowledgeReport(requestID: requestID)
-            }
             applyArtifact(artifact, chart: chart)
+            if let requestID = response.requestID {
+                CommerceStore.shared.enqueueReportAcknowledgement(requestID: requestID)
+                Task { await CommerceStore.shared.acknowledgeReport(requestID: requestID) }
+            }
         } catch {
             var content = aiContent[chart] ?? .empty
             content.status = .failed(error.localizedDescription)

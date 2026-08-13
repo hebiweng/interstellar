@@ -151,6 +151,9 @@ AstroCore Snapshot / Aspect / Event
 - 本轮已重新发起 HUAWEI PURA 70（iPhone 12 mini）的 CoreDevice 配对，设备现为 `available (paired)`；此前是旧配对关系失效，设备通过有线可见但没有开发者服务和隧道。
 - 本轮固定 UI 更新为 1000 条四语字符串：Pro 抽屉始终展示 Monthly / Annual 两种选择，Credits 抽屉始终展示 10 Credits / $1.99 与 20 Credits / $2.99 两档，删除消费者可见的 Xcode / StoreKit 测试说明；Ask 首页增加紧凑的 `1 Credit / 限时免费` 标签，History 卡片字号提高并移除空详情页，Profile 本人卡片不再展示时区。
 - 本轮 Relay 用户同步新增国家/地区代码；管理端用户明细改为卡片内展开/折叠，展示本地化国家/地区，所有时间继续按 Asia/Shanghai 格式化但不再重复标注“上海”，报告 `delivery_ack_timeout` 显示为“交付未确认”。Relay `go test ./...`、`go vet ./...`、管理端 JavaScript 语法、固定 UI/Copy Catalog/架构/lint/卡片合同/私有内容边界和 iPhoneOS arm64 无签名 Swift 6 warnings-as-errors 构建均通过。
+- 后续补充：Profile 顶部标题与设置按钮同排，Credits 明细默认折叠并使用底部抽屉；流水展示月度刷新、购买、年度奖励、管理员调整与具体盘型报告，失败生成的预留/退回不进入消费者流水。管理端及消费者时间精确到分钟。
+- 除合盘外，所有盘型已固定使用 Profile 本人；旧 `charts.subject.v1` 选择会在启动时清理，参数页不再提供人物选择，合盘仍只允许选择另一个人物。
+- 已定位报告“模型成功但 Reports 失败”的客户端共性原因：动态语义指纹刷新会误清正在生成状态，且本地落盘后曾等待 ACK/账户刷新才展示报告。现改为任务级生成状态优先且刷新期间不清理，本地保存后立即展示并先持久化待 ACK 队列、后台发送 ACK；Charts 生成中抽屉的完成按钮由父视图直接关闭。生产历史失败记录仍只保留元数据用于排障。
 - 已从提交 `0baacd2` 构建并于 2026-08-13 部署 `linux/amd64` 镜像 `interstellar-relay:v6-20260812-testability`。切换前停止 Relay 写入并备份生产数据库到 `/opt/interstellar/backups/relay-20260813-192548-pre-testability.db`，随后只重建 `interstellar-relay`；Caddy 保持运行，旧 Web/API 容器保持停止且未删除。
 - 部署后 Relay 容器为 healthy，公开 `/v1/health`、`/privacy`、`/terms` 均返回 200；管理端已出现 Reports、Users 与 Credits 测试能力。管理员登录、Users/Reports/Provider 查询、注销及会话撤销均通过，生产现有 Provider 为 1，Users/Reports 暂为空；未携带安装身份的 `/v1/account/sync` 正确返回 401。
 - 本轮没有使用模拟器；当前 DerivedData 保留，用于已连接真机的后续快速覆盖构建。

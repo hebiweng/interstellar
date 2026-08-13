@@ -394,6 +394,43 @@ func TestAccountSyncStoresValidCountryCode(t *testing.T) {
 	}
 }
 
+func TestCreditLedgerShowsAllowanceAndSuccessfulReportsButHidesFailedReservations(t *testing.T) {
+	s := openTestStore(t)
+	userID := "79797979-7979-4797-8797-797979797979"
+	user, err := s.SyncCommerceUser(userID, "ledger-test-installation")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(user.CreditLedger) != 1 || user.CreditLedger[0].Action != "ALLOWANCE_RENEW" {
+		t.Fatalf("monthly allowance must be visible in the ledger: %+v", user.CreditLedger)
+	}
+	successID := "89898989-8989-4898-8989-898989898989"
+	record, err := s.ReserveCredit(userID, "ledger-test-installation", successID, "report-success", "hash-success", "chart.solar-return", "en", "en", "model")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.MarkReportAwaitingAcknowledgement(userID, successID, record.RequestHash, "model", 1, 1, 0, 1); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.AcknowledgeReport(userID, successID); err != nil {
+		t.Fatal(err)
+	}
+	failedID := "99999999-9999-4999-8999-999999999999"
+	if _, err := s.ReserveCredit(userID, "ledger-test-installation", failedID, "report-failed", "hash-failed", "chart.natal", "en", "en", "model"); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.ReleaseCredit(userID, failedID, "provider_error", "failed"); err != nil {
+		t.Fatal(err)
+	}
+	user, err = s.GetCommerceUser(userID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(user.CreditLedger) != 2 || user.CreditLedger[0].Action != "RESERVE" || user.CreditLedger[0].Scope != "chart.solar-return" {
+		t.Fatalf("only successful report charge and allowance renewal should be visible: %+v", user.CreditLedger)
+	}
+}
+
 func TestAppAttestChallengeIsBodyBoundAndSingleUse(t *testing.T) {
 	s := openTestStore(t)
 	id, original, _, err := s.CreateAppAttestChallenge("install-a", "key-a", appAttestPurposeAssertion, "body-a", time.Minute)

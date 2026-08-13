@@ -107,7 +107,9 @@ private struct PendingGeneration: Identifiable {
                 )
             }
             .sheet(item: $generatingChart) { chart in
-                ReportGeneratingSheet(chart: chart, language: model.language)
+                ReportGeneratingSheet(chart: chart, language: model.language) {
+                    generatingChart = nil
+                }
             }
             .alert(
                 localized("ai.network-consent.chart-title", language: model.language),
@@ -537,21 +539,6 @@ private struct PendingGeneration: Identifiable {
 
     @ViewBuilder
     private var chartParameters: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            if model.selectedChart != .currentSky && model.selectedChart != .synastry {
-                Text(localized("charts.person", language: model.language))
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(AppTheme.muted)
-                Picker(localized("charts.person", language: model.language), selection: $model.chartSubjectID) {
-                    Text(model.profile.name).tag("self")
-                    ForEach(model.savedPeople) { person in
-                        Text(person.profile.name).tag(person.id.uuidString)
-                    }
-                }
-                .pickerStyle(.menu)
-            }
-        }
-
         switch model.selectedChart {
         case .natal:
             parameterSummary(
@@ -874,9 +861,9 @@ private struct PendingGeneration: Identifiable {
 }
 
 private struct ReportGeneratingSheet: View {
-    @Environment(\.dismiss) private var dismiss
     let chart: ChartKind
     let language: AppLanguage
+    let onDone: () -> Void
 
     var body: some View {
         NavigationStack {
@@ -889,7 +876,7 @@ private struct ReportGeneratingSheet: View {
                     .font(.subheadline).foregroundStyle(AppTheme.muted).multilineTextAlignment(.center)
                 Text(localized("reports.no-regenerate-while-generating", language: language))
                     .font(.caption).foregroundStyle(AppTheme.muted).multilineTextAlignment(.center)
-                Button(localized("common.done", language: language)) { dismiss() }
+                Button(localized("common.done", language: language), action: onDone)
                     .font(.headline).foregroundStyle(Color.white).frame(maxWidth: .infinity, minHeight: 50)
                     .background(AppTheme.violet, in: RoundedRectangle(cornerRadius: 16)).buttonStyle(.plain)
             }

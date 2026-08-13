@@ -8,6 +8,7 @@ struct ProfileView: View {
     @ObservedObject private var commerce = CommerceStore.shared
     @State private var showsSettings = false
     @State private var showsEditor = false
+    @State private var showsCreditActivity = false
     @State private var editingPerson: SavedPerson?
 
     var body: some View {
@@ -16,10 +17,19 @@ struct ProfileView: View {
                 ScreenBackground()
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 18) {
-                        ScreenTitle(
-                            eyebrow: localized("profile.your-profile", language: model.language),
-                            title: localized("profile.profile", language: model.language)
-                        )
+                        HStack(alignment: .center) {
+                            Text(localized("profile.profile", language: model.language))
+                                .font(.largeTitle.weight(.bold))
+                                .foregroundStyle(AppTheme.text)
+                            Spacer()
+                            Button { showsSettings = true } label: {
+                                Image(systemName: "gearshape")
+                                    .font(.title3.weight(.semibold))
+                                    .foregroundStyle(AppTheme.text)
+                                    .frame(width: 44, height: 44)
+                            }
+                            .accessibilityLabel(localized("profile.settings", language: model.language))
+                        }
                         profileHero
                         accountSummary
                         peopleSection
@@ -34,17 +44,7 @@ struct ProfileView: View {
                     .padding(.bottom, 30)
                 }
             }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showsSettings = true
-                    } label: {
-                        Image(systemName: "gearshape")
-                            .foregroundStyle(AppTheme.text)
-                    }
-                    .accessibilityLabel(localized("profile.settings", language: model.language))
-                }
-            }
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(isPresented: $showsSettings) {
                 SettingsView()
             }
@@ -62,6 +62,9 @@ struct ProfileView: View {
                         model.deletePeople(at: IndexSet(integer: index))
                     }
                 }
+            }
+            .sheet(isPresented: $showsCreditActivity) {
+                CreditActivitySheet(entries: commerce.account?.creditLedger ?? [], language: model.language)
             }
             .task { await commerce.syncAccount() }
         }
@@ -130,7 +133,22 @@ struct ProfileView: View {
                 .tint(AppTheme.violet)
                 Spacer()
             }
-            creditActivity
+            Button { showsCreditActivity = true } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "list.bullet.rectangle")
+                        .foregroundStyle(AppTheme.violet)
+                    Text(localized("credits.activity", language: model.language))
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(AppTheme.text)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(AppTheme.muted)
+                }
+                .frame(minHeight: 38)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
             if let error = commerce.accountError {
                 Text(error)
                     .font(.caption2)
@@ -150,49 +168,12 @@ struct ProfileView: View {
         .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 14))
     }
 
-    @ViewBuilder
-    private var creditActivity: some View {
-        VStack(alignment: .leading, spacing: 9) {
-            Text(localized("credits.activity", language: model.language)).font(.subheadline.weight(.bold)).foregroundStyle(AppTheme.text)
-            if let entries = commerce.account?.creditLedger, !entries.isEmpty {
-                ForEach(entries.prefix(6)) { entry in
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(creditAction(entry.action)).font(.caption.weight(.semibold)).foregroundStyle(AppTheme.text)
-                            Text(commerceDate(entry.createdAt)).font(.caption2).foregroundStyle(AppTheme.muted)
-                        }
-                        Spacer()
-                        Text(entry.delta > 0 ? "+\(entry.delta)" : String(entry.delta))
-                            .font(.subheadline.weight(.bold))
-                            .foregroundStyle(entry.delta >= 0 ? AppTheme.violet : AppTheme.coral)
-                    }
-                    Divider().overlay(AppTheme.line)
-                }
-            } else {
-                Text(localized("credits.no-activity", language: model.language)).font(.caption).foregroundStyle(AppTheme.muted)
-            }
-        }
-    }
-
-    private func creditAction(_ action: String) -> String {
-        switch action {
-        case "PURCHASE": localized("credits.activity.purchase", language: model.language)
-        case "WELCOME_BONUS": localized("credits.activity.welcome", language: model.language)
-        case "ADMIN_GRANT": localized("credits.activity.grant", language: model.language)
-        case "ADMIN_DEDUCT": localized("credits.activity.deduct", language: model.language)
-        case "ADMIN_RESET": localized("credits.activity.reset", language: model.language)
-        case "CONSUME": localized("credits.activity.used", language: model.language)
-        case "RELEASE": localized("credits.activity.released", language: model.language)
-        case "REVOCATION": localized("credits.activity.revoked", language: model.language)
-        default: localized("credits.activity.adjustment", language: model.language)
-        }
-    }
-
     private func commerceDate(_ value: String) -> String {
         guard let date = ISO8601DateFormatter().date(from: value) else { return value }
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: model.language.rawValue)
         formatter.dateStyle = .medium
+        formatter.timeStyle = .short
         return formatter.string(from: date)
     }
 
@@ -344,6 +325,134 @@ struct ProfileView: View {
         }
     }
 
+}
+
+private struct CreditActivitySheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let entries: [CommerceAccount.LedgerEntry]
+    let language: AppLanguage
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                ScreenBackground()
+                Group {
+                    if entries.isEmpty {
+                        ContentUnavailableView(
+                            localized("credits.no-activity", language: language),
+                            systemImage: "list.bullet.rectangle"
+                        )
+                    } else {
+                        ScrollView(.vertical, showsIndicators: false) {
+                            LazyVStack(spacing: 0) {
+                                ForEach(entries) { entry in
+                                    HStack(alignment: .top, spacing: 12) {
+                                        Image(systemName: activityIcon(entry.action))
+                                            .foregroundStyle(entry.delta >= 0 ? AppTheme.violet : AppTheme.coral)
+                                            .frame(width: 28, height: 28)
+                                            .background((entry.delta >= 0 ? AppTheme.violet : AppTheme.coral).opacity(0.10), in: Circle())
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(activityTitle(entry))
+                                                .font(.subheadline.weight(.semibold))
+                                                .foregroundStyle(AppTheme.text)
+                                            if let detail = activityDetail(entry) {
+                                                Text(detail)
+                                                    .font(.caption)
+                                                    .foregroundStyle(AppTheme.muted)
+                                            }
+                                            Text(activityDate(entry.createdAt))
+                                                .font(.caption2)
+                                                .foregroundStyle(AppTheme.muted)
+                                        }
+                                        Spacer(minLength: 8)
+                                        Text(entry.delta > 0 ? "+\(entry.delta)" : String(entry.delta))
+                                            .font(.headline.weight(.bold))
+                                            .foregroundStyle(entry.delta >= 0 ? AppTheme.violet : AppTheme.coral)
+                                    }
+                                    .padding(.vertical, 13)
+                                    Divider().overlay(AppTheme.line)
+                                }
+                            }
+                            .padding(.horizontal, 18)
+                        }
+                    }
+                }
+            }
+            .navigationTitle(localized("credits.activity", language: language))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { dismiss() } label: { Image(systemName: "xmark.circle.fill") }
+                        .foregroundStyle(AppTheme.muted)
+                        .accessibilityLabel(localized("location.cancel", language: language))
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+    }
+
+    private func activityTitle(_ entry: CommerceAccount.LedgerEntry) -> String {
+        switch entry.action {
+        case "ALLOWANCE_RENEW": localized("credits.activity.renew", language: language)
+        case "PURCHASE": localized("credits.activity.purchase", language: language)
+        case "WELCOME_BONUS": localized("credits.activity.welcome", language: language)
+        case "ADMIN_GRANT": localized("credits.activity.grant", language: language)
+        case "ADMIN_DEDUCT": localized("credits.activity.deduct", language: language)
+        case "ADMIN_RESET": localized("credits.activity.reset", language: language)
+        case "RESERVE": entry.reportStatus == "success"
+            ? localized("credits.activity.used", language: language)
+            : localized("credits.activity.reserved", language: language)
+        case "REVOCATION": localized("credits.activity.revoked", language: language)
+        default: localized("credits.activity.adjustment", language: language)
+        }
+    }
+
+    private func activityDetail(_ entry: CommerceAccount.LedgerEntry) -> String? {
+        if let scope = entry.scope, !scope.isEmpty {
+            return reportTitle(scope)
+        }
+        switch entry.action {
+        case "ALLOWANCE_RENEW": return localized("credits.activity.renew-detail", language: language)
+        case "WELCOME_BONUS": return localized("credits.activity.welcome-detail", language: language)
+        case "PURCHASE": return localized("credits.activity.purchase-detail", language: language)
+        case "ADMIN_GRANT", "ADMIN_DEDUCT", "ADMIN_RESET": return localized("credits.activity.admin-detail", language: language)
+        default: return nil
+        }
+    }
+
+    private func reportTitle(_ scope: String) -> String {
+        switch scope {
+        case "chart.natal": localized("reports.natal-report", language: language)
+        case "chart.current-sky": localized("reports.current-sky-report", language: language)
+        case "chart.transit": localized("reports.transit-report", language: language)
+        case "chart.secondary": localized("reports.progressed-report", language: language)
+        case "chart.solar-return": localized("reports.solar-return-report", language: language)
+        case "chart.synastry": localized("reports.synastry-report", language: language)
+        case let value where value.hasPrefix("ask."): localized("credits.activity.ask", language: language)
+        default: scope
+        }
+    }
+
+    private func activityIcon(_ action: String) -> String {
+        switch action {
+        case "ALLOWANCE_RENEW": "arrow.clockwise"
+        case "PURCHASE": "cart.fill"
+        case "WELCOME_BONUS": "gift.fill"
+        case "ADMIN_GRANT": "plus.circle.fill"
+        case "ADMIN_DEDUCT", "ADMIN_RESET", "REVOCATION": "minus.circle.fill"
+        default: "sparkles"
+        }
+    }
+
+    private func activityDate(_ value: String) -> String {
+        guard let date = ISO8601DateFormatter().date(from: value) else { return value }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: language.rawValue)
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
 }
 
 private struct ProfileAvatarView: View {

@@ -17,6 +17,9 @@ struct CommerceAccount: Codable, Sendable {
         let action: String
         let delta: Int
         let createdAt: String
+        let scope: String?
+        let reportStatus: String?
+        let errorCode: String?
     }
     let userID: String
     let plan: String
@@ -117,6 +120,14 @@ final class CommerceStore: ObservableObject {
         } catch {
             accountError = error.localizedDescription
         }
+    }
+
+    func enqueueReportAcknowledgement(requestID: String) {
+        let pending = PendingReportAcknowledgement(
+            userID: userID.uuidString.lowercased(),
+            requestID: requestID
+        )
+        PendingReportAcknowledgements.insert(pending)
     }
 
     func acknowledgeReport(requestID: String) async {
@@ -222,6 +233,7 @@ private enum PendingReportAcknowledgements {
 enum CommerceRelay {
     static func post(path: String, body: Data) async throws -> Data {
         var request = URLRequest(url: URL(string: "https://aaadmin.xiaoguiwk.top")!.appendingPathComponent(path))
+        request.timeoutInterval = 20
         request.httpMethod = "POST"
         request.httpBody = body
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")

@@ -20,7 +20,7 @@ const root=document.getElementById('app');
 const API=location.hostname==='fate.xiaoguiwk.top'?'/xiaoguiwk-api':'';
 const state={authenticated:null,tab:'providers',providers:[],prompts:[],usage:[],feedback:[],reports:[],users:[],userDetail:null,userSearch:'',models:{},message:null,promptScope:'all',promptLocale:'all',feedbackStatus:'pending',feedbackType:'all',reportStatus:'',reportChart:'',reportLanguage:'',reportDate:'',reportUser:''};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const timeFormatter=new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});
+const timeFormatter=new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
 const formatTime=value=>{if(!value)return '—';const date=new Date(value);return Number.isNaN(date.getTime())?String(value):timeFormatter.format(date).replaceAll('/','-')};
 const countryName=code=>{if(!code)return '—';try{return new Intl.DisplayNames(['zh-Hans'],{type:'region'}).of(code)||code}catch{return code}};
 const reportStatusLabel=r=>r.errorCode==='delivery_ack_timeout'?'交付未确认':r.reportStatus==='awaiting_ack'?'等待交付确认':r.reportStatus;

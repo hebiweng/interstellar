@@ -58,11 +58,14 @@ type CreditGrantSummary struct {
 }
 
 type CreditLedgerEntry struct {
-	ID        int64  `json:"id"`
-	RequestID string `json:"requestID,omitempty"`
-	Action    string `json:"action"`
-	Delta     int    `json:"delta"`
-	CreatedAt string `json:"createdAt"`
+	ID           int64  `json:"id"`
+	RequestID    string `json:"requestID,omitempty"`
+	Action       string `json:"action"`
+	Delta        int    `json:"delta"`
+	CreatedAt    string `json:"createdAt"`
+	Scope        string `json:"scope,omitempty"`
+	ReportStatus string `json:"reportStatus,omitempty"`
+	ErrorCode    string `json:"errorCode,omitempty"`
 }
 
 type ReportRequestRecord struct {
@@ -170,10 +173,20 @@ func refillAllowanceTx(tx *sql.Tx, userID string, now time.Time) (string, error)
 		return "", err
 	}
 	stamp := now.Format(time.RFC3339)
-	_, err = tx.Exec(`INSERT INTO credit_grants(user_id,source,original_amount,remaining_amount,granted_at,period_key)
+	result, err := tx.Exec(`INSERT INTO credit_grants(user_id,source,original_amount,remaining_amount,granted_at,period_key)
 		VALUES(?, 'allowance', ?, ?, ?, ?)
 		ON CONFLICT(user_id,source,period_key) DO NOTHING`, userID, amount, amount, stamp, periodKey)
-	return periodKey, err
+	if err != nil {
+		return "", err
+	}
+	if inserted, _ := result.RowsAffected(); inserted == 1 {
+		if _, err := tx.Exec(`INSERT INTO credit_ledger(user_id,grant_id,action,delta,created_at)
+			SELECT ?,id,'ALLOWANCE_RENEW',?,? FROM credit_grants WHERE user_id=? AND source='allowance' AND period_key=?`,
+			userID, amount, stamp, userID, periodKey); err != nil {
+			return "", err
+		}
+	}
+	return periodKey, nil
 }
 
 func entitlementTx(tx *sql.Tx, userID string, now time.Time) (string, time.Time, string, error) {
@@ -275,14 +288,19 @@ func (s *Store) GetCommerceUser(userID string) (CommerceUser, error) {
 		return user, err
 	}
 	_ = s.db.QueryRow(`SELECT COUNT(*) FROM report_requests WHERE user_id=? AND report_status='success'`, userID).Scan(&user.ReportsGenerated)
-	rows, ledgerErr := s.db.Query(`SELECT id,COALESCE(request_id,''),action,delta,created_at FROM credit_ledger WHERE user_id=? AND delta<>0 ORDER BY created_at DESC,id DESC LIMIT 50`, userID)
+	rows, ledgerErr := s.db.Query(`SELECT l.id,COALESCE(l.request_id,''),l.action,l.delta,l.created_at,
+		COALESCE(r.scope,''),COALESCE(r.report_status,''),COALESCE(r.error_code,'')
+		FROM credit_ledger l LEFT JOIN report_requests r ON r.user_id=l.user_id AND r.request_id=l.request_id
+		WHERE l.user_id=? AND l.delta<>0 AND l.action<>'RELEASE'
+		AND (l.action<>'RESERVE' OR COALESCE(r.report_status,'')='success')
+		ORDER BY l.created_at DESC,l.id DESC LIMIT 50`, userID)
 	if ledgerErr != nil {
 		return user, ledgerErr
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var entry CreditLedgerEntry
-		if err := rows.Scan(&entry.ID, &entry.RequestID, &entry.Action, &entry.Delta, &entry.CreatedAt); err != nil {
+		if err := rows.Scan(&entry.ID, &entry.RequestID, &entry.Action, &entry.Delta, &entry.CreatedAt, &entry.Scope, &entry.ReportStatus, &entry.ErrorCode); err != nil {
 			return user, err
 		}
 		user.CreditLedger = append(user.CreditLedger, entry)

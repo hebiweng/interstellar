@@ -8730,6 +8730,64 @@
         }
       }
     },
+    "credits.activity.admin-detail": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account adjustment by support"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "管理员账户调整"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajuste de cuenta por soporte"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajustement du compte par l’assistance"
+          }
+        }
+      }
+    },
+    "credits.activity.ask": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask question"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask 提问"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pregunta de Ask"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Question Ask"
+          }
+        }
+      }
+    },
     "credits.activity.deduct": {
       "extractionState": "manual",
       "localizations": {
@@ -8817,31 +8875,118 @@
         }
       }
     },
-    "credits.activity.released": {
+    "credits.activity.purchase-detail": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reservation released"
+            "value": "Permanent Credit pack"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "预留已释放"
+            "value": "永久 Credits 套餐"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reserva liberada"
+            "value": "Paquete de Credits permanentes"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Réservation libérée"
+            "value": "Pack de Crédits permanents"
+          }
+        }
+      }
+    },
+    "credits.activity.renew": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monthly Credits renewed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月度 Credits 已刷新"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credits mensuales renovados"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crédits mensuels renouvelés"
+          }
+        }
+      }
+    },
+    "credits.activity.renew-detail": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your plan's monthly allowance"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前计划的月度额度"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Asignación mensual de tu plan"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quota mensuel de votre formule"
+          }
+        }
+      }
+    },
+    "credits.activity.reserved": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credit reserved"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已预留 Credit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credit reservado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crédit réservé"
           }
         }
       }
@@ -8958,6 +9103,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bonus annuel de bienvenue"
+          }
+        }
+      }
+    },
+    "credits.activity.welcome-detail": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "20 Credits valid for one year"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "20 Credits，一年内有效"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "20 Credits válidos durante un año"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "20 Crédits valables un an"
           }
         }
       }
