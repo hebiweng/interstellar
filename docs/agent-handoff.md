@@ -144,14 +144,15 @@ AstroCore Snapshot / Aspect / Event
 - 本轮 AstroCore 25 项、ContentKit 6 项测试通过；Copy Catalog、四语固定 UI（930 条）、架构、lint、卡片合同、私有内容边界和 `git diff --check` 均通过。
 - 测试可见性修复后，iPhoneOS arm64 无签名与 iPhone 12 mini 签名 Debug 构建均以 Swift 6 warnings-as-errors 通过；固定 UI 更新为 962 条四语字符串。新包已覆盖安装并成功启动到同一台 iPhone 12 mini，未删除 App 数据。
 - Relay 变更专项测试通过，覆盖后台 Free/Premium/Auto 强制切换、对应 2/10 allowance 刷新、订阅宽限期与交易/报告/Credit 路径；`go vet ./...`、管理端 JavaScript 语法、全部项目门禁和 `git diff --check` 通过。
-- 已从提交 `0baacd2` 成功构建 `linux/amd64` 镜像 `interstellar-relay:v6-20260812-testability`。当前线上尚未切换：`ssh ali-server` 连续被服务器在认证阶段主动关闭，且本地镜像导出所需的沙箱升级授权被 Codex 审批额度限制拒绝；因此没有跳过数据库备份，也没有对生产容器或数据做写操作。
+- 已从提交 `0baacd2` 构建并于 2026-08-13 部署 `linux/amd64` 镜像 `interstellar-relay:v6-20260812-testability`。切换前停止 Relay 写入并备份生产数据库到 `/opt/interstellar/backups/relay-20260813-192548-pre-testability.db`，随后只重建 `interstellar-relay`；Caddy 保持运行，旧 Web/API 容器保持停止且未删除。
+- 部署后 Relay 容器为 healthy，公开 `/v1/health`、`/privacy`、`/terms` 均返回 200；管理端已出现 Reports、Users 与 Credits 测试能力。管理员登录、Users/Reports/Provider 查询、注销及会话撤销均通过，生产现有 Provider 为 1，Users/Reports 暂为空；未携带安装身份的 `/v1/account/sync` 正确返回 401。
 - 本轮没有使用模拟器；当前 DerivedData 保留，用于已连接真机的后续快速覆盖构建。
 
 ## 5. 当前未完成事项
 
-### 正在处理
+### 最近完成
 
-1. 恢复 `ssh ali-server` 认证并允许导出本地 Docker 镜像后：备份生产 `relay-data` 数据库，上传并加载 `interstellar-relay:v6-20260812-testability`，只切换 Relay 服务，验证 `/v1/account/sync`、Users/Reports 管理端和健康检查。客户端已覆盖安装完成；不得包含来源不明的 timezone vendor ZIP 删除。
+1. 生产 Relay 已切换到 `v6-20260812-testability`，数据库备份、容器健康、公网路由、法律页面、Users/Reports/Provider API、管理员登录与会话撤销均已验证；来源不明的 timezone vendor ZIP 删除未纳入本次部署。
 
 ### 发布前仍需完成
 
@@ -176,15 +177,14 @@ AstroCore Snapshot / Aspect / Event
 
 - 当前免费 Personal Team 无法创建包含 iCloud container 的 provisioning profile；已确认报错来自 iCloud capability，不是 Swift 编译。为先测试其他功能，`Interstellar.entitlements` 已按用户要求临时置空，iCloud 代码仍完整保留并会显示 unavailable。购买/恢复 Apple Developer Program 后，需恢复 iCloud Documents、`iCloud.com.xiaoguiwk.interstellar` 和 ubiquity kv-store entitlements，在 Developer Portal 启用相同能力并重新生成 profile，再做真机备份/恢复验收。
 - App Store Connect 仍需按同一 Product ID 创建 Monthly、Annual 和 10 Credits 商品，配置价格/四语元数据、订阅组、退款/宽限期策略，并把 Server Notifications V2 URL 指向 `https://aaadmin.xiaoguiwk.top/v1/store/notifications`。
-- 本轮 Relay 数据库迁移与新管理端尚未部署；部署前备份 `relay-data`，使用本机/CI 构建的 linux/amd64 镜像切换，不在服务器现场编译。
+- Relay 数据库迁移与新管理端已部署；后续 StoreKit 真机测试产生用户同步或报告流水后，再从 Users/Reports 核对权威余额、Plan 覆盖、Grant 和 ACK 消费记录。
 
 ## 6. 推荐下一步
 
 ```text
 提交当前工作区改动
-→ 恢复 Apple Developer Program 并配置 iCloud / App Store Connect
-→ 构建与部署 Relay linux/amd64 镜像，配置 Notifications V2
-→ 真机 StoreKit、iCloud、Paywall、Credits 与 Reports ACK 全链路验收
+→ 真机 StoreKit、Paywall、Credits 与 Reports ACK 全链路验收，并在 Relay Users/Reports 核对流水
+→ 恢复 Apple Developer Program 并配置 iCloud / App Store Connect 与 Notifications V2
 → 真机逐屏与 Reports 确认弹窗闭环验收
 → Node policy / Horizon / Classical validator
 → 其余盘型 Legacy 迁移
