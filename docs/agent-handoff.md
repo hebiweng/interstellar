@@ -156,6 +156,9 @@ AstroCore Snapshot / Aspect / Event
 - 已定位报告“模型成功但 Reports 失败”的客户端共性原因：动态语义指纹刷新会误清正在生成状态，且本地落盘后曾等待 ACK/账户刷新才展示报告。现改为任务级生成状态优先且刷新期间不清理，本地保存后立即展示并先持久化待 ACK 队列、后台发送 ACK；Charts 生成中抽屉的完成按钮由父视图直接关闭。生产历史失败记录仍只保留元数据用于排障。
 - 本轮提交 `f39639b` 已构建为 `linux/amd64` 镜像 `interstellar-relay:v6-20260813-delivery-ledger`，本机 HTTP 健康检查通过；生产切换前停止 Relay 写入并备份数据库到 `/opt/interstellar/backups/relay-20260813-2135-pre-delivery-ledger.db`，随后只重建 Relay，Caddy 未重启。生产容器及公网 `/v1/health` 正常，`country_code` 迁移存在，管理端已核验“交付未确认”“国家 / 地区”“折叠用户明细”。
 - HUAWEI Mate XTs（iPhone 17 Pro Max）与 HUAWEI PURA 70（iPhone 12 mini）的旧 App 均已卸载以清除本地容器数据，并安装同一最新签名包。内嵌 Personal Team profile 同时包含两台 UDID；12 mini 因锁屏尚未自动启动，17 Pro Max 需在系统设置重新信任新 Personal Team 开发证书后启动。
+- 新用户体验补充：Onboarding 两页卡片与 Next / Get Started 均为屏幕可用宽度；完成后强制进入 Profile 编辑，可保存真实本人资料或跳过沿用样例。除合盘外所有盘继续固定消费本人 Profile。Debug 新安装会自动清除卸载后残留的 Keychain 匿名身份，因此两台测试设备首次成功启动后会分别创建新的、彼此独立的 Relay User ID；Release 不清身份。
+- Moon Today 浅色模式提高暗面明度与边界辨识；AstroCore 新增同一 UTC 时刻北京/巴黎月相一致回归测试，并确认 2026-08-13 21:20（上海）照明比例四舍五入为 1%。本命首卡三图标放大，Element & Mode Balance 增加四元素符号，Planet Placements 改为左侧行星信息统一左对齐、右侧度数/类别上下排列并右对齐。
+- 用户反馈设备信息现读取硬件标识并映射已知机型，例如 `iPhone 12 mini (iPhone13,1)`、`iPhone 17 Pro Max (iPhone18,2)`，同时保留具体系统版本。项目 deployment target 仍为 iOS 17.0，当前支持 iOS 17+，不只支持 iOS 26。
 - 已从提交 `0baacd2` 构建并于 2026-08-13 部署 `linux/amd64` 镜像 `interstellar-relay:v6-20260812-testability`。切换前停止 Relay 写入并备份生产数据库到 `/opt/interstellar/backups/relay-20260813-192548-pre-testability.db`，随后只重建 `interstellar-relay`；Caddy 保持运行，旧 Web/API 容器保持停止且未删除。
 - 部署后 Relay 容器为 healthy，公开 `/v1/health`、`/privacy`、`/terms` 均返回 200；管理端已出现 Reports、Users 与 Credits 测试能力。管理员登录、Users/Reports/Provider 查询、注销及会话撤销均通过，生产现有 Provider 为 1，Users/Reports 暂为空；未携带安装身份的 `/v1/account/sync` 正确返回 401。
 - 本轮没有使用模拟器；当前 DerivedData 保留，用于已连接真机的后续快速覆盖构建。
