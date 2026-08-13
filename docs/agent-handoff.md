@@ -154,6 +154,8 @@ AstroCore Snapshot / Aspect / Event
 - 后续补充：Profile 顶部标题与设置按钮同排，Credits 明细默认折叠并使用底部抽屉；流水展示月度刷新、购买、年度奖励、管理员调整与具体盘型报告，失败生成的预留/退回不进入消费者流水。管理端及消费者时间精确到分钟。
 - 除合盘外，所有盘型已固定使用 Profile 本人；旧 `charts.subject.v1` 选择会在启动时清理，参数页不再提供人物选择，合盘仍只允许选择另一个人物。
 - 已定位报告“模型成功但 Reports 失败”的客户端共性原因：动态语义指纹刷新会误清正在生成状态，且本地落盘后曾等待 ACK/账户刷新才展示报告。现改为任务级生成状态优先且刷新期间不清理，本地保存后立即展示并先持久化待 ACK 队列、后台发送 ACK；Charts 生成中抽屉的完成按钮由父视图直接关闭。生产历史失败记录仍只保留元数据用于排障。
+- 本轮提交 `f39639b` 已构建为 `linux/amd64` 镜像 `interstellar-relay:v6-20260813-delivery-ledger`，本机 HTTP 健康检查通过；生产切换前停止 Relay 写入并备份数据库到 `/opt/interstellar/backups/relay-20260813-2135-pre-delivery-ledger.db`，随后只重建 Relay，Caddy 未重启。生产容器及公网 `/v1/health` 正常，`country_code` 迁移存在，管理端已核验“交付未确认”“国家 / 地区”“折叠用户明细”。
+- HUAWEI Mate XTs（iPhone 17 Pro Max）与 HUAWEI PURA 70（iPhone 12 mini）的旧 App 均已卸载以清除本地容器数据，并安装同一最新签名包。内嵌 Personal Team profile 同时包含两台 UDID；12 mini 因锁屏尚未自动启动，17 Pro Max 需在系统设置重新信任新 Personal Team 开发证书后启动。
 - 已从提交 `0baacd2` 构建并于 2026-08-13 部署 `linux/amd64` 镜像 `interstellar-relay:v6-20260812-testability`。切换前停止 Relay 写入并备份生产数据库到 `/opt/interstellar/backups/relay-20260813-192548-pre-testability.db`，随后只重建 `interstellar-relay`；Caddy 保持运行，旧 Web/API 容器保持停止且未删除。
 - 部署后 Relay 容器为 healthy，公开 `/v1/health`、`/privacy`、`/terms` 均返回 200；管理端已出现 Reports、Users 与 Credits 测试能力。管理员登录、Users/Reports/Provider 查询、注销及会话撤销均通过，生产现有 Provider 为 1，Users/Reports 暂为空；未携带安装身份的 `/v1/account/sync` 正确返回 401。
 - 本轮没有使用模拟器；当前 DerivedData 保留，用于已连接真机的后续快速覆盖构建。
