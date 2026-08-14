@@ -690,7 +690,10 @@ struct AIGenerationClient: Sendable {
                 continue
             }
             guard (200 ..< 300).contains(http.statusCode) else {
-                let message = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["error"] as? String
+                let server = try? JSONDecoder().decode(AppAttestServerError.self, from: data)
+                let message = isAppVerificationErrorCode(server?.code)
+                    ? localized("ai.app-verification-retry", language: request.language)
+                    : server?.error
                 throw AIGenerationError.server(
                     message ?? localizedTemplate(
                         "ai.interpretation-server-http",
@@ -744,11 +747,6 @@ actor AppAttestAuthorizer {
         let bodyHash: String
     }
 
-    private struct ServerError: Decodable {
-        let error: String?
-        let code: String?
-    }
-
     private struct InstallationToken {
         let value: String
         let expiresAt: Date
@@ -758,15 +756,15 @@ actor AppAttestAuthorizer {
 
     private enum AuthorizationError: LocalizedError {
         case unsupported(AppLanguage)
-        case server(status: Int, code: String?, message: String)
+        case server(status: Int, code: String?, language: AppLanguage)
         case invalidResponse(AppLanguage)
 
         var errorDescription: String? {
             switch self {
             case let .unsupported(language):
                 localized("ai.app-verification-unsupported", language: language)
-            case let .server(_, _, message):
-                message
+            case let .server(_, _, language):
+                localized("ai.app-verification-retry", language: language)
             case let .invalidResponse(language):
                 localized("ai.app-verification-invalid-response", language: language)
             }
@@ -783,6 +781,14 @@ actor AppAttestAuthorizer {
     private let service = DCAppAttestService.shared
     private var installationToken: InstallationToken?
 
+    private var keyAccount: String {
+        #if DEBUG
+            "app-attest-key-id-development"
+        #else
+            "app-attest-key-id-production"
+        #endif
+    }
+
     func invalidateToken() {
         installationToken = nil
     }
@@ -793,8 +799,9 @@ actor AppAttestAuthorizer {
         forceTokenRefresh: Bool,
         language: AppLanguage
     ) async throws -> [String: String] {
-        // Temporary: skip App Attest in Debug builds while the Apple Developer Program is not purchased.
-        #if DEBUG || targetEnvironment(simulator)
+        // App Attest is unavailable on Simulator. Physical Debug devices use
+        // the development App Attest environment configured by the scheme.
+        #if targetEnvironment(simulator)
             return ["X-App-Attest-Development-Bypass": "1"]
         #else
             guard service.isSupported else { throw AuthorizationError.unsupported(language) }
@@ -944,15 +951,11 @@ actor AppAttestAuthorizer {
             throw AuthorizationError.invalidResponse(language)
         }
         guard (200 ..< 300).contains(http.statusCode) else {
-            let server = try? JSONDecoder().decode(ServerError.self, from: data)
+            let server = try? JSONDecoder().decode(AppAttestServerError.self, from: data)
             throw AuthorizationError.server(
                 status: http.statusCode,
                 code: server?.code,
-                message: server?.error ?? localizedTemplate(
-                    "ai.app-verification-failed-http",
-                    substitutions: ["statusCode": String(http.statusCode)],
-                    language: language
-                )
+                language: language
             )
         }
         let decoder = JSONDecoder()
@@ -969,7 +972,7 @@ actor AppAttestAuthorizer {
     }
 
     private func keyIdentifier() -> String? {
-        let data = KeychainValue.read(service: InstallationIdentity.service, account: "app-attest-key-id")
+        let data = KeychainValue.read(service: InstallationIdentity.service, account: keyAccount)
         return data.flatMap { String(data: $0, encoding: .utf8) }
     }
 
@@ -977,13 +980,27 @@ actor AppAttestAuthorizer {
         KeychainValue.replace(
             Data(keyID.utf8),
             service: InstallationIdentity.service,
-            account: "app-attest-key-id"
+            account: keyAccount
         )
     }
 
     private func removeKeyIdentifier() {
-        KeychainValue.remove(service: InstallationIdentity.service, account: "app-attest-key-id")
+        KeychainValue.remove(service: InstallationIdentity.service, account: keyAccount)
     }
+}
+
+private struct AppAttestServerError: Decodable {
+    let error: String?
+    let code: String?
+}
+
+private func isAppVerificationErrorCode(_ code: String?) -> Bool {
+    guard let code else { return false }
+    return code == "app_attest_invalid"
+        || code == "app_attest_unavailable"
+        || code == "attestation_required"
+        || code == "attestation_invalid"
+        || code == "challenge_invalid"
 }
 
 private extension JSONEncoder {
@@ -1002,6 +1019,8 @@ enum InstallationIdentity {
     static func resetForTesting() {
         KeychainValue.remove(service: service, account: account)
         KeychainValue.remove(service: service, account: "app-attest-key-id")
+        KeychainValue.remove(service: service, account: "app-attest-key-id-development")
+        KeychainValue.remove(service: service, account: "app-attest-key-id-production")
     }
 #endif
 

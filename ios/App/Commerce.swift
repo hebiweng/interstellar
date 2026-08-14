@@ -2,6 +2,7 @@ import Foundation
 import Security
 import StoreKit
 import SwiftUI
+import WebKit
 
 struct CommerceAccount: Codable, Sendable {
     struct Credits: Codable, Sendable {
@@ -43,6 +44,9 @@ final class CommerceStore: ObservableObject {
     @Published private(set) var account: CommerceAccount?
     @Published private(set) var isApplePremium = false
     @Published private(set) var accountError: String?
+    @Published private(set) var isLoadingProducts = false
+    @Published private(set) var productsUnavailable = false
+    @Published private(set) var purchaseFailed = false
     @Published var showsPaywall = false
     @Published var showsCredits = false
 
@@ -71,10 +75,23 @@ final class CommerceStore: ObservableObject {
     deinit { updatesTask?.cancel() }
 
     func start() async {
-        do { products = try await Product.products(for: [Self.monthlyID, Self.annualID, Self.creditsID, Self.credits20ID]) } catch {}
+        await loadProducts()
         await refreshEntitlements()
         await syncAccount()
         await retryPendingAcknowledgements()
+    }
+
+    func loadProducts() async {
+        guard !isLoadingProducts else { return }
+        isLoadingProducts = true
+        defer { isLoadingProducts = false }
+        do {
+            products = try await Product.products(for: [Self.monthlyID, Self.annualID, Self.creditsID, Self.credits20ID])
+            productsUnavailable = products.isEmpty
+        } catch {
+            products = []
+            productsUnavailable = true
+        }
     }
 
     func refreshEntitlements() async {
@@ -90,12 +107,15 @@ final class CommerceStore: ObservableObject {
     }
 
     func purchase(_ product: Product) async {
+        purchaseFailed = false
         do {
             let result = try await product.purchase(options: [.appAccountToken(userID)])
             guard case let .success(verification) = result,
                   case let .verified(transaction) = verification else { return }
             await submit(transaction, signedTransaction: verification.jwsRepresentation)
-        } catch {}
+        } catch {
+            purchaseFailed = true
+        }
     }
 
     func restore() async {
@@ -173,10 +193,12 @@ final class CommerceStore: ObservableObject {
             let data = try JSONEncoder().encode(Body(userID: userID.uuidString.lowercased(), signedTransaction: signedTransaction))
             _ = try await CommerceRelay.post(path: "v1/store/transactions", body: data)
             await transaction.finish()
+            purchaseFailed = false
             await refreshEntitlements()
             await syncAccount()
         } catch {
             // Keep the transaction unfinished so StoreKit can redeliver it.
+            purchaseFailed = true
         }
     }
 }
@@ -269,7 +291,7 @@ struct PremiumPaywallView: View {
     @ObservedObject var commerce = CommerceStore.shared
     let language: AppLanguage
     @State private var selectedProductID = CommerceStore.annualID
-    @State private var legalDocument: LocalLegalDocument?
+    @State private var legalDocument: LegalDocument?
 
     var body: some View {
         NavigationStack {
@@ -299,6 +321,8 @@ struct PremiumPaywallView: View {
                         )
                     }
 
+                    productAvailability
+
                     VStack(spacing: 0) {
                         benefit("premium.all-insights", value: localized("premium.included", language: language))
                         Divider().overlay(AppTheme.line)
@@ -310,8 +334,13 @@ struct PremiumPaywallView: View {
                     }
 
                     Button(purchaseButtonTitle) {
-                        guard let product = commerce.products.first(where: { $0.id == selectedProductID }) else { return }
-                        Task { await commerce.purchase(product) }
+                        Task {
+                            if let product = commerce.products.first(where: { $0.id == selectedProductID }) {
+                                await commerce.purchase(product)
+                            } else {
+                                await commerce.loadProducts()
+                            }
+                        }
                     }
                     .font(.headline).foregroundStyle(Color.white)
                     .frame(maxWidth: .infinity, minHeight: 52)
@@ -336,16 +365,45 @@ struct PremiumPaywallView: View {
                 }
                 .padding(20)
             }.background(ScreenBackground())
-            .sheet(item: $legalDocument) { LocalLegalView(document: $0, language: language) }
+            .sheet(item: $legalDocument) { LegalDocumentView(document: $0, language: language) }
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.hidden)
+        .task {
+            if commerce.products.isEmpty { await commerce.loadProducts() }
+        }
     }
 
     private var purchaseButtonTitle: String {
-        selectedProductID == CommerceStore.annualID
+        if commerce.isLoadingProducts {
+            return localized("commerce.loading-products", language: language)
+        }
+        if commerce.products.first(where: { $0.id == selectedProductID }) == nil {
+            return localized("commerce.retry-products", language: language)
+        }
+        return selectedProductID == CommerceStore.annualID
             ? localized("premium.choose-annual", language: language)
             : localized("premium.choose-monthly", language: language)
+    }
+
+    @ViewBuilder
+    private var productAvailability: some View {
+        if commerce.isLoadingProducts {
+            HStack(spacing: 8) {
+                ProgressView()
+                Text(localized("commerce.loading-products", language: language))
+            }
+            .font(.footnote)
+            .foregroundStyle(AppTheme.muted)
+        } else if commerce.productsUnavailable {
+            Text(localized("commerce.products-unavailable", language: language))
+                .font(.footnote)
+                .foregroundStyle(AppTheme.coral)
+        } else if commerce.purchaseFailed {
+            Text(localized("commerce.purchase-failed", language: language))
+                .font(.footnote)
+                .foregroundStyle(AppTheme.coral)
+        }
     }
 
     private func productChoice(
@@ -401,6 +459,7 @@ struct CreditsPurchaseView: View {
                 Text(localized("credits.purchase-description", language: language)).font(.subheadline).foregroundStyle(AppTheme.muted)
                 creditPurchaseButton(id: CommerceStore.creditsID, amount: 10, fallbackPrice: "$1.99")
                 creditPurchaseButton(id: CommerceStore.credits20ID, amount: 20, fallbackPrice: "$2.99")
+                productAvailability
                 Text(localized("credits.never-expire", language: language)).font(.footnote).foregroundStyle(AppTheme.muted)
                 Button(localized("location.cancel", language: language)) { dismiss() }
                     .font(.headline).foregroundStyle(AppTheme.text).frame(maxWidth: .infinity, minHeight: 48)
@@ -409,13 +468,21 @@ struct CreditsPurchaseView: View {
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.hidden)
+        .task {
+            if commerce.products.isEmpty { await commerce.loadProducts() }
+        }
     }
 
     private func creditPurchaseButton(id: String, amount: Int, fallbackPrice: String) -> some View {
         let product = commerce.products.first { $0.id == id }
         return Button {
-            guard let product else { return }
-            Task { await commerce.purchase(product) }
+            Task {
+                if let product {
+                    await commerce.purchase(product)
+                } else {
+                    await commerce.loadProducts()
+                }
+            }
         } label: {
             HStack(spacing: 14) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -433,21 +500,115 @@ struct CreditsPurchaseView: View {
         }
         .buttonStyle(.plain)
     }
+
+    @ViewBuilder
+    private var productAvailability: some View {
+        if commerce.isLoadingProducts {
+            HStack(spacing: 8) {
+                ProgressView()
+                Text(localized("commerce.loading-products", language: language))
+            }
+            .font(.footnote)
+            .foregroundStyle(AppTheme.muted)
+        } else if commerce.productsUnavailable {
+            Text(localized("commerce.products-unavailable", language: language))
+                .font(.footnote)
+                .foregroundStyle(AppTheme.coral)
+        } else if commerce.purchaseFailed {
+            Text(localized("commerce.purchase-failed", language: language))
+                .font(.footnote)
+                .foregroundStyle(AppTheme.coral)
+        }
+    }
 }
 
-private enum LocalLegalDocument: String, Identifiable { case terms, privacy; var id: String { rawValue } }
+private enum LegalDocument: String, Identifiable {
+    case terms
+    case privacy
 
-private struct LocalLegalView: View {
+    var id: String { rawValue }
+
+    var url: URL {
+        URL(string: "https://aaadmin.xiaoguiwk.top/\(rawValue)")!
+    }
+}
+
+private struct LegalDocumentView: View {
     @Environment(\.dismiss) private var dismiss
-    let document: LocalLegalDocument
+    let document: LegalDocument
     let language: AppLanguage
+    @State private var loadFailed = false
+
     var body: some View {
         NavigationStack {
-            ScrollView { Text(localized(document == .terms ? "legal.terms-body" : "legal.privacy-body", language: language)).font(.body).foregroundStyle(AppTheme.text).frame(maxWidth: .infinity, alignment: .leading).padding(20) }
+            Group {
+                if loadFailed {
+                    ScrollView {
+                        Text(localized(document == .terms ? "legal.terms-body" : "legal.privacy-body", language: language))
+                            .font(.body)
+                            .foregroundStyle(AppTheme.text)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(20)
+                    }
+                } else {
+                    LegalWebView(url: document.url, loadFailed: $loadFailed)
+                }
+            }
                 .background(ScreenBackground())
                 .navigationTitle(localized(document == .terms ? "legal.terms" : "legal.privacy", language: language))
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .confirmationAction) { Button(localized("common.done", language: language)) { dismiss() } } }
+                .safeAreaInset(edge: .bottom) {
+                    Text(document.url.absoluteString)
+                        .font(.caption2)
+                        .foregroundStyle(AppTheme.muted)
+                        .lineLimit(1)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .frame(maxWidth: .infinity)
+                        .background(.ultraThinMaterial)
+                }
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(localized("common.done", language: language)) { dismiss() }
+                    }
+                }
+        }
+    }
+}
+
+private struct LegalWebView: UIViewRepresentable {
+    let url: URL
+    @Binding var loadFailed: Bool
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(loadFailed: $loadFailed)
+    }
+
+    func makeUIView(context: Context) -> WKWebView {
+        let configuration = WKWebViewConfiguration()
+        configuration.websiteDataStore = .nonPersistent()
+        let webView = WKWebView(frame: .zero, configuration: configuration)
+        webView.navigationDelegate = context.coordinator
+        webView.allowsBackForwardNavigationGestures = true
+        webView.load(URLRequest(url: url, cachePolicy: .reloadRevalidatingCacheData))
+        return webView
+    }
+
+    func updateUIView(_ webView: WKWebView, context: Context) {}
+
+    final class Coordinator: NSObject, WKNavigationDelegate {
+        @Binding private var loadFailed: Bool
+
+        init(loadFailed: Binding<Bool>) {
+            _loadFailed = loadFailed
+        }
+
+        func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+            loadFailed = true
+        }
+
+        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+            loadFailed = true
         }
     }
 }

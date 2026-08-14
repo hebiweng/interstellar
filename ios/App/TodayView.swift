@@ -122,10 +122,10 @@ struct TodayView: View {
             chapterHero
             VStack(spacing: 9) {
                 if let signal = activeTodaySignal {
-                    transitRow(signal, cardID: "active-today", badge: localized("today.active-today", language: model.language), tone: .warm)
+                    transitRow(signal, kind: .active)
                 }
                 if let signal = comingNextSignal {
-                    transitRow(signal, cardID: "coming-next", badge: localized("today.coming-next", language: model.language), tone: .good)
+                    transitRow(signal, kind: .coming)
                 }
             }
             .padding(.top, 11)
@@ -136,6 +136,7 @@ struct TodayView: View {
         let calendar = Calendar.current
         return model.todaySignals
             .filter { signal in
+                guard signal.source == .transit else { return false }
                 guard let date = signal.eventDate else { return signal.category == .activeNow }
                 return calendar.isDateInToday(date) || signal.category == .activeNow
             }
@@ -147,6 +148,7 @@ struct TodayView: View {
         let now = Date()
         return model.todaySignals
             .filter { signal in
+                guard signal.source == .transit else { return false }
                 guard signal.id != activeTodaySignal?.id, let date = signal.eventDate else { return false }
                 return date > now
             }
@@ -189,16 +191,8 @@ struct TodayView: View {
                 .padding(.top, 8)
             HStack(spacing: 6) {
                 TagChip(text: area, tone: .neutral)
-                if let next = window?.nextExact, next >= Date() {
-                    TagChip(
-                        text: LocalizedFormatters.exactAgain(shortDate(next), language: model.language),
-                        tone: .transition
-                    )
-                } else if let window {
-                    TagChip(
-                        text: window.start.shortEventRange(to: window.end, language: model.language, timeZone: TimeZone(identifier: model.profile.timezoneID) ?? .current),
-                        tone: .transition
-                    )
+                if let window {
+                    TagChip(text: chapterTimingText(window, now: Date()), tone: .transition)
                 }
             }
             .padding(.top, 10)
@@ -223,6 +217,20 @@ struct TodayView: View {
         }
     }
 
+    private func chapterTimingText(_ window: ChartEventData.TransitWindow, now: Date) -> String {
+        if let occurrence = window.upcomingExactOccurrence(after: now) {
+            let date = chapterDate(occurrence.date)
+            return occurrence.isReturn
+                ? LocalizedFormatters.exactAgain(date, language: model.language)
+                : LocalizedFormatters.exact(date, language: model.language)
+        }
+        return localizedTemplate(
+            "dynamic.7f1e2d8a22",
+            substitutions: ["value1": chapterDate(window.end)],
+            language: model.language
+        )
+    }
+
     private func chapterLine(_ window: ChartEventData.TransitWindow?) -> some View {
         let now = Date()
         let start = window?.start ?? now.addingTimeInterval(-7 * 86_400)
@@ -230,7 +238,7 @@ struct TodayView: View {
         let total = max(1, end.timeIntervalSince(start))
         let progress = min(1, max(0, now.timeIntervalSince(start) / total))
         return HStack(spacing: 8) {
-            Text(shortDate(start))
+            Text(chapterDate(start))
             GeometryReader { proxy in
                 ZStack(alignment: .leading) {
                     Capsule().fill(AppTheme.line.opacity(0.6)).frame(height: 6)
@@ -245,15 +253,25 @@ struct TodayView: View {
                 }
             }
             .frame(height: 10)
-            Text(shortDate(end))
+            Text(chapterDate(end))
         }
         .font(AppTypography.scaled(9, weight: .medium))
         .foregroundStyle(AppTheme.muted)
         .padding(.top, 14)
     }
 
-    private func transitRow(_ signal: DailySignal, cardID: String, badge: String, tone: InsightBadgeTone) -> some View {
-        let copy = model.todayCardText(cardID)
+    private enum TransitRowKind {
+        case active
+        case coming
+
+        var badgeTone: InsightBadgeTone { self == .active ? .warm : .good }
+    }
+
+    private func transitRow(_ signal: DailySignal, kind: TransitRowKind) -> some View {
+        let badge = localized(
+            kind == .active ? "today.active-today" : "today.coming-next",
+            language: model.language
+        )
         return Button {
             selectedTab = .charts
             model.openSignal(signal)
@@ -268,27 +286,23 @@ struct TodayView: View {
             VStack(alignment: .leading, spacing: 0) {
                 InsightBadge(
                     text: badge,
-                    tone: tone
+                    tone: kind.badgeTone
                 )
-                Text(copy?.headline ?? signal.title)
+                Text(signal.title)
                     .font(AppTypography.scaled(14, weight: .semibold))
                     .foregroundStyle(AppTheme.text)
-                    .padding(.top, 2)
-                Text(copy?.body ?? signal.subtitle)
+                    .padding(.top, 7)
+                Text(signal.subtitle)
                     .font(AppTypography.scaled(11))
                     .lineSpacing(2)
                     .foregroundStyle(AppTheme.muted)
                     .padding(.top, 3)
                 HStack(spacing: 6) {
-                    if let eventDate = signal.eventDate {
-                        TagChip(
-                            text: "\(localized("today.peaks", language: model.language)) \(timeOf(eventDate))",
-                            tone: .transition
-                        )
+                    ForEach(Array(transitMetadata(signal, kind: kind).enumerated()), id: \.offset) { _, text in
+                        TagChip(text: text, tone: .transition)
                     }
-                    TagChip(text: todaySourceTitle(signal.source), tone: .transition)
                 }
-                .padding(.top, 8)
+                .padding(.top, 12)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             Text("›")
@@ -301,6 +315,69 @@ struct TodayView: View {
         .buttonStyle(.plain)
         .padding(14)
         .cardSurface()
+    }
+
+    private func transitMetadata(_ signal: DailySignal, kind: TransitRowKind) -> [String] {
+        var labels: [String] = []
+        if kind == .active {
+            labels.append(
+                signal.eventDate.map {
+                    "\(localized("today.peaks", language: model.language)) \(timeOf($0))"
+                } ?? localized("today.ongoing", language: model.language)
+            )
+        } else if let eventDate = signal.eventDate {
+            labels.append(
+                localizedTemplate(
+                    "today.starts-value",
+                    substitutions: ["value": nearDate(eventDate)],
+                    language: model.language
+                )
+            )
+            if let peakDate = signal.peakDate,
+               abs(peakDate.timeIntervalSince(eventDate)) >= 60 * 60
+            {
+                labels.append(
+                    localizedTemplate(
+                        "today.strongest-value",
+                        substitutions: ["value": shortDate(peakDate)],
+                        language: model.language
+                    )
+                )
+            }
+        }
+        if labels.count < 2, let context = model.todayTransitContext(for: signal) {
+            labels.append("\(shortDomainTitle(context.domain)) · \(context.theme)")
+        }
+        return Array(labels.prefix(2))
+    }
+
+    private func nearDate(_ date: Date) -> String {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: model.profile.timezoneID) ?? .current
+        let days = calendar.dateComponents(
+            [.day],
+            from: calendar.startOfDay(for: Date()),
+            to: calendar.startOfDay(for: date)
+        ).day ?? 0
+        guard (0 ... 6).contains(days) else { return shortDate(date) }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: model.language.rawValue)
+        formatter.timeZone = calendar.timeZone
+        formatter.setLocalizedDateFormatFromTemplate("EEEE")
+        return formatter.string(from: date)
+    }
+
+    private func shortDomainTitle(_ domain: TodayLifeDomain) -> String {
+        switch domain {
+        case .love:
+            localized("today.domain-chip.love", language: model.language)
+        case .work:
+            localized("today.domain-chip.work", language: model.language)
+        case .money:
+            localized("today.domain-chip.money", language: model.language)
+        case .energy:
+            localized("today.domain-chip.energy", language: model.language)
+        }
     }
 
     // MARK: - Moon Today (prototype .moon-card)
@@ -407,19 +484,12 @@ struct TodayView: View {
     private var timelineSection: some View {
         VStack(alignment: .leading, spacing: 0) {
             sectionHead(localized("today.today-timeline", language: model.language), sub: localized("today.local-time", language: model.language))
-            let events = Array(model.todaySignals.prefix(3))
+            let events = timelineEvents
             VStack(alignment: .leading, spacing: 0) {
-                if let interpretation = model.todayCardText("today-timeline")?.body {
-                    Text(interpretation)
-                        .font(AppTypography.scaled(11))
-                        .lineSpacing(2)
-                        .foregroundStyle(AppTheme.muted)
-                        .padding(.bottom, 12)
-                }
                 ForEach(Array(events.enumerated()), id: \.offset) { index, signal in
                     timeEvent(signal, index: index, total: events.count)
                 }
-                if model.todaySignals.isEmpty {
+                if events.isEmpty {
                     Text(localized("today.no-exact-events-today-a-quieter-day", language: model.language))
                         .font(AppTypography.scaled(12))
                         .foregroundStyle(AppTheme.muted)
@@ -431,12 +501,28 @@ struct TodayView: View {
         }
     }
 
+    private var timelineEvents: [DailySignal] {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: model.profile.timezoneID) ?? .current
+        let today = model.todaySignals
+            .filter { signal in
+                guard signal.source == .sky, let date = signal.eventDate else { return false }
+                return calendar.isDate(date, inSameDayAs: Date())
+            }
+            .sorted { ($0.eventDate ?? .distantFuture) < ($1.eventDate ?? .distantFuture) }
+        let major = today.filter { $0.strength >= 90 }
+        return Array((major.isEmpty ? today : major).prefix(3))
+    }
+
     private func timeEvent(_ signal: DailySignal, index: Int, total: Int) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Text(timeOf(signal.eventDate))
                 .font(AppTypography.scaled(10.5, weight: .semibold).monospacedDigit())
                 .foregroundStyle(AppTheme.muted)
-                .frame(width: 42, alignment: .leading)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+                .allowsTightening(true)
+                .frame(width: 46, alignment: .leading)
             VStack(spacing: 0) {
                 let isPast = signal.eventDate.map { $0 < Date() } ?? false
                 Circle()
@@ -611,10 +697,31 @@ struct TodayView: View {
     }
 
     private func stationDeadline(for body: CelestialBody) -> String {
-        guard let station = model.chartEvents.skyStations.first(where: { $0.body == body }) else {
+        guard let station = model.chartEvents.skyStations.first(where: {
+            $0.body == body && !$0.retrogradeAfter
+        }) else {
             return localized("today.reviewing.status", language: model.language)
         }
-        return localizedTemplate("dynamic.c986511590", substitutions: ["value1": String(describing: shortDate(station.date))], language: model.language)
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: model.profile.timezoneID) ?? .current
+        let start = calendar.startOfDay(for: Date())
+        let end = calendar.startOfDay(for: station.date)
+        let days = max(0, calendar.dateComponents([.day], from: start, to: end).day ?? 0)
+        if days == 0 {
+            return localized("today.retrograde-direct-today", language: model.language)
+        }
+        if days <= 7 {
+            return localizedTemplate(
+                "today.retrograde-direct-in-days",
+                substitutions: ["days": String(days)],
+                language: model.language
+            )
+        }
+        return localizedTemplate(
+            "today.retrograde-ends",
+            substitutions: ["date": shortDate(station.date)],
+            language: model.language
+        )
     }
 
     // MARK: - Shared
@@ -682,6 +789,14 @@ struct TodayView: View {
         formatter.timeZone = TimeZone(identifier: model.profile.timezoneID) ?? .current
         formatter.setLocalizedDateFormatFromTemplate("MMM d")
         return formatter.string(from: date)
+    }
+
+    private func chapterDate(_ date: Date) -> String {
+        LocalizedFormatters.shortDateWithYear(
+            date,
+            language: model.language,
+            timeZone: TimeZone(identifier: model.profile.timezoneID) ?? .current
+        )
     }
 
     private func timeOf(_ date: Date?) -> String {

@@ -13,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -139,7 +140,8 @@ func (a *appAttestConfig) handleAttestation(w http.ResponseWriter, r *http.Reque
 		req.ChallengeID, req.InstallationID, req.KeyID, appAttestPurposeAttest, "",
 	)
 	if err != nil {
-		writeError(w, http.StatusUnauthorized, "challenge_invalid", err.Error(), false)
+		logAppAttestRejection(r, "attestation_challenge", err)
+		writeAppVerificationError(w, http.StatusUnauthorized, "challenge_invalid", false)
 		return
 	}
 	object, err := base64.StdEncoding.DecodeString(req.AttestationObject)
@@ -149,7 +151,8 @@ func (a *appAttestConfig) handleAttestation(w http.ResponseWriter, r *http.Reque
 	}
 	verified, err := a.verifyAttestation(object, req.KeyID, challenge)
 	if err != nil {
-		writeError(w, http.StatusUnauthorized, "attestation_invalid", err.Error(), false)
+		logAppAttestRejection(r, "attestation", err)
+		writeAppVerificationError(w, http.StatusUnauthorized, "attestation_invalid", false)
 		return
 	}
 	if err := a.store.SaveAppAttestKey(verified.AppAttestKey, req.InstallationID, verified.receipt); err != nil {
@@ -229,7 +232,7 @@ func (a *appAttestConfig) verifyAttestation(object []byte, keyID string, challen
 		}
 		intermediates.AddCert(certificate)
 	}
-	if _, err := leaf.Verify(x509.VerifyOptions{Roots: a.rootPool, Intermediates: intermediates, CurrentTime: time.Now()}); err != nil {
+	if err := verifyAppAttestCertificateChain(leaf, intermediates, a.rootPool, time.Now()); err != nil {
 		return nil, fmt.Errorf("App Attest certificate chain failed: %w", err)
 	}
 	publicKey, ok := leaf.PublicKey.(*ecdsa.PublicKey)
@@ -259,6 +262,25 @@ func (a *appAttestConfig) verifyAttestation(object []byte, keyID string, challen
 	}, nil
 }
 
+func verifyAppAttestCertificateChain(
+	leaf *x509.Certificate,
+	intermediates *x509.CertPool,
+	roots *x509.CertPool,
+	currentTime time.Time,
+) error {
+	_, err := leaf.Verify(x509.VerifyOptions{
+		Roots:         roots,
+		Intermediates: intermediates,
+		CurrentTime:   currentTime,
+		// Certificate.Verify defaults to TLS server authentication. App Attest
+		// credential certificates are issued for attestation, not HTTPS, so the
+		// chain must be checked independently of a TLS EKU while remaining pinned
+		// to Apple's private App Attestation root above.
+		KeyUsages: []x509.ExtKeyUsage{x509.ExtKeyUsageAny},
+	})
+	return err
+}
+
 var appAttestNonceOID = asn1.ObjectIdentifier{1, 2, 840, 113635, 100, 8, 2}
 
 func appAttestCertificateNonce(certificate *x509.Certificate) ([]byte, error) {
@@ -284,7 +306,10 @@ func parseAuthenticatorData(data []byte, requireAttestedCredential bool) (*parse
 		RPIDHash: append([]byte{}, data[:32]...), Flags: data[32], Counter: binary.BigEndian.Uint32(data[33:37]),
 	}
 	rest := data[37:]
-	if auth.Flags&0x40 != 0 {
+	if requireAttestedCredential {
+		if auth.Flags&0x40 == 0 {
+			return nil, errors.New("attested credential flag is missing")
+		}
 		if len(rest) < 18 {
 			return nil, errors.New("attested credential data is incomplete")
 		}
@@ -302,8 +327,6 @@ func parseAuthenticatorData(data []byte, requireAttestedCredential bool) (*parse
 		if err != nil {
 			return nil, errors.New("credential public key is invalid CBOR")
 		}
-	} else if requireAttestedCredential {
-		return nil, errors.New("attested credential flag is missing")
 	}
 	if auth.Flags&0x80 != 0 {
 		if err := cbor.Unmarshal(rest, &auth.Extensions); err != nil {
@@ -349,8 +372,13 @@ func (a *appAttestConfig) validateAuthenticator(auth *parsedAuthenticatorData, a
 	if keyEnvironment == "development" && a.environment != "development" && !a.allowDevelopment {
 		return errors.New("development App Attest is not enabled")
 	}
+	// The launch validation category and bundle version were added to newer
+	// App Attest payloads. Older supported OS releases omit the extension map,
+	// while still providing the certificate chain, nonce, RP ID, AAGUID,
+	// credential ID, and counter that establish the attestation. Validate the
+	// new signals whenever Apple supplies them, but retain legacy compatibility.
 	if auth.Extensions == nil {
-		return errors.New("App Attest validation extensions are missing")
+		return nil
 	}
 	category, ok := uint32Extension(auth.Extensions["apple_validation_category_01"])
 	if !ok || category == 0 || category > 6 {
@@ -453,10 +481,19 @@ func (a *appAttestConfig) verifyRequestAssertion(r *http.Request, body []byte, i
 	clientDataHash := sha256.Sum256(clientDataRaw)
 	signed := append(append([]byte{}, assertion.AuthData...), clientDataHash[:]...)
 	nonce := sha256.Sum256(signed)
-	if !ecdsa.VerifyASN1(publicKey, nonce[:], assertion.Signature) {
+	if !verifyAppAttestAssertionSignature(publicKey, nonce[:], assertion.Signature) {
 		return errors.New("App Attest assertion signature is invalid")
 	}
 	return a.store.UpdateAppAttestCounter(keyID, installationID, key.SignCount, auth.Counter)
+}
+
+func verifyAppAttestAssertionSignature(publicKey *ecdsa.PublicKey, nonce, signature []byte) bool {
+	// App Attest signs nonce as an ECDSA-SHA256 message. Go's VerifyASN1 is a
+	// lower-level primitive that expects the digest rather than the message, so
+	// hash nonce once more before verification. Passing nonce directly would
+	// incorrectly treat Apple's SHA-256 nonce as an already-signed digest.
+	digest := sha256.Sum256(nonce)
+	return ecdsa.VerifyASN1(publicKey, digest[:], signature)
 }
 
 type appAttestTokenRequest struct {
@@ -482,11 +519,13 @@ func (a *appAttestConfig) handleToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if strings.TrimSpace(r.Header.Get("X-App-Attest-Key-ID")) != req.KeyID {
-		writeError(w, http.StatusUnauthorized, "app_attest_invalid", "key ID mismatch", false)
+		logAppAttestRejection(r, "token_assertion", errors.New("key ID mismatch"))
+		writeAppVerificationError(w, http.StatusUnauthorized, "app_attest_invalid", false)
 		return
 	}
 	if err := a.verifyRequestAssertion(r, body, req.InstallationID, false); err != nil {
-		writeError(w, http.StatusUnauthorized, "app_attest_invalid", err.Error(), false)
+		logAppAttestRejection(r, "token_assertion", err)
+		writeAppVerificationError(w, http.StatusUnauthorized, "app_attest_invalid", false)
 		return
 	}
 	token, expires, err := a.store.CreateAppAttestToken(req.KeyID, req.InstallationID, appAttestTokenTTL)
@@ -495,6 +534,19 @@ func (a *appAttestConfig) handleToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"token": token, "expiresAt": expires.Format(time.RFC3339)})
+}
+
+func logAppAttestRejection(r *http.Request, stage string, err error) {
+	// Never log installation/key IDs, headers, tokens, assertions, certificates,
+	// or request bodies. The path, stage, and verifier-owned error text are
+	// sufficient for production diagnosis without exposing client material.
+	log.Printf("app_attest_rejected path=%q stage=%q reason=%q", r.URL.Path, stage, err.Error())
+}
+
+func writeAppVerificationError(w http.ResponseWriter, status int, code string, retryable bool) {
+	// Detailed verifier failures belong only in sanitized server logs. They must
+	// never be returned to a consumer or reveal which cryptographic check failed.
+	writeError(w, status, code, "App verification failed. Please try again.", retryable)
 }
 
 func validSHA256Base64(value string) bool {

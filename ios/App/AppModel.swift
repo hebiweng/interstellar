@@ -411,6 +411,42 @@ final class AppModel: ObservableObject {
             isCalculatingSynastry = false
             isEnriching = true
             do {
+                // Today must not wait behind the 90-day transit calendar,
+                // weekly forecast, and all-chart event enrichment. Publish its
+                // local-day events first; the heavier consumers continue below.
+                let todayEngine = TodayEngine(
+                    calculator: calculator,
+                    profile: profile,
+                    natal: todayTransitReferenceSnapshot,
+                    skyPreset: preset(for: .currentSky),
+                    transitPreset: preset(for: .transit),
+                    language: language,
+                    content: ContentProvider(language: language)
+                )
+                let todayEvents = try await todayEngine.scan(containing: now)
+                var nextEvents: [DailySignal] = []
+                if !todayEvents.contains(where: { ($0.eventDate ?? .distantPast) > now }) {
+                    var calendar = Calendar(identifier: .gregorian)
+                    calendar.timeZone = TimeZone(identifier: profile.timezoneID) ?? .current
+                    if let tomorrow = calendar.date(byAdding: .day, value: 1, to: now) {
+                        nextEvents = try await todayEngine.scan(
+                            containing: tomorrow,
+                            skyLimit: 1,
+                            transitLimit: 1
+                        )
+                    }
+                }
+                todaySignals = Array((todayEvents + Array(nextEvents.prefix(1)) + activeSignals).prefix(18))
+                todayDashboardModel = try TodayDashboardFactory.make(
+                    contributions: todayContributions,
+                    signals: todaySignals,
+                    content: ContentProvider(language: language),
+                    rules: dashboardRules,
+                    language: language,
+                    timeZone: TimeZone(identifier: profile.timezoneID) ?? .current
+                )
+                logRefreshTiming("today-events-ready", since: refreshStartedAt)
+
                 let transitTimeZone = TimeZone(identifier: transitLocation.timezoneID) ?? .current
                 let timelineRangeDays = TransitTimelineContract.maximumRangeDays
                 let transitScopeID = TransitFactBundleBuilder.makeScopeID(
@@ -479,25 +515,6 @@ final class AppModel: ObservableObject {
                 )
                 saveSnapshotCache()
                 logRefreshTiming("chart-events-ready", since: refreshStartedAt)
-                let todayEvents = try await TodayEngine(
-                    calculator: calculator,
-                    profile: profile,
-                    natal: todayTransitReferenceSnapshot,
-                    skyPreset: preset(for: .currentSky),
-                    transitPreset: preset(for: .transit),
-                    language: language,
-                    content: ContentProvider(language: language)
-                ).scan(containing: now)
-                logRefreshTiming("today-events-ready", since: refreshStartedAt)
-                todaySignals = Array((todayEvents + activeSignals).prefix(5))
-                todayDashboardModel = try TodayDashboardFactory.make(
-                    contributions: todayContributions,
-                    signals: todaySignals,
-                    content: ContentProvider(language: language),
-                    rules: dashboardRules,
-                    language: language,
-                    timeZone: TimeZone(identifier: profile.timezoneID) ?? .current
-                )
             } catch {
                 #if DEBUG
                 print("TIMING_ENRICHMENT_ERROR: \(error)")
@@ -779,6 +796,21 @@ final class AppModel: ObservableObject {
             transitAspects: todayTransitAspectsForContent.isEmpty ? transitAspects : todayTransitAspectsForContent,
             preset: todayCardPreset(cardID)
         )
+    }
+
+    func todayTransitContext(for signal: DailySignal) -> (domain: TodayLifeDomain, theme: String)? {
+        guard signal.source == .transit,
+              let aspect = todayTransitAspectsForContent.first(where: {
+                  signal.id == "transit-\($0.id)" || signal.id.contains("-\($0.id)-")
+              }),
+              let natal = todayNatalForContent ?? self.natal,
+              let body = CelestialBody(rawValue: aspect.firstID)
+        else { return nil }
+        let house = natal.house(containing: aspect.secondLongitude)
+        let rules = TodayDashboardRules.load()
+        let domain = TodayLifeDomain.allCases.first { rules.houses(for: $0).contains(house) }
+            ?? .energy
+        return (domain, ConsumerCopy.bodyTheme(body, language: language))
     }
 
     private func todayCardPreset(_ cardID: String) -> String {

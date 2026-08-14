@@ -32,7 +32,7 @@ struct ReportsView: View {
                         subtitle: localized("reports.generated-once-kept-permanently", language: model.language)
                     )
 
-                    Text(localized("reports.each-completed-report-is-stored-on-device-read-it-again-without-regenera", language: model.language))
+                    Text(localized("reports.richer-calculated-details", language: model.language))
                         .font(.subheadline)
                         .foregroundStyle(AppTheme.muted)
                         .cardSurface()

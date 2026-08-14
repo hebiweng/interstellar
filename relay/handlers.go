@@ -137,11 +137,12 @@ func (c *relayConfig) handleGenerate(w http.ResponseWriter, r *http.Request) {
 	}
 	if !devBypass {
 		if c.appAttest == nil {
-			writeError(w, http.StatusServiceUnavailable, "app_attest_unavailable", "App Attest is not configured", true)
+			writeAppVerificationError(w, http.StatusServiceUnavailable, "app_attest_unavailable", true)
 			return
 		}
 		if err := c.appAttest.verifyGenerateRequest(r, body, installationID); err != nil {
-			writeError(w, http.StatusUnauthorized, "app_attest_invalid", err.Error(), false)
+			logAppAttestRejection(r, "generate_assertion", err)
+			writeAppVerificationError(w, http.StatusUnauthorized, "app_attest_invalid", false)
 			return
 		}
 	}

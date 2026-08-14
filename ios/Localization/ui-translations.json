@@ -11,6 +11,12 @@
     "es": "Respuesta no válida del servicio de verificación de la app.",
     "fr": "Réponse non valide du service de vérification de l’app."
   },
+  "ai.app-verification-retry": {
+    "en": "We couldn’t verify this app right now. Please try again.",
+    "zh": "暂时无法验证 App，请稍后重试。",
+    "es": "No pudimos verificar la app en este momento. Inténtalo de nuevo.",
+    "fr": "Nous n’avons pas pu vérifier l’app pour le moment. Réessayez."
+  },
   "ai.app-verification-unsupported": {
     "en": "This device cannot verify the app installation.",
     "zh": "此设备无法验证 App 安装。",
@@ -4031,11 +4037,11 @@
     "es": "Informe diario",
     "fr": "Rapport quotidien"
   },
-  "reports.each-completed-report-is-stored-on-device-read-it-again-without-regenera": {
-    "en": "Each completed report is stored on device. Read it again without regenerating the same chart or period.",
-    "zh": "每份完成的报告都保存在本机，随时可重读，无需重新生成。",
-    "es": "Cada informe completado se guarda en el dispositivo. Puedes volver a leerlo sin regenerar la misma carta o período.",
-    "fr": "Chaque rapport terminé est stocké sur l’appareil. Vous pouvez le relire sans régénérer la même carte ou période."
+  "reports.richer-calculated-details": {
+    "en": "A report works with richer calculated details for the selected chart—including planet positions, houses and angles, aspects, orbs and strength, motion and timing, plus Modern or Classical assessments where available.",
+    "zh": "报告会根据所选盘型结合更丰富的计算细节，包括星体位置、宫位与四轴、相位及其容许度和强度、运行状态与时间信息，以及适用的现代或古典评估。",
+    "es": "El informe utiliza más detalles calculados de la carta elegida: posiciones planetarias, casas y ángulos, aspectos, orbes e intensidad, movimiento y tiempos, además de evaluaciones modernas o clásicas cuando estén disponibles.",
+    "fr": "Le rapport s’appuie sur davantage de détails calculés pour le thème choisi : positions planétaires, maisons et angles, aspects, orbes et intensité, mouvements et temporalité, ainsi que les évaluations modernes ou classiques disponibles."
   },
   "reports.edit": {
     "en": "Edit",
@@ -4565,6 +4571,42 @@
     "es": "Picos",
     "fr": "Pics"
   },
+  "today.starts-value": {
+    "en": "Starts {{value}}",
+    "zh": "开始于{{value}}",
+    "es": "Empieza {{value}}",
+    "fr": "Commence {{value}}"
+  },
+  "today.strongest-value": {
+    "en": "Strongest {{value}}",
+    "zh": "最强于{{value}}",
+    "es": "Más fuerte {{value}}",
+    "fr": "Plus fort {{value}}"
+  },
+  "today.domain-chip.love": {
+    "en": "Relationships",
+    "zh": "关系",
+    "es": "Relaciones",
+    "fr": "Relations"
+  },
+  "today.domain-chip.work": {
+    "en": "Work",
+    "zh": "工作",
+    "es": "Trabajo",
+    "fr": "Travail"
+  },
+  "today.domain-chip.money": {
+    "en": "Money",
+    "zh": "财务",
+    "es": "Dinero",
+    "fr": "Finances"
+  },
+  "today.domain-chip.energy": {
+    "en": "Energy",
+    "zh": "状态",
+    "es": "Energía",
+    "fr": "Énergie"
+  },
   "today.personal-timing": {
     "en": "Personal timing",
     "zh": "个人节奏",
@@ -4582,6 +4624,60 @@
     "zh": "回顾调整",
     "es": "Retrogradaciones",
     "fr": "Rétrogradations"
+  },
+  "today.event-fact.sky-aspect": {
+    "en": "{{first}} {{aspect}} {{second}}",
+    "zh": "{{first}}{{aspect}}{{second}}",
+    "es": "{{first}} {{aspect}} {{second}}",
+    "fr": "{{first}} {{aspect}} {{second}}"
+  },
+  "today.event-fact.transit-aspect": {
+    "en": "{{first}} {{aspect}} natal {{second}}",
+    "zh": "行运{{first}}{{aspect}}本命{{second}}",
+    "es": "{{first}} {{aspect}} {{second}} natal",
+    "fr": "{{first}} {{aspect}} {{second}} natal"
+  },
+  "today.event-fact.sign-ingress": {
+    "en": "{{body}} enters {{sign}}",
+    "zh": "{{body}}进入{{sign}}",
+    "es": "{{body}} entra en {{sign}}",
+    "fr": "{{body}} entre en {{sign}}"
+  },
+  "today.event-fact.house-ingress": {
+    "en": "{{body}} enters {{house}}",
+    "zh": "{{body}}进入{{house}}",
+    "es": "{{body}} entra en {{house}}",
+    "fr": "{{body}} entre dans {{house}}"
+  },
+  "today.event-fact.stations-direct": {
+    "en": "{{body}} stations direct",
+    "zh": "{{body}}恢复顺行",
+    "es": "{{body}} se estaciona directo",
+    "fr": "{{body}} stationne direct"
+  },
+  "today.event-fact.stations-retrograde": {
+    "en": "{{body}} stations retrograde",
+    "zh": "{{body}}开始逆行",
+    "es": "{{body}} se estaciona retrógrado",
+    "fr": "{{body}} stationne rétrograde"
+  },
+  "today.retrograde-direct-today": {
+    "en": "Direct today",
+    "zh": "今天转顺",
+    "es": "Directo hoy",
+    "fr": "Direct aujourd’hui"
+  },
+  "today.retrograde-direct-in-days": {
+    "en": "Direct in {{days}}d",
+    "zh": "{{days}}天后转顺",
+    "es": "Directo en {{days}} d",
+    "fr": "Direct dans {{days}} j"
+  },
+  "today.retrograde-ends": {
+    "en": "Ends {{date}}",
+    "zh": "{{date}}结束",
+    "es": "Termina {{date}}",
+    "fr": "Se termine {{date}}"
   },
   "today.review-window": {
     "en": "Review window",
@@ -4915,6 +5011,10 @@
   "commerce.user-id": {"en":"User ID","zh":"用户 ID","es":"ID de usuario","fr":"ID utilisateur"},
   "commerce.refresh": {"en":"Refresh account","zh":"刷新账户","es":"Actualizar cuenta","fr":"Actualiser le compte"},
   "commerce.premium-until": {"en":"Pro until","zh":"Pro 有效期至","es":"Pro hasta","fr":"Pro jusqu’au"},
+  "commerce.loading-products": {"en":"Loading App Store products…","zh":"正在加载 App Store 商品…","es":"Cargando productos del App Store…","fr":"Chargement des produits de l’App Store…"},
+  "commerce.retry-products": {"en":"Retry App Store","zh":"重试 App Store","es":"Reintentar App Store","fr":"Réessayer l’App Store"},
+  "commerce.products-unavailable": {"en":"Products are unavailable in this build. Run the app from Xcode with the StoreKit configuration, or configure these products in App Store Connect.","zh":"此构建暂时无法获取商品。请从 Xcode 使用 StoreKit 配置运行，或先在 App Store Connect 配置这些商品。","es":"Los productos no están disponibles en esta compilación. Ejecuta la app desde Xcode con la configuración de StoreKit o configura los productos en App Store Connect.","fr":"Les produits sont indisponibles dans cette version. Lancez l’app depuis Xcode avec la configuration StoreKit ou configurez-les dans App Store Connect."},
+  "commerce.purchase-failed": {"en":"The purchase did not complete. Please try again.","zh":"购买未完成，请重试。","es":"La compra no se completó. Inténtalo de nuevo.","fr":"L’achat n’a pas abouti. Veuillez réessayer."},
   "credits.available": {"en":"Credits available","zh":"可用 Credits","es":"Créditos disponibles","fr":"Crédits disponibles"},
   "credits.monthly": {"en":"Monthly","zh":"月度额度","es":"Mensuales","fr":"Mensuels"},
   "credits.bonus": {"en":"Bonus","zh":"奖励","es":"Bonificación","fr":"Bonus"},

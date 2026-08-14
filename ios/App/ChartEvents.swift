@@ -94,6 +94,26 @@ struct TransitEphemerisSample: Equatable, Sendable {
     let snapshot: ChartSnapshot
 }
 
+struct TransitExactOccurrence: Equatable {
+    let date: Date
+    let isReturn: Bool
+}
+
+extension ChartEventData.TransitWindow {
+    /// The first exact contact that has not happened yet. Repeated contacts are
+    /// kept distinct so the UI does not label the initial peak as a return.
+    func upcomingExactOccurrence(after referenceDate: Date) -> TransitExactOccurrence? {
+        [
+            TransitExactOccurrence(date: exact, isReturn: false),
+            repeatExact.map { TransitExactOccurrence(date: $0, isReturn: true) },
+            nextExact.map { TransitExactOccurrence(date: $0, isReturn: true) },
+        ]
+        .compactMap { $0 }
+        .filter { $0.date > referenceDate }
+        .min { $0.date < $1.date }
+    }
+}
+
 /// Builds `ChartEventData` from the already-computed snapshots. This runs on the
 /// main refresh path so the cards are ready the moment the chart is shown.
 enum ChartEventBuilder {

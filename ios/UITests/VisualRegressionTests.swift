@@ -66,6 +66,32 @@ final class VisualRegressionTests: XCTestCase {
     }
 
     @MainActor
+    func testCommerceEntryButtonsOpenPurchaseSheets() throws {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchEnvironment["INTERSTELLAR_UI_TEST_LANGUAGE"] = "en"
+        app.launchEnvironment["INTERSTELLAR_UI_TEST_APPEARANCE"] = "light"
+        app.launch()
+
+        let profileTab = app.tabBars.buttons["Profile"]
+        XCTAssertTrue(profileTab.waitForExistence(timeout: 20))
+        profileTab.tap()
+
+        let explore = app.buttons["Explore Pro"]
+        scrollToHittable(explore, in: app)
+        XCTAssertTrue(explore.isHittable)
+        explore.tap()
+        XCTAssertTrue(app.staticTexts["INTERSTELLAR PRO"].waitForExistence(timeout: 5))
+        app.buttons["Cancel"].tap()
+
+        let buyCredits = app.buttons["Buy Credits"]
+        scrollToHittable(buyCredits, in: app)
+        XCTAssertTrue(buyCredits.isHittable)
+        buyCredits.tap()
+        XCTAssertTrue(app.staticTexts["Need more reports?"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
     func testEventDrivenCardsRender() throws {
         continueAfterFailure = false
         let app = XCUIApplication()

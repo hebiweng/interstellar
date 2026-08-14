@@ -59,6 +59,35 @@
         }
       }
     },
+    "ai.app-verification-retry": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We couldn’t verify this app right now. Please try again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂时无法验证 App，请稍后重试。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No pudimos verificar la app en este momento. Inténtalo de nuevo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nous n’avons pas pu vérifier l’app pour le moment. Réessayez."
+          }
+        }
+      }
+    },
     "ai.app-verification-unsupported": {
       "extractionState": "manual",
       "localizations": {
@@ -6874,6 +6903,35 @@
         }
       }
     },
+    "commerce.loading-products": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading App Store products…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在加载 App Store 商品…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cargando productos del App Store…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chargement des produits de l’App Store…"
+          }
+        }
+      }
+    },
     "commerce.plan": {
       "extractionState": "manual",
       "localizations": {
@@ -6932,6 +6990,64 @@
         }
       }
     },
+    "commerce.products-unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Products are unavailable in this build. Run the app from Xcode with the StoreKit configuration, or configure these products in App Store Connect."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此构建暂时无法获取商品。请从 Xcode 使用 StoreKit 配置运行，或先在 App Store Connect 配置这些商品。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los productos no están disponibles en esta compilación. Ejecuta la app desde Xcode con la configuración de StoreKit o configura los productos en App Store Connect."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les produits sont indisponibles dans cette version. Lancez l’app depuis Xcode avec la configuration StoreKit ou configurez-les dans App Store Connect."
+          }
+        }
+      }
+    },
+    "commerce.purchase-failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The purchase did not complete. Please try again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "购买未完成，请重试。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La compra no se completó. Inténtalo de nuevo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’achat n’a pas abouti. Veuillez réessayer."
+          }
+        }
+      }
+    },
     "commerce.refresh": {
       "extractionState": "manual",
       "localizations": {
@@ -6957,6 +7073,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "Actualiser le compte"
+          }
+        }
+      }
+    },
+    "commerce.retry-products": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retry App Store"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重试 App Store"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reintentar App Store"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réessayer l’App Store"
           }
         }
       }
@@ -25927,35 +26072,6 @@
         }
       }
     },
-    "reports.each-completed-report-is-stored-on-device-read-it-again-without-regenera": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Each completed report is stored on device. Read it again without regenerating the same chart or period."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "每份完成的报告都保存在本机，随时可重读，无需重新生成。"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cada informe completado se guarda en el dispositivo. Puedes volver a leerlo sin regenerar la misma carta o período."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chaque rapport terminé est stocké sur l’appareil. Vous pouvez le relire sans régénérer la même carte ou période."
-          }
-        }
-      }
-    },
     "reports.edit": {
       "extractionState": "manual",
       "localizations": {
@@ -26590,6 +26706,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "Remplacer le rapport enregistré ?"
+          }
+        }
+      }
+    },
+    "reports.richer-calculated-details": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A report works with richer calculated details for the selected chart—including planet positions, houses and angles, aspects, orbs and strength, motion and timing, plus Modern or Classical assessments where available."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "报告会根据所选盘型结合更丰富的计算细节，包括星体位置、宫位与四轴、相位及其容许度和强度、运行状态与时间信息，以及适用的现代或古典评估。"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El informe utiliza más detalles calculados de la carta elegida: posiciones planetarias, casas y ángulos, aspectos, orbes e intensidad, movimiento y tiempos, además de evaluaciones modernas o clásicas cuando estén disponibles."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le rapport s’appuie sur davantage de détails calculés pour le thème choisi : positions planétaires, maisons et angles, aspects, orbes et intensité, mouvements et temporalité, ainsi que les évaluations modernes ou classiques disponibles."
           }
         }
       }
@@ -27986,6 +28131,122 @@
         }
       }
     },
+    "today.domain-chip.energy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Energy"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "状态"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Energía"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Énergie"
+          }
+        }
+      }
+    },
+    "today.domain-chip.love": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relationships"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关系"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relaciones"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relations"
+          }
+        }
+      }
+    },
+    "today.domain-chip.money": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Money"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "财务"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dinero"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finances"
+          }
+        }
+      }
+    },
+    "today.domain-chip.work": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Work"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "工作"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trabajo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Travail"
+          }
+        }
+      }
+    },
     "today.energy-wellbeing": {
       "extractionState": "manual",
       "localizations": {
@@ -28040,6 +28301,180 @@
           "stringUnit": {
             "state": "translated",
             "value": "Soir"
+          }
+        }
+      }
+    },
+    "today.event-fact.house-ingress": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{body}} enters {{house}}"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{body}}进入{{house}}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{body}} entra en {{house}}"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{body}} entre dans {{house}}"
+          }
+        }
+      }
+    },
+    "today.event-fact.sign-ingress": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{body}} enters {{sign}}"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{body}}进入{{sign}}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{body}} entra en {{sign}}"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{body}} entre en {{sign}}"
+          }
+        }
+      }
+    },
+    "today.event-fact.sky-aspect": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{first}} {{aspect}} {{second}}"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{first}}{{aspect}}{{second}}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{first}} {{aspect}} {{second}}"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{first}} {{aspect}} {{second}}"
+          }
+        }
+      }
+    },
+    "today.event-fact.stations-direct": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{body}} stations direct"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{body}}恢复顺行"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{body}} se estaciona directo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{body}} stationne direct"
+          }
+        }
+      }
+    },
+    "today.event-fact.stations-retrograde": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{body}} stations retrograde"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{body}}开始逆行"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{body}} se estaciona retrógrado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{body}} stationne rétrograde"
+          }
+        }
+      }
+    },
+    "today.event-fact.transit-aspect": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{first}} {{aspect}} natal {{second}}"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行运{{first}}{{aspect}}本命{{second}}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{first}} {{aspect}} {{second}} natal"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{first}} {{aspect}} {{second}} natal"
           }
         }
       }
@@ -28595,6 +29030,93 @@
         }
       }
     },
+    "today.retrograde-direct-in-days": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Direct in {{days}}d"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{days}}天后转顺"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Directo en {{days}} d"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Direct dans {{days}} j"
+          }
+        }
+      }
+    },
+    "today.retrograde-direct-today": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Direct today"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今天转顺"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Directo hoy"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Direct aujourd’hui"
+          }
+        }
+      }
+    },
+    "today.retrograde-ends": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ends {{date}}"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{{date}}结束"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Termina {{date}}"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se termine {{date}}"
+          }
+        }
+      }
+    },
     "today.retrogrades": {
       "extractionState": "manual",
       "localizations": {
@@ -28798,6 +29320,35 @@
         }
       }
     },
+    "today.starts-value": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starts {{value}}"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始于{{value}}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empieza {{value}}"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commence {{value}}"
+          }
+        }
+      }
+    },
     "today.stations-direct": {
       "extractionState": "manual",
       "localizations": {
@@ -28881,6 +29432,35 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stable"
+          }
+        }
+      }
+    },
+    "today.strongest-value": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strongest {{value}}"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最强于{{value}}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más fuerte {{value}}"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus fort {{value}}"
           }
         }
       }

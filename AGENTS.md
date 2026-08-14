@@ -181,14 +181,14 @@ git diff --check
 - `linux/amd64` 镜像必须在本机或 CI 构建后传输；低内存服务器只加载镜像并切换 Compose，不现场编译。
 - 不得把管理员凭据、API Key、出生资料、事实正文、提示词正文或 AI 正文写入 Git、日志、Bark 或截图。
 
-### App Attest 临时状态
+### App Attest 恢复状态
 
-当前因未购买 Apple Developer Program，真机开发暂时使用以下例外：
+Apple Developer Program 已恢复，账号持有人为 KUN WANG；Xcode 自动签名和实际 provisioning profile 已确认正式 Team ID 为 `KCC8FFFAA5`：
 
-- `infra/deploy/compose.production.yaml` 与 `infra/deploy/compose.relay-only.yaml` 的 `RELAY_ALLOW_DEV_BYPASS` 为 `"1"`；
-- Debug/Simulator 构建由 `ios/App/AIGeneration.swift` 发送 `X-App-Attest-Development-Bypass: 1`；
-- 当前 Xcode 免费 Personal Team 的实际 Team ID 为 `YD3FY9ZB52`，entitlements 中未启用 App Attest；`M2A7RHP7MT` 是旧签名身份标识，不得再作为 `DEVELOPMENT_TEAM`。
-
-发布前必须购买/恢复 Apple Developer Program，届时从 Xcode/Developer Portal 重新确认正式 Team ID（不得沿用历史猜测），恢复 `com.apple.developer.devicecheck.appattest-environment`，把 `RELAY_ALLOW_DEV_BYPASS` 改回 `"0"`，并完成生产 App Attest 端到端验证。
+- `Interstellar.entitlements` 已恢复 App Attest、iCloud Documents、`iCloud.com.xiaoguiwk.interstellar` 与 ubiquity kv-store；
+- Debug 真机使用 App Attest development environment，Release 使用 production；只有 Simulator 发送开发绕过头；
+- `infra/deploy/compose.production.yaml` 与 `infra/deploy/compose.relay-only.yaml` 已将 `RELAY_ALLOW_DEV_BYPASS` 设为 `"0"`，App ID 为 `KCC8FFFAA5.com.xiaoguiwk.interstellar`；
+- 旧 `YD3FY9ZB52` Team 签名包不能覆盖升级到新 Team；两台测试设备已在用户明确授权后卸载旧包（本地容器数据已删除），并安装同一个 `KCC8FFFAA5` Debug 包；
+- 生产 Relay 已按新 Compose 部署并关闭开发绕过；iPhone 12 mini 的直装 Release 已连续通过 production App Attest（计数器递增）。TestFlight Build 1 已加入仅内部使用的 `Internal Testing` 群组，自动分发关闭；仍须在 TestFlight 安装包上复验后宣告发布链路闭环。
 
 > AI生成

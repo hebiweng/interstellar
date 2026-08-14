@@ -5,6 +5,10 @@ enum LocalizedFormatters {
         formattedDate(date, template: "MMMd", language: language, timeZone: timeZone)
     }
 
+    static func shortDateWithYear(_ date: Date, language: AppLanguage, timeZone: TimeZone = .current) -> String {
+        formattedDate(date, template: "yMMMd", language: language, timeZone: timeZone)
+    }
+
     static func monthYear(_ date: Date, language: AppLanguage, timeZone: TimeZone = .current) -> String {
         formattedDate(date, template: "yMMM", language: language, timeZone: timeZone)
     }
@@ -64,6 +68,10 @@ enum LocalizedFormatters {
 
     static func exactAgain(_ date: String, language: AppLanguage) -> String {
         localizedTemplate("format.exact-again", substitutions: ["value": date], language: language)
+    }
+
+    static func exact(_ date: String, language: AppLanguage) -> String {
+        localizedTemplate("dynamic.ccf2313c4f", substitutions: ["value1": date], language: language)
     }
 
     static func quarter(_ number: Int, language: AppLanguage) -> String {

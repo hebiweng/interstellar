@@ -3,6 +3,61 @@ import XCTest
 @testable import Interstellar
 
 final class ClassicalTransitPlanningTests: XCTestCase {
+    func testTodayLongTermChoosesInitialExactWhenItIsStillAhead() {
+        let now = Date(timeIntervalSince1970: 10_000)
+        let initial = now.addingTimeInterval(100)
+        let window = todayWindow(
+            exact: initial,
+            repeatExact: now.addingTimeInterval(200),
+            nextExact: now.addingTimeInterval(300)
+        )
+
+        XCTAssertEqual(
+            window.upcomingExactOccurrence(after: now),
+            TransitExactOccurrence(date: initial, isReturn: false)
+        )
+    }
+
+    func testTodayLongTermChoosesFirstFutureReturnInsteadOfPastRange() {
+        let now = Date(timeIntervalSince1970: 10_000)
+        let firstReturn = now.addingTimeInterval(200)
+        let window = todayWindow(
+            exact: now.addingTimeInterval(-100),
+            repeatExact: firstReturn,
+            nextExact: now.addingTimeInterval(300)
+        )
+
+        XCTAssertEqual(
+            window.upcomingExactOccurrence(after: now),
+            TransitExactOccurrence(date: firstReturn, isReturn: true)
+        )
+    }
+
+    func testTodayLongTermHasNoUpcomingExactAfterLastPass() {
+        let now = Date(timeIntervalSince1970: 10_000)
+        let window = todayWindow(
+            exact: now.addingTimeInterval(-300),
+            repeatExact: now.addingTimeInterval(-200),
+            nextExact: now.addingTimeInterval(-100)
+        )
+
+        XCTAssertNil(window.upcomingExactOccurrence(after: now))
+    }
+
+    func testTodayLongTermDatesAlwaysIncludeYear() {
+        let date = utcDate(2026, 8, 14, 12)
+        let timeZone = TimeZone(secondsFromGMT: 0)!
+
+        XCTAssertTrue(
+            LocalizedFormatters.shortDateWithYear(date, language: .english, timeZone: timeZone)
+                .contains("2026")
+        )
+        XCTAssertTrue(
+            LocalizedFormatters.shortDateWithYear(date, language: .simplifiedChinese, timeZone: timeZone)
+                .contains("2026")
+        )
+    }
+
     func testTwentyFourFixturesPreserveTheFrozenSixCardContract() {
         let fixtures = makeFixtures()
         XCTAssertEqual(fixtures.count, 24)
@@ -635,6 +690,27 @@ final class ClassicalTransitPlanningTests: XCTestCase {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(secondsFromGMT: 0)!
         return calendar.date(from: DateComponents(year: year, month: month, day: day, hour: hour))!
+    }
+
+    private func todayWindow(
+        exact: Date,
+        repeatExact: Date?,
+        nextExact: Date?
+    ) -> ChartEventData.TransitWindow {
+        ChartEventData.TransitWindow(
+            first: .saturn,
+            second: .sun,
+            kind: .conjunction,
+            firstLongitude: 0,
+            start: exact.addingTimeInterval(-1_000),
+            exact: exact,
+            end: exact.addingTimeInterval(1_000),
+            repeatExact: repeatExact,
+            nextExact: nextExact,
+            passIndex: 1,
+            passCount: 3,
+            returning: repeatExact != nil || nextExact != nil
+        )
     }
 
     private var ephemerisDirectory: URL {

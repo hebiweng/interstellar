@@ -130,11 +130,10 @@ services:
       RELAY_SEED_DEEPSEEK: "0"
       RELAY_ALLOWED_ORIGIN: https://aaadmin.xiaoguiwk.top
       RELAY_DAILY_GENERATION_QUOTA: ${RELAY_DAILY_GENERATION_QUOTA:-20}
-      # Temporary: App Attest is disabled while the Apple Developer Program is not purchased.
-      RELAY_ALLOW_DEV_BYPASS: "1"
-      RELAY_APP_ATTEST_APP_ID: YD3FY9ZB52.com.xiaoguiwk.interstellar
+      RELAY_ALLOW_DEV_BYPASS: "0"
+      RELAY_APP_ATTEST_APP_ID: KCC8FFFAA5.com.xiaoguiwk.interstellar
       RELAY_APP_ATTEST_ENVIRONMENT: production
-      RELAY_APP_ATTEST_ALLOW_DEVELOPMENT: "1"
+      RELAY_APP_ATTEST_ALLOW_DEVELOPMENT: "0"
       RELAY_APP_ATTEST_BUNDLE_VERSION: "1"
       RELAY_HEALTH_URL: http://127.0.0.1:8080/v1/health
     expose:

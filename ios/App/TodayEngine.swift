@@ -36,7 +36,11 @@ struct TodayEngine {
     let language: AppLanguage
     let content: ContentProvider
 
-    func scan(containing date: Date) async throws -> [DailySignal] {
+    func scan(
+        containing date: Date,
+        skyLimit: Int = 3,
+        transitLimit: Int = 3
+    ) async throws -> [DailySignal] {
         let interval = localDay(containing: date)
         let samples = try await hourlySamples(interval)
         guard samples.count >= 2 else { return [] }
@@ -51,18 +55,42 @@ struct TodayEngine {
         }
 
         var seen = Set<String>()
-        let selected = candidates
+        let unique = candidates
             .sorted {
                 if $0.priority != $1.priority { return $0.priority > $1.priority }
                 return $0.date < $1.date
             }
             .filter { seen.insert($0.id).inserted }
-            .prefix(5)
+        // Keep public-sky and personal-transit candidates independent. Mixing
+        // them before the priority cut allowed a personal exact transit to
+        // evict every sky row; Today Timeline then (correctly) filtered to sky
+        // and rendered an incorrect empty state.
+        let selected = selectCandidates(
+            unique.filter { $0.source == .sky },
+            limit: skyLimit
+        ) + selectCandidates(
+            unique.filter { $0.source == .transit },
+            limit: transitLimit
+        )
+        let chronological = selected
+            .sorted { $0.date < $1.date }
         var signals: [DailySignal] = []
-        for candidate in selected {
-            signals.append(try makeSignal(try await refined(candidate)))
+        for candidate in chronological {
+            let refinedCandidate = try await refined(candidate)
+            signals.append(
+                try makeSignal(
+                    refinedCandidate,
+                    peakDate: try await peakDate(for: refinedCandidate)
+                )
+            )
         }
         return signals
+    }
+
+    private func selectCandidates(_ candidates: [Candidate], limit: Int) -> [Candidate] {
+        guard limit > 0 else { return [] }
+        let major = candidates.filter { $0.priority >= 90 }
+        return Array((major.isEmpty ? candidates : major).prefix(limit))
     }
 
     private func localDay(containing date: Date) -> DateInterval {
@@ -549,30 +577,45 @@ struct TodayEngine {
         return value
     }
 
-    private func makeSignal(_ candidate: Candidate) throws -> DailySignal {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: language.rawValue)
-        formatter.timeZone = TimeZone(identifier: profile.timezoneID) ?? .current
-        formatter.dateFormat = "HH:mm"
-        let time = formatter.string(from: candidate.date)
+    private func peakDate(for candidate: Candidate) async throws -> Date? {
+        switch candidate.kind {
+        case .exact:
+            return candidate.date
+        case let .enteredOrb(aspect) where candidate.source == .transit:
+            guard let body = CelestialBody(rawValue: aspect.firstID) else { return nil }
+            return try? await calculator.nextTransitNatalExactDate(
+                moving: body,
+                natalReferenceLongitude: aspect.secondLongitude,
+                kind: aspect.kind,
+                after: candidate.date
+            )
+        default:
+            return nil
+        }
+    }
 
+    private func makeSignal(_ candidate: Candidate, peakDate: Date?) throws -> DailySignal {
         let copy: (summary: String, detail: String)
+        let factTitle: String
         switch candidate.kind {
         case let .exact(aspect):
             copy = try content.requiredCopy(
                 key: "today.event.connection.peak",
                 variables: connectionVariables(aspect)
             )
+            factTitle = aspectFactTitle(aspect, source: candidate.source)
         case let .enteredOrb(aspect):
             copy = try content.requiredCopy(
                 key: "today.event.connection.building",
                 variables: connectionVariables(aspect)
             )
+            factTitle = aspectFactTitle(aspect, source: candidate.source)
         case let .leftOrb(aspect):
             copy = try content.requiredCopy(
                 key: "today.event.connection.easing",
                 variables: connectionVariables(aspect)
             )
+            factTitle = aspectFactTitle(aspect, source: candidate.source)
         case let .signIngress(body, sign, _):
             copy = try content.requiredCopy(
                 key: "today.event.style.change",
@@ -581,6 +624,14 @@ struct TodayEngine {
                     "style": ConsumerCopy.style(signIndex: sign, language: language),
                 ]
             )
+            factTitle = localizedTemplate(
+                "today.event-fact.sign-ingress",
+                substitutions: [
+                    "body": bodyName(body, language: language),
+                    "sign": Zodiac.name(index: sign, language: language),
+                ],
+                language: language
+            )
         case let .houseIngress(body, house, _):
             copy = try content.requiredCopy(
                 key: "today.event.area.change",
@@ -588,6 +639,14 @@ struct TodayEngine {
                     "theme": ConsumerCopy.bodyTheme(body, language: language),
                     "area": ConsumerCopy.lifeArea(house, language: language),
                 ]
+            )
+            factTitle = localizedTemplate(
+                "today.event-fact.house-ingress",
+                substitutions: [
+                    "body": bodyName(body, language: language),
+                    "house": ConsumerCopy.lifeArea(house, language: language),
+                ],
+                language: language
             )
         case let .station(body, retrograde):
             copy = try content.requiredCopy(
@@ -598,17 +657,25 @@ struct TodayEngine {
                     "theme": ConsumerCopy.bodyTheme(body, language: language),
                 ]
             )
+            factTitle = localizedTemplate(
+                retrograde
+                    ? "today.event-fact.stations-retrograde"
+                    : "today.event-fact.stations-direct",
+                substitutions: ["body": bodyName(body, language: language)],
+                language: language
+            )
         }
 
         return DailySignal(
             id: candidate.id,
             category: .happeningToday,
             source: candidate.source,
-            title: copy.summary,
-            subtitle: "\(time) · \(copy.detail)",
+            title: factTitle,
+            subtitle: copy.detail,
             tone: candidate.tone,
             strength: candidate.priority,
-            eventDate: candidate.date
+            eventDate: candidate.date,
+            peakDate: peakDate
         )
     }
 
@@ -623,5 +690,27 @@ struct TodayEngine {
                 language: language
             ),
         ]
+    }
+
+    private func aspectFactTitle(_ aspect: ChartAspect, source: DailySignal.Source) -> String {
+        let first = bodyName(
+            CelestialBody(rawValue: aspect.firstID) ?? .sun,
+            language: language
+        )
+        let second = bodyName(
+            CelestialBody(rawValue: aspect.secondID) ?? .moon,
+            language: language
+        )
+        return localizedTemplate(
+            source == .transit
+                ? "today.event-fact.transit-aspect"
+                : "today.event-fact.sky-aspect",
+            substitutions: [
+                "first": first,
+                "aspect": aspectKindName(aspect.kind, language: language),
+                "second": second,
+            ],
+            language: language
+        )
     }
 }

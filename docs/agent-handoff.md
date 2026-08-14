@@ -11,22 +11,22 @@ AIGC:
 
 # Interstellar — 当前交接
 
-> 更新时间：2026-08-13。本文件只记录当前有效状态、验证证据、风险和下一步；历史过程查 Git，不在这里重复。
+> 更新时间：2026-08-14。本文件只记录当前有效状态、验证证据、风险和下一步；历史过程查 Git，不在这里重复。
 
 ## 1. 接手快照
 
 | 项目 | 当前值 |
 |---|---|
-| 分支 | `codex/ios-v6-rebuild` |
-| 当前提交 | 本轮 Pro / Credits / Relay 管理提交，以 Git `HEAD` 为准 |
+| 分支 | `iosv0.1` |
+| 当前提交 | iOS v0.1 GitHub 同步提交，以 Git `HEAD` 为准 |
 | 相对 `origin/dev` | 本轮提交前超前 18、落后 0 |
 | 产品合同 | `docs/ios-v6-rebuild-plan.md` |
 | 卡片合同 | `docs/ios-card-implementation-matrix.md` |
-| iOS 测试设备 | 当前已配对并安装到 HUAWEI Mate XTs ULTIMATE DESIGN（iPhone 17 Pro Max）；iPhone 12 mini 当前未配对；后续不使用模拟器 |
+| iOS 测试设备 | HUAWEI PURA 70（iPhone 12 mini）已连接并安装直装 Release；iPhone 17 Pro Max 当前不可用；后续不使用模拟器 |
 | Relay 权威域名 | `https://aaadmin.xiaoguiwk.top` |
-| 当前生产 Relay | 部署完成后以 `docker inspect interstellar-relay` 为准；上一版为 `interstellar-relay:v6-20260812-testability` |
+| 当前生产 Relay | `interstellar-relay:v6-20260814-app-attest-signature`；production App Attest only，开发绕过已关闭 |
 
-工作区有大量未提交的 iOS、本地化、Relay 和文档改动，属于当前用户任务，不得重置或覆盖。另有与当前任务来源不明的 `vendor/timezone-boundary-builder/timezones-2026b.geojson.zip` 删除，尚未处理。
+本分支已整理并提交当前 iOS、本地化、配套 Relay、部署合同和交接文档。与当前任务来源不明的 `vendor/timezone-boundary-builder/timezones-2026b.geojson.zip` 本地删除未纳入提交，后续仍需单独确认来源。
 
 ## 2. 当前产品与实现状态
 
@@ -51,6 +51,11 @@ AIGC:
 
 ### 本轮 UI 与事实修复
 
+- App Attest 生产链路已整体梳理并修复：兼容 Apple attestation certificate extensions，按 X.509 EKU 验证证书链，正确解析 37-byte authenticator data 与 `0x40` AT flag，并按 Apple 语义验证 assertion ECDSA-SHA256 签名，避免对 nonce 二次哈希。Relay 对客户端只返回通用重试文案，内部日志仅记录脱敏阶段和错误类别。生产 Relay 已部署 `interstellar-relay:v6-20260814-app-attest-signature`，`RELAY_ALLOW_DEV_BYPASS=0`、production environment、development fallback 关闭；iPhone 12 mini 直装 Release 连续请求成功，生产计数器从 2 递增到 5，负向请求确认不会泄露内部错误。Relay race tests、vet、相关 iOS Release 构建及全部仓库门禁通过。
+- App Store Connect 已创建 `Interstellar Astrology`（Bundle ID `com.xiaoguiwk.interstellar`）。Release 1.0（Build 1）已在 2026-08-14 11:30 CST 通过 Xcode 上传并处理完成，已加入仅内部使用的 `Internal Testing` 群组；自动分发关闭，当前 2 名内部测试员、1 个构建版本，未创建外部测试组，未提交 Beta Review 或正式 App Review。Build 2 已包含应用内公开 Terms/Privacy 网页和本地失败兜底，Release 编译及发布门禁通过；归档停在 macOS 钥匙串签名授权，按用户要求等待其回到电脑后处理。
+- Today Timeline 的真机差异已定位并修复：旧 Team 包曾导致 12 mini 未覆盖升级；事件筛选曾把公共天象和个人行运混合裁剪，再由 UI 过滤公共天象，导致 17 Pro Max 错误显示 `No exact event`。现按来源分别保留真实候选，公共天象不再被个人精确行运挤掉，次日回退只精算所需首条；Today 扫描也提前到 90 天行运日历、周预测与全量事件 enrichment 之前发布。KUN WANG Team、正式 App Attest/iCloud entitlements 与 production-only Relay 均已投入验证。
+- Today `Current Chapter / Long Term` 的时间标签已修复：原实现只读取第三个 `nextExact`，会漏掉仍在未来的首次精确或第一次回返，并错误回退为含过去起点的整段范围。现从 `exact / repeatExact / nextExact` 中选择最早的未来时间，区分“精确/再次精确”；所有精确点均已过去时只显示未来结束日期。该卡时间标签与底部周期起止日期均按人物时区显示年份，底部过去起点仅表示周期已开始。
+- Today 按 v6 原型语义补齐 `Coming Next` 回退：当天已无后续重大事件时计算次日首条。Timeline 按人物时区顺序展示当天真实公共天象重大事件，并以“星体 + 相位 / 换座 / 停驻”作为事实标题、审核语料详情作为对应解读。Retrogrades 的下一次顺行站点继续使用 AstroEvents 真实速度过零结果，临近 7 天显示倒计时、较远显示结束日期。同步安装了 Reports 丰富计算参数的四语说明。四语本地化、Copy、卡片与架构门禁、AstroCore 26 项测试、iPhoneOS arm64 warnings-as-errors 构建均通过；最新签名包已覆盖安装并启动到 HUAWEI Mate XTs ULTIMATE DESIGN（iPhone 17 Pro Max），未清理本地数据。HUAWEI PURA 70（iPhone 12 mini）当前为 `unavailable`，本轮未能安装。
 - Today 头部已改为标题、完整日期、姓名与地点三层；长姓名和长地址不再与日期争抢同一行。
 - Profile、其他人物与 Ask 的地点入口统一为 Apple Maps；不再展示或编辑经纬度，地点和时区不能手填，时区随地图结果自动更新并只读显示。
 - Ask 三流程的 Life Areas 默认均为空，改为显式 Primary + Related 多选；未选 Primary 时不能计算，列表提供四语生活场景说明。
@@ -124,6 +129,7 @@ AstroCore Snapshot / Aspect / Event
 
 ## 4. 最新验证证据
 
+- `iosv0.1` 同步前全量门禁通过：iOS 卡片合同、四语 Copy Catalog、固定 UI 本地化、架构、lint、私有内容边界与 `git diff --check`；AstroCore 26 项、ContentKit 6 项及 Relay `go test ./...` 通过；iPhoneOS arm64 Debug 无签名构建以 Swift 6 warnings-as-errors 通过。
 - AstroCore 25 项测试通过，包含有界 Horary Judgment 事件证据、同领域 A/B/C 的 sect-aware triplicity 分配、独立模式重复宫位不误触发，以及原始 Option 身份稳定性。
 - iPhoneOS arm64 Debug 无签名构建通过；四语帮助 Markdown 已进入 App Resources，固定 UI 930 条四语本地化生成与构建期校验通过。
 - iPhoneOS arm64 Debug 真机构建通过，并已覆盖安装、启动到 iPhone 12 mini。
@@ -139,6 +145,7 @@ AstroCore Snapshot / Aspect / Event
 - `npm run lint -- --quiet` 通过。
 - `scripts/check-private-content.sh` 通过。
 - `git diff --check` 通过。
+- Today Long Term 四项专项测试在临时 iPhone 12 mini / iOS 26.5 模拟器通过：未来首次精确、未来第一次回返、最后一次精确已过去、英中日期包含年份；App 与测试目标的 Swift 6 warnings-as-errors 无签名 `build-for-testing` 通过。临时模拟器验证后已删除。
 - Relay `go test ./...`、反馈接口校验和生产健康检查通过。
 - 本轮 Relay `go test ./...` 通过，新增覆盖 ACK 恰好一次、未 ACK 释放、Relay 无缓存/无正文、Credit 原 Grant 恢复、购买交易重放、Annual welcome 幂等、撤销回收和 billing grace。
 - 本轮 iPhoneOS arm64 无签名构建通过（Swift 6 + warnings-as-errors）；Scheme 已识别 `Interstellar.storekit`。首次签名真机构建确认免费 Personal Team 被 iCloud capability 阻断；按用户要求临时置空 entitlement 后，iPhone 12 mini 签名构建、覆盖安装和启动均成功。
@@ -161,7 +168,7 @@ AstroCore Snapshot / Aspect / Event
 - 用户反馈设备信息现读取硬件标识并映射已知机型，例如 `iPhone 12 mini (iPhone13,1)`、`iPhone 17 Pro Max (iPhone18,2)`，同时保留具体系统版本。项目 deployment target 仍为 iOS 17.0，当前支持 iOS 17+，不只支持 iOS 26。
 - 已从提交 `0baacd2` 构建并于 2026-08-13 部署 `linux/amd64` 镜像 `interstellar-relay:v6-20260812-testability`。切换前停止 Relay 写入并备份生产数据库到 `/opt/interstellar/backups/relay-20260813-192548-pre-testability.db`，随后只重建 `interstellar-relay`；Caddy 保持运行，旧 Web/API 容器保持停止且未删除。
 - 部署后 Relay 容器为 healthy，公开 `/v1/health`、`/privacy`、`/terms` 均返回 200；管理端已出现 Reports、Users 与 Credits 测试能力。管理员登录、Users/Reports/Provider 查询、注销及会话撤销均通过，生产现有 Provider 为 1，Users/Reports 暂为空；未携带安装身份的 `/v1/account/sync` 正确返回 401。
-- 本轮没有使用模拟器；当前 DerivedData 保留，用于已连接真机的后续快速覆盖构建。
+- 当前 DerivedData 保留，用于已连接真机的后续快速覆盖构建；本轮仅为 Today Long Term 的确定性单元测试临时创建 iPhone 12 mini 模拟器，测试后删除，不替代真机 UI 验收。
 
 ## 5. 当前未完成事项
 
@@ -178,19 +185,15 @@ AstroCore Snapshot / Aspect / Event
 5. 迁移 Ask / Week 旧私有内容结构，以及天象、本命、日返、次限 Legacy factory。
 6. 验证飞行模式、本地 Artifact 零网络、授权撤回后只读、人物删除清理和损坏文件恢复。
 
-### App Attest 阻断
+### App Attest / iCloud 当前状态
 
-当前没有 Apple Developer Program，开发期保持：
+- Apple Developer Program、KUN WANG Team `KCC8FFFAA5`、正式 entitlements、新 Team 证书与包含两台设备的 Development profile 均已恢复；
+- 生产与 Relay-only Compose 已关闭开发绕过并改为新 App ID；生产 Relay 已部署 production-only 配置；
+- 用户已明确授权卸载旧 Team 包。iPhone 12 mini 当前安装 KUN WANG Team 直装 Release 1.0（设备列表仍显示此前营销版本缓存），production App Attest 已连续成功；
+- TestFlight Build 1 已处理完成并仅向 `Internal Testing` 群组开放。需在 TestFlight 安装包上复验 production App Attest；iCloud 仍需做跨安装保存/恢复人工验收。
 
-- `RELAY_ALLOW_DEV_BYPASS="1"`；
-- Debug 构建发送开发绕过头；
-- 免费 Personal Team 为 `YD3FY9ZB52`，正式 App Attest entitlement 未启用。
+### App Store 外部配置阻断
 
-发布前必须恢复 Apple Developer Program，重新确认届时正式 Team ID，恢复 App Attest entitlement，将 `RELAY_ALLOW_DEV_BYPASS` 改为 `"0"`，再做生产端到端验证。
-
-### iCloud / App Store 外部配置阻断
-
-- 当前免费 Personal Team 无法创建包含 iCloud container 的 provisioning profile；已确认报错来自 iCloud capability，不是 Swift 编译。为先测试其他功能，`Interstellar.entitlements` 已按用户要求临时置空，iCloud 代码仍完整保留并会显示 unavailable。购买/恢复 Apple Developer Program 后，需恢复 iCloud Documents、`iCloud.com.xiaoguiwk.interstellar` 和 ubiquity kv-store entitlements，在 Developer Portal 启用相同能力并重新生成 profile，再做真机备份/恢复验收。
 - App Store Connect 仍需按同一 Product ID 创建 Monthly、Annual、10 Credits 和 20 Credits 商品，配置价格/四语元数据、订阅组、退款/宽限期策略，并把 Server Notifications V2 URL 指向 `https://aaadmin.xiaoguiwk.top/v1/store/notifications`。
 - Relay 数据库迁移与新管理端已部署；后续 StoreKit 真机测试产生用户同步或报告流水后，再从 Users/Reports 核对权威余额、Plan 覆盖、Grant 和 ACK 消费记录。
 
@@ -199,11 +202,11 @@ AstroCore Snapshot / Aspect / Event
 ```text
 提交当前工作区改动
 → 真机 StoreKit、Paywall、Credits 与 Reports ACK 全链路验收，并在 Relay Users/Reports 核对流水
-→ 恢复 Apple Developer Program 并配置 iCloud / App Store Connect 与 Notifications V2
+→ 安装 TestFlight Build 1 并复验 production App Attest / iCloud
+→ 配置 App Store Connect 与 Notifications V2
 → 真机逐屏与 Reports 确认弹窗闭环验收
 → Node policy / Horizon / Classical validator
 → 其余盘型 Legacy 迁移
-→ 恢复生产 App Attest
 → 发布准备
 ```
 

@@ -37,16 +37,17 @@ targets:
       base:
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_ENTITLEMENTS: App/Interstellar.entitlements
-        DEVELOPMENT_TEAM: YD3FY9ZB52
+        DEVELOPMENT_TEAM: KCC8FFFAA5
         PRODUCT_BUNDLE_IDENTIFIER: com.xiaoguiwk.interstellar
         PRODUCT_NAME: Interstellar
-        MARKETING_VERSION: 0.1.0
-        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 1.0
+        CURRENT_PROJECT_VERSION: 2
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Interstellar
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: Interstellar uses your location only when you request it, to calculate local chart angles and houses.
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         TARGETED_DEVICE_FAMILY: "1"
@@ -95,7 +96,7 @@ targets:
     settings:
       base:
         CODE_SIGN_STYLE: Automatic
-        DEVELOPMENT_TEAM: YD3FY9ZB52
+        DEVELOPMENT_TEAM: KCC8FFFAA5
         PRODUCT_BUNDLE_IDENTIFIER: com.xiaoguiwk.interstellar.tests
         GENERATE_INFOPLIST_FILE: YES
   InterstellarUITests:
@@ -108,7 +109,7 @@ targets:
     settings:
       base:
         CODE_SIGN_STYLE: Automatic
-        DEVELOPMENT_TEAM: YD3FY9ZB52
+        DEVELOPMENT_TEAM: KCC8FFFAA5
         PRODUCT_BUNDLE_IDENTIFIER: com.xiaoguiwk.interstellar.uitests
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: Interstellar

@@ -704,6 +704,29 @@ struct DailySignal: Identifiable, Equatable {
     let tone: InsightTone
     let strength: Int
     let eventDate: Date?
+    let peakDate: Date?
+
+    init(
+        id: String,
+        category: Category,
+        source: Source,
+        title: String,
+        subtitle: String,
+        tone: InsightTone,
+        strength: Int,
+        eventDate: Date?,
+        peakDate: Date? = nil
+    ) {
+        self.id = id
+        self.category = category
+        self.source = source
+        self.title = title
+        self.subtitle = subtitle
+        self.tone = tone
+        self.strength = strength
+        self.eventDate = eventDate
+        self.peakDate = peakDate
+    }
 }
 
 enum Zodiac {
