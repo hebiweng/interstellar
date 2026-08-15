@@ -1102,6 +1102,7 @@
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Interstellar uses your location only when you request it, to calculate local chart angles and houses.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INTERSTELLAR_SANDBOX_RELAY_BASE_URL = "http://127.0.0.1:8080";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

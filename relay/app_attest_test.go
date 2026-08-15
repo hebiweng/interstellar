@@ -167,6 +167,26 @@ func TestProductionConfigCanExplicitlyAcceptCryptographicDevelopmentAttestations
 	}
 }
 
+func TestBundleVersionPolicySupportsFutureBuildsWithoutDisablingValidation(t *testing.T) {
+	policy, err := parseBundleVersionPolicy("1+,20-22,7")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, version := range []string{"1", "6", "20", "22"} {
+		if !policy.matches(version) {
+			t.Fatalf("version %s was rejected", version)
+		}
+	}
+	for _, version := range []string{"", "-1", "abc"} {
+		if policy.matches(version) {
+			t.Fatalf("invalid version %q was accepted", version)
+		}
+	}
+	if _, err := parseBundleVersionPolicy("22-20"); err == nil {
+		t.Fatal("reversed bundle version range was accepted")
+	}
+}
+
 func TestAuthenticatorAcceptsLegacyPayloadWithoutValidationExtensions(t *testing.T) {
 	store := openTestStore(t)
 	const appID = "TEAM.example.interstellar"

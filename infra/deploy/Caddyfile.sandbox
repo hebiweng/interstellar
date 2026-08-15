@@ -1,0 +1,4 @@
+{$RELAY_SANDBOX_HOST} {
+  encode gzip zstd
+  reverse_proxy interstellar-relay-sandbox:8080
+}

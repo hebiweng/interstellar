@@ -11,7 +11,7 @@ AIGC:
 
 # Interstellar — 当前交接
 
-> 更新时间：2026-08-14。本文件只记录当前有效状态、验证证据、风险和下一步；历史过程查 Git，不在这里重复。
+> 更新时间：2026-08-15。本文件只记录当前有效状态、验证证据、风险和下一步；历史过程查 Git，不在这里重复。
 
 ## 1. 接手快照
 
@@ -52,6 +52,9 @@ AIGC:
 ### 本轮 UI 与事实修复
 
 - App Attest 生产链路已整体梳理并修复：兼容 Apple attestation certificate extensions，按 X.509 EKU 验证证书链，正确解析 37-byte authenticator data 与 `0x40` AT flag，并按 Apple 语义验证 assertion ECDSA-SHA256 签名，避免对 nonce 二次哈希。Relay 对客户端只返回通用重试文案，内部日志仅记录脱敏阶段和错误类别。生产 Relay 已部署 `interstellar-relay:v6-20260814-app-attest-signature`，`RELAY_ALLOW_DEV_BYPASS=0`、production environment、development fallback 关闭；iPhone 12 mini 直装 Release 连续请求成功，生产计数器从 2 递增到 5，负向请求确认不会泄露内部错误。Relay race tests、vet、相关 iOS Release 构建及全部仓库门禁通过。
+- Commerce 链路本轮完成源码修复：`/v1/store/transactions` 返回的 `CommerceUser` 现在直接更新 iOS 账户并写入可信本地缓存；购买后的二次 sync 仅作 reconciliation，失败不覆盖新余额；启动时即使首次账户 sync 失败仍会重放未完成 StoreKit transaction。Credits authoritative balance 使用 Relay ledger 的 `total`，`monthly_bonus` 归入 Monthly，Bonus/Permanent 分类与扣费优先级一致，旧 free allowance 迁移不会重复计入。
+- App Attest bundle version 改为支持精确值、范围和 `1+` 发布策略；production 与 Relay-only Compose 已从固定 `"1"` 改为 `"1+"`。新增独立 `infra/deploy/compose.relay-sandbox.yaml` / `Caddyfile.sandbox`，Sandbox 使用 development App Attest、独立数据库、独立主机与 HTTPS，且仍关闭开发 bypass。
+- `Interstellar Live Sandbox` 已改为 Debug、不挂本地 StoreKit 配置、使用真实 App Store Connect Sandbox 商品和可覆盖的 `INTERSTELLAR_SANDBOX_RELAY_BASE_URL`；生产 `Interstellar` scheme 仍使用 Release 与 production Relay。尚未在真机 staging Relay 上完成 StoreKit Sandbox 人工验收。
 - App Store Connect 已创建 `Interstellar Astrology`（Bundle ID `com.xiaoguiwk.interstellar`）。Release 1.0（Build 1）已在 2026-08-14 11:30 CST 通过 Xcode 上传并处理完成，已加入仅内部使用的 `Internal Testing` 群组；自动分发关闭，当前 2 名内部测试员、1 个构建版本，未创建外部测试组，未提交 Beta Review 或正式 App Review。Build 2 已包含应用内公开 Terms/Privacy 网页和本地失败兜底，Release 编译及发布门禁通过；归档停在 macOS 钥匙串签名授权，按用户要求等待其回到电脑后处理。
 - Today Timeline 的真机差异已定位并修复：旧 Team 包曾导致 12 mini 未覆盖升级；事件筛选曾把公共天象和个人行运混合裁剪，再由 UI 过滤公共天象，导致 17 Pro Max 错误显示 `No exact event`。现按来源分别保留真实候选，公共天象不再被个人精确行运挤掉，次日回退只精算所需首条；Today 扫描也提前到 90 天行运日历、周预测与全量事件 enrichment 之前发布。KUN WANG Team、正式 App Attest/iCloud entitlements 与 production-only Relay 均已投入验证。
 - Today `Current Chapter / Long Term` 的时间标签已修复：原实现只读取第三个 `nextExact`，会漏掉仍在未来的首次精确或第一次回返，并错误回退为含过去起点的整段范围。现从 `exact / repeatExact / nextExact` 中选择最早的未来时间，区分“精确/再次精确”；所有精确点均已过去时只显示未来结束日期。该卡时间标签与底部周期起止日期均按人物时区显示年份，底部过去起点仅表示周期已开始。
@@ -175,6 +178,7 @@ AstroCore Snapshot / Aspect / Event
 ### 最近完成
 
 1. 生产 Relay 已切换到 `v6-20260812-testability`，数据库备份、容器健康、公网路由、法律页面、Users/Reports/Provider API、管理员登录与会话撤销均已验证；来源不明的 timezone vendor ZIP 删除未纳入本次部署。
+2. Commerce/App Attest 修复已通过相关 Relay 单元测试、`go vet ./...`、iOS card contract、architecture check、私有内容边界检查和 `git diff --check`；完整 iOS 构建仍被既有 `Localizable.xcstrings` stale 门禁阻断，未修改该无关生成文件。
 
 ### 发布前仍需完成
 
@@ -191,6 +195,7 @@ AstroCore Snapshot / Aspect / Event
 - 生产与 Relay-only Compose 已关闭开发绕过并改为新 App ID；生产 Relay 已部署 production-only 配置；
 - 用户已明确授权卸载旧 Team 包。iPhone 12 mini 当前安装 KUN WANG Team 直装 Release 1.0（设备列表仍显示此前营销版本缓存），production App Attest 已连续成功；
 - TestFlight Build 1 已处理完成并仅向 `Internal Testing` 群组开放。需在 TestFlight 安装包上复验 production App Attest；iCloud 仍需做跨安装保存/恢复人工验收。
+- 真机 Commerce Sandbox 尚未完成：需先部署 `compose.relay-sandbox.yaml`，把 staging HTTPS 主机写入 Xcode 的 `INTERSTELLAR_SANDBOX_RELAY_BASE_URL`，再验证 StoreKit 商品、首次购买、Relay 临时失败重试、订阅 allowance、恢复购买和 ledger 幂等。
 
 ### App Store 外部配置阻断
 

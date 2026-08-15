@@ -134,7 +134,7 @@ services:
       RELAY_APP_ATTEST_APP_ID: KCC8FFFAA5.com.xiaoguiwk.interstellar
       RELAY_APP_ATTEST_ENVIRONMENT: production
       RELAY_APP_ATTEST_ALLOW_DEVELOPMENT: "0"
-      RELAY_APP_ATTEST_BUNDLE_VERSION: "1"
+      RELAY_APP_ATTEST_BUNDLE_VERSION: "1+"
       RELAY_HEALTH_URL: http://127.0.0.1:8080/v1/health
     expose:
       - "8080"

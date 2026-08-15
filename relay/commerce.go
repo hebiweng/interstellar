@@ -195,6 +195,12 @@ func refillAllowanceTx(tx *sql.Tx, userID string, now time.Time) (string, error)
 			return "", err
 		}
 	}
+	if legacyFreeExists {
+		if _, err := tx.Exec(`UPDATE credit_grants SET remaining_amount=0
+			WHERE user_id=? AND source='allowance' AND period_key=?`, userID, legacyFreePeriodKey); err != nil {
+			return "", err
+		}
+	}
 
 	if plan == "free" {
 		if _, err := tx.Exec(`UPDATE credit_grants SET remaining_amount=0
@@ -386,7 +392,7 @@ func (s *Store) CreditBalance(userID string) (CreditBalance, error) {
 			return b, err
 		}
 		switch source {
-		case "allowance":
+		case "allowance", "monthly_bonus":
 			b.Allowance += amount
 		case "purchased":
 			b.Purchased += amount
@@ -428,7 +434,7 @@ func (s *Store) ReserveCredit(userID, installationID, requestID, reportID, reque
 		return ReportRequestRecord{}, err
 	}
 	rows, err := tx.Query(`SELECT id,remaining_amount FROM credit_grants WHERE user_id=? AND remaining_amount>0
-		AND (expires_at IS NULL OR expires_at>?) ORDER BY CASE source WHEN 'monthly_bonus' THEN 0 WHEN 'allowance' THEN 1 WHEN 'purchased' THEN 3 ELSE 2 END,
+		AND (expires_at IS NULL OR expires_at>?) ORDER BY CASE source WHEN 'monthly_bonus' THEN 0 WHEN 'allowance' THEN 0 WHEN 'annual_welcome' THEN 1 WHEN 'admin' THEN 1 WHEN 'purchased' THEN 2 ELSE 1 END,
 		CASE WHEN expires_at IS NULL THEN 1 ELSE 0 END, expires_at, granted_at, id`, userID, now.Format(time.RFC3339))
 	if err != nil {
 		return ReportRequestRecord{}, err

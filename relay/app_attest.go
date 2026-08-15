@@ -15,6 +15,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -48,7 +49,7 @@ type appAttestConfig struct {
 	appID            string
 	environment      string
 	allowDevelopment bool
-	bundleVersion    string
+	bundleVersions   bundleVersionPolicy
 	rootPool         *x509.CertPool
 }
 
@@ -59,14 +60,79 @@ func newAppAttestConfig(store *Store, appID, environment, bundleVersion string, 
 	if environment != "development" && environment != "production" {
 		return nil, errors.New("RELAY_APP_ATTEST_ENVIRONMENT must be development or production")
 	}
+	bundleVersions, err := parseBundleVersionPolicy(bundleVersion)
+	if err != nil {
+		return nil, err
+	}
 	pool := x509.NewCertPool()
 	if !pool.AppendCertsFromPEM([]byte(appleAppAttestationRoot)) {
 		return nil, errors.New("could not load Apple App Attestation root")
 	}
 	return &appAttestConfig{
 		store: store, appID: appID, environment: environment, allowDevelopment: allowDevelopment,
-		bundleVersion: bundleVersion, rootPool: pool,
+		bundleVersions: bundleVersions, rootPool: pool,
 	}, nil
+}
+
+type bundleVersionRange struct {
+	minimum uint64
+	maximum uint64
+}
+
+type bundleVersionPolicy []bundleVersionRange
+
+func parseBundleVersionPolicy(raw string) (bundleVersionPolicy, error) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil, nil
+	}
+	var policy bundleVersionPolicy
+	for _, item := range strings.Split(raw, ",") {
+		item = strings.TrimSpace(item)
+		if item == "" {
+			return nil, errors.New("RELAY_APP_ATTEST_BUNDLE_VERSION contains an empty range")
+		}
+		if strings.HasSuffix(item, "+") {
+			minimum, err := strconv.ParseUint(strings.TrimSuffix(item, "+"), 10, 64)
+			if err != nil {
+				return nil, errors.New("RELAY_APP_ATTEST_BUNDLE_VERSION contains an invalid range")
+			}
+			policy = append(policy, bundleVersionRange{minimum: minimum, maximum: ^uint64(0)})
+			continue
+		}
+		if strings.Contains(item, "-") {
+			parts := strings.Split(item, "-")
+			if len(parts) != 2 {
+				return nil, errors.New("RELAY_APP_ATTEST_BUNDLE_VERSION contains an invalid range")
+			}
+			minimum, minErr := strconv.ParseUint(strings.TrimSpace(parts[0]), 10, 64)
+			maximum, maxErr := strconv.ParseUint(strings.TrimSpace(parts[1]), 10, 64)
+			if minErr != nil || maxErr != nil || minimum > maximum {
+				return nil, errors.New("RELAY_APP_ATTEST_BUNDLE_VERSION contains an invalid range")
+			}
+			policy = append(policy, bundleVersionRange{minimum: minimum, maximum: maximum})
+			continue
+		}
+		value, err := strconv.ParseUint(item, 10, 64)
+		if err != nil {
+			return nil, errors.New("RELAY_APP_ATTEST_BUNDLE_VERSION contains an invalid version")
+		}
+		policy = append(policy, bundleVersionRange{minimum: value, maximum: value})
+	}
+	return policy, nil
+}
+
+func (p bundleVersionPolicy) matches(raw string) bool {
+	value, err := strconv.ParseUint(strings.TrimSpace(raw), 10, 64)
+	if err != nil {
+		return false
+	}
+	for _, allowed := range p {
+		if value >= allowed.minimum && value <= allowed.maximum {
+			return true
+		}
+	}
+	return false
 }
 
 type appAttestChallengeRequest struct {
@@ -388,7 +454,7 @@ func (a *appAttestConfig) validateAuthenticator(auth *parsedAuthenticatorData, a
 		return errors.New("development-signed app is not allowed in production")
 	}
 	bundleVersion, ok := auth.Extensions["apple_bundle_version_01"].(string)
-	if !ok || (a.bundleVersion != "" && bundleVersion != a.bundleVersion) {
+	if !ok || (a.bundleVersions != nil && !a.bundleVersions.matches(bundleVersion)) {
 		return errors.New("App Attest bundle version mismatch")
 	}
 	return nil

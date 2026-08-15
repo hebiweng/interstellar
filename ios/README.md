@@ -49,6 +49,21 @@ Before staging or publishing any iOS work, run:
 ../scripts/check-private-content.sh
 ```
 
+## Commerce Sandbox
+
+`Interstellar Live Sandbox` runs the Debug configuration without attaching a
+local StoreKit configuration, uses real App Store Connect Sandbox products,
+uses development App Attest, and never falls back to the production Relay.
+Set `INTERSTELLAR_SANDBOX_RELAY_BASE_URL` to the
+HTTPS hostname of the staging Relay before running on a physical device; the
+default `http://127.0.0.1:8080` is only for a local Relay.
+
+The staging Relay is defined by `../infra/deploy/compose.relay-sandbox.yaml`
+and `../infra/deploy/Caddyfile.sandbox`. It keeps App Attest verification on,
+uses the development App Attest environment, and has a separate database and
+host from production. Production continues to use the `Interstellar` scheme,
+the Release configuration, and the production-only Relay.
+
 Official builds compile chart-specific files under `PrivateContent/` and
 `PrivateRules/` into `PrivateContent-*.json`, `PrivateCorpus-*.json`, and
 `PrivateRules-*.json` runtime resources. All private sources and compiled

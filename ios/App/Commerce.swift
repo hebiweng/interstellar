@@ -13,7 +13,7 @@ struct CommerceAccount: Codable, Sendable {
         let reserved: Int
         let total: Int
 
-        var availableTotal: Int { allowance + bonus + purchased }
+        var availableTotal: Int { total }
     }
     struct LedgerEntry: Codable, Identifiable, Sendable {
         let id: Int64
@@ -75,6 +75,7 @@ final class CommerceStore: ObservableObject {
 
     private init() {
         userID = CommerceIdentity.userID
+        account = CommerceAccountCache.load(userID: userID)
         updatesTask = Task { [weak self] in
             for await result in Transaction.updates {
                 guard case let .verified(transaction) = result else { continue }
@@ -180,8 +181,9 @@ final class CommerceStore: ObservableObject {
             accountRefreshInProgress = false
             isRefreshingAccount = false
         }
-        guard await syncAccount() else { return }
-        if await retryUnfinishedTransactions() {
+        await syncAccount()
+        let deliveredTransaction = await retryUnfinishedTransactions()
+        if deliveredTransaction {
             await syncAccount()
         }
     }
@@ -198,7 +200,7 @@ final class CommerceStore: ObservableObject {
                 countryCode: Locale.current.region?.identifier
             ))
             let response = try await CommerceRelay.post(path: "v1/account/sync", body: data)
-            account = try JSONDecoder().decode(CommerceAccount.self, from: response)
+            applyAccount(try JSONDecoder().decode(CommerceAccount.self, from: response))
             accountSyncFailed = false
             return true
         } catch {
@@ -263,7 +265,8 @@ final class CommerceStore: ObservableObject {
         struct Body: Encodable { let userID: String; let signedTransaction: String }
         do {
             let data = try JSONEncoder().encode(Body(userID: userID.uuidString.lowercased(), signedTransaction: signedTransaction))
-            _ = try await CommerceRelay.post(path: "v1/store/transactions", body: data)
+            let response = try await CommerceRelay.post(path: "v1/store/transactions", body: data)
+            applyAccount(try JSONDecoder().decode(CommerceAccount.self, from: response))
             await transaction.finish()
             purchaseFailed = false
             purchasePendingSync = false
@@ -279,6 +282,12 @@ final class CommerceStore: ObservableObject {
             CommerceDiagnostics.log(error, operation: "submit_transaction")
             return false
         }
+    }
+
+    private func applyAccount(_ value: CommerceAccount) {
+        account = value
+        accountSyncFailed = false
+        CommerceAccountCache.save(value, userID: userID)
     }
 
     private func retryUnfinishedTransactions() async -> Bool {
@@ -312,6 +321,7 @@ final class CommerceStore: ObservableObject {
         ) else { return }
         CommerceIdentity.save(recoveredUserID)
         userID = recoveredUserID
+        account = CommerceAccountCache.load(userID: recoveredUserID)
     }
 }
 
@@ -345,6 +355,22 @@ enum CommerceIdentityRecovery {
         guard wasCreatedThisLaunch, let candidate = transactionUserIDs.first else { return nil }
         guard transactionUserIDs.allSatisfy({ $0 == candidate }) else { return nil }
         return candidate == currentUserID ? nil : candidate
+    }
+}
+
+private enum CommerceAccountCache {
+    private static let keyPrefix = "commerce.account-cache.v1."
+
+    static func load(userID: UUID) -> CommerceAccount? {
+        guard let data = UserDefaults.standard.data(forKey: keyPrefix + userID.uuidString.lowercased()) else {
+            return nil
+        }
+        return try? JSONDecoder().decode(CommerceAccount.self, from: data)
+    }
+
+    static func save(_ account: CommerceAccount, userID: UUID) {
+        guard let data = try? JSONEncoder().encode(account) else { return }
+        UserDefaults.standard.set(data, forKey: keyPrefix + userID.uuidString.lowercased())
     }
 }
 
@@ -386,7 +412,7 @@ private enum PendingReportAcknowledgements {
 
 enum CommerceRelay {
     static func post(path: String, body: Data) async throws -> Data {
-        let baseURL = URL(string: "https://aaadmin.xiaoguiwk.top")!
+        let baseURL = RelayEnvironment.baseURL
         var request = URLRequest(url: baseURL.appendingPathComponent(path))
         request.timeoutInterval = 20
         request.httpMethod = "POST"
@@ -404,6 +430,23 @@ enum CommerceRelay {
             throw CommerceRelayError.httpStatus(response.statusCode, message)
         }
         return response.data
+    }
+}
+
+enum RelayEnvironment {
+    static var baseURL: URL {
+        if let rawValue = ProcessInfo.processInfo.environment["INTERSTELLAR_RELAY_BASE_URL"],
+           let value = URL(string: rawValue),
+           value.scheme != nil,
+           value.host != nil
+        {
+            return value
+        }
+#if DEBUG
+        return URL(string: "http://127.0.0.1:8080")!
+#else
+        return URL(string: "https://aaadmin.xiaoguiwk.top")!
+#endif
     }
 }
 

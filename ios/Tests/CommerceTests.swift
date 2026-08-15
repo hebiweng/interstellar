@@ -9,7 +9,7 @@ final class CommerceTests: XCTestCase {
             bonus: 3,
             purchased: 20,
             reserved: 1,
-            total: 999
+            total: 30
         )
 
         XCTAssertEqual(credits.availableTotal, 30)

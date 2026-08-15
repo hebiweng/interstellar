@@ -55,6 +55,7 @@ targets:
       configs:
         Debug:
           APP_ATTEST_ENVIRONMENT: development
+          INTERSTELLAR_SANDBOX_RELAY_BASE_URL: http://127.0.0.1:8080
         Release:
           APP_ATTEST_ENVIRONMENT: production
     postBuildScripts:
@@ -120,10 +121,12 @@ schemes:
       targets:
         Interstellar: all
     run:
-      config: Release
+      config: Debug
+      environmentVariables:
+        INTERSTELLAR_RELAY_BASE_URL: "$(INTERSTELLAR_SANDBOX_RELAY_BASE_URL)"
     profile:
-      config: Release
+      config: Debug
     analyze:
-      config: Release
+      config: Debug
     archive:
       config: Release

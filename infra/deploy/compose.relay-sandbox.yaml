@@ -1,4 +1,4 @@
-name: interstellar-production
+name: interstellar-sandbox
 
 x-runtime-defaults: &runtime-defaults
   restart: unless-stopped
@@ -7,7 +7,7 @@ x-runtime-defaults: &runtime-defaults
   security_opt:
     - no-new-privileges:true
   networks:
-    - interstellar-internal
+    - interstellar-sandbox
   logging:
     driver: json-file
     options:
@@ -17,19 +17,21 @@ x-runtime-defaults: &runtime-defaults
 services:
   edge:
     <<: *runtime-defaults
-    container_name: interstellar-edge
+    container_name: interstellar-sandbox-edge
     image: caddy:2-alpine@sha256:86deaf5e3d3408a6ccec08fbb79989783dd26e206ae10bcf78a801dc8c9ab794
     depends_on:
-      interstellar-relay:
+      interstellar-relay-sandbox:
         condition: service_healthy
     ports:
       - "80:80"
       - "443:443"
       - "443:443/udp"
+    environment:
+      RELAY_SANDBOX_HOST: ${RELAY_SANDBOX_HOST:?set RELAY_SANDBOX_HOST}
     volumes:
-      - ./Caddyfile.fate:/etc/caddy/Caddyfile:ro
-      - interstellar-caddy-data:/data
-      - interstellar-caddy-config:/config
+      - ./Caddyfile.sandbox:/etc/caddy/Caddyfile:ro
+      - interstellar-sandbox-caddy-data:/data
+      - interstellar-sandbox-caddy-config:/config
     mem_limit: 128m
     pids_limit: 96
     read_only: true
@@ -40,9 +42,9 @@ services:
     cap_add:
       - NET_BIND_SERVICE
 
-  interstellar-relay:
+  interstellar-relay-sandbox:
     <<: *runtime-defaults
-    container_name: interstellar-relay
+    container_name: interstellar-relay-sandbox
     image: interstellar-relay:${INTERSTELLAR_IMAGE_TAG:-latest}
     environment:
       RELAY_ADDR: ":8080"
@@ -53,18 +55,18 @@ services:
       RELAY_PRUNE_OTHER_ADMINS: "1"
       RELAY_SEED_PROMPTS: "1"
       RELAY_SEED_DEEPSEEK: "0"
-      RELAY_ALLOWED_ORIGIN: https://aaadmin.xiaoguiwk.top
+      RELAY_ALLOWED_ORIGIN: https://${RELAY_SANDBOX_HOST:?set RELAY_SANDBOX_HOST}
       RELAY_DAILY_GENERATION_QUOTA: ${RELAY_DAILY_GENERATION_QUOTA:-20}
       RELAY_ALLOW_DEV_BYPASS: "0"
       RELAY_APP_ATTEST_APP_ID: KCC8FFFAA5.com.xiaoguiwk.interstellar
-      RELAY_APP_ATTEST_ENVIRONMENT: production
+      RELAY_APP_ATTEST_ENVIRONMENT: development
       RELAY_APP_ATTEST_ALLOW_DEVELOPMENT: "0"
       RELAY_APP_ATTEST_BUNDLE_VERSION: "1+"
       RELAY_HEALTH_URL: http://127.0.0.1:8080/v1/health
     expose:
       - "8080"
     volumes:
-      - relay-data:/data
+      - relay-sandbox-data:/data
     mem_limit: 192m
     pids_limit: 96
     read_only: true
@@ -80,12 +82,12 @@ services:
       start_period: 5s
 
 networks:
-  interstellar-internal:
-    name: interstellar-internal
+  interstellar-sandbox:
+    name: interstellar-sandbox
     driver: bridge
     attachable: true
 
 volumes:
-  interstellar-caddy-data:
-  interstellar-caddy-config:
-  relay-data:
+  interstellar-sandbox-caddy-data:
+  interstellar-sandbox-caddy-config:
+  relay-sandbox-data:

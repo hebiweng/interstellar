@@ -660,9 +660,7 @@ struct AIGenerationClient: Sendable {
     let baseURL: URL
 
     init(baseURL: URL? = nil) {
-        self.baseURL = baseURL
-            ?? ProcessInfo.processInfo.environment["INTERSTELLAR_RELAY_BASE_URL"].flatMap(URL.init(string:))
-            ?? URL(string: "https://aaadmin.xiaoguiwk.top")!
+        self.baseURL = baseURL ?? RelayEnvironment.baseURL
     }
 
     func generate(_ request: AIGenerateRequest) async throws -> AIGenerateResponse {
