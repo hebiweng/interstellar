@@ -41,7 +41,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.xiaoguiwk.interstellar
         PRODUCT_NAME: Interstellar
         MARKETING_VERSION: 1.0
-        CURRENT_PROJECT_VERSION: 2
+        CURRENT_PROJECT_VERSION: 6
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Interstellar
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
@@ -113,3 +113,17 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.xiaoguiwk.interstellar.uitests
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: Interstellar
+
+schemes:
+  Interstellar Live Sandbox:
+    build:
+      targets:
+        Interstellar: all
+    run:
+      config: Release
+    profile:
+      config: Release
+    analyze:
+      config: Release
+    archive:
+      config: Release

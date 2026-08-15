@@ -48,6 +48,7 @@ final class AppModel: ObservableObject {
     @Published private(set) var transit: ChartSnapshot?
     @Published private(set) var progressed: ChartSnapshot?
     @Published private(set) var solarReturn: ChartSnapshot?
+    @Published private(set) var solarReturnReference: ChartSnapshot?
     @Published private(set) var solarReturnAspects: [ChartAspect] = []
     @Published private(set) var synastry: SynastryComparison?
     @Published var synastryPartnerID: String? {
@@ -94,6 +95,7 @@ final class AppModel: ObservableObject {
     private var todayTransitAspectsForContent: [ChartAspect] = []
     private var refreshRequested = false
     private var refreshInFlight = false
+    private var refreshGeneration: UInt = 0
     private let defaults: UserDefaults
     private var corpusProviders: [AppLanguage: Result<CorpusContentProvider, Error>] = [:]
     private var copyCatalogProviders: [AppLanguage: Result<CopyCatalogProvider, Error>] = [:]
@@ -184,6 +186,8 @@ final class AppModel: ObservableObject {
     }
 
     func savePerson(_ person: SavedPerson) {
+        let previous = savedPeople.first(where: { $0.id == person.id })
+        let refreshesSelectedSynastry = synastryPartnerID == person.id.uuidString
         if let index = savedPeople.firstIndex(where: { $0.id == person.id }) {
             savedPeople[index] = person
         } else {
@@ -198,6 +202,15 @@ final class AppModel: ObservableObject {
         }
         persistPeople()
 		scheduleICloudBackup()
+        if let previous, previous.profile != person.profile {
+            artifactStore.remove(subjectHash: profileHash(previous.profile))
+            reloadSavedReports()
+        }
+        if refreshesSelectedSynastry {
+            synastry = nil
+            isCalculatingSynastry = true
+            Task { await refresh() }
+        }
     }
 
     var chartSubjectProfile: UserProfile {
@@ -277,6 +290,8 @@ final class AppModel: ObservableObject {
     }
 
     func refresh() async {
+        refreshGeneration &+= 1
+        let generation = refreshGeneration
         let refreshStartedAt = Date()
         clearChartFocus()
         guard !refreshInFlight else {
@@ -332,6 +347,24 @@ final class AppModel: ObservableObject {
             let progressedSnapshot = calculation.progressed
             let solarReturnSnapshot = calculation.solarReturn
 
+            guard generation == refreshGeneration else {
+                isCalculating = false
+                isCalculatingSynastry = false
+                isEnriching = false
+                refreshInFlight = false
+                if refreshRequested { await refresh() }
+                return
+            }
+
+            // Every enrichment value below depends on this exact snapshot
+            // generation. Invalidate the previous generation before publishing
+            // the new snapshots so cards can never combine new wheels with old
+            // events or calendars.
+            transitCalendar = []
+            transitContentPlan = nil
+            chartEvents = .empty
+            weeklyForecast = .empty
+
             natal = calculation.natal
             transitReference = calculation.transitReference
             progressedReference = calculation.progressedReference
@@ -339,6 +372,7 @@ final class AppModel: ObservableObject {
             transit = calculation.transit
             progressed = calculation.progressed
             solarReturn = calculation.solarReturn
+            solarReturnReference = calculation.solarReturnReference
             solarReturnAspects = calculation.solarReturnAspects
             synastry = calculation.synastry
             isCalculatingSynastry = false
@@ -436,6 +470,9 @@ final class AppModel: ObservableObject {
                         )
                     }
                 }
+                guard generation == refreshGeneration else {
+                    throw CancellationError()
+                }
                 todaySignals = Array((todayEvents + Array(nextEvents.prefix(1)) + activeSignals).prefix(18))
                 todayDashboardModel = try TodayDashboardFactory.make(
                     contributions: todayContributions,
@@ -465,7 +502,7 @@ final class AppModel: ObservableObject {
                     location: transitLocation.geographicLocation,
                     preset: preset(for: .transit)
                 )
-                transitCalendar = enrichmentService.buildTransitCalendar(
+                let nextTransitCalendar = enrichmentService.buildTransitCalendar(
                     natal: transitReferenceSnapshot,
                     startingAt: transitDate,
                     rangeDays: timelineRangeDays,
@@ -474,7 +511,7 @@ final class AppModel: ObservableObject {
                     samples: transitSamples
                 )
                 logRefreshTiming("transit-calendar-ready", since: refreshStartedAt)
-                weeklyForecast = try await enrichmentService.buildWeeklyForecast(
+                let nextWeeklyForecast = try await enrichmentService.buildWeeklyForecast(
                     calculator: calculator,
                     profile: profile,
                     presets: presets,
@@ -485,7 +522,7 @@ final class AppModel: ObservableObject {
                     startingAt: now
                 )
                 logRefreshTiming("weekly-forecast-ready", since: refreshStartedAt)
-                chartEvents = try await ChartEventBuilder.build(
+                let nextChartEvents = try await ChartEventBuilder.build(
                     calculator: calculator,
                     skyAnchor: skyDate,
                     transitAnchor: transitDate,
@@ -504,15 +541,22 @@ final class AppModel: ObservableObject {
                     progressedAspects: progressedAspects,
                     solarReturnMoment: solarReturnSnapshot.utcDate
                 )
-                transitContentPlan = enrichmentService.makeTransitContentPlan(
+                let nextTransitContentPlan = enrichmentService.makeTransitContentPlan(
                     snapshot: transitMovingSnapshot,
                     natal: transitReferenceSnapshot,
                     aspects: transitAspects,
-                    events: chartEvents,
+                    events: nextChartEvents,
                     timeZone: transitTimeZone,
-                    calendarDays: transitCalendar,
+                    calendarDays: nextTransitCalendar,
                     preset: preset(for: .transit)
                 )
+                guard generation == refreshGeneration else {
+                    throw CancellationError()
+                }
+                transitCalendar = nextTransitCalendar
+                weeklyForecast = nextWeeklyForecast
+                chartEvents = nextChartEvents
+                transitContentPlan = nextTransitContentPlan
                 saveSnapshotCache()
                 logRefreshTiming("chart-events-ready", since: refreshStartedAt)
             } catch {
@@ -555,6 +599,7 @@ final class AppModel: ObservableObject {
         transit = cached.transit
         progressed = cached.progressed
         solarReturn = cached.solarReturn
+        solarReturnReference = cached.solarReturnReference
         solarReturnAspects = cached.solarReturnAspects
         synastry = cached.synastry
         transitAspects = cached.transitAspects
@@ -581,7 +626,8 @@ final class AppModel: ObservableObject {
               let currentSky,
               let transit,
               let progressed,
-              let solarReturn
+              let solarReturn,
+              let solarReturnReference
         else {
             return
         }
@@ -597,6 +643,7 @@ final class AppModel: ObservableObject {
                 transit: transit,
                 progressed: progressed,
                 solarReturn: solarReturn,
+                solarReturnReference: solarReturnReference,
                 solarReturnAspects: solarReturnAspects,
                 synastry: synastry,
                 transitAspects: transitAspects,
@@ -697,7 +744,7 @@ final class AppModel: ObservableObject {
         switch chart {
         case .transit: transitReference
         case .secondary: progressedReference
-        case .solarReturn: natal
+        case .solarReturn: solarReturnReference
         case .synastry: synastry?.second
         case .natal, .currentSky: nil
         }
@@ -722,13 +769,20 @@ final class AppModel: ObservableObject {
                 copyCatalogProviders[language] = catalogResult
             }
             let cardSnapshot = snapshot(for: chart)
-            let cardNatal = chart.isComparison ? referenceSnapshot(for: chart) : natal
+            let cardNatal = chart.usesReferenceWheel ? referenceSnapshot(for: chart) : natal
             let cardAspects = comparisonAspects(for: chart)
             let isFocusedTransit = focusedChart == .transit && chart == .transit
             let cardEvents = focusedChart == chart ? .empty : chartEvents
-            let cardTimeZoneID = chart == .transit
-                ? transitLocationOverride?.timezoneID ?? chartSubjectProfile.timezoneID
-                : chartSubjectProfile.timezoneID
+            let cardTimeZoneID = switch chart {
+            case .currentSky:
+                currentSkyLocationOverride?.timezoneID ?? chartSubjectProfile.timezoneID
+            case .transit:
+                transitLocationOverride?.timezoneID ?? chartSubjectProfile.timezoneID
+            case .solarReturn:
+                solarReturnLocationOverride?.timezoneID ?? chartSubjectProfile.timezoneID
+            case .natal, .secondary, .synastry:
+                chartSubjectProfile.timezoneID
+            }
             let cardTimeZone = TimeZone(identifier: cardTimeZoneID) ?? .current
             let cardTransitCalendar = isFocusedTransit ? [] : transitCalendar
             let plannedTransit = chart == .transit

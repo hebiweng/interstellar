@@ -93,7 +93,13 @@ extension InsightFactory {
             card( id: "upcoming-7-days",
                 title: localized("insight.current-sky.upcoming-7-days", language: language),
                 icon: "▦", visual: .dateEvents,
-                facts: skyUpcomingFacts(events, fallback: top, language: language, timeZone: timeZone),
+                facts: skyUpcomingFacts(
+                    events,
+                    anchor: snapshot.utcDate,
+                    fallback: top,
+                    language: language,
+                    timeZone: timeZone
+                ),
                 language: language
             ),
         ]
@@ -171,13 +177,14 @@ extension InsightFactory {
 
     static func skyUpcomingFacts(
         _ events: ChartEventData,
+        anchor: Date,
         fallback: [ChartAspect],
         language: AppLanguage,
         timeZone: TimeZone
     ) -> [InsightFact] {
         var rows: [(date: Date, title: String, note: String?)] = []
         for ingress in events.skyIngresses {
-            let interval = ingress.date.timeIntervalSinceNow
+            let interval = ingress.date.timeIntervalSince(anchor)
             guard interval >= 0, interval <= 7 * 86_400 else { continue }
             rows.append((
                 ingress.date,
@@ -186,9 +193,22 @@ extension InsightFactory {
             ))
         }
         for exact in events.skyExactEvents {
-            let interval = exact.date.timeIntervalSinceNow
+            let interval = exact.date.timeIntervalSince(anchor)
             guard interval >= 0, interval <= 7 * 86_400 else { continue }
             rows.append((exact.date, skyExactEventTitle(exact, language: language), nil))
+        }
+        for station in events.skyStations {
+            let interval = station.date.timeIntervalSince(anchor)
+            guard interval >= 0, interval <= 7 * 86_400 else { continue }
+            let status = localized(
+                station.retrogradeAfter ? "today.stations-retrograde" : "today.stations-direct",
+                language: language
+            )
+            rows.append((
+                station.date,
+                "\(bodyName(station.body, language: language)) · \(status)",
+                nil
+            ))
         }
         rows.sort { $0.date < $1.date }
         let topRows = rows.prefix(3)

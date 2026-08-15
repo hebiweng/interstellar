@@ -74,9 +74,13 @@ struct ProfileView: View {
                 }
             }
             .sheet(isPresented: $showsCreditActivity) {
-                CreditActivitySheet(entries: commerce.account?.creditLedger ?? [], language: model.language)
+                CreditActivitySheet(
+                    entries: commerce.account?.creditLedger ?? [],
+                    accountUnavailable: commerce.account == nil && commerce.accountSyncFailed,
+                    language: model.language
+                )
             }
-            .task { await commerce.syncAccount() }
+            .task { await commerce.refreshAccount() }
             .onAppear {
                 guard initialSetupRequested else { return }
                 initialSetupRequested = false
@@ -93,9 +97,17 @@ struct ProfileView: View {
                     .font(.title3.weight(.bold))
                     .foregroundStyle(AppTheme.text)
                 Spacer()
-                Button { Task { await commerce.syncAccount() } } label: { Image(systemName: "arrow.clockwise") }
+                Button { Task { await commerce.refreshAccount() } } label: {
+                    if commerce.isRefreshingAccount {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                }
                     .buttonStyle(.plain)
                     .foregroundStyle(AppTheme.violet)
+                    .disabled(commerce.isRefreshingAccount)
                     .accessibilityLabel(localized("commerce.refresh", language: model.language))
                 Text(commerce.planTitle)
                     .font(.caption.weight(.bold))
@@ -104,17 +116,30 @@ struct ProfileView: View {
                     .padding(.vertical, 6)
                     .background((commerce.isPremium ? AppTheme.violet : AppTheme.muted).opacity(0.12), in: Capsule())
             }
-            if let credits = commerce.account?.credits {
-                HStack(spacing: 10) {
-                    creditBucket(value: credits.allowance, label: "credits.monthly")
-                    creditBucket(value: credits.bonus, label: "credits.bonus")
-                    creditBucket(value: credits.purchased, label: "credits.permanent")
-                }
+            HStack(spacing: 10) {
+                creditBucket(value: commerce.account?.credits.allowance, label: "credits.monthly")
+                creditBucket(value: commerce.account?.credits.bonus, label: "credits.bonus")
+                creditBucket(value: commerce.account?.credits.purchased, label: "credits.permanent")
             }
             HStack {
                 Text(localized("credits.total", language: model.language)).font(.caption).foregroundStyle(AppTheme.muted)
                 Spacer()
-                Text(String(commerce.totalCredits)).font(.title2.bold()).foregroundStyle(AppTheme.violet)
+                Text(creditValue(commerce.account?.credits.availableTotal)).font(.title2.bold()).foregroundStyle(AppTheme.violet)
+            }
+            if let reserved = commerce.account?.credits.reserved, reserved > 0 {
+                HStack {
+                    Text(localized("credits.reserved", language: model.language)).font(.caption).foregroundStyle(AppTheme.muted)
+                    Spacer()
+                    Text(String(reserved)).font(.caption.weight(.semibold)).foregroundStyle(AppTheme.text)
+                }
+            }
+            if commerce.account == nil, !commerce.accountSyncFailed {
+                HStack(spacing: 8) {
+                    ProgressView()
+                    Text(localized("commerce.refreshing-account", language: model.language))
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.muted)
+                }
             }
             if let renewal = commerce.account?.creditsRenewAt {
                 HStack {
@@ -165,8 +190,8 @@ struct ProfileView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            if let error = commerce.accountError {
-                Text(error)
+            if commerce.accountSyncFailed {
+                Text(localized("commerce.account-refresh-failed", language: model.language))
                     .font(.caption2)
                     .foregroundStyle(AppTheme.coral)
             }
@@ -174,14 +199,18 @@ struct ProfileView: View {
         .cardSurface()
     }
 
-    private func creditBucket(value: Int, label: String) -> some View {
+    private func creditBucket(value: Int?, label: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(String(value)).font(.title2.bold()).foregroundStyle(AppTheme.text)
+            Text(creditValue(value)).font(.title2.bold()).foregroundStyle(AppTheme.text)
             Text(localized(label, language: model.language)).font(.caption2).foregroundStyle(AppTheme.muted)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
         .background(AppTheme.panelRaised, in: RoundedRectangle(cornerRadius: 14))
+    }
+
+    private func creditValue(_ value: Int?) -> String {
+        value.map(String.init) ?? "—"
     }
 
     private func commerceDate(_ value: String) -> String {
@@ -346,6 +375,7 @@ struct ProfileView: View {
 private struct CreditActivitySheet: View {
     @Environment(\.dismiss) private var dismiss
     let entries: [CommerceAccount.LedgerEntry]
+    let accountUnavailable: Bool
     let language: AppLanguage
 
     var body: some View {
@@ -353,7 +383,12 @@ private struct CreditActivitySheet: View {
             ZStack {
                 ScreenBackground()
                 Group {
-                    if entries.isEmpty {
+                    if accountUnavailable {
+                        ContentUnavailableView(
+                            localized("commerce.account-refresh-failed", language: language),
+                            systemImage: "exclamationmark.triangle"
+                        )
+                    } else if entries.isEmpty {
                         ContentUnavailableView(
                             localized("credits.no-activity", language: language),
                             systemImage: "list.bullet.rectangle"
@@ -410,7 +445,11 @@ private struct CreditActivitySheet: View {
 
     private func activityTitle(_ entry: CommerceAccount.LedgerEntry) -> String {
         switch entry.action {
-        case "ALLOWANCE_RENEW": localized("credits.activity.renew", language: language)
+        case "MONTHLY_BONUS_RENEW": localized("credits.activity.monthly-bonus", language: language)
+        case "PRO_ALLOWANCE_RENEW": localized("credits.activity.pro-renew", language: language)
+        case "ALLOWANCE_RENEW": entry.delta <= 2
+            ? localized("credits.activity.monthly-bonus", language: language)
+            : localized("credits.activity.pro-renew", language: language)
         case "PURCHASE": localized("credits.activity.purchase", language: language)
         case "WELCOME_BONUS": localized("credits.activity.welcome", language: language)
         case "ADMIN_GRANT": localized("credits.activity.grant", language: language)
@@ -429,7 +468,11 @@ private struct CreditActivitySheet: View {
             return reportTitle(scope)
         }
         switch entry.action {
-        case "ALLOWANCE_RENEW": return localized("credits.activity.renew-detail", language: language)
+        case "MONTHLY_BONUS_RENEW": return localized("credits.activity.monthly-bonus-detail", language: language)
+        case "PRO_ALLOWANCE_RENEW": return localized("credits.activity.pro-renew-detail", language: language)
+        case "ALLOWANCE_RENEW": return entry.delta <= 2
+            ? localized("credits.activity.monthly-bonus-detail", language: language)
+            : localized("credits.activity.pro-renew-detail", language: language)
         case "WELCOME_BONUS": return localized("credits.activity.welcome-detail", language: language)
         case "PURCHASE": return localized("credits.activity.purchase-detail", language: language)
         case "ADMIN_GRANT", "ADMIN_DEDUCT", "ADMIN_RESET": return localized("credits.activity.admin-detail", language: language)
@@ -452,7 +495,7 @@ private struct CreditActivitySheet: View {
 
     private func activityIcon(_ action: String) -> String {
         switch action {
-        case "ALLOWANCE_RENEW": "arrow.clockwise"
+        case "ALLOWANCE_RENEW", "MONTHLY_BONUS_RENEW", "PRO_ALLOWANCE_RENEW": "arrow.clockwise"
         case "PURCHASE": "cart.fill"
         case "WELCOME_BONUS": "gift.fill"
         case "ADMIN_GRANT": "plus.circle.fill"
@@ -732,7 +775,13 @@ private struct CommerceSettingsView: View {
         Form {
             Section {
                 LabeledContent(localized("commerce.plan", language: model.language), value: commerce.planTitle)
-                LabeledContent(localized("credits.title", language: model.language), value: String(commerce.totalCredits))
+                LabeledContent(localized("credits.monthly", language: model.language), value: creditValue(commerce.account?.credits.allowance))
+                LabeledContent(localized("credits.bonus", language: model.language), value: creditValue(commerce.account?.credits.bonus))
+                LabeledContent(localized("credits.permanent", language: model.language), value: creditValue(commerce.account?.credits.purchased))
+                LabeledContent(localized("credits.total", language: model.language), value: creditValue(commerce.account?.credits.availableTotal))
+                if let reserved = commerce.account?.credits.reserved, reserved > 0 {
+                    LabeledContent(localized("credits.reserved", language: model.language), value: String(reserved))
+                }
                 if let renewal = commerce.account?.creditsRenewAt {
                     LabeledContent(localized("credits.renews", language: model.language), value: formatted(renewal))
                 }
@@ -750,13 +799,25 @@ private struct CommerceSettingsView: View {
                 }
                 Button(localized("credits.buy", language: model.language)) { commerce.showsCredits = true }
                 Button(localized("premium.restore", language: model.language)) { Task { await commerce.restore() } }
-                Button(localized("commerce.refresh", language: model.language)) { Task { await commerce.syncAccount() } }
+                Button {
+                    Task { await commerce.refreshAccount() }
+                } label: {
+                    if commerce.isRefreshingAccount {
+                        ProgressView()
+                    } else {
+                        Text(localized("commerce.refresh", language: model.language))
+                    }
+                }
+                .disabled(commerce.isRefreshingAccount)
             }
-            if let error = commerce.accountError {
-                Section { Text(error).foregroundStyle(AppTheme.coral) }
+            if commerce.accountSyncFailed {
+                Section {
+                    Text(localized("commerce.account-refresh-failed", language: model.language))
+                        .foregroundStyle(AppTheme.coral)
+                }
             }
         }
-        .task { await commerce.syncAccount() }
+        .task { await commerce.refreshAccount() }
         .settingsDetailStyle(title: localized("commerce.account", language: model.language))
     }
 
@@ -766,6 +827,10 @@ private struct CommerceSettingsView: View {
         formatter.locale = Locale(identifier: model.language.rawValue)
         formatter.dateStyle = .medium
         return formatter.string(from: date)
+    }
+
+    private func creditValue(_ value: Int?) -> String {
+        value.map(String.init) ?? "—"
     }
 }
 
@@ -950,7 +1015,7 @@ private struct AboutSettingsView: View {
 
     var body: some View {
         Form {
-            LabeledContent(localized("profile.version", language: model.language), value: "0.1.0")
+            LabeledContent(localized("profile.version", language: model.language), value: appVersion)
             LabeledContent(localized("profile.calculation", language: model.language), value: "Swiss Ephemeris")
             LabeledContent(localized("profile.editorial-content", language: model.language), value: "© 2026 Interstellar")
             NavigationLink(localized("profile.open-source-licenses", language: model.language)) {
@@ -958,6 +1023,16 @@ private struct AboutSettingsView: View {
             }
         }
         .settingsDetailStyle(title: localized("profile.about", language: model.language))
+    }
+
+    private var appVersion: String {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"
+        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—"
+        #if DEBUG
+            return "\(version) (\(build)) Debug"
+        #else
+            return "\(version) (\(build))"
+        #endif
     }
 }
 

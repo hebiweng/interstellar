@@ -12,14 +12,19 @@ final class VisualRegressionTests: XCTestCase {
 
         XCTAssertTrue(app.tabBars.buttons["Today"].waitForExistence(timeout: 20))
         XCTAssertTrue(app.staticTexts["Current Chapter"].waitForExistence(timeout: 30))
+        XCTAssertEqual(
+            app.staticTexts.matching(NSPredicate(format: "label == %@", "Current Chapter")).count,
+            1,
+            "The section heading should remain, but the duplicate label inside the first card must be removed"
+        )
         XCTAssertTrue(
             app.staticTexts["Calculating locally…"].waitForNonExistence(timeout: 5),
             "The blocking launch calculation state should disappear once the essential snapshots are ready"
         )
         XCTAssertTrue(app.buttons["Reports"].exists)
-        let sky = app.staticTexts["View Current Sky Chart"]
-        scrollTo(sky, in: app)
-        XCTAssertTrue(sky.exists)
+        let upcomingSky = app.staticTexts["Upcoming Sky Events"]
+        scrollTo(upcomingSky, in: app)
+        XCTAssertTrue(upcomingSky.exists)
 
         let chartsTab = app.tabBars.buttons["Charts"]
         chartsTab.tap()
@@ -40,9 +45,15 @@ final class VisualRegressionTests: XCTestCase {
         XCTAssertTrue(people.exists)
 
         app.buttons["Settings"].tap()
+        let appearance = app.buttons["Appearance"]
+        XCTAssertTrue(appearance.waitForExistence(timeout: 5))
+        appearance.tap()
         XCTAssertTrue(app.staticTexts["Text size"].waitForExistence(timeout: 5))
+        app.navigationBars.buttons["Settings"].tap()
+        let support = app.buttons["Support"]
+        XCTAssertTrue(support.waitForExistence(timeout: 5))
+        support.tap()
         let feedback = app.staticTexts["Report or suggest a feature"]
-        scrollTo(feedback, in: app)
         XCTAssertTrue(feedback.exists)
         feedback.tap()
         XCTAssertTrue(app.staticTexts["Feedback type"].waitForExistence(timeout: 5))
@@ -82,13 +93,20 @@ final class VisualRegressionTests: XCTestCase {
         XCTAssertTrue(explore.isHittable)
         explore.tap()
         XCTAssertTrue(app.staticTexts["INTERSTELLAR PRO"].waitForExistence(timeout: 5))
-        app.buttons["Cancel"].tap()
+        let proCancel = app.buttons["Cancel"]
+        XCTAssertTrue(proCancel.isHittable)
+        proCancel.tap()
+        XCTAssertTrue(app.staticTexts["INTERSTELLAR PRO"].waitForNonExistence(timeout: 3))
 
         let buyCredits = app.buttons["Buy Credits"]
         scrollToHittable(buyCredits, in: app)
         XCTAssertTrue(buyCredits.isHittable)
         buyCredits.tap()
         XCTAssertTrue(app.staticTexts["Need more reports?"].waitForExistence(timeout: 5))
+        let creditsCancel = app.buttons["Cancel"]
+        XCTAssertTrue(creditsCancel.isHittable)
+        creditsCancel.tap()
+        XCTAssertTrue(app.staticTexts["Need more reports?"].waitForNonExistence(timeout: 3))
     }
 
     @MainActor

@@ -27,6 +27,10 @@ extension InsightFactory {
         let ascSign = Zodiac.name(index: Int(snapshot.angles.ascendantDegrees / 30) % 12, language: language)
         let ruler = ruler(ofSign: Int(snapshot.angles.ascendantDegrees / 30) % 12)
         let top = Array(snapshot.aspects.prefix(4))
+        var seenAspectIDs = Set<String>()
+        let yearAspects = (aspects + snapshot.aspects)
+            .filter { seenAspectIDs.insert($0.id).inserted }
+            .sorted { $0.strength > $1.strength }
         let houseScores = houseValues(snapshot, natal: nil, aspects: snapshot.aspects)
         let activeHouses = activeHouseFacts(houseScores, language: language)
         let strongestSupport = snapshot.aspects.first { $0.kind.supportive } ?? snapshot.aspects.first
@@ -96,7 +100,7 @@ extension InsightFactory {
             card( id: "year-aspects",
                 title: localized("insight.solar-return.year-aspects", language: language),
                 icon: "⌗", visual: .aspectList,
-                facts: top.map {
+                facts: yearAspects.prefix(5).map {
                     fact(
                         aspectTitle($0, language: language),
                         "\(phaseLabel($0.phase, language: language)) · \(ConsumerCopy.intensity($0.strength, language: language))",

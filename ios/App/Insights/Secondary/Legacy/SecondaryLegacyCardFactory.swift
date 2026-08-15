@@ -206,7 +206,7 @@ extension InsightFactory {
                 )
             }
         }
-        let now = Date()
+        let now = events.secondaryTargetDate ?? Date()
         var rows: [InsightFact] = []
         let moonTitle = localizedTemplate("dynamic.ce5ddbd118", substitutions: ["value1": String(describing: Zodiac.name(index: moon.signIndex, language: language))], language: language)
         rows.append(

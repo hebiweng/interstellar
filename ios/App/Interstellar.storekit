@@ -48,10 +48,10 @@
           "groupNumber" : 1,
           "internalID" : "058B667B-AC05-4E1D-A555-353892824D28",
           "localizations" : [
-            { "description" : "All chart insights, unlimited people and 10 Credits per period.", "displayName" : "Pro Monthly", "locale" : "en_US" },
-            { "description" : "全部星盘解读、不限人物，以及每周期 10 Credits。", "displayName" : "Pro 月度", "locale" : "zh_Hans" },
-            { "description" : "Todos los análisis, personas ilimitadas y 10 Credits por período.", "displayName" : "Pro mensual", "locale" : "es_ES" },
-            { "description" : "Toutes les analyses, profils illimités et 10 Credits par période.", "displayName" : "Pro mensuel", "locale" : "fr_FR" }
+            { "description" : "All chart insights, unlimited people and 10 extra Pro Credits each month, plus 2 free monthly Credits.", "displayName" : "Pro Monthly", "locale" : "en_US" },
+            { "description" : "全部星盘解读、不限人物，并每月额外增加 10 个 Pro Credits，另保留每月 2 个免费 Credits。", "displayName" : "Pro 月度", "locale" : "zh_Hans" },
+            { "description" : "Todos los análisis, personas ilimitadas y 10 Credits Pro extra al mes, además de 2 Credits gratuitos mensuales.", "displayName" : "Pro mensual", "locale" : "es_ES" },
+            { "description" : "Toutes les analyses, profils illimités et 10 Credits Pro supplémentaires par mois, plus 2 Credits gratuits mensuels.", "displayName" : "Pro mensuel", "locale" : "fr_FR" }
           ],
           "productID" : "premium_monthly",
           "recurringSubscriptionPeriod" : "P1M",
@@ -65,10 +65,10 @@
           "groupNumber" : 2,
           "internalID" : "4219A973-4B8B-4167-A3A0-19AC19BF8B44",
           "localizations" : [
-            { "description" : "Annual Pro. First purchase includes 20 bonus Credits valid for 365 days.", "displayName" : "Pro Annual", "locale" : "en_US" },
-            { "description" : "年度 Pro，首次购买赠送 20 Credits，365 天有效。", "displayName" : "Pro 年度", "locale" : "zh_Hans" },
-            { "description" : "Pro anual. La primera compra incluye 20 Credits válidos 365 días.", "displayName" : "Pro anual", "locale" : "es_ES" },
-            { "description" : "Pro annuel. Le premier achat inclut 20 Credits valables 365 jours.", "displayName" : "Pro annuel", "locale" : "fr_FR" }
+            { "description" : "Annual Pro adds 10 extra Pro Credits each month. First purchase also includes 20 bonus Credits valid for 365 days.", "displayName" : "Pro Annual", "locale" : "en_US" },
+            { "description" : "年度 Pro 每月额外增加 10 个 Pro Credits；首次购买另赠 20 Credits，365 天有效。", "displayName" : "Pro 年度", "locale" : "zh_Hans" },
+            { "description" : "Pro anual añade 10 Credits Pro extra al mes. La primera compra también incluye 20 Credits válidos 365 días.", "displayName" : "Pro anual", "locale" : "es_ES" },
+            { "description" : "Pro annuel ajoute 10 Credits Pro supplémentaires par mois. Le premier achat inclut aussi 20 Credits valables 365 jours.", "displayName" : "Pro annuel", "locale" : "fr_FR" }
           ],
           "productID" : "premium_annual",
           "recurringSubscriptionPeriod" : "P1Y",

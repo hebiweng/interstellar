@@ -573,21 +573,27 @@ struct ReportGenerationSheet: View {
                     ReportCreditSummary(language: model.language)
 
                     HStack(spacing: 12) {
-                        Button(localized("reports.edit", language: model.language)) {
+                        Button {
                             onEdit()
+                        } label: {
+                            Text(localized("reports.edit", language: model.language))
+                                .drawerTapTarget(minHeight: 52)
                         }
                         .buttonStyle(.bordered)
                         .tint(AppTheme.muted)
 
-                        Button(commerce.totalCredits > 0
-                               ? localized("reports.generate", language: model.language)
-                               : localized("credits.buy", language: model.language)) {
+                        Button {
                             if commerce.totalCredits > 0 {
                                 onGenerate()
                             } else {
                                 onCancel()
                                 DispatchQueue.main.async { commerce.showsCredits = true }
                             }
+                        } label: {
+                            Text(commerce.totalCredits > 0
+                                 ? localized("reports.generate", language: model.language)
+                                 : localized("credits.buy", language: model.language))
+                                .drawerTapTarget(minHeight: 52)
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(AppTheme.violet)
@@ -717,19 +723,21 @@ private struct PeriodReportGenerationSheet: View {
                     .font(.subheadline)
                     .foregroundStyle(AppTheme.muted)
                 ReportCreditSummary(language: model.language)
-                Button(commerce.totalCredits > 0
-                       ? localized("reports.generate", language: model.language)
-                       : localized("credits.buy", language: model.language)) {
+                Button {
                     if commerce.totalCredits > 0 {
                         onGenerate()
                     } else {
                         onCancel()
                         DispatchQueue.main.async { commerce.showsCredits = true }
                     }
+                } label: {
+                    Text(commerce.totalCredits > 0
+                         ? localized("reports.generate", language: model.language)
+                         : localized("credits.buy", language: model.language))
+                        .drawerTapTarget(minHeight: 54)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(AppTheme.violet)
-                .frame(maxWidth: .infinity)
                 Spacer()
             }
             .padding(18)

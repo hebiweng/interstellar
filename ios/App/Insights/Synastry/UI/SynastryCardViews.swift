@@ -538,15 +538,20 @@ struct SynastryFactDetailSheet: View {
     }
 
     private var doneButton: some View {
-        Button(localized("charts.done", language: language)) { dismiss() }
-            .font(AppTypography.scaled(13, weight: .bold))
-            .foregroundStyle(Color.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 13)
-            .background(
-                LinearGradient(colors: [AppTheme.blue, AppTheme.violet], startPoint: .leading, endPoint: .trailing),
-                in: RoundedRectangle(cornerRadius: 14, style: .continuous)
-            )
+        Button {
+            dismiss()
+        } label: {
+            Text(localized("charts.done", language: language))
+                .font(AppTypography.scaled(13, weight: .bold))
+                .foregroundStyle(Color.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 13)
+                .background(
+                    LinearGradient(colors: [AppTheme.blue, AppTheme.violet], startPoint: .leading, endPoint: .trailing),
+                    in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+                )
+                .drawerTapTarget(minHeight: 52)
+        }
             .buttonStyle(.plain)
     }
 }

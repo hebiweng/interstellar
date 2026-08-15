@@ -554,6 +554,7 @@ private struct PendingGeneration: Identifiable {
                     selection: targetDateBinding(for: .currentSky)
                 )
                 .datePickerStyle(.compact)
+                .environment(\.timeZone, parameterTimeZone(for: .currentSky))
                 locationButton(model.currentSkyLocationOverride?.placeName ?? model.chartSubjectProfile.placeName)
             }
             .cardSurface()
@@ -565,6 +566,7 @@ private struct PendingGeneration: Identifiable {
                     selection: targetDateBinding(for: .transit)
                 )
                 .datePickerStyle(.compact)
+                .environment(\.timeZone, parameterTimeZone(for: .transit))
                 Picker(localized("charts.range", language: model.language), selection: transitRangeBinding) {
                     Text(localized("charts.30-days", language: model.language)).tag(30)
                     Text(localized("charts.7-days", language: model.language)).tag(7)
@@ -608,6 +610,20 @@ private struct PendingGeneration: Identifiable {
                 systemImage: "person.2"
             )
         }
+    }
+
+    private func parameterTimeZone(for chart: ChartKind) -> TimeZone {
+        let identifier = switch chart {
+        case .currentSky:
+            model.currentSkyLocationOverride?.timezoneID ?? model.chartSubjectProfile.timezoneID
+        case .transit:
+            model.transitLocationOverride?.timezoneID ?? model.chartSubjectProfile.timezoneID
+        case .solarReturn:
+            model.solarReturnLocationOverride?.timezoneID ?? model.chartSubjectProfile.timezoneID
+        case .natal, .secondary, .synastry:
+            model.chartSubjectProfile.timezoneID
+        }
+        return TimeZone(identifier: identifier) ?? .current
     }
 
     private func parameterHeader(resetTitle: String) -> some View {
@@ -779,7 +795,7 @@ private struct PendingGeneration: Identifiable {
                 ChartWheelView(
                     snapshot: snapshot,
                     reference: model.referenceSnapshot(for: model.selectedChart),
-                    comparisonAspects: model.selectedChart.isComparison
+                    comparisonAspects: model.selectedChart.usesReferenceWheel
                         ? model.comparisonAspects(for: model.selectedChart)
                         : [],
                     language: model.language
@@ -791,11 +807,11 @@ private struct PendingGeneration: Identifiable {
                 AspectChartView(
                     aspects: model.comparisonAspects(for: model.selectedChart),
                     movingPoints: snapshot.points,
-                    referencePoints: model.selectedChart.isComparison
+                    referencePoints: model.selectedChart.usesReferenceWheel
                         ? model.referenceSnapshot(for: model.selectedChart)?.points ?? []
                         : [],
                     language: model.language,
-                    comparison: model.selectedChart.isComparison
+                    comparison: model.selectedChart.usesReferenceWheel
                 )
             }
         } else if let message = model.errorMessage {
@@ -876,8 +892,12 @@ private struct ReportGeneratingSheet: View {
                     .font(.subheadline).foregroundStyle(AppTheme.muted).multilineTextAlignment(.center)
                 Text(localized("reports.no-regenerate-while-generating", language: language))
                     .font(.caption).foregroundStyle(AppTheme.muted).multilineTextAlignment(.center)
-                Button(localized("common.done", language: language), action: onDone)
-                    .font(.headline).foregroundStyle(Color.white).frame(maxWidth: .infinity, minHeight: 50)
+                Button(action: onDone) {
+                    Text(localized("common.done", language: language))
+                        .font(.headline)
+                        .foregroundStyle(Color.white)
+                        .drawerTapTarget(minHeight: 52)
+                }
                     .background(AppTheme.violet, in: RoundedRectangle(cornerRadius: 16)).buttonStyle(.plain)
             }
             .padding(22)

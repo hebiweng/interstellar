@@ -14,7 +14,7 @@ import (
 
 const (
 	creditReservationTTL = 6 * time.Minute
-	freeAllowance        = 2
+	monthlyBonus         = 2
 	premiumAllowance     = 10
 )
 
@@ -161,28 +161,65 @@ func refillAllowanceTx(tx *sql.Tx, userID string, now time.Time) (string, error)
 	if err != nil {
 		return "", err
 	}
-	amount := freeAllowance
-	periodKey := "free:" + now.Format("2006-01")
-	if plan != "free" {
-		amount = premiumAllowance
-		index := calendarMonthIndex(anchor, now)
-		periodKey = plan + ":" + anchor.Format("2006-01-02") + fmt.Sprintf(":%d", index)
+	stamp := now.Format(time.RFC3339)
+	bonusPeriodKey := "monthly_bonus:" + now.Format("2006-01")
+	legacyFreePeriodKey := "free:" + now.Format("2006-01")
+	bonusRemaining := monthlyBonus
+	var legacyFreeRemaining int
+	legacyFreeExists := tx.QueryRow(`SELECT remaining_amount FROM credit_grants
+		WHERE user_id=? AND source='allowance' AND period_key=?`, userID, legacyFreePeriodKey).
+		Scan(&legacyFreeRemaining) == nil
+	if legacyFreeExists {
+		bonusRemaining = legacyFreeRemaining
+		if bonusRemaining < 0 {
+			bonusRemaining = 0
+		}
+		if bonusRemaining > monthlyBonus {
+			bonusRemaining = monthlyBonus
+		}
 	}
+	if _, err := tx.Exec(`UPDATE credit_grants SET remaining_amount=0
+		WHERE user_id=? AND source='monthly_bonus' AND period_key<>? AND remaining_amount>0`, userID, bonusPeriodKey); err != nil {
+		return "", err
+	}
+	bonusResult, err := tx.Exec(`INSERT INTO credit_grants(user_id,source,original_amount,remaining_amount,granted_at,period_key)
+		VALUES(?, 'monthly_bonus', ?, ?, ?, ?)
+		ON CONFLICT(user_id,source,period_key) DO NOTHING`, userID, monthlyBonus, bonusRemaining, stamp, bonusPeriodKey)
+	if err != nil {
+		return "", err
+	}
+	if inserted, _ := bonusResult.RowsAffected(); inserted == 1 && !legacyFreeExists {
+		if _, err := tx.Exec(`INSERT INTO credit_ledger(user_id,grant_id,action,delta,created_at)
+			SELECT ?,id,'MONTHLY_BONUS_RENEW',?,? FROM credit_grants WHERE user_id=? AND source='monthly_bonus' AND period_key=?`,
+			userID, monthlyBonus, stamp, userID, bonusPeriodKey); err != nil {
+			return "", err
+		}
+	}
+
+	if plan == "free" {
+		if _, err := tx.Exec(`UPDATE credit_grants SET remaining_amount=0
+			WHERE user_id=? AND source='allowance' AND remaining_amount>0`, userID); err != nil {
+			return "", err
+		}
+		return "", nil
+	}
+
+	index := calendarMonthIndex(anchor, now)
+	periodKey := plan + ":" + anchor.Format("2006-01-02") + fmt.Sprintf(":%d", index)
 	if _, err := tx.Exec(`UPDATE credit_grants SET remaining_amount=0
 		WHERE user_id=? AND source='allowance' AND period_key<>? AND remaining_amount>0`, userID, periodKey); err != nil {
 		return "", err
 	}
-	stamp := now.Format(time.RFC3339)
 	result, err := tx.Exec(`INSERT INTO credit_grants(user_id,source,original_amount,remaining_amount,granted_at,period_key)
 		VALUES(?, 'allowance', ?, ?, ?, ?)
-		ON CONFLICT(user_id,source,period_key) DO NOTHING`, userID, amount, amount, stamp, periodKey)
+		ON CONFLICT(user_id,source,period_key) DO NOTHING`, userID, premiumAllowance, premiumAllowance, stamp, periodKey)
 	if err != nil {
 		return "", err
 	}
 	if inserted, _ := result.RowsAffected(); inserted == 1 {
 		if _, err := tx.Exec(`INSERT INTO credit_ledger(user_id,grant_id,action,delta,created_at)
-			SELECT ?,id,'ALLOWANCE_RENEW',?,? FROM credit_grants WHERE user_id=? AND source='allowance' AND period_key=?`,
-			userID, amount, stamp, userID, periodKey); err != nil {
+			SELECT ?,id,'PRO_ALLOWANCE_RENEW',?,? FROM credit_grants WHERE user_id=? AND source='allowance' AND period_key=?`,
+			userID, premiumAllowance, stamp, userID, periodKey); err != nil {
 			return "", err
 		}
 	}
@@ -391,7 +428,7 @@ func (s *Store) ReserveCredit(userID, installationID, requestID, reportID, reque
 		return ReportRequestRecord{}, err
 	}
 	rows, err := tx.Query(`SELECT id,remaining_amount FROM credit_grants WHERE user_id=? AND remaining_amount>0
-		AND (expires_at IS NULL OR expires_at>?) ORDER BY CASE source WHEN 'allowance' THEN 0 WHEN 'purchased' THEN 2 ELSE 1 END,
+		AND (expires_at IS NULL OR expires_at>?) ORDER BY CASE source WHEN 'monthly_bonus' THEN 0 WHEN 'allowance' THEN 1 WHEN 'purchased' THEN 3 ELSE 2 END,
 		CASE WHEN expires_at IS NULL THEN 1 ELSE 0 END, expires_at, granted_at, id`, userID, now.Format(time.RFC3339))
 	if err != nil {
 		return ReportRequestRecord{}, err
@@ -612,7 +649,7 @@ func (s *Store) DeductAdminCredits(userID string, amount int, operator string) e
 	}
 	defer tx.Rollback()
 	rows, err := tx.Query(`SELECT id,remaining_amount FROM credit_grants WHERE user_id=? AND remaining_amount>0 AND (expires_at IS NULL OR expires_at>?)
-		ORDER BY CASE source WHEN 'allowance' THEN 0 WHEN 'annual_welcome' THEN 1 WHEN 'admin' THEN 2 WHEN 'purchased' THEN 3 ELSE 2 END,
+		ORDER BY CASE source WHEN 'monthly_bonus' THEN 0 WHEN 'allowance' THEN 1 WHEN 'annual_welcome' THEN 2 WHEN 'admin' THEN 3 WHEN 'purchased' THEN 4 ELSE 3 END,
 		CASE WHEN expires_at IS NULL THEN 1 ELSE 0 END,expires_at,granted_at,id`, userID, now.Format(time.RFC3339))
 	if err != nil {
 		return err
@@ -738,20 +775,10 @@ func (s *Store) SetAdminPlan(userID, plan string, expiresAt *time.Time, operator
 	if err != nil {
 		return err
 	}
-	allowance := freeAllowance
-	if plan == "premium" {
-		allowance = premiumAllowance
-	} else if plan == "auto" {
-		currentPlan, _, _, entitlementErr := entitlementTx(tx, userID, now)
-		if entitlementErr != nil {
-			return entitlementErr
+	if periodKey != "" {
+		if _, err = tx.Exec(`UPDATE credit_grants SET original_amount=?,remaining_amount=?,granted_at=? WHERE user_id=? AND source='allowance' AND period_key=?`, premiumAllowance, premiumAllowance, now.Format(time.RFC3339), userID, periodKey); err != nil {
+			return err
 		}
-		if currentPlan != "free" {
-			allowance = premiumAllowance
-		}
-	}
-	if _, err = tx.Exec(`UPDATE credit_grants SET original_amount=?,remaining_amount=?,granted_at=? WHERE user_id=? AND source='allowance' AND period_key=?`, allowance, allowance, now.Format(time.RFC3339), userID, periodKey); err != nil {
-		return err
 	}
 	if err = tx.Commit(); err != nil {
 		return err

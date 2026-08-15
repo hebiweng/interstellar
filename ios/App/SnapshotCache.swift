@@ -2,7 +2,7 @@ import AstroCore
 import Foundation
 
 struct SnapshotCachePayload: Codable {
-    static let currentSchemaVersion = 3
+    static let currentSchemaVersion = 4
 
     let schemaVersion: Int
     let configurationFingerprint: String
@@ -14,6 +14,7 @@ struct SnapshotCachePayload: Codable {
     let transit: ChartSnapshot
     let progressed: ChartSnapshot
     let solarReturn: ChartSnapshot
+    let solarReturnReference: ChartSnapshot
     let solarReturnAspects: [ChartAspect]
     let synastry: SynastryComparison?
     let transitAspects: [ChartAspect]

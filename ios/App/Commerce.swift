@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import Security
 import StoreKit
 import SwiftUI
@@ -11,6 +12,8 @@ struct CommerceAccount: Codable, Sendable {
         let purchased: Int
         let reserved: Int
         let total: Int
+
+        var availableTotal: Int { allowance + bonus + purchased }
     }
     struct LedgerEntry: Codable, Identifiable, Sendable {
         let id: Int64
@@ -43,15 +46,20 @@ final class CommerceStore: ObservableObject {
     @Published private(set) var products: [Product] = []
     @Published private(set) var account: CommerceAccount?
     @Published private(set) var isApplePremium = false
-    @Published private(set) var accountError: String?
+    @Published private(set) var accountSyncFailed = false
     @Published private(set) var isLoadingProducts = false
     @Published private(set) var productsUnavailable = false
     @Published private(set) var purchaseFailed = false
+    @Published private(set) var purchasePendingSync = false
+    @Published private(set) var isPurchasing = false
+    @Published private(set) var isRefreshingAccount = false
     @Published var showsPaywall = false
     @Published var showsCredits = false
 
 	@Published private(set) var userID: UUID
     private var updatesTask: Task<Void, Never>?
+    private var accountRefreshInProgress = false
+    private var accountSyncInProgress = false
 
     var isPremium: Bool {
         if account?.adminPlanOverride != nil {
@@ -59,8 +67,11 @@ final class CommerceStore: ObservableObject {
         }
         return isApplePremium || account?.plan == "premium"
     }
-    var totalCredits: Int { account?.credits.total ?? 0 }
-    var planTitle: String { isPremium ? "Pro" : "Free" }
+    var totalCredits: Int { account?.credits.availableTotal ?? 0 }
+    var planTitle: String {
+        guard let account else { return "—" }
+        return account.plan == "premium" ? "Pro" : "Free"
+    }
 
     private init() {
         userID = CommerceIdentity.userID
@@ -75,9 +86,10 @@ final class CommerceStore: ObservableObject {
     deinit { updatesTask?.cancel() }
 
     func start() async {
+        await recoverIdentityFromUnfinishedTransactionsIfNeeded()
         await loadProducts()
         await refreshEntitlements()
-        await syncAccount()
+        await refreshAccount()
         await retryPendingAcknowledgements()
     }
 
@@ -86,11 +98,30 @@ final class CommerceStore: ObservableObject {
         isLoadingProducts = true
         defer { isLoadingProducts = false }
         do {
-            products = try await Product.products(for: [Self.monthlyID, Self.annualID, Self.creditsID, Self.credits20ID])
-            productsUnavailable = products.isEmpty
+            let requestedIDs = [Self.monthlyID, Self.annualID, Self.creditsID, Self.credits20ID]
+            var loaded: [Product] = []
+            for attempt in 0 ..< 3 {
+                loaded = try await Product.products(for: requestedIDs)
+                CommerceDiagnostics.logger.info(
+                    "StoreKit catalog attempt=\(attempt + 1) requested=\(requestedIDs.count) returned=\(loaded.count) ids=\(loaded.map(\.id).sorted().joined(separator: ","), privacy: .public)"
+                )
+                if loaded.count == requestedIDs.count { break }
+                if attempt < 2 {
+                    try await Task.sleep(nanoseconds: UInt64(attempt + 1) * 1_000_000_000)
+                }
+            }
+            products = loaded
+            let returnedIDs = Set(loaded.map(\.id))
+            let missingIDs = requestedIDs.filter { !returnedIDs.contains($0) }
+            productsUnavailable = !missingIDs.isEmpty
+            purchaseFailed = false
+            CommerceDiagnostics.logger.info(
+                "StoreKit catalog completed missing=\(missingIDs.joined(separator: ","), privacy: .public)"
+            )
         } catch {
             products = []
             productsUnavailable = true
+            CommerceDiagnostics.log(error, operation: "load_products")
         }
     }
 
@@ -107,14 +138,28 @@ final class CommerceStore: ObservableObject {
     }
 
     func purchase(_ product: Product) async {
+        guard !isPurchasing else { return }
+        isPurchasing = true
+        defer { isPurchasing = false }
         purchaseFailed = false
+        purchasePendingSync = false
         do {
             let result = try await product.purchase(options: [.appAccountToken(userID)])
-            guard case let .success(verification) = result,
-                  case let .verified(transaction) = verification else { return }
-            await submit(transaction, signedTransaction: verification.jwsRepresentation)
+            switch result {
+            case let .success(verification):
+                guard case let .verified(transaction) = verification else {
+                    purchaseFailed = true
+                    return
+                }
+                await submit(transaction, signedTransaction: verification.jwsRepresentation)
+            case .pending, .userCancelled:
+                return
+            @unknown default:
+                purchaseFailed = true
+            }
         } catch {
             purchaseFailed = true
+            CommerceDiagnostics.log(error, operation: "purchase")
         }
     }
 
@@ -127,7 +172,25 @@ final class CommerceStore: ObservableObject {
         await syncAccount()
     }
 
-    func syncAccount() async {
+    func refreshAccount() async {
+        guard !accountRefreshInProgress else { return }
+        accountRefreshInProgress = true
+        isRefreshingAccount = true
+        defer {
+            accountRefreshInProgress = false
+            isRefreshingAccount = false
+        }
+        guard await syncAccount() else { return }
+        if await retryUnfinishedTransactions() {
+            await syncAccount()
+        }
+    }
+
+    @discardableResult
+    func syncAccount() async -> Bool {
+        guard !accountSyncInProgress else { return false }
+        accountSyncInProgress = true
+        defer { accountSyncInProgress = false }
         struct Body: Encodable { let userID: String; let countryCode: String? }
         do {
             let data = try JSONEncoder().encode(Body(
@@ -136,9 +199,12 @@ final class CommerceStore: ObservableObject {
             ))
             let response = try await CommerceRelay.post(path: "v1/account/sync", body: data)
             account = try JSONDecoder().decode(CommerceAccount.self, from: response)
-            accountError = nil
+            accountSyncFailed = false
+            return true
         } catch {
-            accountError = error.localizedDescription
+            accountSyncFailed = true
+            CommerceDiagnostics.log(error, operation: "sync_account")
+            return false
         }
     }
 
@@ -182,11 +248,17 @@ final class CommerceStore: ObservableObject {
         }
     }
 
-    private func submit(_ transaction: StoreKit.Transaction, signedTransaction: String) async {
-		if let restoredUserID = transaction.appAccountToken, restoredUserID != userID {
-			CommerceIdentity.save(restoredUserID)
-			userID = restoredUserID
-		}
+    @discardableResult
+    private func submit(
+        _ transaction: StoreKit.Transaction,
+        signedTransaction: String,
+        refreshAccountAfterSuccess: Bool = true
+    ) async -> Bool {
+        if let transactionUserID = transaction.appAccountToken, transactionUserID != userID {
+            purchasePendingSync = true
+            CommerceDiagnostics.logger.error("submit_transaction failed reason=app_account_token_mismatch")
+            return false
+        }
         // The server endpoint verifies this signed JWS before changing paid state.
         struct Body: Encodable { let userID: String; let signedTransaction: String }
         do {
@@ -194,29 +266,86 @@ final class CommerceStore: ObservableObject {
             _ = try await CommerceRelay.post(path: "v1/store/transactions", body: data)
             await transaction.finish()
             purchaseFailed = false
+            purchasePendingSync = false
             await refreshEntitlements()
-            await syncAccount()
+            if refreshAccountAfterSuccess {
+                await syncAccount()
+            }
+            return true
         } catch {
-            // Keep the transaction unfinished so StoreKit can redeliver it.
-            purchaseFailed = true
+        // Keep the transaction unfinished so StoreKit can redeliver it on the
+        // next account refresh or app launch without charging the user again.
+            purchasePendingSync = true
+            CommerceDiagnostics.log(error, operation: "submit_transaction")
+            return false
         }
+    }
+
+    private func retryUnfinishedTransactions() async -> Bool {
+        var deliveredTransaction = false
+        for await verification in Transaction.unfinished {
+            guard case let .verified(transaction) = verification else { continue }
+            let delivered = await submit(
+                transaction,
+                signedTransaction: verification.jwsRepresentation,
+                refreshAccountAfterSuccess: false
+            )
+            guard delivered else { break }
+            deliveredTransaction = true
+        }
+        return deliveredTransaction
+    }
+
+    private func recoverIdentityFromUnfinishedTransactionsIfNeeded() async {
+        guard CommerceIdentity.wasCreatedThisLaunch else { return }
+        var transactionUserIDs: [UUID] = []
+        for await verification in Transaction.unfinished {
+            guard case let .verified(transaction) = verification,
+                  let transactionUserID = transaction.appAccountToken
+            else { continue }
+            transactionUserIDs.append(transactionUserID)
+        }
+        guard let recoveredUserID = CommerceIdentityRecovery.recoveredUserID(
+            currentUserID: userID,
+            wasCreatedThisLaunch: true,
+            transactionUserIDs: transactionUserIDs
+        ) else { return }
+        CommerceIdentity.save(recoveredUserID)
+        userID = recoveredUserID
     }
 }
 
 enum CommerceIdentity {
     private static let service = "com.xiaoguiwk.interstellar.commerce"
     private static let account = "anonymous-user-id"
-    static let userID: UUID = {
+    private static let initialState: (userID: UUID, wasCreated: Bool) = {
         if let data = KeychainValue.read(service: service, account: account),
-           let raw = String(data: data, encoding: .utf8), let value = UUID(uuidString: raw) { return value }
+           let raw = String(data: data, encoding: .utf8), let value = UUID(uuidString: raw) {
+            return (value, false)
+        }
         let value = UUID()
         KeychainValue.replace(Data(value.uuidString.lowercased().utf8), service: service, account: account)
-        return value
+        return (value, true)
     }()
+
+    static var userID: UUID { initialState.userID }
+    static var wasCreatedThisLaunch: Bool { initialState.wasCreated }
 	static func save(_ value: UUID) { KeychainValue.replace(Data(value.uuidString.lowercased().utf8), service: service, account: account) }
 #if DEBUG
     static func resetForTesting() { KeychainValue.remove(service: service, account: account) }
 #endif
+}
+
+enum CommerceIdentityRecovery {
+    static func recoveredUserID(
+        currentUserID: UUID,
+        wasCreatedThisLaunch: Bool,
+        transactionUserIDs: [UUID]
+    ) -> UUID? {
+        guard wasCreatedThisLaunch, let candidate = transactionUserIDs.first else { return nil }
+        guard transactionUserIDs.allSatisfy({ $0 == candidate }) else { return nil }
+        return candidate == currentUserID ? nil : candidate
+    }
 }
 
 private struct PendingReportAcknowledgement: Codable, Hashable {
@@ -257,21 +386,35 @@ private enum PendingReportAcknowledgements {
 
 enum CommerceRelay {
     static func post(path: String, body: Data) async throws -> Data {
-        var request = URLRequest(url: URL(string: "https://aaadmin.xiaoguiwk.top")!.appendingPathComponent(path))
+        let baseURL = URL(string: "https://aaadmin.xiaoguiwk.top")!
+        var request = URLRequest(url: baseURL.appendingPathComponent(path))
         request.timeoutInterval = 20
         request.httpMethod = "POST"
         request.httpBody = body
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(InstallationIdentity.value, forHTTPHeaderField: "X-Installation-ID")
-        let headers = try await AppAttestAuthorizer.shared.headers(for: body, baseURL: URL(string: "https://aaadmin.xiaoguiwk.top")!, forceTokenRefresh: false, language: .english)
-        headers.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
-        guard (200..<300).contains(http.statusCode) else {
-            let message = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["error"] as? String
-            throw CommerceRelayError.httpStatus(http.statusCode, message)
+        let response = try await AppAttestAuthorizer.shared.send(
+            request,
+            body: body,
+            baseURL: baseURL,
+            language: .english
+        )
+        guard (200..<300).contains(response.statusCode) else {
+            let message = (try? JSONSerialization.jsonObject(with: response.data) as? [String: Any])?["error"] as? String
+            throw CommerceRelayError.httpStatus(response.statusCode, message)
         }
-        return data
+        return response.data
+    }
+}
+
+private enum CommerceDiagnostics {
+    static let logger = Logger(subsystem: "com.xiaoguiwk.interstellar", category: "Commerce")
+
+    static func log(_ error: Error, operation: String) {
+        let value = error as NSError
+        logger.error(
+            "\(operation, privacy: .public) failed domain=\(value.domain, privacy: .public) code=\(value.code)"
+        )
     }
 }
 
@@ -287,7 +430,6 @@ enum CommerceRelayError: LocalizedError {
 }
 
 struct PremiumPaywallView: View {
-    @Environment(\.dismiss) private var dismiss
     @ObservedObject var commerce = CommerceStore.shared
     let language: AppLanguage
     @State private var selectedProductID = CommerceStore.annualID
@@ -333,7 +475,7 @@ struct PremiumPaywallView: View {
                         benefit("premium.annual-welcome", value: localized("premium.annual-only", language: language), sparkle: true)
                     }
 
-                    Button(purchaseButtonTitle) {
+                    Button {
                         Task {
                             if let product = commerce.products.first(where: { $0.id == selectedProductID }) {
                                 await commerce.purchase(product)
@@ -341,18 +483,27 @@ struct PremiumPaywallView: View {
                                 await commerce.loadProducts()
                             }
                         }
+                    } label: {
+                        Text(purchaseButtonTitle)
+                            .font(.headline)
+                            .foregroundStyle(Color.white)
+                            .drawerTapTarget(minHeight: 52)
                     }
-                    .font(.headline).foregroundStyle(Color.white)
-                    .frame(maxWidth: .infinity, minHeight: 52)
                     .background(AppTheme.violet, in: RoundedRectangle(cornerRadius: 16))
                     .buttonStyle(.plain)
+                    .disabled(commerce.isPurchasing)
 
-                    Button(localized("location.cancel", language: language)) { dismiss() }
-                        .font(.headline).foregroundStyle(AppTheme.text)
-                        .frame(maxWidth: .infinity, minHeight: 48)
-                        .background(AppTheme.panel, in: RoundedRectangle(cornerRadius: 16))
-                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppTheme.line))
-                        .buttonStyle(.plain)
+                    Button {
+                        commerce.showsPaywall = false
+                    } label: {
+                        Text(localized("location.cancel", language: language))
+                            .font(.headline)
+                            .foregroundStyle(AppTheme.text)
+                            .drawerTapTarget(minHeight: 52)
+                    }
+                    .background(AppTheme.panel, in: RoundedRectangle(cornerRadius: 16))
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppTheme.line))
+                    .buttonStyle(.plain)
 
                     Button(localized("premium.restore", language: language)) { Task { await commerce.restore() } }
                         .font(.footnote.weight(.semibold)).frame(maxWidth: .infinity)
@@ -375,6 +526,9 @@ struct PremiumPaywallView: View {
     }
 
     private var purchaseButtonTitle: String {
+        if commerce.isPurchasing {
+            return localized("commerce.processing-purchase", language: language)
+        }
         if commerce.isLoadingProducts {
             return localized("commerce.loading-products", language: language)
         }
@@ -395,6 +549,10 @@ struct PremiumPaywallView: View {
             }
             .font(.footnote)
             .foregroundStyle(AppTheme.muted)
+        } else if commerce.purchasePendingSync {
+            Text(localized("commerce.purchase-pending-sync", language: language))
+                .font(.footnote)
+                .foregroundStyle(AppTheme.violet)
         } else if commerce.productsUnavailable {
             Text(localized("commerce.products-unavailable", language: language))
                 .font(.footnote)
@@ -448,7 +606,6 @@ struct PremiumPaywallView: View {
 }
 
 struct CreditsPurchaseView: View {
-    @Environment(\.dismiss) private var dismiss
     @ObservedObject var commerce = CommerceStore.shared
     let language: AppLanguage
     var body: some View {
@@ -461,9 +618,17 @@ struct CreditsPurchaseView: View {
                 creditPurchaseButton(id: CommerceStore.credits20ID, amount: 20, fallbackPrice: "$2.99")
                 productAvailability
                 Text(localized("credits.never-expire", language: language)).font(.footnote).foregroundStyle(AppTheme.muted)
-                Button(localized("location.cancel", language: language)) { dismiss() }
-                    .font(.headline).foregroundStyle(AppTheme.text).frame(maxWidth: .infinity, minHeight: 48)
-                    .background(AppTheme.panel, in: RoundedRectangle(cornerRadius: 16)).overlay(RoundedRectangle(cornerRadius: 16).stroke(AppTheme.line)).buttonStyle(.plain)
+                Button {
+                    commerce.showsCredits = false
+                } label: {
+                    Text(localized("location.cancel", language: language))
+                        .font(.headline)
+                        .foregroundStyle(AppTheme.text)
+                        .drawerTapTarget(minHeight: 52)
+                }
+                .background(AppTheme.panel, in: RoundedRectangle(cornerRadius: 16))
+                .overlay(RoundedRectangle(cornerRadius: 16).stroke(AppTheme.line))
+                .buttonStyle(.plain)
             }.padding(20).background(ScreenBackground())
         }
         .presentationDetents([.medium, .large])
@@ -497,19 +662,32 @@ struct CreditsPurchaseView: View {
             .padding(17)
             .background(AppTheme.panel, in: RoundedRectangle(cornerRadius: 18))
             .overlay(RoundedRectangle(cornerRadius: 18).stroke(AppTheme.line))
+            .drawerTapTarget(minHeight: 54)
         }
         .buttonStyle(.plain)
+        .disabled(commerce.isPurchasing)
     }
 
     @ViewBuilder
     private var productAvailability: some View {
-        if commerce.isLoadingProducts {
+        if commerce.isPurchasing {
+            HStack(spacing: 8) {
+                ProgressView()
+                Text(localized("commerce.processing-purchase", language: language))
+            }
+            .font(.footnote)
+            .foregroundStyle(AppTheme.muted)
+        } else if commerce.isLoadingProducts {
             HStack(spacing: 8) {
                 ProgressView()
                 Text(localized("commerce.loading-products", language: language))
             }
             .font(.footnote)
             .foregroundStyle(AppTheme.muted)
+        } else if commerce.purchasePendingSync {
+            Text(localized("commerce.purchase-pending-sync", language: language))
+                .font(.footnote)
+                .foregroundStyle(AppTheme.violet)
         } else if commerce.productsUnavailable {
             Text(localized("commerce.products-unavailable", language: language))
                 .font(.footnote)

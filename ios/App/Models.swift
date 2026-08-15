@@ -155,6 +155,13 @@ enum ChartKind: String, CaseIterable, Identifiable, Codable {
 
     var isComparison: Bool { self == .transit || self == .secondary || self == .synastry }
 
+    /// Charts whose wheel and aspect matrix use a second, receiving chart.
+    /// Solar returns are not relationship comparisons, but their wheel is a
+    /// return-to-natal double wheel and therefore shares this rendering shape.
+    var usesReferenceWheel: Bool {
+        self == .transit || self == .secondary || self == .solarReturn || self == .synastry
+    }
+
     var contentPrefix: String {
         switch self {
         case .natal: "natal"

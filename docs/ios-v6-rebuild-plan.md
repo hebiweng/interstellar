@@ -95,7 +95,7 @@ Ask 的 Judgment 与 Support 必须分离。Judgment 消费真实 direct perfect
 - Free 完整开放 Today、本命、天象、Ask、Chart Wheel、Aspects、日期、地点、范围与其他参数；Special 仅兼容历史数据，不向消费者提供选择；
 - Free 在行运、合盘、日返、次限只开放第 1 张 Interpretation Card，第 2 张起使用不泄露正文的锁定卡触发 contextual Paywall；Free 允许本人加 2 位其他人物，新增第 3 位时触发 Paywall；
 - Free 进入上述 Premium 盘时必须在首屏明确显示“第 1 张免费预览、其余需 Premium”，不能只在滚动到第 2 张卡后才看到付费提示；
-- Free 每个 UTC 自然月 refill allowance 到 2；Premium 按订阅锚点的每个月 refill 到 10，均为替换而非累加；Annual 首次购买一次性发放 20 Bonus Credits、1 年过期，续订、恢复与交易重放不得重复；
+- 所有账户每个 UTC 自然月获得 2 个免费 Credits；Pro 在保留这 2 个免费 Credits 的基础上，按订阅锚点每月额外获得 10 个 Pro Credits，两类月度额度均为替换而非累加；Annual 首次购买一次性发放 20 Bonus Credits、1 年过期，续订、恢复与交易重放不得重复；
 - Credit 消耗顺序固定为 allowance → 有期限的 bonus/admin → purchased；购买的 Credits 永不过期。Relay 是余额、预留、消费、释放与 Ledger 的唯一权威；
 - 匿名 `userID` 由首次启动生成并保存到 Keychain，与 installation ID 分离；Profile 底部以小字展示可复制 User ID，StoreKit 使用 `appAccountToken=userID`，恢复购买只允许经 Apple 签名交易把新安装重新关联到原 UUID；
 - iCloud 备份由用户设置控制，只写用户私人 ubiquity container，包含 Profile、其他人物、语言/外观/字号/预设、六盘报告和周期报告；Relay 不参与跨设备报告存储；

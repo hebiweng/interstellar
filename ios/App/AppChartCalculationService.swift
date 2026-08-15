@@ -39,6 +39,7 @@ struct AppChartCalculationResult {
     let transit: ChartSnapshot
     let progressed: ChartSnapshot
     let solarReturn: ChartSnapshot
+    let solarReturnReference: ChartSnapshot
     let solarReturnAspects: [ChartAspect]
     let synastry: SynastryComparison?
     let transitAspects: [ChartAspect]
@@ -90,6 +91,9 @@ final class AppChartCalculationService {
         let progressedReference = request.preset(for: .secondary) == request.preset(for: .natal)
             ? natal
             : try await calculator.calculateSnapshot(natalInput, preset: request.preset(for: .secondary))
+        let solarReturnReference = request.preset(for: .solarReturn) == request.preset(for: .natal)
+            ? natal
+            : try await calculator.calculateSnapshot(natalInput, preset: request.preset(for: .solarReturn))
         let currentSky = try await calculator.calculateSnapshot(
             NatalInput(utcDate: skyDate, location: skyLocation.geographicLocation),
             preset: request.preset(for: .currentSky)
@@ -117,7 +121,7 @@ final class AppChartCalculationService {
         )
         let solarReturnAspects = SwissEphemerisCalculator.solarReturnNatalAspects(
             solarReturn: solarReturn,
-            natal: natal
+            natal: solarReturnReference
         )
         let synastry: SynastryComparison?
         if let partner = request.synastryPartnerProfile {
@@ -213,6 +217,7 @@ final class AppChartCalculationService {
             transit: transit,
             progressed: progressed,
             solarReturn: solarReturn,
+            solarReturnReference: solarReturnReference,
             solarReturnAspects: solarReturnAspects,
             synastry: synastry,
             transitAspects: transitAspects,

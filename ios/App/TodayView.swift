@@ -120,7 +120,7 @@ struct TodayView: View {
                 model.selectChart(.transit)
             }
             chapterHero
-            VStack(spacing: 9) {
+            VStack(spacing: 12) {
                 if let signal = activeTodaySignal {
                     transitRow(signal, kind: .active)
                 }
@@ -166,22 +166,19 @@ struct TodayView: View {
         let summaryText = copy?.body
             ?? localized("today.the-required-reviewed-content-is-missing", language: model.language)
         return VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .center, spacing: 12) {
-                Text(localized("today.current-chapter.cf27f20", language: model.language))
-                    .font(AppTypography.scaled(11, weight: .bold))
-                    .tracking(1.5)
-                    .foregroundStyle(AppTheme.violet)
-                Spacer(minLength: 8)
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Text(title)
+                    .font(AppTypography.scaled(22, weight: .bold))
+                    .kerning(-0.5)
+                    .foregroundStyle(AppTheme.text)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+                    .allowsTightening(true)
+                    .layoutPriority(1)
+                Spacer(minLength: 0)
                 InsightBadge(text: localized("insight.shared.long-term", language: model.language), tone: .purple)
+                    .fixedSize(horizontal: true, vertical: false)
             }
-            Text(title)
-                .font(AppTypography.scaled(24, weight: .bold))
-                .kerning(-0.6)
-                .lineSpacing(2)
-                .foregroundStyle(AppTheme.text)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 7)
             Text(summaryText)
                 .font(AppTypography.scaled(12))
                 .lineSpacing(3)
@@ -278,9 +275,9 @@ struct TodayView: View {
         } label: {
             HStack(alignment: .top, spacing: 12) {
             Text(signal.source.symbol)
-                .font(AppTypography.scaled(20, weight: .semibold))
+                .font(AppTypography.scaled(18, weight: .semibold))
                 .foregroundStyle(AppTheme.violet)
-                .frame(width: 42, height: 42)
+                .frame(width: 38, height: 38)
                 .background(AppTheme.violet.opacity(0.1), in: RoundedRectangle(cornerRadius: 13))
                 .overlay(RoundedRectangle(cornerRadius: 13).stroke(AppTheme.violet.opacity(0.2), lineWidth: 1))
             VStack(alignment: .leading, spacing: 0) {
@@ -302,7 +299,7 @@ struct TodayView: View {
                         TagChip(text: text, tone: .transition)
                     }
                 }
-                .padding(.top, 12)
+                .padding(.top, 8)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             Text("›")
@@ -313,7 +310,8 @@ struct TodayView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .padding(14)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
         .cardSurface()
     }
 
@@ -551,7 +549,7 @@ struct TodayView: View {
     private var upcomingSection: some View {
         VStack(alignment: .leading, spacing: 0) {
             sectionHead(localized("today.upcoming-sky-events", language: model.language), sub: localized("today.next-7-days", language: model.language))
-            VStack(spacing: 9) {
+            VStack(spacing: 12) {
                 if let interpretation = model.todayCardText("upcoming-sky-events")?.body {
                     Text(interpretation)
                         .font(AppTypography.scaled(11))
@@ -566,26 +564,27 @@ struct TodayView: View {
                         model.selectChart(.currentSky)
                         model.setTargetDate(event.date, for: .currentSky)
                     } label: {
-                        HStack(spacing: 12) {
+                        HStack(spacing: 10) {
                             VStack(spacing: 0) {
                                 Text(monthAbbreviation(event.date)).font(AppTypography.scaled(9, weight: .semibold)).foregroundStyle(AppTheme.muted)
                                 Text(dayNumber(event.date)).font(AppTypography.scaled(16, weight: .bold).monospacedDigit()).foregroundStyle(AppTheme.text)
                             }
                             .frame(width: 40)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(event.title)
-                                    .font(AppTypography.scaled(13, weight: .semibold))
-                                    .foregroundStyle(AppTheme.text)
-                                Text(event.subtitle)
-                                    .font(AppTypography.scaled(11))
-                                    .foregroundStyle(AppTheme.muted)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption.weight(.bold))
+                            Text(event.title)
+                                .font(AppTypography.scaled(12.5, weight: .semibold))
+                                .foregroundStyle(AppTheme.text)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.82)
+                                .layoutPriority(1)
+                            Spacer(minLength: 4)
+                            Text(event.subtitle)
+                                .font(AppTypography.scaled(10))
                                 .foregroundStyle(AppTheme.muted)
+                                .lineLimit(1)
+                                .fixedSize(horizontal: true, vertical: false)
                         }
-                        .padding(13)
+                        .padding(.horizontal, 13)
+                        .padding(.vertical, 9)
                         .cardSurface()
                     }
                     .buttonStyle(.plain)

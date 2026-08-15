@@ -16,7 +16,7 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if onboardingCompleted {
+            if onboardingCompleted || bypassesOnboardingForUITests {
                 TabView(selection: $selection) {
                     TodayView(selectedTab: $selection)
                         .tag(RootTab.today)
@@ -69,6 +69,14 @@ struct RootView: View {
         }
 		.sheet(isPresented: $commerce.showsPaywall) { PremiumPaywallView(language: model.language) }
 		.sheet(isPresented: $commerce.showsCredits) { CreditsPurchaseView(language: model.language) }
+    }
+
+    private var bypassesOnboardingForUITests: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.environment["INTERSTELLAR_UI_TEST_LANGUAGE"] != nil
+        #else
+        false
+        #endif
     }
 }
 

@@ -129,4 +129,12 @@ extension View {
     func cardSurface() -> some View {
         modifier(CardSurface())
     }
+
+    /// Makes custom bottom-sheet actions respond across their full visual
+    /// surface. Without an explicit content shape, plain buttons inside a
+    /// ScrollView can leave only the text itself reliably tappable.
+    func drawerTapTarget(minHeight: CGFloat = 48) -> some View {
+        frame(maxWidth: .infinity, minHeight: minHeight)
+            .contentShape(Rectangle())
+    }
 }

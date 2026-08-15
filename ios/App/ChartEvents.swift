@@ -11,6 +11,7 @@ struct ChartEventData: Equatable, Codable {
     var transitPlanetEvents: [TransitPlanetEvent] = []
     var progressedMoon: ProgressedMoonWindow?
     var progressedTurningPoints: [ProgressedTurningPoint] = []
+    var secondaryTargetDate: Date?
     var solarSeasons: [SolarSeason] = []
     var solarYearStart: Date?
 
@@ -139,6 +140,7 @@ enum ChartEventBuilder {
         solarReturnMoment: Date?
     ) async throws -> ChartEventData {
         var data = ChartEventData()
+        data.secondaryTargetDate = secondaryTargetDate
 
         // 1. Sky sign changes: next ingresses of the fast-moving bodies,
         //    keeping at most two Moon rows so the card stays varied.
@@ -309,10 +311,24 @@ enum ChartEventBuilder {
                signLabel: ""
            )
         {
+            let enteredProgressedDate = progressedSnapshot.utcDate.addingTimeInterval(
+                -window.daysInSign * 86_400
+            )
+            let enteredTargetDate = SwissEphemerisCalculator.secondaryTargetDate(
+                birthDate: birthDate,
+                progressedDate: enteredProgressedDate
+            )
+            let nextIngressTargetDate = SwissEphemerisCalculator.secondaryTargetDate(
+                birthDate: birthDate,
+                progressedDate: window.ingressDate
+            )
             data.progressedMoon = ChartEventData.ProgressedMoonWindow(
                 signIndex: moon.signIndex,
-                daysInSign: Int(window.daysInSign.rounded()),
-                nextIngress: window.ingressDate
+                daysInSign: max(
+                    0,
+                    Int(secondaryTargetDate.timeIntervalSince(enteredTargetDate) / 86_400)
+                ),
+                nextIngress: nextIngressTargetDate
             )
         }
 

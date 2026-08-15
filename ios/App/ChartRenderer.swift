@@ -1,6 +1,25 @@
 import AstroCore
 import SwiftUI
 
+enum AstrologyWheelGeometry {
+    /// ASC is fixed at the left edge. Increasing zodiac longitude proceeds
+    /// from ASC toward the lower half of the screen, matching the conventional
+    /// counter-clockwise house order in a screen coordinate system (positive Y
+    /// points downward).
+    static func point(
+        center: CGPoint,
+        radius: Double,
+        longitude: Double,
+        ascendantRotation: Double
+    ) -> CGPoint {
+        let angle = (180 - (longitude - ascendantRotation)) * .pi / 180
+        return CGPoint(
+            x: center.x + cos(angle) * radius,
+            y: center.y + sin(angle) * radius
+        )
+    }
+}
+
 struct ChartWheelView: View {
     let snapshot: ChartSnapshot
     let reference: ChartSnapshot?
@@ -508,10 +527,11 @@ struct ChartWheelView: View {
     }
 
     private func point(center: CGPoint, radius: Double, longitude: Double, rotation: Double) -> CGPoint {
-        let angle = (longitude - rotation + 180) * .pi / 180
-        return CGPoint(
-            x: center.x + cos(angle) * radius,
-            y: center.y + sin(angle) * radius
+        AstrologyWheelGeometry.point(
+            center: center,
+            radius: radius,
+            longitude: longitude,
+            ascendantRotation: rotation
         )
     }
 }

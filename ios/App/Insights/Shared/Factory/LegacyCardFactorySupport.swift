@@ -72,7 +72,7 @@ extension InsightFactory {
         var scores: [String: Double] = [:]
         for aspect in aspects {
             scores[aspect.firstID, default: 0] += aspect.strength
-            scores[aspect.secondID, default: 0] += aspect.strength * 0.6
+            scores[aspect.secondID, default: 0] += aspect.strength
         }
         let names = scores
             .sorted { $0.value > $1.value }
@@ -197,9 +197,15 @@ extension InsightFactory {
             values[index] += point.retrograde ? 0.75 : 0.5
         }
         for aspect in aspects {
-            let house = natal?.house(containing: aspect.firstLongitude) ?? snapshot.house(containing: aspect.firstLongitude)
-            let index = max(0, min(11, house - 1))
-            values[index] += max(0.1, aspect.strength)
+            let firstHouse = natal?.house(containing: aspect.firstLongitude)
+                ?? snapshot.house(containing: aspect.firstLongitude)
+            let firstIndex = max(0, min(11, firstHouse - 1))
+            values[firstIndex] += max(0.1, aspect.strength)
+            if natal == nil {
+                let secondHouse = snapshot.house(containing: aspect.secondLongitude)
+                let secondIndex = max(0, min(11, secondHouse - 1))
+                values[secondIndex] += max(0.1, aspect.strength)
+            }
         }
         guard let maximum = values.max(), maximum > 0 else { return values }
         return values.map { $0 / maximum }

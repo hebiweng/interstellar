@@ -458,6 +458,15 @@ public actor SwissEphemerisCalculator {
         return birthDate.addingTimeInterval(years * 86_400)
     }
 
+    /// Maps a date on the secondary-progression ephemeris axis back to the
+    /// corresponding real-world target date (one ephemeris day per tropical
+    /// year). UI and event models must use this inverse before presenting a
+    /// progressed ingress date to the user.
+    public nonisolated static func secondaryTargetDate(birthDate: Date, progressedDate: Date) -> Date {
+        let progressedDays = max(0, progressedDate.timeIntervalSince(birthDate) / 86_400)
+        return birthDate.addingTimeInterval(progressedDays * 365.2425 * 86_400)
+    }
+
     private func validate(_ location: GeographicLocation) throws {
         guard (-90 ... 90).contains(location.latitudeDegrees) else {
             throw AstroCoreError.invalidLatitude(location.latitudeDegrees)

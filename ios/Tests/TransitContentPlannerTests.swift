@@ -1,4 +1,5 @@
 import AstroCore
+import CoreGraphics
 import XCTest
 @testable import Interstellar
 
@@ -1540,5 +1541,41 @@ final class TransitContentPlannerTests: XCTestCase {
             },
             timeZoneIdentifier: value.timeZoneIdentifier
         )
+    }
+}
+
+final class ChartWheelGeometryTests: XCTestCase {
+    func testAscendantAndDescendantStayOnHorizontalAxis() {
+        let center = CGPoint(x: 100, y: 100)
+        let ascendant = AstrologyWheelGeometry.point(
+            center: center,
+            radius: 80,
+            longitude: 42,
+            ascendantRotation: 42
+        )
+        let descendant = AstrologyWheelGeometry.point(
+            center: center,
+            radius: 80,
+            longitude: 222,
+            ascendantRotation: 42
+        )
+
+        XCTAssertEqual(ascendant.x, 20, accuracy: 0.0001)
+        XCTAssertEqual(ascendant.y, 100, accuracy: 0.0001)
+        XCTAssertEqual(descendant.x, 180, accuracy: 0.0001)
+        XCTAssertEqual(descendant.y, 100, accuracy: 0.0001)
+    }
+
+    func testIncreasingLongitudeMovesBelowAscendant() {
+        let center = CGPoint(x: 100, y: 100)
+        let point = AstrologyWheelGeometry.point(
+            center: center,
+            radius: 80,
+            longitude: 132,
+            ascendantRotation: 42
+        )
+
+        XCTAssertEqual(point.x, 100, accuracy: 0.0001)
+        XCTAssertEqual(point.y, 180, accuracy: 0.0001)
     }
 }

@@ -66,6 +66,11 @@ struct AstroCoreTests {
         )
 
         #expect(abs(progressed.timeIntervalSince(birth) - 30 * 86_400) < 0.001)
+        let mappedTarget = SwissEphemerisCalculator.secondaryTargetDate(
+            birthDate: birth,
+            progressedDate: progressed
+        )
+        #expect(abs(mappedTarget.timeIntervalSince(target)) < 0.001)
     }
 
     @Test("Cross-chart comparison returns only aspects inside the requested orb")
@@ -654,7 +659,7 @@ struct AstroCoreTests {
         #expect(station.retrogradeAfter == (afterSpeed < 0))
     }
 
-    @Test("Progressed Moon reports an ingress date within a few years")
+    @Test("Progressed Moon ingress maps back to the real-world progression axis")
     func progressedMoonWindow() async throws {
         let calculator = try SwissEphemerisCalculator(ephemerisDirectory: ephemerisDirectory)
         let birth = Date(timeIntervalSince1970: 824_259_600)
@@ -664,6 +669,12 @@ struct AstroCoreTests {
         #expect(window.ingressDate > progressedDate)
         #expect(window.daysInSign > 0)
         #expect(window.daysInSign < 365 * 4)
+        let targetIngress = SwissEphemerisCalculator.secondaryTargetDate(
+            birthDate: birth,
+            progressedDate: window.ingressDate
+        )
+        #expect(targetIngress > target)
+        #expect(targetIngress.timeIntervalSince(target) < 4 * 365.2425 * 86_400)
     }
 
     @Test("Lunar phase is location independent at the same UTC moment")

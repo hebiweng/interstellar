@@ -2,6 +2,7 @@ import AstroCore
 import CryptoKit
 import DeviceCheck
 import Foundation
+import OSLog
 import Security
 
 // MARK: - Generation states
@@ -665,46 +666,32 @@ struct AIGenerationClient: Sendable {
     }
 
     func generate(_ request: AIGenerateRequest) async throws -> AIGenerateResponse {
-        for attempt in 0 ..< 2 {
-            var urlRequest = URLRequest(url: baseURL.appendingPathComponent("v1/generate"))
-            urlRequest.httpMethod = "POST"
-            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            urlRequest.setValue(InstallationIdentity.value, forHTTPHeaderField: "X-Installation-ID")
-            let authorization = try await AppAttestAuthorizer.shared.headers(
-                for: request.bodyData,
-                baseURL: baseURL,
-                forceTokenRefresh: attempt > 0,
-                language: request.language
-            )
-            for (name, value) in authorization {
-                urlRequest.setValue(value, forHTTPHeaderField: name)
-            }
-            urlRequest.timeoutInterval = 180
-            urlRequest.httpBody = request.bodyData
-            let (data, response) = try await URLSession.shared.data(for: urlRequest)
-            guard let http = response as? HTTPURLResponse else {
-                throw AIGenerationError.invalidResponse(request.language)
-            }
-            if http.statusCode == 401, attempt == 0 {
-                await AppAttestAuthorizer.shared.invalidateToken()
-                continue
-            }
-            guard (200 ..< 300).contains(http.statusCode) else {
-                let server = try? JSONDecoder().decode(AppAttestServerError.self, from: data)
-                let message = isAppVerificationErrorCode(server?.code)
-                    ? localized("ai.app-verification-retry", language: request.language)
-                    : server?.error
-                throw AIGenerationError.server(
-                    message ?? localizedTemplate(
-                        "ai.interpretation-server-http",
-                        substitutions: ["statusCode": String(http.statusCode)],
-                        language: request.language
-                    )
+        var urlRequest = URLRequest(url: baseURL.appendingPathComponent("v1/generate"))
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.setValue(InstallationIdentity.value, forHTTPHeaderField: "X-Installation-ID")
+        urlRequest.timeoutInterval = 180
+        urlRequest.httpBody = request.bodyData
+        let response = try await AppAttestAuthorizer.shared.send(
+            urlRequest,
+            body: request.bodyData,
+            baseURL: baseURL,
+            language: request.language
+        )
+        guard (200 ..< 300).contains(response.statusCode) else {
+            let server = try? JSONDecoder().decode(AppAttestServerError.self, from: response.data)
+            let message = isAppVerificationErrorCode(server?.code)
+                ? localized("ai.app-verification-retry", language: request.language)
+                : server?.error
+            throw AIGenerationError.server(
+                message ?? localizedTemplate(
+                    "ai.interpretation-server-http",
+                    substitutions: ["statusCode": String(response.statusCode)],
+                    language: request.language
                 )
-            }
-            return try JSONDecoder().decode(AIGenerateResponse.self, from: data)
+            )
         }
-        throw AIGenerationError.server(localized("ai.authorization-failed", language: request.language))
+        return try JSONDecoder().decode(AIGenerateResponse.self, from: response.data)
     }
 }
 
@@ -780,6 +767,8 @@ actor AppAttestAuthorizer {
 
     private let service = DCAppAttestService.shared
     private var installationToken: InstallationToken?
+    private var requestInProgress = false
+    private var requestWaiters: [CheckedContinuation<Void, Never>] = []
 
     private var keyAccount: String {
         #if DEBUG
@@ -789,11 +778,40 @@ actor AppAttestAuthorizer {
         #endif
     }
 
-    func invalidateToken() {
-        installationToken = nil
+    func send(
+        _ request: URLRequest,
+        body: Data,
+        baseURL: URL,
+        language: AppLanguage
+    ) async throws -> AppAttestHTTPResponse {
+        await acquireRequestSlot()
+        defer { releaseRequestSlot() }
+
+        for attempt in 0 ..< 2 {
+            var authorizedRequest = request
+            let authorization = try await headers(
+                for: body,
+                baseURL: baseURL,
+                forceTokenRefresh: attempt > 0,
+                language: language
+            )
+            for (name, value) in authorization {
+                authorizedRequest.setValue(value, forHTTPHeaderField: name)
+            }
+            let (data, response) = try await URLSession.shared.data(for: authorizedRequest)
+            guard let http = response as? HTTPURLResponse else {
+                throw AuthorizationError.invalidResponse(language)
+            }
+            if http.statusCode == 401, attempt == 0 {
+                installationToken = nil
+                continue
+            }
+            return AppAttestHTTPResponse(data: data, statusCode: http.statusCode)
+        }
+        throw AuthorizationError.server(status: 401, code: "app_attest_invalid", language: language)
     }
 
-   func headers(
+    private func headers(
         for body: Data,
         baseURL: URL,
         forceTokenRefresh: Bool,
@@ -812,13 +830,38 @@ actor AppAttestAuthorizer {
             guard let token = installationToken, token.isUsable else {
                 throw AuthorizationError.invalidResponse(language)
             }
-            return try await assertionHeaders(
-                body: body,
-                keyID: keyID,
-                token: token.value,
-                baseURL: baseURL,
-                language: language
-            )
+            do {
+                return try await assertionHeaders(
+                    body: body,
+                    keyID: keyID,
+                    token: token.value,
+                    baseURL: baseURL,
+                    language: language
+                )
+            } catch where AppAttestErrorClassifier.requiresNewKey(error) {
+                // DeviceCheck error 2 means the stored key is no longer a
+                // valid input for assertion generation (for example after an
+                // environment/team transition or a stale Keychain survivor).
+                // Discard it once and establish a fresh attested key instead
+                // of surfacing Apple's opaque NSError in Credit Activity.
+                logAppleFailure(error, stage: "recover_invalid_key")
+                installationToken = nil
+                removeKeyIdentifier()
+                let replacementKeyID = try await ensureKeyAndToken(
+                    baseURL: baseURL,
+                    language: language
+                )
+                guard let replacementToken = installationToken, replacementToken.isUsable else {
+                    throw AuthorizationError.invalidResponse(language)
+                }
+                return try await assertionHeaders(
+                    body: body,
+                    keyID: replacementKeyID,
+                    token: replacementToken.value,
+                    baseURL: baseURL,
+                    language: language
+                )
+            }
         #endif
     }
 
@@ -834,7 +877,13 @@ actor AppAttestAuthorizer {
                 removeKeyIdentifier()
             }
         }
-        let keyID = try await service.generateKey()
+        let keyID: String
+        do {
+            keyID = try await service.generateKey()
+        } catch {
+            logAppleFailure(error, stage: "generate_key")
+            throw error
+        }
         do {
             installationToken = try await attestNewKey(keyID: keyID, baseURL: baseURL, language: language)
             saveKeyIdentifier(keyID)
@@ -852,7 +901,13 @@ actor AppAttestAuthorizer {
         guard let challengeData = Data(base64Encoded: challenge.challenge) else {
             throw AuthorizationError.invalidResponse(language)
         }
-        let attestation = try await service.attestKey(keyID, clientDataHash: digest(challengeData))
+        let attestation: Data
+        do {
+            attestation = try await service.attestKey(keyID, clientDataHash: digest(challengeData))
+        } catch {
+            logAppleFailure(error, stage: "attest_key")
+            throw error
+        }
         let request = AttestationRequest(
             installationID: InstallationIdentity.value,
             keyID: keyID,
@@ -897,7 +952,13 @@ actor AppAttestAuthorizer {
             challenge: challenge.challenge,
             bodyHash: bodyHash
         ))
-        let assertion = try await service.generateAssertion(keyID, clientDataHash: digest(clientData))
+        let assertion: Data
+        do {
+            assertion = try await service.generateAssertion(keyID, clientDataHash: digest(clientData))
+        } catch {
+            logAppleFailure(error, stage: "generate_assertion")
+            throw error
+        }
         var headers = [
             "X-App-Attest-Key-ID": keyID,
             "X-App-Attest-Challenge-ID": challenge.challengeID,
@@ -971,6 +1032,31 @@ actor AppAttestAuthorizer {
         Data(SHA256.hash(data: data))
     }
 
+    private func acquireRequestSlot() async {
+        if !requestInProgress {
+            requestInProgress = true
+            return
+        }
+        await withCheckedContinuation { continuation in
+            requestWaiters.append(continuation)
+        }
+    }
+
+    private func releaseRequestSlot() {
+        if requestWaiters.isEmpty {
+            requestInProgress = false
+        } else {
+            requestWaiters.removeFirst().resume()
+        }
+    }
+
+    private func logAppleFailure(_ error: Error, stage: String) {
+        let value = error as NSError
+        AppAttestDiagnostics.logger.error(
+            "Apple App Attest failed stage=\(stage, privacy: .public) domain=\(value.domain, privacy: .public) code=\(value.code)"
+        )
+    }
+
     private func keyIdentifier() -> String? {
         let data = KeychainValue.read(service: InstallationIdentity.service, account: keyAccount)
         return data.flatMap { String(data: $0, encoding: .utf8) }
@@ -987,6 +1073,23 @@ actor AppAttestAuthorizer {
     private func removeKeyIdentifier() {
         KeychainValue.remove(service: InstallationIdentity.service, account: keyAccount)
     }
+}
+
+enum AppAttestErrorClassifier {
+    static func requiresNewKey(_ error: Error) -> Bool {
+        let value = error as NSError
+        return value.domain == DCErrorDomain
+            && value.code == DCError.invalidKey.rawValue
+    }
+}
+
+struct AppAttestHTTPResponse: Sendable {
+    let data: Data
+    let statusCode: Int
+}
+
+private enum AppAttestDiagnostics {
+    static let logger = Logger(subsystem: "com.xiaoguiwk.interstellar", category: "AppAttest")
 }
 
 private struct AppAttestServerError: Decodable {

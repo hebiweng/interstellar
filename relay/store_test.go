@@ -205,7 +205,7 @@ func TestUnacknowledgedReportReleasesItsOriginalCredit(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if balance.Total != freeAllowance || balance.Reserved != 0 {
+	if balance.Total != monthlyBonus || balance.Allowance != 0 || balance.Bonus != monthlyBonus || balance.Reserved != 0 {
 		t.Fatalf("unacknowledged credit was not restored: %+v", balance)
 	}
 	stored, _ := s.GetReportRequest(userID, requestID)
@@ -244,7 +244,7 @@ func TestStoreTransactionReplayAndAnnualWelcomeAreIdempotent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if balance.Purchased != 10 || balance.Bonus != 20 || balance.Allowance != premiumAllowance {
+	if balance.Purchased != 10 || balance.Bonus != monthlyBonus+20 || balance.Allowance != premiumAllowance || balance.Total != 10+monthlyBonus+20+premiumAllowance {
 		t.Fatalf("transaction grants must be exactly once: %+v", balance)
 	}
 	annual.RevocationDate = time.Now().UTC().UnixMilli()
@@ -255,7 +255,7 @@ func TestStoreTransactionReplayAndAnnualWelcomeAreIdempotent(t *testing.T) {
 	if err != nil || user.Plan != "free" {
 		t.Fatalf("replayed transaction revocation must update entitlement: user=%+v err=%v", user, err)
 	}
-	if user.Credits.Bonus != 0 {
+	if user.Credits.Bonus != monthlyBonus {
 		t.Fatalf("revoked annual purchase must remove unused welcome Credits: %+v", user.Credits)
 	}
 }
@@ -277,7 +277,7 @@ func TestVerifiedSubscriptionGracePeriodKeepsPremiumActive(t *testing.T) {
 	if err != nil || user.Plan != "premium" || user.PlanSource != "premium_monthly" || user.AppleSubscriptionStatus != "grace" {
 		t.Fatalf("billing grace should preserve Premium: user=%+v err=%v", user, err)
 	}
-	if user.Credits.Bonus != 0 {
+	if user.Credits.Bonus != monthlyBonus || user.Credits.Allowance != premiumAllowance {
 		t.Fatalf("monthly Pro must not grant the annual welcome Credits: %+v", user.Credits)
 	}
 }
@@ -303,7 +303,7 @@ func TestTwentyCreditPurchaseAndAdminResetPreserveNonAdminCredits(t *testing.T) 
 	if err != nil {
 		t.Fatal(err)
 	}
-	if user.Credits.Purchased != 20 || user.Credits.Bonus != 0 || user.Credits.Allowance != freeAllowance {
+	if user.Credits.Purchased != 20 || user.Credits.Bonus != monthlyBonus || user.Credits.Allowance != 0 || user.Credits.Total != 20+monthlyBonus {
 		t.Fatalf("reset must remove only unused admin Credits: %+v", user.Credits)
 	}
 	if len(user.CreditLedger) < 3 || user.CreditLedger[0].Action != "ADMIN_RESET" || user.CreditLedger[0].Delta != -7 {
@@ -356,14 +356,14 @@ func TestAdminPlanOverrideSwitchesFreePremiumAndAuto(t *testing.T) {
 		t.Fatal(err)
 	}
 	premium, err := s.GetCommerceUser(userID)
-	if err != nil || premium.Plan != "premium" || premium.AdminPlanOverride != "premium" || premium.Credits.Allowance != premiumAllowance {
+	if err != nil || premium.Plan != "premium" || premium.AdminPlanOverride != "premium" || premium.Credits.Allowance != premiumAllowance || premium.Credits.Bonus != monthlyBonus || premium.Credits.Total != premiumAllowance+monthlyBonus {
 		t.Fatalf("premium override not applied: user=%+v err=%v", premium, err)
 	}
 	if err := s.SetAdminPlan(userID, "free", nil, "test-admin", "test free"); err != nil {
 		t.Fatal(err)
 	}
 	free, err := s.GetCommerceUser(userID)
-	if err != nil || free.Plan != "free" || free.AdminPlanOverride != "free" || free.Credits.Allowance != freeAllowance {
+	if err != nil || free.Plan != "free" || free.AdminPlanOverride != "free" || free.Credits.Allowance != 0 || free.Credits.Bonus != monthlyBonus || free.Credits.Total != monthlyBonus {
 		t.Fatalf("free override not applied: user=%+v err=%v", free, err)
 	}
 	if err := s.SetAdminPlan(userID, "auto", nil, "test-admin", "test auto"); err != nil {

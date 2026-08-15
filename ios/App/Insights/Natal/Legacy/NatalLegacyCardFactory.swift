@@ -15,7 +15,9 @@ extension InsightFactory {
         let sun = snapshot.point(.sun)
         let moon = snapshot.point(.moon)
         let venus = snapshot.point(.venus)
-        let ascSign = Zodiac.name(index: Int(snapshot.angles.ascendantDegrees / 30) % 12, language: language)
+        let ascSignIndex = Int(snapshot.angles.ascendantDegrees / 30) % 12
+        let ascSign = Zodiac.name(index: ascSignIndex, language: language)
+        let ascRuler = ruler(ofSign: ascSignIndex)
         let mcSignIndex = Int(snapshot.angles.midheavenDegrees / 30) % 12
         let mcRuler = ruler(ofSign: mcSignIndex)
         let mcRulerPoint = snapshot.point(mcRuler)
@@ -43,7 +45,7 @@ extension InsightFactory {
             strongestChallenge.map { fact(localized("insight.natal.growth-edge", language: language), aspectTitle($0, language: language), .challenging) },
         ].compactMap { $0 }
         let signatureFacts: [InsightFact] = [
-            fact(localized("insight.natal.chart-ruler", language: language), bodyName(mcRuler, language: language), .supportive, symbol: mcRuler.symbol),
+            fact(localized("insight.natal.chart-ruler", language: language), bodyName(ascRuler, language: language), .supportive, symbol: ascRuler.symbol),
             dominant.map { fact(localized("insight.natal.dominant", language: language), $0, .transition) },
             fact(localized("insight.natal.orientation", language: language), orientation, .neutral),
         ].compactMap { $0 }
@@ -109,7 +111,7 @@ extension InsightFactory {
             card( id: "chart-signature",
                 title: localized("insight.natal.chart-signature", language: language),
                 icon: "✶", visual: .signatureTrio(
-                    ruler: mcRuler.symbol,
+                    ruler: ascRuler.symbol,
                     dominant: dominant ?? "",
                     orientation: orientation
                 ),
