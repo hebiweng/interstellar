@@ -13,20 +13,34 @@ AIGC:
 
 > 更新时间：2026-09-02。本文件只记录当前工作区、构建、环境、验证证据和立即下一步。产品需求见 `docs/ios-product-backlog.md`，正式上架门禁见 `docs/ios-release-readiness.md`，历史过程查 Git。
 
+## 0.0.2 Pro Credits 政策、Build 18 与 Relay build25（2026-09-02）
+
+- Credits 政策已统一为：新用户首月 Free 5、之后每月 Free 2；Pro 每月额外 10；Annual Pro 首购另送 20（365 天有效）。因此新用户首月开通年付 Pro 的总额为 5 + 10 + 20 = 35。Guide、付费墙、法律条款、StoreKit 本地描述、iOS `CreditPolicy` 与 Relay 均已同步，相关回归断言已加入。
+- Build 18 Archive 已成功生成：`1.0 (18)`、Bundle `com.xiaoguiwk.interstellar`、arm64，路径为 `/private/tmp/Interstellar-1.0-18-credits.xcarchive`；已通过 Xcode `app-store-connect` 分发流程上传成功，App Store Connect 返回 `Upload succeeded` / `EXPORT SUCCEEDED`，当前等待 Apple 处理。
+- 生产 Relay 已切换为 `interstellar-relay:v6-20260902-build25-pro-credits`（`linux/amd64`，镜像 ID `sha256:3e6ff9c7ff179d9bb9263f38cbbe9def4f2dfbbc3038afc419d632e5a908ccf4`）。切换前 SQLite online backup 为 `/opt/interstellar/backups/relay-before-build25-pro-credits-20260902T121938Z.db`，SHA-256 为 `7c23b92dbbf382f0df30bb498a345dc31451d6f71257d050546ca80f521b82e5`，integrity 为 `ok`；切换后数据库 integrity 仍为 `ok`，Relay healthy、RestartCount=0，公开 `/v1/health` 返回 `ok`，Edge/Caddy 未重建。
+
+## 0.0.1 Evidence ID 与 Compare 超时修复（2026-09-02）
+
+- 已应用用户提供的 `interstellar-fix-d57bb0b.zip`：Compare 出站 evidence ID 按事实来源分 namespace，保留本地 stable fact ID 用于 A/B 配对，并在发送前拒绝空 ID 或重复 ID；Simple / Pro 轮盘差异也已合入 `ChartRenderer`。
+- Relay 对 `compare.*` 与 `ask.deep_analysis` 的首次模型生成超时统一为 90 秒；普通图表报告保持原默认值，Themes 原有 90 秒与 16,000 输出上限不变。
+- 生产 Relay 已切换为 `interstellar-relay:v6-20260902-build24-compare-evidence-timeout`（`linux/amd64`，镜像 ID `sha256:0ea0407c5811aaf46674feee8c2d4bd43c9b425454269da3e47296503c98043`）。切换前 SQLite online backup 为 `/opt/interstellar/backups/relay-before-build24-compare-evidence-timeout-20260902T094156Z.db`，SHA-256 `afdb1319789011c47bbf9a1017ff4f2407d325361b09f4028e30b3e0ecaf8ec5`，integrity `ok`；仅重建 Relay，容器 healthy、RestartCount=0，公开 `/v1/health` 正常。
+- 回归证据：Relay `go test ./...` / `go vet ./...`、iOS Compare evidence-ID 定向测试、`InterstellarTests` 95/95 和 `git diff --check` 通过。真实 iPhone 12 mini 上已发起一单 `Me Over Time` Compare，点击 Home 后恢复前台；结果包中的设备 UI 层级确认本地结果页保持分析中，随后出现完整报告正文和 `Based on … chart factors` 证据按钮。UI 测试命令唯一失败是临时断言把实际按钮 `View Charts` 写成了 `View charts`，临时代码已移除，不是产品报告失败。
+- `charts` 当前提交为 `6369628`（`fix: finalize phase R5 report delivery`）。已从该提交生成签名 Release Archive：`/private/tmp/Interstellar-1.0-17-r5-6369628.xcarchive`，Bundle `com.xiaoguiwk.interstellar`，版本 `1.0 (17)`；通过 Xcode `app-store-connect` 分发流程上传成功，回执为 `Upload succeeded` / `UPLOAD SUCCEEDED with no errors`，App Store Connect 当前等待处理。
+
 ## 0.0 Phase R5 ZIP 接收与 Relay 补齐（2026-09-01）
 
 - 2026-09-02 已补 Ask / Compare 报告恢复状态机：App 启动或进入相关页面只用原 requestID 查询 Relay；generating 继续显示分析中，completed 取回/校验/保存/ACK，Relay 明确 failed 落为终态；网络、App Attest、取回和中断落为 `deliveryFailed`，不会自动创建 AI 请求。用户手动重试也先取回，只有 Relay 明确失败才用同一 requestID 重新提交。轮询由 3 秒降到 10 秒。旧 Compare `chartsReady` 记录在打开具体结果页时也会查 Relay；旧 Ask 缺 session 的记录须先打开结果页补齐上下文。
-- Relay build23 代码把 Ask / Compare 模型格式或证据校验失败改为首次后最多 3 次静默修复（总调用上限 4）；HTTP、网络、鉴权、超时不自动重试。`interstellar-relay:v6-20260902-build23-report-recovery` 已构建并上传服务器，镜像 ID `sha256:f3bbc11e18d5de2c1290df17ad30b677837da9519d17edd0a6b6f25738b48e2d`。部署前备份 `/opt/interstellar/backups/relay-before-build23-report-recovery-20260902T000352Z.db`，SHA-256 `68153f7b1e5a0c74a39a93814bc264ef0bcff5db236190a4caaa223d2537d1f4`、integrity `ok`。生产 `.env` 缺 `RELAY_APP_STORE_ISSUER_ID` / `RELAY_APP_STORE_KEY_ID`，安全策略禁止自行从运行容器提取凭据，因此尚未切换，生产仍为健康的 build22。
+- Relay build23 代码把 Ask / Compare 模型格式或证据校验失败改为首次后最多 3 次静默修复（总调用上限 4）；HTTP、网络、鉴权、超时不自动重试。其行为已在 build24 中继续保留；build24 另外加入 Compare/Ask 90 秒首次生成超时与 Compare 出站 evidence ID 唯一性保护。
 - 最终 Debug 客户端已于 2026-09-02 覆盖安装并启动到 iPhone 12 mini。定向 Ask / Compare 回归 87/87、AstroCore 126/126、ContentKit 6/6、Relay 全量测试/vet、真机编译和全部适用门禁通过。详细状态与未处理问题见 `docs/phase-r5-delivery-status-20260902.md`。
 - 完整 iOS / Relay / 私有语料源交付 ZIP 已上传到 Private 仓库 `hebiweng/interstellar` 的独立 `zip` 分支，提交 `ee468b0e25e5adffb7a6924ca35b108bf37adf7c`。ZIP SHA-256 为 `a4db30007836f10215e47421a7e5879974670eb7bd0cfd66e0701b7922f69930`；`charts` 分支未推送、未污染。
 
 - 本轮权威输入为公开 `charts` 分支的 `phase-r5-postaudit-professional-evidence.zip`，本地下载 SHA-256 为 `0d1e75dba225422a79a1c142d0544d15efcf5038363565db485eff0c9a081b7d`。ZIP 的 iOS、Charts、Themes、Ask、Compare、AstroCore、固定 UI、本地化和专项测试作为产品/业务基线；未采用 `iosv0.1` 分支的其他内容。旧单文件 `ios/App/SynastryView.swift` 已按 ZIP 的模块拆分结果删除。
 - Phase R5 新增四种 Compare、Ask 四模式与免费确定性结果、1 Credit Deep Analysis、Lilly considerations/fortitudes/perfection/timing、独立 Electional Core、Ask / Themes / Compare / Charts / Profile 五标签，以及 Charts/Themes/轮盘/固定 UI 调整。ZIP 外只补了实际 Xcode 构建暴露的兼容缺口：Best Time 不再读取 Horary `analysis`，旧 When 历史只读 `legacyHoraryAnalysis`，缺失主题色改用现有 amber，固定字号改为 Dynamic Type，Compare Swift 6 分支补显式返回，旧 Today 根标签观察移除。
 - Relay 已补齐 `compare.me_over_time / two_people / two_places / relationship_over_time` 与 `ask.deep_analysis` scope、默认提示词初始化和管理端覆盖链路，分别生成客户端要求的严格 JSON；提示词要求只解释不可变事实、只引用稳定 Evidence ID、禁止重算或编造。未知引用被清理，summary/required section 全无有效证据时由 Relay 自动修复一次后失败并释放 Credit。Compare facts 编码现在显式携带稳定 `id`，且请求的 `compare_type` 必须与路由一致。Relay 会递归拒绝坐标、时区、出生时间、Profile、Snapshot、ChartSnapshot、渲染轮盘等禁止字段。
-- Compare 与 Ask Deep Analysis 均为 1 Credit；失败、超时或持久化失败释放原预留，同一 requestID/相同请求哈希可以重新预留并重试，最终只在客户端完成原子本地保存后 ACK/消费一次。Relay 发放政策已与客户端文案对齐为首个 Free 周期总计 5、后续 Free 月 2、Pro 月 15；Annual 首购 20 bonus 保持不变。
+- Compare 与 Ask Deep Analysis 均为 1 Credit；失败、超时或持久化失败释放原预留，同一 requestID/相同请求哈希可以重新预留并重试，最终只在客户端完成原子本地保存后 ACK/消费一次。Relay 发放政策已与客户端文案对齐为新用户首月 Free 5、后续 Free 月 2、Pro 每月额外 10；Annual Pro 首购另送 20，首月年付 Pro 新用户可得 35。
 - 2026-09-01 已修复 Phase R5 真机反馈：Compare 本地计算后立即进入历史并由 manager 持有后台报告任务；双人对比从关系事实生成最多 8 条“主要对比”，其他模式按确定性优先级显示最多 8 条“主要变化”，数量与列表一致；依据使用单一 sheet payload 立即读取本地事实；日期预设保持所选高亮；A/B 星盘使用分段标签切换。Ask Deep 任务改由持久 manager 持有，Ask 历史显示分析中/可重试；Themes 历史显示生成状态，结果页直接展示轮盘并保留详情入口。
-- 生产 Relay 已切换到 `interstellar-relay:v6-20260901-build22-phase-r5`（`linux/amd64`，镜像 ID `sha256:1a8491142f73cdf2951f726c781afa4e458f83e90349aabec6332795afeac3f3`）。切换前 SQLite 在线 backup API 备份为 `/opt/interstellar/backups/relay-before-build22-phase-r5-20260901T141849Z.db`，SHA-256 为 `0ebec8acdaaebe7e495ba868122848a7b13c80bbd5fda0fe73074feda94898a7`；备份与切换后 integrity 均为 `ok`。四个 Compare scope 与 `ask.deep_analysis` 已在生产库注册，容器 healthy、RestartCount=0，公开 `/v1/health` 正常；Edge 自 2026-08-13 起未重建且 RestartCount=0。
-- 当前 Phase R5 修复版已于 2026-09-01 以签名 Release 包再次覆盖安装到 `HUAWEI PURA 70`（iPhone 12 mini，设备 ID `F492A359-E624-5D05-8C41-B99A5B0B3926`），未卸载 App。安装包为 `Stelyra 1.0 (17)`、Bundle `com.xiaoguiwk.interstellar`，使用 production App Attest 和 `https://aaadmin.xiaoguiwk.top`；安装查询成功，启动后 `Interstellar` 进程 PID 24835 保持运行。未主动执行会消费 Credit 的 Compare / Ask 生产 smoke。
+- build22 是本阶段的历史基线；当前生产状态、备份和健康检查以本文件 `0.0.1 Evidence ID 与 Compare 超时修复` 为准。Edge 自 2026-08-13 起未重建且 RestartCount=0。
+- 当前 Phase R5 修复版已于 2026-09-02 以 iPhoneOS Debug 包覆盖安装到 `HUAWEI PURA 70`（iPhone 12 mini，设备 ID `F492A359-E624-5D05-8C41-B99A5B0B3926`），未卸载 App；使用 production App Attest 和 `https://aaadmin.xiaoguiwk.top`。已完成一单真实 Compare 生产 smoke，详见 `0.0.1`。
 - 已验证：Phase R5 聚焦 Ask/Compare/Themes 合同 70/70；AstroCore 126/126；ContentKit 6/6；Relay 全量测试与 `go vet`；iPhone 12 mini Simulator 与签名 Release 真机构建；卡片合同、私有内容边界、Copy、本地化、架构、lint 和 `git diff --check`。仓库全量 Python 为 678 passed / 3 skipped / 17 failed；失败均为 ZIP 外既存后端数据或已被 Phase R5 取代的旧分支断言，包括 JPL 本地 artifact 缺失、旧 Charts/Reports 结构、旧八语假设和仍要求已拆除的 `SynastryView.swift`，未用旧断言覆盖 ZIP。
 - 下一步只剩用户在真机进行视觉/交互和主动 Compare/Ask ACK smoke；消费型 smoke 必须由用户明确操作。
 
@@ -93,11 +107,12 @@ AIGC:
 | 项目 | 当前值 |
 |---|---|
 | 分支 | `charts` |
-| 源码基线提交 | `e1c4b72`、`fc25260`、`8492d5d`；Stelyra 1.0.1 (2) Themes 为当前交付 |
+| 源码基线提交 | `6369628`；包含此前 `e1c4b72`、`fc25260`、`8492d5d` 的当前 `charts` 交付 |
 | Bundle / Team | `com.xiaoguiwk.interstellar` / `KCC8FFFAA5` |
 | 测试设备 | iPhone 12 mini、iPhone 17 Pro Max |
 | Relay | `https://aaadmin.xiaoguiwk.top` |
-| 生产 Relay 镜像 | `interstellar-relay:v6-20260901-build22-phase-r5`；2026-09-01 22:19 部署，健康且 RestartCount=0 |
+| 生产 Relay 镜像 | `interstellar-relay:v6-20260902-build25-pro-credits`；2026-09-02 部署，健康且 RestartCount=0 |
+| 最新 iOS Archive | `1.0 (18)`；`/private/tmp/Interstellar-1.0-18-credits.xcarchive`；已上传 App Store Connect，等待处理 |
 
 Build 8 Archive 已成功生成：
 

@@ -40,7 +40,7 @@ func TestPhaseR5GenerationScopesAndCreditCosts(t *testing.T) {
 }
 
 func TestPhaseR5CreditPolicyConstants(t *testing.T) {
-	if firstPeriodBonus != 5 || monthlyBonus != 2 || premiumAllowance != 15 {
+	if firstPeriodBonus != 5 || monthlyBonus != 2 || premiumAllowance != 10 {
 		t.Fatalf("unexpected Phase R5 Credit policy: first=%d recurring=%d pro=%d", firstPeriodBonus, monthlyBonus, premiumAllowance)
 	}
 	s := openTestStore(t)
@@ -51,6 +51,64 @@ func TestPhaseR5CreditPolicyConstants(t *testing.T) {
 	balance, err := s.CreditBalance(userID)
 	if err != nil || balance.Total != firstPeriodBonus {
 		t.Fatalf("first Free period must total 5 Credits: balance=%+v err=%v", balance, err)
+	}
+}
+
+func TestNewAnnualProUserReceivesThirtyFiveCreditsInFirstMonth(t *testing.T) {
+	s := openTestStore(t)
+	userID := "84848484-8484-4484-8484-848484848484"
+	if _, err := s.SyncCommerceUser(userID, "phase-r5-annual-installation"); err != nil {
+		t.Fatal(err)
+	}
+
+	now := time.Now().UTC()
+	annual := AppleTransactionPayload{
+		TransactionID:         "phase-r5-annual-transaction",
+		OriginalTransactionID: "phase-r5-annual-original",
+		ProductID:             "premium_annual",
+		AppAccountToken:       userID,
+		BundleID:              "com.xiaoguiwk.interstellar",
+		PurchaseDate:          now.UnixMilli(),
+		ExpiresDate:           now.AddDate(1, 0, 0).UnixMilli(),
+	}
+	if err := s.ApplyVerifiedStoreTransaction(userID, annual, "phase-r5-annual-jws"); err != nil {
+		t.Fatal(err)
+	}
+
+	balance, err := s.CreditBalance(userID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if balance.Allowance != firstPeriodBonus+premiumAllowance || balance.Bonus != 20 || balance.Total != 35 {
+		t.Fatalf("new annual Pro user must receive 5 + 10 + 20 = 35 Credits: %+v", balance)
+	}
+}
+
+func TestFreeUserReceivesTwoCreditsAfterFirstMonth(t *testing.T) {
+	s := openTestStore(t)
+	userID := "85858585-8585-4585-8585-858585858585"
+	if _, err := s.SyncCommerceUser(userID, "phase-r5-free-installation"); err != nil {
+		t.Fatal(err)
+	}
+
+	tx, err := s.db.Begin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := refillAllowanceTx(tx, userID, time.Now().UTC().AddDate(0, 1, 0)); err != nil {
+		_ = tx.Rollback()
+		t.Fatal(err)
+	}
+	if err := tx.Commit(); err != nil {
+		t.Fatal(err)
+	}
+
+	balance, err := s.CreditBalance(userID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if balance.Total != monthlyBonus {
+		t.Fatalf("Free user must receive 2 Credits after the first month: %+v", balance)
 	}
 }
 

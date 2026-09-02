@@ -9,7 +9,7 @@ import WebKit
 enum CreditPolicy {
     static let firstFreePeriodCredits = 5
     static let recurringFreeMonthlyCredits = 2
-    static let proMonthlyCredits = 15
+    static let proMonthlyCredits = 10
 }
 
 struct CommerceAccount: Codable, Sendable {

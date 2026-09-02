@@ -11,7 +11,7 @@ AIGC:
 
 # Interstellar iOS 产品待办
 
-> 更新时间：2026-08-30。本文件只记录尚未实施的产品需求和优先级。已生效的产品规则以 `docs/ios-v6-rebuild-plan.md` 和 `docs/ios-card-implementation-matrix.md` 为准。
+> 更新时间：2026-09-02。本文件只记录尚未实施的产品需求和优先级。已生效的产品规则以 `docs/ios-v6-rebuild-plan.md` 和 `docs/ios-card-implementation-matrix.md` 为准。
 
 ## P1 — 账户与 Apple 身份权威归属
 

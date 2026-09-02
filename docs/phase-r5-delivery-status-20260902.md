@@ -1,9 +1,9 @@
 # Phase R5 交付状态、AI 报告恢复逻辑与已知问题
 
-日期：2026-09-02  
-工作分支：本地 `charts` 工作区（未推送到远端 `charts`）  
-交付分支：`hebiweng/interstellar` 的 `zip` 分支  
-上游工作包：`phase-r5-postaudit-professional-evidence.zip`  
+日期：2026-09-02
+工作分支：本地 `charts` 工作区（未推送到远端 `charts`）
+交付分支：`hebiweng/interstellar` 的 `zip` 分支
+上游工作包：`phase-r5-postaudit-professional-evidence.zip`
 上游包 SHA-256：`0d1e75dba225422a79a1c142d0544d15efcf5038363565db485eff0c9a081b7d`
 
 ## 1. 本次只完成的问题
@@ -64,17 +64,14 @@ Ask / Compare 的 AI 返回若已收到、但 JSON 或证据结构校验失败�
 - 最终 Debug 真机构建已通过 warnings-as-errors 编译。
 - 已于 2026-09-02 覆盖安装并成功启动到 iPhone 12 mini。
 - Bundle ID：`com.xiaoguiwk.interstellar`。
+- Credits 政策已统一为新用户首月 Free 5、后续每月 Free 2、Pro 每月额外 10；Annual Pro 首购另送 20，首月年付 Pro 新用户总额为 35。Guide、付费墙、法律条款、StoreKit 描述与客户端 `CreditPolicy` 已同步。
+- Build 18 `1.0 (18)` 签名 Release Archive：`/private/tmp/Interstellar-1.0-18-credits.xcarchive`，Bundle `com.xiaoguiwk.interstellar`，arm64；已通过 Xcode `app-store-connect` 分发流程上传成功，App Store Connect 返回 `Upload succeeded` / `EXPORT SUCCEEDED`，当前等待处理。
 
 ### Relay
 
-- 新镜像已本机构建：`interstellar-relay:v6-20260902-build23-report-recovery`。
-- 镜像 ID：`sha256:f3bbc11e18d5de2c1290df17ad30b677837da9519d17edd0a6b6f25738b48e2d`，`linux/amd64`。
-- 部署前生产数据库已通过 SQLite online backup API 备份：`/opt/interstellar/backups/relay-before-build23-report-recovery-20260902T000352Z.db`。
-- 备份 SHA-256：`68153f7b1e5a0c74a39a93814bc264ef0bcff5db236190a4caaa223d2537d1f4`；完整性为 `ok`。
-- 新镜像已上传并载入生产服务器，但尚未切换容器。
-- 当前生产仍运行 `interstellar-relay:v6-20260901-build22-phase-r5`，容器在尝试切换前为 healthy、RestartCount=0。
-
-阻塞原因：生产 `/opt/interstellar/.env` 缺少 `RELAY_APP_STORE_ISSUER_ID` 与 `RELAY_APP_STORE_KEY_ID`，而当前运行容器内存在这两项。安全策略禁止代理自行从运行容器提取凭据来绕过缺失配置。需要运维人员把这两个变量补入权威 `.env`，或明确授权一次无输出的原值复用，再只重建 `interstellar-relay`。在切换完成前，“格式错误最多修复三次”仍只存在于代码和 build23 镜像中，生产 build22 仍是旧行为。
+- 当前生产运行 `interstellar-relay:v6-20260902-build25-pro-credits`，镜像 ID `sha256:3e6ff9c7ff179d9bb9263f38cbbe9def4f2dfbbc3038afc419d632e5a908ccf4`，平台 `linux/amd64`。
+- 部署前生产数据库已通过 SQLite online backup API 备份：`/opt/interstellar/backups/relay-before-build25-pro-credits-20260902T121938Z.db`；SHA-256 `7c23b92dbbf382f0df30bb498a345dc31451d6f71257d050546ca80f521b82e5`，完整性为 `ok`；切换后完整性仍为 `ok`。
+- 仅重建 `interstellar-relay`，容器 healthy、RestartCount=0，公开 `/v1/health` 正常；Edge/Caddy 未重建。
 
 ## 4. 已完成的验证
 
@@ -90,8 +87,11 @@ Ask / Compare 的 AI 返回若已收到、但 JSON 或证据结构校验失败�
 - `npm run lint -- --quiet` 通过。
 - `scripts/check-private-content.sh` 对公开边界检查通过。
 - `git diff --check` 通过。
+- Compare 出站 evidence ID 唯一性回归通过；本地 stable fact ID 与 A/B 配对保持不变。
+- `compare.*` 与 `ask.deep_analysis` 首次生成超时 90 秒的 Relay 回归通过。
+- 真实 iPhone 12 mini Compare smoke 已发起并完成报告交付：Home 后恢复前台，UI 结果包确认从分析中状态进入完整报告并出现证据按钮。临时 UI 测试仅因 `View Charts` 大小写断言错误而返回测试失败，临时代码已移除；不构成产品报告失败。
 
-尚未完成生产端到端验收：由于 build23 尚未切换，不能声明 Ask / Compare 的新恢复协议已在生产真实生成链路完全通过。安装到 12 mini 的客户端可先尝试取回 build22 已生成的同 requestID 报告；最终验收应在 build23 切换后各完成一次 Ask、Compare 的生成、后台/前台恢复、本地保存和 ACK。
+尚未完成的生产端到端范围：本轮已完成 Compare 一单真实生成与后台/前台恢复；Ask 以及 Compare 其他三种模式仍需单独的用户授权 smoke，不能由这一单推断全部 scope 均成功。
 
 ## 5. 其他已报告问题：本次不再继续修改
 

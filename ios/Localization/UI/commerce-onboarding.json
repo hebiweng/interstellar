@@ -352,15 +352,15 @@
     "pt-BR": "Monthly Pro Credits renewed"
   },
   "credits.activity.pro-renew-detail": {
-    "en": "15 Pro Credits renewed for this month",
-    "zh": "本月 15 个 Pro Credits 已更新",
-    "es": "15 Credits Pro renovados para este mes",
-    "fr": "15 Credits Pro renouvelés pour ce mois",
-    "tr": "Bu ay için 15 Pro Credit yenilendi",
-    "de": "15 Pro Credits für diesen Monat erneuert",
-    "it": "15 Pro Credit rinnovati per questo mese",
-    "ko": "이번 달 Pro Credit 15개 갱신",
-    "pt-BR": "15 Pro Credits renovados para este mês"
+    "en": "10 Pro Credits renewed for this month",
+    "zh": "本月 10 个 Pro Credits 已更新",
+    "es": "10 Credits Pro renovados para este mes",
+    "fr": "10 Credits Pro renouvelés pour ce mois",
+    "tr": "Bu ay için 10 Pro Credit yenilendi",
+    "de": "10 Pro Credits für diesen Monat erneuert",
+    "it": "10 Pro Credit rinnovati per questo mese",
+    "ko": "이번 달 Pro Credit 10개 갱신",
+    "pt-BR": "10 Pro Credits renovados para este mês"
   },
   "credits.activity.purchase": {
     "en": "Credits purchased",
@@ -759,15 +759,15 @@
     "pt-BR": "Next"
   },
   "onboarding.plans-message": {
-    "en": "Your first Free month starts with 5 Credits; later Free months refresh to 2. Pro includes 15 Credits each month and unlocks the complete interpretation layer.",
-    "zh": "首个 Free 月共 5 Credits，之后 Free 每月刷新为 2 Credits。Pro 每月包含 15 Credits，并解锁完整解读层。",
-    "es": "Tu primer mes Free empieza con 5 Credits; después Free se renueva con 2 al mes. Pro incluye 15 Credits al mes y desbloquea toda la capa de interpretación.",
-    "fr": "Votre premier mois Free commence avec 5 Credits ; ensuite Free se renouvelle avec 2 Credits par mois. Pro inclut 15 Credits par mois et déverrouille toute la couche d’interprétation.",
-    "tr": "İlk Free ayınız 5 Credit ile başlar; sonraki Free aylarında 2 Credit yenilenir. Pro her ay 15 Credit içerir ve tüm yorumlama katmanını açar.",
-    "de": "Dein erster Free-Monat startet mit 5 Credits; danach werden monatlich 2 Free-Credits erneuert. Pro enthält 15 Credits pro Monat und schaltet die vollständige Deutungsebene frei.",
-    "it": "Il primo mese Free parte con 5 Credit; in seguito Free si rinnova con 2 Credit al mese. Pro include 15 Credit al mese e sblocca l’intero livello interpretativo.",
-    "ko": "첫 Free 월은 Credit 5개로 시작하며 이후 Free는 매월 2개로 갱신됩니다. Pro는 매월 Credit 15개와 전체 해석 기능을 제공합니다.",
-    "pt-BR": "Seu primeiro mês Free começa com 5 Credits; depois o Free renova 2 Credits por mês. O Pro inclui 15 Credits mensais e desbloqueia toda a camada de interpretação."
+    "en": "Your first Free month starts with 5 Credits; later Free months refresh to 2. Pro includes 10 extra Pro Credits each month and unlocks the complete interpretation layer.",
+    "zh": "首个 Free 月共 5 Credits，之后 Free 每月刷新为 2 Credits。Pro 每月额外包含 10 个 Pro Credits，并解锁完整解读层。",
+    "es": "Tu primer mes Free empieza con 5 Credits; después Free se renueva con 2 al mes. Pro incluye 10 Credits Pro extra cada mes y desbloquea toda la capa de interpretación.",
+    "fr": "Votre premier mois Free commence avec 5 Credits ; ensuite Free se renouvelle avec 2 Credits par mois. Pro inclut 10 Credits Pro supplémentaires chaque mois et déverrouille toute la couche d’interprétation.",
+    "tr": "İlk Free ayınız 5 Credit ile başlar; sonraki Free aylarında 2 Credit yenilenir. Pro her ay 10 ek Pro Credit içerir ve tüm yorumlama katmanını açar.",
+    "de": "Dein erster Free-Monat startet mit 5 Credits; danach werden monatlich 2 Free-Credits erneuert. Pro enthält 10 zusätzliche Pro Credits pro Monat und schaltet die vollständige Deutungsebene frei.",
+    "it": "Il primo mese Free parte con 5 Credit; in seguito Free si rinnova con 2 Credit al mese. Pro include 10 Pro Credit extra ogni mese e sblocca l’intero livello interpretativo.",
+    "ko": "첫 Free 월은 Credit 5개로 시작하며 이후 Free는 매월 2개로 갱신됩니다. Pro는 매월 추가 Pro Credit 10개와 전체 해석 기능을 제공합니다.",
+    "pt-BR": "Seu primeiro mês Free começa com 5 Credits; depois o Free renova 2 Credits por mês. O Pro inclui 10 extra Pro Credits por mês e desbloqueia toda a camada de interpretação."
   },
   "onboarding.plans-title": {
     "en": "Free or Pro",
@@ -781,15 +781,15 @@
     "pt-BR": "Free or Pro"
   },
   "onboarding.premium-credits": {
-    "en": "15 Pro Credits each month",
-    "zh": "每月 15 个 Pro Credits",
-    "es": "15 Credits Pro al mes",
-    "fr": "15 Credits Pro par mois",
-    "tr": "Her ay 15 Pro Credit",
-    "de": "15 Pro Credits pro Monat",
-    "it": "15 Pro Credit al mese",
-    "ko": "매월 Pro Credit 15개",
-    "pt-BR": "15 Pro Credits por mês"
+    "en": "10 extra Pro Credits each month",
+    "zh": "每月额外 10 个 Pro Credits",
+    "es": "10 Credits Pro extra cada mes",
+    "fr": "10 Credits Pro supplémentaires chaque mois",
+    "tr": "Her ay 10 ek Pro Credit",
+    "de": "10 zusätzliche Pro Credits pro Monat",
+    "it": "10 Pro Credit extra ogni mese",
+    "ko": "매월 추가 Pro Credit 10개",
+    "pt-BR": "10 extra Pro Credits each month"
   },
   "onboarding.premium-insights": {
     "en": "All interpretation cards in every chart",
@@ -1067,15 +1067,15 @@
     "pt-BR": "Pro chart preview"
   },
   "premium.pro-description": {
-    "en": "Pro unlocks every interpretation card, advanced controls and unlimited people, and includes 15 Pro Credits each month.",
-    "zh": "Pro 解锁全部解读卡、高级控制和不限人物，并每月包含 15 个 Pro Credits。",
-    "es": "Pro desbloquea todas las interpretaciones, controles avanzados y personas ilimitadas, e incluye 15 Credits Pro al mes.",
-    "fr": "Pro déverrouille toutes les interprétations, les réglages avancés et les profils illimités, et inclut 15 Credits Pro par mois.",
-    "tr": "Pro tüm yorum kartlarını, gelişmiş kontrolleri ve sınırsız kişiyi açar ve her ay 15 Pro Credit içerir.",
-    "de": "Pro schaltet alle Deutungskarten, erweiterte Steuerungen und unbegrenzt viele Personen frei und enthält 15 Pro Credits pro Monat.",
-    "it": "Pro sblocca tutte le schede interpretative, i controlli avanzati e persone illimitate, e include 15 Pro Credit al mese.",
-    "ko": "Pro는 모든 해석 카드, 고급 제어 및 사람 무제한 저장을 잠금 해제하고 매월 Pro Credit 15개를 제공합니다.",
-    "pt-BR": "O Pro desbloqueia todas as interpretações, controles avançados e pessoas ilimitadas, e inclui 15 Pro Credits por mês."
+    "en": "Pro unlocks every interpretation card, advanced controls and unlimited people, and includes 10 extra Pro Credits each month.",
+    "zh": "Pro 解锁全部解读卡、高级控制和不限人物，并每月额外包含 10 个 Pro Credits。",
+    "es": "Pro desbloquea todas las interpretaciones, controles avanzados y personas ilimitadas, e incluye 10 Credits Pro extra cada mes.",
+    "fr": "Pro déverrouille toutes les interprétations, les réglages avancés et les profils illimités, et inclut 10 Credits Pro supplémentaires chaque mois.",
+    "tr": "Pro tüm yorum kartlarını, gelişmiş kontrolleri ve sınırsız kişiyi açar ve her ay 10 ek Pro Credit içerir.",
+    "de": "Pro schaltet alle Deutungskarten, erweiterte Steuerungen und unbegrenzt viele Personen frei und enthält 10 zusätzliche Pro Credits pro Monat.",
+    "it": "Pro sblocca tutte le schede interpretative, i controlli avanzati e persone illimitate, e include 10 Pro Credit extra ogni mese.",
+    "ko": "Pro는 모든 해석 카드, 고급 제어 및 사람 무제한 저장을 잠금 해제하고 매월 추가 Pro Credit 10개를 제공합니다.",
+    "pt-BR": "O Pro desbloqueia todas as interpretações, controles avançados e pessoas ilimitadas, e inclui 10 Pro Credits extras por mês."
   },
   "premium.renewal-note": {
     "en": "Subscriptions renew automatically unless cancelled in your Apple account settings.",

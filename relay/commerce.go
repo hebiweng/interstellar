@@ -17,7 +17,7 @@ const (
 	creditReservationTTL = 6 * time.Minute
 	firstPeriodBonus     = 5
 	monthlyBonus         = 2
-	premiumAllowance     = 15
+	premiumAllowance     = 10
 )
 
 var uuidPattern = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$`)

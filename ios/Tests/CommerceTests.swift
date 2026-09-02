@@ -4,6 +4,12 @@ import DeviceCheck
 @testable import Interstellar
 
 final class CommerceTests: XCTestCase {
+    func testCreditPolicyMatchesMonthlyCreditContract() {
+        XCTAssertEqual(CreditPolicy.firstFreePeriodCredits, 5)
+        XCTAssertEqual(CreditPolicy.recurringFreeMonthlyCredits, 2)
+        XCTAssertEqual(CreditPolicy.proMonthlyCredits, 10)
+    }
+
     func testFreshAppContainerRotatesAppAttestKeyOnce() throws {
         let suiteName = "CommerceTests.AppInstallationLifecycle.\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
