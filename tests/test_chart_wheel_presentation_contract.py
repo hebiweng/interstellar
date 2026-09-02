@@ -23,15 +23,19 @@ def test_chart_wheel_has_one_parameterized_presentation_layer():
     assert "presentation: ChartWheelPresentation = .standard" in source
 
 
-def test_chart_wheel_motion_is_layered_and_reduce_motion_aware():
+def test_chart_wheel_is_static_and_uses_shared_display_architecture():
     source = text(RENDERER)
-    assert "@Environment(\\.accessibilityReduceMotion)" in source
-    assert "@State private var revealProgress" in source
-    assert "structureOpacity" in source
-    assert "pointOpacity" in source
-    assert "aspectOpacity" in source
-    assert ".task(id: motionTaskID)" in source
-    assert "accessibilityReduceMotion" in source
+    for forbidden in [
+        "revealProgress", "accessibilityReduceMotion", ".scaleEffect(",
+        "withAnimation(", ".animation(", ".onTapGesture", "selectedPlanet",
+        "selectedHouse",
+    ]:
+        assert forbidden not in source
+    for required in [
+        "ChartDisplayMode", "ChartDisplayConfig", "ChartGeometry",
+        "ChartVisualTokens", "displayMode: ChartDisplayMode = .simple",
+    ]:
+        assert required in source
 
 
 def test_chart_wheel_presentation_has_distinct_center_language():
@@ -56,12 +60,15 @@ def test_compare_uses_compare_wheel_presentation():
 
 def test_ask_wheel_strengthens_existing_horary_highlights_without_new_data():
     source = text(RENDERER)
-    assert "presentation == .ask ? 0.15 : 0.11" in source
+    assert "presentation == .ask ? 0.13 : 0.08" in source
     assert "horaryOverlay?.highlightedHouses" in source
     assert "horaryOverlay?.keyAspectIDs" in source
 
 
 def test_compare_wheel_strengthens_real_cross_chart_connections():
     source = text(RENDERER)
-    assert "presentation == .compare ? 0.32 : 0.25" in source
+    assert "private func drawComparisonAspects" in source
+    assert "geometry.comparisonOuterAspectRadius" in source
+    assert "geometry.comparisonInnerAspectRadius" in source
+    assert "(displayMode == .simple ? 0.22 : 0.28)" in source
     assert "comparisonAspects" in source

@@ -29,6 +29,7 @@ struct ChartsView: View {
     @State private var showAllCharts = false
     @State private var showReports = false
     @State private var chartsSpace: ChartsSpace = .you
+    @AppStorage("charts.wheel-display-mode") private var wheelDisplayModeRaw = ChartDisplayMode.simple.rawValue
 
     private let youFixedShortcuts: [ChartKind] = [.natal, .transit, .secondary]
     private let bondsFixedShortcuts: [RelationshipChartKind] = [.composite, .synastryA, .compositeTransit]
@@ -440,19 +441,59 @@ private struct PendingGeneration: Identifiable {
     }
 
     private var chartControlBar: some View {
-        HStack(spacing: 10) {
-            viewSelector
-            Button { showParameters = true } label: {
-                Label(localized("charts.parameters.button", language: model.language), systemImage: "slider.horizontal.3")
+        VStack(spacing: 10) {
+            HStack(spacing: 10) {
+                viewSelector
+                Button { showParameters = true } label: {
+                    Label(
+                        localized(
+                            "charts.parameters.button",
+                            language: model.language
+                        ),
+                        systemImage: "slider.horizontal.3"
+                    )
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(AppTheme.violet)
                     .padding(.horizontal, 12)
                     .frame(minHeight: 42)
-                    .background(AppTheme.violet.opacity(0.1), in: RoundedRectangle(cornerRadius: 13))
-                    .overlay(RoundedRectangle(cornerRadius: 13).stroke(AppTheme.violet.opacity(0.22)))
+                    .background(
+                        AppTheme.violet.opacity(0.1),
+                        in: RoundedRectangle(cornerRadius: 13)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 13)
+                            .stroke(AppTheme.violet.opacity(0.22))
+                    )
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("charts-parameters-button")
             }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("charts-parameters-button")
+
+            if model.viewMode == .wheel {
+                Picker(
+                    "",
+                    selection: wheelDisplayModeBinding
+                ) {
+                    Text(
+                        ChartWheelCopy.text(
+                            .simple,
+                            language: model.language
+                        )
+                    )
+                    .tag(ChartDisplayMode.simple)
+
+                    Text(
+                        ChartWheelCopy.text(
+                            .pro,
+                            language: model.language
+                        )
+                    )
+                    .tag(ChartDisplayMode.pro)
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .accessibilityIdentifier("charts-wheel-display-mode")
+            }
         }
     }
 
@@ -1162,6 +1203,17 @@ private struct PendingGeneration: Identifiable {
         }
     }
 
+    private var wheelDisplayMode: ChartDisplayMode {
+        ChartDisplayMode(rawValue: wheelDisplayModeRaw) ?? .simple
+    }
+
+    private var wheelDisplayModeBinding: Binding<ChartDisplayMode> {
+        Binding(
+            get: { wheelDisplayMode },
+            set: { wheelDisplayModeRaw = $0.rawValue }
+        )
+    }
+
     private var viewSelector: some View {
         HStack(spacing: 6) {
             modeButton(.wheel, icon: "circle.hexagongrid")
@@ -1275,17 +1327,38 @@ private struct PendingGeneration: Identifiable {
     private var chartResultContent: some View {
         if let snapshot = model.snapshot(for: model.selectedChart) {
             if model.viewMode == .wheel {
+                let reference = model.referenceSnapshot(
+                    for: model.selectedChart
+                )
+                let aspects = model.selectedChart.usesReferenceWheel
+                    ? model.comparisonAspects(for: model.selectedChart)
+                    : []
+
                 ChartWheelView(
                     snapshot: snapshot,
-                    reference: model.referenceSnapshot(for: model.selectedChart),
-                    comparisonAspects: model.selectedChart.usesReferenceWheel
-                        ? model.comparisonAspects(for: model.selectedChart)
-                        : [],
-                    language: model.language
+                    reference: reference,
+                    comparisonAspects: aspects,
+                    language: model.language,
+                    displayMode: wheelDisplayMode
                 )
-                .padding(12)
-                .background(AppTheme.panel, in: RoundedRectangle(cornerRadius: 24))
-                .overlay(RoundedRectangle(cornerRadius: 24).stroke(AppTheme.line))
+                .padding(.vertical, 8)
+                .background(
+                    AppTheme.panel,
+                    in: RoundedRectangle(cornerRadius: 24)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(AppTheme.line)
+                )
+
+                if wheelDisplayMode == .pro {
+                    ChartProDetailView(
+                        snapshot: snapshot,
+                        reference: reference,
+                        comparisonAspects: aspects,
+                        language: model.language
+                    )
+                }
             } else {
                 AspectChartView(
                     aspects: model.comparisonAspects(for: model.selectedChart),
@@ -1350,15 +1423,35 @@ private struct PendingGeneration: Identifiable {
     private func relationshipResultContent(_ kind: RelationshipChartKind) -> some View {
         if let artifact = model.relationshipArtifact(for: kind) {
             if model.viewMode == .wheel {
+                let aspects = artifact.reference == nil
+                    ? []
+                    : artifact.comparisonAspects
+
                 ChartWheelView(
                     snapshot: artifact.snapshot,
                     reference: artifact.reference,
-                    comparisonAspects: artifact.reference == nil ? [] : artifact.comparisonAspects,
-                    language: model.language
+                    comparisonAspects: aspects,
+                    language: model.language,
+                    displayMode: wheelDisplayMode
                 )
-                .padding(12)
-                .background(AppTheme.panel, in: RoundedRectangle(cornerRadius: 24))
-                .overlay(RoundedRectangle(cornerRadius: 24).stroke(AppTheme.line))
+                .padding(.vertical, 8)
+                .background(
+                    AppTheme.panel,
+                    in: RoundedRectangle(cornerRadius: 24)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(AppTheme.line)
+                )
+
+                if wheelDisplayMode == .pro {
+                    ChartProDetailView(
+                        snapshot: artifact.snapshot,
+                        reference: artifact.reference,
+                        comparisonAspects: aspects,
+                        language: model.language
+                    )
+                }
             } else {
                 AspectChartView(
                     aspects: artifact.reference == nil ? artifact.snapshot.aspects : artifact.comparisonAspects,
@@ -1559,6 +1652,410 @@ private struct PendingGeneration: Identifiable {
         }
     }
 }
+
+// MARK: - Pro Wheel Details
+
+private enum ChartProDetailTab: String, CaseIterable, Identifiable {
+    case planets
+    case aspects
+    case houses
+    case table
+
+    var id: String { rawValue }
+
+    func title(language: AppLanguage) -> String {
+        switch self {
+        case .planets:
+            ChartWheelCopy.text(.planets, language: language)
+        case .aspects:
+            ChartWheelCopy.text(.aspects, language: language)
+        case .houses:
+            ChartWheelCopy.text(.houses, language: language)
+        case .table:
+            ChartWheelCopy.text(.table, language: language)
+        }
+    }
+}
+
+struct ChartProDetailView: View {
+    let snapshot: ChartSnapshot
+    let reference: ChartSnapshot?
+    let comparisonAspects: [ChartAspect]
+    let language: AppLanguage
+
+    @State private var selectedTab: ChartProDetailTab = .planets
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            metadata
+
+            Picker(
+                "",
+                selection: $selectedTab
+            ) {
+                ForEach(ChartProDetailTab.allCases) { tab in
+                    Text(tab.title(language: language))
+                        .tag(tab)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+
+            switch selectedTab {
+            case .planets:
+                planetList
+            case .aspects:
+                aspectList
+            case .houses:
+                houseList
+            case .table:
+                planetTable
+            }
+        }
+        .padding(14)
+        .background(
+            AppTheme.panel,
+            in: RoundedRectangle(cornerRadius: 20, style: .continuous)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(AppTheme.line, lineWidth: 1)
+        )
+        .accessibilityIdentifier("chart-pro-details")
+    }
+
+    private var metadata: some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(formattedDate(snapshot.utcDate))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(AppTheme.text)
+                Text(
+                    String(
+                        format: "%.4f°, %.4f°",
+                        snapshot.location.latitudeDegrees,
+                        snapshot.location.longitudeDegrees
+                    )
+                )
+                .font(.caption2)
+                .foregroundStyle(AppTheme.muted)
+            }
+
+            Spacer(minLength: 8)
+
+            VStack(alignment: .trailing, spacing: 3) {
+                Text(
+                    reference == nil
+                        ? ChartWheelCopy.text(.pro, language: language)
+                        : localized(
+                            "chart.double-astrology-wheel",
+                            language: language
+                        )
+                )
+                .font(.caption.weight(.bold))
+                .foregroundStyle(AppTheme.violet)
+
+                Text("\(snapshot.points.count) · \(displayedAspects.count)")
+                    .font(.caption2)
+                    .foregroundStyle(AppTheme.muted)
+            }
+        }
+    }
+
+    private var planetList: some View {
+        VStack(spacing: 0) {
+            ForEach(snapshot.points) { point in
+                planetRow(point)
+                if point.id != snapshot.points.last?.id {
+                    Divider().overlay(AppTheme.line)
+                }
+            }
+        }
+    }
+
+    private func planetRow(_ point: ChartPoint) -> some View {
+        HStack(spacing: 11) {
+            Text(point.body.symbol)
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(
+                    ChartVisualTokens.adaptive.planetColor(point.body)
+                )
+                .frame(width: 26)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(bodyName(point.body, language: language))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(AppTheme.text)
+
+                Text(
+                    "\(Zodiac.name(index: point.signIndex, language: language)) · "
+                        + formatDegree(point.degreeInSign)
+                        + " · H\(snapshot.house(containing: point.longitudeDegrees))"
+                )
+                .font(.caption)
+                .foregroundStyle(AppTheme.muted)
+            }
+
+            Spacer()
+
+            if point.retrograde {
+                Text("R")
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(AppTheme.coral)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 4)
+                    .background(
+                        AppTheme.coral.opacity(0.10),
+                        in: Capsule()
+                    )
+            }
+        }
+        .padding(.vertical, 9)
+    }
+
+    private var aspectList: some View {
+        VStack(spacing: 0) {
+            ForEach(displayedAspects.prefix(24)) { aspect in
+                HStack(spacing: 11) {
+                    Text(aspect.kind.symbol)
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(
+                            ChartVisualTokens.adaptive
+                                .aspectColor(aspect.kind)
+                        )
+                        .frame(width: 26)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(aspectTitle(aspect))
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(AppTheme.text)
+
+                        Text(
+                            "\(localized("chart.orb", language: language)) "
+                                + String(format: "%.2f°", aspect.orbDegrees)
+                                + " · "
+                                + ConsumerCopy.timing(
+                                    aspect.phase,
+                                    language: language
+                                )
+                        )
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.muted)
+                    }
+
+                    Spacer()
+
+                    Text(String(format: "%.0f%%", aspect.strength * 100))
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(AppTheme.muted)
+                }
+                .padding(.vertical, 9)
+
+                if aspect.id != displayedAspects.prefix(24).last?.id {
+                    Divider().overlay(AppTheme.line)
+                }
+            }
+        }
+    }
+
+    private var houseList: some View {
+        VStack(spacing: 0) {
+            ForEach(snapshot.houses) { house in
+                let signIndex = normalizedSignIndex(house.cuspDegrees)
+                let degree = normalizedDegreeInSign(house.cuspDegrees)
+
+                HStack(spacing: 12) {
+                    Text("H\(house.number)")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(
+                            house.number == 1 || house.number == 10
+                                ? AppTheme.violet
+                                : AppTheme.text
+                        )
+                        .frame(width: 34, alignment: .leading)
+
+                    Text(
+                        Zodiac.name(index: signIndex, language: language)
+                    )
+                    .font(.subheadline)
+                    .foregroundStyle(AppTheme.text)
+
+                    Spacer()
+
+                    Text(formatDegree(degree))
+                        .font(.caption.monospacedDigit())
+                        .foregroundStyle(AppTheme.muted)
+                }
+                .padding(.vertical, 9)
+
+                if house.id != snapshot.houses.last?.id {
+                    Divider().overlay(AppTheme.line)
+                }
+            }
+        }
+    }
+
+    private var planetTable: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 0) {
+                tableHeader
+                Divider().overlay(AppTheme.line)
+
+                ForEach(snapshot.points) { point in
+                    tableRow(point)
+                    if point.id != snapshot.points.last?.id {
+                        Divider().overlay(AppTheme.line)
+                    }
+                }
+            }
+            .frame(minWidth: 570, alignment: .leading)
+        }
+    }
+
+    private var tableHeader: some View {
+        HStack(spacing: 8) {
+            tableCell(
+                ChartWheelCopy.text(.planets, language: language),
+                width: 112,
+                bold: true
+            )
+            tableCell(
+                ChartWheelCopy.text(.sign, language: language),
+                width: 100,
+                bold: true
+            )
+            tableCell(
+                ChartWheelCopy.text(.degree, language: language),
+                width: 72,
+                bold: true
+            )
+            tableCell(
+                ChartWheelCopy.text(.house, language: language),
+                width: 58,
+                bold: true
+            )
+            tableCell(
+                ChartWheelCopy.text(.retro, language: language),
+                width: 52,
+                bold: true
+            )
+            tableCell(
+                ChartWheelCopy.text(.speed, language: language),
+                width: 112,
+                bold: true
+            )
+        }
+        .padding(.vertical, 8)
+    }
+
+    private func tableRow(_ point: ChartPoint) -> some View {
+        HStack(spacing: 8) {
+            tableCell(
+                "\(point.body.symbol) \(bodyName(point.body, language: language))",
+                width: 112
+            )
+            tableCell(
+                Zodiac.name(index: point.signIndex, language: language),
+                width: 100
+            )
+            tableCell(
+                formatDegree(point.degreeInSign),
+                width: 72,
+                monospaced: true
+            )
+            tableCell(
+                "H\(snapshot.house(containing: point.longitudeDegrees))",
+                width: 58
+            )
+            tableCell(
+                point.retrograde ? "R" : "—",
+                width: 52
+            )
+            tableCell(
+                String(
+                    format: "%.4f°/d",
+                    point.position.longitudeSpeedDegreesPerDay
+                ),
+                width: 112,
+                monospaced: true
+            )
+        }
+        .padding(.vertical, 8)
+    }
+
+    private func tableCell(
+        _ text: String,
+        width: CGFloat,
+        bold: Bool = false,
+        monospaced: Bool = false
+    ) -> some View {
+        Text(text)
+            .font(
+                monospaced
+                    ? Font.caption.monospacedDigit()
+                    : (bold ? Font.caption.weight(.bold) : Font.caption)
+            )
+            .foregroundStyle(bold ? AppTheme.text : AppTheme.muted)
+            .frame(width: width, alignment: .leading)
+            .lineLimit(1)
+    }
+
+    private var displayedAspects: [ChartAspect] {
+        let source = reference == nil
+            ? snapshot.aspects
+            : comparisonAspects
+        return source.sorted { lhs, rhs in
+            if lhs.strength == rhs.strength {
+                return lhs.orbDegrees < rhs.orbDegrees
+            }
+            return lhs.strength > rhs.strength
+        }
+    }
+
+    private func aspectTitle(_ aspect: ChartAspect) -> String {
+        "\(bodyLabel(aspect.firstID)) \(aspect.kind.symbol) "
+            + bodyLabel(aspect.secondID)
+    }
+
+    private func bodyLabel(_ id: String) -> String {
+        guard let body = CelestialBody(rawValue: id) else {
+            return id
+        }
+        return bodyName(body, language: language)
+    }
+
+    private func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: language.rawValue)
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+
+    private func formatDegree(_ value: Double) -> String {
+        let degree = Int(value)
+        let minute = Int(((value - Double(degree)) * 60).rounded())
+        if minute == 60 {
+            return "\(degree + 1)°00′"
+        }
+        return String(format: "%d°%02d′", degree, minute)
+    }
+
+    private func normalizedSignIndex(_ longitude: Double) -> Int {
+        Int(normalizedLongitude(longitude) / 30)
+    }
+
+    private func normalizedDegreeInSign(_ longitude: Double) -> Double {
+        normalizedLongitude(longitude)
+            .truncatingRemainder(dividingBy: 30)
+    }
+
+    private func normalizedLongitude(_ longitude: Double) -> Double {
+        let raw = longitude.truncatingRemainder(dividingBy: 360)
+        return raw >= 0 ? raw : raw + 360
+    }
+}
+
 
 private struct ReportGeneratingSheet: View {
     let chart: ChartKind

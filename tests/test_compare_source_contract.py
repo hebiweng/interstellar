@@ -61,10 +61,14 @@ def test_coordinator_implements_all_four_real_calculation_recipes():
 
 def test_compare_relay_uses_existing_generate_status_fetch_ack_flow():
     s = read(AI)
+    shared = read(ROOT / "ios/App/AppAIReportService.swift")
     assert '"mode": "compare"' in s
-    assert 'appendingPathComponent("v1/generate")' in s
-    assert '"v1/reports/status"' in s
-    assert '"v1/reports/fetch"' in s
+    assert "AIReportTaskManager()" in s
+    assert "taskManager.submit(" in s
+    assert "taskManager.recover(" in s
+    assert 'path: "v1/generate"' in shared
+    assert 'path: "v1/reports/status"' in shared
+    assert 'path: "v1/reports/fetch"' in shared
     manager = read(MANAGER)
     assert "acknowledgeReport(requestID:" in manager
     assert manager.index("store.upsert(current)") < manager.index("acknowledgeReport(requestID:")
@@ -169,10 +173,14 @@ def test_ask_deep_payload_is_structured_deterministic_and_privacy_minimized():
 
 def test_ask_deep_uses_existing_relay_reservation_and_ack_flow():
     s = read(ASK_DEEP)
+    shared = read(ROOT / "ios/App/AppAIReportService.swift")
     assert '"mode": "ask_deep"' in s
-    assert 'appendingPathComponent("v1/generate")' in s
-    assert '"v1/reports/status"' in s
-    assert '"v1/reports/fetch"' in s
+    assert "AIReportTaskManager()" in s
+    assert "taskManager.submit(" in s
+    assert "taskManager.recover(" in s
+    assert 'path: "v1/generate"' in shared
+    assert 'path: "v1/reports/status"' in shared
+    assert 'path: "v1/reports/fetch"' in shared
     assert 'acknowledgeReport(requestID:' in s
     assert '"creditCost"' not in s
     assert 'let requestID = record.id' in s, 'retry must reuse the same idempotency/reservation key'

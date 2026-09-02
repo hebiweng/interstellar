@@ -18,7 +18,6 @@ struct AppAIChartFactsInput {
     let transitBundle: TransitFactBundle?
     let relationship: PersonRelationship?
 }
-
 struct AppAIChartFactsOutput {
     let document: [String: Any]
     let transitPlan: TransitContentPlan?
@@ -459,5 +458,344 @@ final class AppAIReportService {
     private func minuteString(_ date: Date, formatter: ISO8601DateFormatter) -> String {
         let seconds = floor(date.timeIntervalSince1970 / 60) * 60
         return formatter.string(from: Date(timeIntervalSince1970: seconds))
+    }
+}
+
+// MARK: - Shared AI Report Task Lifecycle
+
+enum AIReportTaskError: LocalizedError, Sendable, Equatable {
+    case delivery(String)
+    case relayFailed(String)
+
+    var errorDescription: String? {
+        switch self {
+        case let .delivery(message), let .relayFailed(message):
+            message
+        }
+    }
+}
+
+/// Shared lifecycle manager for report-style AI tasks.
+///
+/// Domain services (Ask / Compare) remain responsible for facts construction,
+/// fingerprints, request schemas, response decoding and evidence validation.
+///
+/// Invariant: recovery never creates a new AI task. Only `submit` may POST to
+/// /v1/generate. `recoverFirst` is reserved for an explicit user retry.
+@MainActor
+protocol AIReportTaskTransport {
+    func createTask(
+        body: Data,
+        language: AppLanguage
+    ) async throws -> ReportTaskState
+
+    func status(
+        userID: String,
+        requestID: String,
+        language: AppLanguage
+    ) async throws -> ReportTaskState
+
+    func statusIfExists(
+        userID: String,
+        requestID: String,
+        language: AppLanguage
+    ) async throws -> ReportTaskState?
+
+    func fetch(
+        userID: String,
+        requestID: String,
+        language: AppLanguage
+    ) async throws -> Data
+}
+
+@MainActor
+struct AIReportTaskManager {
+    private let client: any AIReportTaskTransport
+    private let pollIntervalNanoseconds: UInt64
+
+    init(
+        baseURL: URL? = nil,
+        pollIntervalNanoseconds: UInt64 = 10_000_000_000
+    ) {
+        client = AIReportTaskClient(baseURL: baseURL)
+        self.pollIntervalNanoseconds = pollIntervalNanoseconds
+    }
+
+    init(
+        client: any AIReportTaskTransport,
+        pollIntervalNanoseconds: UInt64 = 10_000_000_000
+    ) {
+        self.client = client
+        self.pollIntervalNanoseconds = pollIntervalNanoseconds
+    }
+
+    func submit<Result>(
+        requestID: String,
+        body: Data,
+        language: AppLanguage,
+        recoverFirst: Bool = false,
+        onGenerating: @escaping () -> Void = {},
+        decode: @escaping (Data) throws -> Result
+    ) async throws -> Result {
+        if recoverFirst {
+            do {
+                if let recovered: Result = try await recover(
+                    requestID: requestID,
+                    language: language,
+                    onGenerating: onGenerating,
+                    decode: decode
+                ) {
+                    return recovered
+                }
+            } catch AIReportTaskError.relayFailed {
+                // Explicit user retry only: a Relay-confirmed terminal failure
+                // may be resubmitted with the same idempotency key.
+            }
+        }
+
+        _ = try await client.createTask(body: body, language: language)
+        return try await waitForResult(
+            requestID: requestID,
+            language: language,
+            onGenerating: onGenerating,
+            decode: decode
+        )
+    }
+
+    /// Reconciles an existing task. Returns nil only when Relay has no task for
+    /// requestID. This method never calls /v1/generate.
+    func recover<Result>(
+        requestID: String,
+        language: AppLanguage,
+        onGenerating: @escaping () -> Void = {},
+        decode: @escaping (Data) throws -> Result
+    ) async throws -> Result? {
+        let userID = CommerceStore.shared.userID.uuidString.lowercased()
+        guard let state = try await client.statusIfExists(
+            userID: userID,
+            requestID: requestID,
+            language: language
+        ) else {
+            return nil
+        }
+
+        switch state.status {
+        case "completed":
+            let data = try await client.fetch(
+                userID: userID,
+                requestID: requestID,
+                language: language
+            )
+            return try decode(data)
+
+        case "failed":
+            throw AIReportTaskError.relayFailed(
+                state.error ?? "Report generation failed."
+            )
+
+        default:
+            onGenerating()
+            return try await waitForResult(
+                requestID: requestID,
+                language: language,
+                onGenerating: onGenerating,
+                alreadyNotifiedGenerating: true,
+                decode: decode
+            )
+        }
+    }
+
+    private func waitForResult<Result>(
+        requestID: String,
+        language: AppLanguage,
+        onGenerating: @escaping () -> Void,
+        alreadyNotifiedGenerating: Bool = false,
+        decode: @escaping (Data) throws -> Result
+    ) async throws -> Result {
+        let userID = CommerceStore.shared.userID.uuidString.lowercased()
+        var didNotifyGenerating = alreadyNotifiedGenerating
+
+        while !Task.isCancelled {
+            let state = try await client.status(
+                userID: userID,
+                requestID: requestID,
+                language: language
+            )
+
+            switch state.status {
+            case "completed":
+                let data = try await client.fetch(
+                    userID: userID,
+                    requestID: requestID,
+                    language: language
+                )
+                return try decode(data)
+
+            case "failed":
+                throw AIReportTaskError.relayFailed(
+                    state.error ?? "Report generation failed."
+                )
+
+            default:
+                if !didNotifyGenerating {
+                    didNotifyGenerating = true
+                    onGenerating()
+                }
+                try await Task.sleep(nanoseconds: pollIntervalNanoseconds)
+            }
+        }
+
+        throw CancellationError()
+    }
+}
+
+@MainActor
+private struct AIReportTaskClient: AIReportTaskTransport {
+    let baseURL: URL
+
+    init(baseURL: URL? = nil) {
+        self.baseURL = baseURL ?? RelayEnvironment.baseURL
+    }
+
+    func createTask(body: Data, language: AppLanguage) async throws -> ReportTaskState {
+        let response = try await postResponse(
+            body,
+            path: "v1/generate",
+            language: language
+        )
+        guard (200 ..< 300).contains(response.statusCode) else {
+            // A create-response error does not prove that generation failed.
+            // The POST may have reached Relay and persisted a task before the
+            // client lost delivery/auth state. Treat it as delivery failure;
+            // an explicit /reports/status == failed is the only relayFailed.
+            throw AIReportTaskError.delivery(
+                serverMessage(
+                    data: response.data,
+                    fallback: "Report Relay HTTP \(response.statusCode)"
+                )
+            )
+        }
+        do {
+            return try JSONDecoder().decode(ReportTaskState.self, from: response.data)
+        } catch {
+            throw AIReportTaskError.delivery(error.localizedDescription)
+        }
+    }
+
+    func status(
+        userID: String,
+        requestID: String,
+        language: AppLanguage
+    ) async throws -> ReportTaskState {
+        let body = try statusBody(userID: userID, requestID: requestID)
+        let response = try await postResponse(
+            body,
+            path: "v1/reports/status",
+            language: language
+        )
+        guard (200 ..< 300).contains(response.statusCode) else {
+            throw AIReportTaskError.delivery(
+                serverMessage(
+                    data: response.data,
+                    fallback: "Report status HTTP \(response.statusCode)"
+                )
+            )
+        }
+        do {
+            return try JSONDecoder().decode(ReportTaskState.self, from: response.data)
+        } catch {
+            throw AIReportTaskError.delivery(error.localizedDescription)
+        }
+    }
+
+    func statusIfExists(
+        userID: String,
+        requestID: String,
+        language: AppLanguage
+    ) async throws -> ReportTaskState? {
+        let body = try statusBody(userID: userID, requestID: requestID)
+        let response = try await postResponse(
+            body,
+            path: "v1/reports/status",
+            language: language
+        )
+        if response.statusCode == 404 {
+            return nil
+        }
+        guard (200 ..< 300).contains(response.statusCode) else {
+            throw AIReportTaskError.delivery(
+                serverMessage(
+                    data: response.data,
+                    fallback: "Report status HTTP \(response.statusCode)"
+                )
+            )
+        }
+        do {
+            return try JSONDecoder().decode(ReportTaskState.self, from: response.data)
+        } catch {
+            throw AIReportTaskError.delivery(error.localizedDescription)
+        }
+    }
+
+    func fetch(
+        userID: String,
+        requestID: String,
+        language: AppLanguage
+    ) async throws -> Data {
+        let body = try statusBody(userID: userID, requestID: requestID)
+        let response = try await postResponse(
+            body,
+            path: "v1/reports/fetch",
+            language: language
+        )
+        guard (200 ..< 300).contains(response.statusCode) else {
+            throw AIReportTaskError.delivery(
+                serverMessage(
+                    data: response.data,
+                    fallback: "Report fetch HTTP \(response.statusCode)"
+                )
+            )
+        }
+        return response.data
+    }
+
+    private func statusBody(userID: String, requestID: String) throws -> Data {
+        try JSONEncoder().encode([
+            "userID": userID,
+            "requestID": requestID,
+        ])
+    }
+
+    private func postResponse(
+        _ body: Data,
+        path: String,
+        language: AppLanguage
+    ) async throws -> AppAttestHTTPResponse {
+        var request = URLRequest(url: baseURL.appendingPathComponent(path))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(
+            InstallationIdentity.value,
+            forHTTPHeaderField: "X-Installation-ID"
+        )
+        request.timeoutInterval = 30
+        request.httpBody = body
+
+        do {
+            return try await AppAttestAuthorizer.shared.send(
+                request,
+                body: body,
+                baseURL: baseURL,
+                language: language
+            )
+        } catch {
+            throw AIReportTaskError.delivery(error.localizedDescription)
+        }
+    }
+
+    private func serverMessage(data: Data, fallback: String) -> String {
+        let json = (try? JSONSerialization.jsonObject(with: data))
+            as? [String: Any]
+        return (json?["error"] as? String) ?? fallback
     }
 }

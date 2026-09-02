@@ -494,79 +494,6 @@ private struct AskDeepFetchEnvelope: Decodable {
     let result: AskDeepNarrativeResponse
 }
 
-private struct AskDeepRelayClient: Sendable {
-    let baseURL: URL
-
-    init(baseURL: URL? = nil) {
-        self.baseURL = baseURL ?? RelayEnvironment.baseURL
-    }
-
-    func createTask(body: Data, language: AppLanguage) async throws -> ReportTaskState {
-        var request = URLRequest(url: baseURL.appendingPathComponent("v1/generate"))
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(InstallationIdentity.value, forHTTPHeaderField: "X-Installation-ID")
-        request.timeoutInterval = 30
-        request.httpBody = body
-        let response: AppAttestHTTPResponse
-        do {
-            response = try await AppAttestAuthorizer.shared.send(request, body: body, baseURL: baseURL, language: language)
-        } catch {
-            throw AskDeepAIError.delivery(error.localizedDescription)
-        }
-        guard (200 ..< 300).contains(response.statusCode) else {
-            let json = (try? JSONSerialization.jsonObject(with: response.data)) as? [String: Any]
-            throw AskDeepAIError.failed((json?["error"] as? String) ?? "Ask Deep Analysis HTTP \(response.statusCode)")
-        }
-        return try JSONDecoder().decode(ReportTaskState.self, from: response.data)
-    }
-
-    func status(userID: String, requestID: String, language: AppLanguage) async throws -> ReportTaskState {
-        let body = try JSONEncoder().encode(["userID": userID, "requestID": requestID])
-        return try JSONDecoder().decode(ReportTaskState.self, from: try await post(body, path: "v1/reports/status", language: language))
-    }
-
-    func statusIfExists(userID: String, requestID: String, language: AppLanguage) async throws -> ReportTaskState? {
-        let body = try JSONEncoder().encode(["userID": userID, "requestID": requestID])
-        let response = try await postResponse(body, path: "v1/reports/status", language: language)
-        if response.statusCode == 404 { return nil }
-        try validate(response, fallback: "Ask Deep Analysis HTTP \(response.statusCode)")
-        return try JSONDecoder().decode(ReportTaskState.self, from: response.data)
-    }
-
-    func fetch(userID: String, requestID: String, language: AppLanguage) async throws -> Data {
-        let body = try JSONEncoder().encode(["userID": userID, "requestID": requestID])
-        return try await post(body, path: "v1/reports/fetch", language: language)
-    }
-
-    private func post(_ body: Data, path: String, language: AppLanguage) async throws -> Data {
-        let response = try await postResponse(body, path: path, language: language)
-        try validate(response, fallback: "Ask Deep Analysis HTTP \(response.statusCode)")
-        return response.data
-    }
-
-    private func postResponse(_ body: Data, path: String, language: AppLanguage) async throws -> AppAttestHTTPResponse {
-        var request = URLRequest(url: baseURL.appendingPathComponent(path))
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(InstallationIdentity.value, forHTTPHeaderField: "X-Installation-ID")
-        request.timeoutInterval = 30
-        request.httpBody = body
-        do {
-            return try await AppAttestAuthorizer.shared.send(request, body: body, baseURL: baseURL, language: language)
-        } catch {
-            throw AskDeepAIError.delivery(error.localizedDescription)
-        }
-    }
-
-    private func validate(_ response: AppAttestHTTPResponse, fallback: String) throws {
-        guard (200 ..< 300).contains(response.statusCode) else {
-            let json = (try? JSONSerialization.jsonObject(with: response.data)) as? [String: Any]
-            throw AskDeepAIError.delivery((json?["error"] as? String) ?? fallback)
-        }
-    }
-}
-
 enum AskDeepAIError: LocalizedError {
     case invalidEnvelope
     case fingerprintMismatch
@@ -576,9 +503,12 @@ enum AskDeepAIError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .invalidEnvelope: "Deep Analysis returned an invalid response."
-        case .fingerprintMismatch: "Deep Analysis returned facts for a different question calculation."
-        case let .delivery(message), let .relayFailed(message), let .failed(message): message
+        case .invalidEnvelope:
+            "Deep Analysis returned an invalid response."
+        case .fingerprintMismatch:
+            "Deep Analysis returned facts for a different question calculation."
+        case let .delivery(message), let .relayFailed(message), let .failed(message):
+            message
         }
     }
 }
@@ -593,10 +523,13 @@ struct AskDeepAIService {
         let validFactIDs: Set<String>
     }
 
-    private let client = AskDeepRelayClient()
+    private let taskManager = AIReportTaskManager()
     private let builder = AskDeepFactBuilder()
 
-    func prepare(session: HorarySession, language: AppLanguage) throws -> Prepared {
+    func prepare(
+        session: HorarySession,
+        language: AppLanguage
+    ) throws -> Prepared {
         let facts = builder.build(session: session)
         let request = AskDeepAIRequest(
             questionType: session.mode.rawValue,
@@ -605,15 +538,23 @@ struct AskDeepAIService {
             locale: language.reportRequestLanguage.rawValue
         )
         let encoded = try JSONEncoder().encode(request)
-        guard let factsObject = try JSONSerialization.jsonObject(with: encoded) as? [String: Any] else {
+        guard let factsObject = try JSONSerialization.jsonObject(with: encoded)
+            as? [String: Any]
+        else {
             throw AskDeepAIError.invalidEnvelope
         }
-        let canonical = try JSONSerialization.data(withJSONObject: factsObject, options: [.sortedKeys])
+        let canonical = try JSONSerialization.data(
+            withJSONObject: factsObject,
+            options: [.sortedKeys]
+        )
         let factsHash = SHA256Digest.hash(canonical).hex
         let fingerprintSeed = "ask_deep|\(session.mode.rawValue)|\(factsHash)"
+
         return Prepared(
             request: request,
-            semanticFingerprint: SHA256Digest.hash(Data(fingerprintSeed.utf8)).hex,
+            semanticFingerprint: SHA256Digest.hash(
+                Data(fingerprintSeed.utf8)
+            ).hex,
             factsHash: factsHash,
             factsObject: factsObject,
             validFactIDs: Set(facts.map(\.id))
@@ -621,12 +562,17 @@ struct AskDeepAIService {
     }
 
     func sessionFingerprint(_ session: HorarySession) -> String {
-        let createdAt = String(format: "%.3f", session.createdAt.timeIntervalSince1970)
+        let createdAt = String(
+            format: "%.3f",
+            session.createdAt.timeIntervalSince1970
+        )
         let symbolicUnits = session.timingResult?.symbolicUnits
             .map { String(format: "%.6f", $0) } ?? ""
         let timingScales = session.timingResult?.scales
             .map(\.rawValue).joined(separator: ",") ?? ""
-        let candidateCount = String(session.timingCandidates.count + session.electionCandidates.count)
+        let candidateCount = String(
+            session.timingCandidates.count + session.electionCandidates.count
+        )
         let raw = [
             session.mode.rawValue,
             createdAt,
@@ -640,6 +586,7 @@ struct AskDeepAIService {
         return SHA256Digest.hash(Data(raw.utf8)).hex
     }
 
+    /// Automatic reconciliation. This path never creates an AI request.
     func recover(
         session: HorarySession,
         language: AppLanguage,
@@ -647,23 +594,25 @@ struct AskDeepAIService {
         onGenerating: @MainActor @escaping () -> Void = {}
     ) async throws -> AskDeepNarrativeResponse? {
         let prepared = try prepare(session: session, language: language)
-        let userID = CommerceStore.shared.userID.uuidString.lowercased()
-        guard let state = try await client.statusIfExists(
-            userID: userID,
-            requestID: requestID,
-            language: language
-        ) else { return nil }
-        switch state.status {
-        case "completed":
-            return try await fetchResult(prepared: prepared, requestID: requestID, language: language)
-        case "failed":
-            throw AskDeepAIError.relayFailed(state.error ?? "Deep Analysis generation failed")
-        default:
-            onGenerating()
-            return try await waitForResult(prepared: prepared, requestID: requestID, language: language)
+
+        do {
+            return try await taskManager.recover(
+                requestID: requestID,
+                language: language,
+                onGenerating: onGenerating
+            ) { data in
+                try decodeResult(data: data, prepared: prepared)
+            }
+        } catch AIReportTaskError.delivery(let message) {
+            throw AskDeepAIError.delivery(message)
+        } catch AIReportTaskError.relayFailed(let message) {
+            throw AskDeepAIError.relayFailed(message)
         }
     }
 
+    /// The only Ask Deep path that may POST /v1/generate.
+    ///
+    /// recoverFirst is true only for an explicit user retry.
     func generate(
         session: HorarySession,
         language: AppLanguage,
@@ -672,53 +621,41 @@ struct AskDeepAIService {
         recoverFirst: Bool = false
     ) async throws -> AskDeepNarrativeResponse {
         let prepared = try prepare(session: session, language: language)
-        if recoverFirst {
-            do {
-                if let recovered = try await recover(
-                    session: session,
-                    language: language,
-                    requestID: requestID
-                ) { return recovered }
-            } catch AskDeepAIError.relayFailed {
-                // Only an explicit user retry may resubmit a Relay-confirmed failure.
+        let body = try requestBody(
+            prepared: prepared,
+            requestID: requestID,
+            forceRegenerate: forceRegenerate
+        )
+
+        do {
+            return try await taskManager.submit(
+                requestID: requestID,
+                body: body,
+                language: language,
+                recoverFirst: recoverFirst
+            ) { data in
+                try decodeResult(data: data, prepared: prepared)
             }
+        } catch AIReportTaskError.delivery(let message) {
+            throw AskDeepAIError.delivery(message)
+        } catch AIReportTaskError.relayFailed(let message) {
+            throw AskDeepAIError.relayFailed(message)
         }
-        let body = try requestBody(prepared: prepared, requestID: requestID, forceRegenerate: forceRegenerate)
-        _ = try await client.createTask(body: body, language: language)
-        return try await waitForResult(prepared: prepared, requestID: requestID, language: language)
     }
 
-    private func waitForResult(
-        prepared: Prepared,
-        requestID: String,
-        language: AppLanguage
-    ) async throws -> AskDeepNarrativeResponse {
-        let userID = CommerceStore.shared.userID.uuidString.lowercased()
-        while !Task.isCancelled {
-            let state = try await client.status(userID: userID, requestID: requestID, language: language)
-            switch state.status {
-            case "completed":
-                return try await fetchResult(prepared: prepared, requestID: requestID, language: language)
-            case "failed":
-                throw AskDeepAIError.relayFailed(state.error ?? "Deep Analysis generation failed")
-            default:
-                try await Task.sleep(nanoseconds: 10_000_000_000)
-            }
-        }
-        throw CancellationError()
-    }
-
-    private func fetchResult(
-        prepared: Prepared,
-        requestID: String,
-        language: AppLanguage
-    ) async throws -> AskDeepNarrativeResponse {
-        let userID = CommerceStore.shared.userID.uuidString.lowercased()
-        let data = try await client.fetch(userID: userID, requestID: requestID, language: language)
-        let envelope = try JSONDecoder().decode(AskDeepFetchEnvelope.self, from: data)
+    private func decodeResult(
+        data: Data,
+        prepared: Prepared
+    ) throws -> AskDeepNarrativeResponse {
+        let envelope = try JSONDecoder().decode(
+            AskDeepFetchEnvelope.self,
+            from: data
+        )
         guard envelope.semanticFingerprint == prepared.semanticFingerprint,
               envelope.factsHash == prepared.factsHash
-        else { throw AskDeepAIError.fingerprintMismatch }
+        else {
+            throw AskDeepAIError.fingerprintMismatch
+        }
         return try AskDeepNarrativeValidator.validate(
             envelope.result,
             validFactIDs: prepared.validFactIDs
@@ -741,10 +678,13 @@ struct AskDeepAIService {
             "generationSchemaVersion": GeneratedChartArtifact.schemaVersion,
             "facts": prepared.factsObject,
             "locale": prepared.request.locale,
-            "clientVersion": "ios-v7-ask-deep",
+            "clientVersion": "ios-v8-shared-ai-manager",
             "forceRegenerate": forceRegenerate,
         ]
-        return try JSONSerialization.data(withJSONObject: body, options: [.sortedKeys])
+        return try JSONSerialization.data(
+            withJSONObject: body,
+            options: [.sortedKeys]
+        )
     }
 }
 

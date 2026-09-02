@@ -181,12 +181,15 @@ def test_ask_deep_job_is_manager_owned_and_history_observes_durable_status():
 
 def test_ask_failure_is_only_retried_by_user_and_recovers_server_result_first():
     deep = ASK_DEEP.read_text()
+    shared = (ROOT / "ios/App/AppAIReportService.swift").read_text()
     manager = deep[deep.index("final class AskDeepAnalysisManager"):]
     assert ".onAppear" not in manager
     assert "recoverFirst: isRetry" in manager
-    assert "statusIfExists" in deep
-    generate = deep[deep.index("func generate("):deep.index("private func waitForResult")]
-    assert generate.index("recover(") < generate.index("client.createTask")
+    assert "statusIfExists" in shared
+    submit = shared[shared.index("func submit<Result>("):shared.index("/// Reconciles an existing task")]
+    assert submit.index("recover(") < submit.index("client.createTask")
+    recover = shared[shared.index("func recover<Result>("):shared.index("private func waitForResult")]
+    assert "client.createTask" not in recover
     section = deep[deep.index("struct AskDeepAnalysisSection"):]
     assert ".task { manager.reconcile(" in section
     assert ".task { manager.begin(" not in section

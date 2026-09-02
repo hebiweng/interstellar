@@ -57,12 +57,13 @@ def test_theme_relay_contract_is_idempotent_and_two_credit_server_contract():
     assert '"mode": "theme"' in s
     assert '"semanticFingerprint": semanticFingerprint' in s
     assert '"factsHash": factsHash' in s
-    assert '"generationSchemaVersion": GeneratedChartArtifact.schemaVersion' in s
+    assert '"generationSchemaVersion":' in s
+    assert "GeneratedChartArtifact.schemaVersion" in s
     assert '"creditCost"' not in s, "the Relay derives the two-credit cost from the trusted theme scope"
     assert "store.upsert(completed)" in s
     assert "acknowledgeReport(requestID: delivery.requestID)" in s
     assert s.index("store.upsert(completed)") < s.index("acknowledgeReport(requestID: delivery.requestID)")
-    assert 'appendingPathComponent("v1/generate")' in s
+    assert 'path: "v1/generate"' in s
 
 
 def test_theme_facts_are_merged_once_bounded_and_raw_context_is_not_sent():
@@ -179,14 +180,26 @@ def test_interrupted_theme_generation_stays_pending_and_resumes_with_same_reques
     load_start = s.index("private func load()")
     load_end = s.index("private func persist()", load_start)
     load = s[load_start:load_end]
-    assert "decoded[index].status = .chartsReady" in load
+    assert "decoded[index].status = .chartsReady" not in load
     assert "decoded[index].status = .reportFailed" not in load
-    cancel_start = s.index("catch is CancellationError")
-    cancel_end = s.index("} catch is URLError", cancel_start)
-    cancel = s[cancel_start:cancel_end]
-    assert "current.status = .chartsReady" in cancel
+    assert "func resumePendingReport(" in s
+    resume_start = s.index("func resumePendingReport(")
+    resume_end = s.index("private func beginReportGeneration", resume_start)
+    resume = s[resume_start:resume_end]
+    assert "reportService.recover(" in resume
+    assert "reportService.generate(" not in resume
+    resume_cancel_start = resume.index("catch is CancellationError")
+    resume_cancel_end = resume.index("} catch is URLError", resume_cancel_start)
+    resume_cancel = resume[resume_cancel_start:resume_cancel_end]
+    assert "status = .chartsReady" not in resume_cancel
+    assert "status = .reportFailed" not in resume_cancel
+
+    generation = s[resume_end:]
+    cancel_start = generation.index("catch is CancellationError")
+    cancel_end = generation.index("} catch is URLError", cancel_start)
+    cancel = generation[cancel_start:cancel_end]
+    assert "current.status = .generatingReport" in cancel
     assert "current.status = .reportFailed" not in cancel
-    assert "func resumePendingReport(analysisID: String, model: AppModel)" in s
     result_start = s.index("struct ThemeResultView")
     result = s[result_start:]
     assert "@Environment(\\.scenePhase) private var scenePhase" in result

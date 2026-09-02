@@ -27,6 +27,435 @@ enum ChartWheelPresentation: String, Sendable {
     case compare
 }
 
+// MARK: - Wheel Display Architecture
+
+enum ChartDisplayMode: String, CaseIterable, Identifiable, Sendable {
+    case simple
+    case pro
+
+    var id: String { rawValue }
+}
+
+enum ZodiacLabelDensity: Sendable {
+    case glyphOnly
+    case glyphAndDegree
+}
+
+enum DegreePrecision: Sendable {
+    case whole
+    case minute
+}
+
+enum AspectDensity: Sendable {
+    case major
+    case extended
+}
+
+struct ChartDisplayConfig: Sendable {
+    let mode: ChartDisplayMode
+    let showMinorAspects: Bool
+    let showFullDegreePrecision: Bool
+    let showPlanetTable: Bool
+    let showChartMetadata: Bool
+    let showSummary: Bool
+    let zodiacLabelDensity: ZodiacLabelDensity
+    let degreePrecision: DegreePrecision
+    let aspectDensity: AspectDensity
+
+    static let simple = ChartDisplayConfig(
+        mode: .simple,
+        showMinorAspects: false,
+        showFullDegreePrecision: false,
+        showPlanetTable: false,
+        showChartMetadata: false,
+        showSummary: true,
+        zodiacLabelDensity: .glyphOnly,
+        degreePrecision: .whole,
+        aspectDensity: .major
+    )
+
+    static let pro = ChartDisplayConfig(
+        mode: .pro,
+        // AstroCore currently emits the five major aspect kinds only.
+        // Keep the UI honest instead of inventing minor aspects.
+        showMinorAspects: false,
+        showFullDegreePrecision: true,
+        showPlanetTable: true,
+        showChartMetadata: true,
+        showSummary: false,
+        zodiacLabelDensity: .glyphAndDegree,
+        degreePrecision: .minute,
+        aspectDensity: .extended
+    )
+
+    static func config(for mode: ChartDisplayMode) -> ChartDisplayConfig {
+        switch mode {
+        case .simple: .simple
+        case .pro: .pro
+        }
+    }
+}
+
+struct ChartVisualTokens {
+    let background: Color
+    let wheelSurface: Color
+    let primaryText: Color
+    let secondaryText: Color
+    let gridStrong: Color
+    let gridNormal: Color
+    let gridWeak: Color
+    let axisColor: Color
+    let accentColor: Color
+    let aspectPositive: Color
+    let aspectChallenging: Color
+    let aspectNeutral: Color
+
+    static var adaptive: ChartVisualTokens {
+        ChartVisualTokens(
+            background: AppTheme.background,
+            wheelSurface: AppTheme.panel,
+            primaryText: AppTheme.text,
+            secondaryText: AppTheme.muted,
+            gridStrong: AppTheme.text.opacity(0.34),
+            gridNormal: AppTheme.text.opacity(0.16),
+            gridWeak: AppTheme.text.opacity(0.085),
+            axisColor: AppTheme.violet,
+            accentColor: AppTheme.violet,
+            aspectPositive: AppTheme.blue,
+            aspectChallenging: AppTheme.coral,
+            aspectNeutral: AppTheme.amber
+        )
+    }
+
+    func planetColor(_ body: CelestialBody) -> Color {
+        switch body {
+        case .sun: AppTheme.amber
+        case .moon: AppTheme.blue
+        case .mercury: AppTheme.violet
+        case .venus: AppTheme.mint
+        case .mars: AppTheme.coral
+        case .jupiter: AppTheme.amber
+        case .saturn: AppTheme.muted
+        case .uranus: AppTheme.blue
+        case .neptune: AppTheme.mint
+        case .pluto: AppTheme.violet
+        case .trueNode, .lilith, .partOfFortune, .juno:
+            AppTheme.muted
+        }
+    }
+
+    func aspectColor(_ kind: AspectKind) -> Color {
+        switch kind {
+        case .trine, .sextile:
+            aspectPositive
+        case .square, .opposition:
+            aspectChallenging
+        case .conjunction:
+            aspectNeutral
+        }
+    }
+}
+
+struct ChartGeometry {
+    let bounds: CGRect
+    let safeLabelBounds: CGRect
+    let center: CGPoint
+    let wheelRadius: CGFloat
+    let outerTickRadius: CGFloat
+    let zodiacRadius: CGFloat
+    let outerPlanetRadius: CGFloat
+    let innerPlanetRadius: CGFloat
+    let houseOuterRadius: CGFloat
+    let houseInnerRadius: CGFloat
+    let houseNumberRadius: CGFloat
+    let aspectRadius: CGFloat
+    let comparisonOuterAspectRadius: CGFloat
+    let comparisonInnerAspectRadius: CGFloat
+
+    init(
+        size: CGSize,
+        mode: ChartDisplayMode,
+        externalLabelReserve: CGFloat = 12
+    ) {
+        let bounds = CGRect(origin: .zero, size: size)
+        self.bounds = bounds
+
+        // All visible content, including ASC/DSC/MC/IC labels, must stay inside
+        // this area. The renderer does not use clipping to hide overflow.
+        let edgeInset: CGFloat = 8
+        let safe = bounds.insetBy(
+            dx: edgeInset + externalLabelReserve,
+            dy: edgeInset
+        )
+        safeLabelBounds = safe
+
+        let diameter = min(safe.width, safe.height)
+        let radius = max(1, diameter / 2)
+        center = CGPoint(x: bounds.midX, y: bounds.midY)
+        wheelRadius = radius
+
+        switch mode {
+        case .simple:
+            outerTickRadius = radius
+            zodiacRadius = radius * 0.90
+            outerPlanetRadius = radius * 0.69
+            innerPlanetRadius = radius * 0.50
+            houseOuterRadius = radius * 0.80
+            houseInnerRadius = radius * 0.59
+            houseNumberRadius = radius * 0.625
+            aspectRadius = radius * 0.555
+            comparisonOuterAspectRadius = radius * 0.61
+            comparisonInnerAspectRadius = radius * 0.47
+
+        case .pro:
+            outerTickRadius = radius
+            zodiacRadius = radius * 0.89
+            outerPlanetRadius = radius * 0.70
+            innerPlanetRadius = radius * 0.51
+            houseOuterRadius = radius * 0.81
+            houseInnerRadius = radius * 0.595
+            houseNumberRadius = radius * 0.625
+            aspectRadius = radius * 0.56
+            comparisonOuterAspectRadius = radius * 0.615
+            comparisonInnerAspectRadius = radius * 0.475
+        }
+    }
+
+    func point(
+        longitude: Double,
+        rotation: Double,
+        radius: CGFloat
+    ) -> CGPoint {
+        AstrologyWheelGeometry.point(
+            center: center,
+            radius: Double(radius),
+            longitude: longitude,
+            ascendantRotation: rotation
+        )
+    }
+
+    func clampedLabelPoint(
+        longitude: Double,
+        rotation: Double,
+        radius: CGFloat,
+        horizontalReserve: CGFloat = 18,
+        verticalReserve: CGFloat = 10
+    ) -> CGPoint {
+        let raw = point(
+            longitude: longitude,
+            rotation: rotation,
+            radius: radius
+        )
+        return CGPoint(
+            x: min(
+                safeLabelBounds.maxX - horizontalReserve,
+                max(safeLabelBounds.minX + horizontalReserve, raw.x)
+            ),
+            y: min(
+                safeLabelBounds.maxY - verticalReserve,
+                max(safeLabelBounds.minY + verticalReserve, raw.y)
+            )
+        )
+    }
+}
+
+struct ChartSummaryItem: Identifiable, Sendable {
+    let id: String
+    let glyph: String
+    let title: String
+    let primary: String
+    let secondary: String
+}
+
+
+enum ChartWheelCopyKey {
+    case simple
+    case pro
+    case planets
+    case aspects
+    case houses
+    case table
+    case sign
+    case degree
+    case house
+    case retro
+    case speed
+}
+
+enum ChartWheelCopy {
+    static func text(
+        _ key: ChartWheelCopyKey,
+        language: AppLanguage
+    ) -> String {
+        let code = language.rawValue.lowercased()
+        switch code {
+        case let value where value.hasPrefix("zh"):
+            return chinese(key)
+        case let value where value.hasPrefix("es"):
+            return spanish(key)
+        case let value where value.hasPrefix("fr"):
+            return french(key)
+        case let value where value.hasPrefix("tr"):
+            return turkish(key)
+        case let value where value.hasPrefix("de"):
+            return german(key)
+        case let value where value.hasPrefix("it"):
+            return italian(key)
+        case let value where value.hasPrefix("ko"):
+            return korean(key)
+        case let value where value.hasPrefix("pt"):
+            return portuguese(key)
+        default:
+            return english(key)
+        }
+    }
+
+    private static func english(_ key: ChartWheelCopyKey) -> String {
+        switch key {
+        case .simple: "Simple"
+        case .pro: "Pro"
+        case .planets: "Planets"
+        case .aspects: "Aspects"
+        case .houses: "Houses"
+        case .table: "Table"
+        case .sign: "Sign"
+        case .degree: "Degree"
+        case .house: "House"
+        case .retro: "Retro"
+        case .speed: "Speed"
+        }
+    }
+
+    private static func chinese(_ key: ChartWheelCopyKey) -> String {
+        switch key {
+        case .simple: "简洁"
+        case .pro: "专业"
+        case .planets: "行星"
+        case .aspects: "相位"
+        case .houses: "宫位"
+        case .table: "表格"
+        case .sign: "星座"
+        case .degree: "度数"
+        case .house: "宫位"
+        case .retro: "逆行"
+        case .speed: "速度"
+        }
+    }
+
+    private static func spanish(_ key: ChartWheelCopyKey) -> String {
+        switch key {
+        case .simple: "Simple"
+        case .pro: "Pro"
+        case .planets: "Planetas"
+        case .aspects: "Aspectos"
+        case .houses: "Casas"
+        case .table: "Tabla"
+        case .sign: "Signo"
+        case .degree: "Grado"
+        case .house: "Casa"
+        case .retro: "Retró."
+        case .speed: "Velocidad"
+        }
+    }
+
+    private static func french(_ key: ChartWheelCopyKey) -> String {
+        switch key {
+        case .simple: "Simple"
+        case .pro: "Pro"
+        case .planets: "Planètes"
+        case .aspects: "Aspects"
+        case .houses: "Maisons"
+        case .table: "Tableau"
+        case .sign: "Signe"
+        case .degree: "Degré"
+        case .house: "Maison"
+        case .retro: "Rétro."
+        case .speed: "Vitesse"
+        }
+    }
+
+    private static func turkish(_ key: ChartWheelCopyKey) -> String {
+        switch key {
+        case .simple: "Basit"
+        case .pro: "Pro"
+        case .planets: "Gezegenler"
+        case .aspects: "Açılar"
+        case .houses: "Evler"
+        case .table: "Tablo"
+        case .sign: "Burç"
+        case .degree: "Derece"
+        case .house: "Ev"
+        case .retro: "Retro"
+        case .speed: "Hız"
+        }
+    }
+
+    private static func german(_ key: ChartWheelCopyKey) -> String {
+        switch key {
+        case .simple: "Einfach"
+        case .pro: "Pro"
+        case .planets: "Planeten"
+        case .aspects: "Aspekte"
+        case .houses: "Häuser"
+        case .table: "Tabelle"
+        case .sign: "Zeichen"
+        case .degree: "Grad"
+        case .house: "Haus"
+        case .retro: "Retro"
+        case .speed: "Tempo"
+        }
+    }
+
+    private static func italian(_ key: ChartWheelCopyKey) -> String {
+        switch key {
+        case .simple: "Semplice"
+        case .pro: "Pro"
+        case .planets: "Pianeti"
+        case .aspects: "Aspetti"
+        case .houses: "Case"
+        case .table: "Tabella"
+        case .sign: "Segno"
+        case .degree: "Grado"
+        case .house: "Casa"
+        case .retro: "Retro"
+        case .speed: "Velocità"
+        }
+    }
+
+    private static func korean(_ key: ChartWheelCopyKey) -> String {
+        switch key {
+        case .simple: "간단"
+        case .pro: "프로"
+        case .planets: "행성"
+        case .aspects: "애스펙트"
+        case .houses: "하우스"
+        case .table: "표"
+        case .sign: "사인"
+        case .degree: "도수"
+        case .house: "하우스"
+        case .retro: "역행"
+        case .speed: "속도"
+        }
+    }
+
+    private static func portuguese(_ key: ChartWheelCopyKey) -> String {
+        switch key {
+        case .simple: "Simples"
+        case .pro: "Pro"
+        case .planets: "Planetas"
+        case .aspects: "Aspectos"
+        case .houses: "Casas"
+        case .table: "Tabela"
+        case .sign: "Signo"
+        case .degree: "Grau"
+        case .house: "Casa"
+        case .retro: "Retró."
+        case .speed: "Velocidade"
+        }
+    }
+}
+
+
 struct ChartWheelView: View {
     let snapshot: ChartSnapshot
     let reference: ChartSnapshot?
@@ -34,9 +463,7 @@ struct ChartWheelView: View {
     let language: AppLanguage
     let horaryOverlay: HoraryOverlay?
     let presentation: ChartWheelPresentation
-    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
-    @ScaledMetric(relativeTo: .caption) private var dynamicTextScale: CGFloat = 1
-    @State private var revealProgress: Double = 0
+    let displayMode: ChartDisplayMode
 
     init(
         snapshot: ChartSnapshot,
@@ -44,7 +471,8 @@ struct ChartWheelView: View {
         comparisonAspects: [ChartAspect],
         language: AppLanguage,
         horaryOverlay: HoraryOverlay? = nil,
-        presentation: ChartWheelPresentation = .standard
+        presentation: ChartWheelPresentation = .standard,
+        displayMode: ChartDisplayMode = .simple
     ) {
         self.snapshot = snapshot
         self.reference = reference
@@ -52,293 +480,680 @@ struct ChartWheelView: View {
         self.language = language
         self.horaryOverlay = horaryOverlay
         self.presentation = presentation
+        self.displayMode = displayMode
     }
 
     var body: some View {
-        Canvas { context, size in
-            let center = CGPoint(x: size.width / 2, y: size.height / 2)
-            let radius = min(size.width, size.height) * 0.47
-            let typographyScale = min(1.34, max(1, min(size.width, size.height) / 345)) * dynamicTextScale
-            let rotation = reference?.angles.ascendantDegrees ?? snapshot.angles.ascendantDegrees
-
-            var structureContext = context
-            structureContext.opacity = structureOpacity
-            var pointContext = context
-            pointContext.opacity = pointOpacity
-            var aspectContext = context
-            aspectContext.opacity = aspectOpacity
-
-            drawCircle(context: &structureContext, center: center, radius: radius, color: AppTheme.text.opacity(0.32))
-            drawCircle(context: &structureContext, center: center, radius: radius * 0.82, color: AppTheme.text.opacity(0.14))
-            drawCircle(context: &structureContext, center: center, radius: radius * 0.61, color: AppTheme.text.opacity(0.09))
-            drawDegreeTicks(
-                context: &structureContext,
-                center: center,
-                radius: radius,
-                rotation: rotation
-            )
-
-            for index in 0 ..< 12 {
-                let boundary = Double(index * 30)
-                let outer = point(center: center, radius: radius, longitude: boundary, rotation: rotation)
-                let inner = point(center: center, radius: radius * 0.82, longitude: boundary, rotation: rotation)
-                var path = Path()
-                path.move(to: inner)
-                path.addLine(to: outer)
-                structureContext.stroke(path, with: .color(AppTheme.text.opacity(0.14)), lineWidth: 0.8)
-
-                let labelPoint = point(
-                    center: center,
-                    radius: radius * 0.91,
-                    longitude: boundary + 15,
-                    rotation: rotation
+        let config = ChartDisplayConfig.config(for: displayMode)
+        VStack(spacing: displayMode == .simple ? 14 : 10) {
+            Canvas { context, size in
+                let geometry = ChartGeometry(
+                    size: size,
+                    mode: displayMode,
+                    externalLabelReserve: 0
                 )
-                structureContext.draw(
-                    Text(zodiacWheelLabel(index))
-                        .font(
-                            .system(
-                                size: (language == .english ? 9.0 : 9.5) * typographyScale,
-                                weight: .semibold
-                            )
-                        )
-                        .foregroundStyle(AppTheme.muted),
-                    at: labelPoint
+                let tokens = ChartVisualTokens.adaptive
+                let rotation = reference?.angles.ascendantDegrees
+                    ?? snapshot.angles.ascendantDegrees
+                let minDimension = min(size.width, size.height)
+                let scale = min(1.12, max(0.88, minDimension / 350))
+
+                drawWheelSurface(
+                    context: &context,
+                    geometry: geometry,
+                    tokens: tokens
+                )
+                drawHouses(
+                    snapshot: reference ?? snapshot,
+                    context: &context,
+                    geometry: geometry,
+                    rotation: rotation,
+                    tokens: tokens,
+                    scale: scale
+                )
+                drawTicks(
+                    context: &context,
+                    geometry: geometry,
+                    rotation: rotation,
+                    tokens: tokens,
+                    config: config
+                )
+                drawZodiac(
+                    context: &context,
+                    geometry: geometry,
+                    rotation: rotation,
+                    tokens: tokens,
+                    config: config,
+                    scale: scale
+                )
+
+                if reference != nil {
+                    drawComparisonAspects(
+                        comparisonAspects,
+                        context: &context,
+                        geometry: geometry,
+                        rotation: rotation,
+                        tokens: tokens,
+                        config: config
+                    )
+                } else {
+                    drawAspects(
+                        snapshot.aspects,
+                        context: &context,
+                        geometry: geometry,
+                        rotation: rotation,
+                        tokens: tokens,
+                        config: config,
+                        keyAspectIDs: horaryOverlay?.keyAspectIDs ?? []
+                    )
+                }
+
+                drawAxes(
+                    snapshot: reference ?? snapshot,
+                    context: &context,
+                    geometry: geometry,
+                    rotation: rotation,
+                    tokens: tokens,
+                    config: config,
+                    scale: scale
+                )
+
+                if let reference {
+                    drawPlanets(
+                        reference.points,
+                        context: &context,
+                        geometry: geometry,
+                        radius: geometry.innerPlanetRadius,
+                        rotation: rotation,
+                        tokens: tokens,
+                        config: config,
+                        scale: scale,
+                        secondaryRing: true,
+                        labels: [:]
+                    )
+                    drawPlanets(
+                        snapshot.points,
+                        context: &context,
+                        geometry: geometry,
+                        radius: geometry.outerPlanetRadius,
+                        rotation: rotation,
+                        tokens: tokens,
+                        config: config,
+                        scale: scale,
+                        secondaryRing: false,
+                        labels: [:]
+                    )
+                } else {
+                    drawPlanets(
+                        snapshot.points,
+                        context: &context,
+                        geometry: geometry,
+                        radius: geometry.outerPlanetRadius,
+                        rotation: rotation,
+                        tokens: tokens,
+                        config: config,
+                        scale: scale,
+                        secondaryRing: false,
+                        labels: horaryOverlay?.planetLabels ?? [:]
+                    )
+                }
+
+                drawPresentationCenter(
+                    context: &context,
+                    center: geometry.center,
+                    tokens: tokens,
+                    referenceExists: reference != nil
                 )
             }
-
-            let houseSnapshot = reference ?? snapshot
-            drawHighlightedHouses(
-                horaryOverlay?.highlightedHouses ?? [],
-                houses: houseSnapshot.houses,
-                context: &structureContext,
-                center: center,
-                innerRadius: radius * 0.61,
-                outerRadius: radius * 0.82,
-                rotation: rotation
+            .aspectRatio(1, contentMode: .fit)
+            .accessibilityLabel(
+                reference == nil
+                    ? localized("chart.astrology-wheel", language: language)
+                    : localized("chart.double-astrology-wheel", language: language)
             )
-            for (index, house) in houseSnapshot.houses.enumerated() {
-                let outer = point(center: center, radius: radius * 0.82, longitude: house.cuspDegrees, rotation: rotation)
-                let inner = point(center: center, radius: radius * 0.61, longitude: house.cuspDegrees, rotation: rotation)
-                var path = Path()
-                path.move(to: inner)
-                path.addLine(to: outer)
-                structureContext.stroke(
-                    path,
-                    with: .color(house.number == 1 || house.number == 10 ? AppTheme.violet.opacity(0.8) : AppTheme.text.opacity(0.12)),
-                    lineWidth: house.number == 1 || house.number == 10 ? 1.6 : 0.7
-                )
+            .accessibilityIdentifier("astrology-wheel")
 
-                let nextHouse = houseSnapshot.houses[(index + 1) % houseSnapshot.houses.count]
-                let houseLongitude = circularMidpoint(
-                    from: house.cuspDegrees,
-                    to: nextHouse.cuspDegrees
+            if config.showSummary,
+               reference == nil,
+               presentation == .standard
+            {
+                simpleSummary
+            }
+        }
+    }
+
+    private var simpleSummary: some View {
+        HStack(alignment: .top, spacing: 8) {
+            summaryCard(for: .sun)
+            summaryCard(for: .moon)
+            risingSummaryCard
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    @ViewBuilder
+    private func summaryCard(for body: CelestialBody) -> some View {
+        if let point = snapshot.point(body) {
+            let house = snapshot.house(containing: point.longitudeDegrees)
+            VStack(alignment: .leading, spacing: 5) {
+                HStack(spacing: 5) {
+                    Text(body.symbol)
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(ChartVisualTokens.adaptive.planetColor(body))
+                    Text(bodyName(body, language: language))
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(AppTheme.text)
+                        .lineLimit(1)
+                }
+                Text(
+                    "\(Int(point.degreeInSign))° \(Zodiac.name(index: point.signIndex, language: language))"
                 )
-                structureContext.draw(
-                    Text("\(house.number)")
-                        .font(.system(size: 9 * typographyScale, weight: .semibold))
-                        .foregroundStyle(
-                            horaryOverlay?.highlightedHouses.contains(house.number) == true
-                                ? AppTheme.violet
-                                : AppTheme.muted.opacity(0.78)
-                        ),
-                    at: point(
-                        center: center,
-                        radius: radius * 0.64,
-                        longitude: houseLongitude,
-                        rotation: rotation
+                .font(.caption)
+                .foregroundStyle(AppTheme.text)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+                Text("H\(house)")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(AppTheme.muted)
+            }
+            .frame(maxWidth: .infinity, minHeight: 76, alignment: .topLeading)
+            .padding(10)
+            .background(
+                AppTheme.panelRaised.opacity(0.78),
+                in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(AppTheme.line, lineWidth: 0.8)
+            )
+        }
+    }
+
+    private var risingSummaryCard: some View {
+        let longitude = snapshot.angles.ascendantDegrees
+        let signIndex = normalizedSignIndex(longitude)
+        let degree = normalizedDegreeInSign(longitude)
+
+        return VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 5) {
+                Text("ASC")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(AppTheme.violet)
+                Text(localized("chart.rising", language: language))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(AppTheme.text)
+                    .lineLimit(1)
+            }
+            Text(
+                "\(Int(degree))° \(Zodiac.name(index: signIndex, language: language))"
+            )
+            .font(.caption)
+            .foregroundStyle(AppTheme.text)
+            .lineLimit(2)
+            .fixedSize(horizontal: false, vertical: true)
+            Text("H1")
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(AppTheme.muted)
+        }
+        .frame(maxWidth: .infinity, minHeight: 76, alignment: .topLeading)
+        .padding(10)
+        .background(
+            AppTheme.panelRaised.opacity(0.78),
+            in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(AppTheme.line, lineWidth: 0.8)
+        )
+    }
+
+    private func drawWheelSurface(
+        context: inout GraphicsContext,
+        geometry: ChartGeometry,
+        tokens: ChartVisualTokens
+    ) {
+        let outer = circleRect(
+            center: geometry.center,
+            radius: geometry.wheelRadius
+        )
+        context.fill(
+            Path(ellipseIn: outer),
+            with: .color(tokens.wheelSurface.opacity(0.34))
+        )
+        context.stroke(
+            Path(ellipseIn: outer),
+            with: .color(tokens.gridStrong),
+            lineWidth: displayMode == .simple ? 1.0 : 1.1
+        )
+
+        for radius in [
+            geometry.houseOuterRadius,
+            geometry.houseInnerRadius,
+        ] {
+            context.stroke(
+                Path(ellipseIn: circleRect(center: geometry.center, radius: radius)),
+                with: .color(
+                    radius == geometry.houseOuterRadius
+                        ? tokens.gridNormal
+                        : tokens.gridWeak
+                ),
+                lineWidth: radius == geometry.houseOuterRadius ? 0.8 : 0.65
+            )
+        }
+    }
+
+    private func drawHouses(
+        snapshot: ChartSnapshot,
+        context: inout GraphicsContext,
+        geometry: ChartGeometry,
+        rotation: Double,
+        tokens: ChartVisualTokens,
+        scale: CGFloat
+    ) {
+        drawHighlightedHouses(
+            horaryOverlay?.highlightedHouses ?? [],
+            houses: snapshot.houses,
+            context: &context,
+            geometry: geometry,
+            rotation: rotation,
+            tokens: tokens
+        )
+
+        guard snapshot.houses.count == 12 else { return }
+        for index in snapshot.houses.indices {
+            let house = snapshot.houses[index]
+            let isAxisHouse = house.number == 1 || house.number == 10
+            var line = Path()
+            line.move(
+                to: geometry.point(
+                    longitude: house.cuspDegrees,
+                    rotation: rotation,
+                    radius: geometry.houseInnerRadius
+                )
+            )
+            line.addLine(
+                to: geometry.point(
+                    longitude: house.cuspDegrees,
+                    rotation: rotation,
+                    radius: geometry.houseOuterRadius
+                )
+            )
+            context.stroke(
+                line,
+                with: .color(isAxisHouse ? tokens.axisColor.opacity(0.72) : tokens.gridNormal),
+                lineWidth: isAxisHouse ? 1.25 : 0.65
+            )
+
+            let next = snapshot.houses[(index + 1) % snapshot.houses.count]
+            let midpoint = circularMidpoint(
+                from: house.cuspDegrees,
+                to: next.cuspDegrees
+            )
+            context.draw(
+                Text("\(house.number)")
+                    .font(
+                        .system(
+                            size: (displayMode == .simple ? 9.5 : 10.5) * scale,
+                            weight: .semibold
+                        )
+                    )
+                    .foregroundStyle(
+                        horaryOverlay?.highlightedHouses.contains(house.number) == true
+                            ? tokens.axisColor
+                            : tokens.secondaryText.opacity(
+                                displayMode == .simple ? 0.68 : 0.84
+                            )
+                    ),
+                at: geometry.point(
+                    longitude: midpoint,
+                    rotation: rotation,
+                    radius: geometry.houseNumberRadius
+                )
+            )
+        }
+    }
+
+    private func drawTicks(
+        context: inout GraphicsContext,
+        geometry: ChartGeometry,
+        rotation: Double,
+        tokens: ChartVisualTokens,
+        config: ChartDisplayConfig
+    ) {
+        for degree in 0 ..< 360 {
+            if displayMode == .simple, !degree.isMultiple(of: 5) {
+                continue
+            }
+
+            let isTen = degree.isMultiple(of: 10)
+            let isFive = degree.isMultiple(of: 5)
+            let length: CGFloat
+            let opacity: Double
+
+            if displayMode == .simple {
+                length = isTen ? 5.5 : 3.0
+                opacity = isTen ? 0.22 : 0.11
+            } else {
+                length = isTen ? 7 : isFive ? 4.5 : 2
+                opacity = isTen ? 0.28 : isFive ? 0.16 : 0.07
+            }
+
+            var tick = Path()
+            tick.move(
+                to: geometry.point(
+                    longitude: Double(degree),
+                    rotation: rotation,
+                    radius: geometry.outerTickRadius - length
+                )
+            )
+            tick.addLine(
+                to: geometry.point(
+                    longitude: Double(degree),
+                    rotation: rotation,
+                    radius: geometry.outerTickRadius
+                )
+            )
+            context.stroke(
+                tick,
+                with: .color(tokens.primaryText.opacity(opacity)),
+                lineWidth: isTen ? 0.7 : 0.45
+            )
+        }
+    }
+
+    private func drawZodiac(
+        context: inout GraphicsContext,
+        geometry: ChartGeometry,
+        rotation: Double,
+        tokens: ChartVisualTokens,
+        config: ChartDisplayConfig,
+        scale: CGFloat
+    ) {
+        for index in 0 ..< 12 {
+            let boundary = Double(index * 30)
+            var divider = Path()
+            divider.move(
+                to: geometry.point(
+                    longitude: boundary,
+                    rotation: rotation,
+                    radius: geometry.houseOuterRadius
+                )
+            )
+            divider.addLine(
+                to: geometry.point(
+                    longitude: boundary,
+                    rotation: rotation,
+                    radius: geometry.wheelRadius
+                )
+            )
+            context.stroke(
+                divider,
+                with: .color(tokens.gridNormal),
+                lineWidth: 0.75
+            )
+
+            let midpoint = boundary + 15
+            let glyph = zodiacGlyph(index)
+            let glyphSize = (displayMode == .simple ? 20.0 : 17.0) * scale
+
+            context.draw(
+                Text(glyph)
+                    .font(.system(size: glyphSize, weight: .medium))
+                    .foregroundStyle(
+                        tokens.secondaryText.opacity(
+                            displayMode == .simple ? 0.78 : 0.72
+                        )
+                    ),
+                at: geometry.point(
+                    longitude: midpoint,
+                    rotation: rotation,
+                    radius: geometry.zodiacRadius
+                )
+            )
+
+            if config.zodiacLabelDensity == .glyphAndDegree {
+                context.draw(
+                    Text("\(index * 30)°")
+                        .font(.system(size: 8.5 * scale, weight: .medium))
+                        .foregroundStyle(tokens.secondaryText.opacity(0.55)),
+                    at: geometry.point(
+                        longitude: midpoint,
+                        rotation: rotation,
+                        radius: geometry.zodiacRadius - 15
                     )
                 )
             }
-
-            drawAxes(
-                angles: houseSnapshot.angles,
-                context: &structureContext,
-                center: center,
-                radius: radius * 0.82,
-                rotation: rotation,
-                typographyScale: typographyScale
-            )
-
-            if let reference {
-                drawComparisonAspectLines(
-                    comparisonAspects,
-                    context: &aspectContext,
-                    center: center,
-                    movingRadius: radius * 0.62,
-                    referenceRadius: radius * 0.48,
-                    rotation: rotation
-                )
-                drawPoints(
-                    reference.points,
-                    context: &pointContext,
-                    center: center,
-                    radius: radius * 0.52,
-                    rotation: rotation,
-                    color: AppTheme.muted,
-                    fontSize: 9 * typographyScale,
-                    degreeFontSize: 8 * typographyScale,
-                    showsDegrees: true,
-                    labels: [:]
-                )
-                drawPoints(
-                    snapshot.points,
-                    context: &pointContext,
-                    center: center,
-                    radius: radius * 0.70,
-                    rotation: rotation,
-                    color: AppTheme.violet,
-                    fontSize: 9.5 * typographyScale,
-                    degreeFontSize: 8 * typographyScale,
-                    showsDegrees: true,
-                    labels: [:]
-                )
-            } else {
-                drawAspectLines(
-                    snapshot.aspects,
-                    context: &aspectContext,
-                    center: center,
-                    radius: radius * 0.57,
-                    rotation: rotation,
-                    keyAspectIDs: horaryOverlay?.keyAspectIDs ?? []
-                )
-                drawPoints(
-                    snapshot.points,
-                    context: &pointContext,
-                    center: center,
-                    radius: radius * 0.70,
-                    rotation: rotation,
-                    color: AppTheme.text,
-                    fontSize: 9.5 * typographyScale,
-                    degreeFontSize: 8 * typographyScale,
-                    showsDegrees: true,
-                    labels: horaryOverlay?.planetLabels ?? [:]
-                )
-            }
-
-            drawPresentationCenter(
-                context: &pointContext,
-                center: center,
-                referenceExists: reference != nil
-            )
-        }
-        .aspectRatio(1, contentMode: .fit)
-        .scaleEffect(CGFloat(0.985 + 0.015 * revealProgress))
-        .accessibilityLabel(
-            reference == nil
-                ? localized("chart.astrology-wheel", language: language)
-                : localized("chart.double-astrology-wheel", language: language)
-        )
-        .accessibilityIdentifier("astrology-wheel")
-        .task(id: motionTaskID) {
-            if accessibilityReduceMotion {
-                revealProgress = 1
-                return
-            }
-            revealProgress = 0
-            await Task.yield()
-            withAnimation(.easeOut(duration: 0.82)) {
-                revealProgress = 1
-            }
-        }
-        .onChange(of: accessibilityReduceMotion) { _, reduceMotion in
-            if reduceMotion {
-                revealProgress = 1
-            }
         }
     }
 
-    private var motionTaskID: String {
-        let referenceDate = reference?.utcDate.timeIntervalSince1970 ?? -1
-        return "\(snapshot.utcDate.timeIntervalSince1970)|\(referenceDate)|\(presentation.rawValue)"
-    }
-
-    private var structureOpacity: Double {
-        clamp(revealProgress / 0.46)
-    }
-
-    private var pointOpacity: Double {
-        clamp((revealProgress - 0.18) / 0.55)
-    }
-
-    private var aspectOpacity: Double {
-        clamp((revealProgress - 0.48) / 0.52)
-    }
-
-    private func clamp(_ value: Double) -> Double {
-        min(1, max(0, value))
-    }
-
-    private func drawPresentationCenter(
+    private func drawAxes(
+        snapshot: ChartSnapshot,
         context: inout GraphicsContext,
-        center: CGPoint,
-        referenceExists: Bool
+        geometry: ChartGeometry,
+        rotation: Double,
+        tokens: ChartVisualTokens,
+        config: ChartDisplayConfig,
+        scale: CGFloat
     ) {
-        switch presentation {
-        case .standard:
-            context.draw(
-                Text(referenceExists ? "◉" : "◎")
-                    .font(AppTypography.scaled(20, weight: .light))
-                    .foregroundStyle(AppTheme.violet.opacity(0.7)),
-                at: center
-            )
+        let axes: [(String, Double, Bool)] = [
+            ("ASC", snapshot.angles.ascendantDegrees, true),
+            ("DSC", snapshot.angles.ascendantDegrees + 180, false),
+            ("MC", snapshot.angles.midheavenDegrees, true),
+            ("IC", snapshot.angles.midheavenDegrees + 180, false),
+        ]
 
-        case .ask:
-            let halo = CGRect(x: center.x - 15, y: center.y - 15, width: 30, height: 30)
-            context.stroke(
-                Path(ellipseIn: halo),
-                with: .color(AppTheme.violet.opacity(0.18)),
-                lineWidth: 0.9
-            )
-            context.draw(
-                Text("✦")
-                    .font(AppTypography.scaled(18, weight: .medium))
-                    .foregroundStyle(AppTheme.violet.opacity(0.86)),
-                at: center
-            )
-
-        case .theme:
-            let offsets: [CGPoint] = [
-                CGPoint(x: -15, y: 0),
-                CGPoint(x: 0, y: -15),
-                CGPoint(x: 15, y: 0),
-                CGPoint(x: 0, y: 15),
-            ]
-            for offset in offsets {
-                var line = Path()
-                line.move(to: center)
-                line.addLine(to: CGPoint(x: center.x + offset.x, y: center.y + offset.y))
-                context.stroke(line, with: .color(AppTheme.violet.opacity(0.15)), lineWidth: 0.7)
-                let node = CGRect(
-                    x: center.x + offset.x - 2.2,
-                    y: center.y + offset.y - 2.2,
-                    width: 4.4,
-                    height: 4.4
+        for (label, longitude, emphasized) in axes {
+            var path = Path()
+            path.move(to: geometry.center)
+            path.addLine(
+                to: geometry.point(
+                    longitude: longitude,
+                    rotation: rotation,
+                    radius: geometry.houseOuterRadius
                 )
-                context.fill(Path(ellipseIn: node), with: .color(AppTheme.violet.opacity(0.42)))
-            }
-            context.draw(
-                Text("✦")
-                    .font(AppTypography.scaled(16, weight: .medium))
-                    .foregroundStyle(AppTheme.violet.opacity(0.84)),
-                at: center
+            )
+            context.stroke(
+                path,
+                with: .color(
+                    emphasized
+                        ? tokens.axisColor.opacity(0.72)
+                        : tokens.primaryText.opacity(0.17)
+                ),
+                lineWidth: emphasized ? 1.25 : 0.8
             )
 
-        case .compare:
-            let left = CGPoint(x: center.x - 17, y: center.y)
-            let right = CGPoint(x: center.x + 17, y: center.y)
-            var link = Path()
-            link.move(to: left)
-            link.addLine(to: right)
-            context.stroke(link, with: .color(AppTheme.violet.opacity(0.18)), lineWidth: 0.8)
-            for nodeCenter in [left, right] {
-                let node = CGRect(x: nodeCenter.x - 3.2, y: nodeCenter.y - 3.2, width: 6.4, height: 6.4)
-                context.stroke(Path(ellipseIn: node), with: .color(AppTheme.violet.opacity(0.48)), lineWidth: 0.9)
-            }
+            let degree = normalizedDegreeInSign(longitude)
+            let text = displayMode == .simple
+                ? label
+                : "\(label)\n\(formatDegree(degree, precision: config.degreePrecision))"
+
             context.draw(
-                Text("⇄")
-                    .font(AppTypography.scaled(15, weight: .semibold))
-                    .foregroundStyle(AppTheme.violet.opacity(0.82)),
-                at: center
+                Text(text)
+                    .font(
+                        .system(
+                            size: (displayMode == .simple ? 9.5 : 9.0) * scale,
+                            weight: .bold
+                        )
+                    )
+                    .foregroundColor(
+                        emphasized
+                            ? tokens.axisColor
+                            : tokens.secondaryText
+                    ),
+                at: geometry.clampedLabelPoint(
+                    longitude: longitude,
+                    rotation: rotation,
+                    radius: geometry.wheelRadius - 6,
+                    horizontalReserve: displayMode == .simple ? 17 : 22,
+                    verticalReserve: displayMode == .simple ? 9 : 15
+                )
+            )
+        }
+    }
+
+    private func drawPlanets(
+        _ points: [ChartPoint],
+        context: inout GraphicsContext,
+        geometry: ChartGeometry,
+        radius: CGFloat,
+        rotation: Double,
+        tokens: ChartVisualTokens,
+        config: ChartDisplayConfig,
+        scale: CGFloat,
+        secondaryRing: Bool,
+        labels: [CelestialBody: String]
+    ) {
+        let adjusted = collisionAdjusted(points)
+        for (pointValue, displayLongitude) in adjusted {
+            let color = secondaryRing
+                ? tokens.secondaryText
+                : tokens.planetColor(pointValue.body)
+            let glyphSize = (
+                displayMode == .simple ? 19.0 : 17.0
+            ) * scale
+            let degreeSize = (
+                displayMode == .simple ? 10.5 : 9.5
+            ) * scale
+
+            let anchor = geometry.point(
+                longitude: pointValue.longitudeDegrees,
+                rotation: rotation,
+                radius: radius - 12
+            )
+            let leaderEnd = geometry.point(
+                longitude: displayLongitude,
+                rotation: rotation,
+                radius: radius - 5
+            )
+            var leader = Path()
+            leader.move(to: anchor)
+            leader.addLine(to: leaderEnd)
+            context.stroke(
+                leader,
+                with: .color(color.opacity(secondaryRing ? 0.16 : 0.24)),
+                lineWidth: 0.55
+            )
+
+            let degree = formatDegree(
+                pointValue.degreeInSign,
+                precision: config.degreePrecision
+            )
+            let retrograde = pointValue.retrograde ? " R" : ""
+            let role = labels[pointValue.body].map { "\n\($0)" } ?? ""
+            let house = snapshot.house(containing: pointValue.longitudeDegrees)
+            let secondaryLine = displayMode == .simple
+                ? "\(degree) · H\(house)\(retrograde)"
+                : "\(degree)\(retrograde)"
+
+            let label = Text(pointValue.body.symbol)
+                .font(.system(size: glyphSize, weight: .semibold))
+                .foregroundColor(color)
+                + Text("\n\(secondaryLine)")
+                .font(.system(size: degreeSize, weight: .medium))
+                .foregroundColor(color.opacity(secondaryRing ? 0.72 : 0.82))
+                + Text(role)
+                .font(.system(size: max(8, degreeSize - 0.5), weight: .bold))
+                .foregroundColor(tokens.axisColor)
+
+            context.draw(
+                label,
+                at: geometry.point(
+                    longitude: displayLongitude,
+                    rotation: rotation,
+                    radius: radius
+                )
+            )
+        }
+    }
+
+    private func drawAspects(
+        _ aspects: [ChartAspect],
+        context: inout GraphicsContext,
+        geometry: ChartGeometry,
+        rotation: Double,
+        tokens: ChartVisualTokens,
+        config: ChartDisplayConfig,
+        keyAspectIDs: Set<String>
+    ) {
+        let limit = config.aspectDensity == .major ? 14 : 28
+        for aspect in aspects
+            .sorted(by: { $0.strength > $1.strength })
+            .prefix(limit)
+        {
+            let emphasized = keyAspectIDs.contains(aspect.id)
+            var path = Path()
+            path.move(
+                to: geometry.point(
+                    longitude: aspect.firstLongitude,
+                    rotation: rotation,
+                    radius: geometry.aspectRadius
+                )
+            )
+            path.addLine(
+                to: geometry.point(
+                    longitude: aspect.secondLongitude,
+                    rotation: rotation,
+                    radius: geometry.aspectRadius
+                )
+            )
+
+            let baseOpacity = displayMode == .simple ? 0.22 : 0.27
+            let strengthOpacity = min(0.48, aspect.strength * 0.34)
+            context.stroke(
+                path,
+                with: .color(
+                    tokens.aspectColor(aspect.kind)
+                        .opacity(
+                            emphasized
+                                ? 0.78
+                                : baseOpacity + strengthOpacity
+                        )
+                ),
+                lineWidth: emphasized
+                    ? 1.6
+                    : (displayMode == .simple ? 0.75 : 0.85)
+            )
+        }
+    }
+
+    private func drawComparisonAspects(
+        _ aspects: [ChartAspect],
+        context: inout GraphicsContext,
+        geometry: ChartGeometry,
+        rotation: Double,
+        tokens: ChartVisualTokens,
+        config: ChartDisplayConfig
+    ) {
+        let limit = config.aspectDensity == .major ? 14 : 28
+        for aspect in aspects
+            .sorted(by: { $0.strength > $1.strength })
+            .prefix(limit)
+        {
+            var path = Path()
+            path.move(
+                to: geometry.point(
+                    longitude: aspect.firstLongitude,
+                    rotation: rotation,
+                    radius: geometry.comparisonOuterAspectRadius
+                )
+            )
+            path.addLine(
+                to: geometry.point(
+                    longitude: aspect.secondLongitude,
+                    rotation: rotation,
+                    radius: geometry.comparisonInnerAspectRadius
+                )
+            )
+            context.stroke(
+                path,
+                with: .color(
+                    tokens.aspectColor(aspect.kind)
+                        .opacity(
+                            (displayMode == .simple ? 0.22 : 0.28)
+                                + min(0.42, aspect.strength * 0.32)
+                        )
+                ),
+                lineWidth: displayMode == .simple ? 0.75 : 0.9
             )
         }
     }
@@ -347,242 +1162,135 @@ struct ChartWheelView: View {
         _ highlighted: Set<Int>,
         houses: [ChartHouse],
         context: inout GraphicsContext,
-        center: CGPoint,
-        innerRadius: Double,
-        outerRadius: Double,
-        rotation: Double
+        geometry: ChartGeometry,
+        rotation: Double,
+        tokens: ChartVisualTokens
     ) {
         guard !highlighted.isEmpty, houses.count == 12 else { return }
-        for index in houses.indices where highlighted.contains(houses[index].number) {
+
+        for index in houses.indices
+        where highlighted.contains(houses[index].number) {
             let start = houses[index].cuspDegrees
             var end = houses[(index + 1) % houses.count].cuspDegrees
             while end <= start { end += 360 }
+
             var path = Path()
             let steps = max(6, Int((end - start) / 2))
-            path.move(to: point(center: center, radius: innerRadius, longitude: start, rotation: rotation))
+            path.move(
+                to: geometry.point(
+                    longitude: start,
+                    rotation: rotation,
+                    radius: geometry.houseInnerRadius
+                )
+            )
             for step in 0 ... steps {
-                let longitude = start + (end - start) * Double(step) / Double(steps)
+                let longitude = start
+                    + (end - start) * Double(step) / Double(steps)
                 path.addLine(
-                    to: point(
-                        center: center,
-                        radius: outerRadius,
+                    to: geometry.point(
                         longitude: longitude,
-                        rotation: rotation
+                        rotation: rotation,
+                        radius: geometry.houseOuterRadius
                     )
                 )
             }
             for step in (0 ... steps).reversed() {
-                let longitude = start + (end - start) * Double(step) / Double(steps)
+                let longitude = start
+                    + (end - start) * Double(step) / Double(steps)
                 path.addLine(
-                    to: point(
-                        center: center,
-                        radius: innerRadius,
+                    to: geometry.point(
                         longitude: longitude,
-                        rotation: rotation
+                        rotation: rotation,
+                        radius: geometry.houseInnerRadius
                     )
                 )
             }
             path.closeSubpath()
-            context.fill(path, with: .color(AppTheme.violet.opacity(presentation == .ask ? 0.15 : 0.11)))
-        }
-    }
-
-    private func drawCircle(
-        context: inout GraphicsContext,
-        center: CGPoint,
-        radius: Double,
-        color: Color
-    ) {
-        let rect = CGRect(
-            x: center.x - radius,
-            y: center.y - radius,
-            width: radius * 2,
-            height: radius * 2
-        )
-        context.stroke(Path(ellipseIn: rect), with: .color(color), lineWidth: 1)
-    }
-
-    private func drawDegreeTicks(
-        context: inout GraphicsContext,
-        center: CGPoint,
-        radius: Double,
-        rotation: Double
-    ) {
-        for degree in 0 ..< 360 {
-            let isTen = degree.isMultiple(of: 10)
-            let isFive = degree.isMultiple(of: 5)
-            let tickLength = isTen ? 7.0 : isFive ? 4.5 : 2.2
-            let opacity = isTen ? 0.3 : isFive ? 0.18 : 0.09
-            var tick = Path()
-            tick.move(
-                to: point(
-                    center: center,
-                    radius: radius - tickLength,
-                    longitude: Double(degree),
-                    rotation: rotation
-                )
-            )
-            tick.addLine(
-                to: point(
-                    center: center,
-                    radius: radius,
-                    longitude: Double(degree),
-                    rotation: rotation
-                )
-            )
-            context.stroke(
-                tick,
-                with: .color(AppTheme.text.opacity(opacity)),
-                lineWidth: isTen ? 0.75 : 0.45
-            )
-        }
-    }
-
-    private func drawAxes(
-        angles: NatalAngles,
-        context: inout GraphicsContext,
-        center: CGPoint,
-        radius: Double,
-        rotation: Double,
-        typographyScale: Double
-    ) {
-        let axes: [(String, Double, Bool)] = [
-            (localized("chart.rising", language: language), angles.ascendantDegrees, true),
-            (localized("chart.setting", language: language), angles.ascendantDegrees + 180, false),
-            (localized("chart.midheaven", language: language), angles.midheavenDegrees, true),
-            (localized("chart.nadir", language: language), angles.midheavenDegrees + 180, false),
-        ]
-        for (label, longitude, emphasized) in axes {
-            var path = Path()
-            path.move(to: center)
-            path.addLine(
-                to: point(
-                    center: center,
-                    radius: radius,
-                    longitude: longitude,
-                    rotation: rotation
-                )
-            )
-            context.stroke(
+            context.fill(
                 path,
                 with: .color(
-                    emphasized
-                        ? AppTheme.violet.opacity(0.48)
-                        : AppTheme.text.opacity(0.13)
-                ),
-                lineWidth: emphasized ? 1.15 : 0.75
-            )
-            context.draw(
-                Text(label)
-                    .font(
-                        .system(
-                            size: (language == .english ? 8.2 : 8.6) * typographyScale,
-                            weight: .bold
-                        )
+                    tokens.axisColor.opacity(
+                        presentation == .ask ? 0.13 : 0.08
                     )
-                    .foregroundStyle(
-                        emphasized
-                            ? AppTheme.violet
-                            : AppTheme.muted.opacity(0.76)
-                    ),
-                at: point(
-                    center: center,
-                    radius: radius * 0.92,
-                    longitude: longitude,
-                    rotation: rotation
                 )
             )
         }
     }
 
-    private func drawPoints(
-        _ points: [ChartPoint],
+    private func drawPresentationCenter(
         context: inout GraphicsContext,
         center: CGPoint,
-        radius: Double,
-        rotation: Double,
-        color: Color,
-        fontSize: Double,
-        degreeFontSize: Double,
-        showsDegrees: Bool,
-        labels: [CelestialBody: String]
+        tokens: ChartVisualTokens,
+        referenceExists: Bool
     ) {
+        let text: String = switch presentation {
+        case .standard:
+            referenceExists ? "◉" : "◎"
+        case .ask:
+            "✦"
+        case .theme:
+            "✦"
+        case .compare:
+            "⇄"
+        }
+
+        context.draw(
+            Text(text)
+                .font(
+                    .system(
+                        size: displayMode == .simple ? 16 : 15,
+                        weight: .medium
+                    )
+                )
+                .foregroundStyle(tokens.axisColor.opacity(0.58)),
+            at: center
+        )
+    }
+
+    private func collisionAdjusted(
+        _ points: [ChartPoint]
+    ) -> [(ChartPoint, Double)] {
         let sorted = circularlySorted(points)
-        let minimumSpacing = language == .english ? 17.0 : 15.0
+        let minimumSpacing = displayMode == .simple ? 16.0 : 13.0
         var adjusted: [(ChartPoint, Double)] = []
+
         for pointValue in sorted {
             var longitude = pointValue.longitudeDegrees
             if let first = adjusted.first?.1 {
                 while longitude < first { longitude += 360 }
             }
-            if let previous = adjusted.last?.1, longitude - previous < minimumSpacing {
+            if let previous = adjusted.last?.1,
+               longitude - previous < minimumSpacing
+            {
                 longitude = previous + minimumSpacing
             }
             adjusted.append((pointValue, longitude))
         }
-        for (pointValue, longitude) in adjusted {
-            let location = point(center: center, radius: radius, longitude: longitude, rotation: rotation)
-            let anchor = point(
-                center: center,
-                radius: radius - 13,
-                longitude: pointValue.longitudeDegrees,
-                rotation: rotation
-            )
-            var leader = Path()
-            leader.move(to: anchor)
-            leader.addLine(
-                to: point(
-                    center: center,
-                    radius: radius - 5,
-                    longitude: longitude,
-                    rotation: rotation
-                )
-            )
-            context.stroke(leader, with: .color(color.opacity(0.28)), lineWidth: 0.55)
-            let role = labels[pointValue.body].map { "\n\($0)" } ?? ""
-            let label = Text(wheelBodyLabel(pointValue.body) + retrogradeLabel(pointValue))
-                .font(.system(size: fontSize, weight: .semibold))
-                .foregroundColor(color)
-                + Text(showsDegrees ? "\n\(Int(pointValue.degreeInSign))°" : "")
-                .font(.system(size: degreeFontSize, weight: .medium))
-                .foregroundColor(color.opacity(0.7))
-                + Text(role)
-                .font(.system(size: max(8, degreeFontSize), weight: .bold))
-                .foregroundColor(AppTheme.violet)
-            context.draw(
-                label,
-                at: location
-            )
+
+        // Prevent the final stagger from wrapping on top of the first label.
+        guard adjusted.count > 1,
+              let first = adjusted.first,
+              let last = adjusted.last
+        else {
+            return adjusted
         }
-    }
-
-    private func zodiacWheelLabel(_ index: Int) -> String {
-        let name = Zodiac.name(index: index, language: language)
-        if language == .simplifiedChinese {
-            return name.replacingOccurrences(of: "座", with: "")
+        let closingGap = (first.1 + 360) - last.1
+        if closingGap < minimumSpacing {
+            let correction = (minimumSpacing - closingGap)
+                / Double(adjusted.count)
+            adjusted = adjusted.enumerated().map { index, pair in
+                (pair.0, pair.1 - correction * Double(index))
+            }
         }
-        return String(name.prefix(3))
-    }
-
-    private func wheelBodyLabel(_ body: CelestialBody) -> String {
-        let name = bodyName(body, language: language)
-        return language == .simplifiedChinese ? String(name.prefix(2)) : String(name.prefix(5))
-    }
-
-    private func retrogradeLabel(_ point: ChartPoint) -> String {
-        guard point.retrograde else { return "" }
-        return localized("chart.retrograde-marker", language: language)
-    }
-
-    private func circularMidpoint(from start: Double, to rawEnd: Double) -> Double {
-        var end = rawEnd
-        while end < start { end += 360 }
-        return (start + (end - start) / 2).truncatingRemainder(dividingBy: 360)
+        return adjusted
     }
 
     private func circularlySorted(_ points: [ChartPoint]) -> [ChartPoint] {
-        let sorted = points.sorted { $0.longitudeDegrees < $1.longitudeDegrees }
+        let sorted = points.sorted {
+            $0.longitudeDegrees < $1.longitudeDegrees
+        }
         guard sorted.count > 1 else { return sorted }
+
         var largestGap = -Double.infinity
         var startIndex = 0
         for index in sorted.indices {
@@ -596,74 +1304,71 @@ struct ChartWheelView: View {
                 startIndex = nextIndex
             }
         }
-        return Array(sorted[startIndex...]) + Array(sorted[..<startIndex])
+
+        return Array(sorted[startIndex...])
+            + Array(sorted[..<startIndex])
     }
 
-    private func drawAspectLines(
-        _ aspects: [ChartAspect],
-        context: inout GraphicsContext,
+    private func circleRect(
         center: CGPoint,
-        radius: Double,
-        rotation: Double,
-        keyAspectIDs: Set<String>
-    ) {
-        for aspect in aspects.prefix(18) {
-            let emphasized = keyAspectIDs.contains(aspect.id)
-            var path = Path()
-            path.move(to: point(center: center, radius: radius, longitude: aspect.firstLongitude, rotation: rotation))
-            path.addLine(to: point(center: center, radius: radius, longitude: aspect.secondLongitude, rotation: rotation))
-            context.stroke(
-                path,
-                with: .color(
-                    AppTheme.tone(tone(aspect.kind))
-                        .opacity(emphasized ? 0.92 : 0.18 + aspect.strength * 0.32)
-                ),
-                lineWidth: emphasized ? 2.4 : 0.5 + aspect.strength
-            )
-        }
-    }
-
-    private func drawComparisonAspectLines(
-        _ aspects: [ChartAspect],
-        context: inout GraphicsContext,
-        center: CGPoint,
-        movingRadius: Double,
-        referenceRadius: Double,
-        rotation: Double
-    ) {
-        for aspect in aspects.prefix(18) {
-            var path = Path()
-            path.move(
-                to: point(
-                    center: center,
-                    radius: movingRadius,
-                    longitude: aspect.firstLongitude,
-                    rotation: rotation
-                )
-            )
-            path.addLine(
-                to: point(
-                    center: center,
-                    radius: referenceRadius,
-                    longitude: aspect.secondLongitude,
-                    rotation: rotation
-                )
-            )
-            context.stroke(
-                path,
-                with: .color(AppTheme.tone(tone(aspect.kind)).opacity((presentation == .compare ? 0.32 : 0.25) + aspect.strength * 0.4)),
-                lineWidth: 0.5 + aspect.strength
-            )
-        }
-    }
-
-    private func point(center: CGPoint, radius: Double, longitude: Double, rotation: Double) -> CGPoint {
-        AstrologyWheelGeometry.point(
-            center: center,
-            radius: radius,
-            longitude: longitude,
-            ascendantRotation: rotation
+        radius: CGFloat
+    ) -> CGRect {
+        CGRect(
+            x: center.x - radius,
+            y: center.y - radius,
+            width: radius * 2,
+            height: radius * 2
         )
+    }
+
+    private func circularMidpoint(
+        from start: Double,
+        to rawEnd: Double
+    ) -> Double {
+        var end = rawEnd
+        while end < start { end += 360 }
+        return (start + (end - start) / 2)
+            .truncatingRemainder(dividingBy: 360)
+    }
+
+    private func normalizedSignIndex(_ longitude: Double) -> Int {
+        Int(normalizedLongitude(longitude) / 30)
+    }
+
+    private func normalizedDegreeInSign(_ longitude: Double) -> Double {
+        normalizedLongitude(longitude)
+            .truncatingRemainder(dividingBy: 30)
+    }
+
+    private func normalizedLongitude(_ longitude: Double) -> Double {
+        let raw = longitude.truncatingRemainder(dividingBy: 360)
+        return raw >= 0 ? raw : raw + 360
+    }
+
+    private func formatDegree(
+        _ value: Double,
+        precision: DegreePrecision
+    ) -> String {
+        switch precision {
+        case .whole:
+            return "\(Int(value.rounded()))°"
+        case .minute:
+            let degrees = Int(value)
+            let minutes = Int(((value - Double(degrees)) * 60).rounded())
+            if minutes == 60 {
+                return "\(degrees + 1)°00′"
+            }
+            return String(format: "%d°%02d′", degrees, minutes)
+        }
+    }
+
+    private func zodiacGlyph(_ index: Int) -> String {
+        let glyphs = [
+            "♈︎", "♉︎", "♊︎", "♋︎",
+            "♌︎", "♍︎", "♎︎", "♏︎",
+            "♐︎", "♑︎", "♒︎", "♓︎",
+        ]
+        return glyphs[((index % 12) + 12) % 12]
     }
 }
 

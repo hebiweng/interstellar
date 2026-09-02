@@ -42,19 +42,26 @@ def test_failed_compare_is_terminal_until_explicit_retry():
 def test_manual_compare_retry_recovers_existing_relay_result_before_generation():
     manager = text()
     service = (ROOT / "ios/App/CompareAIService.swift").read_text()
+    shared = (ROOT / "ios/App/AppAIReportService.swift").read_text()
     retry = manager[manager.index("func retry"):]
     assert "recoverFirst: true" in retry
-    assert "statusIfExists" in service
+    assert "statusIfExists" in shared
     generate = service[service.index("func generate("):]
-    assert generate.index("recover(") < generate.index("client.createTask")
+    assert "taskManager.submit(" in generate
+    submit = shared[shared.index("func submit<Result>("):shared.index("/// Reconciles an existing task")]
+    assert submit.index("recover(") < submit.index("client.createTask")
 
 
 def test_compare_reconciliation_never_submits_generation_and_only_marks_running_after_relay_status():
     manager = text()
     service = (ROOT / "ios/App/CompareAIService.swift").read_text()
+    shared = (ROOT / "ios/App/AppAIReportService.swift").read_text()
     reconcile = manager[manager.index("func reconcilePendingReports"):manager.index("func analyze")]
     assert "reportService.recover" in reconcile
     assert "reportService.generate" not in reconcile
     recover = service[service.index("func recover("):service.index("func generate(")]
-    assert "client.createTask" not in recover
-    assert "onGenerating()" in recover
+    assert "taskManager.recover(" in recover
+    assert "onGenerating: onGenerating" in recover
+    shared_recover = shared[shared.index("func recover<Result>("):shared.index("private func waitForResult")]
+    assert "client.createTask" not in shared_recover
+    assert "onGenerating()" in shared_recover

@@ -58,7 +58,7 @@ def test_theme_source_is_in_xcode_project():
 
 def test_theme_relay_uses_server_prompt_key_and_direct_generate_endpoint():
     source = THEMES.read_text()
-    assert 'appendingPathComponent("v1/generate")' in source
+    assert 'path: "v1/generate"' in source
     assert '"reportPromptKey": "theme.\\(payload.analysis.theme)"' in source
     assert '"semanticFingerprint": semanticFingerprint' in source
     assert '"factsHash": factsHash' in source

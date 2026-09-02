@@ -1,4 +1,5 @@
 import XCTest
+import CoreGraphics
 import DeviceCheck
 @testable import Interstellar
 
@@ -432,4 +433,461 @@ final class CommerceTests: XCTestCase {
 
 private enum AppTransactionTestError: Error {
 	case unavailable
+}
+
+@MainActor
+final class AIReportTaskManagerTests: XCTestCase {
+    func testRecoverMissingNeverCreatesTask() async throws {
+        let transport = FakeAIReportTaskTransport()
+        transport.statusIfExistsResult = nil
+        let manager = AIReportTaskManager(
+            client: transport,
+            pollIntervalNanoseconds: 1
+        )
+
+        let result: String? = try await manager.recover(
+            requestID: "missing",
+            language: .english
+        ) { data in
+            String(decoding: data, as: UTF8.self)
+        }
+
+        XCTAssertNil(result)
+        XCTAssertEqual(transport.createCount, 0)
+        XCTAssertEqual(transport.statusIfExistsCount, 1)
+        XCTAssertEqual(transport.fetchCount, 0)
+    }
+
+    func testRecoverGeneratingPollsAndFetchesWithoutCreate() async throws {
+        let transport = FakeAIReportTaskTransport()
+        transport.statusIfExistsResult = state(
+            requestID: "r1",
+            status: "generating"
+        )
+        transport.statusQueue = [
+            state(requestID: "r1", status: "completed"),
+        ]
+        transport.fetchData = Data("done".utf8)
+
+        var generatingCount = 0
+        let manager = AIReportTaskManager(
+            client: transport,
+            pollIntervalNanoseconds: 1
+        )
+
+        let result: String? = try await manager.recover(
+            requestID: "r1",
+            language: .english,
+            onGenerating: { generatingCount += 1 }
+        ) { data in
+            String(decoding: data, as: UTF8.self)
+        }
+
+        XCTAssertEqual(result, "done")
+        XCTAssertEqual(generatingCount, 1)
+        XCTAssertEqual(transport.createCount, 0)
+        XCTAssertEqual(transport.fetchCount, 1)
+    }
+
+    func testRecoverRelayFailureNeverCreatesTask() async {
+        let transport = FakeAIReportTaskTransport()
+        transport.statusIfExistsResult = state(
+            requestID: "r2",
+            status: "failed",
+            error: "provider failed"
+        )
+        let manager = AIReportTaskManager(
+            client: transport,
+            pollIntervalNanoseconds: 1
+        )
+
+        do {
+            let _: String? = try await manager.recover(
+                requestID: "r2",
+                language: .english
+            ) { data in
+                String(decoding: data, as: UTF8.self)
+            }
+            XCTFail("Expected relay failure")
+        } catch AIReportTaskError.relayFailed(let message) {
+            XCTAssertEqual(message, "provider failed")
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+
+        XCTAssertEqual(transport.createCount, 0)
+    }
+
+    func testRecoverDeliveryFailureNeverCreatesTask() async {
+        let transport = FakeAIReportTaskTransport()
+        transport.statusIfExistsError = AIReportTaskError.delivery(
+            "network unavailable"
+        )
+        let manager = AIReportTaskManager(
+            client: transport,
+            pollIntervalNanoseconds: 1
+        )
+
+        do {
+            let _: String? = try await manager.recover(
+                requestID: "r3",
+                language: .english
+            ) { data in
+                String(decoding: data, as: UTF8.self)
+            }
+            XCTFail("Expected delivery failure")
+        } catch AIReportTaskError.delivery(let message) {
+            XCTAssertEqual(message, "network unavailable")
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+
+        XCTAssertEqual(transport.createCount, 0)
+    }
+
+    func testRecoverCompletedDecodeFailureNeverCreatesTask() async {
+        let transport = FakeAIReportTaskTransport()
+        transport.statusIfExistsResult = state(
+            requestID: "bad-envelope",
+            status: "completed"
+        )
+        transport.fetchData = Data("invalid".utf8)
+        let manager = AIReportTaskManager(
+            client: transport,
+            pollIntervalNanoseconds: 1
+        )
+
+        do {
+            let _: String? = try await manager.recover(
+                requestID: "bad-envelope",
+                language: .english
+            ) { _ in
+                throw TestDecodeError.invalid
+            }
+            XCTFail("Expected decode failure")
+        } catch TestDecodeError.invalid {
+            // Expected. A completed-but-invalid delivery must never regenerate.
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+
+        XCTAssertEqual(transport.createCount, 0)
+        XCTAssertEqual(transport.fetchCount, 1)
+    }
+
+    func testCreateDeliveryFailureIsNotRetriedAutomatically() async {
+        let transport = FakeAIReportTaskTransport()
+        transport.createError = AIReportTaskError.delivery(
+            "request delivery uncertain"
+        )
+        let manager = AIReportTaskManager(
+            client: transport,
+            pollIntervalNanoseconds: 1
+        )
+
+        do {
+            let _: String = try await manager.submit(
+                requestID: "create-uncertain",
+                body: Data("{}".utf8),
+                language: .english
+            ) { data in
+                String(decoding: data, as: UTF8.self)
+            }
+            XCTFail("Expected delivery failure")
+        } catch AIReportTaskError.delivery(let message) {
+            XCTAssertEqual(message, "request delivery uncertain")
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+
+        XCTAssertEqual(transport.createCount, 1)
+        XCTAssertEqual(transport.statusIfExistsCount, 0)
+        XCTAssertEqual(transport.fetchCount, 0)
+    }
+
+    func testExplicitRetryMayResubmitRelayConfirmedFailure() async throws {
+        let transport = FakeAIReportTaskTransport()
+        transport.statusIfExistsResult = state(
+            requestID: "retry-id",
+            status: "failed",
+            error: "old failure"
+        )
+        transport.statusQueue = [
+            state(requestID: "retry-id", status: "completed"),
+        ]
+        transport.fetchData = Data("recovered-after-retry".utf8)
+
+        let requestBody = try JSONSerialization.data(
+            withJSONObject: [
+                "requestID": "retry-id",
+                "mode": "compare",
+            ]
+        )
+        let manager = AIReportTaskManager(
+            client: transport,
+            pollIntervalNanoseconds: 1
+        )
+
+        let result: String = try await manager.submit(
+            requestID: "retry-id",
+            body: requestBody,
+            language: .english,
+            recoverFirst: true
+        ) { data in
+            String(decoding: data, as: UTF8.self)
+        }
+
+        XCTAssertEqual(result, "recovered-after-retry")
+        XCTAssertEqual(transport.statusIfExistsCount, 1)
+        XCTAssertEqual(transport.createCount, 1)
+        XCTAssertEqual(transport.createdRequestID, "retry-id")
+        XCTAssertEqual(transport.fetchCount, 1)
+    }
+
+    func testNormalSubmitDoesNotRunRecoveryFirst() async throws {
+        let transport = FakeAIReportTaskTransport()
+        transport.statusQueue = [
+            state(requestID: "new-id", status: "completed"),
+        ]
+        transport.fetchData = Data("new-result".utf8)
+
+        let body = try JSONSerialization.data(
+            withJSONObject: ["requestID": "new-id"]
+        )
+        let manager = AIReportTaskManager(
+            client: transport,
+            pollIntervalNanoseconds: 1
+        )
+
+        let result: String = try await manager.submit(
+            requestID: "new-id",
+            body: body,
+            language: .english
+        ) { data in
+            String(decoding: data, as: UTF8.self)
+        }
+
+        XCTAssertEqual(result, "new-result")
+        XCTAssertEqual(transport.statusIfExistsCount, 0)
+        XCTAssertEqual(transport.createCount, 1)
+        XCTAssertEqual(transport.fetchCount, 1)
+    }
+
+    private func state(
+        requestID: String,
+        status: String,
+        error: String? = nil
+    ) -> ReportTaskState {
+        ReportTaskState(
+            requestID: requestID,
+            status: status,
+            code: nil,
+            error: error
+        )
+    }
+}
+
+private enum TestDecodeError: Error {
+    case invalid
+}
+
+@MainActor
+private final class FakeAIReportTaskTransport: AIReportTaskTransport {
+    var createCount = 0
+    var statusCount = 0
+    var statusIfExistsCount = 0
+    var fetchCount = 0
+
+    var createError: Error?
+    var statusIfExistsResult: ReportTaskState?
+    var statusIfExistsError: Error?
+    var statusQueue: [ReportTaskState] = []
+    var fetchData = Data()
+    var createdRequestID: String?
+
+    func createTask(
+        body: Data,
+        language: AppLanguage
+    ) async throws -> ReportTaskState {
+        _ = language
+        createCount += 1
+        if let createError {
+            throw createError
+        }
+        if let json = try? JSONSerialization.jsonObject(with: body)
+            as? [String: Any]
+        {
+            createdRequestID = json["requestID"] as? String
+        }
+        return ReportTaskState(
+            requestID: createdRequestID,
+            status: "generating",
+            code: nil,
+            error: nil
+        )
+    }
+
+    func status(
+        userID: String,
+        requestID: String,
+        language: AppLanguage
+    ) async throws -> ReportTaskState {
+        _ = userID
+        _ = requestID
+        _ = language
+        statusCount += 1
+        if statusQueue.isEmpty {
+            return ReportTaskState(
+                requestID: requestID,
+                status: "generating",
+                code: nil,
+                error: nil
+            )
+        }
+        return statusQueue.removeFirst()
+    }
+
+    func statusIfExists(
+        userID: String,
+        requestID: String,
+        language: AppLanguage
+    ) async throws -> ReportTaskState? {
+        _ = userID
+        _ = requestID
+        _ = language
+        statusIfExistsCount += 1
+        if let statusIfExistsError {
+            throw statusIfExistsError
+        }
+        return statusIfExistsResult
+    }
+
+    func fetch(
+        userID: String,
+        requestID: String,
+        language: AppLanguage
+    ) async throws -> Data {
+        _ = userID
+        _ = requestID
+        _ = language
+        fetchCount += 1
+        return fetchData
+    }
+}
+
+final class R5ChartWheelGeometryTests: XCTestCase {
+    func testSimpleGeometryStaysInsideSafeBoundsAcrossPhoneWidths() {
+        // ChartsView uses 18pt page padding on each side. These are the
+        // resulting content widths for the supported iPhone width classes.
+        let screenWidths: [CGFloat] = [375, 390, 393, 402, 430]
+
+        for screenWidth in screenWidths {
+            let contentWidth = screenWidth - 36
+            let geometry = ChartGeometry(
+                size: CGSize(
+                    width: contentWidth,
+                    height: contentWidth
+                ),
+                mode: .simple,
+                externalLabelReserve: 0
+            )
+
+            XCTAssertGreaterThan(geometry.wheelRadius, 0)
+            XCTAssertGreaterThanOrEqual(
+                geometry.safeLabelBounds.minX,
+                8,
+                "screen width \(screenWidth)"
+            )
+            XCTAssertLessThanOrEqual(
+                geometry.safeLabelBounds.maxX,
+                contentWidth - 8,
+                "screen width \(screenWidth)"
+            )
+            XCTAssertLessThanOrEqual(
+                geometry.wheelRadius * 2,
+                geometry.safeLabelBounds.width + 0.001,
+                "screen width \(screenWidth)"
+            )
+            XCTAssertLessThan(
+                geometry.zodiacRadius,
+                geometry.wheelRadius,
+                "screen width \(screenWidth)"
+            )
+            XCTAssertLessThan(
+                geometry.outerPlanetRadius,
+                geometry.zodiacRadius,
+                "screen width \(screenWidth)"
+            )
+            XCTAssertLessThan(
+                geometry.aspectRadius,
+                geometry.outerPlanetRadius,
+                "screen width \(screenWidth)"
+            )
+        }
+    }
+
+    func testAxisLabelClampNeverLeavesSafeBounds() {
+        let geometry = ChartGeometry(
+            size: CGSize(width: 339, height: 339),
+            mode: .simple,
+            externalLabelReserve: 0
+        )
+
+        for longitude in stride(
+            from: 0.0,
+            to: 360.0,
+            by: 5.0
+        ) {
+            let point = geometry.clampedLabelPoint(
+                longitude: longitude,
+                rotation: 127.5,
+                radius: geometry.wheelRadius - 6,
+                horizontalReserve: 17,
+                verticalReserve: 9
+            )
+
+            XCTAssertGreaterThanOrEqual(
+                point.x,
+                geometry.safeLabelBounds.minX + 17 - 0.001
+            )
+            XCTAssertLessThanOrEqual(
+                point.x,
+                geometry.safeLabelBounds.maxX - 17 + 0.001
+            )
+            XCTAssertGreaterThanOrEqual(
+                point.y,
+                geometry.safeLabelBounds.minY + 9 - 0.001
+            )
+            XCTAssertLessThanOrEqual(
+                point.y,
+                geometry.safeLabelBounds.maxY - 9 + 0.001
+            )
+        }
+    }
+
+    func testSimpleAndProShareSameGeometryTypeWithDifferentDensity() {
+        let size = CGSize(width: 339, height: 339)
+        let simple = ChartGeometry(
+            size: size,
+            mode: .simple,
+            externalLabelReserve: 0
+        )
+        let pro = ChartGeometry(
+            size: size,
+            mode: .pro,
+            externalLabelReserve: 0
+        )
+
+        XCTAssertEqual(simple.center, pro.center)
+        XCTAssertEqual(simple.wheelRadius, pro.wheelRadius)
+        XCTAssertNotEqual(
+            simple.outerPlanetRadius,
+            pro.outerPlanetRadius
+        )
+
+        XCTAssertTrue(ChartDisplayConfig.simple.showSummary)
+        XCTAssertFalse(ChartDisplayConfig.pro.showSummary)
+        XCTAssertFalse(ChartDisplayConfig.simple.showPlanetTable)
+        XCTAssertTrue(ChartDisplayConfig.pro.showPlanetTable)
+    }
 }

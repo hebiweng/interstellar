@@ -1508,16 +1508,8 @@ final class ThemeAnalysisStore: ObservableObject {
 
     private func load() {
         guard let data = try? Data(contentsOf: fileURL),
-              var decoded = try? JSONDecoder().decode([ThemeAnalysis].self, from: data)
+              let decoded = try? JSONDecoder().decode([ThemeAnalysis].self, from: data)
         else { return }
-        for index in decoded.indices where decoded[index].status == .generatingReport {
-            // The in-memory polling task is gone after process termination, but
-            // Relay may still be generating the report. Keep the persisted
-            // analysis pending so the result screen can resume polling with the
-            // same idempotency key.
-            decoded[index].status = .chartsReady
-            decoded[index].generationError = nil
-        }
         analyses = decoded.sorted { $0.createdAt > $1.createdAt }
     }
 
@@ -1539,60 +1531,136 @@ struct ThemeRelayClient: Sendable {
         self.baseURL = baseURL ?? RelayEnvironment.baseURL
     }
 
-    func createTask(body: Data, language: AppLanguage) async throws -> ReportTaskState {
-        var request = URLRequest(url: baseURL.appendingPathComponent("v1/generate"))
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(InstallationIdentity.value, forHTTPHeaderField: "X-Installation-ID")
-        request.timeoutInterval = 30
-        request.httpBody = body
-        let response = try await AppAttestAuthorizer.shared.send(
-            request,
-            body: body,
-            baseURL: baseURL,
+    func createTask(
+        body: Data,
+        language: AppLanguage
+    ) async throws -> ReportTaskState {
+        let response = try await postResponse(
+            body,
+            path: "v1/generate",
             language: language
         )
-        guard (200 ..< 300).contains(response.statusCode) else {
-            let json = (try? JSONSerialization.jsonObject(with: response.data)) as? [String: Any]
-            throw ThemeAnalysisError.relay(
-                (json?["error"] as? String) ?? "Theme Relay HTTP \(response.statusCode)"
-            )
-        }
-        return try JSONDecoder().decode(ReportTaskState.self, from: response.data)
+        try validate(
+            response,
+            fallback: "Theme Relay HTTP \(response.statusCode)"
+        )
+        return try JSONDecoder().decode(
+            ReportTaskState.self,
+            from: response.data
+        )
     }
 
-    func status(userID: String, analysisID: String, language: AppLanguage) async throws -> ReportTaskState {
-        let body = try JSONEncoder().encode(["userID": userID, "requestID": analysisID])
-        let data = try await post(body, path: "v1/reports/status", language: language)
-        return try JSONDecoder().decode(ReportTaskState.self, from: data)
-    }
-
-    func fetch(userID: String, analysisID: String, language: AppLanguage) async throws -> Data {
-        let body = try JSONEncoder().encode(["userID": userID, "requestID": analysisID])
-        return try await post(body, path: "v1/reports/fetch", language: language)
-    }
-
-    private func post(_ body: Data, path: String, language: AppLanguage) async throws -> Data {
-        var request = URLRequest(url: baseURL.appendingPathComponent(path))
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(InstallationIdentity.value, forHTTPHeaderField: "X-Installation-ID")
-        request.timeoutInterval = 30
-        request.httpBody = body
-        let response = try await AppAttestAuthorizer.shared.send(
-            request,
-            body: body,
-            baseURL: baseURL,
+    func status(
+        userID: String,
+        analysisID: String,
+        language: AppLanguage
+    ) async throws -> ReportTaskState {
+        let body = try JSONEncoder().encode([
+            "userID": userID,
+            "requestID": analysisID,
+        ])
+        let response = try await postResponse(
+            body,
+            path: "v1/reports/status",
             language: language
         )
-        guard (200 ..< 300).contains(response.statusCode) else {
-            let json = (try? JSONSerialization.jsonObject(with: response.data)) as? [String: Any]
-            throw ThemeAnalysisError.relay(
-                (json?["error"] as? String)
-                    ?? "Theme Relay HTTP \(response.statusCode)"
-            )
+        try validate(
+            response,
+            fallback: "Theme Relay HTTP \(response.statusCode)"
+        )
+        return try JSONDecoder().decode(
+            ReportTaskState.self,
+            from: response.data
+        )
+    }
+
+    func statusIfExists(
+        userID: String,
+        analysisID: String,
+        language: AppLanguage
+    ) async throws -> ReportTaskState? {
+        let body = try JSONEncoder().encode([
+            "userID": userID,
+            "requestID": analysisID,
+        ])
+        let response = try await postResponse(
+            body,
+            path: "v1/reports/status",
+            language: language
+        )
+        if response.statusCode == 404 {
+            return nil
         }
+        try validate(
+            response,
+            fallback: "Theme Relay HTTP \(response.statusCode)"
+        )
+        return try JSONDecoder().decode(
+            ReportTaskState.self,
+            from: response.data
+        )
+    }
+
+    func fetch(
+        userID: String,
+        analysisID: String,
+        language: AppLanguage
+    ) async throws -> Data {
+        let body = try JSONEncoder().encode([
+            "userID": userID,
+            "requestID": analysisID,
+        ])
+        let response = try await postResponse(
+            body,
+            path: "v1/reports/fetch",
+            language: language
+        )
+        try validate(
+            response,
+            fallback: "Theme Relay HTTP \(response.statusCode)"
+        )
         return response.data
+    }
+
+    private func postResponse(
+        _ body: Data,
+        path: String,
+        language: AppLanguage
+    ) async throws -> AppAttestHTTPResponse {
+        var request = URLRequest(
+            url: baseURL.appendingPathComponent(path)
+        )
+        request.httpMethod = "POST"
+        request.setValue(
+            "application/json",
+            forHTTPHeaderField: "Content-Type"
+        )
+        request.setValue(
+            InstallationIdentity.value,
+            forHTTPHeaderField: "X-Installation-ID"
+        )
+        request.timeoutInterval = 30
+        request.httpBody = body
+        return try await AppAttestAuthorizer.shared.send(
+            request,
+            body: body,
+            baseURL: baseURL,
+            language: language
+        )
+    }
+
+    private func validate(
+        _ response: AppAttestHTTPResponse,
+        fallback: String
+    ) throws {
+        guard (200 ..< 300).contains(response.statusCode) else {
+            let json = (
+                try? JSONSerialization.jsonObject(with: response.data)
+            ) as? [String: Any]
+            throw ThemeAnalysisError.relay(
+                (json?["error"] as? String) ?? fallback
+            )
+        }
     }
 }
 
@@ -1612,14 +1680,28 @@ struct ThemeReportService: Sendable {
         let requestID: String
     }
 
-    func identity(payload: ThemeAIPayload, input: ThemeInput) throws -> Identity {
-        let evidenceData = try JSONEncoder().encode(payload.flattenedEvidenceFacts)
+    func identity(
+        payload: ThemeAIPayload,
+        input: ThemeInput
+    ) throws -> Identity {
+        let evidenceData = try JSONEncoder().encode(
+            payload.flattenedEvidenceFacts
+        )
         let peopleData = try JSONEncoder().encode(payload.people)
         let analysisData = try JSONEncoder().encode(payload.analysis)
-        guard let evidenceFacts = try JSONSerialization.jsonObject(with: evidenceData) as? [[String: Any]],
-              let people = try JSONSerialization.jsonObject(with: peopleData) as? [[String: Any]],
-              let themeContext = try JSONSerialization.jsonObject(with: analysisData) as? [String: Any]
-        else { throw ThemeAnalysisError.invalidRelayResponse }
+
+        guard let evidenceFacts = try JSONSerialization.jsonObject(
+            with: evidenceData
+        ) as? [[String: Any]],
+        let people = try JSONSerialization.jsonObject(
+            with: peopleData
+        ) as? [[String: Any]],
+        let themeContext = try JSONSerialization.jsonObject(
+            with: analysisData
+        ) as? [String: Any]
+        else {
+            throw ThemeAnalysisError.invalidRelayResponse
+        }
 
         let facts: [String: Any] = [
             "schemaVersion": payload.schemaVersion,
@@ -1631,20 +1713,35 @@ struct ThemeReportService: Sendable {
         let params: [String: Any] = [
             "theme": input.theme.rawValue,
             "analysisMode": input.analysisMode?.rawValue ?? "individual",
-            "period": "\(payload.analysis.period.label):\(payload.analysis.period.start):\(payload.analysis.period.end)",
+            "period":
+                "\(payload.analysis.period.label):"
+                + "\(payload.analysis.period.start):"
+                + "\(payload.analysis.period.end)",
             "focus": input.focus,
         ]
-        let factsData = try JSONSerialization.data(withJSONObject: facts, options: [.sortedKeys])
+
+        let factsData = try JSONSerialization.data(
+            withJSONObject: facts,
+            options: [.sortedKeys]
+        )
         let factsHash = SHA256Digest.hash(factsData).hex
-        let profileHashes = ([input.primary] + [input.otherPerson].compactMap { $0 } + input.familyMembers)
-            .map { AppAIReportService().profileHash($0.profile) }
+        let profileHashes = (
+            [input.primary]
+                + [input.otherPerson].compactMap { $0 }
+                + input.familyMembers
+        )
+        .map { AppAIReportService().profileHash($0.profile) }
+
         let raw = [
             "theme.\(input.theme.rawValue)",
             profileHashes.joined(separator: ","),
-            params.keys.sorted().map { "\($0)=\(params[$0] ?? "")" }.joined(separator: ","),
+            params.keys.sorted().map {
+                "\($0)=\(params[$0] ?? "")"
+            }.joined(separator: ","),
             "generation=\(GeneratedChartArtifact.schemaVersion)",
             factsHash,
         ].joined(separator: "|")
+
         return Identity(
             semanticFingerprint: SHA256Digest.hash(Data(raw.utf8)).hex,
             factsHash: factsHash,
@@ -1669,7 +1766,10 @@ struct ThemeReportService: Sendable {
             factsHash: factsHash,
             language: language
         )
-        _ = try await client.createTask(body: body, language: language)
+        _ = try await client.createTask(
+            body: body,
+            language: language
+        )
         return try await waitForReport(
             analysisID: analysisID,
             payload: payload,
@@ -1677,6 +1777,47 @@ struct ThemeReportService: Sendable {
             factsHash: factsHash,
             language: language
         )
+    }
+
+    /// Recovery-only path. This never calls /v1/generate.
+    func recover(
+        analysisID: String,
+        payload: ThemeAIPayload,
+        semanticFingerprint: String,
+        factsHash: String,
+        language: AppLanguage
+    ) async throws -> Delivery? {
+        let userID = CommerceStore.shared.userID.uuidString.lowercased()
+        guard let state = try await client.statusIfExists(
+            userID: userID,
+            analysisID: analysisID,
+            language: language
+        ) else {
+            return nil
+        }
+
+        switch state.status {
+        case "completed":
+            return try await fetchDelivery(
+                analysisID: analysisID,
+                payload: payload,
+                semanticFingerprint: semanticFingerprint,
+                factsHash: factsHash,
+                language: language
+            )
+        case "failed":
+            throw ThemeAnalysisError.relay(
+                state.error ?? "Theme report generation failed"
+            )
+        default:
+            return try await waitForReport(
+                analysisID: analysisID,
+                payload: payload,
+                semanticFingerprint: semanticFingerprint,
+                factsHash: factsHash,
+                language: language
+            )
+        }
     }
 
     private func waitForReport(
@@ -1687,37 +1828,80 @@ struct ThemeReportService: Sendable {
         language: AppLanguage
     ) async throws -> Delivery {
         let userID = CommerceStore.shared.userID.uuidString.lowercased()
+
         while !Task.isCancelled {
-            let state = try await client.status(userID: userID, analysisID: analysisID, language: language)
+            let state = try await client.status(
+                userID: userID,
+                analysisID: analysisID,
+                language: language
+            )
             switch state.status {
             case "completed":
-                let data = try await client.fetch(userID: userID, analysisID: analysisID, language: language)
-                let response = try JSONDecoder().decode(AIGenerateResponse.self, from: data)
-                guard response.semanticFingerprint == semanticFingerprint,
-                      response.factsHash == factsHash
-                else { throw ThemeAnalysisError.invalidReportContract }
-                let report = ThemeReportResponse(
-                    title: response.report.title,
-                    subtitle: response.report.subtitle,
-                    sections: response.report.sections.map {
-                        ThemeReportSection(
-                            number: $0.number,
-                            title: $0.title,
-                            body: $0.body,
-                            callout: $0.callout,
-                            evidenceFactIDs: $0.evidenceFactIDs
-                        )
-                    }
+                return try await fetchDelivery(
+                    analysisID: analysisID,
+                    payload: payload,
+                    semanticFingerprint: semanticFingerprint,
+                    factsHash: factsHash,
+                    language: language
                 )
-                try validate(report: report, evidenceFacts: payload.flattenedEvidenceFacts)
-                return Delivery(report: report, requestID: analysisID)
             case "failed":
-                throw ThemeAnalysisError.relay(state.error ?? "Theme report generation failed")
+                throw ThemeAnalysisError.relay(
+                    state.error ?? "Theme report generation failed"
+                )
             default:
-                try await Task.sleep(nanoseconds: 3_000_000_000)
+                try await Task.sleep(
+                    nanoseconds: 10_000_000_000
+                )
             }
         }
+
         throw CancellationError()
+    }
+
+    private func fetchDelivery(
+        analysisID: String,
+        payload: ThemeAIPayload,
+        semanticFingerprint: String,
+        factsHash: String,
+        language: AppLanguage
+    ) async throws -> Delivery {
+        let userID = CommerceStore.shared.userID.uuidString.lowercased()
+        let data = try await client.fetch(
+            userID: userID,
+            analysisID: analysisID,
+            language: language
+        )
+        let response = try JSONDecoder().decode(
+            AIGenerateResponse.self,
+            from: data
+        )
+        guard response.semanticFingerprint == semanticFingerprint,
+              response.factsHash == factsHash
+        else {
+            throw ThemeAnalysisError.invalidReportContract
+        }
+
+        let report = ThemeReportResponse(
+            title: response.report.title,
+            subtitle: response.report.subtitle,
+            sections: response.report.sections.map {
+                ThemeReportSection(
+                    number: $0.number,
+                    title: $0.title,
+                    body: $0.body,
+                    callout: $0.callout,
+                    evidenceFactIDs: $0.evidenceFactIDs
+                )
+            }
+        )
+        try validate(
+            report: report,
+            evidenceFacts: payload.flattenedEvidenceFacts
+        )
+        return Delivery(
+            report: report,
+            requestID: analysisID
+        )
     }
 
     private func requestBody(
@@ -1726,12 +1910,15 @@ struct ThemeReportService: Sendable {
         input: ThemeInput,
         semanticFingerprint: String,
         factsHash: String,
-        language: AppLanguage,
+        language: AppLanguage
     ) throws -> Data {
         let identity = try identity(payload: payload, input: input)
-        guard identity.semanticFingerprint == semanticFingerprint, identity.factsHash == factsHash else {
+        guard identity.semanticFingerprint == semanticFingerprint,
+              identity.factsHash == factsHash
+        else {
             throw ThemeAnalysisError.invalidReportContract
         }
+
         let body: [String: Any] = [
             "userID": CommerceStore.shared.userID.uuidString.lowercased(),
             "requestID": analysisID,
@@ -1739,19 +1926,28 @@ struct ThemeReportService: Sendable {
             "mode": "theme",
             "themeKind": payload.analysis.theme,
             "reportPromptKey": "theme.\(payload.analysis.theme)",
-            "profileHash": AppAIReportService().profileHash(input.primary.profile),
+            "profileHash":
+                AppAIReportService().profileHash(input.primary.profile),
             "semanticFingerprint": semanticFingerprint,
             "factsHash": factsHash,
-            "generationSchemaVersion": GeneratedChartArtifact.schemaVersion,
+            "generationSchemaVersion":
+                GeneratedChartArtifact.schemaVersion,
             "params": identity.params,
             "facts": identity.facts,
             "locale": language.reportRequestLanguage.rawValue,
-            "clientVersion": "ios-v6-themes",
+            "clientVersion": "ios-v7-theme-recovery",
         ]
-        return try JSONSerialization.data(withJSONObject: body, options: [.sortedKeys])
+
+        return try JSONSerialization.data(
+            withJSONObject: body,
+            options: [.sortedKeys]
+        )
     }
 
-    private func validate(report: ThemeReportResponse, evidenceFacts: [ThemeAIFact]) throws {
+    private func validate(
+        report: ThemeReportResponse,
+        evidenceFacts: [ThemeAIFact]
+    ) throws {
         let allowedIDs = Set(evidenceFacts.map(\.id))
         guard !report.title.trimmed.isEmpty,
               !report.subtitle.trimmed.isEmpty,
@@ -1761,9 +1957,12 @@ struct ThemeReportService: Sendable {
                       && !section.title.trimmed.isEmpty
                       && !section.body.trimmed.isEmpty
                       && !(section.evidenceFactIDs ?? []).isEmpty
-                      && (section.evidenceFactIDs ?? []).allSatisfy(allowedIDs.contains)
+                      && (section.evidenceFactIDs ?? [])
+                      .allSatisfy(allowedIDs.contains)
               })
-        else { throw ThemeAnalysisError.invalidReportContract }
+        else {
+            throw ThemeAnalysisError.invalidReportContract
+        }
     }
 }
 
@@ -1816,15 +2015,94 @@ final class ThemeAnalysisManager: ObservableObject {
               let analysis = store.analysis(id: analysisID),
               analysis.report == nil
         else { return }
+
+        // Manual retry remains the only Theme path that may submit again.
         beginReportGeneration(analysisID: analysisID, model: model)
     }
 
-    func resumePendingReport(analysisID: String, model: AppModel) {
-        guard let analysis = store.analysis(id: analysisID),
+    func resumePendingReport(
+        analysisID: String,
+        model: AppModel
+    ) {
+        guard reportTasks[analysisID] == nil,
+              let analysis = store.analysis(id: analysisID),
               analysis.report == nil,
-              analysis.status == .chartsReady || analysis.status == .generatingReport
+              analysis.status == .chartsReady
+                  || analysis.status == .generatingReport
         else { return }
-        retry(analysisID: analysisID, model: model)
+
+        // Automatic resume is recovery-only. It must never create a second
+        // Relay task.
+        reportTasks[analysisID] = Task { [weak self] in
+            guard let self else { return }
+            defer { self.reportTasks[analysisID] = nil }
+
+            do {
+                guard let current = self.store.analysis(id: analysisID)
+                else { return }
+
+                let payload = self.factsBuilder.build(
+                    input: current.input,
+                    recipe: current.recipe,
+                    artifacts: current.chartArtifacts
+                )
+                let identity = try self.reportService.identity(
+                    payload: payload,
+                    input: current.input
+                )
+                guard identity.semanticFingerprint
+                    == current.semanticFingerprint,
+                    identity.factsHash == current.factsHash
+                else {
+                    throw ThemeAnalysisError.invalidReportContract
+                }
+
+                guard let delivery = try await self.reportService.recover(
+                    analysisID: analysisID,
+                    payload: payload,
+                    semanticFingerprint: identity.semanticFingerprint,
+                    factsHash: identity.factsHash,
+                    language: current.input.locale
+                ) else {
+                    // chartsReady can legitimately mean the user never
+                    // submitted an AI task (offline / no consent).
+                    if current.status == .chartsReady {
+                        return
+                    }
+
+                    var missing = current
+                    missing.status = .reportFailed
+                    missing.generationError =
+                        "The Relay has no Theme report for this request."
+                    _ = self.store.upsert(missing)
+                    return
+                }
+
+                guard var completed = self.store.analysis(id: analysisID)
+                else { return }
+                completed.report = delivery.report
+                completed.status = .completed
+                completed.generationError = nil
+                guard self.store.upsert(completed) else {
+                    throw ThemeAnalysisError.invalidRelayResponse
+                }
+                await CommerceStore.shared.acknowledgeReport(
+                    requestID: delivery.requestID
+                )
+            } catch is CancellationError {
+                // Keep the persisted state recoverable. Never turn a client
+                // interruption into a new generation request.
+            } catch is URLError {
+                // Transport failure is not Relay failure. The next page open
+                // can reconcile the same requestID again.
+            } catch {
+                if var failed = self.store.analysis(id: analysisID) {
+                    failed.status = .reportFailed
+                    failed.generationError = error.localizedDescription
+                    _ = self.store.upsert(failed)
+                }
+            }
+        }
     }
 
     private func beginReportGeneration(analysisID: String, model: AppModel) {
@@ -1877,16 +2155,14 @@ final class ThemeAnalysisManager: ObservableObject {
                 }
                 await CommerceStore.shared.acknowledgeReport(requestID: delivery.requestID)
             } catch is CancellationError {
-                // Suspension or termination does not mean Relay failed. Keep
-                // the request pending and resume it with the original key.
                 if var current = self.store.analysis(id: analysisID) {
-                    current.status = .chartsReady
+                    current.status = .generatingReport
                     current.generationError = nil
                     self.store.upsert(current)
                 }
             } catch is URLError {
                 if var current = self.store.analysis(id: analysisID) {
-                    current.status = .chartsReady
+                    current.status = .generatingReport
                     current.generationError = nil
                     self.store.upsert(current)
                 }
