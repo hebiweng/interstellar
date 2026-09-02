@@ -1,0 +1,201 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-09T15:12:10.379Z",
+  "chartID": "modern.synastry",
+  "calculationSamples": [
+    {
+      "scenarioID": "france-canada",
+      "personA": "Elena Hart",
+      "countryA": "France",
+      "personB": "Julian Mercer",
+      "countryB": "Canada"
+    },
+    {
+      "scenarioID": "britain-italy",
+      "personA": "Oliver Bennett",
+      "countryA": "United Kingdom",
+      "personB": "Giulia Romano",
+      "countryB": "Italy"
+    },
+    {
+      "scenarioID": "usa-germany",
+      "personA": "Maya Brooks",
+      "countryA": "United States",
+      "personB": "Lukas Weber",
+      "countryB": "Germany"
+    },
+    {
+      "scenarioID": "spain-sweden",
+      "personA": "Sofia Navarro",
+      "countryA": "Spain",
+      "personB": "Erik Lindberg",
+      "countryB": "Sweden"
+    },
+    {
+      "scenarioID": "ireland-netherlands",
+      "personA": "Nora Walsh",
+      "countryA": "Ireland",
+      "personB": "Daan de Vries",
+      "countryB": "Netherlands"
+    },
+    {
+      "scenarioID": "australia-portugal",
+      "personA": "Claire Wilson",
+      "countryA": "Australia",
+      "personB": "Tiago Costa",
+      "countryB": "Portugal"
+    }
+  ],
+  "finiteDomainProbes": [
+    {
+      "targetCopyKey": "modern.synastry.relationship-overview.balanced",
+      "cardID": "relationship-overview",
+      "themeID": "balanced"
+    },
+    {
+      "targetCopyKey": "modern.synastry.relationship-overview.supportive",
+      "cardID": "relationship-overview",
+      "themeID": "supportive"
+    },
+    {
+      "targetCopyKey": "modern.synastry.relationship-overview.growth-through-friction",
+      "cardID": "relationship-overview",
+      "themeID": "growth-through-friction"
+    },
+    {
+      "targetCopyKey": "modern.synastry.relationship-overview.intense",
+      "cardID": "relationship-overview",
+      "themeID": "intense"
+    },
+    {
+      "targetCopyKey": "modern.synastry.perspectives.mental-activation",
+      "cardID": "perspectives",
+      "themeID": "mental-activation"
+    },
+    {
+      "targetCopyKey": "modern.synastry.perspectives.emotional-activation",
+      "cardID": "perspectives",
+      "themeID": "emotional-activation"
+    },
+    {
+      "targetCopyKey": "modern.synastry.perspectives.relational-activation",
+      "cardID": "perspectives",
+      "themeID": "relational-activation"
+    },
+    {
+      "targetCopyKey": "modern.synastry.perspectives.practical-activation",
+      "cardID": "perspectives",
+      "themeID": "practical-activation"
+    },
+    {
+      "targetCopyKey": "modern.synastry.perspectives.mixed-activation",
+      "cardID": "perspectives",
+      "themeID": "mixed-activation"
+    },
+    {
+      "targetCopyKey": "modern.synastry.emotional-connection.flow",
+      "cardID": "emotional-connection",
+      "themeID": "flow"
+    },
+    {
+      "targetCopyKey": "modern.synastry.emotional-connection.friction",
+      "cardID": "emotional-connection",
+      "themeID": "friction"
+    },
+    {
+      "targetCopyKey": "modern.synastry.emotional-connection.mixed",
+      "cardID": "emotional-connection",
+      "themeID": "mixed"
+    },
+    {
+      "targetCopyKey": "modern.synastry.emotional-connection.quiet",
+      "cardID": "emotional-connection",
+      "themeID": "quiet"
+    },
+    {
+      "targetCopyKey": "modern.synastry.communication.flow",
+      "cardID": "communication",
+      "themeID": "flow"
+    },
+    {
+      "targetCopyKey": "modern.synastry.communication.friction",
+      "cardID": "communication",
+      "themeID": "friction"
+    },
+    {
+      "targetCopyKey": "modern.synastry.communication.mixed",
+      "cardID": "communication",
+      "themeID": "mixed"
+    },
+    {
+      "targetCopyKey": "modern.synastry.communication.quiet",
+      "cardID": "communication",
+      "themeID": "quiet"
+    },
+    {
+      "targetCopyKey": "modern.synastry.chemistry.flow",
+      "cardID": "chemistry",
+      "themeID": "flow"
+    },
+    {
+      "targetCopyKey": "modern.synastry.chemistry.friction",
+      "cardID": "chemistry",
+      "themeID": "friction"
+    },
+    {
+      "targetCopyKey": "modern.synastry.chemistry.mixed",
+      "cardID": "chemistry",
+      "themeID": "mixed"
+    },
+    {
+      "targetCopyKey": "modern.synastry.chemistry.quiet",
+      "cardID": "chemistry",
+      "themeID": "quiet"
+    },
+    {
+      "targetCopyKey": "modern.synastry.commitment.flow",
+      "cardID": "commitment",
+      "themeID": "flow"
+    },
+    {
+      "targetCopyKey": "modern.synastry.commitment.friction",
+      "cardID": "commitment",
+      "themeID": "friction"
+    },
+    {
+      "targetCopyKey": "modern.synastry.commitment.mixed",
+      "cardID": "commitment",
+      "themeID": "mixed"
+    },
+    {
+      "targetCopyKey": "modern.synastry.commitment.quiet",
+      "cardID": "commitment",
+      "themeID": "quiet"
+    },
+    {
+      "targetCopyKey": "modern.synastry.house-overlays.mixed",
+      "cardID": "house-overlays",
+      "themeID": "mixed"
+    },
+    {
+      "targetCopyKey": "modern.synastry.key-inter-aspects.flow",
+      "cardID": "key-inter-aspects",
+      "themeID": "flow"
+    },
+    {
+      "targetCopyKey": "modern.synastry.key-inter-aspects.friction",
+      "cardID": "key-inter-aspects",
+      "themeID": "friction"
+    },
+    {
+      "targetCopyKey": "modern.synastry.key-inter-aspects.mixed",
+      "cardID": "key-inter-aspects",
+      "themeID": "mixed"
+    },
+    {
+      "targetCopyKey": "modern.synastry.key-inter-aspects.quiet",
+      "cardID": "key-inter-aspects",
+      "themeID": "quiet"
+    }
+  ]
+}

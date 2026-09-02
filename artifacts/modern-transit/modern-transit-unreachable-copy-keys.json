@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-03T15:22:36.350Z",
+  "chartID": "modern.transit",
+  "unreachableCount": 3,
+  "unreachable": [
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.emotional.weight",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "emotional.weight",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to emotional.weight.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "unreachable",
+      "catalogStatus": "missing-copy"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.mental.clarity",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "mental.clarity",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to mental.clarity.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "unreachable",
+      "catalogStatus": "missing-copy"
+    },
+    {
+      "key": "modern.transit.cycleChapter.currentCycle.relationship.freedom",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "themeID": "relationship.freedom",
+      "integratedThemeID": null,
+      "roleID": "currentCycle",
+      "variables": [],
+      "useCondition": "The first available currentCycle aggregate signal maps to relationship.freedom.",
+      "requiredBy": [
+        "TransitContentPlanner.current-cycles",
+        "CopyCatalogMatcher.transitCardText",
+        "InsightFactory.current-cycles",
+        "GeneratedChartArtifact"
+      ],
+      "reachabilityStatus": "unreachable",
+      "catalogStatus": "missing-copy"
+    }
+  ]
+}

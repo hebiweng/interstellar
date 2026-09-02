@@ -1,0 +1,237 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-Hans",
+  "technique": "natal",
+  "rules": [
+    {
+      "id": "natal.natal-interpretation.v1",
+      "technique": "natal",
+      "cardID": "natal-interpretation",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "natal.career-direction.v1",
+      "technique": "natal",
+      "cardID": "career-direction",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "natal.strengths-growth.v1",
+      "technique": "natal",
+      "cardID": "strengths-growth",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "natal.element-balance.v1",
+      "technique": "natal",
+      "cardID": "element-balance",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "natal.house-emphasis.v1",
+      "technique": "natal",
+      "cardID": "house-emphasis",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "natal.chart-signature.v1",
+      "technique": "natal",
+      "cardID": "chart-signature",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "natal.planet-placements.v1",
+      "technique": "natal",
+      "cardID": "planet-placements",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "natal.key-aspects.v1",
+      "technique": "natal",
+      "cardID": "key-aspects",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "natal.love-connection.v1",
+      "technique": "natal",
+      "cardID": "love-connection",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "natal.emotional-needs.v1",
+      "technique": "natal",
+      "cardID": "emotional-needs",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    }
+  ]
+}

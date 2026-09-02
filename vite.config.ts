@@ -10,6 +10,7 @@ const { d1, r2 } = hostingConfig;
 
 // macOS Seatbelt blocks FSEvents, so Codex previews need polling for HMR.
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
+const apiProxyTarget = process.env.INTERSTELLAR_API_PROXY_TARGET?.trim();
 
 const localBindingConfig = {
   main: "./worker/index.ts",
@@ -44,9 +45,47 @@ export default defineConfig(async () => {
   const { cloudflare } = await import("@cloudflare/vite-plugin");
 
   return {
-    server: isCodexSeatbeltSandbox
-      ? { watch: { useFsEvents: false, usePolling: true } }
-      : undefined,
+    server:
+      isCodexSeatbeltSandbox || apiProxyTarget
+        ? {
+            ...(isCodexSeatbeltSandbox
+              ? { watch: { useFsEvents: false, usePolling: true } }
+              : {}),
+            ...(apiProxyTarget
+              ? {
+                  proxy: {
+                    "/api/v1": {
+                      target: apiProxyTarget,
+                      changeOrigin: true,
+                    },
+                  },
+                }
+              : {}),
+          }
+        : undefined,
+    // 生产构建禁用 source map，减小部署包体积。
+    build: {
+      sourcemap: false,
+      rollupOptions: {
+        // 排除 @vercel/og 死重依赖（vinext 传递依赖，项目未使用 OG 功能）
+        external: [
+          "@vercel/og",
+          "satori",
+          "@resvg/resvg-wasm",
+          "yoga-layout",
+          "@shuding/opentype.js",
+        ],
+      },
+    },
+    optimizeDeps: {
+      exclude: [
+        "@vercel/og",
+        "satori",
+        "@resvg/resvg-wasm",
+        "yoga-layout",
+        "@shuding/opentype.js",
+      ],
+    },
     plugins: [
       vinext(),
       sites(),

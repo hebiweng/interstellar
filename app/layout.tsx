@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const localHost = /^(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/.test(host);
   const protocol = requestHeaders.get("x-forwarded-proto") ?? (localHost ? "http" : "https");
   const baseUrl = new URL(`${protocol}://${host}`);
-  const socialImage = new URL("/og.png", baseUrl).toString();
+  const socialImage = new URL("/og.webp", baseUrl).toString();
 
   return {
     metadataBase: baseUrl,
@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Professional astrology calculation, visualization, and evidence workspace.",
       type: "website",
       url: baseUrl,
-      images: [{ url: socialImage, width: 1536, height: 1024, alt: "Interstellar professional astrology workspace" }],
+      images: [{ url: socialImage, width: 1200, height: 630, alt: "Interstellar professional astrology workspace" }],
     },
     twitter: {
       card: "summary_large_image",

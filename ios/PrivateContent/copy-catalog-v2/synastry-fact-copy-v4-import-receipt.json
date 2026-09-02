@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "importedAt": "2026-08-11T14:47:53.534Z",
+  "sourcePackage": "interstellar-synastry-v4.1bHDtA",
+  "files": [
+    {
+      "name": "classical-synastry-fact-copy-bilingual.json",
+      "sha256": "986fdd108c0e1f1226f44de666b3be2f79d5d7bb6b20d0f0f96049153aa3d8f7"
+    },
+    {
+      "name": "classical-synastry-fact-copy-en.patch.json",
+      "sha256": "33332e3b58b38fc93ba3ae199c02a415e394db613ab7851b975478ac8182a670"
+    },
+    {
+      "name": "classical-synastry-fact-copy-validation.json",
+      "sha256": "32e00cb9c6145490bc299ba0a4b5f133fec99bc1146b5422099eed367ab976b5"
+    },
+    {
+      "name": "classical-synastry-fact-copy-zh-Hans.patch.json",
+      "sha256": "a54a0d74806ba7da84762f4ba38acf9eb09f77c8a780258222f8dd9648adaa67"
+    },
+    {
+      "name": "modern-synastry-fact-copy-bilingual.json",
+      "sha256": "315daab5f3e746eda650163c754718bcb4c5b464fde7722ce8626fa7087ef3b7"
+    },
+    {
+      "name": "modern-synastry-fact-copy-en.patch.json",
+      "sha256": "f69a9a00c9de67297d0df57062a710b22ecdbab2fa6f7b7f3a0a90fceeded0dd"
+    },
+    {
+      "name": "modern-synastry-fact-copy-validation.json",
+      "sha256": "c4dd14682ac39467aa5a49aba377b6fe36899ef8055dd4e01a10723eaba7a9b8"
+    },
+    {
+      "name": "modern-synastry-fact-copy-zh-Hans.patch.json",
+      "sha256": "74b0ec77a8e646ab6036ff42ec08d669d87f00fac03872ad6fdb947fa24eaa73"
+    }
+  ]
+}

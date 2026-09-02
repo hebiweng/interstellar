@@ -115,6 +115,35 @@ def test_latest_natal_overwrites_and_accounts_are_isolated(tmp_path) -> None:
         assert len(workspace["people"]) == 1
         assert workspace["people"][0]["latestNatal"]["snapshotId"] == "calculation-latest"
 
+        stale_analysis = first.post(
+            "/api/v1/account/workspace",
+            json={
+                "action": "save_ai_analysis",
+                "personId": person_id,
+                "snapshotId": "calculation-first",
+                "aiAnalysisText": "这份迟到的旧分析不能覆盖最新结果。",
+                "aiModelId": "deepseek-test",
+            },
+        )
+        assert stale_analysis.status_code == 409
+        assert stale_analysis.json()["error"] == "STALE_AI_ANALYSIS"
+
+        latest_analysis = first.post(
+            "/api/v1/account/workspace",
+            json={
+                "action": "save_ai_analysis",
+                "personId": person_id,
+                "snapshotId": "calculation-latest",
+                "aiAnalysisText": "只保存当前星盘的最后一次分析。",
+                "aiModelId": "deepseek-test",
+            },
+        )
+        assert latest_analysis.status_code == 200
+        refreshed = first.get("/api/v1/account/workspace").json()
+        assert refreshed["people"][0]["latestNatal"]["aiAnalysisText"] == (
+            "只保存当前星盘的最后一次分析。"
+        )
+
         register(second, "second@example.com")
         isolated = second.get("/api/v1/account/workspace").json()
         assert isolated["people"] == []

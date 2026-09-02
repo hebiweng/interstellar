@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-Hans",
+  "technique": "secondary",
+  "rules": [
+    {
+      "id": "secondary.developmental-chapter.v1",
+      "technique": "secondary",
+      "cardID": "developmental-chapter",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "secondary.progressed-moon.v1",
+      "technique": "secondary",
+      "cardID": "progressed-moon",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "secondary.identity-development.v1",
+      "technique": "secondary",
+      "cardID": "identity-development",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "secondary.turning-points.v1",
+      "technique": "secondary",
+      "cardID": "turning-points",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "secondary.areas-maturing.v1",
+      "technique": "secondary",
+      "cardID": "areas-maturing",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "secondary.timeline.v1",
+      "technique": "secondary",
+      "cardID": "timeline",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    }
+  ]
+}

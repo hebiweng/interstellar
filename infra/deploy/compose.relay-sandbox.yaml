@@ -1,0 +1,93 @@
+name: interstellar-sandbox
+
+x-runtime-defaults: &runtime-defaults
+  restart: unless-stopped
+  init: true
+  stop_grace_period: 20s
+  security_opt:
+    - no-new-privileges:true
+  networks:
+    - interstellar-sandbox
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  edge:
+    <<: *runtime-defaults
+    container_name: interstellar-sandbox-edge
+    image: caddy:2-alpine@sha256:86deaf5e3d3408a6ccec08fbb79989783dd26e206ae10bcf78a801dc8c9ab794
+    depends_on:
+      interstellar-relay-sandbox:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      RELAY_SANDBOX_HOST: ${RELAY_SANDBOX_HOST:?set RELAY_SANDBOX_HOST}
+    volumes:
+      - ./Caddyfile.sandbox:/etc/caddy/Caddyfile:ro
+      - interstellar-sandbox-caddy-data:/data
+      - interstellar-sandbox-caddy-config:/config
+    mem_limit: 128m
+    pids_limit: 96
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+
+  interstellar-relay-sandbox:
+    <<: *runtime-defaults
+    container_name: interstellar-relay-sandbox
+    image: interstellar-relay:${INTERSTELLAR_IMAGE_TAG:-latest}
+    environment:
+      RELAY_ADDR: ":8080"
+      RELAY_DB_PATH: /data/relay.db
+      RELAY_SECRET: ${RELAY_SECRET:?set RELAY_SECRET in .env}
+      RELAY_ADMIN_USER: ${RELAY_ADMIN_USER:?set a random RELAY_ADMIN_USER in .env}
+      RELAY_ADMIN_PASS: ${RELAY_ADMIN_PASS:?set RELAY_ADMIN_PASS in .env}
+      RELAY_PRUNE_OTHER_ADMINS: "1"
+      RELAY_SEED_PROMPTS: "1"
+      RELAY_SEED_PROVIDERS: "1"
+      RELAY_ALLOWED_ORIGIN: https://${RELAY_SANDBOX_HOST:?set RELAY_SANDBOX_HOST}
+      RELAY_DAILY_GENERATION_QUOTA: ${RELAY_DAILY_GENERATION_QUOTA:-20}
+      RELAY_ALLOW_DEV_BYPASS: "0"
+      RELAY_APP_ATTEST_APP_ID: KCC8FFFAA5.com.xiaoguiwk.interstellar
+      RELAY_APP_ATTEST_ENVIRONMENT: development
+      RELAY_APP_ATTEST_ALLOW_DEVELOPMENT: "0"
+      RELAY_APP_ATTEST_BUNDLE_VERSION: "1+"
+      RELAY_HEALTH_URL: http://127.0.0.1:8080/v1/health
+    expose:
+      - "8080"
+    volumes:
+      - relay-sandbox-data:/data
+    mem_limit: 192m
+    pids_limit: 96
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "/app/relay", "health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+networks:
+  interstellar-sandbox:
+    name: interstellar-sandbox
+    driver: bridge
+    attachable: true
+
+volumes:
+  interstellar-sandbox-caddy-data:
+  interstellar-sandbox-caddy-config:
+  relay-sandbox-data:

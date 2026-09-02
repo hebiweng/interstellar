@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 1,
+  "locale": "en",
+  "area": "today",
+  "entries": [
+    {
+      "contentKey": "today.domain.love.supportive",
+      "summary": "Make room for connection",
+      "detail": "Conversation feels more natural when neither side rushes the answer. A little more patience makes it easier to hear what the other person is actually trying to say.",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.love.challenging",
+      "summary": "Say what you really need",
+      "detail": "It is easier to miss each other's meaning today. One clear question will help more than guessing, especially when a small concern starts to feel bigger than it is.",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.love.transition",
+      "summary": "Let the conversation unfold",
+      "detail": "A relationship issue is still taking shape. Leave room for new information before deciding what the other person means or what the next step should be.",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.love.neutral",
+      "summary": "Keep connection simple",
+      "detail": "Relationships are relatively steady today. Ordinary attention, a direct reply, or unhurried time together will matter more than trying to force a major conversation.",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.work.supportive",
+      "summary": "Move the main task forward",
+      "detail": "The main task has enough support today. Keep the order simple, finish the most useful step first, and let that result create room for the next decision.",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.work.challenging",
+      "summary": "Organize before pushing",
+      "detail": "The work can move, but responsibilities and steps need to be clearer first. A short pause to confirm ownership will save more time than pushing through confusion.",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.work.transition",
+      "summary": "Choose the next clear step",
+      "detail": "Priorities are shifting and not every task deserves equal attention. Pick the part that is already clear, move it once, and reassess before adding more work.",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.work.neutral",
+      "summary": "Keep the day practical",
+      "detail": "Work is relatively steady today. Stay with the existing plan, close small open loops, and avoid creating extra urgency where none is needed.",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.money.supportive",
+      "summary": "Use what you already have",
+      "detail": "Current resources are easier to coordinate when the goal stays specific. Start with the time, money, and support already available before looking for more.",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.money.challenging",
+      "summary": "Review before deciding",
+      "detail": "Existing commitments deserve another look before adding a new expense. Check the longer arrangement, not only the immediate price or short-term appeal.",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.money.transition",
+      "summary": "Leave room to adjust",
+      "detail": "A resource decision is still changing shape. Keep the arrangement flexible until the real cost, timing, and people involved are easier to see.",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.money.neutral",
+      "summary": "Stay with the current plan",
+      "detail": "Money and resources are relatively steady today. Routine checks and ordinary restraint are enough; there is no need to force a new decision.",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.energy.supportive",
+      "summary": "Follow a steady pace",
+      "detail": "Your pace is relatively steady today. Keep the schedule simple, use the clearer part of the day well, and stop before tiredness turns into distraction.",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.energy.challenging",
+      "summary": "Leave some breathing room",
+      "detail": "Attention may peak and drop quickly. Put the important work earlier, reduce unnecessary switching, and leave a little space later in the day.",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.energy.transition",
+      "summary": "Adjust the pace as you go",
+      "detail": "Your energy may not stay even all day. Use the focused periods for demanding work and let quieter periods remain genuinely lighter.",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.energy.neutral",
+      "summary": "Keep your usual rhythm",
+      "detail": "Energy is relatively even today. The ordinary routine is enough, especially if you avoid adding extra tasks simply because the day feels open.",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.event.connection.peak",
+      "summary": "{{first}} and {{second}} are at their clearest point",
+      "detail": "This theme is strongest now.",
+      "sourceRevision": "today-event-system-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.event.connection.building",
+      "summary": "{{first}} and {{second}} are starting to matter more",
+      "detail": "This theme is still building.",
+      "sourceRevision": "today-event-system-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.event.connection.easing",
+      "summary": "{{first}} and {{second}} are becoming easier to process",
+      "detail": "The busiest part of this theme has passed.",
+      "sourceRevision": "today-event-system-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.event.style.change",
+      "summary": "{{theme}} takes on a {{style}} approach",
+      "detail": "A new way of handling this theme begins.",
+      "sourceRevision": "today-event-system-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.event.area.change",
+      "summary": "{{theme}} shifts toward {{area}}",
+      "detail": "Attention starts moving into this part of life.",
+      "sourceRevision": "today-event-system-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.event.motion.review",
+      "summary": "{{theme}} changes pace",
+      "detail": "A review-and-adjust period begins.",
+      "sourceRevision": "today-event-system-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.event.motion.forward",
+      "summary": "{{theme}} changes pace",
+      "detail": "Forward movement begins to feel steadier.",
+      "sourceRevision": "today-event-system-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.sky.supportive",
+      "summary": "The atmosphere opens up",
+      "detail": "The wider mood is easier to work with. Use the opening for conversations or decisions that benefit from a little more space.",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.sky.challenging",
+      "summary": "The atmosphere tightens",
+      "detail": "The wider mood carries more friction. Slow the first reaction and keep plans simple until the pressure begins to settle.",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.sky.transition",
+      "summary": "The atmosphere is changing",
+      "detail": "A broader shift is taking shape. Notice what starts drawing attention before deciding how much of it needs your response.",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.sky.neutral",
+      "summary": "The atmosphere stays even",
+      "detail": "No single outside signal needs to lead the day. Keep the pace practical and let ordinary priorities remain in charge.",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.transit.supportive",
+      "summary": "A personal opening is forming",
+      "detail": "One part of your current situation has more room to move. Choose the clearest useful step and let its result guide what follows.",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.transit.challenging",
+      "summary": "A personal pressure point is active",
+      "detail": "A current issue may demand more attention than expected. Protect the main priority and avoid turning one difficult moment into a final conclusion.",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.transit.transition",
+      "summary": "Your next step is changing",
+      "detail": "The immediate direction is still becoming clear. Move what is already certain, then reassess before making a larger commitment.",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.transit.neutral",
+      "summary": "Your personal pace stays steady",
+      "detail": "Current conditions do not require a dramatic change. Continue the useful part of the plan and close small open loops.",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.secondary.supportive",
+      "summary": "Long-term growth has support",
+      "detail": "A gradual change is easier to carry forward now. Repeat the habit or choice that already feels more stable instead of forcing a breakthrough.",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.secondary.challenging",
+      "summary": "An older pattern needs attention",
+      "detail": "A familiar response may feel heavier than usual. Treat it as a chance to choose differently, even if the first change is small.",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.secondary.transition",
+      "summary": "A deeper shift is underway",
+      "detail": "The change is gradual rather than immediate. Notice which reactions no longer fit and give a newer response time to become natural.",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.secondary.neutral",
+      "summary": "The longer story stays steady",
+      "detail": "No major inner turn needs to be forced today. Keep building the direction that has already proved sustainable.",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.chapter.title",
+      "summary": "{{theme}} is reshaping your {{area}}",
+      "detail": "This is a slower adjustment, not a one-day mood. It keeps returning to your {{area}} for weeks, and the change builds gradually.",
+      "sourceRevision": "today-chapter-v2-2026-08-01",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.chapter.summary",
+      "summary": "A long chapter around your {{area}} is quietly unfolding.",
+      "detail": "This is a slower adjustment, not a one-day mood. It keeps returning to your {{area}} for weeks, and the change builds gradually.",
+      "sourceRevision": "today-chapter-v2-2026-08-01",
+      "translationStatus": "approved"
+    }
+  ]
+}

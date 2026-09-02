@@ -1,0 +1,293 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-09T15:12:10.379Z",
+  "chartID": "modern.synastry",
+  "realCalculationSampleCount": 6,
+  "finiteProbeCount": 30,
+  "samples": [
+    {
+      "scenarioID": "france-canada",
+      "personA": "Elena Hart",
+      "countryA": "France",
+      "personB": "Julian Mercer",
+      "countryB": "Canada"
+    },
+    {
+      "scenarioID": "britain-italy",
+      "personA": "Oliver Bennett",
+      "countryA": "United Kingdom",
+      "personB": "Giulia Romano",
+      "countryB": "Italy"
+    },
+    {
+      "scenarioID": "usa-germany",
+      "personA": "Maya Brooks",
+      "countryA": "United States",
+      "personB": "Lukas Weber",
+      "countryB": "Germany"
+    },
+    {
+      "scenarioID": "spain-sweden",
+      "personA": "Sofia Navarro",
+      "countryA": "Spain",
+      "personB": "Erik Lindberg",
+      "countryB": "Sweden"
+    },
+    {
+      "scenarioID": "ireland-netherlands",
+      "personA": "Nora Walsh",
+      "countryA": "Ireland",
+      "personB": "Daan de Vries",
+      "countryB": "Netherlands"
+    },
+    {
+      "scenarioID": "australia-portugal",
+      "personA": "Claire Wilson",
+      "countryA": "Australia",
+      "personB": "Tiago Costa",
+      "countryB": "Portugal"
+    }
+  ],
+  "observations": [
+    {
+      "scenarioID": "finite-relationship-overview-balanced",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.relationship-overview.balanced"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-relationship-overview-supportive",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.relationship-overview.supportive"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-relationship-overview-growth-through-friction",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.relationship-overview.growth-through-friction"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-relationship-overview-intense",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.relationship-overview.intense"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-perspectives-mental-activation",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.perspectives.mental-activation"
+      ],
+      "direction": "independent personA/personB direction"
+    },
+    {
+      "scenarioID": "finite-perspectives-emotional-activation",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.perspectives.emotional-activation"
+      ],
+      "direction": "independent personA/personB direction"
+    },
+    {
+      "scenarioID": "finite-perspectives-relational-activation",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.perspectives.relational-activation"
+      ],
+      "direction": "independent personA/personB direction"
+    },
+    {
+      "scenarioID": "finite-perspectives-practical-activation",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.perspectives.practical-activation"
+      ],
+      "direction": "independent personA/personB direction"
+    },
+    {
+      "scenarioID": "finite-perspectives-mixed-activation",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.perspectives.mixed-activation"
+      ],
+      "direction": "independent personA/personB direction"
+    },
+    {
+      "scenarioID": "finite-emotional-connection-flow",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.emotional-connection.flow"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-emotional-connection-friction",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.emotional-connection.friction"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-emotional-connection-mixed",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.emotional-connection.mixed"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-emotional-connection-quiet",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.emotional-connection.quiet"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-communication-flow",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.communication.flow"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-communication-friction",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.communication.friction"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-communication-mixed",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.communication.mixed"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-communication-quiet",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.communication.quiet"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-chemistry-flow",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.chemistry.flow"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-chemistry-friction",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.chemistry.friction"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-chemistry-mixed",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.chemistry.mixed"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-chemistry-quiet",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.chemistry.quiet"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-commitment-flow",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.commitment.flow"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-commitment-friction",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.commitment.friction"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-commitment-mixed",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.commitment.mixed"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-commitment-quiet",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.commitment.quiet"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-house-overlays-mixed",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.house-overlays.mixed"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-key-inter-aspects-flow",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.key-inter-aspects.flow"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-key-inter-aspects-friction",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.key-inter-aspects.friction"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-key-inter-aspects-mixed",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.key-inter-aspects.mixed"
+      ],
+      "direction": null
+    },
+    {
+      "scenarioID": "finite-key-inter-aspects-quiet",
+      "kind": "finite-domain-planner-probe",
+      "copyKeys": [
+        "modern.synastry.key-inter-aspects.quiet"
+      ],
+      "direction": null
+    }
+  ]
+}

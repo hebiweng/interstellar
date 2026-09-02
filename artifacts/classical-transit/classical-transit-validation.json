@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-03T15:19:11.485Z",
+  "chartID": "classical.transit",
+  "cardIDs": [
+    "current-story",
+    "current-cycles",
+    "transit-timeline",
+    "planet-paths",
+    "life-areas",
+    "active-transits"
+  ],
+  "requirementCount": 71,
+  "reachableCount": 71,
+  "unreachableCount": 0,
+  "observedCount": 71,
+  "unobservedCount": 0,
+  "missingCopyCount": 0,
+  "unknownCopyCount": 0,
+  "approvedClassicalReuseCount": 71,
+  "classicalToModernFallbackCount": 0,
+  "timelineConsumerCopyRequestCount": 0,
+  "invalidSourceFactIDCount": 0,
+  "duplicateFullClaimCount": 0,
+  "unstableScopeIDCount": 0,
+  "cardContractErrorCount": 0,
+  "emptyStateContractErrorCount": 0,
+  "placeholderContractErrorCount": 0,
+  "fixtureCount": 24,
+  "realRunCount": 9,
+  "finiteProbeCount": 68,
+  "capabilityGaps": [
+    "AstroCore does not expose a sect/day-chart fact for Transit planning.",
+    "AstroCore does not expose a sect/night-chart fact for Transit planning.",
+    "AstroCore does not expose prohibition, frustration, or prevented-perfection facts."
+  ],
+  "passed": true
+}

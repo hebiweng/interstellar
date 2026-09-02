@@ -1,0 +1,746 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-09T15:12:10.379Z",
+  "chartID": "classical.synastry",
+  "requirementCount": 33,
+  "reachableCount": 33,
+  "unreachableCount": 0,
+  "observedCount": 33,
+  "unobservedCount": 0,
+  "missingCount": 0,
+  "structuralRequirements": {
+    "revision": 3,
+    "status": "candidate",
+    "sectionSubtitles": "Fixed UI copy from the v6 prototype; Classical chemistry omits Pluto.",
+    "perspective": {
+      "tabs": "{experiencerName} feels",
+      "proseVariables": [
+        "otherName"
+      ],
+      "proseVoice": "second person: you/your plus {{otherName}}",
+      "direction": "personA consumes personBToA facts; personB consumes personAToB facts"
+    },
+    "nameTemplates": {
+      "houseOverlay": "{{sourceName}}’s {{body}} in {{receiverName}}’s {{house}}",
+      "interAspect": "{{personAName}} {{personABody}} {{aspect}} {{personBName}} {{personBBody}}"
+    },
+    "dynamicSelection": {
+      "emotionalConnection": "strongest supportive Moon contact plus strongest challenging Moon contact; fixed two-cell UI renders an explicit no-distinct-signal state for an absent role",
+      "communication": "up to three strongest Mercury contacts; step1/step2/step3 are neutral shared-path labels with no person name or second-person voice (English 2–4 words and at most 28 characters; Simplified Chinese at most 10 characters)",
+      "chemistry": "distinct attraction/intensity contacts; Classical excludes Pluto",
+      "commitment": "Saturn stability plus distinct Jupiter growth contact, falling back to the strongest corresponding Saturn/Jupiter house overlay; fixed two-cell UI renders an explicit no-distinct-signal state only when neither fact exists",
+      "houseOverlays": "four relevance-ranked overlays, two in each direction",
+      "keyInterAspects": "three to six by strength/relevance, not positivity"
+    },
+    "drawers": [
+      "relationship-overview",
+      "emotional-connection",
+      "communication",
+      "chemistry",
+      "commitment",
+      "key-inter-aspect row"
+    ]
+  },
+  "requirements": [
+    {
+      "key": "classical.synastry.relationship-overview.mutual-reception",
+      "cardID": "relationship-overview",
+      "themeID": "mutual-reception",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [],
+      "useCondition": "relationship-overview selects mutual-reception.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.relationship-overview.one-way-reception",
+      "cardID": "relationship-overview",
+      "themeID": "one-way-reception",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [],
+      "useCondition": "relationship-overview selects one-way-reception.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.relationship-overview.fortified-support",
+      "cardID": "relationship-overview",
+      "themeID": "fortified-support",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [],
+      "useCondition": "relationship-overview selects fortified-support.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.relationship-overview.impaired-pressure",
+      "cardID": "relationship-overview",
+      "themeID": "impaired-pressure",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [],
+      "useCondition": "relationship-overview selects impaired-pressure.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.relationship-overview.mixed-testimony",
+      "cardID": "relationship-overview",
+      "themeID": "mixed-testimony",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [],
+      "useCondition": "relationship-overview selects mixed-testimony.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.relationship-overview.neutral",
+      "cardID": "relationship-overview",
+      "themeID": "neutral",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [],
+      "useCondition": "relationship-overview selects neutral.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.perspectives.mental-activation",
+      "cardID": "perspectives",
+      "themeID": "mental-activation",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [
+        "otherName"
+      ],
+      "useCondition": "The selected direction has theme mental-activation; use {{otherName}} with you/your.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.perspectives.emotional-activation",
+      "cardID": "perspectives",
+      "themeID": "emotional-activation",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [
+        "otherName"
+      ],
+      "useCondition": "The selected direction has theme emotional-activation; use {{otherName}} with you/your.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.perspectives.relational-activation",
+      "cardID": "perspectives",
+      "themeID": "relational-activation",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [
+        "otherName"
+      ],
+      "useCondition": "The selected direction has theme relational-activation; use {{otherName}} with you/your.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.perspectives.practical-activation",
+      "cardID": "perspectives",
+      "themeID": "practical-activation",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [
+        "otherName"
+      ],
+      "useCondition": "The selected direction has theme practical-activation; use {{otherName}} with you/your.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.perspectives.mixed-activation",
+      "cardID": "perspectives",
+      "themeID": "mixed-activation",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [
+        "otherName"
+      ],
+      "useCondition": "The selected direction has theme mixed-activation; use {{otherName}} with you/your.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.emotional-connection.flow",
+      "cardID": "emotional-connection",
+      "themeID": "flow",
+      "fields": [
+        "headline",
+        "body",
+        "flow.body",
+        "difference.body"
+      ],
+      "variables": [],
+      "useCondition": "emotional-connection selects flow.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.emotional-connection.friction",
+      "cardID": "emotional-connection",
+      "themeID": "friction",
+      "fields": [
+        "headline",
+        "body",
+        "flow.body",
+        "difference.body"
+      ],
+      "variables": [],
+      "useCondition": "emotional-connection selects friction.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.emotional-connection.mixed",
+      "cardID": "emotional-connection",
+      "themeID": "mixed",
+      "fields": [
+        "headline",
+        "body",
+        "flow.body",
+        "difference.body"
+      ],
+      "variables": [],
+      "useCondition": "emotional-connection selects mixed.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.emotional-connection.quiet",
+      "cardID": "emotional-connection",
+      "themeID": "quiet",
+      "fields": [
+        "headline",
+        "body",
+        "flow.body",
+        "difference.body"
+      ],
+      "variables": [],
+      "useCondition": "emotional-connection selects quiet.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.communication.flow",
+      "cardID": "communication",
+      "themeID": "flow",
+      "fields": [
+        "headline",
+        "body",
+        "step1",
+        "step2",
+        "step3"
+      ],
+      "variables": [],
+      "useCondition": "communication selects flow.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.communication.friction",
+      "cardID": "communication",
+      "themeID": "friction",
+      "fields": [
+        "headline",
+        "body",
+        "step1",
+        "step2",
+        "step3"
+      ],
+      "variables": [],
+      "useCondition": "communication selects friction.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.communication.mixed",
+      "cardID": "communication",
+      "themeID": "mixed",
+      "fields": [
+        "headline",
+        "body",
+        "step1",
+        "step2",
+        "step3"
+      ],
+      "variables": [],
+      "useCondition": "communication selects mixed.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.communication.quiet",
+      "cardID": "communication",
+      "themeID": "quiet",
+      "fields": [
+        "headline",
+        "body",
+        "step1",
+        "step2",
+        "step3"
+      ],
+      "variables": [],
+      "useCondition": "communication selects quiet.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.chemistry.flow",
+      "cardID": "chemistry",
+      "themeID": "flow",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [],
+      "useCondition": "chemistry selects flow.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.chemistry.friction",
+      "cardID": "chemistry",
+      "themeID": "friction",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [],
+      "useCondition": "chemistry selects friction.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.chemistry.mixed",
+      "cardID": "chemistry",
+      "themeID": "mixed",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [],
+      "useCondition": "chemistry selects mixed.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.chemistry.quiet",
+      "cardID": "chemistry",
+      "themeID": "quiet",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [],
+      "useCondition": "chemistry selects quiet.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.commitment.received",
+      "cardID": "commitment",
+      "themeID": "received",
+      "fields": [
+        "headline",
+        "body",
+        "stability.body",
+        "growth.body"
+      ],
+      "variables": [],
+      "useCondition": "commitment selects received.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.commitment.flow",
+      "cardID": "commitment",
+      "themeID": "flow",
+      "fields": [
+        "headline",
+        "body",
+        "stability.body",
+        "growth.body"
+      ],
+      "variables": [],
+      "useCondition": "commitment selects flow.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.commitment.friction",
+      "cardID": "commitment",
+      "themeID": "friction",
+      "fields": [
+        "headline",
+        "body",
+        "stability.body",
+        "growth.body"
+      ],
+      "variables": [],
+      "useCondition": "commitment selects friction.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.commitment.mixed",
+      "cardID": "commitment",
+      "themeID": "mixed",
+      "fields": [
+        "headline",
+        "body",
+        "stability.body",
+        "growth.body"
+      ],
+      "variables": [],
+      "useCondition": "commitment selects mixed.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.commitment.quiet",
+      "cardID": "commitment",
+      "themeID": "quiet",
+      "fields": [
+        "headline",
+        "body",
+        "stability.body",
+        "growth.body"
+      ],
+      "variables": [],
+      "useCondition": "commitment selects quiet.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.house-overlays.mixed",
+      "cardID": "house-overlays",
+      "themeID": "mixed",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [],
+      "useCondition": "house-overlays selects mixed.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.key-inter-aspects.flow",
+      "cardID": "key-inter-aspects",
+      "themeID": "flow",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [],
+      "useCondition": "key-inter-aspects selects flow.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.key-inter-aspects.friction",
+      "cardID": "key-inter-aspects",
+      "themeID": "friction",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [],
+      "useCondition": "key-inter-aspects selects friction.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.key-inter-aspects.mixed",
+      "cardID": "key-inter-aspects",
+      "themeID": "mixed",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [],
+      "useCondition": "key-inter-aspects selects mixed.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    },
+    {
+      "key": "classical.synastry.key-inter-aspects.quiet",
+      "cardID": "key-inter-aspects",
+      "themeID": "quiet",
+      "fields": [
+        "headline",
+        "body"
+      ],
+      "variables": [],
+      "useCondition": "key-inter-aspects selects quiet.",
+      "requiredBy": [
+        "SynastryContentPlanner",
+        "CopyCatalogMatcher.synastryCardText",
+        "SynastryChartCardFactory"
+      ],
+      "reachabilityStatus": "reachable",
+      "observationStatus": "observed-finite-domain-probe",
+      "catalogStatus": "present",
+      "missingLocales": []
+    }
+  ]
+}

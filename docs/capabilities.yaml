@@ -697,7 +697,7 @@ capabilities:
     validation_profile: astrology_stable
 
   - id: astronomy.fixed_stars
-    name_zh: 固定星位置、合相与Paran基础
+    name_zh: 固定星位置与本命合相
     catalog_sections: ["2.13"]
     category: astronomy
     phase: beta
@@ -709,7 +709,10 @@ capabilities:
     data_sources: [swiss_ephemeris]
     optional_data_sources: [gaia_dr3]
     inputs: [fixed_star_selection, epoch, observer]
-    outputs: [fixed_star_positions, conjunctions]
+    outputs: [fixed_star_positions, magnitudes, conjunctions]
+    known_limits:
+      - 本命固定星预设当前包含24颗星
+      - Paran属于独立地理占星技法，当前本命主链路不实现
     validation_profile: astronomy_stable
 
   - id: astronomy.minor_bodies

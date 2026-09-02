@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "locale": "en",
+  "area": "week",
+  "entries": [
+    {
+      "contentKey": "week.domain.love.supportive",
+      "summary": "Connection has room to grow",
+      "detail": "A conversation or shared plan is easier to move forward. Give the other person enough time to respond.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.love.challenging",
+      "summary": "Relationships need more room",
+      "detail": "Small misunderstandings can take up extra space. Ask one clear question before deciding what the other person means.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.love.transition",
+      "summary": "A relationship is changing shape",
+      "detail": "New information may shift how a conversation feels. Leave the conclusion open until both sides are clearer.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.love.neutral",
+      "summary": "Connection stays steady",
+      "detail": "Ordinary attention matters more than a major gesture. Keep communication simple and direct.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.work.supportive",
+      "summary": "The main task can move",
+      "detail": "Conditions support practical progress. Finish the clearest useful step before adding another priority.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.work.challenging",
+      "summary": "Work needs clearer order",
+      "detail": "Responsibilities may compete for attention. Confirm ownership and timing before pushing harder.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.work.transition",
+      "summary": "Priorities are shifting",
+      "detail": "The next step is becoming clearer, but the whole plan is not settled. Move one part and reassess.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.work.neutral",
+      "summary": "Work keeps a steady pace",
+      "detail": "The existing plan is enough. Close small open loops without creating extra urgency.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.money.supportive",
+      "summary": "Resources are easier to arrange",
+      "detail": "A practical money choice has more room to work. Start with what is already available.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.money.challenging",
+      "summary": "Money needs another look",
+      "detail": "Check existing commitments before adding a new expense. The longer cost matters more than the first price.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.money.transition",
+      "summary": "Keep money choices flexible",
+      "detail": "The real cost or timing is still becoming clear. Preserve room to adjust before committing.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.money.neutral",
+      "summary": "Resources stay stable",
+      "detail": "Routine checks and ordinary restraint are enough. A new decision does not need to be forced.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.energy.supportive",
+      "summary": "Energy is easier to direct",
+      "detail": "Use the clearer stretch for demanding work and stop before focus turns into fatigue.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.energy.challenging",
+      "summary": "Protect your energy",
+      "detail": "Attention may rise and fall quickly. Reduce unnecessary switching and leave recovery space.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.energy.transition",
+      "summary": "Adjust the pace as it changes",
+      "detail": "The day may not feel even. Match harder tasks to focused periods and keep quieter periods lighter.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.energy.neutral",
+      "summary": "Your pace stays even",
+      "detail": "The usual routine is enough. Keep some open space instead of filling every quiet moment.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.peak.ahead",
+      "summary": "The week's busiest point is still ahead",
+      "detail": "The pace is still building, so leave room before the more demanding part arrives.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.peak.current",
+      "summary": "This is the week's busiest point",
+      "detail": "Keep the main priority visible and avoid spreading attention across too many tasks.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.peak.passed",
+      "summary": "The week's busiest point has passed",
+      "detail": "The pace is easing. Finish what is already in motion before opening a new front.",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    }
+  ]
+}

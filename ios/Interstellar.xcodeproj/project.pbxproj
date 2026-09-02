@@ -1,0 +1,1622 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		02366B954939BBA2E0278EAB /* CopyCatalogMatcher+CurrentSky.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9246EC3FF329DF2BC403326 /* CopyCatalogMatcher+CurrentSky.swift */; };
+		026D94872BB73545933C4DFD /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = BB5BCE81BEF6F479DD875A36 /* LICENSE */; };
+		06CFB14BDA022A6FBA3EF7C2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4E6DA38605D25A9654FE7E62 /* Assets.xcassets */; };
+		0B0DF80883498AC0DD01748F /* AstroTerms-tr.json in Resources */ = {isa = PBXBuildFile; fileRef = 2EDEBDDDA02E586930435442 /* AstroTerms-tr.json */; };
+		0DADEB896547684C5A4056A8 /* ChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5C939878A4D22398ADB7CBE /* ChartsView.swift */; };
+		0FAC513A2875B976CAB37574 /* TodayDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97EEE681F90CAE569A4F0B3A /* TodayDashboard.swift */; };
+		105F3069133D0ECB6D9BF316 /* SolarReturnContentPlanning.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF745DE02EEC6E1EF4F0C359 /* SolarReturnContentPlanning.swift */; };
+		12D11D41A360D66214B94377 /* CommerceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ABDA3272B25CD258001ACE3 /* CommerceTests.swift */; };
+		1385C846098AD427DA218E0C /* VisualRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501ADE1C8B476ED84F14B948 /* VisualRegressionTests.swift */; };
+		15A53D4BD43601EE6426BA5A /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA31C8B1C13F10113F10E112 /* TodayView.swift */; };
+		16C6E1985313246353EDB4F7 /* AstroTerms-es.json in Resources */ = {isa = PBXBuildFile; fileRef = AB744A28C654F60FA3B7A42F /* AstroTerms-es.json */; };
+		1794539D993157B75CDD0030 /* abc-life-areas-help-zh-Hans.md in Resources */ = {isa = PBXBuildFile; fileRef = 51D302BEED2320F6644CB2B1 /* abc-life-areas-help-zh-Hans.md */; };
+		17DA24AF7292AB4828A37395 /* InsightContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B2767ACABFDDAEEBA88C4E /* InsightContent.swift */; };
+		1D9909C647E496C423149F54 /* NatalCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70137E5B98FB7ED9A5271D4E /* NatalCardViews.swift */; };
+		224FEC7D4D41AF9D34240781 /* ThemesFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = E25ECA2E98004920D9946269 /* ThemesFeature.swift */; };
+		22FE763B15FC08F52E396C93 /* InsightVisualRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C15B6C5E4FC301E99B2B07C /* InsightVisualRouter.swift */; };
+		238A3EA2ACA6069784BFC215 /* abc-life-areas-help-it.md in Resources */ = {isa = PBXBuildFile; fileRef = F00887EF80E3519668D4FB80 /* abc-life-areas-help-it.md */; };
+		23D75513693B6367A96D25C7 /* CurrentSkyCardDraftFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 903C47EC97FEBE36E19DE427 /* CurrentSkyCardDraftFactory.swift */; };
+		23E0C4CF0271BF7660C0066E /* AstroTerms-pt-BR.json in Resources */ = {isa = PBXBuildFile; fileRef = 8548A4FC08592FA5EFFF4C95 /* AstroTerms-pt-BR.json */; };
+		27A3F02DDE952EFCB8004CA1 /* SecondaryCardDraftFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 183D70FDF77DECA83886D1A9 /* SecondaryCardDraftFactory.swift */; };
+		291E8EEC1EE0DBF283E31334 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 264D74ADDEE8C297C14A037B /* libsqlite3.tbd */; };
+		2BAFAAA81DADC6247F5F641E /* Interstellar.storekit in Resources */ = {isa = PBXBuildFile; fileRef = F5469F68D509DB75F34215F3 /* Interstellar.storekit */; };
+		33054AA25131FE100A8ACD0B /* ClassicalTransitPlanningTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CBBF3C1035EE83B4DD9EADC /* ClassicalTransitPlanningTests.swift */; };
+		33AF4A0526E3FCBA484AE56F /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E20C395BDFD8BD0B24388C /* AppModel.swift */; };
+		388FE3F37754814E0A699FE6 /* agpl-3.0.txt in Resources */ = {isa = PBXBuildFile; fileRef = 304F386EC1EE838F3AD709A9 /* agpl-3.0.txt */; };
+		3C1AFAC75A47C87CC9F4D40C /* SynastryLegacyCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0F4E5EB51698A7A4BAD76D /* SynastryLegacyCardFactory.swift */; };
+		3FF959A490BE10D499C12683 /* ReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E55B957F3B40BB06BDBB4DE /* ReportsView.swift */; };
+		44FD8E26CE2466635A276B1D /* CurrentSkyChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0FB53B8C0D70570B8A46BF6 /* CurrentSkyChartCardFactory.swift */; };
+		464458B2F8E2AF6F04173689 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2A9B7F6653E3B21A74DFFF2 /* Models.swift */; };
+		4929DDDC3B76B0B33EF5FE0F /* SharedCardComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C9751803A580CFFD4F8F56 /* SharedCardComponents.swift */; };
+		495F919A17C34BF2A6544CDA /* CopyCatalogMatcher+Natal.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2ECE55A8EDFBADC38950773 /* CopyCatalogMatcher+Natal.swift */; };
+		4980870A6064480F223751CA /* CardContractValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E40E064E50A383864A2EE726 /* CardContractValidator.swift */; };
+		4B7D0311C26198EF9744195B /* OfflineLocationStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 206C0850536130300B377FCB /* OfflineLocationStoreTests.swift */; };
+		4C985AF7B6AFDBAB6785A004 /* TodayEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8B5EDCA7BBB5A87878D3A6E /* TodayEngine.swift */; };
+		4E899578F7FE3416C60B223B /* CopyCatalogMatcher+SolarReturn.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2144E58BD7D63D1B164367E /* CopyCatalogMatcher+SolarReturn.swift */; };
+		4F27F066D66B76B397D64A03 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BDBF1C8DDAF72951EAEA6DCF /* Localizable.xcstrings */; };
+		5028400A7A6E814BF89BCD27 /* SynastryChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18C0A36185173B04800EC00 /* SynastryChartCardFactory.swift */; };
+		5335DA4440460DC6D77949CA /* ephe in Resources */ = {isa = PBXBuildFile; fileRef = 0CA4E3ABEDF5DDF5FAB1AC76 /* ephe */; };
+		55B03CCB788EBBEE523A3D9C /* ChartDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9A86BA44C035CA78AEA7E2 /* ChartDefinition.swift */; };
+		55F5308410E0745739D19183 /* SecondaryChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F219C33B43B0E13C2DE254 /* SecondaryChartCardFactory.swift */; };
+		5646D7AB2237751B2C397EFB /* abc-life-areas-help-pt-BR.md in Resources */ = {isa = PBXBuildFile; fileRef = ECD88EE9D5427CF320E5A723 /* abc-life-areas-help-pt-BR.md */; };
+		5950553625EE9C7B0A2F7DF4 /* AstroTerms-en.json in Resources */ = {isa = PBXBuildFile; fileRef = E49BBC6A375BF1066E055FC2 /* AstroTerms-en.json */; };
+		5971882F0B032678A52F2356 /* InsightFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F8D78DCB5EEDC2C7B7AB0F3 /* InsightFactory.swift */; };
+		59E494C9AC4EB5EEDFB910CD /* LocalizedFormatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B5FB5FF8C581EAA64A6F58 /* LocalizedFormatters.swift */; };
+		5EA16EAEC323BA7C8DD81A9A /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A6D85449819D6C4E404066 /* Theme.swift */; };
+		5F50F5CBE22497DE87F201C7 /* TransitContentPlannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0741E435F931A6CA96910082 /* TransitContentPlannerTests.swift */; };
+		61351E9509F520477D1797F6 /* InterstellarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 055D71348E930EDB7CEA9D25 /* InterstellarApp.swift */; };
+		65AA570CA8FFCED805E95E4D /* OfflineLocationData-LICENSES.txt in Resources */ = {isa = PBXBuildFile; fileRef = 697E1E1E7B99A786B398AC90 /* OfflineLocationData-LICENSES.txt */; };
+		69D2947D4DAEF327395440EC /* TransitChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1046F5BCC8A7B5114076BE5 /* TransitChartCardFactory.swift */; };
+		6CB4F6BDA130DD6EC32046DF /* SolarReturnCardDraftFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BF01811F46E947A7B6B1F16 /* SolarReturnCardDraftFactory.swift */; };
+		6DF8FD6A4F935548CE5FFF08 /* CurrentSkyCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4A3A93914F96ADD04BCE584 /* CurrentSkyCardViews.swift */; };
+		6EDA491777E0013C8ED4B6FC /* ICloudBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B10192A26DC6FF24AAE0F44 /* ICloudBackup.swift */; };
+		7054C08BB4A305C2CE8328DA /* AskHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1C2A46A3725C8A3CDBFC8B /* AskHistory.swift */; };
+		7067CD7AE2454C6EF33E9BA7 /* NatalCardDraftFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC6C2CCBAA0E8F2E2E94726 /* NatalCardDraftFactory.swift */; };
+		70CE71FDF7551584DFD1DCE4 /* AppRelationshipChartCalculationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B890D3ADFBC964CD38F3C3 /* AppRelationshipChartCalculationService.swift */; };
+		7146C73C4FBB984FB0E84E57 /* Reports.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3989AA7077B4B8CF57C56610 /* Reports.swift */; };
+		7195DECE9971A2CC7BF9F222 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F53A273536232B2755B411 /* RootView.swift */; };
+		77C79F87ECF06FBD5A1BBC66 /* AstroCore in Frameworks */ = {isa = PBXBuildFile; productRef = 920366345E4608960231F5F8 /* AstroCore */; };
+		79F33F52F35C68F4E0743487 /* abc-life-areas-help-es.md in Resources */ = {isa = PBXBuildFile; fileRef = 3D415F3E6315EB99B176E7CB /* abc-life-areas-help-es.md */; };
+		7B00116445E815363BD4B368 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 12B96210B8B65212F06462C7 /* InfoPlist.strings */; };
+		7B37214AECB62744C27DD168 /* AIGeneration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2114D2FD8739C6BB62FD26EF /* AIGeneration.swift */; };
+		7BA26679B82098921000CCF4 /* SecondaryCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA033884853D4F649DCA3A50 /* SecondaryCardViews.swift */; };
+		7C3EB319F1135FEB443FD045 /* SecondaryContentPlanning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03FC50F4B714EC5097204956 /* SecondaryContentPlanning.swift */; };
+		7FDF5EB81E59857B29D526B5 /* AstroTerms-fr.json in Resources */ = {isa = PBXBuildFile; fileRef = A638D9D9A2F918B27471D35F /* AstroTerms-fr.json */; };
+		80B678D9DAB2A785989708A6 /* ChartEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FFE425FA91D67D5112FB3FE /* ChartEvents.swift */; };
+		81879C97D92790AA2A645A78 /* ClassicalTransitPlanningStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7B06AF686095F8D7074FC4 /* ClassicalTransitPlanningStrategy.swift */; };
+		82A5A08E61A2A43E19EC5007 /* LocationPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1C4311E86E866790B89BEA /* LocationPicker.swift */; };
+		832EEE8C722945D95B952F99 /* NatalChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 870550BABBB1A4045FB38419 /* NatalChartCardFactory.swift */; };
+		83E776DFD24F77B62FDFF78B /* WeeklyForecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D7BD1EE6C166DE149FA32C4 /* WeeklyForecast.swift */; };
+		8548C3309D21611BA159183D /* AppAIReportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16CCFFB5C0A8A83EACE8C47F /* AppAIReportService.swift */; };
+		88E12219F4EFF13E0736FE45 /* CopyCatalogMatcher+Secondary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DA05D01ACC5CCFEED503A57 /* CopyCatalogMatcher+Secondary.swift */; };
+		910D7E37690DFE9CF39B6CCB /* abc-life-areas-help-en.md in Resources */ = {isa = PBXBuildFile; fileRef = E8C236CDE4D10394DD945034 /* abc-life-areas-help-en.md */; };
+		91545E32283B2DC79603CE15 /* CurrentSkyContentPlanning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB76F51D656570D68D5D97 /* CurrentSkyContentPlanning.swift */; };
+		9724D9A3584084D69C4A0CFC /* AstroTerms-zh-Hans.json in Resources */ = {isa = PBXBuildFile; fileRef = C5445403CDC1A5A53F3CA7BE /* AstroTerms-zh-Hans.json */; };
+		9DFD0DFF988B807727C7E222 /* abc-life-areas-help-fr.md in Resources */ = {isa = PBXBuildFile; fileRef = 14356E98A5D38BD641396766 /* abc-life-areas-help-fr.md */; };
+		9FD05B03244F0CBA98292AB3 /* AstroTerms-it.json in Resources */ = {isa = PBXBuildFile; fileRef = 5FC2D35DBFDC0FB355D4E768 /* AstroTerms-it.json */; };
+		A415657BEBB15DDC2970BF62 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBA16A86F74493A35A7A74AE /* OnboardingView.swift */; };
+		A67DFAE27B65045744E93553 /* TransitCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 981F4C2821CFBF67FAAA0AD8 /* TransitCardFactory.swift */; };
+		A863BE485A3BF7AE893CF28F /* ContentKit in Frameworks */ = {isa = PBXBuildFile; productRef = 5B9BE7BBBE9923D7E31A58CA /* ContentKit */; };
+		A97623F0AAAF05AA48DDE9C2 /* Commerce.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56BC8AFFCB4F85EB79AA6B5B /* Commerce.swift */; };
+		AA34CAD28D767A1F2C0D2D42 /* AppChartCalculationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0D4BA551D42474094AA7BA /* AppChartCalculationService.swift */; };
+		ACE891B9EF0E4DF7055CA6D8 /* PrivateRules-Today.json in Resources */ = {isa = PBXBuildFile; fileRef = DEAB31C516DCEE8FEDBE75A8 /* PrivateRules-Today.json */; };
+		AEBFB69B492E07ADA4D3ECFB /* ClassicalTransitContractValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96EA5C5093F66F8DBEDE5D37 /* ClassicalTransitContractValidator.swift */; };
+		B1D36C32B63168DDBD014D2C /* AppAdvancedChartCalculationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBF1B6E1809CA6034129EA1D /* AppAdvancedChartCalculationService.swift */; };
+		B1F740BBC29FB11A27FD3A37 /* LegacyCardFactorySupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F38F42C1794260A5DB8E8B /* LegacyCardFactorySupport.swift */; };
+		B352EACAC1D2F8221F6D68D7 /* CopyCatalogMatcher+Planned.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF011663EB776C015212B826 /* CopyCatalogMatcher+Planned.swift */; };
+		B3DB778AD83F03C3816282C8 /* AstroTerms-de.json in Resources */ = {isa = PBXBuildFile; fileRef = 31FB59BF03677D6251715CAE /* AstroTerms-de.json */; };
+		B47D63ACE732AFE79F71740D /* InterpretationContextFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03268C1EAB77BCD4B05BCC74 /* InterpretationContextFactory.swift */; };
+		B6111E2F452E307366314E7C /* ConsumerCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = C28BE23BBAEDB4F998B852E4 /* ConsumerCopy.swift */; };
+		B7847893967C4EC6302F6EB7 /* NatalContentPlanning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6447516956662FAEDCBD4AF7 /* NatalContentPlanning.swift */; };
+		BA383EA66FF2C6A25247DE91 /* AppEnrichmentService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A787B2E1810C2E4F9D1CB9 /* AppEnrichmentService.swift */; };
+		BD54F74F35A8C8E4B7EBEA87 /* ClassicalTransitThemeMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F3351613FF5684A3CC89A3 /* ClassicalTransitThemeMapper.swift */; };
+		BD8668B8DBC6CEF2092D8962 /* abc-life-areas-help-tr.md in Resources */ = {isa = PBXBuildFile; fileRef = 735A6F019DA99E1C137DB0D9 /* abc-life-areas-help-tr.md */; };
+		BF84B2B0706F6DBB8773DCD3 /* AstroTerms.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD2F2C2DC93A3770F96DC584 /* AstroTerms.swift */; };
+		BFEF26946DEBCC71082A8828 /* CopyCatalogMatcher+Synastry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D5E38526DAC47EF3413FD59 /* CopyCatalogMatcher+Synastry.swift */; };
+		C09B0F0F7FF22C4AC54D285B /* ChartRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B958CF1AD3B3C7FE6219102 /* ChartRenderer.swift */; };
+		C4222E4A7E9E56D1FA7C480C /* TransitCardContractValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4C25AC99C2A3DD4770FC077 /* TransitCardContractValidator.swift */; };
+		C8306B15A449782072AD1599 /* AdvancedChartCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8496F7ACDFAAF38F93E8B74 /* AdvancedChartCache.swift */; };
+		CB9F0FB190BD8004F5C091BC /* SolarReturnCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5BC32F5A9499E4F9D5AE269 /* SolarReturnCardViews.swift */; };
+		CC5B24A93D8A5754DEC6904D /* abc-life-areas-help-de.md in Resources */ = {isa = PBXBuildFile; fileRef = F3DE848E50731E0E4C97D2D3 /* abc-life-areas-help-de.md */; };
+		CD7C5811C4C499E2E242E0D1 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45FCBC91108D8B597D89E39C /* ProfileView.swift */; };
+		CE67DE4D3AB8A95E65BF59BA /* AstroCore in Frameworks */ = {isa = PBXBuildFile; productRef = C9A7C547B8DF2CD2A8F2A498 /* AstroCore */; };
+		CF0A13278301A647D1CD133E /* SolarReturnChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37CFC1E719FF3811269D124 /* SolarReturnChartCardFactory.swift */; };
+		D00797D053FAE29DE567A3DC /* TransitContentPlanning.swift in Sources */ = {isa = PBXBuildFile; fileRef = A42D05993CC02C05A0EF29EC /* TransitContentPlanning.swift */; };
+		D07B4840EFE347B3C9FACD44 /* OfflineLocations.sqlite3 in Resources */ = {isa = PBXBuildFile; fileRef = 239055D63B08193BFB93A503 /* OfflineLocations.sqlite3 */; };
+		D28C9C0C6EB06EF822BDDA91 /* AstroTerms-ko.json in Resources */ = {isa = PBXBuildFile; fileRef = 26FD9206B6C9932AE2632B71 /* AstroTerms-ko.json */; };
+		D2D0091B09F103587B4248E8 /* ChartCardFactoryContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = B216680241A82944F268E9E7 /* ChartCardFactoryContext.swift */; };
+		D40BC4EC458DE75C314BC350 /* TransitCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 540E8C52B9FD903F6E70EFDF /* TransitCardViews.swift */; };
+		D47EB0AED288791FA3705364 /* AdvancedChartModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACAF20ADFA34FF19F163011D /* AdvancedChartModels.swift */; };
+		D51DC095CC19CE43B59D3CBC /* SnapshotCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E86A56712B23B2F792406049 /* SnapshotCache.swift */; };
+		D580F0929EEB4324DD916489 /* ChartCardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7374A19C7F598DB01612A991 /* ChartCardFactory.swift */; };
+		DA6B16C2768D7B5927B08060 /* InsightCardAssembler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46DDB44B7F03260D94FE6C9A /* InsightCardAssembler.swift */; };
+		DB0731391AC61BBE5989E812 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 128B1AB0A6B05217E772C8FB /* PrivacyInfo.xcprivacy */; };
+		E1BAB6547F55155B65E7152F /* ChartContentPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1DB4BAC9C63E02073891A1A /* ChartContentPlan.swift */; };
+		E597F871F49F5F2A9A054A7F /* SynastryCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BAD00A6ED8F9C344824B06F /* SynastryCardViews.swift */; };
+		E8A54A8BED98C02BEF4DB816 /* abc-life-areas-help-ko.md in Resources */ = {isa = PBXBuildFile; fileRef = EDCEA31F6237E73FD048B40A /* abc-life-areas-help-ko.md */; };
+		EC6A8A4FDB2270B2A17EE47E /* CopyCatalogMatcher+Transit.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3E51ABD17125BFA6309793 /* CopyCatalogMatcher+Transit.swift */; };
+		EDC141B2862EE19AD956E8EA /* OfflineLocationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D1F28A922081C6A8239A498 /* OfflineLocationStore.swift */; };
+		F148813E729FEB595A1040DC /* InsightCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840A27B131AF789B41A4F43C /* InsightCardView.swift */; };
+		F4876ED7999E7F20391AC90C /* PrivateContent in Resources */ = {isa = PBXBuildFile; fileRef = BA4920A95C84D6F5C91E89E1 /* PrivateContent */; };
+		AC144C705CFBF93352A1A687 /* CompareModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504C556BBED501ECE17FD779 /* CompareModels.swift */; };
+		31DBFECBB63C67E0DF20E974 /* CompareFactBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59F01AB7AB00A2742DD3765 /* CompareFactBuilder.swift */; };
+		63D9E319C343927AED82CEAF /* CompareCalculationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EA7FEFB790D69A54D2AFDCE /* CompareCalculationCoordinator.swift */; };
+		2CF78C5D878560B1C1F7979D /* CompareAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13454BB2D2F4B1CFB1FFFD36 /* CompareAIService.swift */; };
+		EEB6C3475EB0AF608253BCDB /* CompareAnalysisStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F3B44AE485234D6A71D0079 /* CompareAnalysisStore.swift */; };
+		36EE155071B984575EB60292 /* CompareAnalysisManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E619163AB6485867C7B7FD2 /* CompareAnalysisManager.swift */; };
+		A5C761981919FF864B36ED4B /* CompareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46FD532C61B2340684B76047 /* CompareView.swift */; };
+		AF459B05F0D1E97D777F0E30 /* AskDeepAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76E03A93026CCD1DE5AEEA27 /* AskDeepAnalysis.swift */; };
+		8189BF06F8735E4E360C196D /* AskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29DC6C30C92027B3F61431F9 /* AskView.swift */; };
+		A46A5DC377E7BA54D96AA294 /* AskHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A4B88A8C90DC09ECB69C0BE /* AskHomeView.swift */; };
+		6A0BFF473E20CB2CDECEF683 /* AskConfigurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18EAAB33EA6FA860A757A39 /* AskConfigurationView.swift */; };
+		10EBDE2C524138D9BAB11395 /* AskActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D66A8D464B728CD4E0C7605 /* AskActions.swift */; };
+		11720C322AE29E4D8F6478B6 /* AskResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 809DAB646874DA33AE218A0B /* AskResultView.swift */; };
+		71D3AD6BCD43877DFCB7783E /* AskConsumerJudgmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 697703BEC5D0263DD56ABC24 /* AskConsumerJudgmentView.swift */; };
+		AFBB2CE6977E49CD949B6852 /* AskContentComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 497CF006CE57B6544879FE4D /* AskContentComposer.swift */; };
+		CB89F717A6B529F18201D8DC /* AskProfessionalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D23C7729A8681F4BD6E7C720 /* AskProfessionalView.swift */; };
+		F4E1A91E7B0D4C2A9A100001 /* AskProfessionalEvidenceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4E1A91E7B0D4C2A9A100002 /* AskProfessionalEvidenceView.swift */; };
+		12602C559B646819CB20EA94 /* AskLifeAreaViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF456CC83DD6C4E78FBD45E1 /* AskLifeAreaViews.swift */; };
+		BD58549D02059A27B5334EA7 /* AskHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA456B787178FCB9F583CCBE /* AskHistoryView.swift */; };
+		BF19004CEC7767988DC99C9C /* AskSupportingTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB52DDB01B2E9DF4FCDB89AF /* AskSupportingTypes.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		08CFEC5348E8AE1C10136F2E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 469E01B8FBC254FA1551B6B1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5BDCE77BA28C6994C9CDC92D;
+			remoteInfo = Interstellar;
+		};
+		55F29F019343E200AE1A6462 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 469E01B8FBC254FA1551B6B1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5BDCE77BA28C6994C9CDC92D;
+			remoteInfo = Interstellar;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		02E20C395BDFD8BD0B24388C /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		03268C1EAB77BCD4B05BCC74 /* InterpretationContextFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterpretationContextFactory.swift; sourceTree = "<group>"; };
+		03FC50F4B714EC5097204956 /* SecondaryContentPlanning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondaryContentPlanning.swift; sourceTree = "<group>"; };
+		055D71348E930EDB7CEA9D25 /* InterstellarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterstellarApp.swift; sourceTree = "<group>"; };
+		0741E435F931A6CA96910082 /* TransitContentPlannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitContentPlannerTests.swift; sourceTree = "<group>"; };
+		0BF01811F46E947A7B6B1F16 /* SolarReturnCardDraftFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolarReturnCardDraftFactory.swift; sourceTree = "<group>"; };
+		0CA4E3ABEDF5DDF5FAB1AC76 /* ephe */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ephe; path = ../vendor/swisseph/ephe; sourceTree = SOURCE_ROOT; };
+		0D7BD1EE6C166DE149FA32C4 /* WeeklyForecast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyForecast.swift; sourceTree = "<group>"; };
+		128B1AB0A6B05217E772C8FB /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		14356E98A5D38BD641396766 /* abc-life-areas-help-fr.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "abc-life-areas-help-fr.md"; sourceTree = "<group>"; };
+		16CCFFB5C0A8A83EACE8C47F /* AppAIReportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAIReportService.swift; sourceTree = "<group>"; };
+		183D70FDF77DECA83886D1A9 /* SecondaryCardDraftFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondaryCardDraftFactory.swift; sourceTree = "<group>"; };
+		1C15B6C5E4FC301E99B2B07C /* InsightVisualRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightVisualRouter.swift; sourceTree = "<group>"; };
+		1D5E38526DAC47EF3413FD59 /* CopyCatalogMatcher+Synastry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CopyCatalogMatcher+Synastry.swift"; sourceTree = "<group>"; };
+		206C0850536130300B377FCB /* OfflineLocationStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineLocationStoreTests.swift; sourceTree = "<group>"; };
+		2114D2FD8739C6BB62FD26EF /* AIGeneration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIGeneration.swift; sourceTree = "<group>"; };
+		239055D63B08193BFB93A503 /* OfflineLocations.sqlite3 */ = {isa = PBXFileReference; path = OfflineLocations.sqlite3; sourceTree = "<group>"; };
+		23B890D3ADFBC964CD38F3C3 /* AppRelationshipChartCalculationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRelationshipChartCalculationService.swift; sourceTree = "<group>"; };
+		264D74ADDEE8C297C14A037B /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
+		26FD9206B6C9932AE2632B71 /* AstroTerms-ko.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "AstroTerms-ko.json"; sourceTree = "<group>"; };
+		28B5FB5FF8C581EAA64A6F58 /* LocalizedFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedFormatters.swift; sourceTree = "<group>"; };
+		2A4FBE0CC517EF4C1D54C807 /* InterstellarUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = InterstellarUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2B10192A26DC6FF24AAE0F44 /* ICloudBackup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudBackup.swift; sourceTree = "<group>"; };
+		2B9A86BA44C035CA78AEA7E2 /* ChartDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartDefinition.swift; sourceTree = "<group>"; };
+		2C19015724A0F9DB648CEDBD /* Interstellar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Interstellar.entitlements; sourceTree = "<group>"; };
+		2DA05D01ACC5CCFEED503A57 /* CopyCatalogMatcher+Secondary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CopyCatalogMatcher+Secondary.swift"; sourceTree = "<group>"; };
+		2EDEBDDDA02E586930435442 /* AstroTerms-tr.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "AstroTerms-tr.json"; sourceTree = "<group>"; };
+		304F386EC1EE838F3AD709A9 /* agpl-3.0.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "agpl-3.0.txt"; sourceTree = "<group>"; };
+		31FB59BF03677D6251715CAE /* AstroTerms-de.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "AstroTerms-de.json"; sourceTree = "<group>"; };
+		33F53A273536232B2755B411 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		3989AA7077B4B8CF57C56610 /* Reports.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reports.swift; sourceTree = "<group>"; };
+		3B958CF1AD3B3C7FE6219102 /* ChartRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartRenderer.swift; sourceTree = "<group>"; };
+		3D415F3E6315EB99B176E7CB /* abc-life-areas-help-es.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "abc-life-areas-help-es.md"; sourceTree = "<group>"; };
+		3E1C2A46A3725C8A3CDBFC8B /* AskHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskHistory.swift; sourceTree = "<group>"; };
+		40093D315097B7945D211895 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		45FCBC91108D8B597D89E39C /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		46DDB44B7F03260D94FE6C9A /* InsightCardAssembler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightCardAssembler.swift; sourceTree = "<group>"; };
+		49A787B2E1810C2E4F9D1CB9 /* AppEnrichmentService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnrichmentService.swift; sourceTree = "<group>"; };
+		4BAD00A6ED8F9C344824B06F /* SynastryCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynastryCardViews.swift; sourceTree = "<group>"; };
+		4E6DA38605D25A9654FE7E62 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		501ADE1C8B476ED84F14B948 /* VisualRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualRegressionTests.swift; sourceTree = "<group>"; };
+		50F219C33B43B0E13C2DE254 /* SecondaryChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondaryChartCardFactory.swift; sourceTree = "<group>"; };
+		50F3351613FF5684A3CC89A3 /* ClassicalTransitThemeMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassicalTransitThemeMapper.swift; sourceTree = "<group>"; };
+		51D302BEED2320F6644CB2B1 /* abc-life-areas-help-zh-Hans.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "abc-life-areas-help-zh-Hans.md"; sourceTree = "<group>"; };
+		540E8C52B9FD903F6E70EFDF /* TransitCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitCardViews.swift; sourceTree = "<group>"; };
+		56BC8AFFCB4F85EB79AA6B5B /* Commerce.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commerce.swift; sourceTree = "<group>"; };
+		57F38F42C1794260A5DB8E8B /* LegacyCardFactorySupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyCardFactorySupport.swift; sourceTree = "<group>"; };
+		5A1C4311E86E866790B89BEA /* LocationPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPicker.swift; sourceTree = "<group>"; };
+		5CCCA84B397C2C9CC92887D6 /* ContentKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ContentKit; path = Packages/ContentKit; sourceTree = SOURCE_ROOT; };
+		5E55B957F3B40BB06BDBB4DE /* ReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsView.swift; sourceTree = "<group>"; };
+		5FC2D35DBFDC0FB355D4E768 /* AstroTerms-it.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "AstroTerms-it.json"; sourceTree = "<group>"; };
+		61806FB9231FDE05FF182B43 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		6447516956662FAEDCBD4AF7 /* NatalContentPlanning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NatalContentPlanning.swift; sourceTree = "<group>"; };
+		65C9751803A580CFFD4F8F56 /* SharedCardComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedCardComponents.swift; sourceTree = "<group>"; };
+		661AA6692BBDB981B3874B3C /* Interstellar.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Interstellar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		697E1E1E7B99A786B398AC90 /* OfflineLocationData-LICENSES.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "OfflineLocationData-LICENSES.txt"; sourceTree = "<group>"; };
+		6ABDA3272B25CD258001ACE3 /* CommerceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommerceTests.swift; sourceTree = "<group>"; };
+		6BB2E09E42264D1B13FD52ED /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		6EC6C2CCBAA0E8F2E2E94726 /* NatalCardDraftFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NatalCardDraftFactory.swift; sourceTree = "<group>"; };
+		6FFE425FA91D67D5112FB3FE /* ChartEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartEvents.swift; sourceTree = "<group>"; };
+		70137E5B98FB7ED9A5271D4E /* NatalCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NatalCardViews.swift; sourceTree = "<group>"; };
+		735A6F019DA99E1C137DB0D9 /* abc-life-areas-help-tr.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "abc-life-areas-help-tr.md"; sourceTree = "<group>"; };
+		7374A19C7F598DB01612A991 /* ChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartCardFactory.swift; sourceTree = "<group>"; };
+		840A27B131AF789B41A4F43C /* InsightCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightCardView.swift; sourceTree = "<group>"; };
+		8548A4FC08592FA5EFFF4C95 /* AstroTerms-pt-BR.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "AstroTerms-pt-BR.json"; sourceTree = "<group>"; };
+		855649E77F416B63EF175FE9 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		85759306099A7814769C8012 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		870550BABBB1A4045FB38419 /* NatalChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NatalChartCardFactory.swift; sourceTree = "<group>"; };
+		8EDB76F51D656570D68D5D97 /* CurrentSkyContentPlanning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentSkyContentPlanning.swift; sourceTree = "<group>"; };
+		8F8D78DCB5EEDC2C7B7AB0F3 /* InsightFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightFactory.swift; sourceTree = "<group>"; };
+		903C47EC97FEBE36E19DE427 /* CurrentSkyCardDraftFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentSkyCardDraftFactory.swift; sourceTree = "<group>"; };
+		96EA5C5093F66F8DBEDE5D37 /* ClassicalTransitContractValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassicalTransitContractValidator.swift; sourceTree = "<group>"; };
+		97EEE681F90CAE569A4F0B3A /* TodayDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayDashboard.swift; sourceTree = "<group>"; };
+		981F4C2821CFBF67FAAA0AD8 /* TransitCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitCardFactory.swift; sourceTree = "<group>"; };
+		9ABF1E198A9CC166ADC05C23 /* AstroCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AstroCore; path = Packages/AstroCore; sourceTree = SOURCE_ROOT; };
+		9CBBF3C1035EE83B4DD9EADC /* ClassicalTransitPlanningTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassicalTransitPlanningTests.swift; sourceTree = "<group>"; };
+		9D1F28A922081C6A8239A498 /* OfflineLocationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineLocationStore.swift; sourceTree = "<group>"; };
+		A1046F5BCC8A7B5114076BE5 /* TransitChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitChartCardFactory.swift; sourceTree = "<group>"; };
+		A2A9B7F6653E3B21A74DFFF2 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		A2C5273C247A4AE167E5145B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A42D05993CC02C05A0EF29EC /* TransitContentPlanning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitContentPlanning.swift; sourceTree = "<group>"; };
+		A638D9D9A2F918B27471D35F /* AstroTerms-fr.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "AstroTerms-fr.json"; sourceTree = "<group>"; };
+		A8496F7ACDFAAF38F93E8B74 /* AdvancedChartCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedChartCache.swift; sourceTree = "<group>"; };
+		AB744A28C654F60FA3B7A42F /* AstroTerms-es.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "AstroTerms-es.json"; sourceTree = "<group>"; };
+		ACAF20ADFA34FF19F163011D /* AdvancedChartModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedChartModels.swift; sourceTree = "<group>"; };
+		AD2F2C2DC93A3770F96DC584 /* AstroTerms.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AstroTerms.swift; sourceTree = "<group>"; };
+		B1DB4BAC9C63E02073891A1A /* ChartContentPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartContentPlan.swift; sourceTree = "<group>"; };
+		B216680241A82944F268E9E7 /* ChartCardFactoryContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartCardFactoryContext.swift; sourceTree = "<group>"; };
+		B4A3A93914F96ADD04BCE584 /* CurrentSkyCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentSkyCardViews.swift; sourceTree = "<group>"; };
+		BA31C8B1C13F10113F10E112 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
+		BA4920A95C84D6F5C91E89E1 /* PrivateContent */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PrivateContent; path = App/Resources/PrivateContent; sourceTree = SOURCE_ROOT; };
+		BB5BCE81BEF6F479DD875A36 /* LICENSE */ = {isa = PBXFileReference; path = LICENSE; sourceTree = "<group>"; };
+		BBA16A86F74493A35A7A74AE /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		BD387F6A83026B674CCD09BF /* InterstellarTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = InterstellarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BDBF1C8DDAF72951EAEA6DCF /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		BF745DE02EEC6E1EF4F0C359 /* SolarReturnContentPlanning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolarReturnContentPlanning.swift; sourceTree = "<group>"; };
+		C18C0A36185173B04800EC00 /* SynastryChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynastryChartCardFactory.swift; sourceTree = "<group>"; };
+		C28BE23BBAEDB4F998B852E4 /* ConsumerCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumerCopy.swift; sourceTree = "<group>"; };
+		C2ECE55A8EDFBADC38950773 /* CopyCatalogMatcher+Natal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CopyCatalogMatcher+Natal.swift"; sourceTree = "<group>"; };
+		C4C25AC99C2A3DD4770FC077 /* TransitCardContractValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitCardContractValidator.swift; sourceTree = "<group>"; };
+		C5445403CDC1A5A53F3CA7BE /* AstroTerms-zh-Hans.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "AstroTerms-zh-Hans.json"; sourceTree = "<group>"; };
+		C7B2767ACABFDDAEEBA88C4E /* InsightContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightContent.swift; sourceTree = "<group>"; };
+		C9246EC3FF329DF2BC403326 /* CopyCatalogMatcher+CurrentSky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CopyCatalogMatcher+CurrentSky.swift"; sourceTree = "<group>"; };
+		D0FB53B8C0D70570B8A46BF6 /* CurrentSkyChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentSkyChartCardFactory.swift; sourceTree = "<group>"; };
+		D37CFC1E719FF3811269D124 /* SolarReturnChartCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolarReturnChartCardFactory.swift; sourceTree = "<group>"; };
+		D54353BC880639565417B837 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		D5BC32F5A9499E4F9D5AE269 /* SolarReturnCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolarReturnCardViews.swift; sourceTree = "<group>"; };
+		D6A6D85449819D6C4E404066 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		D8B5EDCA7BBB5A87878D3A6E /* TodayEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayEngine.swift; sourceTree = "<group>"; };
+		DA7B06AF686095F8D7074FC4 /* ClassicalTransitPlanningStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassicalTransitPlanningStrategy.swift; sourceTree = "<group>"; };
+		DB0D4BA551D42474094AA7BA /* AppChartCalculationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppChartCalculationService.swift; sourceTree = "<group>"; };
+		DC3A06818DDE0D31281BF549 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		DEAB31C516DCEE8FEDBE75A8 /* PrivateRules-Today.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "PrivateRules-Today.json"; sourceTree = "<group>"; };
+		E2144E58BD7D63D1B164367E /* CopyCatalogMatcher+SolarReturn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CopyCatalogMatcher+SolarReturn.swift"; sourceTree = "<group>"; };
+		E25ECA2E98004920D9946269 /* ThemesFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemesFeature.swift; sourceTree = "<group>"; };
+		E40E064E50A383864A2EE726 /* CardContractValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardContractValidator.swift; sourceTree = "<group>"; };
+		E49BBC6A375BF1066E055FC2 /* AstroTerms-en.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "AstroTerms-en.json"; sourceTree = "<group>"; };
+		E5C939878A4D22398ADB7CBE /* ChartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartsView.swift; sourceTree = "<group>"; };
+		E86A56712B23B2F792406049 /* SnapshotCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotCache.swift; sourceTree = "<group>"; };
+		E8C236CDE4D10394DD945034 /* abc-life-areas-help-en.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "abc-life-areas-help-en.md"; sourceTree = "<group>"; };
+		EA033884853D4F649DCA3A50 /* SecondaryCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondaryCardViews.swift; sourceTree = "<group>"; };
+		ECD88EE9D5427CF320E5A723 /* abc-life-areas-help-pt-BR.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "abc-life-areas-help-pt-BR.md"; sourceTree = "<group>"; };
+		EDCEA31F6237E73FD048B40A /* abc-life-areas-help-ko.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "abc-life-areas-help-ko.md"; sourceTree = "<group>"; };
+		EF3E51ABD17125BFA6309793 /* CopyCatalogMatcher+Transit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CopyCatalogMatcher+Transit.swift"; sourceTree = "<group>"; };
+		F00887EF80E3519668D4FB80 /* abc-life-areas-help-it.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "abc-life-areas-help-it.md"; sourceTree = "<group>"; };
+		F3DE848E50731E0E4C97D2D3 /* abc-life-areas-help-de.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "abc-life-areas-help-de.md"; sourceTree = "<group>"; };
+		F5469F68D509DB75F34215F3 /* Interstellar.storekit */ = {isa = PBXFileReference; path = Interstellar.storekit; sourceTree = "<group>"; };
+		F846F67BA2B8EDCCA6F37681 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		FA0F4E5EB51698A7A4BAD76D /* SynastryLegacyCardFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynastryLegacyCardFactory.swift; sourceTree = "<group>"; };
+		FBF1B6E1809CA6034129EA1D /* AppAdvancedChartCalculationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAdvancedChartCalculationService.swift; sourceTree = "<group>"; };
+		FF011663EB776C015212B826 /* CopyCatalogMatcher+Planned.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CopyCatalogMatcher+Planned.swift"; sourceTree = "<group>"; };
+		504C556BBED501ECE17FD779 /* CompareModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompareModels.swift; sourceTree = "<group>"; };
+		E59F01AB7AB00A2742DD3765 /* CompareFactBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompareFactBuilder.swift; sourceTree = "<group>"; };
+		7EA7FEFB790D69A54D2AFDCE /* CompareCalculationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompareCalculationCoordinator.swift; sourceTree = "<group>"; };
+		13454BB2D2F4B1CFB1FFFD36 /* CompareAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompareAIService.swift; sourceTree = "<group>"; };
+		5F3B44AE485234D6A71D0079 /* CompareAnalysisStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompareAnalysisStore.swift; sourceTree = "<group>"; };
+		1E619163AB6485867C7B7FD2 /* CompareAnalysisManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompareAnalysisManager.swift; sourceTree = "<group>"; };
+		46FD532C61B2340684B76047 /* CompareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompareView.swift; sourceTree = "<group>"; };
+		76E03A93026CCD1DE5AEEA27 /* AskDeepAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskDeepAnalysis.swift; sourceTree = "<group>"; };
+		29DC6C30C92027B3F61431F9 /* AskView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskView.swift; sourceTree = "<group>"; };
+		6A4B88A8C90DC09ECB69C0BE /* AskHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskHomeView.swift; sourceTree = "<group>"; };
+		E18EAAB33EA6FA860A757A39 /* AskConfigurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskConfigurationView.swift; sourceTree = "<group>"; };
+		1D66A8D464B728CD4E0C7605 /* AskActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskActions.swift; sourceTree = "<group>"; };
+		809DAB646874DA33AE218A0B /* AskResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskResultView.swift; sourceTree = "<group>"; };
+		697703BEC5D0263DD56ABC24 /* AskConsumerJudgmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskConsumerJudgmentView.swift; sourceTree = "<group>"; };
+		497CF006CE57B6544879FE4D /* AskContentComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskContentComposer.swift; sourceTree = "<group>"; };
+		D23C7729A8681F4BD6E7C720 /* AskProfessionalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskProfessionalView.swift; sourceTree = "<group>"; };
+		F4E1A91E7B0D4C2A9A100002 /* AskProfessionalEvidenceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskProfessionalEvidenceView.swift; sourceTree = "<group>"; };
+		DF456CC83DD6C4E78FBD45E1 /* AskLifeAreaViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskLifeAreaViews.swift; sourceTree = "<group>"; };
+		DA456B787178FCB9F583CCBE /* AskHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskHistoryView.swift; sourceTree = "<group>"; };
+		CB52DDB01B2E9DF4FCDB89AF /* AskSupportingTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskSupportingTypes.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8445764ECF02FD3F9C599062 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				77C79F87ECF06FBD5A1BBC66 /* AstroCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BCAE43056CF59D29BC780F30 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CE67DE4D3AB8A95E65BF59BA /* AstroCore in Frameworks */,
+				A863BE485A3BF7AE893CF28F /* ContentKit in Frameworks */,
+				291E8EEC1EE0DBF283E31334 /* libsqlite3.tbd in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		04C3E5FA907FAC1A2EB8F8D3 /* CurrentSky */ = {
+			isa = PBXGroup;
+			children = (
+				F69C89E43B09409F2A723F56 /* Copy */,
+				D623313B2FF0105AA20B3B51 /* Factory */,
+				D570231D32CE1FFBEDDA1AA4 /* Planning */,
+				12D74A446EB8DF804546C4EB /* UI */,
+			);
+			path = CurrentSky;
+			sourceTree = "<group>";
+		};
+		069C1E33322E4B7AE5C7CA08 /* Factory */ = {
+			isa = PBXGroup;
+			children = (
+				C18C0A36185173B04800EC00 /* SynastryChartCardFactory.swift */,
+			);
+			path = Factory;
+			sourceTree = "<group>";
+		};
+		0E1DC49FCE37A42BE37E26AB /* Help */ = {
+			isa = PBXGroup;
+			children = (
+				F3DE848E50731E0E4C97D2D3 /* abc-life-areas-help-de.md */,
+				E8C236CDE4D10394DD945034 /* abc-life-areas-help-en.md */,
+				3D415F3E6315EB99B176E7CB /* abc-life-areas-help-es.md */,
+				14356E98A5D38BD641396766 /* abc-life-areas-help-fr.md */,
+				F00887EF80E3519668D4FB80 /* abc-life-areas-help-it.md */,
+				EDCEA31F6237E73FD048B40A /* abc-life-areas-help-ko.md */,
+				ECD88EE9D5427CF320E5A723 /* abc-life-areas-help-pt-BR.md */,
+				735A6F019DA99E1C137DB0D9 /* abc-life-areas-help-tr.md */,
+				51D302BEED2320F6644CB2B1 /* abc-life-areas-help-zh-Hans.md */,
+			);
+			path = Help;
+			sourceTree = "<group>";
+		};
+		12D74A446EB8DF804546C4EB /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				B4A3A93914F96ADD04BCE584 /* CurrentSkyCardViews.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		1458A9879F742C5942560CCB /* Planning */ = {
+			isa = PBXGroup;
+			children = (
+				B1DB4BAC9C63E02073891A1A /* ChartContentPlan.swift */,
+			);
+			path = Planning;
+			sourceTree = "<group>";
+		};
+		1A8E09962B56340779AEAA7F /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				840A27B131AF789B41A4F43C /* InsightCardView.swift */,
+				1C15B6C5E4FC301E99B2B07C /* InsightVisualRouter.swift */,
+				65C9751803A580CFFD4F8F56 /* SharedCardComponents.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		22ACD26F2272D74E9E5639DC /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				9ABF1E198A9CC166ADC05C23 /* AstroCore */,
+				5CCCA84B397C2C9CC92887D6 /* ContentKit */,
+				E89DBBA3F53338C84A97210D /* AstroCore */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+		2F7FAE3C486A31D62B231B03 /* CSwissEphemeris */ = {
+			isa = PBXGroup;
+			children = (
+				304F386EC1EE838F3AD709A9 /* agpl-3.0.txt */,
+				BB5BCE81BEF6F479DD875A36 /* LICENSE */,
+			);
+			path = CSwissEphemeris;
+			sourceTree = "<group>";
+		};
+		316183805AF5AFF0E943D1C5 /* swisseph */ = {
+			isa = PBXGroup;
+			children = (
+				0CA4E3ABEDF5DDF5FAB1AC76 /* ephe */,
+			);
+			path = swisseph;
+			sourceTree = "<group>";
+		};
+		3502B2324CFB9686F57F785D /* Factory */ = {
+			isa = PBXGroup;
+			children = (
+				183D70FDF77DECA83886D1A9 /* SecondaryCardDraftFactory.swift */,
+				50F219C33B43B0E13C2DE254 /* SecondaryChartCardFactory.swift */,
+			);
+			path = Factory;
+			sourceTree = "<group>";
+		};
+		3F884B5D5AFA31A92C6B35EF /* Copy */ = {
+			isa = PBXGroup;
+			children = (
+				E2144E58BD7D63D1B164367E /* CopyCatalogMatcher+SolarReturn.swift */,
+			);
+			path = Copy;
+			sourceTree = "<group>";
+		};
+		42A01D0822F438575914EB58 /* Copy */ = {
+			isa = PBXGroup;
+			children = (
+				2DA05D01ACC5CCFEED503A57 /* CopyCatalogMatcher+Secondary.swift */,
+			);
+			path = Copy;
+			sourceTree = "<group>";
+		};
+		48D828E1F896F8523C6978E5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				264D74ADDEE8C297C14A037B /* libsqlite3.tbd */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		4A94BE3C06634146226905CD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				661AA6692BBDB981B3874B3C /* Interstellar.app */,
+				BD387F6A83026B674CCD09BF /* InterstellarTests.xctest */,
+				2A4FBE0CC517EF4C1D54C807 /* InterstellarUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4ACDDC06B776EE52FAA8B6EE /* SolarReturn */ = {
+			isa = PBXGroup;
+			children = (
+				3F884B5D5AFA31A92C6B35EF /* Copy */,
+				67FE31E3BC01D6798F3367F0 /* Factory */,
+				7E7F81A51488D08298A0D544 /* Planning */,
+				97862C114698338B6E6167BE /* UI */,
+			);
+			path = SolarReturn;
+			sourceTree = "<group>";
+		};
+		4D274E06C1F8086361B0D075 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				5E6EEF1C497F277AB6E548FE /* Copy */,
+				6410A57A6C7CFBB193354DDF /* Factory */,
+				1458A9879F742C5942560CCB /* Planning */,
+				D83C4CF69721A60AE91FA8DA /* Routing */,
+				1A8E09962B56340779AEAA7F /* UI */,
+				51DFEF1367DCB36ED870CE95 /* Validation */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		50884E84420FD8E7FDB6BBCB /* Copy */ = {
+			isa = PBXGroup;
+			children = (
+				C2ECE55A8EDFBADC38950773 /* CopyCatalogMatcher+Natal.swift */,
+			);
+			path = Copy;
+			sourceTree = "<group>";
+		};
+		51199DA3E8F0A82E7491986C = {
+			isa = PBXGroup;
+			children = (
+				773A4979A3B42DC40BD4E1DB /* App */,
+				DFECC8B4B658E0913DDCB57E /* Interstellar */,
+				22ACD26F2272D74E9E5639DC /* Packages */,
+				6989C6012B02305C88665476 /* Tests */,
+				FEFA79031999B559DA91DF51 /* UITests */,
+				48D828E1F896F8523C6978E5 /* Frameworks */,
+				4A94BE3C06634146226905CD /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		51DFEF1367DCB36ED870CE95 /* Validation */ = {
+			isa = PBXGroup;
+			children = (
+				E40E064E50A383864A2EE726 /* CardContractValidator.swift */,
+			);
+			path = Validation;
+			sourceTree = "<group>";
+		};
+		554B600A12F620DFD2DDB9CA /* Copy */ = {
+			isa = PBXGroup;
+			children = (
+				1D5E38526DAC47EF3413FD59 /* CopyCatalogMatcher+Synastry.swift */,
+			);
+			path = Copy;
+			sourceTree = "<group>";
+		};
+		5D3FD880A27C98BB1A72CCEC /* Insights */ = {
+			isa = PBXGroup;
+			children = (
+				04C3E5FA907FAC1A2EB8F8D3 /* CurrentSky */,
+				620E64BBA977922D3DF9E3D9 /* Natal */,
+				A0E5D4CE1194663356EA1475 /* Secondary */,
+				4D274E06C1F8086361B0D075 /* Shared */,
+				4ACDDC06B776EE52FAA8B6EE /* SolarReturn */,
+				A7BA135D6012BE6263E01287 /* Synastry */,
+				AEEBB7AA1AB3C5B85D85E72B /* Transit */,
+			);
+			path = Insights;
+			sourceTree = "<group>";
+		};
+		5E6EEF1C497F277AB6E548FE /* Copy */ = {
+			isa = PBXGroup;
+			children = (
+				FF011663EB776C015212B826 /* CopyCatalogMatcher+Planned.swift */,
+			);
+			path = Copy;
+			sourceTree = "<group>";
+		};
+		620E64BBA977922D3DF9E3D9 /* Natal */ = {
+			isa = PBXGroup;
+			children = (
+				50884E84420FD8E7FDB6BBCB /* Copy */,
+				BA527899CDA81D7034400E9E /* Factory */,
+				C2DB3775BB7C17385200B1D2 /* Planning */,
+				A6383DFB582A24E3370E569E /* UI */,
+			);
+			path = Natal;
+			sourceTree = "<group>";
+		};
+		6410A57A6C7CFBB193354DDF /* Factory */ = {
+			isa = PBXGroup;
+			children = (
+				7374A19C7F598DB01612A991 /* ChartCardFactory.swift */,
+				B216680241A82944F268E9E7 /* ChartCardFactoryContext.swift */,
+				46DDB44B7F03260D94FE6C9A /* InsightCardAssembler.swift */,
+				57F38F42C1794260A5DB8E8B /* LegacyCardFactorySupport.swift */,
+			);
+			path = Factory;
+			sourceTree = "<group>";
+		};
+		67FE31E3BC01D6798F3367F0 /* Factory */ = {
+			isa = PBXGroup;
+			children = (
+				0BF01811F46E947A7B6B1F16 /* SolarReturnCardDraftFactory.swift */,
+				D37CFC1E719FF3811269D124 /* SolarReturnChartCardFactory.swift */,
+			);
+			path = Factory;
+			sourceTree = "<group>";
+		};
+		6989C6012B02305C88665476 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				9CBBF3C1035EE83B4DD9EADC /* ClassicalTransitPlanningTests.swift */,
+				6ABDA3272B25CD258001ACE3 /* CommerceTests.swift */,
+				206C0850536130300B377FCB /* OfflineLocationStoreTests.swift */,
+				0741E435F931A6CA96910082 /* TransitContentPlannerTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		6EE52E643C2A9D30A537EF63 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				4BAD00A6ED8F9C344824B06F /* SynastryCardViews.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		70C3E2BFDF422B3A61DC95B4 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				EA033884853D4F649DCA3A50 /* SecondaryCardViews.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		73D0337A6FC8B80094D270CA /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				540E8C52B9FD903F6E70EFDF /* TransitCardViews.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		04AE23A835D767E44FE68E3D /* Ask */ = {
+			isa = PBXGroup;
+			children = (
+				29DC6C30C92027B3F61431F9 /* AskView.swift */,
+				6A4B88A8C90DC09ECB69C0BE /* AskHomeView.swift */,
+				E18EAAB33EA6FA860A757A39 /* AskConfigurationView.swift */,
+				1D66A8D464B728CD4E0C7605 /* AskActions.swift */,
+				809DAB646874DA33AE218A0B /* AskResultView.swift */,
+				697703BEC5D0263DD56ABC24 /* AskConsumerJudgmentView.swift */,
+				497CF006CE57B6544879FE4D /* AskContentComposer.swift */,
+				D23C7729A8681F4BD6E7C720 /* AskProfessionalView.swift */,
+				F4E1A91E7B0D4C2A9A100002 /* AskProfessionalEvidenceView.swift */,
+				DF456CC83DD6C4E78FBD45E1 /* AskLifeAreaViews.swift */,
+				DA456B787178FCB9F583CCBE /* AskHistoryView.swift */,
+				CB52DDB01B2E9DF4FCDB89AF /* AskSupportingTypes.swift */,
+			);
+			path = Ask;
+			sourceTree = "<group>";
+		};
+		773A4979A3B42DC40BD4E1DB /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A8496F7ACDFAAF38F93E8B74 /* AdvancedChartCache.swift */,
+				ACAF20ADFA34FF19F163011D /* AdvancedChartModels.swift */,
+				2114D2FD8739C6BB62FD26EF /* AIGeneration.swift */,
+				FBF1B6E1809CA6034129EA1D /* AppAdvancedChartCalculationService.swift */,
+				16CCFFB5C0A8A83EACE8C47F /* AppAIReportService.swift */,
+				DB0D4BA551D42474094AA7BA /* AppChartCalculationService.swift */,
+				49A787B2E1810C2E4F9D1CB9 /* AppEnrichmentService.swift */,
+				02E20C395BDFD8BD0B24388C /* AppModel.swift */,
+				23B890D3ADFBC964CD38F3C3 /* AppRelationshipChartCalculationService.swift */,
+				3E1C2A46A3725C8A3CDBFC8B /* AskHistory.swift */,
+				76E03A93026CCD1DE5AEEA27 /* AskDeepAnalysis.swift */,
+				04AE23A835D767E44FE68E3D /* Ask */,
+				4E6DA38605D25A9654FE7E62 /* Assets.xcassets */,
+				AD2F2C2DC93A3770F96DC584 /* AstroTerms.swift */,
+				2B9A86BA44C035CA78AEA7E2 /* ChartDefinition.swift */,
+				6FFE425FA91D67D5112FB3FE /* ChartEvents.swift */,
+				3B958CF1AD3B3C7FE6219102 /* ChartRenderer.swift */,
+				E5C939878A4D22398ADB7CBE /* ChartsView.swift */,
+				56BC8AFFCB4F85EB79AA6B5B /* Commerce.swift */,
+				C28BE23BBAEDB4F998B852E4 /* ConsumerCopy.swift */,
+				2B10192A26DC6FF24AAE0F44 /* ICloudBackup.swift */,
+				F846F67BA2B8EDCCA6F37681 /* Info.plist */,
+				C7B2767ACABFDDAEEBA88C4E /* InsightContent.swift */,
+				03268C1EAB77BCD4B05BCC74 /* InterpretationContextFactory.swift */,
+				2C19015724A0F9DB648CEDBD /* Interstellar.entitlements */,
+				F5469F68D509DB75F34215F3 /* Interstellar.storekit */,
+				055D71348E930EDB7CEA9D25 /* InterstellarApp.swift */,
+				BDBF1C8DDAF72951EAEA6DCF /* Localizable.xcstrings */,
+				28B5FB5FF8C581EAA64A6F58 /* LocalizedFormatters.swift */,
+				5A1C4311E86E866790B89BEA /* LocationPicker.swift */,
+				A2A9B7F6653E3B21A74DFFF2 /* Models.swift */,
+				9D1F28A922081C6A8239A498 /* OfflineLocationStore.swift */,
+				BBA16A86F74493A35A7A74AE /* OnboardingView.swift */,
+				128B1AB0A6B05217E772C8FB /* PrivacyInfo.xcprivacy */,
+				45FCBC91108D8B597D89E39C /* ProfileView.swift */,
+				3989AA7077B4B8CF57C56610 /* Reports.swift */,
+				5E55B957F3B40BB06BDBB4DE /* ReportsView.swift */,
+				33F53A273536232B2755B411 /* RootView.swift */,
+				E86A56712B23B2F792406049 /* SnapshotCache.swift */,
+				D6A6D85449819D6C4E404066 /* Theme.swift */,
+				504C556BBED501ECE17FD779 /* CompareModels.swift */,
+				E59F01AB7AB00A2742DD3765 /* CompareFactBuilder.swift */,
+				7EA7FEFB790D69A54D2AFDCE /* CompareCalculationCoordinator.swift */,
+				13454BB2D2F4B1CFB1FFFD36 /* CompareAIService.swift */,
+				5F3B44AE485234D6A71D0079 /* CompareAnalysisStore.swift */,
+				1E619163AB6485867C7B7FD2 /* CompareAnalysisManager.swift */,
+				46FD532C61B2340684B76047 /* CompareView.swift */,
+				E25ECA2E98004920D9946269 /* ThemesFeature.swift */,
+				97EEE681F90CAE569A4F0B3A /* TodayDashboard.swift */,
+				D8B5EDCA7BBB5A87878D3A6E /* TodayEngine.swift */,
+				BA31C8B1C13F10113F10E112 /* TodayView.swift */,
+				0D7BD1EE6C166DE149FA32C4 /* WeeklyForecast.swift */,
+				12B96210B8B65212F06462C7 /* InfoPlist.strings */,
+				5D3FD880A27C98BB1A72CCEC /* Insights */,
+				D8BBB6A7B936FB770BB2A892 /* Resources */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		7B4B1FC5E78E4C2FE1D13C3F /* Legacy */ = {
+			isa = PBXGroup;
+			children = (
+				FA0F4E5EB51698A7A4BAD76D /* SynastryLegacyCardFactory.swift */,
+			);
+			path = Legacy;
+			sourceTree = "<group>";
+		};
+		7E7F81A51488D08298A0D544 /* Planning */ = {
+			isa = PBXGroup;
+			children = (
+				BF745DE02EEC6E1EF4F0C359 /* SolarReturnContentPlanning.swift */,
+			);
+			path = Planning;
+			sourceTree = "<group>";
+		};
+		85C340F84BA0E946C5854AB2 /* Factory */ = {
+			isa = PBXGroup;
+			children = (
+				981F4C2821CFBF67FAAA0AD8 /* TransitCardFactory.swift */,
+				A1046F5BCC8A7B5114076BE5 /* TransitChartCardFactory.swift */,
+			);
+			path = Factory;
+			sourceTree = "<group>";
+		};
+		88DBFA5905683FEF7E1102E7 /* Copy */ = {
+			isa = PBXGroup;
+			children = (
+				50F3351613FF5684A3CC89A3 /* ClassicalTransitThemeMapper.swift */,
+				EF3E51ABD17125BFA6309793 /* CopyCatalogMatcher+Transit.swift */,
+			);
+			path = Copy;
+			sourceTree = "<group>";
+		};
+		973ABFD6539F3FD68E979900 /* vendor */ = {
+			isa = PBXGroup;
+			children = (
+				316183805AF5AFF0E943D1C5 /* swisseph */,
+			);
+			path = vendor;
+			sourceTree = "<group>";
+		};
+		97862C114698338B6E6167BE /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				D5BC32F5A9499E4F9D5AE269 /* SolarReturnCardViews.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		A0E5D4CE1194663356EA1475 /* Secondary */ = {
+			isa = PBXGroup;
+			children = (
+				42A01D0822F438575914EB58 /* Copy */,
+				3502B2324CFB9686F57F785D /* Factory */,
+				F2D1276025934FE3BD41E126 /* Planning */,
+				70C3E2BFDF422B3A61DC95B4 /* UI */,
+			);
+			path = Secondary;
+			sourceTree = "<group>";
+		};
+		A6383DFB582A24E3370E569E /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				70137E5B98FB7ED9A5271D4E /* NatalCardViews.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		A7BA135D6012BE6263E01287 /* Synastry */ = {
+			isa = PBXGroup;
+			children = (
+				554B600A12F620DFD2DDB9CA /* Copy */,
+				069C1E33322E4B7AE5C7CA08 /* Factory */,
+				7B4B1FC5E78E4C2FE1D13C3F /* Legacy */,
+				6EE52E643C2A9D30A537EF63 /* UI */,
+			);
+			path = Synastry;
+			sourceTree = "<group>";
+		};
+		AEEBB7AA1AB3C5B85D85E72B /* Transit */ = {
+			isa = PBXGroup;
+			children = (
+				88DBFA5905683FEF7E1102E7 /* Copy */,
+				85C340F84BA0E946C5854AB2 /* Factory */,
+				E0E965193CD9B4D3715EB446 /* Planning */,
+				73D0337A6FC8B80094D270CA /* UI */,
+				CB6A3ABBBC50F4081616E7DE /* Validation */,
+			);
+			path = Transit;
+			sourceTree = "<group>";
+		};
+		BA527899CDA81D7034400E9E /* Factory */ = {
+			isa = PBXGroup;
+			children = (
+				6EC6C2CCBAA0E8F2E2E94726 /* NatalCardDraftFactory.swift */,
+				870550BABBB1A4045FB38419 /* NatalChartCardFactory.swift */,
+			);
+			path = Factory;
+			sourceTree = "<group>";
+		};
+		C2DB3775BB7C17385200B1D2 /* Planning */ = {
+			isa = PBXGroup;
+			children = (
+				6447516956662FAEDCBD4AF7 /* NatalContentPlanning.swift */,
+			);
+			path = Planning;
+			sourceTree = "<group>";
+		};
+		CB6A3ABBBC50F4081616E7DE /* Validation */ = {
+			isa = PBXGroup;
+			children = (
+				96EA5C5093F66F8DBEDE5D37 /* ClassicalTransitContractValidator.swift */,
+				C4C25AC99C2A3DD4770FC077 /* TransitCardContractValidator.swift */,
+			);
+			path = Validation;
+			sourceTree = "<group>";
+		};
+		D570231D32CE1FFBEDDA1AA4 /* Planning */ = {
+			isa = PBXGroup;
+			children = (
+				8EDB76F51D656570D68D5D97 /* CurrentSkyContentPlanning.swift */,
+			);
+			path = Planning;
+			sourceTree = "<group>";
+		};
+		D623313B2FF0105AA20B3B51 /* Factory */ = {
+			isa = PBXGroup;
+			children = (
+				903C47EC97FEBE36E19DE427 /* CurrentSkyCardDraftFactory.swift */,
+				D0FB53B8C0D70570B8A46BF6 /* CurrentSkyChartCardFactory.swift */,
+			);
+			path = Factory;
+			sourceTree = "<group>";
+		};
+		D83C4CF69721A60AE91FA8DA /* Routing */ = {
+			isa = PBXGroup;
+			children = (
+				8F8D78DCB5EEDC2C7B7AB0F3 /* InsightFactory.swift */,
+			);
+			path = Routing;
+			sourceTree = "<group>";
+		};
+		D8BBB6A7B936FB770BB2A892 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				31FB59BF03677D6251715CAE /* AstroTerms-de.json */,
+				E49BBC6A375BF1066E055FC2 /* AstroTerms-en.json */,
+				AB744A28C654F60FA3B7A42F /* AstroTerms-es.json */,
+				A638D9D9A2F918B27471D35F /* AstroTerms-fr.json */,
+				5FC2D35DBFDC0FB355D4E768 /* AstroTerms-it.json */,
+				26FD9206B6C9932AE2632B71 /* AstroTerms-ko.json */,
+				8548A4FC08592FA5EFFF4C95 /* AstroTerms-pt-BR.json */,
+				2EDEBDDDA02E586930435442 /* AstroTerms-tr.json */,
+				C5445403CDC1A5A53F3CA7BE /* AstroTerms-zh-Hans.json */,
+				697E1E1E7B99A786B398AC90 /* OfflineLocationData-LICENSES.txt */,
+				239055D63B08193BFB93A503 /* OfflineLocations.sqlite3 */,
+				BA4920A95C84D6F5C91E89E1 /* PrivateContent */,
+				DEAB31C516DCEE8FEDBE75A8 /* PrivateRules-Today.json */,
+				0E1DC49FCE37A42BE37E26AB /* Help */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		DFECC8B4B658E0913DDCB57E /* Interstellar */ = {
+			isa = PBXGroup;
+			children = (
+				973ABFD6539F3FD68E979900 /* vendor */,
+			);
+			name = Interstellar;
+			path = ..;
+			sourceTree = "<group>";
+		};
+		E0E965193CD9B4D3715EB446 /* Planning */ = {
+			isa = PBXGroup;
+			children = (
+				DA7B06AF686095F8D7074FC4 /* ClassicalTransitPlanningStrategy.swift */,
+				A42D05993CC02C05A0EF29EC /* TransitContentPlanning.swift */,
+			);
+			path = Planning;
+			sourceTree = "<group>";
+		};
+		E89DBBA3F53338C84A97210D /* AstroCore */ = {
+			isa = PBXGroup;
+			children = (
+				F9375EA2EE4FD60E26EBF3DE /* Sources */,
+			);
+			path = AstroCore;
+			sourceTree = "<group>";
+		};
+		F2D1276025934FE3BD41E126 /* Planning */ = {
+			isa = PBXGroup;
+			children = (
+				03FC50F4B714EC5097204956 /* SecondaryContentPlanning.swift */,
+			);
+			path = Planning;
+			sourceTree = "<group>";
+		};
+		F69C89E43B09409F2A723F56 /* Copy */ = {
+			isa = PBXGroup;
+			children = (
+				C9246EC3FF329DF2BC403326 /* CopyCatalogMatcher+CurrentSky.swift */,
+			);
+			path = Copy;
+			sourceTree = "<group>";
+		};
+		F9375EA2EE4FD60E26EBF3DE /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				2F7FAE3C486A31D62B231B03 /* CSwissEphemeris */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		FEFA79031999B559DA91DF51 /* UITests */ = {
+			isa = PBXGroup;
+			children = (
+				501ADE1C8B476ED84F14B948 /* VisualRegressionTests.swift */,
+			);
+			path = UITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5BDCE77BA28C6994C9CDC92D /* Interstellar */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AFB87C38821083D879B38E8C /* Build configuration list for PBXNativeTarget "Interstellar" */;
+			buildPhases = (
+				FD498F080A4F3385CA664584 /* Build and Validate Content and Localization */,
+				55DD53BA0370D7F4EF5E2FC2 /* Sources */,
+				974C12AB5196073A62E77D34 /* Resources */,
+				BCAE43056CF59D29BC780F30 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Interstellar;
+			packageProductDependencies = (
+				C9A7C547B8DF2CD2A8F2A498 /* AstroCore */,
+				5B9BE7BBBE9923D7E31A58CA /* ContentKit */,
+			);
+			productName = Interstellar;
+			productReference = 661AA6692BBDB981B3874B3C /* Interstellar.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C7D3DFB1A1D5EC9E657E67FB /* InterstellarUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 01B654A41889EB1639A85E29 /* Build configuration list for PBXNativeTarget "InterstellarUITests" */;
+			buildPhases = (
+				26194CFEF272118DFB9E1B0E /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8C3789308862C2A8863ADB83 /* PBXTargetDependency */,
+			);
+			name = InterstellarUITests;
+			packageProductDependencies = (
+			);
+			productName = InterstellarUITests;
+			productReference = 2A4FBE0CC517EF4C1D54C807 /* InterstellarUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		DDD73701B185F9C466FB341C /* InterstellarTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B36A4163B9BBD37FA8656D4B /* Build configuration list for PBXNativeTarget "InterstellarTests" */;
+			buildPhases = (
+				D79CE13A11269364E98813A0 /* Sources */,
+				8445764ECF02FD3F9C599062 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0D27B5FA7E71FBE69B6CEAA6 /* PBXTargetDependency */,
+			);
+			name = InterstellarTests;
+			packageProductDependencies = (
+				920366345E4608960231F5F8 /* AstroCore */,
+			);
+			productName = InterstellarTests;
+			productReference = BD387F6A83026B674CCD09BF /* InterstellarTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		469E01B8FBC254FA1551B6B1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					5BDCE77BA28C6994C9CDC92D = {
+						DevelopmentTeam = KCC8FFFAA5;
+						ProvisioningStyle = Automatic;
+					};
+					C7D3DFB1A1D5EC9E657E67FB = {
+						DevelopmentTeam = KCC8FFFAA5;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 5BDCE77BA28C6994C9CDC92D;
+					};
+					DDD73701B185F9C466FB341C = {
+						DevelopmentTeam = KCC8FFFAA5;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 0AA9A7FB960289EE434A8A41 /* Build configuration list for PBXProject "Interstellar" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				de,
+				en,
+				es,
+				fr,
+				it,
+				ko,
+				"pt-BR",
+				tr,
+				"zh-Hans",
+			);
+			mainGroup = 51199DA3E8F0A82E7491986C;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				FA43989682F9CBDFFCEB9CAE /* XCLocalSwiftPackageReference "Packages/AstroCore" */,
+				E96D78A550505E3C584770A9 /* XCLocalSwiftPackageReference "Packages/ContentKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 4A94BE3C06634146226905CD /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5BDCE77BA28C6994C9CDC92D /* Interstellar */,
+				DDD73701B185F9C466FB341C /* InterstellarTests */,
+				C7D3DFB1A1D5EC9E657E67FB /* InterstellarUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		974C12AB5196073A62E77D34 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				06CFB14BDA022A6FBA3EF7C2 /* Assets.xcassets in Resources */,
+				B3DB778AD83F03C3816282C8 /* AstroTerms-de.json in Resources */,
+				5950553625EE9C7B0A2F7DF4 /* AstroTerms-en.json in Resources */,
+				16C6E1985313246353EDB4F7 /* AstroTerms-es.json in Resources */,
+				7FDF5EB81E59857B29D526B5 /* AstroTerms-fr.json in Resources */,
+				9FD05B03244F0CBA98292AB3 /* AstroTerms-it.json in Resources */,
+				D28C9C0C6EB06EF822BDDA91 /* AstroTerms-ko.json in Resources */,
+				23E0C4CF0271BF7660C0066E /* AstroTerms-pt-BR.json in Resources */,
+				0B0DF80883498AC0DD01748F /* AstroTerms-tr.json in Resources */,
+				9724D9A3584084D69C4A0CFC /* AstroTerms-zh-Hans.json in Resources */,
+				7B00116445E815363BD4B368 /* InfoPlist.strings in Resources */,
+				2BAFAAA81DADC6247F5F641E /* Interstellar.storekit in Resources */,
+				026D94872BB73545933C4DFD /* LICENSE in Resources */,
+				4F27F066D66B76B397D64A03 /* Localizable.xcstrings in Resources */,
+				65AA570CA8FFCED805E95E4D /* OfflineLocationData-LICENSES.txt in Resources */,
+				D07B4840EFE347B3C9FACD44 /* OfflineLocations.sqlite3 in Resources */,
+				DB0731391AC61BBE5989E812 /* PrivacyInfo.xcprivacy in Resources */,
+				F4876ED7999E7F20391AC90C /* PrivateContent in Resources */,
+				ACE891B9EF0E4DF7055CA6D8 /* PrivateRules-Today.json in Resources */,
+				CC5B24A93D8A5754DEC6904D /* abc-life-areas-help-de.md in Resources */,
+				910D7E37690DFE9CF39B6CCB /* abc-life-areas-help-en.md in Resources */,
+				79F33F52F35C68F4E0743487 /* abc-life-areas-help-es.md in Resources */,
+				9DFD0DFF988B807727C7E222 /* abc-life-areas-help-fr.md in Resources */,
+				238A3EA2ACA6069784BFC215 /* abc-life-areas-help-it.md in Resources */,
+				E8A54A8BED98C02BEF4DB816 /* abc-life-areas-help-ko.md in Resources */,
+				5646D7AB2237751B2C397EFB /* abc-life-areas-help-pt-BR.md in Resources */,
+				BD8668B8DBC6CEF2092D8962 /* abc-life-areas-help-tr.md in Resources */,
+				1794539D993157B75CDD0030 /* abc-life-areas-help-zh-Hans.md in Resources */,
+				388FE3F37754814E0A699FE6 /* agpl-3.0.txt in Resources */,
+				5335DA4440460DC6D77949CA /* ephe in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		FD498F080A4F3385CA664584 /* Build and Validate Content and Localization */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/App/Localizable.xcstrings",
+				"$(SRCROOT)/App/Resources/AstroTerms-en.json",
+				"$(SRCROOT)/App/Resources/AstroTerms-zh-Hans.json",
+				"$(SRCROOT)/App/Resources/AstroTerms-es.json",
+				"$(SRCROOT)/App/Resources/AstroTerms-fr.json",
+				"$(SRCROOT)/App/Resources/AstroTerms-tr.json",
+				"$(SRCROOT)/App/Resources/AstroTerms-de.json",
+				"$(SRCROOT)/App/Resources/AstroTerms-it.json",
+				"$(SRCROOT)/App/Resources/AstroTerms-pt-BR.json",
+				"$(SRCROOT)/App/Resources/AstroTerms-ko.json",
+				"$(SRCROOT)/Localization/UI/core.json",
+				"$(SRCROOT)/Localization/UI/shared-content-ui.json",
+				"$(SRCROOT)/Localization/UI/charts.json",
+				"$(SRCROOT)/Localization/UI/insights.json",
+				"$(SRCROOT)/Localization/UI/today-ask.json",
+				"$(SRCROOT)/Localization/UI/profile-settings.json",
+				"$(SRCROOT)/Localization/UI/reports-ai.json",
+				"$(SRCROOT)/Localization/UI/commerce-onboarding.json",
+				"$(SRCROOT)/Localization/UI/legal-license.json",
+				"$(SRCROOT)/Localization/UI/themes.json",
+				"$(SRCROOT)/ContentSchema/copy-catalog.schema.json",
+			);
+			name = "Build and Validate Content and Localization";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -eu\ncd \"$SRCROOT/..\"\nexport PATH=~/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH\ncommand -v node >/dev/null 2>&1 || { echo \"node not found in PATH=$PATH\" >&2; exit 1; }\nif test -d ios/PrivateContent; then\n  node scripts/build-ios-private-content.mjs --build\n  node scripts/build-ios-private-content.mjs --validate\nelse\n  echo \"Proprietary interpretation sources are not included; building the public calculation-only source tree.\"\nfi\nnode scripts/build-ios-localization.mjs --validate\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		26194CFEF272118DFB9E1B0E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1385C846098AD427DA218E0C /* VisualRegressionTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		55DD53BA0370D7F4EF5E2FC2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7B37214AECB62744C27DD168 /* AIGeneration.swift in Sources */,
+				C8306B15A449782072AD1599 /* AdvancedChartCache.swift in Sources */,
+				D47EB0AED288791FA3705364 /* AdvancedChartModels.swift in Sources */,
+				8548C3309D21611BA159183D /* AppAIReportService.swift in Sources */,
+				B1D36C32B63168DDBD014D2C /* AppAdvancedChartCalculationService.swift in Sources */,
+				AA34CAD28D767A1F2C0D2D42 /* AppChartCalculationService.swift in Sources */,
+				BA383EA66FF2C6A25247DE91 /* AppEnrichmentService.swift in Sources */,
+				33AF4A0526E3FCBA484AE56F /* AppModel.swift in Sources */,
+				70CE71FDF7551584DFD1DCE4 /* AppRelationshipChartCalculationService.swift in Sources */,
+				7054C08BB4A305C2CE8328DA /* AskHistory.swift in Sources */,
+				AF459B05F0D1E97D777F0E30 /* AskDeepAnalysis.swift in Sources */,
+				BF84B2B0706F6DBB8773DCD3 /* AstroTerms.swift in Sources */,
+				4980870A6064480F223751CA /* CardContractValidator.swift in Sources */,
+				D580F0929EEB4324DD916489 /* ChartCardFactory.swift in Sources */,
+				D2D0091B09F103587B4248E8 /* ChartCardFactoryContext.swift in Sources */,
+				E1BAB6547F55155B65E7152F /* ChartContentPlan.swift in Sources */,
+				55B03CCB788EBBEE523A3D9C /* ChartDefinition.swift in Sources */,
+				80B678D9DAB2A785989708A6 /* ChartEvents.swift in Sources */,
+				C09B0F0F7FF22C4AC54D285B /* ChartRenderer.swift in Sources */,
+				0DADEB896547684C5A4056A8 /* ChartsView.swift in Sources */,
+				AEBFB69B492E07ADA4D3ECFB /* ClassicalTransitContractValidator.swift in Sources */,
+				81879C97D92790AA2A645A78 /* ClassicalTransitPlanningStrategy.swift in Sources */,
+				BD54F74F35A8C8E4B7EBEA87 /* ClassicalTransitThemeMapper.swift in Sources */,
+				A97623F0AAAF05AA48DDE9C2 /* Commerce.swift in Sources */,
+				B6111E2F452E307366314E7C /* ConsumerCopy.swift in Sources */,
+				02366B954939BBA2E0278EAB /* CopyCatalogMatcher+CurrentSky.swift in Sources */,
+				495F919A17C34BF2A6544CDA /* CopyCatalogMatcher+Natal.swift in Sources */,
+				B352EACAC1D2F8221F6D68D7 /* CopyCatalogMatcher+Planned.swift in Sources */,
+				88E12219F4EFF13E0736FE45 /* CopyCatalogMatcher+Secondary.swift in Sources */,
+				4E899578F7FE3416C60B223B /* CopyCatalogMatcher+SolarReturn.swift in Sources */,
+				BFEF26946DEBCC71082A8828 /* CopyCatalogMatcher+Synastry.swift in Sources */,
+				EC6A8A4FDB2270B2A17EE47E /* CopyCatalogMatcher+Transit.swift in Sources */,
+				23D75513693B6367A96D25C7 /* CurrentSkyCardDraftFactory.swift in Sources */,
+				6DF8FD6A4F935548CE5FFF08 /* CurrentSkyCardViews.swift in Sources */,
+				44FD8E26CE2466635A276B1D /* CurrentSkyChartCardFactory.swift in Sources */,
+				91545E32283B2DC79603CE15 /* CurrentSkyContentPlanning.swift in Sources */,
+				6EDA491777E0013C8ED4B6FC /* ICloudBackup.swift in Sources */,
+				DA6B16C2768D7B5927B08060 /* InsightCardAssembler.swift in Sources */,
+				F148813E729FEB595A1040DC /* InsightCardView.swift in Sources */,
+				17DA24AF7292AB4828A37395 /* InsightContent.swift in Sources */,
+				5971882F0B032678A52F2356 /* InsightFactory.swift in Sources */,
+				22FE763B15FC08F52E396C93 /* InsightVisualRouter.swift in Sources */,
+				B47D63ACE732AFE79F71740D /* InterpretationContextFactory.swift in Sources */,
+				61351E9509F520477D1797F6 /* InterstellarApp.swift in Sources */,
+				B1F740BBC29FB11A27FD3A37 /* LegacyCardFactorySupport.swift in Sources */,
+				59E494C9AC4EB5EEDFB910CD /* LocalizedFormatters.swift in Sources */,
+				82A5A08E61A2A43E19EC5007 /* LocationPicker.swift in Sources */,
+				464458B2F8E2AF6F04173689 /* Models.swift in Sources */,
+				7067CD7AE2454C6EF33E9BA7 /* NatalCardDraftFactory.swift in Sources */,
+				1D9909C647E496C423149F54 /* NatalCardViews.swift in Sources */,
+				832EEE8C722945D95B952F99 /* NatalChartCardFactory.swift in Sources */,
+				B7847893967C4EC6302F6EB7 /* NatalContentPlanning.swift in Sources */,
+				EDC141B2862EE19AD956E8EA /* OfflineLocationStore.swift in Sources */,
+				A415657BEBB15DDC2970BF62 /* OnboardingView.swift in Sources */,
+				CD7C5811C4C499E2E242E0D1 /* ProfileView.swift in Sources */,
+				7146C73C4FBB984FB0E84E57 /* Reports.swift in Sources */,
+				3FF959A490BE10D499C12683 /* ReportsView.swift in Sources */,
+				7195DECE9971A2CC7BF9F222 /* RootView.swift in Sources */,
+				27A3F02DDE952EFCB8004CA1 /* SecondaryCardDraftFactory.swift in Sources */,
+				7BA26679B82098921000CCF4 /* SecondaryCardViews.swift in Sources */,
+				55F5308410E0745739D19183 /* SecondaryChartCardFactory.swift in Sources */,
+				7C3EB319F1135FEB443FD045 /* SecondaryContentPlanning.swift in Sources */,
+				4929DDDC3B76B0B33EF5FE0F /* SharedCardComponents.swift in Sources */,
+				D51DC095CC19CE43B59D3CBC /* SnapshotCache.swift in Sources */,
+				6CB4F6BDA130DD6EC32046DF /* SolarReturnCardDraftFactory.swift in Sources */,
+				CB9F0FB190BD8004F5C091BC /* SolarReturnCardViews.swift in Sources */,
+				CF0A13278301A647D1CD133E /* SolarReturnChartCardFactory.swift in Sources */,
+				105F3069133D0ECB6D9BF316 /* SolarReturnContentPlanning.swift in Sources */,
+				E597F871F49F5F2A9A054A7F /* SynastryCardViews.swift in Sources */,
+				5028400A7A6E814BF89BCD27 /* SynastryChartCardFactory.swift in Sources */,
+				3C1AFAC75A47C87CC9F4D40C /* SynastryLegacyCardFactory.swift in Sources */,
+				5EA16EAEC323BA7C8DD81A9A /* Theme.swift in Sources */,
+				8189BF06F8735E4E360C196D /* AskView.swift in Sources */,
+				A46A5DC377E7BA54D96AA294 /* AskHomeView.swift in Sources */,
+				6A0BFF473E20CB2CDECEF683 /* AskConfigurationView.swift in Sources */,
+				10EBDE2C524138D9BAB11395 /* AskActions.swift in Sources */,
+				11720C322AE29E4D8F6478B6 /* AskResultView.swift in Sources */,
+				71D3AD6BCD43877DFCB7783E /* AskConsumerJudgmentView.swift in Sources */,
+				AFBB2CE6977E49CD949B6852 /* AskContentComposer.swift in Sources */,
+				CB89F717A6B529F18201D8DC /* AskProfessionalView.swift in Sources */,
+				F4E1A91E7B0D4C2A9A100001 /* AskProfessionalEvidenceView.swift in Sources */,
+				12602C559B646819CB20EA94 /* AskLifeAreaViews.swift in Sources */,
+				BD58549D02059A27B5334EA7 /* AskHistoryView.swift in Sources */,
+				BF19004CEC7767988DC99C9C /* AskSupportingTypes.swift in Sources */,
+				AC144C705CFBF93352A1A687 /* CompareModels.swift in Sources */,
+				31DBFECBB63C67E0DF20E974 /* CompareFactBuilder.swift in Sources */,
+				63D9E319C343927AED82CEAF /* CompareCalculationCoordinator.swift in Sources */,
+				2CF78C5D878560B1C1F7979D /* CompareAIService.swift in Sources */,
+				EEB6C3475EB0AF608253BCDB /* CompareAnalysisStore.swift in Sources */,
+				36EE155071B984575EB60292 /* CompareAnalysisManager.swift in Sources */,
+				A5C761981919FF864B36ED4B /* CompareView.swift in Sources */,
+				224FEC7D4D41AF9D34240781 /* ThemesFeature.swift in Sources */,
+				0FAC513A2875B976CAB37574 /* TodayDashboard.swift in Sources */,
+				4C985AF7B6AFDBAB6785A004 /* TodayEngine.swift in Sources */,
+				15A53D4BD43601EE6426BA5A /* TodayView.swift in Sources */,
+				C4222E4A7E9E56D1FA7C480C /* TransitCardContractValidator.swift in Sources */,
+				A67DFAE27B65045744E93553 /* TransitCardFactory.swift in Sources */,
+				D40BC4EC458DE75C314BC350 /* TransitCardViews.swift in Sources */,
+				69D2947D4DAEF327395440EC /* TransitChartCardFactory.swift in Sources */,
+				D00797D053FAE29DE567A3DC /* TransitContentPlanning.swift in Sources */,
+				83E776DFD24F77B62FDFF78B /* WeeklyForecast.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D79CE13A11269364E98813A0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				33054AA25131FE100A8ACD0B /* ClassicalTransitPlanningTests.swift in Sources */,
+				12D11D41A360D66214B94377 /* CommerceTests.swift in Sources */,
+				4B7D0311C26198EF9744195B /* OfflineLocationStoreTests.swift in Sources */,
+				5F50F5CBE22497DE87F201C7 /* TransitContentPlannerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0D27B5FA7E71FBE69B6CEAA6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5BDCE77BA28C6994C9CDC92D /* Interstellar */;
+			targetProxy = 08CFEC5348E8AE1C10136F2E /* PBXContainerItemProxy */;
+		};
+		8C3789308862C2A8863ADB83 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5BDCE77BA28C6994C9CDC92D /* Interstellar */;
+			targetProxy = 55F29F019343E200AE1A6462 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		12B96210B8B65212F06462C7 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				DC3A06818DDE0D31281BF549 /* de */,
+				A2C5273C247A4AE167E5145B /* en */,
+				855649E77F416B63EF175FE9 /* es */,
+				D54353BC880639565417B837 /* fr */,
+				61806FB9231FDE05FF182B43 /* it */,
+				85759306099A7814769C8012 /* ko */,
+				6BB2E09E42264D1B13FD52ED /* tr */,
+				40093D315097B7945D211895 /* zh-Hans */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		1FE64669CC855015E2330291 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = KCC8FFFAA5;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xiaoguiwk.interstellar.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Interstellar.app/Interstellar";
+			};
+			name = Release;
+		};
+		3E1331F6418112704228923F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APP_ATTEST_ENVIRONMENT = production;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/Interstellar.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 17;
+				DEVELOPMENT_TEAM = KCC8FFFAA5;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = App/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Stelyra;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Interstellar uses your location only when you request it, to calculate local chart angles and houses.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INTERSTELLAR_RELAY_BASE_URL = "$(INTERSTELLAR_SANDBOX_RELAY_BASE_URL)";
+				INTERSTELLAR_SANDBOX_RELAY_BASE_URL = "https://aaadmin.xiaoguiwk.top";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xiaoguiwk.interstellar;
+				PRODUCT_NAME = Interstellar;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		54FCE08778A1491824D7A2C0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APP_ATTEST_ENVIRONMENT = production;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/Interstellar.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 17;
+				DEVELOPMENT_TEAM = KCC8FFFAA5;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = App/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Stelyra;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Interstellar uses your location only when you request it, to calculate local chart angles and houses.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INTERSTELLAR_RELAY_BASE_URL = "https://aaadmin.xiaoguiwk.top";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xiaoguiwk.interstellar;
+				PRODUCT_NAME = Interstellar;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		5DB682FFC8448471A7A53E5D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		882971B94113E7A48F1CE8AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = KCC8FFFAA5;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xiaoguiwk.interstellar.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Interstellar.app/Interstellar";
+			};
+			name = Debug;
+		};
+		B91F55C126D381B530C04CEC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = KCC8FFFAA5;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xiaoguiwk.interstellar.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Interstellar;
+			};
+			name = Release;
+		};
+		CC8B42BBAB85B87D51D164A8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = KCC8FFFAA5;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xiaoguiwk.interstellar.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Interstellar;
+			};
+			name = Debug;
+		};
+		F2190456893043C9590C3011 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		01B654A41889EB1639A85E29 /* Build configuration list for PBXNativeTarget "InterstellarUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CC8B42BBAB85B87D51D164A8 /* Debug */,
+				B91F55C126D381B530C04CEC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		0AA9A7FB960289EE434A8A41 /* Build configuration list for PBXProject "Interstellar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F2190456893043C9590C3011 /* Debug */,
+				5DB682FFC8448471A7A53E5D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		AFB87C38821083D879B38E8C /* Build configuration list for PBXNativeTarget "Interstellar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3E1331F6418112704228923F /* Debug */,
+				54FCE08778A1491824D7A2C0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B36A4163B9BBD37FA8656D4B /* Build configuration list for PBXNativeTarget "InterstellarTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				882971B94113E7A48F1CE8AF /* Debug */,
+				1FE64669CC855015E2330291 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		E96D78A550505E3C584770A9 /* XCLocalSwiftPackageReference "Packages/ContentKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/ContentKit;
+		};
+		FA43989682F9CBDFFCEB9CAE /* XCLocalSwiftPackageReference "Packages/AstroCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/AstroCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5B9BE7BBBE9923D7E31A58CA /* ContentKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ContentKit;
+		};
+		920366345E4608960231F5F8 /* AstroCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AstroCore;
+		};
+		C9A7C547B8DF2CD2A8F2A498 /* AstroCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AstroCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 469E01B8FBC254FA1551B6B1 /* Project object */;
+}

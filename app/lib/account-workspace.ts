@@ -1,4 +1,5 @@
 import type { NatalCalculationSettings, NatalPersonInput, NatalSnapshot } from "./interstellar-api";
+import { fetchWithTimeout, parseJsonErrorBody, type FetchOptions } from "./api-client";
 
 export type LatestNatalRecord = {
   snapshotId: string;
@@ -35,32 +36,55 @@ export type AccountWorkspace = {
   };
 };
 
-function accountApiBase(): string {
-  const configured = process.env.NEXT_PUBLIC_INTERSTELLAR_API_URL?.trim();
-  return configured ? configured.replace(/\/$/, "") : "/api/v1";
+/** 账户工作区错误（替代原生 Error，保持 instanceof 兼容）。 */
+export class AccountWorkspaceError extends Error {
+  constructor(message: string, readonly status?: number) {
+    super(message);
+    this.name = "AccountWorkspaceError";
+  }
 }
 
-async function workspaceRequest<T>(init?: RequestInit): Promise<T> {
-  const response = await fetch(`${accountApiBase()}/account/workspace`, {
-    ...init,
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+const DEFAULT_TIMEOUT_MS = 30_000;
+
+async function workspaceRequest<T>(init?: FetchOptions): Promise<T> {
+  const response = await fetchWithTimeout("/account/workspace", {
+    method: init?.method ?? "GET",
+    body: init?.body,
+    headers: init?.headers,
+    timeoutMs: init?.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+    signal: init?.signal,
   });
-  const body = await response.json().catch(() => null) as { message?: string } | null;
-  if (!response.ok) throw new Error(body?.message ?? `工作区请求失败（${response.status}）`);
-  return body as T;
+  const errorBody = await parseJsonErrorBody(response);
+  if (!response.ok) {
+    throw new AccountWorkspaceError(
+      errorBody?.message ?? `工作区请求失败（${response.status}）`,
+      response.status,
+    );
+  }
+  if (errorBody?.raw == null) {
+    throw new AccountWorkspaceError("工作区返回了空响应。", response.status);
+  }
+  return errorBody.raw as T;
 }
 
 async function accountRequest<T>(path: string, input?: Record<string, string>): Promise<T> {
-  const response = await fetch(`${accountApiBase()}/account/${path}`, {
+  const response = await fetchWithTimeout(`/account/${path}`, {
     method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
     body: input ? JSON.stringify(input) : undefined,
+    hasBody: Boolean(input),
+    timeoutMs: DEFAULT_TIMEOUT_MS,
   });
-  const body = await response.json().catch(() => null) as { message?: string } | null;
-  if (!response.ok) throw new Error(body?.message ?? `账户请求失败（${response.status}）`);
-  return body as T;
+  const errorBody = await parseJsonErrorBody(response);
+  if (!response.ok) {
+    throw new AccountWorkspaceError(
+      errorBody?.message ?? `账户请求失败（${response.status}）`,
+      response.status,
+    );
+  }
+  if (errorBody?.raw == null) {
+    throw new AccountWorkspaceError("账户请求返回了空响应。", response.status);
+  }
+  return errorBody.raw as T;
 }
 
 export function registerAccount(input: { email: string; password: string; displayName: string }) {
@@ -86,6 +110,13 @@ export function getAccountWorkspace(): Promise<AccountWorkspace> {
   return workspaceRequest<AccountWorkspace>();
 }
 
+/**
+ * 账户工作区写操作。
+ *
+ * 后端契约：所有写操作共用 POST /account/workspace + body.action 路由
+ * （见后端 account workspace router）。虽然这不符合 REST 语义，但
+ * 后端不支持独立的 RESTful 端点，前端必须遵循现有契约。
+ */
 export function saveAccountPerson(person: NatalPersonInput, personId?: string) {
   return workspaceRequest<{ id: string; savedAt: string }>({
     method: "POST",
@@ -130,9 +161,9 @@ export function saveLatestNatal(input: {
   });
 }
 
-export function saveLatestAiAnalysis(personId: string, aiAnalysisText: string, aiModelId: string) {
+export function saveLatestAiAnalysis(personId: string, snapshotId: string, aiAnalysisText: string, aiModelId: string) {
   return workspaceRequest<{ personId: string; saved: boolean }>({
     method: "POST",
-    body: JSON.stringify({ action: "save_ai_analysis", personId, aiAnalysisText, aiModelId }),
+    body: JSON.stringify({ action: "save_ai_analysis", personId, snapshotId, aiAnalysisText, aiModelId }),
   });
 }

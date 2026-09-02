@@ -1,3 +1,27 @@
+# ── Dev stage: full node_modules, no build/prune ──
+FROM node:22-bookworm-slim AS dev
+
+ENV NODE_OPTIONS=--max-old-space-size=768 \
+    PORT=3000
+WORKDIR /opt/interstellar
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY app ./app
+COPY public ./public
+COPY .openai ./.openai
+COPY build ./build
+COPY drizzle ./drizzle
+COPY worker ./worker
+COPY scripts ./scripts
+COPY next.config.ts postcss.config.mjs tsconfig.json vite.config.ts ./
+ARG NEXT_PUBLIC_INTERSTELLAR_API_URL=/api/v1
+ENV NEXT_PUBLIC_INTERSTELLAR_API_URL=$NEXT_PUBLIC_INTERSTELLAR_API_URL
+
+EXPOSE 3000
+CMD ["npm", "run", "dev", "--", "--hostname", "0.0.0.0"]
+
+# ── Build stage: compile + prune for production ──
 FROM node:22-bookworm-slim AS build
 
 ENV NODE_OPTIONS=--max-old-space-size=768
@@ -11,23 +35,27 @@ COPY .openai ./.openai
 COPY build ./build
 COPY drizzle ./drizzle
 COPY worker ./worker
+COPY scripts ./scripts
 COPY next.config.ts postcss.config.mjs tsconfig.json vite.config.ts ./
+ARG NEXT_PUBLIC_INTERSTELLAR_API_URL=/api/v1
+ENV NEXT_PUBLIC_INTERSTELLAR_API_URL=$NEXT_PUBLIC_INTERSTELLAR_API_URL
 RUN npm run build
 
+# ── Runtime stage: minimal standalone output ──
 FROM node:22-bookworm-slim AS runtime
 
+ARG NEXT_PUBLIC_INTERSTELLAR_API_URL=/api/v1
 ENV NODE_ENV=production \
     PORT=3000 \
-    NODE_OPTIONS=--max-old-space-size=256
+    NODE_OPTIONS=--max-old-space-size=256 \
+    NEXT_PUBLIC_INTERSTELLAR_API_URL=${NEXT_PUBLIC_INTERSTELLAR_API_URL:-/api/v1}
 WORKDIR /opt/interstellar
 
 RUN groupadd --system --gid 10001 interstellar \
     && useradd --system --uid 10001 --gid interstellar --home /opt/interstellar interstellar
 
-COPY --from=build --chown=interstellar:interstellar /opt/interstellar/package.json ./package.json
-COPY --from=build --chown=interstellar:interstellar /opt/interstellar/node_modules ./node_modules
-COPY --from=build --chown=interstellar:interstellar /opt/interstellar/dist ./dist
+COPY --from=build --chown=interstellar:interstellar /opt/interstellar/dist/standalone ./
 
 USER interstellar
 EXPOSE 3000
-CMD ["./node_modules/.bin/vinext", "start"]
+CMD ["node", "server.js"]

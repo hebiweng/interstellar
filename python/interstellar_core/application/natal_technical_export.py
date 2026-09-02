@@ -64,6 +64,14 @@ def natal_technical_document_content_hash(snapshot: Mapping[str, Any]) -> str:
             "dignities": result.get("dignities"),
             "receptions": result.get("receptions"),
             "lots": result.get("lots"),
+            "fixed_stars": result.get("fixed_stars"),
+            "fixed_star_contacts": result.get("fixed_star_contacts"),
+            "special_degrees": result.get("special_degrees"),
+            "mirror_points": result.get("mirror_points"),
+            "midpoints": result.get("midpoints"),
+            "profections": result.get("profections"),
+            "firdaria": result.get("firdaria"),
+            "zodiacal_releasing": result.get("zodiacal_releasing"),
         },
         "warnings": snapshot.get("warnings") or [],
     }
@@ -107,6 +115,21 @@ POINT_LABELS_ZH = {
     "pallas": "智神星",
     "juno": "婚神星",
     "vesta": "灶神星",
+    "pholus": "福洛斯",
+    "nessus": "涅索斯",
+    "chariklo": "查里克洛",
+    "eros": "爱神星",
+    "psyche": "灵神星",
+    "eris": "阋神星",
+    "sedna": "赛德娜",
+    "haumea": "妊神星",
+    "makemake": "鸟神星",
+    "quaoar": "创神星",
+    "orcus": "亡神星",
+    "ixion": "伊克西翁",
+    "varuna": "伐楼拿",
+    "astraea": "义神星",
+    "hygiea": "健神星",
     "fortune": "福点",
     "spirit": "精神点",
     "lot_eros": "爱神点",
@@ -191,7 +214,7 @@ SETTING_LABELS_ZH = {
     "equal_aries": "Equal Aries 宫制",
     "alcabitius": "Alcabitius 宫制",
     "morinus": "Morinus 宫制",
-    "krusinski": "Krusinski 宫制",
+    "krusinski": "Krusinski / Pisa 克鲁辛斯基-比萨宫制",
     "vehlow": "Vehlow 宫制",
     "meridian": "Meridian 子午线宫制",
     "carter_poli_equatorial": "Carter Poli-Equatorial 宫制",
@@ -349,10 +372,7 @@ def render_natal_technical_document(
     lines: list[str] = [
         "# Interstellar 本命盘分析数据" if markdown else "【Interstellar 本命盘分析数据】",
         "",
-        (
-            "说明：本文档只包含可供占星师或外部模型分析的已计算结果；"
-            "AI 不参与星历、宫位或相位计算；完整 JSON 可单独导出。"
-        ),
+        "当前人物最后一次本命盘的计算结果。",
     ]
 
     subject = _nested(snapshot, "normalized_input", "subject_version") or {}
@@ -430,12 +450,51 @@ def render_natal_technical_document(
             for key, value in orb_overrides.items()
         )
         _bullet(lines, f"容许度覆盖：{orb_text or '使用当前配置默认值'}")
+    elif isinstance(orb_overrides, list):
+        scope_labels = {
+            "chart_context": "全局／盘型",
+            "aspect": "相位",
+            "point_class": "点位类别",
+            "point_pair": "指定点位对",
+        }
+        for override in orb_overrides:
+            if not isinstance(override, Mapping):
+                continue
+            selector = (
+                override.get("chart_context")
+                or override.get("aspect_id")
+                or override.get("point_class")
+                or "-".join(
+                    str(item)
+                    for item in (override.get("point_a"), override.get("point_b"))
+                    if item
+                )
+                or "全部"
+            )
+            scope = str(override.get("scope"))
+            scope_label = scope_labels.get(scope, scope)
+            _bullet(
+                lines,
+                f"容许度覆盖（{scope_label}·{selector}）："
+                f"{_degree(override.get('orb_deg'))}",
+            )
+    classical_settings = settings.get("classical_settings") or {}
+    if isinstance(classical_settings, Mapping):
+        triplicity_label = {
+            "dorothean.v1": "多罗修斯三分主星表",
+            "ptolemaic.v1": "托勒密三分主星表",
+        }.get(str(classical_settings.get("triplicity_table")), "未指定")
+        terms_label = {
+            "egyptian.v1": "埃及界",
+            "ptolemaic.v1": "托勒密界",
+        }.get(str(classical_settings.get("terms_table")), "未指定")
+        _bullet(lines, f"古典规则表：{triplicity_label}；{terms_label}")
 
     _section(lines, "天文计算上下文", markdown=markdown)
     if date_level_mode:
         _bullet(
             lines,
-            "计算模式：完整当地民用日范围；宫位、四轴、相位、结构、Lots 与古典结果已阻断",
+            "计算模式：完整当地民用日范围；宫位、四轴、相位、结构、阿拉伯点与古典结果不会生成",
         )
     day_night_label = {
         "day": "昼盘",
@@ -523,6 +582,88 @@ def render_natal_technical_document(
             ),
         )
 
+    if result.get("fixed_stars"):
+        _section(lines, "固定星与本命合相", markdown=markdown)
+        contacts_by_star: dict[str, list[Mapping[str, Any]]] = {}
+        for contact in result.get("fixed_star_contacts") or []:
+            if isinstance(contact, Mapping):
+                contacts_by_star.setdefault(str(contact.get("star_id")), []).append(contact)
+        for star in result.get("fixed_stars") or []:
+            if not isinstance(star, Mapping):
+                continue
+            ecliptic = _nested(star, "position", "ecliptic") or {}
+            equatorial = _nested(star, "position", "equatorial") or {}
+            contacts = contacts_by_star.get(str(star.get("star_id")), [])
+            contact_text = "、".join(
+                f"{_label_point(str(contact.get('point_id')))}"
+                f"（容许 {_degree(contact.get('orb_deg'))}）"
+                for contact in contacts
+            )
+            _bullet(
+                lines,
+                (
+                    f"{star.get('label_zh') or star.get('name')} ({star.get('name')})："
+                    f"{_label_sign(star.get('sign'))} {_degree(star.get('degree_in_sign'))}；"
+                    f"黄经 {_degree(ecliptic.get('longitude_deg'))}，"
+                    f"赤纬 {_signed_degree(equatorial.get('declination_deg'))}；"
+                    f"视星等 {_number(star.get('magnitude_v'), 2)}；"
+                    f"本命合相 {contact_text or '无（当前容许度）'}"
+                ),
+            )
+
+    special_degrees = result.get("special_degrees") or {}
+    if isinstance(special_degrees, Mapping) and special_degrees.get("points"):
+        _section(lines, "特殊度数事实", markdown=markdown)
+        for fact in special_degrees.get("points") or []:
+            if not isinstance(fact, Mapping):
+                continue
+            flags = [f"第{fact.get('decan_index')}面"]
+            if fact.get("in_via_combusta"):
+                flags.append("燃烧之路")
+            if fact.get("in_terminal_degree_29"):
+                flags.append("所在星座的第 29 度区间")
+            point_label = _label_point(str(fact.get("point_id")))
+            sign_label = _label_sign(fact.get("sign_id"))
+            degree_label = _degree(fact.get("degree_in_sign"))
+            _bullet(
+                lines,
+                f"{point_label}：{sign_label} {degree_label}；{'、'.join(flags)}",
+            )
+
+    mirrors = result.get("mirror_points") or {}
+    if isinstance(mirrors, Mapping) and mirrors.get("mirror_points"):
+        _section(lines, "映点与反映点", markdown=markdown)
+        for fact in mirrors.get("mirror_points") or []:
+            if not isinstance(fact, Mapping):
+                continue
+            antiscia_sign = _label_sign(fact.get("antiscia_sign_id"))
+            antiscia_degree = _degree(fact.get("antiscia_degree_in_sign"))
+            contra_sign = _label_sign(fact.get("contra_antiscia_sign_id"))
+            contra_degree = _degree(fact.get("contra_antiscia_degree_in_sign"))
+            _bullet(
+                lines,
+                (
+                    f"{_label_point(str(fact.get('point_id')))}："
+                    f"映点 {antiscia_sign} {antiscia_degree}；"
+                    f"反映点 {contra_sign} {contra_degree}"
+                ),
+            )
+        for contact in mirrors.get("contacts") or []:
+            if not isinstance(contact, Mapping):
+                continue
+            contact_label = (
+                "映点接触"
+                if contact.get("contact_type") == "antiscia"
+                else "反映点接触"
+            )
+            _bullet(
+                lines,
+                (
+                    f"{contact_label}：{_label_point(str(contact.get('point_a')))}与"
+                    f"{_label_point(str(contact.get('point_b')))}；偏差 "
+                    f"{_degree(contact.get('separation_from_exact_deg'))}"
+                ),
+            )
     _section(lines, "十二宫", markdown=markdown)
     if date_level_mode and not (result.get("houses") or []):
         _bullet(lines, "不可用：出生时刻未知，未以 00:00 或日期中点伪造宫位。")
@@ -609,7 +750,7 @@ def render_natal_technical_document(
 
     _section(lines, "古典与希腊化事实", markdown=markdown)
     if date_level_mode:
-        _bullet(lines, "不可用：Sect、宫位、Lots 与时刻依赖古典条件需要可靠出生时刻。")
+        _bullet(lines, "不可用：昼夜体系、宫位、阿拉伯点与时刻依赖古典条件需要可靠出生时刻。")
     classical = result.get("classical") or {}
     sect = classical.get("sect") or {}
     if isinstance(sect, Mapping):
@@ -676,6 +817,94 @@ def render_natal_technical_document(
                 f"公式 {lot.get('formula_expression')}"
             ),
         )
+
+    midpoints = result.get("midpoints") or {}
+    if isinstance(midpoints, Mapping) and midpoints.get("midpoints"):
+        _section(lines, "中点", markdown=markdown)
+        for midpoint in midpoints.get("midpoints") or []:
+            if not isinstance(midpoint, Mapping):
+                continue
+            _bullet(
+                lines,
+                (
+                    f"{_label_point(str(midpoint.get('point_a')))} / "
+                    f"{_label_point(str(midpoint.get('point_b')))}："
+                    f"直接中点 {_degree(midpoint.get('direct_midpoint_deg'))}；"
+                    f"间接中点 {_degree(midpoint.get('indirect_midpoint_deg'))}"
+                ),
+            )
+        for hit in midpoints.get("hits") or []:
+            if not isinstance(hit, Mapping):
+                continue
+            pair = str(hit.get("midpoint_id") or "").replace("midpoint:", "").split(":")
+            pair_label = " / ".join(_label_point(item) for item in pair if item)
+            _bullet(
+                lines,
+                (
+                    f"中点命中：{pair_label} {hit.get('midpoint_type')}轴 "
+                    f"{ASPECT_LABELS_ZH.get(str(hit.get('aspect_id')), hit.get('aspect_id'))} "
+                    f"{_label_point(str(hit.get('target_point_id')))}；"
+                    f"偏差 {_degree(hit.get('orb_deg'))}"
+                ),
+            )
+
+    firdaria = result.get("firdaria") or {}
+    profections = result.get("profections") or {}
+    releasing = result.get("zodiacal_releasing") or {}
+    if (
+        (isinstance(firdaria, Mapping) and bool(firdaria))
+        or (isinstance(profections, Mapping) and bool(profections))
+    ):
+        _section(lines, "时间主星", markdown=markdown)
+    if isinstance(firdaria, Mapping):
+        for period in firdaria.get("major_periods") or []:
+            if isinstance(period, Mapping) and period.get("current"):
+                major_lord = _label_point(str(period.get("major_lord_id")))
+                _bullet(
+                    lines,
+                    f"当前法达主运：{major_lord}；"
+                    f"{period.get('start_utc')} 至 {period.get('end_utc')}",
+                )
+        for period in firdaria.get("sub_periods") or []:
+            if isinstance(period, Mapping) and period.get("current"):
+                minor_lord = _label_point(str(period.get("minor_lord_id")))
+                _bullet(
+                    lines,
+                    f"当前法达次运：{minor_lord}；"
+                    f"{period.get('start_utc')} 至 {period.get('end_utc')}",
+                )
+    if isinstance(profections, Mapping):
+        for period in profections.get("periods") or []:
+            if isinstance(period, Mapping) and period.get("current"):
+                time_lords = "、".join(
+                    _label_point(str(item)) for item in period.get("time_lord_ids") or []
+                )
+                _bullet(
+                    lines,
+                    (
+                        f"当前年度小限：{period.get('age')}岁，第{period.get('activated_house')}宫，"
+                        f"{_label_sign(period.get('activated_sign'))}，主星 "
+                        f"{time_lords}"
+                    ),
+                )
+    if isinstance(releasing, Mapping):
+        for lot_id, document in releasing.items():
+            if not isinstance(document, Mapping):
+                continue
+            levels = document.get("levels") or {}
+            if not isinstance(levels, Mapping):
+                continue
+            for level in ("L1", "L2"):
+                for period in levels.get(level) or []:
+                    if isinstance(period, Mapping) and period.get("current"):
+                        _bullet(
+                            lines,
+                            (
+                                f"{_label_point(str(lot_id))}黄道释放 {level}："
+                                f"{_label_sign(period.get('sign_id'))}；"
+                                f"{period.get('start_utc')} 至 {period.get('end_utc')}"
+                            ),
+                        )
 
     _section(lines, "输入质量与分析提醒", markdown=markdown)
     if not (snapshot.get("warnings") or []):

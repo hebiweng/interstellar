@@ -1,0 +1,2711 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-11T14:10:04.013Z",
+  "chartID": "classical.synastry",
+  "calculationSamples": [
+    {
+      "scenarioID": "argentina-egypt"
+    },
+    {
+      "scenarioID": "britain-italy"
+    },
+    {
+      "scenarioID": "china-usa"
+    },
+    {
+      "scenarioID": "france-canada"
+    },
+    {
+      "scenarioID": "india-southafrica"
+    },
+    {
+      "scenarioID": "japan-brazil"
+    },
+    {
+      "scenarioID": "mexico-uk"
+    },
+    {
+      "scenarioID": "netherlands-portugal"
+    },
+    {
+      "scenarioID": "newzealand-egypt"
+    },
+    {
+      "scenarioID": "russia-australia"
+    },
+    {
+      "scenarioID": "spain-ireland"
+    },
+    {
+      "scenarioID": "sweden-usa"
+    },
+    {
+      "scenarioID": "turkey-indonesia"
+    },
+    {
+      "scenarioID": "usa-germany"
+    }
+  ],
+  "observedFactPatterns": [
+    {
+      "key": "classical.synastry.fact.chemistry.attraction.aspect.jupiter.trine.venus",
+      "cardID": "chemistry",
+      "role": "attraction",
+      "factType": "aspect",
+      "factPattern": "jupiter.trine.venus"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.attraction.aspect.mars.sextile.jupiter",
+      "cardID": "chemistry",
+      "role": "attraction",
+      "factType": "aspect",
+      "factPattern": "mars.sextile.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.attraction.aspect.mars.sextile.mars",
+      "cardID": "chemistry",
+      "role": "attraction",
+      "factType": "aspect",
+      "factPattern": "mars.sextile.mars"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.attraction.aspect.mars.sextile.moon",
+      "cardID": "chemistry",
+      "role": "attraction",
+      "factType": "aspect",
+      "factPattern": "mars.sextile.moon"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.attraction.aspect.mars.sextile.venus",
+      "cardID": "chemistry",
+      "role": "attraction",
+      "factType": "aspect",
+      "factPattern": "mars.sextile.venus"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.attraction.aspect.mars.trine.jupiter",
+      "cardID": "chemistry",
+      "role": "attraction",
+      "factType": "aspect",
+      "factPattern": "mars.trine.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.attraction.aspect.mars.trine.saturn",
+      "cardID": "chemistry",
+      "role": "attraction",
+      "factType": "aspect",
+      "factPattern": "mars.trine.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.attraction.aspect.mercury.trine.mars",
+      "cardID": "chemistry",
+      "role": "attraction",
+      "factType": "aspect",
+      "factPattern": "mercury.trine.mars"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.attraction.aspect.moon.sextile.mars",
+      "cardID": "chemistry",
+      "role": "attraction",
+      "factType": "aspect",
+      "factPattern": "moon.sextile.mars"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.attraction.aspect.sun.trine.mars",
+      "cardID": "chemistry",
+      "role": "attraction",
+      "factType": "aspect",
+      "factPattern": "sun.trine.mars"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.attraction.aspect.venus.sextile.mercury",
+      "cardID": "chemistry",
+      "role": "attraction",
+      "factType": "aspect",
+      "factPattern": "venus.sextile.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.attraction.aspect.venus.trine.moon",
+      "cardID": "chemistry",
+      "role": "attraction",
+      "factType": "aspect",
+      "factPattern": "venus.trine.moon"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.attraction.aspect.venus.trine.saturn",
+      "cardID": "chemistry",
+      "role": "attraction",
+      "factType": "aspect",
+      "factPattern": "venus.trine.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.attraction.aspect.venus.trine.venus",
+      "cardID": "chemistry",
+      "role": "attraction",
+      "factType": "aspect",
+      "factPattern": "venus.trine.venus"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.intensity.aspect.jupiter.opposition.mars",
+      "cardID": "chemistry",
+      "role": "intensity",
+      "factType": "aspect",
+      "factPattern": "jupiter.opposition.mars"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.intensity.aspect.jupiter.square.mars",
+      "cardID": "chemistry",
+      "role": "intensity",
+      "factType": "aspect",
+      "factPattern": "jupiter.square.mars"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.intensity.aspect.mars.conjunction.mars",
+      "cardID": "chemistry",
+      "role": "intensity",
+      "factType": "aspect",
+      "factPattern": "mars.conjunction.mars"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.intensity.aspect.mars.conjunction.mercury",
+      "cardID": "chemistry",
+      "role": "intensity",
+      "factType": "aspect",
+      "factPattern": "mars.conjunction.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.intensity.aspect.mars.conjunction.venus",
+      "cardID": "chemistry",
+      "role": "intensity",
+      "factType": "aspect",
+      "factPattern": "mars.conjunction.venus"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.intensity.aspect.mars.opposition.sun",
+      "cardID": "chemistry",
+      "role": "intensity",
+      "factType": "aspect",
+      "factPattern": "mars.opposition.sun"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.intensity.aspect.mars.opposition.venus",
+      "cardID": "chemistry",
+      "role": "intensity",
+      "factType": "aspect",
+      "factPattern": "mars.opposition.venus"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.intensity.aspect.mars.square.jupiter",
+      "cardID": "chemistry",
+      "role": "intensity",
+      "factType": "aspect",
+      "factPattern": "mars.square.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.intensity.aspect.mars.square.sun",
+      "cardID": "chemistry",
+      "role": "intensity",
+      "factType": "aspect",
+      "factPattern": "mars.square.sun"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.intensity.aspect.mars.square.venus",
+      "cardID": "chemistry",
+      "role": "intensity",
+      "factType": "aspect",
+      "factPattern": "mars.square.venus"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.intensity.aspect.mercury.conjunction.mars",
+      "cardID": "chemistry",
+      "role": "intensity",
+      "factType": "aspect",
+      "factPattern": "mercury.conjunction.mars"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.intensity.aspect.venus.square.venus",
+      "cardID": "chemistry",
+      "role": "intensity",
+      "factType": "aspect",
+      "factPattern": "venus.square.venus"
+    },
+    {
+      "key": "classical.synastry.fact.chemistry.intensity.aspect.venus.trine.saturn",
+      "cardID": "chemistry",
+      "role": "intensity",
+      "factType": "aspect",
+      "factPattern": "venus.trine.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personA.jupiter.challenging",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personA.jupiter.challenging"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personA.mercury.challenging",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personA.mercury.challenging"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personA.moon.challenging",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personA.moon.challenging"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personA.moon.supportive",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personA.moon.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personA.saturn.challenging",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personA.saturn.challenging"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personA.saturn.supportive",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personA.saturn.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personA.sun.challenging",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personA.sun.challenging"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personA.sun.supportive",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personA.sun.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personA.venus.supportive",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personA.venus.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personB.jupiter.challenging",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.jupiter.challenging"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personB.jupiter.supportive",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.jupiter.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personB.mars.challenging",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.mars.challenging"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personB.mars.supportive",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.mars.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personB.mercury.supportive",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.mercury.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personB.moon.supportive",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.moon.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personB.saturn.challenging",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.saturn.challenging"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personB.saturn.supportive",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.saturn.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personB.sun.supportive",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.sun.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.general.planet-condition.personB.venus.challenging",
+      "cardID": "commitment",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.venus.challenging"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.growth.aspect.jupiter.sextile.mercury",
+      "cardID": "commitment",
+      "role": "growth",
+      "factType": "aspect",
+      "factPattern": "jupiter.sextile.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.growth.aspect.jupiter.trine.mercury",
+      "cardID": "commitment",
+      "role": "growth",
+      "factType": "aspect",
+      "factPattern": "jupiter.trine.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.growth.aspect.jupiter.trine.moon",
+      "cardID": "commitment",
+      "role": "growth",
+      "factType": "aspect",
+      "factPattern": "jupiter.trine.moon"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.growth.aspect.jupiter.trine.venus",
+      "cardID": "commitment",
+      "role": "growth",
+      "factType": "aspect",
+      "factPattern": "jupiter.trine.venus"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.growth.aspect.mars.sextile.jupiter",
+      "cardID": "commitment",
+      "role": "growth",
+      "factType": "aspect",
+      "factPattern": "mars.sextile.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.growth.aspect.mercury.conjunction.jupiter",
+      "cardID": "commitment",
+      "role": "growth",
+      "factType": "aspect",
+      "factPattern": "mercury.conjunction.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.growth.aspect.moon.conjunction.jupiter",
+      "cardID": "commitment",
+      "role": "growth",
+      "factType": "aspect",
+      "factPattern": "moon.conjunction.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.growth.aspect.moon.opposition.jupiter",
+      "cardID": "commitment",
+      "role": "growth",
+      "factType": "aspect",
+      "factPattern": "moon.opposition.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.growth.aspect.saturn.trine.jupiter",
+      "cardID": "commitment",
+      "role": "growth",
+      "factType": "aspect",
+      "factPattern": "saturn.trine.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.growth.aspect.sun.conjunction.jupiter",
+      "cardID": "commitment",
+      "role": "growth",
+      "factType": "aspect",
+      "factPattern": "sun.conjunction.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.growth.aspect.sun.sextile.jupiter",
+      "cardID": "commitment",
+      "role": "growth",
+      "factType": "aspect",
+      "factPattern": "sun.sextile.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.growth.aspect.venus.sextile.jupiter",
+      "cardID": "commitment",
+      "role": "growth",
+      "factType": "aspect",
+      "factPattern": "venus.sextile.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.stability.aspect.jupiter.conjunction.saturn",
+      "cardID": "commitment",
+      "role": "stability",
+      "factType": "aspect",
+      "factPattern": "jupiter.conjunction.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.stability.aspect.jupiter.square.saturn",
+      "cardID": "commitment",
+      "role": "stability",
+      "factType": "aspect",
+      "factPattern": "jupiter.square.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.stability.aspect.mars.trine.saturn",
+      "cardID": "commitment",
+      "role": "stability",
+      "factType": "aspect",
+      "factPattern": "mars.trine.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.stability.aspect.mercury.sextile.saturn",
+      "cardID": "commitment",
+      "role": "stability",
+      "factType": "aspect",
+      "factPattern": "mercury.sextile.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.stability.aspect.moon.sextile.saturn",
+      "cardID": "commitment",
+      "role": "stability",
+      "factType": "aspect",
+      "factPattern": "moon.sextile.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.stability.aspect.moon.trine.saturn",
+      "cardID": "commitment",
+      "role": "stability",
+      "factType": "aspect",
+      "factPattern": "moon.trine.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.stability.aspect.saturn.opposition.saturn",
+      "cardID": "commitment",
+      "role": "stability",
+      "factType": "aspect",
+      "factPattern": "saturn.opposition.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.stability.aspect.saturn.square.mercury",
+      "cardID": "commitment",
+      "role": "stability",
+      "factType": "aspect",
+      "factPattern": "saturn.square.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.stability.aspect.saturn.trine.mercury",
+      "cardID": "commitment",
+      "role": "stability",
+      "factType": "aspect",
+      "factPattern": "saturn.trine.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.stability.aspect.sun.square.saturn",
+      "cardID": "commitment",
+      "role": "stability",
+      "factType": "aspect",
+      "factPattern": "sun.square.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.stability.aspect.venus.square.saturn",
+      "cardID": "commitment",
+      "role": "stability",
+      "factType": "aspect",
+      "factPattern": "venus.square.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.commitment.stability.overlay.personAToB.saturn.house-8",
+      "cardID": "commitment",
+      "role": "stability",
+      "factType": "overlay",
+      "factPattern": "personAToB.saturn.house-8"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.jupiter.sextile.mercury",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.sextile.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.jupiter.trine.mercury",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.trine.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.mars.conjunction.mercury",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.conjunction.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.mars.opposition.mercury",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.opposition.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.mercury.conjunction.jupiter",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.conjunction.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.mercury.opposition.jupiter",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.opposition.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.mercury.opposition.moon",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.opposition.moon"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.mercury.opposition.venus",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.opposition.venus"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.mercury.sextile.mars",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.sextile.mars"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.mercury.sextile.saturn",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.sextile.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.mercury.square.mercury",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.square.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.mercury.square.saturn",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.square.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.mercury.square.venus",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.square.venus"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.mercury.trine.jupiter",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.trine.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.mercury.trine.mars",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.trine.mars"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.mercury.trine.mercury",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.trine.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.mercury.trine.sun",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.trine.sun"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.mercury.trine.venus",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.trine.venus"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.moon.conjunction.mercury",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.conjunction.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.moon.square.mercury",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.square.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.moon.trine.mercury",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.trine.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.saturn.square.mercury",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "saturn.square.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.saturn.trine.mercury",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "saturn.trine.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.sun.opposition.mercury",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "sun.opposition.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.venus.opposition.mercury",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.opposition.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.venus.sextile.mercury",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.sextile.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.communication.general.aspect.venus.square.mercury",
+      "cardID": "communication",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.square.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.difference.aspect.mars.square.moon",
+      "cardID": "emotional-connection",
+      "role": "difference",
+      "factType": "aspect",
+      "factPattern": "mars.square.moon"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.difference.aspect.mercury.opposition.moon",
+      "cardID": "emotional-connection",
+      "role": "difference",
+      "factType": "aspect",
+      "factPattern": "mercury.opposition.moon"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.difference.aspect.mercury.square.moon",
+      "cardID": "emotional-connection",
+      "role": "difference",
+      "factType": "aspect",
+      "factPattern": "mercury.square.moon"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.difference.aspect.moon.opposition.jupiter",
+      "cardID": "emotional-connection",
+      "role": "difference",
+      "factType": "aspect",
+      "factPattern": "moon.opposition.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.difference.aspect.moon.square.moon",
+      "cardID": "emotional-connection",
+      "role": "difference",
+      "factType": "aspect",
+      "factPattern": "moon.square.moon"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.difference.aspect.moon.square.venus",
+      "cardID": "emotional-connection",
+      "role": "difference",
+      "factType": "aspect",
+      "factPattern": "moon.square.venus"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.difference.aspect.sun.square.moon",
+      "cardID": "emotional-connection",
+      "role": "difference",
+      "factType": "aspect",
+      "factPattern": "sun.square.moon"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.difference.overlay.personAToB.moon.house-3",
+      "cardID": "emotional-connection",
+      "role": "difference",
+      "factType": "overlay",
+      "factPattern": "personAToB.moon.house-3"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.difference.overlay.personAToB.moon.house-5",
+      "cardID": "emotional-connection",
+      "role": "difference",
+      "factType": "overlay",
+      "factPattern": "personAToB.moon.house-5"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.difference.overlay.personBToA.moon.house-8",
+      "cardID": "emotional-connection",
+      "role": "difference",
+      "factType": "overlay",
+      "factPattern": "personBToA.moon.house-8"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.flow.aspect.jupiter.sextile.moon",
+      "cardID": "emotional-connection",
+      "role": "flow",
+      "factType": "aspect",
+      "factPattern": "jupiter.sextile.moon"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.flow.aspect.moon.sextile.mars",
+      "cardID": "emotional-connection",
+      "role": "flow",
+      "factType": "aspect",
+      "factPattern": "moon.sextile.mars"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.flow.aspect.moon.sextile.moon",
+      "cardID": "emotional-connection",
+      "role": "flow",
+      "factType": "aspect",
+      "factPattern": "moon.sextile.moon"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.flow.aspect.moon.sextile.sun",
+      "cardID": "emotional-connection",
+      "role": "flow",
+      "factType": "aspect",
+      "factPattern": "moon.sextile.sun"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.flow.aspect.moon.trine.mercury",
+      "cardID": "emotional-connection",
+      "role": "flow",
+      "factType": "aspect",
+      "factPattern": "moon.trine.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.flow.aspect.moon.trine.saturn",
+      "cardID": "emotional-connection",
+      "role": "flow",
+      "factType": "aspect",
+      "factPattern": "moon.trine.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.flow.aspect.moon.trine.sun",
+      "cardID": "emotional-connection",
+      "role": "flow",
+      "factType": "aspect",
+      "factPattern": "moon.trine.sun"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.flow.aspect.sun.trine.moon",
+      "cardID": "emotional-connection",
+      "role": "flow",
+      "factType": "aspect",
+      "factPattern": "sun.trine.moon"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.flow.aspect.venus.sextile.moon",
+      "cardID": "emotional-connection",
+      "role": "flow",
+      "factType": "aspect",
+      "factPattern": "venus.sextile.moon"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.flow.aspect.venus.trine.moon",
+      "cardID": "emotional-connection",
+      "role": "flow",
+      "factType": "aspect",
+      "factPattern": "venus.trine.moon"
+    },
+    {
+      "key": "classical.synastry.fact.emotional-connection.flow.overlay.personBToA.moon.house-1",
+      "cardID": "emotional-connection",
+      "role": "flow",
+      "factType": "overlay",
+      "factPattern": "personBToA.moon.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.jupiter.house-1",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.jupiter.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.jupiter.house-10",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.jupiter.house-10"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.jupiter.house-4",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.jupiter.house-4"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.jupiter.house-5",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.jupiter.house-5"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.jupiter.house-7",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.jupiter.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.mars.house-1",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.mars.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.mars.house-10",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.mars.house-10"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.mars.house-3",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.mars.house-3"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.mars.house-4",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.mars.house-4"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.mars.house-7",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.mars.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.mercury.house-10",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.mercury.house-10"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.mercury.house-7",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.mercury.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.moon.house-1",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.moon.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.moon.house-10",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.moon.house-10"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.moon.house-11",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.moon.house-11"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.moon.house-3",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.moon.house-3"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.saturn.house-4",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.saturn.house-4"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.sun.house-10",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.sun.house-10"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.sun.house-4",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.sun.house-4"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.sun.house-7",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.sun.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personAToB.venus.house-8",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.venus.house-8"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personBToA.jupiter.house-1",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.jupiter.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personBToA.jupiter.house-7",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.jupiter.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personBToA.mars.house-1",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.mars.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personBToA.mars.house-10",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.mars.house-10"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personBToA.mars.house-7",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.mars.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personBToA.mercury.house-1",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.mercury.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personBToA.moon.house-1",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.moon.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personBToA.moon.house-10",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.moon.house-10"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personBToA.moon.house-4",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.moon.house-4"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personBToA.moon.house-6",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.moon.house-6"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personBToA.moon.house-7",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.moon.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personBToA.saturn.house-1",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.saturn.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personBToA.sun.house-1",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.sun.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personBToA.sun.house-11",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.sun.house-11"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personBToA.sun.house-7",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.sun.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personBToA.sun.house-8",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.sun.house-8"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personBToA.venus.house-1",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.venus.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.house-overlays.general.overlay.personBToA.venus.house-4",
+      "cardID": "house-overlays",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.venus.house-4"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.jupiter.conjunction.venus",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.conjunction.venus"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.jupiter.opposition.mars",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.opposition.mars"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.jupiter.opposition.mercury",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.opposition.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.jupiter.opposition.saturn",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.opposition.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.jupiter.sextile.jupiter",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.sextile.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.jupiter.sextile.mars",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.sextile.mars"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.jupiter.sextile.venus",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.sextile.venus"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.jupiter.square.jupiter",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.square.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.jupiter.square.saturn",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.square.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.jupiter.trine.jupiter",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.trine.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.jupiter.trine.mars",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.trine.mars"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.jupiter.trine.moon",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.trine.moon"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.jupiter.trine.saturn",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.trine.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.jupiter.trine.sun",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.trine.sun"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.mars.conjunction.mars",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.conjunction.mars"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.mars.opposition.jupiter",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.opposition.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.mars.opposition.moon",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.opposition.moon"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.mars.opposition.saturn",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.opposition.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.mars.opposition.sun",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.opposition.sun"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.mars.square.mars",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.square.mars"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.mars.trine.mars",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.trine.mars"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.mars.trine.sun",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.trine.sun"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.mars.trine.venus",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.trine.venus"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.mercury.opposition.mercury",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.opposition.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.mercury.square.moon",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.square.moon"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.mercury.square.venus",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.square.venus"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.mercury.trine.jupiter",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.trine.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.mercury.trine.sun",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.trine.sun"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.moon.conjunction.moon",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.conjunction.moon"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.moon.conjunction.sun",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.conjunction.sun"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.moon.sextile.mars",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.sextile.mars"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.moon.sextile.sun",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.sextile.sun"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.moon.sextile.venus",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.sextile.venus"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.moon.square.jupiter",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.square.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.moon.square.sun",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.square.sun"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.moon.trine.jupiter",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.trine.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.moon.trine.moon",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.trine.moon"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.moon.trine.saturn",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.trine.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.moon.trine.sun",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.trine.sun"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.moon.trine.venus",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.trine.venus"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.saturn.conjunction.moon",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "saturn.conjunction.moon"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.saturn.conjunction.sun",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "saturn.conjunction.sun"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.saturn.opposition.sun",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "saturn.opposition.sun"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.saturn.sextile.moon",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "saturn.sextile.moon"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.saturn.sextile.venus",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "saturn.sextile.venus"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.saturn.square.jupiter",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "saturn.square.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.saturn.square.venus",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "saturn.square.venus"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.saturn.trine.jupiter",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "saturn.trine.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.saturn.trine.moon",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "saturn.trine.moon"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.saturn.trine.sun",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "saturn.trine.sun"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.saturn.trine.venus",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "saturn.trine.venus"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.sun.conjunction.jupiter",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "sun.conjunction.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.sun.conjunction.moon",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "sun.conjunction.moon"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.sun.conjunction.saturn",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "sun.conjunction.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.sun.opposition.moon",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "sun.opposition.moon"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.sun.opposition.sun",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "sun.opposition.sun"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.sun.sextile.jupiter",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "sun.sextile.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.sun.sextile.moon",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "sun.sextile.moon"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.sun.square.sun",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "sun.square.sun"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.sun.square.venus",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "sun.square.venus"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.venus.conjunction.saturn",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.conjunction.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.venus.opposition.moon",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.opposition.moon"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.venus.opposition.sun",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.opposition.sun"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.venus.opposition.venus",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.opposition.venus"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.venus.sextile.jupiter",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.sextile.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.venus.sextile.moon",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.sextile.moon"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.venus.sextile.sun",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.sextile.sun"
+    },
+    {
+      "key": "classical.synastry.fact.key-inter-aspects.general.aspect.venus.trine.sun",
+      "cardID": "key-inter-aspects",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.trine.sun"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.jupiter.house-1",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.jupiter.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.jupiter.house-10",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.jupiter.house-10"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.jupiter.house-11",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.jupiter.house-11"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.jupiter.house-4",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.jupiter.house-4"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.jupiter.house-5",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.jupiter.house-5"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.jupiter.house-7",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.jupiter.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.mars.house-1",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.mars.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.mars.house-10",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.mars.house-10"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.mars.house-11",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.mars.house-11"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.mars.house-12",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.mars.house-12"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.mars.house-3",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.mars.house-3"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.mars.house-4",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.mars.house-4"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.mars.house-7",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.mars.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.mars.house-8",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.mars.house-8"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.mercury.house-10",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.mercury.house-10"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.mercury.house-4",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.mercury.house-4"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.mercury.house-7",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.mercury.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.moon.house-1",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.moon.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.moon.house-10",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.moon.house-10"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.moon.house-11",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.moon.house-11"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.moon.house-2",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.moon.house-2"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.moon.house-3",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.moon.house-3"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.moon.house-5",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.moon.house-5"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.moon.house-6",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.moon.house-6"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.saturn.house-1",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.saturn.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.saturn.house-4",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.saturn.house-4"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.saturn.house-7",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.saturn.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.saturn.house-8",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.saturn.house-8"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.sun.house-10",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.sun.house-10"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.sun.house-3",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.sun.house-3"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.sun.house-4",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.sun.house-4"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.sun.house-7",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.sun.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.sun.house-8",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.sun.house-8"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.sun.house-9",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.sun.house-9"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.venus.house-11",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.venus.house-11"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personAToB.venus.house-8",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personAToB.venus.house-8"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.jupiter.house-1",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.jupiter.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.jupiter.house-10",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.jupiter.house-10"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.jupiter.house-4",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.jupiter.house-4"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.jupiter.house-7",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.jupiter.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.jupiter.house-8",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.jupiter.house-8"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.mars.house-1",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.mars.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.mars.house-10",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.mars.house-10"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.mars.house-11",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.mars.house-11"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.mars.house-3",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.mars.house-3"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.mars.house-4",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.mars.house-4"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.mars.house-5",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.mars.house-5"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.mars.house-7",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.mars.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.mars.house-9",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.mars.house-9"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.mercury.house-1",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.mercury.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.mercury.house-11",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.mercury.house-11"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.mercury.house-7",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.mercury.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.mercury.house-8",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.mercury.house-8"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.moon.house-1",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.moon.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.moon.house-10",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.moon.house-10"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.moon.house-4",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.moon.house-4"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.moon.house-5",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.moon.house-5"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.moon.house-6",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.moon.house-6"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.moon.house-7",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.moon.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.moon.house-8",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.moon.house-8"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.saturn.house-1",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.saturn.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.saturn.house-3",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.saturn.house-3"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.saturn.house-7",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.saturn.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.sun.house-1",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.sun.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.sun.house-11",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.sun.house-11"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.sun.house-2",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.sun.house-2"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.sun.house-5",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.sun.house-5"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.sun.house-7",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.sun.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.sun.house-8",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.sun.house-8"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.venus.house-1",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.venus.house-1"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.venus.house-4",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.venus.house-4"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.venus.house-7",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.venus.house-7"
+    },
+    {
+      "key": "classical.synastry.fact.perspectives.general.overlay.personBToA.venus.house-8",
+      "cardID": "perspectives",
+      "role": null,
+      "factType": "overlay",
+      "factPattern": "personBToA.venus.house-8"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.jupiter.conjunction.saturn",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.conjunction.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.jupiter.opposition.saturn",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.opposition.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.jupiter.sextile.mars",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.sextile.mars"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.jupiter.sextile.mercury",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.sextile.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.jupiter.sextile.moon",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.sextile.moon"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.jupiter.square.jupiter",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.square.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.jupiter.square.mars",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.square.mars"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.jupiter.trine.jupiter",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.trine.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.jupiter.trine.mars",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.trine.mars"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.jupiter.trine.mercury",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.trine.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.jupiter.trine.moon",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.trine.moon"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.jupiter.trine.venus",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "jupiter.trine.venus"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mars.conjunction.mars",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.conjunction.mars"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mars.conjunction.mercury",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.conjunction.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mars.opposition.mercury",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.opposition.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mars.opposition.sun",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.opposition.sun"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mars.opposition.venus",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.opposition.venus"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mars.sextile.jupiter",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.sextile.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mars.sextile.mars",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.sextile.mars"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mars.sextile.moon",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.sextile.moon"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mars.sextile.venus",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.sextile.venus"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mars.square.jupiter",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.square.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mars.trine.mars",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.trine.mars"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mars.trine.saturn",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.trine.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mars.trine.sun",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mars.trine.sun"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mercury.conjunction.mars",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.conjunction.mars"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mercury.opposition.moon",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.opposition.moon"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mercury.sextile.saturn",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.sextile.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mercury.square.mercury",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.square.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mercury.square.saturn",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.square.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mercury.trine.jupiter",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.trine.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mercury.trine.mars",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.trine.mars"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mercury.trine.mercury",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.trine.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.mercury.trine.sun",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "mercury.trine.sun"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.moon.conjunction.jupiter",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.conjunction.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.moon.conjunction.mercury",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.conjunction.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.moon.sextile.mars",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.sextile.mars"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.moon.sextile.moon",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.sextile.moon"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.moon.sextile.sun",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.sextile.sun"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.moon.square.moon",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.square.moon"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.moon.trine.mercury",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.trine.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.moon.trine.moon",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.trine.moon"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.moon.trine.saturn",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.trine.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.moon.trine.sun",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.trine.sun"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.moon.trine.venus",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "moon.trine.venus"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.saturn.opposition.saturn",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "saturn.opposition.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.saturn.sextile.venus",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "saturn.sextile.venus"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.saturn.square.mercury",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "saturn.square.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.saturn.trine.moon",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "saturn.trine.moon"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.sun.conjunction.jupiter",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "sun.conjunction.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.sun.opposition.mercury",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "sun.opposition.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.sun.opposition.sun",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "sun.opposition.sun"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.sun.sextile.jupiter",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "sun.sextile.jupiter"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.sun.square.moon",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "sun.square.moon"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.venus.opposition.moon",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.opposition.moon"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.venus.sextile.mercury",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.sextile.mercury"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.venus.sextile.moon",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.sextile.moon"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.venus.sextile.sun",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.sextile.sun"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.venus.square.saturn",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.square.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.venus.square.venus",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.square.venus"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.venus.trine.moon",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.trine.moon"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.venus.trine.saturn",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.trine.saturn"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.aspect.venus.trine.venus",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "aspect",
+      "factPattern": "venus.trine.venus"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personA.jupiter.challenging",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personA.jupiter.challenging"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personA.mercury.challenging",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personA.mercury.challenging"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personA.moon.challenging",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personA.moon.challenging"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personA.moon.supportive",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personA.moon.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personA.saturn.challenging",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personA.saturn.challenging"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personA.saturn.supportive",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personA.saturn.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personA.sun.challenging",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personA.sun.challenging"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personA.sun.supportive",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personA.sun.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personA.venus.supportive",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personA.venus.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personB.jupiter.challenging",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.jupiter.challenging"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personB.jupiter.supportive",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.jupiter.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personB.mars.challenging",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.mars.challenging"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personB.mars.supportive",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.mars.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personB.mercury.supportive",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.mercury.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personB.moon.supportive",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.moon.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personB.saturn.challenging",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.saturn.challenging"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personB.saturn.supportive",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.saturn.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personB.sun.supportive",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.sun.supportive"
+    },
+    {
+      "key": "classical.synastry.fact.relationship-overview.general.planet-condition.personB.venus.challenging",
+      "cardID": "relationship-overview",
+      "role": null,
+      "factType": "planet-condition",
+      "factPattern": "personB.venus.challenging"
+    }
+  ]
+}

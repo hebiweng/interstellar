@@ -1,4 +1,4 @@
-"""Experimental Swiss Ephemeris adapter for geocentric apparent positions.
+"""Experimental Swiss Ephemeris adapter for apparent positions.
 
 This module computes astronomy facts only. It does not assign houses, calculate aspects,
 or perform astrological interpretation. Swiss Ephemeris may fall back to the built-in
@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import math
 import threading
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
@@ -20,6 +20,11 @@ from types import ModuleType
 from typing import Any, Literal
 
 import swisseph as swe
+
+# PySwissEph stores ephemeris path, sidereal mode and topocentric observer in
+# process-global C state.  Every adapter that touches that state must share
+# this lock so concurrent requests cannot leak configuration into each other.
+SWISS_BACKEND_LOCK = threading.RLock()
 
 SIGN_IDS: tuple[str, ...] = (
     "aries",
@@ -44,8 +49,12 @@ AYANAMSA_MODES: dict[str, int] = {
     "lahiri": swe.SIDM_LAHIRI,
     "deluce": swe.SIDM_DELUCE,
     "raman": swe.SIDM_RAMAN,
+    "ushashashi": swe.SIDM_USHASHASHI,
     "krishnamurti": swe.SIDM_KRISHNAMURTI,
+    "djwhal_khul": swe.SIDM_DJWHAL_KHUL,
     "yukteshwar": swe.SIDM_YUKTESHWAR,
+    "jn_bhasin": swe.SIDM_JN_BHASIN,
+    "true_pushya": swe.SIDM_TRUE_PUSHYA,
     "hipparchos": swe.SIDM_HIPPARCHOS,
     "true_revati": swe.SIDM_TRUE_REVATI,
     "true_citra": swe.SIDM_TRUE_CITRA,
@@ -97,6 +106,39 @@ EXTENDED_BODY_DEFINITIONS: tuple[BodyDefinition, ...] = (
     BodyDefinition("pallas", swe.PALLAS, "asteroid", "mpc:2"),
     BodyDefinition("juno", swe.JUNO, "asteroid", "mpc:3"),
     BodyDefinition("vesta", swe.VESTA, "asteroid", "mpc:4"),
+)
+
+# The professional common-minor-body preset is deliberately finite and
+# versioned.  Chiron plus the four major asteroids above are supplied by
+# ``seas_18.se1``; Pholus is supplied by that same official distribution.
+# The remaining objects use Swiss Ephemeris' documented ``AST_OFFSET + MPC``
+# addressing and repository-vendored short files (1500--2099).  Do not add a
+# point here unless its exact artifact, checksum and coverage are present in
+# the active Swiss dataset lock.
+COMMON_MINOR_BODY_DEFINITIONS: tuple[BodyDefinition, ...] = (
+    BodyDefinition("pholus", swe.PHOLUS, "centaur", "mpc:5145"),
+    BodyDefinition("nessus", swe.AST_OFFSET + 7066, "centaur", "mpc:7066"),
+    BodyDefinition("chariklo", swe.AST_OFFSET + 10199, "centaur", "mpc:10199"),
+    BodyDefinition("asteroid_eros", swe.AST_OFFSET + 433, "asteroid", "mpc:433"),
+    BodyDefinition("psyche", swe.AST_OFFSET + 16, "asteroid", "mpc:16"),
+    BodyDefinition("eris", swe.AST_OFFSET + 136199, "dwarf_planet", "mpc:136199"),
+    BodyDefinition("sedna", swe.AST_OFFSET + 90377, "dwarf_planet", "mpc:90377"),
+    BodyDefinition("haumea", swe.AST_OFFSET + 136108, "dwarf_planet", "mpc:136108"),
+    BodyDefinition("makemake", swe.AST_OFFSET + 136472, "dwarf_planet", "mpc:136472"),
+    BodyDefinition("quaoar", swe.AST_OFFSET + 50000, "dwarf_planet", "mpc:50000"),
+    BodyDefinition("orcus", swe.AST_OFFSET + 90482, "dwarf_planet", "mpc:90482"),
+    BodyDefinition("ixion", swe.AST_OFFSET + 28978, "dwarf_planet", "mpc:28978"),
+    BodyDefinition("varuna", swe.AST_OFFSET + 20000, "dwarf_planet", "mpc:20000"),
+    BodyDefinition("astraea", swe.AST_OFFSET + 5, "asteroid", "mpc:5"),
+    BodyDefinition("hygiea", swe.AST_OFFSET + 10, "asteroid", "mpc:10"),
+)
+COMMON_MINOR_BODY_POINT_IDS: tuple[str, ...] = (
+    "chiron",
+    "ceres",
+    "pallas",
+    "juno",
+    "vesta",
+    *(definition.point_id for definition in COMMON_MINOR_BODY_DEFINITIONS),
 )
 
 # Hamburg/Trans-Neptunian points use Swiss Ephemeris' published built-in
@@ -168,6 +210,7 @@ HAMBURG_TNP_POINT_IDS: tuple[str, ...] = tuple(
 DIRECT_POINT_DEFINITIONS: tuple[BodyDefinition, ...] = (
     *BODY_DEFINITIONS,
     *EXTENDED_BODY_DEFINITIONS,
+    *COMMON_MINOR_BODY_DEFINITIONS,
     *HAMBURG_TNP_DEFINITIONS,
 )
 DIRECT_POINT_REGISTRY: dict[str, BodyDefinition] = {
@@ -233,7 +276,7 @@ class AdapterProvenance:
     requested_mode: str
     actual_modes: tuple[str, ...]
     apparent: bool
-    center: Literal["geocentric"]
+    center: Literal["geocentric", "topocentric"]
     zodiac: Literal["tropical", "sidereal"]
     ayanamsa: str | None
     ayanamsa_value_deg: float | None
@@ -293,7 +336,7 @@ class SwissEphemerisAdapter:
     missing ephemeris files are errors rather than silent omissions.
     """
 
-    _backend_lock = threading.RLock()
+    _backend_lock = SWISS_BACKEND_LOCK
 
     def __init__(
         self,
@@ -327,6 +370,8 @@ class SwissEphemerisAdapter:
         point_ids: Iterable[str] | None = None,
         zodiac: Literal["tropical", "sidereal"] = "tropical",
         ayanamsa: str | None = None,
+        center: Literal["geocentric", "topocentric"] = "geocentric",
+        observer: Mapping[str, Any] | None = None,
     ) -> EphemerisResult:
         jd_ut, normalized_utc = self._normalize_time(
             utc_instant=utc_instant,
@@ -334,12 +379,18 @@ class SwissEphemerisAdapter:
         )
         ayanamsa_mode = self._validate_zodiac(zodiac=zodiac, ayanamsa=ayanamsa)
         requested_mode_flag = self._requested_mode_flag()
-        ecliptic_flags = requested_mode_flag | swe.FLG_SPEED
+        center_flag, observer_coordinates = self._validate_center(
+            center=center,
+            observer=observer,
+        )
+        ecliptic_flags = requested_mode_flag | swe.FLG_SPEED | center_flag
         if zodiac == "sidereal":
             ecliptic_flags |= swe.FLG_SIDEREAL
         # Right ascension and declination remain physical equatorial
         # coordinates.  Ayanamsa only changes the zodiacal longitude.
-        equatorial_flags = requested_mode_flag | swe.FLG_SPEED | swe.FLG_EQUATORIAL
+        equatorial_flags = (
+            requested_mode_flag | swe.FLG_SPEED | swe.FLG_EQUATORIAL | center_flag
+        )
         points: list[dict[str, Any]] = []
         warnings: list[AdapterWarning] = []
         flag_records: list[PointFlagRecord] = []
@@ -350,14 +401,22 @@ class SwissEphemerisAdapter:
                 self._backend.set_ephe_path(self.ephemeris_path)
             if ayanamsa_mode is not None:
                 self._backend.set_sid_mode(ayanamsa_mode)
+            if observer_coordinates is not None:
+                self._backend.set_topo(*observer_coordinates)
             for body in definitions:
                 ecliptic = self._calculate_raw(jd_ut, body, ecliptic_flags)
                 equatorial = self._calculate_raw(jd_ut, body, equatorial_flags)
-                self._validate_return_flags(body, ecliptic, required_flags=swe.FLG_SPEED)
+                self._validate_return_flags(
+                    body,
+                    ecliptic,
+                    required_flags=swe.FLG_SPEED | center_flag,
+                    center=center,
+                )
                 self._validate_return_flags(
                     body,
                     equatorial,
-                    required_flags=swe.FLG_SPEED | swe.FLG_EQUATORIAL,
+                    required_flags=swe.FLG_SPEED | swe.FLG_EQUATORIAL | center_flag,
+                    center=center,
                 )
                 actual_mode = self._mode_from_flags(ecliptic.returned_flags)
                 equatorial_mode = self._mode_from_flags(equatorial.returned_flags)
@@ -378,7 +437,15 @@ class SwissEphemerisAdapter:
                             point_id=body.point_id,
                         )
                     )
-                points.append(self._point_record(body, jd_ut, ecliptic, equatorial))
+                points.append(
+                    self._point_record(
+                        body,
+                        jd_ut,
+                        ecliptic,
+                        equatorial,
+                        center=center,
+                    )
+                )
                 flag_records.append(
                     PointFlagRecord(
                         point_id=body.point_id,
@@ -418,7 +485,7 @@ class SwissEphemerisAdapter:
             requested_mode=self.mode.value,
             actual_modes=actual_modes,
             apparent=True,
-            center="geocentric",
+            center=center,
             zodiac=zodiac,
             ayanamsa=ayanamsa,
             ayanamsa_value_deg=ayanamsa_value,
@@ -444,6 +511,32 @@ class SwissEphemerisAdapter:
             provenance=provenance,
             warnings=tuple(warnings),
         )
+
+    def _validate_center(
+        self,
+        *,
+        center: str,
+        observer: Mapping[str, Any] | None,
+    ) -> tuple[int, tuple[float, float, float] | None]:
+        if center == "geocentric":
+            return 0, None
+        if center != "topocentric":
+            raise EphemerisInputError(f"unsupported center: {center}")
+        if not isinstance(observer, Mapping):
+            raise EphemerisInputError("topocentric center requires an observer location")
+        try:
+            longitude = float(observer["longitude"])
+            latitude = float(observer["latitude"])
+            elevation = float(observer.get("elevation_m") or 0.0)
+        except (KeyError, TypeError, ValueError) as exc:
+            raise EphemerisInputError(
+                "topocentric observer requires numeric longitude, latitude and optional elevation_m"
+            ) from exc
+        if not (-180 <= longitude <= 180 and -90 <= latitude <= 90):
+            raise EphemerisInputError("topocentric observer coordinates are out of range")
+        if not all(math.isfinite(value) for value in (longitude, latitude, elevation)):
+            raise EphemerisInputError("topocentric observer coordinates must be finite")
+        return swe.FLG_TOPOCTR, (longitude, latitude, elevation)
 
     def _validate_zodiac(
         self,
@@ -635,17 +728,20 @@ class SwissEphemerisAdapter:
         calculation: _RawCalculation,
         *,
         required_flags: int,
+        center: Literal["geocentric", "topocentric"] = "geocentric",
     ) -> None:
         if calculation.returned_flags & required_flags != required_flags:
             raise EphemerisFlagsError(
                 f"{body.point_id} returned flags {calculation.returned_flags} do not include "
                 f"required flags {required_flags}"
             )
-        forbidden = swe.FLG_HELCTR | swe.FLG_TOPOCTR | swe.FLG_TRUEPOS | swe.FLG_J2000
+        forbidden = swe.FLG_HELCTR | swe.FLG_TRUEPOS | swe.FLG_J2000
+        if center == "geocentric":
+            forbidden |= swe.FLG_TOPOCTR
         if calculation.returned_flags & forbidden:
             raise EphemerisFlagsError(
                 f"{body.point_id} returned flags conflict with "
-                "geocentric apparent-of-date semantics"
+                f"{center} apparent-of-date semantics"
             )
 
     def _mode_from_flags(self, returned_flags: int) -> str:
@@ -692,6 +788,8 @@ class SwissEphemerisAdapter:
         julian_day_ut: float,
         ecliptic: _RawCalculation,
         equatorial: _RawCalculation,
+        *,
+        center: Literal["geocentric", "topocentric"] = "geocentric",
     ) -> dict[str, Any]:
         longitude, latitude, distance, lon_speed, lat_speed, distance_speed = ecliptic.values
         right_ascension, declination, eq_distance, ra_speed, dec_speed, _ = equatorial.values
@@ -724,7 +822,7 @@ class SwissEphemerisAdapter:
                 },
                 "motion_state": motion_state,
                 "frame": "true_ecliptic_of_date",
-                "center": "geocentric",
+                "center": center,
                 "epoch": f"JDUT:{julian_day_ut:.9f}",
                 "uncertainty_arcsec": None,
             },

@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "locale": "en",
+  "technique": "synastry",
+  "rules": [
+    {
+      "id": "synastry.relationship-overview.v1",
+      "technique": "synastry",
+      "cardID": "relationship-overview",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "synastry.perspectives.v1",
+      "technique": "synastry",
+      "cardID": "perspectives",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "synastry.emotional-connection.v1",
+      "technique": "synastry",
+      "cardID": "emotional-connection",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "synastry.communication.v1",
+      "technique": "synastry",
+      "cardID": "communication",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "synastry.chemistry.v1",
+      "technique": "synastry",
+      "cardID": "chemistry",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "synastry.commitment.v1",
+      "technique": "synastry",
+      "cardID": "commitment",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "synastry.house-overlays.v1",
+      "technique": "synastry",
+      "cardID": "house-overlays",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "synastry.key-inter-aspects.v1",
+      "technique": "synastry",
+      "cardID": "key-inter-aspects",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    }
+  ]
+}

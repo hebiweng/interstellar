@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-03T15:22:36.057Z",
+  "chartID": "modern.transit",
+  "requirementCount": 219,
+  "reachableCount": 216,
+  "unreachableCount": 3,
+  "observedCount": 216,
+  "unobservedCount": 0,
+  "missingCopyCount": 0,
+  "unknownCopyCount": 0,
+  "fixedFixtureCount": 14,
+  "realChartCount": 5,
+  "realRunCount": 20,
+  "exhaustiveProbeCount": 4623,
+  "passed": true,
+  "sourceArtifacts": [
+    "modern-transit-copy-requirements.json",
+    "modern-transit-observed-copy-keys.json",
+    "modern-transit-unknown-copy-keys.json",
+    "modern-transit-unreachable-copy-keys.json",
+    "modern-transit-missing-copy.json"
+  ]
+}

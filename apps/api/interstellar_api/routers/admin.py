@@ -447,3 +447,28 @@ def audit_log(
         return {"items": _store(request).list_audit_logs(limit=limit)}
     except AccountError as error:
         return _safe_error(error)
+
+
+@router.get("/metrics", response_model=None)
+def get_admin_metrics(request: Request) -> dict[str, Any] | JSONResponse:
+    try:
+        _admin(request)
+        cpu_percent = 0
+        memory_percent = 0
+        try:
+            import psutil
+            cpu_percent = psutil.cpu_percent(interval=None)
+            memory_percent = psutil.virtual_memory().percent
+        except Exception:
+            pass
+        return {
+            "cpu_percent": cpu_percent,
+            "memory_percent": memory_percent,
+            "total_requests": 0,
+            "active_users_24h": 0,
+            "ai_calls_24h": 0,
+            "exports_24h": 0,
+        }
+    except AccountError as error:
+        return _safe_error(error)
+

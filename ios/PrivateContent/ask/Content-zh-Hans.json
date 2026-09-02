@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-Hans",
+  "area": "ask",
+  "entries": [
+    {
+      "contentKey": "ask.verdict.very-likely",
+      "summary": "当前盘面对这个结果提供了很强的支持。",
+      "detail": "主要指标指向同一方向，彼此矛盾较少。{{score}}%表示当前盘面的支持程度很高，并不保证事情必然发生；现实中的选择和条件变化仍会影响最终结果。",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.verdict.likely",
+      "summary": "支持这个结果的力量多于阻力。",
+      "detail": "盘面的主要联系可以发挥作用，支持因素也超过了阻碍。{{score}}%表示当前条件整体偏向有利，但实际推进中仍可能遇到延迟，相关人的决定也可能改变结果。",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.verdict.mixed",
+      "summary": "支持与阻力比较接近，结果还没有定下来。",
+      "detail": "当前盘面没有一方形成明显优势，{{score}}% 支持度显示事情仍在变化中。后续行动、新信息或现实条件变化可能让方向变得更清楚。",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.verdict.unlikely",
+      "summary": "目前的阻力大于支持。",
+      "detail": "主要指标之间不容易形成配合，或其中一方缺少实际推动能力。{{score}}%表示按现在的方式继续会比较困难。调整时间或现实做法，可能比一味加大力度更有效。",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.verdict.very-unlikely",
+      "summary": "当前盘面对这个结果提供的支持很少。",
+      "detail": "几个核心指标存在明显阻碍、缺少联系，或暂时无法把事情继续向前推动。{{score}}%只针对问题当前的状态，更适合用来重新考虑路线，而不是当成永久不变的预言。",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.choice.leading",
+      "summary": "{{option}} 的有效路径最清楚，支持度为 {{score}}%。",
+      "detail": "它与提问者的联系完成得更清楚或更早，接纳、行星状态与月亮也为它提供了 {{score}}% 支持度。",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.choice.close",
+      "summary": "{{option}}暂时领先，但几个选项的差距不大。",
+      "detail": "{{option}} 目前以 {{score}}% 排在第一，但它与下一项的联系、接纳和行星状态非常接近，领先并不明显。",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.timing.best",
+      "summary": "这是所选范围内支持度最高的时间窗口。",
+      "detail": "这个时间达到{{score}}%适合度，因为目标领域、盘面主导力量和月亮之间的配合比其他候选时间更顺畅。它可以提供计划上的优势，但不能保证所有外部条件都会配合。",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.connection.supportive",
+      "summary": "事情的两端正在形成可以利用的联系。",
+      "detail": "双方代表力量正在通过顺畅或直接的方式接近，说明事情存在向前推进的通道，相关的人或条件有机会接触。其他盘面因素会继续决定这段联系是否容易落到现实中。",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.connection.challenging",
+      "summary": "双方存在联系，但推进过程带有摩擦。",
+      "detail": "双方代表力量正在通过一个较有压力的方式接近。事情可以发展，但让步、延迟或难以回避的条件可能影响过程。想要继续推进，通常需要先做出明确调整。",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.connection.separating",
+      "summary": "最明显的联系已经开始减弱。",
+      "detail": "双方代表力量显示某件事刚刚到达高点，或关键变化已经发生。推动力不再像之前那样增强，结果可能更多取决于已经完成的行动，而不是等待全新的发展。",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.connection.none",
+      "summary": "事情的两端暂时没有直接接触的通道。",
+      "detail": "当前范围内没有主要联系把双方代表力量连接起来，常见含义是距离、缺少协调，或问题中的条件还没有准备好。其他支持因素可以缓和这种情况，但不能完全代替缺失的联系。",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.moon.next",
+      "summary": "事情还有继续发展和变化的空间。",
+      "detail": "月亮离开当前位置之前仍会形成新的主要联系，说明局面还在活动中，下一步行动、沟通或条件变化仍有机会出现。后续联系的性质会进一步说明事情接下来如何移动。",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.moon.void",
+      "summary": "当前局面缺少推动新变化的力量。",
+      "detail": "月亮离开当前位置前不会再形成新的主要联系。事情可能维持原状、逐渐失去紧迫感，或没有按预期继续发展。已经采取的行动仍有作用，但新的推动力比较有限。",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.risk.present",
+      "summary": "行动前有一项或多项阻碍值得优先处理。",
+      "detail": "盘面中存在比较明显的延迟、反复、压力，或行动能力受限。专业分析会显示扣分来自哪里。与其把当前分数看成固定结果，不如先直接处理这些现实条件。",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.risk.limited",
+      "summary": "目前没有单一阻碍压过整体结果。",
+      "detail": "盘面仍有普通限制，但主要风险没有盖过核心联系，因此现有支持更容易被实际利用。即使盘面偏向有利，现实准备仍然必要，它不会自动消除现实中的成本和边界。",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.judgment.yes",
+      "summary": "盘面显示这件事存在有效的完成路径。",
+      "detail": "主要征象星能够在换座、留逆或阻断联系发生前完成联系。接纳、行星状态与月亮为这条路径提供了 {{score}}% 支持度。",
+      "sourceRevision": "ask-judgment-v2-2026-08-12",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.judgment.no",
+      "summary": "盘面显示原本的完成路径会被阻止。",
+      "detail": "主要路径在完成前被打断，也没有有效的传递或汇集重新建立完成条件。周边条件目前为 {{score}}% 支持度。",
+      "sourceRevision": "ask-judgment-v2-2026-08-12",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.judgment.no-clear",
+      "summary": "盘面暂时没有给出明确的完成或否定。",
+      "detail": "目前没有决定性的完成路径，或者证据更接近延迟而非最终结果。周边条件维持在 {{score}}% 支持度。",
+      "sourceRevision": "ask-judgment-v2-2026-08-12",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.choice.no-clear",
+      "summary": "盘面没有把领先选项清楚地区分开。",
+      "detail": "比较完成路径、接纳、行星状态与月亮后，最强选项仍然相当。{{option}} 目前有 {{score}}% 支持度，与另一个领先选项没有明显差距。",
+      "sourceRevision": "ask-judgment-v2-2026-08-12",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.connection.translation",
+      "summary": "另一颗行星在双方之间传递这件事。",
+      "detail": "它先离开一方，再在双方改变方向前联系另一方。第三个人、消息或现实条件可能帮助这段联系完成。",
+      "sourceRevision": "ask-judgment-v2-2026-08-12",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.connection.collection",
+      "summary": "另一颗行星把双方汇集到一起。",
+      "detail": "两颗主要征象星都在路径中断前联系同一颗速度较慢的行星。共同的人、决定或现实条件可能让事情汇合。",
+      "sourceRevision": "ask-judgment-v2-2026-08-12",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.connection.prevented",
+      "summary": "原本的联系在完成前被打断。",
+      "detail": "换座或转向发生在主要征象星完成联系之前，也没有其他路径重新连接双方。",
+      "sourceRevision": "ask-judgment-v2-2026-08-12",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.connection.delayed",
+      "summary": "更早发生的联系延迟了原本的路径。",
+      "detail": "另一颗行星先联系接收方。原本的路径仍然存在，但时间和条件已经发生变化。",
+      "sourceRevision": "ask-judgment-v2-2026-08-12",
+      "translationStatus": "approved"
+    }
+  ]
+}

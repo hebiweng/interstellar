@@ -84,6 +84,19 @@ def _calculation_payload(version_id: str) -> dict:
     }
 
 
+def _current_sky_payload(version_id: str) -> dict:
+    payload = _calculation_payload(version_id)
+    payload["chart"] = {"family": "mundane", "technique": "mundane.current_sky"}
+    return payload
+
+
+def _sky_event_payload() -> dict:
+    payload = _birth_payload()
+    payload["version"]["kind"] = "event"
+    payload["version"]["display_name"] = "Current sky reference moment"
+    return payload
+
+
 def test_selected_utc_to_reproducible_m3_natal_fact_snapshot() -> None:
     with _client() as client:
         saved = client.post("/api/v1/subjects", json=_birth_payload()).json()
@@ -216,6 +229,208 @@ def test_selected_utc_to_reproducible_m3_natal_fact_snapshot() -> None:
         )
 
 
+def test_current_sky_is_a_single_event_chart_without_person_timing_results() -> None:
+    with _client() as client:
+        saved = client.post("/api/v1/subjects", json=_sky_event_payload()).json()
+        response = client.post(
+            "/api/v1/calculations",
+            json=_current_sky_payload(saved["version"]["id"]),
+        )
+
+        assert response.status_code == 201, response.text
+        snapshot = response.json()
+        assert len(snapshot["result"]["charts"]) == 1
+        assert snapshot["result"]["charts"][0]["family"] == "mundane"
+        assert snapshot["result"]["charts"][0]["technique"] == "mundane.current_sky"
+        assert snapshot["result"]["profections"] is None
+        assert snapshot["result"]["firdaria"] is None
+        assert snapshot["result"]["zodiacal_releasing"] == {}
+        output_ids = {
+            item["output_id"] for item in snapshot["result"]["output_manifest"]
+        }
+        assert "manifest.mundane.current_sky" in output_ids
+        assert "manifest.timing.natal_periods" not in output_ids
+
+
+def test_transit_comparison_reuses_natal_and_current_sky_snapshots() -> None:
+    with _client() as client:
+        natal_subject = client.post("/api/v1/subjects", json=_birth_payload()).json()
+        sky_subject = client.post("/api/v1/subjects", json=_sky_event_payload()).json()
+        natal_snapshot = client.post(
+            "/api/v1/calculations",
+            json=_calculation_payload(natal_subject["version"]["id"]),
+        ).json()
+        sky_snapshot = client.post(
+            "/api/v1/calculations",
+            json=_current_sky_payload(sky_subject["version"]["id"]),
+        ).json()
+
+        response = client.post(
+            "/api/v1/calculations/comparisons",
+            json={
+                "reference_snapshot": natal_snapshot,
+                "moving_snapshot_id": sky_snapshot["id"],
+                "context": "transit",
+                "settings": _calculation_payload("unused")["settings"],
+            },
+        )
+
+    assert response.status_code == 201, response.text
+    comparison = response.json()
+    assert comparison["status"] == "complete"
+    result = comparison["result"]
+    assert result["context"] == "transit"
+    assert result["reference_snapshot_id"] == natal_snapshot["id"]
+    assert result["moving_snapshot_id"] == sky_snapshot["id"]
+    assert len(result["moving_points_in_reference_houses"]) == len(
+        sky_snapshot["result"]["points"]
+    )
+    assert all(
+        1 <= placement["reference_house"] <= 12
+        for placement in result["moving_points_in_reference_houses"]
+    )
+    assert result["cross_aspects"]
+    assert all(
+        aspect["context"] == "transit" for aspect in result["cross_aspects"]
+    )
+    assert all(
+        aspect["moving_point_id"] and aspect["reference_point_id"]
+        for aspect in result["cross_aspects"]
+    )
+
+
+def test_secondary_progression_reuses_natal_snapshot_and_returns_comparison() -> None:
+    with _client() as client:
+        natal_subject = client.post("/api/v1/subjects", json=_birth_payload()).json()
+        natal_snapshot = client.post(
+            "/api/v1/calculations",
+            json=_calculation_payload(natal_subject["version"]["id"]),
+        ).json()
+        response = client.post(
+            "/api/v1/calculations/secondary-progressions",
+            json={
+                "reference_snapshot": natal_snapshot,
+                "target_date": "2026-07-23",
+                "settings": _calculation_payload("unused")["settings"],
+                "rule_pack_hash": f"sha256:{'b' * 64}",
+            },
+        )
+
+    assert response.status_code == 201, response.text
+    result = response.json()
+    assert result["status"] == "complete"
+    assert result["reference_snapshot_id"] == natal_snapshot["id"]
+    assert result["target_date"] == "2026-07-23"
+    assert result["progressed_time"].startswith("2000-01-28T")
+    sign_periods = {item["point_id"]: item for item in result["progressed_sign_periods"]}
+    assert set(sign_periods) == {"moon", "sun"}
+    assert sign_periods["moon"]["ingress_date"] <= result["target_date"]
+    assert sign_periods["moon"]["egress_date"] > result["target_date"]
+    assert sign_periods["sun"]["ingress_date"] <= result["target_date"]
+    assert sign_periods["sun"]["egress_date"] > result["target_date"]
+    assert sign_periods["moon"]["boundary_resolution"] == "date"
+    progressed = result["progressed_snapshot"]
+    assert progressed["result"]["charts"][0]["family"] == "progression"
+    assert progressed["result"]["charts"][0]["technique"] == "progression.secondary"
+    output_ids = {
+        item["output_id"] for item in progressed["result"]["output_manifest"]
+    }
+    assert "manifest.progression.secondary" in output_ids
+    comparison = result["comparison"]["result"]
+    assert comparison["context"] == "progression"
+    assert comparison["reference_snapshot_id"] == natal_snapshot["id"]
+    assert comparison["moving_snapshot_id"] == progressed["id"]
+    assert comparison["cross_aspects"]
+    assert len(comparison["moving_points_in_reference_houses"]) == len(
+        progressed["result"]["points"]
+    )
+
+
+def test_classical_tables_orb_hierarchy_and_special_facts_reach_snapshot() -> None:
+    with _client() as client:
+        saved = client.post("/api/v1/subjects", json=_birth_payload()).json()
+        version_id = saved["version"]["id"]
+
+        zero_orb_payload = _calculation_payload(version_id)
+        zero_orb_payload["settings"]["orb_overrides"] = [
+            {"scope": "chart_context", "chart_context": "within_chart", "orb_deg": 0}
+        ]
+        zero_orb = client.post("/api/v1/calculations", json=zero_orb_payload)
+        assert zero_orb.status_code == 201, zero_orb.text
+
+        pair_payload = _calculation_payload(version_id)
+        pair_payload["settings"]["orb_overrides"] = [
+            {"scope": "chart_context", "chart_context": "within_chart", "orb_deg": 0},
+            {
+                "scope": "point_pair",
+                "point_a": "sun",
+                "point_b": "moon",
+                "orb_deg": 30,
+            },
+        ]
+        pair_payload["settings"]["classical_settings"] = {
+            "triplicity_table": "ptolemaic.v1",
+            "terms_table": "ptolemaic.v1",
+        }
+        pair_response = client.post("/api/v1/calculations", json=pair_payload)
+        assert pair_response.status_code == 201, pair_response.text
+
+    zero_snapshot = zero_orb.json()
+    pair_snapshot = pair_response.json()
+    assert len(pair_snapshot["result"]["aspects"]) > len(
+        zero_snapshot["result"]["aspects"]
+    )
+    sun_moon = [
+        aspect
+        for aspect in pair_snapshot["result"]["aspects"]
+        if {aspect["point_a"], aspect["point_b"]} == {"sun", "moon"}
+    ]
+    assert sun_moon
+    assert all(any("point_pair" in ref for ref in aspect["rule_refs"]) for aspect in sun_moon)
+
+    classical = pair_snapshot["result"]["classical"]
+    assert classical["triplicity_table"] == "ptolemaic"
+    assert classical["terms_table"] == "ptolemaic"
+    assert "ptolemaic" in json.dumps(
+        pair_snapshot["result"]["dignities"], ensure_ascii=False
+    )
+
+    special_degrees = pair_snapshot["result"]["special_degrees"]
+    mirrors = pair_snapshot["result"]["mirror_points"]
+    assert len(special_degrees["points"]) == len(pair_snapshot["result"]["points"])
+    assert len(mirrors["mirror_points"]) == len(pair_snapshot["result"]["points"])
+    assert special_degrees["provenance"]["algorithm_card_id"] == (
+        "ALG-NATAL-SPECIAL-DEGREES-001"
+    )
+    assert mirrors["provenance"]["algorithm_card_id"] == "ALG-NATAL-MIRROR-POINTS-001"
+
+
+def test_sidereal_snapshot_does_not_apply_tropical_special_degree_profile() -> None:
+    with _client() as client:
+        saved = client.post("/api/v1/subjects", json=_birth_payload()).json()
+        payload = _calculation_payload(saved["version"]["id"])
+        payload["settings"].update(
+            {"zodiac": "sidereal", "ayanamsa": "fagan_bradley"}
+        )
+        response = client.post("/api/v1/calculations", json=payload)
+
+    assert response.status_code == 201, response.text
+    snapshot = response.json()
+    special_degrees = snapshot["result"]["special_degrees"]
+    mirrors = snapshot["result"]["mirror_points"]
+    manifest = next(
+        item
+        for item in snapshot["result"]["output_manifest"]
+        if item["output_id"] == "manifest.natal.special_degrees"
+    )
+    assert special_degrees["availability"] == "not_applicable"
+    assert special_degrees["points"] == []
+    assert special_degrees["provenance"]["profile_zodiac"] == "tropical"
+    assert manifest["status"] == "blocked"
+    assert manifest["table_ids"] == []
+    assert mirrors["mirror_points"]
+
+
 def test_professional_natal_profile_materializes_signs_points_structure_and_classical() -> (
     None
 ):
@@ -305,7 +520,7 @@ def test_professional_natal_profile_materializes_signs_points_structure_and_clas
 
     snapshot = response.json()
     point_ids = [point["point_id"] for point in snapshot["result"]["points"]]
-    assert len(point_ids) == 47
+    assert len(point_ids) == 62
     assert point_ids[:10] == [
         "sun",
         "moon",
@@ -364,8 +579,8 @@ def test_professional_natal_profile_materializes_signs_points_structure_and_clas
         "lot_exaltation",
     }
     chart = snapshot["result"]["charts"][0]
-    assert chart["aspect_evaluation"]["selected_point_count"] == 47
-    assert chart["aspect_evaluation"]["evaluated_pair_count"] == 1081
+    assert chart["aspect_evaluation"]["selected_point_count"] == 62
+    assert chart["aspect_evaluation"]["evaluated_pair_count"] == 1891
     assert {aspect["type"] for aspect in chart["aspects"]} - {
         "conjunction",
         "sextile",
@@ -572,6 +787,45 @@ def test_sidereal_natal_api_rejects_missing_or_unknown_ayanamsa() -> None:
     assert "settings.ayanamsa" in unknown.json()["fields"]
 
 
+def test_natal_api_materializes_selected_fixed_stars_and_contacts() -> None:
+    with _professional_client() as client:
+        saved = client.post("/api/v1/subjects", json=_birth_payload()).json()
+        payload = _calculation_payload(saved["version"]["id"])
+        payload["settings"]["fixed_star_ids"] = ["aldebaran", "spica", "regulus"]
+        payload["settings"]["custom_parameters"] = {
+            "fixed_star_conjunction_orb_deg": 2.0,
+        }
+        response = client.post("/api/v1/calculations", json=payload)
+
+    assert response.status_code == 201, response.text
+    snapshot = response.json()
+    stars = snapshot["result"]["fixed_stars"]
+    assert [star["star_id"] for star in stars] == ["aldebaran", "spica", "regulus"]
+    assert all(star["position"]["center"] == "geocentric" for star in stars)
+    assert all(star["formula_ref"] == "ephemeris.swiss.fixed_star.v1" for star in stars)
+    chart = snapshot["result"]["charts"][0]
+    assert chart["fixed_stars"] == stars
+    assert chart["fixed_star_contacts"] == snapshot["result"]["fixed_star_contacts"]
+    manifest = next(
+        item
+        for item in snapshot["result"]["output_manifest"]
+        if item["calculation_id"] == "astronomy.fixed_stars"
+    )
+    assert manifest["status"] == "generated"
+    assert manifest["result_pointer"] == "/result/fixed_stars"
+
+
+def test_natal_api_rejects_unknown_fixed_star_ids() -> None:
+    with _professional_client() as client:
+        saved = client.post("/api/v1/subjects", json=_birth_payload()).json()
+        payload = _calculation_payload(saved["version"]["id"])
+        payload["settings"]["fixed_star_ids"] = ["not_a_catalog_star"]
+        response = client.post("/api/v1/calculations", json=payload)
+
+    assert response.status_code == 422
+    assert "unsupported ids" in response.json()["fields"]["subject.time_spec"]
+
+
 def test_unknown_birth_time_never_runs_as_midnight() -> None:
     with _client() as client:
         saved = client.post(
@@ -615,19 +869,29 @@ def test_unknown_birth_time_never_runs_as_midnight() -> None:
     assert manifests["natal.standard_chart"]["status"] == "blocked"
 
 
-def test_m2_rejects_unimplemented_coordinate_mode_instead_of_degrading_silently() -> (
+def test_m2_accepts_topocentric_natal_and_rejects_heliocentric_chart_semantics() -> (
     None
 ):
     with _client() as client:
         saved = client.post("/api/v1/subjects", json=_birth_payload()).json()
         payload = _calculation_payload(saved["version"]["id"])
+        payload["settings"]["center"] = "topocentric"
+        topocentric = client.post("/api/v1/calculations", json=payload)
+        payload = _calculation_payload(saved["version"]["id"])
         payload["settings"]["center"] = "heliocentric"
         response = client.post("/api/v1/calculations", json=payload)
 
-    assert response.status_code == 422
-    assert response.json()["fields"]["settings.center"] == (
-        "M2 supports geocentric positions only"
+    assert topocentric.status_code == 201, topocentric.text
+    assert (
+        topocentric.json()["result"]["astronomical_context"]["coordinate_settings"]["center"]
+        == "topocentric"
     )
+    assert all(
+        point["position"]["center"] == "topocentric"
+        for point in topocentric.json()["result"]["points"]
+    )
+    assert response.status_code == 422
+    assert "separate Earth/Sun-origin" in response.json()["fields"]["settings.center"]
 
 
 def test_process_adapter_rejects_snapshot_overwrite() -> None:

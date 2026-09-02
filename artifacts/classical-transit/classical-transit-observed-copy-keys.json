@@ -1,0 +1,1778 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-03T15:19:11.482Z",
+  "chartID": "classical.transit",
+  "observedCount": 71,
+  "observed": [
+    {
+      "scenarioIDs": [
+        "applying",
+        "aspects-no-window",
+        "benefic-dominant",
+        "completion-window",
+        "duplicate-theme-evidence",
+        "house-strength",
+        "malefic-dominant",
+        "mixed-testimony",
+        "no-reception",
+        "probe-angular-emphasis",
+        "probe-applying-contact",
+        "probe-cadent-delay",
+        "probe-cycle-currentCycle-applying-contact",
+        "probe-cycle-currentCycle-motion-change",
+        "probe-cycle-dailyCycle-applying-contact",
+        "probe-cycle-dailyCycle-motion-change",
+        "probe-cycle-longCycle-applying-contact",
+        "probe-cycle-longCycle-motion-change",
+        "probe-integrated-constrained",
+        "probe-integrated-mixed",
+        "probe-integrated-supported",
+        "probe-role-benefic",
+        "probe-role-malefic",
+        "probe-succedent-continuity",
+        "returning-pass",
+        "sparse-facts"
+      ],
+      "cardID": "active-transits",
+      "occurrenceCount": 26,
+      "themeID": "applying-contact",
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "key": "classical.transit.activeTransitShort.active.applying-contact",
+      "roleID": "active",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture"
+      ],
+      "sourceFactIDs": [
+        "transit.benefic-dominant.aspect.jupiter.trine.sun"
+      ]
+    },
+    {
+      "scenarioIDs": [
+        "essential-debility",
+        "probe-cycle-currentCycle-debilitated-planet",
+        "probe-cycle-dailyCycle-debilitated-planet",
+        "probe-cycle-longCycle-debilitated-planet",
+        "probe-debilitated-planet",
+        "probe-role-impaired"
+      ],
+      "cardID": "active-transits",
+      "occurrenceCount": 6,
+      "themeID": "debilitated-planet",
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "key": "classical.transit.activeTransitShort.active.debilitated-planet",
+      "roleID": "active",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture"
+      ],
+      "sourceFactIDs": [
+        "transit.essential-debility.aspect.jupiter.trine.sun"
+      ]
+    },
+    {
+      "scenarioIDs": [
+        "probe-cycle-currentCycle-exact-contact",
+        "probe-cycle-dailyCycle-exact-contact",
+        "probe-cycle-longCycle-exact-contact",
+        "probe-exact-contact"
+      ],
+      "cardID": "active-transits",
+      "occurrenceCount": 4,
+      "themeID": "exact-contact",
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "key": "classical.transit.activeTransitShort.active.exact-contact",
+      "roleID": "active",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "sourceFactIDs": [
+        "transit.probe-exact-contact.aspect.jupiter.trine.sun"
+      ]
+    },
+    {
+      "scenarioIDs": [
+        "essential-dignity",
+        "probe-cycle-currentCycle-fortified-planet",
+        "probe-cycle-dailyCycle-fortified-planet",
+        "probe-cycle-longCycle-fortified-planet",
+        "probe-fortified-planet",
+        "probe-role-fortified"
+      ],
+      "cardID": "active-transits",
+      "occurrenceCount": 6,
+      "themeID": "fortified-planet",
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "key": "classical.transit.activeTransitShort.active.fortified-planet",
+      "roleID": "active",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture"
+      ],
+      "sourceFactIDs": [
+        "transit.essential-dignity.aspect.jupiter.trine.sun"
+      ]
+    },
+    {
+      "scenarioIDs": [
+        "london-1769947200",
+        "london-1785672000",
+        "london-1793534400",
+        "new-york-1769947200",
+        "new-york-1785672000",
+        "new-york-1793534400",
+        "probe-cycle-currentCycle-reception-support",
+        "probe-cycle-dailyCycle-reception-support",
+        "probe-cycle-longCycle-reception-support",
+        "probe-reception-support",
+        "probe-role-received",
+        "reception",
+        "shanghai-1785672000",
+        "shanghai-1793534400"
+      ],
+      "cardID": "active-transits",
+      "occurrenceCount": 14,
+      "themeID": "reception-support",
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "key": "classical.transit.activeTransitShort.active.reception-support",
+      "roleID": "active",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "sourceFactIDs": [
+        "transit.reception.aspect.jupiter.trine.sun"
+      ]
+    },
+    {
+      "scenarioIDs": [
+        "probe-cycle-currentCycle-retrograde-review",
+        "probe-cycle-dailyCycle-retrograde-review",
+        "probe-cycle-longCycle-retrograde-review",
+        "probe-retrograde-review",
+        "retrograde"
+      ],
+      "cardID": "active-transits",
+      "occurrenceCount": 5,
+      "themeID": "retrograde-review",
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "key": "classical.transit.activeTransitShort.active.retrograde-review",
+      "roleID": "active",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture"
+      ],
+      "sourceFactIDs": [
+        "transit.retrograde.aspect.jupiter.trine.sun"
+      ]
+    },
+    {
+      "scenarioIDs": [
+        "probe-cycle-currentCycle-separating-contact",
+        "probe-cycle-dailyCycle-separating-contact",
+        "probe-cycle-longCycle-separating-contact",
+        "probe-separating-contact",
+        "separating"
+      ],
+      "cardID": "active-transits",
+      "occurrenceCount": 5,
+      "themeID": "separating-contact",
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "key": "classical.transit.activeTransitShort.active.separating-contact",
+      "roleID": "active",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture"
+      ],
+      "sourceFactIDs": [
+        "transit.separating.aspect.jupiter.trine.sun"
+      ]
+    },
+    {
+      "scenarioIDs": [
+        "probe-cycle-currentCycle-solar-fortification",
+        "probe-cycle-dailyCycle-solar-fortification",
+        "probe-cycle-longCycle-solar-fortification",
+        "probe-solar-fortification"
+      ],
+      "cardID": "active-transits",
+      "occurrenceCount": 4,
+      "themeID": "solar-fortification",
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "key": "classical.transit.activeTransitShort.active.solar-fortification",
+      "roleID": "active",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "sourceFactIDs": [
+        "transit.probe-solar-fortification.aspect.jupiter.trine.sun"
+      ]
+    },
+    {
+      "scenarioIDs": [
+        "probe-cycle-currentCycle-solar-impairment",
+        "probe-cycle-dailyCycle-solar-impairment",
+        "probe-cycle-longCycle-solar-impairment",
+        "probe-solar-impairment",
+        "shanghai-1769947200",
+        "solar-condition"
+      ],
+      "cardID": "active-transits",
+      "occurrenceCount": 6,
+      "themeID": "solar-impairment",
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "key": "classical.transit.activeTransitShort.active.solar-impairment",
+      "roleID": "active",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "sourceFactIDs": [
+        "transit.solar-condition.aspect.jupiter.trine.moon"
+      ]
+    },
+    {
+      "scenarioIDs": [
+        "events-only",
+        "probe-active-house-ingress"
+      ],
+      "cardID": "active-transits",
+      "occurrenceCount": 2,
+      "themeID": "motion-change",
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "key": "classical.transit.activeTransitShort.activeHouseIngress.motion-change",
+      "roleID": "activeHouseIngress",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture"
+      ],
+      "sourceFactIDs": [
+        "transit.events-only.event.mercury.houseIngress"
+      ]
+    },
+    {
+      "scenarioIDs": [
+        "probe-active-sign-ingress"
+      ],
+      "cardID": "active-transits",
+      "occurrenceCount": 1,
+      "themeID": "motion-change",
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "key": "classical.transit.activeTransitShort.activeSignIngress.motion-change",
+      "roleID": "activeSignIngress",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "sourceFactIDs": [
+        "transit.probe-active-sign-ingress.event.mercury.signIngress"
+      ]
+    },
+    {
+      "scenarioIDs": [
+        "probe-active-station-direct",
+        "station-direct"
+      ],
+      "cardID": "active-transits",
+      "occurrenceCount": 2,
+      "themeID": "motion-change",
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "key": "classical.transit.activeTransitShort.activeStationDirect.motion-change",
+      "roleID": "activeStationDirect",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture"
+      ],
+      "sourceFactIDs": [
+        "transit.station-direct.event.mercury.stationDirect"
+      ]
+    },
+    {
+      "scenarioIDs": [
+        "probe-active-station-retrograde",
+        "probe-motion-change",
+        "station-retrograde"
+      ],
+      "cardID": "active-transits",
+      "occurrenceCount": 3,
+      "themeID": "motion-change",
+      "copySlot": "activeTransitShort",
+      "variables": {},
+      "key": "classical.transit.activeTransitShort.activeStationRetrograde.motion-change",
+      "roleID": "activeStationRetrograde",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture"
+      ],
+      "sourceFactIDs": [
+        "transit.station-retrograde.event.mercury.stationRetrograde"
+      ]
+    },
+    {
+      "scenarioIDs": [
+        "applying",
+        "aspects-no-window",
+        "benefic-dominant",
+        "completion-window",
+        "duplicate-theme-evidence",
+        "house-strength",
+        "mixed-testimony",
+        "new-york-1793534400",
+        "no-reception",
+        "probe-angular-emphasis",
+        "probe-applying-contact",
+        "probe-cadent-delay",
+        "probe-cycle-currentCycle-applying-contact",
+        "probe-integrated-mixed",
+        "probe-integrated-supported",
+        "probe-role-benefic",
+        "probe-succedent-continuity",
+        "sparse-facts"
+      ],
+      "cardID": "current-cycles",
+      "occurrenceCount": 18,
+      "themeID": "applying-contact",
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "key": "classical.transit.cycleChapter.currentCycle.applying-contact",
+      "roleID": "currentCycle",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "sourceFactIDs": [
+        "transit.benefic-dominant.aspect.jupiter.trine.sun"
+      ]
+    },
+    {
+      "scenarioIDs": [
+        "essential-debility",
+        "probe-cycle-currentCycle-debilitated-planet",
+        "probe-debilitated-planet",
+        "probe-role-impaired"
+      ],
+      "cardID": "current-cycles",
+      "occurrenceCount": 4,
+      "themeID": "debilitated-planet",
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "key": "classical.transit.cycleChapter.currentCycle.debilitated-planet",
+      "roleID": "currentCycle",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture"
+      ],
+      "sourceFactIDs": [
+        "transit.essential-debility.aspect.jupiter.trine.sun"
+      ]
+    },
+    {
+      "scenarioIDs": [
+        "probe-cycle-currentCycle-exact-contact",
+        "probe-exact-contact"
+      ],
+      "cardID": "current-cycles",
+      "occurrenceCount": 2,
+      "themeID": "exact-contact",
+      "copySlot": "cycleChapter",
+      "variables": {},
+      "key": "classical.transit.cycleChapter.currentCycle.exact-contact",
+      "roleID": "currentCycle",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "sourceFactIDs": [
+        "transit.probe-exact-contact.aspect.jupiter.trine.sun"
+      ]
+    },
+    {
+      "scenarioIDs": [
+        "essential-dignity",
+        "probe-cycle-currentCycle-fortified-planet",
+        "probe-fortified-planet",
+        "probe-role-fortified"
+      ],
+      "roleID": "currentCycle",
+      "key": "classical.transit.cycleChapter.currentCycle.fortified-planet",
+      "copySlot": "cycleChapter",
+      "sourceFactIDs": [
+        "transit.essential-dignity.aspect.jupiter.trine.sun"
+      ],
+      "themeID": "fortified-planet",
+      "occurrenceCount": 4,
+      "cardID": "current-cycles",
+      "variables": {},
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture"
+      ]
+    },
+    {
+      "scenarioIDs": [
+        "probe-cycle-currentCycle-motion-change",
+        "returning-pass"
+      ],
+      "roleID": "currentCycle",
+      "key": "classical.transit.cycleChapter.currentCycle.motion-change",
+      "copySlot": "cycleChapter",
+      "sourceFactIDs": [
+        "transit.returning-pass.window.jupiter.trine.sun"
+      ],
+      "themeID": "motion-change",
+      "occurrenceCount": 2,
+      "cardID": "current-cycles",
+      "variables": {},
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture"
+      ]
+    },
+    {
+      "scenarioIDs": [
+        "london-1793534400",
+        "new-york-1769947200",
+        "probe-cycle-currentCycle-reception-support",
+        "probe-reception-support",
+        "probe-role-received",
+        "reception",
+        "shanghai-1769947200",
+        "shanghai-1785672000",
+        "shanghai-1793534400"
+      ],
+      "roleID": "currentCycle",
+      "key": "classical.transit.cycleChapter.currentCycle.reception-support",
+      "copySlot": "cycleChapter",
+      "sourceFactIDs": [
+        "transit.reception.aspect.jupiter.trine.sun"
+      ],
+      "themeID": "reception-support",
+      "occurrenceCount": 9,
+      "cardID": "current-cycles",
+      "variables": {},
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture",
+        "real-chart"
+      ]
+    },
+    {
+      "variables": {},
+      "key": "classical.transit.cycleChapter.currentCycle.retrograde-review",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "sourceFactIDs": [
+        "transit.retrograde.aspect.jupiter.trine.sun"
+      ],
+      "roleID": "currentCycle",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "themeID": "retrograde-review",
+      "occurrenceCount": 4,
+      "scenarioIDs": [
+        "london-1769947200",
+        "probe-cycle-currentCycle-retrograde-review",
+        "probe-retrograde-review",
+        "retrograde"
+      ]
+    },
+    {
+      "variables": {},
+      "key": "classical.transit.cycleChapter.currentCycle.separating-contact",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "sourceFactIDs": [
+        "transit.separating.aspect.jupiter.trine.sun"
+      ],
+      "roleID": "currentCycle",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture"
+      ],
+      "themeID": "separating-contact",
+      "occurrenceCount": 3,
+      "scenarioIDs": [
+        "probe-cycle-currentCycle-separating-contact",
+        "probe-separating-contact",
+        "separating"
+      ]
+    },
+    {
+      "variables": {},
+      "key": "classical.transit.cycleChapter.currentCycle.solar-fortification",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "sourceFactIDs": [
+        "transit.probe-solar-fortification.aspect.jupiter.trine.sun"
+      ],
+      "roleID": "currentCycle",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "themeID": "solar-fortification",
+      "occurrenceCount": 2,
+      "scenarioIDs": [
+        "probe-cycle-currentCycle-solar-fortification",
+        "probe-solar-fortification"
+      ]
+    },
+    {
+      "variables": {},
+      "key": "classical.transit.cycleChapter.currentCycle.solar-impairment",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "sourceFactIDs": [
+        "transit.solar-condition.aspect.jupiter.trine.moon"
+      ],
+      "roleID": "currentCycle",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "themeID": "solar-impairment",
+      "occurrenceCount": 5,
+      "scenarioIDs": [
+        "london-1785672000",
+        "new-york-1785672000",
+        "probe-cycle-currentCycle-solar-impairment",
+        "probe-solar-impairment",
+        "solar-condition"
+      ]
+    },
+    {
+      "variables": {},
+      "key": "classical.transit.cycleChapter.dailyCycle.applying-contact",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "sourceFactIDs": [
+        "transit.probe-cycle-dailyCycle-applying-contact.aspect.mercury.trine.sun"
+      ],
+      "roleID": "dailyCycle",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "themeID": "applying-contact",
+      "occurrenceCount": 1,
+      "scenarioIDs": [
+        "probe-cycle-dailyCycle-applying-contact"
+      ]
+    },
+    {
+      "variables": {},
+      "key": "classical.transit.cycleChapter.dailyCycle.debilitated-planet",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "sourceFactIDs": [
+        "transit.probe-cycle-dailyCycle-debilitated-planet.aspect.mercury.trine.sun"
+      ],
+      "roleID": "dailyCycle",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "themeID": "debilitated-planet",
+      "occurrenceCount": 1,
+      "scenarioIDs": [
+        "probe-cycle-dailyCycle-debilitated-planet"
+      ]
+    },
+    {
+      "variables": {},
+      "key": "classical.transit.cycleChapter.dailyCycle.exact-contact",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "sourceFactIDs": [
+        "transit.probe-cycle-dailyCycle-exact-contact.aspect.mercury.trine.sun"
+      ],
+      "roleID": "dailyCycle",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "themeID": "exact-contact",
+      "occurrenceCount": 1,
+      "scenarioIDs": [
+        "probe-cycle-dailyCycle-exact-contact"
+      ]
+    },
+    {
+      "variables": {},
+      "key": "classical.transit.cycleChapter.dailyCycle.fortified-planet",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "sourceFactIDs": [
+        "transit.probe-cycle-dailyCycle-fortified-planet.aspect.mercury.trine.sun"
+      ],
+      "roleID": "dailyCycle",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "themeID": "fortified-planet",
+      "occurrenceCount": 1,
+      "scenarioIDs": [
+        "probe-cycle-dailyCycle-fortified-planet"
+      ]
+    },
+    {
+      "variables": {},
+      "key": "classical.transit.cycleChapter.dailyCycle.motion-change",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "sourceFactIDs": [
+        "transit.probe-cycle-dailyCycle-motion-change.window.mercury.trine.sun"
+      ],
+      "roleID": "dailyCycle",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "themeID": "motion-change",
+      "occurrenceCount": 1,
+      "scenarioIDs": [
+        "probe-cycle-dailyCycle-motion-change"
+      ]
+    },
+    {
+      "variables": {},
+      "key": "classical.transit.cycleChapter.dailyCycle.reception-support",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "sourceFactIDs": [
+        "transit.probe-cycle-dailyCycle-reception-support.aspect.mercury.trine.sun"
+      ],
+      "roleID": "dailyCycle",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "real-chart"
+      ],
+      "themeID": "reception-support",
+      "occurrenceCount": 8,
+      "scenarioIDs": [
+        "london-1769947200",
+        "london-1785672000",
+        "london-1793534400",
+        "new-york-1785672000",
+        "new-york-1793534400",
+        "probe-cycle-dailyCycle-reception-support",
+        "shanghai-1785672000",
+        "shanghai-1793534400"
+      ]
+    },
+    {
+      "variables": {},
+      "key": "classical.transit.cycleChapter.dailyCycle.retrograde-review",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "sourceFactIDs": [
+        "transit.probe-cycle-dailyCycle-retrograde-review.aspect.mercury.trine.sun"
+      ],
+      "roleID": "dailyCycle",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "themeID": "retrograde-review",
+      "occurrenceCount": 1,
+      "scenarioIDs": [
+        "probe-cycle-dailyCycle-retrograde-review"
+      ]
+    },
+    {
+      "variables": {},
+      "key": "classical.transit.cycleChapter.dailyCycle.separating-contact",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "sourceFactIDs": [
+        "transit.probe-cycle-dailyCycle-separating-contact.aspect.mercury.trine.sun"
+      ],
+      "roleID": "dailyCycle",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "themeID": "separating-contact",
+      "occurrenceCount": 1,
+      "scenarioIDs": [
+        "probe-cycle-dailyCycle-separating-contact"
+      ]
+    },
+    {
+      "variables": {},
+      "key": "classical.transit.cycleChapter.dailyCycle.solar-fortification",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "sourceFactIDs": [
+        "transit.probe-cycle-dailyCycle-solar-fortification.aspect.mercury.trine.sun"
+      ],
+      "roleID": "dailyCycle",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "themeID": "solar-fortification",
+      "occurrenceCount": 1,
+      "scenarioIDs": [
+        "probe-cycle-dailyCycle-solar-fortification"
+      ]
+    },
+    {
+      "variables": {},
+      "key": "classical.transit.cycleChapter.dailyCycle.solar-impairment",
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "sourceFactIDs": [
+        "transit.probe-cycle-dailyCycle-solar-impairment.aspect.mercury.trine.sun"
+      ],
+      "roleID": "dailyCycle",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "real-chart"
+      ],
+      "themeID": "solar-impairment",
+      "occurrenceCount": 3,
+      "scenarioIDs": [
+        "new-york-1769947200",
+        "probe-cycle-dailyCycle-solar-impairment",
+        "shanghai-1769947200"
+      ]
+    },
+    {
+      "variables": {},
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "key": "classical.transit.cycleChapter.longCycle.applying-contact",
+      "sourceFactIDs": [
+        "transit.malefic-dominant.aspect.saturn.square.sun"
+      ],
+      "roleID": "longCycle",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture"
+      ],
+      "themeID": "applying-contact",
+      "occurrenceCount": 6,
+      "scenarioIDs": [
+        "malefic-dominant",
+        "mixed-testimony",
+        "probe-cycle-longCycle-applying-contact",
+        "probe-integrated-constrained",
+        "probe-integrated-mixed",
+        "probe-role-malefic"
+      ]
+    },
+    {
+      "variables": {},
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "key": "classical.transit.cycleChapter.longCycle.debilitated-planet",
+      "sourceFactIDs": [
+        "transit.probe-cycle-longCycle-debilitated-planet.aspect.saturn.trine.sun"
+      ],
+      "roleID": "longCycle",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "themeID": "debilitated-planet",
+      "occurrenceCount": 1,
+      "scenarioIDs": [
+        "probe-cycle-longCycle-debilitated-planet"
+      ]
+    },
+    {
+      "variables": {},
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "key": "classical.transit.cycleChapter.longCycle.exact-contact",
+      "sourceFactIDs": [
+        "transit.probe-cycle-longCycle-exact-contact.aspect.saturn.trine.sun"
+      ],
+      "roleID": "longCycle",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "themeID": "exact-contact",
+      "occurrenceCount": 1,
+      "scenarioIDs": [
+        "probe-cycle-longCycle-exact-contact"
+      ]
+    },
+    {
+      "variables": {},
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "key": "classical.transit.cycleChapter.longCycle.fortified-planet",
+      "sourceFactIDs": [
+        "transit.probe-cycle-longCycle-fortified-planet.aspect.saturn.trine.sun"
+      ],
+      "roleID": "longCycle",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "themeID": "fortified-planet",
+      "occurrenceCount": 1,
+      "scenarioIDs": [
+        "probe-cycle-longCycle-fortified-planet"
+      ]
+    },
+    {
+      "variables": {},
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "key": "classical.transit.cycleChapter.longCycle.motion-change",
+      "sourceFactIDs": [
+        "transit.probe-cycle-longCycle-motion-change.window.saturn.trine.sun"
+      ],
+      "roleID": "longCycle",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "themeID": "motion-change",
+      "occurrenceCount": 1,
+      "scenarioIDs": [
+        "probe-cycle-longCycle-motion-change"
+      ]
+    },
+    {
+      "variables": {},
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "key": "classical.transit.cycleChapter.longCycle.reception-support",
+      "sourceFactIDs": [
+        "transit.probe-cycle-longCycle-reception-support.aspect.saturn.trine.sun"
+      ],
+      "roleID": "longCycle",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "real-chart"
+      ],
+      "themeID": "reception-support",
+      "occurrenceCount": 8,
+      "scenarioIDs": [
+        "london-1769947200",
+        "london-1785672000",
+        "london-1793534400",
+        "new-york-1769947200",
+        "new-york-1785672000",
+        "new-york-1793534400",
+        "probe-cycle-longCycle-reception-support",
+        "shanghai-1769947200"
+      ]
+    },
+    {
+      "variables": {},
+      "cardID": "current-cycles",
+      "copySlot": "cycleChapter",
+      "key": "classical.transit.cycleChapter.longCycle.retrograde-review",
+      "sourceFactIDs": [
+        "transit.probe-cycle-longCycle-retrograde-review.aspect.saturn.trine.sun"
+      ],
+      "roleID": "longCycle",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "real-chart"
+      ],
+      "themeID": "retrograde-review",
+      "occurrenceCount": 3,
+      "scenarioIDs": [
+        "probe-cycle-longCycle-retrograde-review",
+        "shanghai-1785672000",
+        "shanghai-1793534400"
+      ]
+    },
+    {
+      "copySlot": "cycleChapter",
+      "themeID": "separating-contact",
+      "occurrenceCount": 1,
+      "sourceFactIDs": [
+        "transit.probe-cycle-longCycle-separating-contact.aspect.saturn.trine.sun"
+      ],
+      "variables": {},
+      "key": "classical.transit.cycleChapter.longCycle.separating-contact",
+      "scenarioIDs": [
+        "probe-cycle-longCycle-separating-contact"
+      ],
+      "roleID": "longCycle",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "cardID": "current-cycles"
+    },
+    {
+      "copySlot": "cycleChapter",
+      "themeID": "solar-fortification",
+      "occurrenceCount": 1,
+      "sourceFactIDs": [
+        "transit.probe-cycle-longCycle-solar-fortification.aspect.saturn.trine.sun"
+      ],
+      "variables": {},
+      "key": "classical.transit.cycleChapter.longCycle.solar-fortification",
+      "scenarioIDs": [
+        "probe-cycle-longCycle-solar-fortification"
+      ],
+      "roleID": "longCycle",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "cardID": "current-cycles"
+    },
+    {
+      "copySlot": "cycleChapter",
+      "themeID": "solar-impairment",
+      "occurrenceCount": 1,
+      "sourceFactIDs": [
+        "transit.probe-cycle-longCycle-solar-impairment.aspect.saturn.trine.sun"
+      ],
+      "variables": {},
+      "key": "classical.transit.cycleChapter.longCycle.solar-impairment",
+      "scenarioIDs": [
+        "probe-cycle-longCycle-solar-impairment"
+      ],
+      "roleID": "longCycle",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "cardID": "current-cycles"
+    },
+    {
+      "cardID": "current-story",
+      "sourceFactIDs": [
+        "transit.malefic-dominant.aspect.saturn.square.sun"
+      ],
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture"
+      ],
+      "copySlot": "integratedStory",
+      "variables": {},
+      "integratedThemeID": "constrained-momentum",
+      "occurrenceCount": 22,
+      "key": "classical.transit.integratedStory.constrained-momentum",
+      "scenarioIDs": [
+        "essential-debility",
+        "malefic-dominant",
+        "probe-cycle-currentCycle-debilitated-planet",
+        "probe-cycle-currentCycle-retrograde-review",
+        "probe-cycle-currentCycle-solar-impairment",
+        "probe-cycle-dailyCycle-debilitated-planet",
+        "probe-cycle-dailyCycle-retrograde-review",
+        "probe-cycle-dailyCycle-solar-impairment",
+        "probe-cycle-longCycle-applying-contact",
+        "probe-cycle-longCycle-debilitated-planet",
+        "probe-cycle-longCycle-exact-contact",
+        "probe-cycle-longCycle-motion-change",
+        "probe-cycle-longCycle-retrograde-review",
+        "probe-cycle-longCycle-separating-contact",
+        "probe-cycle-longCycle-solar-impairment",
+        "probe-debilitated-planet",
+        "probe-integrated-constrained",
+        "probe-retrograde-review",
+        "probe-role-impaired",
+        "probe-role-malefic",
+        "probe-solar-impairment",
+        "retrograde"
+      ]
+    },
+    {
+      "cardID": "current-story",
+      "sourceFactIDs": [
+        "transit.mixed-testimony.aspect.jupiter.trine.sun",
+        "transit.mixed-testimony.aspect.saturn.square.moon"
+      ],
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "copySlot": "integratedStory",
+      "variables": {},
+      "integratedThemeID": "mixed-testimony",
+      "occurrenceCount": 5,
+      "key": "classical.transit.integratedStory.mixed-testimony",
+      "scenarioIDs": [
+        "mixed-testimony",
+        "new-york-1769947200",
+        "probe-integrated-mixed",
+        "shanghai-1769947200",
+        "solar-condition"
+      ]
+    },
+    {
+      "cardID": "current-story",
+      "sourceFactIDs": [
+        "transit.benefic-dominant.aspect.jupiter.trine.sun"
+      ],
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "copySlot": "integratedStory",
+      "variables": {},
+      "integratedThemeID": "supported-momentum",
+      "occurrenceCount": 49,
+      "key": "classical.transit.integratedStory.supported-momentum",
+      "scenarioIDs": [
+        "applying",
+        "aspects-no-window",
+        "benefic-dominant",
+        "completion-window",
+        "duplicate-theme-evidence",
+        "essential-dignity",
+        "house-strength",
+        "london-1769947200",
+        "london-1785672000",
+        "london-1793534400",
+        "new-york-1785672000",
+        "new-york-1793534400",
+        "no-reception",
+        "probe-angular-emphasis",
+        "probe-applying-contact",
+        "probe-cadent-delay",
+        "probe-cycle-currentCycle-applying-contact",
+        "probe-cycle-currentCycle-exact-contact",
+        "probe-cycle-currentCycle-fortified-planet",
+        "probe-cycle-currentCycle-motion-change",
+        "probe-cycle-currentCycle-reception-support",
+        "probe-cycle-currentCycle-separating-contact",
+        "probe-cycle-currentCycle-solar-fortification",
+        "probe-cycle-dailyCycle-applying-contact",
+        "probe-cycle-dailyCycle-exact-contact",
+        "probe-cycle-dailyCycle-fortified-planet",
+        "probe-cycle-dailyCycle-motion-change",
+        "probe-cycle-dailyCycle-reception-support",
+        "probe-cycle-dailyCycle-separating-contact",
+        "probe-cycle-dailyCycle-solar-fortification",
+        "probe-cycle-longCycle-fortified-planet",
+        "probe-cycle-longCycle-reception-support",
+        "probe-cycle-longCycle-solar-fortification",
+        "probe-exact-contact",
+        "probe-fortified-planet",
+        "probe-integrated-supported",
+        "probe-reception-support",
+        "probe-role-benefic",
+        "probe-role-fortified",
+        "probe-role-received",
+        "probe-separating-contact",
+        "probe-solar-fortification",
+        "probe-succedent-continuity",
+        "reception",
+        "returning-pass",
+        "separating",
+        "shanghai-1785672000",
+        "shanghai-1793534400",
+        "sparse-facts"
+      ]
+    },
+    {
+      "roleID": "lifeArea",
+      "cardID": "life-areas",
+      "sourceFactIDs": [
+        "transit.benefic-dominant.area.1",
+        "transit.benefic-dominant.aspect.jupiter.trine.sun",
+        "transit.benefic-dominant.placement.jupiter"
+      ],
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture",
+        "real-chart"
+      ],
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "variables": {},
+      "occurrenceCount": 78,
+      "key": "classical.transit.lifeAreaShort.house-1",
+      "scenarioIDs": [
+        "applying",
+        "aspects-no-window",
+        "benefic-dominant",
+        "completion-window",
+        "duplicate-theme-evidence",
+        "essential-debility",
+        "essential-dignity",
+        "events-only",
+        "house-strength",
+        "london-1769947200",
+        "malefic-dominant",
+        "mixed-testimony",
+        "no-reception",
+        "probe-active-house-ingress",
+        "probe-active-sign-ingress",
+        "probe-active-station-direct",
+        "probe-active-station-retrograde",
+        "probe-angular-emphasis",
+        "probe-applying-contact",
+        "probe-cadent-delay",
+        "probe-cycle-currentCycle-applying-contact",
+        "probe-cycle-currentCycle-debilitated-planet",
+        "probe-cycle-currentCycle-exact-contact",
+        "probe-cycle-currentCycle-fortified-planet",
+        "probe-cycle-currentCycle-motion-change",
+        "probe-cycle-currentCycle-reception-support",
+        "probe-cycle-currentCycle-retrograde-review",
+        "probe-cycle-currentCycle-separating-contact",
+        "probe-cycle-currentCycle-solar-fortification",
+        "probe-cycle-currentCycle-solar-impairment",
+        "probe-cycle-dailyCycle-applying-contact",
+        "probe-cycle-dailyCycle-debilitated-planet",
+        "probe-cycle-dailyCycle-exact-contact",
+        "probe-cycle-dailyCycle-fortified-planet",
+        "probe-cycle-dailyCycle-motion-change",
+        "probe-cycle-dailyCycle-reception-support",
+        "probe-cycle-dailyCycle-retrograde-review",
+        "probe-cycle-dailyCycle-separating-contact",
+        "probe-cycle-dailyCycle-solar-fortification",
+        "probe-cycle-dailyCycle-solar-impairment",
+        "probe-cycle-longCycle-applying-contact",
+        "probe-cycle-longCycle-debilitated-planet",
+        "probe-cycle-longCycle-exact-contact",
+        "probe-cycle-longCycle-fortified-planet",
+        "probe-cycle-longCycle-motion-change",
+        "probe-cycle-longCycle-reception-support",
+        "probe-cycle-longCycle-retrograde-review",
+        "probe-cycle-longCycle-separating-contact",
+        "probe-cycle-longCycle-solar-fortification",
+        "probe-cycle-longCycle-solar-impairment",
+        "probe-debilitated-planet",
+        "probe-exact-contact",
+        "probe-fortified-planet",
+        "probe-house-activation",
+        "probe-integrated-constrained",
+        "probe-integrated-mixed",
+        "probe-integrated-supported",
+        "probe-life-area-1",
+        "probe-motion-change",
+        "probe-reception-support",
+        "probe-retrograde-review",
+        "probe-role-benefic",
+        "probe-role-fortified",
+        "probe-role-impaired",
+        "probe-role-malefic",
+        "probe-role-received",
+        "probe-separating-contact",
+        "probe-solar-fortification",
+        "probe-solar-impairment",
+        "probe-succedent-continuity",
+        "reception",
+        "retrograde",
+        "returning-pass",
+        "separating",
+        "shanghai-1769947200",
+        "solar-condition",
+        "station-direct",
+        "station-retrograde"
+      ]
+    },
+    {
+      "roleID": "lifeArea",
+      "cardID": "life-areas",
+      "sourceFactIDs": [
+        "transit.probe-life-area-10.area.10"
+      ],
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "variables": {},
+      "occurrenceCount": 1,
+      "key": "classical.transit.lifeAreaShort.house-10",
+      "scenarioIDs": [
+        "probe-life-area-10"
+      ]
+    },
+    {
+      "roleID": "lifeArea",
+      "cardID": "life-areas",
+      "sourceFactIDs": [
+        "transit.probe-life-area-11.area.11"
+      ],
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "real-chart"
+      ],
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "variables": {},
+      "occurrenceCount": 2,
+      "key": "classical.transit.lifeAreaShort.house-11",
+      "scenarioIDs": [
+        "new-york-1785672000",
+        "probe-life-area-11"
+      ]
+    },
+    {
+      "roleID": "lifeArea",
+      "cardID": "life-areas",
+      "sourceFactIDs": [
+        "transit.probe-life-area-12.area.12"
+      ],
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "variables": {},
+      "occurrenceCount": 1,
+      "key": "classical.transit.lifeAreaShort.house-12",
+      "scenarioIDs": [
+        "probe-life-area-12"
+      ]
+    },
+    {
+      "roleID": "lifeArea",
+      "cardID": "life-areas",
+      "sourceFactIDs": [
+        "transit.probe-life-area-2.area.2"
+      ],
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "real-chart"
+      ],
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "variables": {},
+      "occurrenceCount": 4,
+      "key": "classical.transit.lifeAreaShort.house-2",
+      "scenarioIDs": [
+        "london-1785672000",
+        "probe-life-area-2",
+        "shanghai-1785672000",
+        "shanghai-1793534400"
+      ]
+    },
+    {
+      "roleID": "lifeArea",
+      "cardID": "life-areas",
+      "sourceFactIDs": [
+        "transit.probe-life-area-3.area.3"
+      ],
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "real-chart"
+      ],
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "variables": {},
+      "occurrenceCount": 2,
+      "key": "classical.transit.lifeAreaShort.house-3",
+      "scenarioIDs": [
+        "new-york-1793534400",
+        "probe-life-area-3"
+      ]
+    },
+    {
+      "roleID": "lifeArea",
+      "cardID": "life-areas",
+      "sourceFactIDs": [
+        "transit.probe-life-area-4.area.4"
+      ],
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "variables": {},
+      "occurrenceCount": 1,
+      "key": "classical.transit.lifeAreaShort.house-4",
+      "scenarioIDs": [
+        "probe-life-area-4"
+      ]
+    },
+    {
+      "roleID": "lifeArea",
+      "cardID": "life-areas",
+      "sourceFactIDs": [
+        "transit.probe-life-area-5.area.5"
+      ],
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "variables": {},
+      "occurrenceCount": 1,
+      "key": "classical.transit.lifeAreaShort.house-5",
+      "scenarioIDs": [
+        "probe-life-area-5"
+      ]
+    },
+    {
+      "roleID": "lifeArea",
+      "cardID": "life-areas",
+      "sourceFactIDs": [
+        "transit.probe-life-area-6.area.6"
+      ],
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "real-chart"
+      ],
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "variables": {},
+      "occurrenceCount": 2,
+      "key": "classical.transit.lifeAreaShort.house-6",
+      "scenarioIDs": [
+        "new-york-1769947200",
+        "probe-life-area-6"
+      ]
+    },
+    {
+      "roleID": "lifeArea",
+      "cardID": "life-areas",
+      "sourceFactIDs": [
+        "transit.probe-life-area-7.area.7"
+      ],
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "variables": {},
+      "occurrenceCount": 1,
+      "key": "classical.transit.lifeAreaShort.house-7",
+      "scenarioIDs": [
+        "probe-life-area-7"
+      ]
+    },
+    {
+      "roleID": "lifeArea",
+      "cardID": "life-areas",
+      "sourceFactIDs": [
+        "transit.probe-life-area-8.area.8"
+      ],
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "variables": {},
+      "occurrenceCount": 1,
+      "key": "classical.transit.lifeAreaShort.house-8",
+      "scenarioIDs": [
+        "probe-life-area-8"
+      ]
+    },
+    {
+      "roleID": "lifeArea",
+      "cardID": "life-areas",
+      "sourceFactIDs": [
+        "transit.probe-life-area-9.area.9"
+      ],
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "real-chart"
+      ],
+      "copySlot": "lifeAreaShort",
+      "themeID": "house-activation",
+      "variables": {},
+      "occurrenceCount": 2,
+      "key": "classical.transit.lifeAreaShort.house-9",
+      "scenarioIDs": [
+        "london-1793534400",
+        "probe-life-area-9"
+      ]
+    },
+    {
+      "roleID": "path",
+      "cardID": "planet-paths",
+      "sourceFactIDs": [
+        "transit.benefic-dominant.placement.jupiter"
+      ],
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture"
+      ],
+      "copySlot": "planetPathShort",
+      "themeID": "angular-emphasis",
+      "variables": {},
+      "occurrenceCount": 68,
+      "key": "classical.transit.planetPathShort.angular-emphasis",
+      "scenarioIDs": [
+        "applying",
+        "aspects-no-window",
+        "benefic-dominant",
+        "completion-window",
+        "duplicate-theme-evidence",
+        "essential-debility",
+        "essential-dignity",
+        "events-only",
+        "house-strength",
+        "malefic-dominant",
+        "mixed-testimony",
+        "no-reception",
+        "probe-active-house-ingress",
+        "probe-active-sign-ingress",
+        "probe-active-station-direct",
+        "probe-active-station-retrograde",
+        "probe-angular-emphasis",
+        "probe-applying-contact",
+        "probe-cycle-currentCycle-applying-contact",
+        "probe-cycle-currentCycle-debilitated-planet",
+        "probe-cycle-currentCycle-exact-contact",
+        "probe-cycle-currentCycle-fortified-planet",
+        "probe-cycle-currentCycle-motion-change",
+        "probe-cycle-currentCycle-reception-support",
+        "probe-cycle-currentCycle-retrograde-review",
+        "probe-cycle-currentCycle-separating-contact",
+        "probe-cycle-currentCycle-solar-fortification",
+        "probe-cycle-currentCycle-solar-impairment",
+        "probe-cycle-dailyCycle-applying-contact",
+        "probe-cycle-dailyCycle-debilitated-planet",
+        "probe-cycle-dailyCycle-exact-contact",
+        "probe-cycle-dailyCycle-fortified-planet",
+        "probe-cycle-dailyCycle-motion-change",
+        "probe-cycle-dailyCycle-reception-support",
+        "probe-cycle-dailyCycle-retrograde-review",
+        "probe-cycle-dailyCycle-separating-contact",
+        "probe-cycle-dailyCycle-solar-fortification",
+        "probe-cycle-dailyCycle-solar-impairment",
+        "probe-cycle-longCycle-applying-contact",
+        "probe-cycle-longCycle-debilitated-planet",
+        "probe-cycle-longCycle-exact-contact",
+        "probe-cycle-longCycle-fortified-planet",
+        "probe-cycle-longCycle-motion-change",
+        "probe-cycle-longCycle-reception-support",
+        "probe-cycle-longCycle-retrograde-review",
+        "probe-cycle-longCycle-separating-contact",
+        "probe-cycle-longCycle-solar-fortification",
+        "probe-cycle-longCycle-solar-impairment",
+        "probe-exact-contact",
+        "probe-house-activation",
+        "probe-integrated-constrained",
+        "probe-integrated-mixed",
+        "probe-integrated-supported",
+        "probe-motion-change",
+        "probe-reception-support",
+        "probe-role-benefic",
+        "probe-role-fortified",
+        "probe-role-impaired",
+        "probe-role-malefic",
+        "probe-role-received",
+        "probe-separating-contact",
+        "reception",
+        "retrograde",
+        "returning-pass",
+        "separating",
+        "solar-condition",
+        "station-direct",
+        "station-retrograde"
+      ]
+    },
+    {
+      "roleID": "path",
+      "cardID": "planet-paths",
+      "sourceFactIDs": [
+        "transit.probe-cadent-delay.placement.jupiter"
+      ],
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "copySlot": "planetPathShort",
+      "themeID": "cadent-delay",
+      "variables": {},
+      "occurrenceCount": 1,
+      "key": "classical.transit.planetPathShort.cadent-delay",
+      "scenarioIDs": [
+        "probe-cadent-delay"
+      ]
+    },
+    {
+      "roleID": "path",
+      "cardID": "planet-paths",
+      "sourceFactIDs": [
+        "transit.probe-debilitated-planet.placement.jupiter"
+      ],
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ],
+      "copySlot": "planetPathShort",
+      "themeID": "debilitated-planet",
+      "variables": {},
+      "occurrenceCount": 1,
+      "key": "classical.transit.planetPathShort.debilitated-planet",
+      "scenarioIDs": [
+        "probe-debilitated-planet"
+      ]
+    },
+    {
+      "key": "classical.transit.planetPathShort.fortified-planet",
+      "themeID": "fortified-planet",
+      "sourceFactIDs": [
+        "transit.probe-fortified-planet.placement.jupiter"
+      ],
+      "cardID": "planet-paths",
+      "variables": {},
+      "scenarioIDs": [
+        "probe-fortified-planet"
+      ],
+      "occurrenceCount": 1,
+      "roleID": "path",
+      "copySlot": "planetPathShort",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ]
+    },
+    {
+      "key": "classical.transit.planetPathShort.retrograde-review",
+      "themeID": "retrograde-review",
+      "sourceFactIDs": [
+        "transit.probe-retrograde-review.placement.jupiter"
+      ],
+      "cardID": "planet-paths",
+      "variables": {},
+      "scenarioIDs": [
+        "london-1785672000",
+        "london-1793534400",
+        "new-york-1793534400",
+        "probe-retrograde-review"
+      ],
+      "occurrenceCount": 4,
+      "roleID": "path",
+      "copySlot": "planetPathShort",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "real-chart"
+      ]
+    },
+    {
+      "key": "classical.transit.planetPathShort.solar-fortification",
+      "themeID": "solar-fortification",
+      "sourceFactIDs": [
+        "transit.probe-solar-fortification.placement.jupiter"
+      ],
+      "cardID": "planet-paths",
+      "variables": {},
+      "scenarioIDs": [
+        "probe-solar-fortification"
+      ],
+      "occurrenceCount": 1,
+      "roleID": "path",
+      "copySlot": "planetPathShort",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ]
+    },
+    {
+      "key": "classical.transit.planetPathShort.solar-impairment",
+      "themeID": "solar-impairment",
+      "sourceFactIDs": [
+        "transit.probe-solar-impairment.placement.jupiter"
+      ],
+      "cardID": "planet-paths",
+      "variables": {},
+      "scenarioIDs": [
+        "london-1769947200",
+        "new-york-1769947200",
+        "new-york-1785672000",
+        "probe-solar-impairment",
+        "shanghai-1769947200",
+        "shanghai-1785672000",
+        "shanghai-1793534400"
+      ],
+      "occurrenceCount": 7,
+      "roleID": "path",
+      "copySlot": "planetPathShort",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "real-chart"
+      ]
+    },
+    {
+      "key": "classical.transit.planetPathShort.succedent-continuity",
+      "themeID": "succedent-continuity",
+      "sourceFactIDs": [
+        "transit.probe-succedent-continuity.placement.jupiter"
+      ],
+      "cardID": "planet-paths",
+      "variables": {},
+      "scenarioIDs": [
+        "probe-succedent-continuity"
+      ],
+      "occurrenceCount": 1,
+      "roleID": "path",
+      "copySlot": "planetPathShort",
+      "scenarioKinds": [
+        "finite-domain-probe"
+      ]
+    },
+    {
+      "key": "classical.transit.signalRole.beneficSupport",
+      "sourceFactIDs": [
+        "transit.benefic-dominant.aspect.jupiter.trine.sun"
+      ],
+      "cardID": "current-story",
+      "variables": {},
+      "scenarioIDs": [
+        "applying",
+        "aspects-no-window",
+        "benefic-dominant",
+        "completion-window",
+        "duplicate-theme-evidence",
+        "house-strength",
+        "mixed-testimony",
+        "no-reception",
+        "probe-angular-emphasis",
+        "probe-applying-contact",
+        "probe-cadent-delay",
+        "probe-cycle-currentCycle-applying-contact",
+        "probe-cycle-currentCycle-exact-contact",
+        "probe-cycle-currentCycle-motion-change",
+        "probe-cycle-currentCycle-separating-contact",
+        "probe-cycle-dailyCycle-applying-contact",
+        "probe-cycle-dailyCycle-exact-contact",
+        "probe-cycle-dailyCycle-motion-change",
+        "probe-cycle-dailyCycle-separating-contact",
+        "probe-exact-contact",
+        "probe-integrated-mixed",
+        "probe-integrated-supported",
+        "probe-role-benefic",
+        "probe-separating-contact",
+        "probe-succedent-continuity",
+        "returning-pass",
+        "separating",
+        "sparse-facts"
+      ],
+      "occurrenceCount": 31,
+      "roleID": "beneficSupport",
+      "copySlot": "signalRole",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture"
+      ]
+    },
+    {
+      "key": "classical.transit.signalRole.fortified",
+      "sourceFactIDs": [
+        "transit.essential-dignity.aspect.jupiter.trine.sun"
+      ],
+      "cardID": "current-story",
+      "variables": {},
+      "scenarioIDs": [
+        "essential-dignity",
+        "probe-cycle-currentCycle-fortified-planet",
+        "probe-cycle-currentCycle-solar-fortification",
+        "probe-cycle-dailyCycle-fortified-planet",
+        "probe-cycle-dailyCycle-solar-fortification",
+        "probe-cycle-longCycle-fortified-planet",
+        "probe-cycle-longCycle-solar-fortification",
+        "probe-fortified-planet",
+        "probe-role-fortified",
+        "probe-solar-fortification",
+        "solar-condition"
+      ],
+      "occurrenceCount": 11,
+      "roleID": "fortified",
+      "copySlot": "signalRole",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture"
+      ]
+    },
+    {
+      "key": "classical.transit.signalRole.impaired",
+      "sourceFactIDs": [
+        "transit.essential-debility.aspect.jupiter.trine.sun"
+      ],
+      "cardID": "current-story",
+      "variables": {},
+      "scenarioIDs": [
+        "essential-debility",
+        "new-york-1769947200",
+        "probe-cycle-currentCycle-debilitated-planet",
+        "probe-cycle-currentCycle-retrograde-review",
+        "probe-cycle-currentCycle-solar-impairment",
+        "probe-cycle-dailyCycle-debilitated-planet",
+        "probe-cycle-dailyCycle-retrograde-review",
+        "probe-cycle-dailyCycle-solar-impairment",
+        "probe-cycle-longCycle-debilitated-planet",
+        "probe-cycle-longCycle-retrograde-review",
+        "probe-cycle-longCycle-solar-impairment",
+        "probe-debilitated-planet",
+        "probe-retrograde-review",
+        "probe-role-impaired",
+        "probe-solar-impairment",
+        "retrograde",
+        "shanghai-1769947200",
+        "solar-condition"
+      ],
+      "occurrenceCount": 20,
+      "roleID": "impaired",
+      "copySlot": "signalRole",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture",
+        "real-chart"
+      ]
+    },
+    {
+      "key": "classical.transit.signalRole.maleficPressure",
+      "sourceFactIDs": [
+        "transit.malefic-dominant.aspect.saturn.square.sun"
+      ],
+      "cardID": "current-story",
+      "variables": {},
+      "scenarioIDs": [
+        "malefic-dominant",
+        "mixed-testimony",
+        "probe-cycle-longCycle-applying-contact",
+        "probe-cycle-longCycle-exact-contact",
+        "probe-cycle-longCycle-motion-change",
+        "probe-cycle-longCycle-separating-contact",
+        "probe-integrated-constrained",
+        "probe-integrated-mixed",
+        "probe-role-malefic"
+      ],
+      "occurrenceCount": 9,
+      "roleID": "maleficPressure",
+      "copySlot": "signalRole",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture"
+      ]
+    },
+    {
+      "key": "classical.transit.signalRole.received",
+      "sourceFactIDs": [
+        "transit.reception.aspect.jupiter.trine.sun"
+      ],
+      "cardID": "current-story",
+      "variables": {},
+      "scenarioIDs": [
+        "london-1769947200",
+        "london-1785672000",
+        "london-1793534400",
+        "new-york-1769947200",
+        "new-york-1785672000",
+        "new-york-1793534400",
+        "probe-cycle-currentCycle-reception-support",
+        "probe-cycle-dailyCycle-reception-support",
+        "probe-cycle-longCycle-reception-support",
+        "probe-reception-support",
+        "probe-role-received",
+        "reception",
+        "shanghai-1769947200",
+        "shanghai-1785672000",
+        "shanghai-1793534400"
+      ],
+      "occurrenceCount": 30,
+      "roleID": "received",
+      "copySlot": "signalRole",
+      "scenarioKinds": [
+        "finite-domain-probe",
+        "fixed-fixture",
+        "real-chart"
+      ]
+    }
+  ]
+}

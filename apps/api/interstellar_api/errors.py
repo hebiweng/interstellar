@@ -103,7 +103,8 @@ def install_problem_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(RequestValidationError)
     async def handle_validation(request: Request, exc: RequestValidationError) -> JSONResponse:
-        fields = {"errors": exc.errors(include_url=False, include_context=False)}
+        raw_errors = exc.errors()
+        fields = {"errors": raw_errors}
         return _problem_response(
             request,
             status=422,

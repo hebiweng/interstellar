@@ -1,3 +1,5 @@
+import { fetchWithTimeout, parseJsonErrorBody, type FetchOptions } from "./api-client";
+
 export type AdminRole = "user" | "admin" | "super_admin";
 export type UserStatus = "active" | "disabled" | "suspended" | "pending_deletion" | "deleted";
 
@@ -70,6 +72,15 @@ export type AdminAiProvider = {
   updatedAt: string | null;
 };
 
+
+export type AdminMetrics = {
+  cpu_percent: number;
+  memory_percent: number;
+  total_requests: number;
+  active_users_24h: number;
+  ai_calls_24h: number;
+  exports_24h: number;
+};
 export type AdminAiPrompt = {
   platformPrompt: string;
   version: string;
@@ -85,11 +96,15 @@ export class AdminApiError extends Error {
   }
 }
 
-function apiBase(): string {
-  const configured = process.env.NEXT_PUBLIC_INTERSTELLAR_API_URL?.trim();
-  return configured ? configured.replace(/\/$/, "") : "/api/v1";
-}
+const DEFAULT_TIMEOUT_MS = 30_000;
 
+/**
+ * 递归将 snake_case 键转为 camelCase。
+ *
+ * 注意：此转换是历史行为，消费方依赖 camelCase 字段名。
+ * 移除会破坏所有 admin 页面的字段访问。
+ * 保留但添加显式注释，便于后续维护时理解。
+ */
 function camelize<T>(value: unknown): T {
   if (Array.isArray(value)) return value.map((item) => camelize(item)) as T;
   if (!value || typeof value !== "object") return value as T;
@@ -99,22 +114,30 @@ function camelize<T>(value: unknown): T {
   ])) as T;
 }
 
-async function adminRequest<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${apiBase()}/admin${path}`, {
-    ...init,
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+async function adminRequest<T>(path: string, init?: FetchOptions): Promise<T> {
+  const response = await fetchWithTimeout(`/admin${path}`, {
+    method: init?.method,
+    body: init?.body,
+    headers: init?.headers,
+    timeoutMs: init?.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+    signal: init?.signal,
   });
-  const body = await response.json().catch(() => null) as { message?: string; detail?: string } | null;
+  const errorBody = await parseJsonErrorBody(response);
   if (!response.ok) {
     const defaults: Record<number, string> = {
       401: "请先登录管理员账户。",
       403: "当前账户没有后台管理权限。",
       404: "后台管理接口尚未启用。",
     };
-    throw new AdminApiError(body?.message ?? body?.detail ?? defaults[response.status] ?? `后台请求失败（${response.status}）`, response.status);
+    throw new AdminApiError(
+      errorBody?.message ?? errorBody?.detail ?? defaults[response.status] ?? `后台请求失败（${response.status}）`,
+      response.status,
+    );
   }
-  return camelize<T>(body);
+  if (errorBody?.raw == null) {
+    throw new AdminApiError("后台请求返回了空响应。", response.status);
+  }
+  return camelize<T>(errorBody.raw);
 }
 
 type EventAggregate = { count?: number; succeeded?: number; failed?: number; averageDurationMs?: number | null };
@@ -343,4 +366,7 @@ export function restoreDefaultAiPrompt() {
     method: "PATCH",
     body: JSON.stringify({ platform_prompt: "", version: "platform-default" }),
   }).then((body) => ({ ...body, safetyBoundaryLabel: "服务端不可覆盖安全边界" }));
+}
+export async function getAdminMetrics(): Promise<AdminMetrics> {
+  return adminRequest<AdminMetrics>("/metrics");
 }

@@ -15,6 +15,33 @@ x-runtime-defaults: &runtime-defaults
       max-file: "3"
 
 services:
+  edge:
+    <<: *runtime-defaults
+    container_name: interstellar-edge
+    image: caddy:2-alpine@sha256:86deaf5e3d3408a6ccec08fbb79989783dd26e206ae10bcf78a801dc8c9ab794
+    depends_on:
+      web:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile.fate:/etc/caddy/Caddyfile:ro
+      - interstellar-caddy-data:/data
+      - interstellar-caddy-config:/config
+    mem_limit: 128m
+    pids_limit: 96
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+
   web:
     <<: *runtime-defaults
     container_name: interstellar-web
@@ -22,12 +49,14 @@ services:
     build:
       context: ../..
       dockerfile: infra/deploy/Dockerfile.web
+      args:
+        NEXT_PUBLIC_INTERSTELLAR_API_URL: /api/v1
     environment:
       NODE_ENV: production
       PORT: "3000"
     expose:
       - "3000"
-    mem_limit: 384m
+    mem_limit: 256m
     pids_limit: 128
     read_only: true
     tmpfs:
@@ -56,9 +85,13 @@ services:
       INTERSTELLAR_LOG_LEVEL: INFO
       INTERSTELLAR_CORS_ALLOWED_ORIGINS: https://fate.xiaoguiwk.top
       INTERSTELLAR_ACCOUNT_DATABASE_PATH: /var/lib/interstellar/accounts.sqlite3
-      # Small-memory production profile: timezone selection uses the official
-      # GeoNames IANA hint and remains user-confirmed. Mount the full TBB
-      # archive and override these two variables only on hosts with >=4 GiB.
+      # Small-memory production profile: search uses a deterministic CN subset
+      # derived from the locked official GeoNames release. Timezone selection
+      # uses the GeoNames IANA hint and remains user-confirmed.
+      INTERSTELLAR_GEONAMES_PATH: /opt/interstellar/vendor/geonames/cities500-2026-07-19.zip
+      INTERSTELLAR_GEONAMES_ADMIN1_PATH: /opt/interstellar/vendor/geonames/admin1CodesASCII-2026-07-19.txt
+      INTERSTELLAR_GEONAMES_ADMIN2_PATH: /opt/interstellar/vendor/geonames/admin2Codes-2026-07-19.txt
+      INTERSTELLAR_GEONAMES_DATASET_VERSION: cities500-CN-2026-07-19
       INTERSTELLAR_TIMEZONE_BOUNDARIES_PATH: ${INTERSTELLAR_TIMEZONE_BOUNDARIES_PATH:-/opt/interstellar/deploy-data/timezone-boundaries-geonames-fallback.geojson}
       INTERSTELLAR_TIMEZONE_BOUNDARIES_DATASET_VERSION: ${INTERSTELLAR_TIMEZONE_BOUNDARIES_DATASET_VERSION:-geonames-hint-only-v1}
       INTERSTELLAR_AUTH_COOKIE_NAME: interstellar_session
@@ -69,10 +102,10 @@ services:
       INTERSTELLAR_ADMIN_MASTER_KEY: ${INTERSTELLAR_ADMIN_MASTER_KEY:-}
       INTERSTELLAR_DEEPSEEK_API_KEY: ${INTERSTELLAR_DEEPSEEK_API_KEY:-}
       INTERSTELLAR_DEEPSEEK_BASE_URL: ${INTERSTELLAR_DEEPSEEK_BASE_URL:-https://api.deepseek.com}
-      INTERSTELLAR_DEEPSEEK_MODEL: ${INTERSTELLAR_DEEPSEEK_MODEL:-deepseek-v4-pro}
+      INTERSTELLAR_DEEPSEEK_MODEL: ${INTERSTELLAR_DEEPSEEK_MODEL:-deepseek-v4-flash}
     expose:
       - "8018"
-    mem_limit: 1024m
+    mem_limit: 384m
     pids_limit: 192
     volumes:
       - ${INTERSTELLAR_DATA_DIR:-/opt/interstellar/data}:/var/lib/interstellar
@@ -82,8 +115,63 @@ services:
     cap_drop:
       - ALL
 
+  interstellar-relay:
+    <<: *runtime-defaults
+    container_name: interstellar-relay
+    image: interstellar-relay:${INTERSTELLAR_IMAGE_TAG:-latest}
+    environment:
+      RELAY_ADDR: ":8080"
+      RELAY_DB_PATH: /data/relay.db
+      RELAY_SECRET: ${RELAY_SECRET:?set RELAY_SECRET in .env}
+      RELAY_ADMIN_USER: ${RELAY_ADMIN_USER:?set a random RELAY_ADMIN_USER in .env}
+      RELAY_ADMIN_PASS: ${RELAY_ADMIN_PASS:?set RELAY_ADMIN_PASS in .env}
+      RELAY_PRUNE_OTHER_ADMINS: "1"
+      RELAY_SEED_PROMPTS: "1"
+      RELAY_SEED_PROVIDERS: "1"
+      RELAY_ALLOWED_ORIGIN: https://aaadmin.xiaoguiwk.top
+      RELAY_DAILY_GENERATION_QUOTA: ${RELAY_DAILY_GENERATION_QUOTA:-20}
+      RELAY_ALLOW_DEV_BYPASS: "0"
+      RELAY_APP_ATTEST_APP_ID: KCC8FFFAA5.com.xiaoguiwk.interstellar
+      RELAY_APP_ATTEST_ENVIRONMENT: production
+      RELAY_APP_ATTEST_ALLOW_DEVELOPMENT: "0"
+      RELAY_APP_ATTEST_BUNDLE_VERSION: "1+"
+      RELAY_APP_STORE_ISSUER_ID: ${RELAY_APP_STORE_ISSUER_ID:?set App Store Server API issuer ID}
+      RELAY_APP_STORE_KEY_ID: ${RELAY_APP_STORE_KEY_ID:?set App Store Server API key ID}
+      RELAY_APP_STORE_PRIVATE_KEY_PATH: /run/secrets/app-store-iap-key.p8
+      RELAY_APP_STORE_RECONCILE_INTERVAL_HOURS: ${RELAY_APP_STORE_RECONCILE_INTERVAL_HOURS:-6}
+      RELAY_HEALTH_URL: http://127.0.0.1:8080/v1/health
+    expose:
+      - "8080"
+    volumes:
+      - relay-data:/data
+      - ${RELAY_APP_STORE_PRIVATE_KEY_FILE:?set host path to App Store Server API .p8 key}:/run/secrets/app-store-iap-key.p8:ro
+    mem_limit: 192m
+    pids_limit: 96
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "/app/relay", "health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+
 networks:
   interstellar-internal:
     name: interstellar-internal
     driver: bridge
     attachable: true
+
+
+
+volumes:
+  interstellar-caddy-data:
+    name: interstellar-caddy-data
+  interstellar-caddy-config:
+    name: interstellar-caddy-config
+  relay-data:
+    name: interstellar-relay-data

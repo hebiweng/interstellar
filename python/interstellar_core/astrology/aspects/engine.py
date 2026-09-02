@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Mapping
 from dataclasses import dataclass
 
 from interstellar_core.astronomy.derived import smallest_angular_separation
@@ -18,6 +19,7 @@ from .models import (
     MajorAspectProfile,
     OrbProfile,
 )
+from .orb_overrides import OrbOverrideSet
 from .profiles import OFFICIAL_MAJOR_ASPECTS_V1, OFFICIAL_STANDARD_ORBS_V1
 
 
@@ -98,6 +100,8 @@ def find_major_aspects(
     context: AspectContext = AspectContext.WITHIN_CHART,
     major_profile: MajorAspectProfile = OFFICIAL_MAJOR_ASPECTS_V1,
     orb_profile: OrbProfile = OFFICIAL_STANDARD_ORBS_V1,
+    orb_overrides: OrbOverrideSet | None = None,
+    point_classes: Mapping[str, str] | None = None,
 ) -> tuple[CanonicalAspect, ...]:
     """Return every major-aspect hit, ordered by orb then profile order."""
     if point_a.id == point_b.id:
@@ -109,7 +113,22 @@ def find_major_aspects(
     canonical_a, canonical_b = _canonical_point_order(point_a, point_b)
     hits: list[tuple[float, int, CanonicalAspect]] = []
     for profile_index, aspect in enumerate(major_profile.aspects):
-        effective_orb = orb_profile.effective_orb(aspect.id)
+        preset_orb = orb_profile.effective_orb(aspect.id)
+        effective = (
+            orb_overrides.resolve(
+                preset_orb_deg=preset_orb,
+                preset_rule_ref=f"{orb_profile.id}@{orb_profile.version}",
+                preset_source=orb_profile.source,
+                context=context,
+                aspect_id=aspect.id,
+                point_a=canonical_a,
+                point_b=canonical_b,
+                point_classes=point_classes,
+            )
+            if orb_overrides is not None
+            else None
+        )
+        effective_orb = effective.orb_deg if effective is not None else preset_orb
         error = abs(actual_angle - aspect.exact_angle_deg)
         if error > effective_orb:
             continue
@@ -151,6 +170,11 @@ def find_major_aspects(
                         "ALG-ASTRONOMY-004",
                         f"{major_profile.id}@{major_profile.version}",
                         f"{orb_profile.id}@{orb_profile.version}",
+                        *(
+                            (effective.rule_ref,)
+                            if effective is not None and effective.scope != "preset"
+                            else ()
+                        ),
                     ),
                 ),
             )
@@ -166,6 +190,8 @@ def find_closest_major_aspect(
     context: AspectContext = AspectContext.WITHIN_CHART,
     major_profile: MajorAspectProfile = OFFICIAL_MAJOR_ASPECTS_V1,
     orb_profile: OrbProfile = OFFICIAL_STANDARD_ORBS_V1,
+    orb_overrides: OrbOverrideSet | None = None,
+    point_classes: Mapping[str, str] | None = None,
 ) -> CanonicalAspect | None:
     """Return the tightest hit; no-hit is represented by ``None``."""
     hits = find_major_aspects(
@@ -174,5 +200,7 @@ def find_closest_major_aspect(
         context=context,
         major_profile=major_profile,
         orb_profile=orb_profile,
+        orb_overrides=orb_overrides,
+        point_classes=point_classes,
     )
     return hits[0] if hits else None

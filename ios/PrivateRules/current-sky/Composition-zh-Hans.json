@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-Hans",
+  "technique": "current-sky",
+  "rules": [
+    {
+      "id": "current-sky.sky-overview.v1",
+      "technique": "current-sky",
+      "cardID": "sky-overview",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "current-sky.moon-now.v1",
+      "technique": "current-sky",
+      "cardID": "moon-now",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "current-sky.aspect-pattern.v1",
+      "technique": "current-sky",
+      "cardID": "aspect-pattern",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "current-sky.planetary-motion.v1",
+      "technique": "current-sky",
+      "cardID": "planetary-motion",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "current-sky.sign-changes.v1",
+      "technique": "current-sky",
+      "cardID": "sign-changes",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "current-sky.element-climate.v1",
+      "technique": "current-sky",
+      "cardID": "element-climate",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "current-sky.upcoming-7-days.v1",
+      "technique": "current-sky",
+      "cardID": "upcoming-7-days",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    }
+  ]
+}

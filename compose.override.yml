@@ -1,0 +1,50 @@
+# Development override for Docker Compose.
+# Auto-merged when present in the project directory.
+# Enables hot-reload for the web service (Next.js dev server + volume mounts).
+#
+# Usage: docker compose up -d
+# No additional flags needed; this file is auto-merged.
+#
+# IMPORTANT: compose.app.yaml is NOT auto-discovered by Docker Compose.
+# This override includes all web-service config (ports, depends_on, etc.)
+# so that `docker compose up -d` works without specifying -f flags.
+# For production, use: docker compose -f compose.yaml -f compose.app.yaml up -d --build
+#
+# How it works:
+#   - Overrides web service to use the Dockerfile.web *build* stage
+#     (has node_modules, npm, and full source — not the minimal runtime stage)
+#   - Volume-mounts ./app and ./public for live code changes
+#   - Runs `npm run dev` instead of `node server.js`
+#   - Changes take effect immediately on page refresh (0-wait hot reload)
+#
+# Full-stack dev (including API): docker compose -f compose.yaml -f compose.app.yaml -f compose.override.yml up -d
+
+services:
+  web:
+    build:
+      # Stop at the build stage which has node_modules and full source.
+      # The runtime stage only has the standalone output — insufficient for dev.
+      # Full build config required: Docker Compose replaces (not merges) build objects.
+      context: .
+      dockerfile: infra/deploy/Dockerfile.web
+      target: dev
+    image: interstellar-web:local
+    restart: unless-stopped
+    networks:
+      - backend
+    environment:
+      # Browser requests stay same-origin; Vinext proxies them over the
+      # Compose network to the API container.
+      NEXT_PUBLIC_INTERSTELLAR_API_URL: /api/v1
+      INTERSTELLAR_API_PROXY_TARGET: http://api:8018
+      NEXT_WATCH: "1"
+    ports:
+      - "127.0.0.1:${INTERSTELLAR_WEB_PORT:-3000}:3000"
+    volumes:
+      - ./app:/opt/interstellar/app
+      - ./public:/opt/interstellar/public
+      - ./vite.config.ts:/opt/interstellar/vite.config.ts:ro
+    command: ["npm", "run", "dev", "--", "--hostname", "0.0.0.0"]
+    # Vinext/Vite's initial RSC compilation can exceed 768 MiB even when the
+    # Node heap itself is capped; leave headroom for native tooling.
+    mem_limit: 1280m

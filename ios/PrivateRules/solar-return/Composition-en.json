@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "locale": "en",
+  "technique": "solar-return",
+  "rules": [
+    {
+      "id": "solar-return.year-theme.v1",
+      "technique": "solar-return",
+      "cardID": "year-theme",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "solar-return.year-anchors.v1",
+      "technique": "solar-return",
+      "cardID": "year-anchors",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "solar-return.priority-areas.v1",
+      "technique": "solar-return",
+      "cardID": "priority-areas",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "solar-return.year-dynamics.v1",
+      "technique": "solar-return",
+      "cardID": "year-dynamics",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1,
+            "requiredTags": [
+              "aspect",
+              "single-chart",
+              "challenging"
+            ]
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "solar-return.year-timeline.v1",
+      "technique": "solar-return",
+      "cardID": "year-timeline",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "solar-return.natal-overlay.v1",
+      "technique": "solar-return",
+      "cardID": "natal-overlay",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    },
+    {
+      "id": "solar-return.year-aspects.v1",
+      "technique": "solar-return",
+      "cardID": "year-aspects",
+      "summaryTemplate": "{{primary.1.summary}}",
+      "detailTemplate": "{{primary.1.detail}}",
+      "bindings": [
+        {
+          "name": "primary",
+          "query": {
+            "layers": [
+              "core"
+            ],
+            "limit": 1
+          },
+          "required": true
+        }
+      ],
+      "summaryMinimum": 10,
+      "summaryMaximum": 80,
+      "detailMinimum": 40,
+      "detailMaximum": 260
+    }
+  ]
+}

@@ -181,7 +181,8 @@ def test_provider_keys_are_encrypted_masked_and_prompts_are_versioned(tmp_path) 
         ).json()
         assert first["version"] != second["version"]
         restored = admin.post("/api/v1/admin/ai-prompt/restore-default").json()
-        assert restored["platform_prompt"] == ""
+        assert "大白话" in restored["platform_prompt"]
+        assert restored["platform_prompt"] != second["platform_prompt"]
 
     with sqlite3.connect(tmp_path / "accounts.sqlite3") as connection:
         encrypted = connection.execute(

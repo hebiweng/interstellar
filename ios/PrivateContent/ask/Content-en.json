@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "locale": "en",
+  "area": "ask",
+  "entries": [
+    {
+      "contentKey": "ask.verdict.very-likely",
+      "summary": "The chart gives this outcome strong support.",
+      "detail": "The main indicators point in the same direction, with fewer contradictions than usual. A {{score}}% likelihood means the chart is strongly supportive, not that the result is guaranteed. Real choices and changing circumstances still matter.",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.verdict.likely",
+      "summary": "The outcome has more support than resistance.",
+      "detail": "The central relationship in the chart is usable and the supporting factors outweigh the obstacles. The {{score}}% likelihood describes a favorable balance, while leaving room for practical delays or decisions that can change the result.",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.verdict.mixed",
+      "summary": "The chart remains mixed, so the result is not settled.",
+      "detail": "Support and resistance are close enough that neither side dominates. The {{score}}% likelihood is best read as an unsettled situation. Wait for clearer action, new information, or a change in the conditions around the question.",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.verdict.unlikely",
+      "summary": "The chart shows more resistance than support.",
+      "detail": "The central indicators do not connect easily, or important conditions weaken their ability to act. A {{score}}% likelihood suggests that the present route is difficult. Changing the timing or the practical approach may matter more than pushing harder.",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.verdict.very-unlikely",
+      "summary": "The present chart gives this outcome little support.",
+      "detail": "Several core indicators are blocked, disconnected, or unable to carry the matter forward. The {{score}}% likelihood applies to the question as it stands now. It is more useful as a signal to reconsider the route than as a permanent prediction.",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.choice.leading",
+      "summary": "{{option}} has the clearest valid path, with {{score}}% support.",
+      "detail": "Its connection completes more clearly or sooner than the alternatives. Reception, planetary condition, and the Moon also give it {{score}}% support in the current chart.",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.choice.close",
+      "summary": "{{option}} leads, but the choice remains close.",
+      "detail": "{{option}} ranks first at {{score}}%, yet the gap to the next option is small. The chart does not justify treating this as an obvious winner. Compare practical costs and reversibility before making the final decision.",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.timing.best",
+      "summary": "This is the strongest available window in the selected range.",
+      "detail": "The leading window reaches {{score}}% suitability because the target area, the chart ruler, and the Moon work together more cleanly here than in the alternatives. Use it as a planning advantage, not as a guarantee that outside conditions will cooperate.",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.connection.supportive",
+      "summary": "The two sides are moving toward a workable connection.",
+      "detail": "The main representatives are forming a supportive or direct applying contact. That gives the matter a route forward and shows that the relevant sides can reach one another. The rest of the chart determines whether the connection is easy to use.",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.connection.challenging",
+      "summary": "A connection exists, but it comes with friction.",
+      "detail": "The main representatives are moving toward one another through a demanding contact. The matter can develop, but compromise, delay, or a difficult condition is likely to shape how it unfolds. Progress may require a clear adjustment.",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.connection.separating",
+      "summary": "The strongest connection is already moving apart.",
+      "detail": "The main representatives describe something that has recently peaked or already taken shape. Momentum is no longer building in the same way. The result may depend more on what has already happened than on a new development.",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.connection.none",
+      "summary": "The two sides do not yet have a direct route to each other.",
+      "detail": "No major contact currently links the central representatives within the accepted range. That often describes distance, missing coordination, or a question whose pieces are not ready to meet. Other supporting factors can soften this, but cannot replace the missing link.",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.moon.next",
+      "summary": "The Moon still has somewhere to carry the matter.",
+      "detail": "Before leaving its current sign, the Moon reaches another major contact. This shows that the situation remains active and that another step, conversation, or change can still develop. The quality of that next contact helps explain the direction of movement.",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.moon.void",
+      "summary": "The Moon shows limited momentum for a new development.",
+      "detail": "The Moon makes no further major contact before leaving its current sign. Situations under this condition often continue without a decisive change, lose urgency, or fail to develop as expected. Existing actions still matter, but fresh momentum is limited.",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.risk.present",
+      "summary": "One or more obstacles deserve attention before acting.",
+      "detail": "The chart includes a meaningful source of delay, reversal, pressure, or reduced freedom to act. The professional analysis shows where the deduction came from. Addressing that condition directly is more useful than treating the score as fixed.",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.risk.limited",
+      "summary": "No single obstacle dominates the result.",
+      "detail": "The chart still contains ordinary limits, but none of the main risk factors overwhelms the central connection. This makes the available support easier to use. Practical preparation remains necessary because a favorable chart does not remove real-world constraints.",
+      "sourceRevision": "ask-mvp-v1-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.judgment.yes",
+      "summary": "The chart shows a valid path for the matter to complete.",
+      "detail": "The main significators can perfect without an earlier sign change, station, or blocking contact. Reception, planetary condition, and the Moon give the path {{score}}% support.",
+      "sourceRevision": "ask-judgment-v2-2026-08-12",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.judgment.no",
+      "summary": "The chart shows the expected completion being prevented.",
+      "detail": "The main route is interrupted before it can perfect, and no valid translation or collection restores it. The surrounding conditions register {{score}}% support.",
+      "sourceRevision": "ask-judgment-v2-2026-08-12",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.judgment.no-clear",
+      "summary": "The chart does not provide a clear completion or denial.",
+      "detail": "No decisive perfection path is available, or the evidence indicates delay rather than a final outcome. The surrounding conditions remain mixed at {{score}}% support.",
+      "sourceRevision": "ask-judgment-v2-2026-08-12",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.choice.no-clear",
+      "summary": "The chart does not separate the leading options clearly.",
+      "detail": "The strongest options remain even after comparing completion, reception, planetary condition, and the Moon. {{option}} currently has {{score}}% support, with no clear separation from the other leading option.",
+      "sourceRevision": "ask-judgment-v2-2026-08-12",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.connection.translation",
+      "summary": "Another planet carries the matter between the two sides.",
+      "detail": "It separates from one significator and applies to the other before either side changes course. A third person, message, or circumstance may help the connection complete.",
+      "sourceRevision": "ask-judgment-v2-2026-08-12",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.connection.collection",
+      "summary": "Another planet brings both sides together.",
+      "detail": "Both significators apply to the same slower planet before the path is interrupted. A shared person, decision, or circumstance may gather the matter into one place.",
+      "sourceRevision": "ask-judgment-v2-2026-08-12",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.connection.prevented",
+      "summary": "The expected connection is interrupted before it completes.",
+      "detail": "A sign change or reversal arrives before the main significators perfect their contact, and no alternate path reconnects them.",
+      "sourceRevision": "ask-judgment-v2-2026-08-12",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "ask.connection.delayed",
+      "summary": "An earlier contact delays the expected connection.",
+      "detail": "Another planet reaches the receiving significator first. The original path remains present, but its timing and conditions are altered.",
+      "sourceRevision": "ask-judgment-v2-2026-08-12",
+      "translationStatus": "approved"
+    }
+  ]
+}

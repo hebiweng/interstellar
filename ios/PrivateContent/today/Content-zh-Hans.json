@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-Hans",
+  "area": "today",
+  "entries": [
+    {
+      "contentKey": "today.domain.love.supportive",
+      "summary": "给关系留出空间",
+      "detail": "不急着得到答案时，交流会更自然，也更容易听见对方真正想说的话。今天多一点耐心，比急着下结论更有帮助。",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.love.challenging",
+      "summary": "把真实需求说出来",
+      "detail": "彼此容易误解对方的意思。多确认一句，比反复猜测更有效，尤其不要让一个小顾虑在沉默中越变越大。",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.love.transition",
+      "summary": "让谈话慢慢展开",
+      "detail": "一段关系议题还在变化中。先留出接收新信息的空间，再决定对方是什么意思、下一步应该怎么做。",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.love.neutral",
+      "summary": "保持简单的连接",
+      "detail": "今天的关系节奏比较平稳。及时回应、认真听完或留一点不被打扰的相处时间，比强行展开重大谈话更合适。",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.work.supportive",
+      "summary": "把主要事情往前推",
+      "detail": "主要事情有推进空间。保持顺序简单，先完成最有用的一步，让这个结果为后面的决定腾出空间。",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.work.challenging",
+      "summary": "先理顺，再推进",
+      "detail": "事情并非推不动，只是分工和步骤需要更清楚。先花一点时间确认由谁负责，通常比带着混乱继续推进更省力。",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.work.transition",
+      "summary": "先选出明确的一步",
+      "detail": "优先级正在变化，不是每件事都要同时处理。先完成目前最明确的部分，再根据结果调整下一步。",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.work.neutral",
+      "summary": "按实际顺序完成",
+      "detail": "今天的工作节奏比较平稳。继续原来的计划，收好零散任务，不必给普通事情临时增加紧迫感。",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.money.supportive",
+      "summary": "先用好手里的资源",
+      "detail": "目标越具体，手里的时间、金钱和支持越容易安排到位。寻找更多资源之前，先看看现有条件能完成什么。",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.money.challenging",
+      "summary": "先看清，再决定",
+      "detail": "增加新支出之前，先重新看一遍已有承诺和长期安排。不要只看眼前价格，也要看后续成本和持续时间。",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.money.transition",
+      "summary": "给安排留下余地",
+      "detail": "一项资源决定还在变化中。看清实际成本、时间和参与者之前，尽量保留可以调整的空间。",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.money.neutral",
+      "summary": "继续原来的安排",
+      "detail": "今天的财富与资源节奏比较平稳。完成常规检查、保持正常克制就够了，不必强行做出新决定。",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.energy.supportive",
+      "summary": "按舒服的节奏来",
+      "detail": "今天的精力比较稳定。把日程保持简单，用好注意力清楚的时段，在疲惫变成分心之前停下来休息。",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.energy.challenging",
+      "summary": "给今天留一点余地",
+      "detail": "注意力容易先集中、后疲惫。重要事情放在前面，减少不必要的切换，后半天留一点缓冲。",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.energy.transition",
+      "summary": "边走边调整节奏",
+      "detail": "今天的精力不一定始终平均。专注时处理更费力的事情，安静时段就真正放轻一点。",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.domain.energy.neutral",
+      "summary": "保持平常的节奏",
+      "detail": "今天的状态比较平稳。按正常安排完成事情就好，不要因为日程暂时有空，就临时塞进过多任务。",
+      "sourceRevision": "today-consumer-draft-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.event.connection.peak",
+      "summary": "{{first}}与{{second}}正处在最明显的节点",
+      "detail": "这个主题此刻最集中。",
+      "sourceRevision": "today-event-system-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.event.connection.building",
+      "summary": "{{first}}与{{second}}开始变得更重要",
+      "detail": "这个主题仍在增强。",
+      "sourceRevision": "today-event-system-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.event.connection.easing",
+      "summary": "{{first}}与{{second}}开始更容易处理",
+      "detail": "这个主题最忙的阶段已经过去。",
+      "sourceRevision": "today-event-system-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.event.style.change",
+      "summary": "{{theme}}开始采用{{style}}的方式",
+      "detail": "处理这个主题的方式正在变化。",
+      "sourceRevision": "today-event-system-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.event.area.change",
+      "summary": "{{theme}}的重点转向{{area}}",
+      "detail": "注意力开始进入这个生活领域。",
+      "sourceRevision": "today-event-system-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.event.motion.review",
+      "summary": "{{theme}}的节奏发生变化",
+      "detail": "一段回顾和调整期开始了。",
+      "sourceRevision": "today-event-system-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.event.motion.forward",
+      "summary": "{{theme}}的节奏发生变化",
+      "detail": "向前推进的感觉开始稳定。",
+      "sourceRevision": "today-event-system-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.sky.supportive",
+      "summary": "整体氛围开始舒展",
+      "detail": "外部环境更容易配合。适合把握这段空间，推进需要沟通、协调或等待回应的事情。",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.sky.challenging",
+      "summary": "整体氛围稍显紧张",
+      "detail": "外部摩擦有所增加。先放慢第一反应，把安排保持简单，等压力开始回落后再处理复杂选择。",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.sky.transition",
+      "summary": "整体氛围正在转变",
+      "detail": "更大的变化正在成形。先观察哪些事情开始吸引注意，再决定其中哪些真正需要你的回应。",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.sky.neutral",
+      "summary": "整体氛围保持平稳",
+      "detail": "外部没有单一信号需要主导今天。维持实际节奏，让原本的重要事项继续排在前面。",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.transit.supportive",
+      "summary": "个人推进空间正在形成",
+      "detail": "眼前的一件事更容易向前移动。先完成最明确、最有用的一步，再根据结果决定后续安排。",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.transit.challenging",
+      "summary": "个人压力点正在活跃",
+      "detail": "当前问题可能比预期更占注意力。守住最重要的事情，不要因为一个困难时刻就提前下最终结论。",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.transit.transition",
+      "summary": "下一步正在发生变化",
+      "detail": "眼前方向还在变清楚。先推动已经确定的部分，作出更大承诺之前再重新判断一次。",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.transit.neutral",
+      "summary": "个人节奏保持稳定",
+      "detail": "当前条件不要求大幅改变。继续原计划中有效的部分，并把零散未完成事项逐一收好。",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.secondary.supportive",
+      "summary": "长期成长得到支持",
+      "detail": "一项渐进变化更容易继续。重复已经变得稳定的习惯或选择，不必强求一次明显突破。",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.secondary.challenging",
+      "summary": "旧有模式需要留意",
+      "detail": "熟悉的反应可能比平时更沉重。把它当作一次改变选择的机会，即使第一步很小也有意义。",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.secondary.transition",
+      "summary": "更深层的变化正在进行",
+      "detail": "这不是立即完成的变化。留意哪些反应已经不再适合，并给新的处理方式足够时间变得自然。",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.rhythm.secondary.neutral",
+      "summary": "长期方向保持稳定",
+      "detail": "今天不需要强行制造内在转折。继续积累已经证明能够长期维持的方向。",
+      "sourceRevision": "today-rhythm-mvp-2026-07-30",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.chapter.title",
+      "summary": "{{theme}}在慢慢重写{{area}}",
+      "detail": "这是一段较慢的调整，不是一天的情绪。接下来几周，它会反复落在你的{{area}}上，变化是逐步积累的。",
+      "sourceRevision": "today-chapter-v2-2026-08-01",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "today.chapter.summary",
+      "summary": "围绕你的{{area}}，一段长期阶段正在慢慢展开。",
+      "detail": "这是一段较慢的调整，不是一天的情绪。接下来几周，它会反复落在你的{{area}}上，变化是逐步积累的。",
+      "sourceRevision": "today-chapter-v2-2026-08-01",
+      "translationStatus": "approved"
+    }
+  ]
+}

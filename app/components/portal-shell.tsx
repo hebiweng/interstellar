@@ -6,7 +6,7 @@ import Link from "next/link";
 import styles from "./portal-shell.module.css";
 
 type PortalShellProps = {
-  active: "workspace" | "analysis" | "technique" | "objects" | "account" | "admin";
+  active: "workspace" | "analysis" | "objects" | "account" | "admin";
   eyebrow: string;
   title: string;
   description: string;
@@ -17,7 +17,6 @@ type PortalShellProps = {
 const navigation = [
   { id: "workspace", label: "工作台", href: "/" },
   { id: "analysis", label: "分析中心", href: "/?analysis-center=1" },
-  { id: "technique", label: "技法排盘", href: "/?new-analysis=1&entry=technique" },
   { id: "objects", label: "对象库", href: "/objects" },
 ] as const;
 

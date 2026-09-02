@@ -21,6 +21,7 @@ from interstellar_api.routers.accounts import router as accounts_router
 from interstellar_api.routers.admin import router as admin_router
 from interstellar_api.routers.analytics import router as analytics_router
 from interstellar_api.routers.datasets import router as datasets_router
+from interstellar_api.routers.feedback import router as feedback_router
 from interstellar_api.routers.health import router as health_router
 from interstellar_api.routers.locations import router as locations_router
 from interstellar_api.routers.m1_workflow import router as m1_workflow_router
@@ -149,6 +150,7 @@ def create_app(settings: ApiSettings | None = None) -> FastAPI:
     install_request_context(app, request_id_header=resolved.request_id_header)
     app.include_router(health_router)
     app.include_router(accounts_router)
+    app.include_router(feedback_router)
     app.include_router(admin_router)
     app.include_router(analytics_router)
     app.include_router(datasets_router)

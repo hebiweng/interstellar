@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-Hans",
+  "area": "week",
+  "entries": [
+    {
+      "contentKey": "week.domain.love.supportive",
+      "summary": "关系有继续靠近的空间",
+      "detail": "一段沟通或共同安排更容易向前推进，也要给对方足够的回应时间。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.love.challenging",
+      "summary": "关系需要多留一点余地",
+      "detail": "小误会容易占据更多注意力。先问一个清楚的问题，再判断对方真正的意思。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.love.transition",
+      "summary": "一段关系正在改变形态",
+      "detail": "新信息可能改变一段对话的感受。在双方都更清楚之前，先不要急着下结论。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.love.neutral",
+      "summary": "关系保持平稳",
+      "detail": "日常关注比重大表达更重要。沟通保持简单、直接就好。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.work.supportive",
+      "summary": "主要任务可以向前推进",
+      "detail": "现实条件更容易配合。先完成最清楚、最有用的一步，再增加新的重点。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.work.challenging",
+      "summary": "工作需要重新排清顺序",
+      "detail": "几项责任可能争夺注意力。继续加速之前，先确认负责人和时间安排。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.work.transition",
+      "summary": "工作重点正在变化",
+      "detail": "下一步逐渐变清楚，但整体方案还没完全稳定。先推动一部分，再重新判断。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.work.neutral",
+      "summary": "工作保持稳定节奏",
+      "detail": "现有计划已经够用。把零散未完成事项收好，不必额外制造紧迫感。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.money.supportive",
+      "summary": "资源更容易安排",
+      "detail": "一项实际的财务选择有更多操作空间。先从已经拥有的资源开始。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.money.challenging",
+      "summary": "财务需要再看一遍",
+      "detail": "增加新支出之前，先检查已有承诺。长期成本比眼前价格更值得注意。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.money.transition",
+      "summary": "财务选择要保留弹性",
+      "detail": "实际成本或时间还在变清楚。正式承诺之前，保留可以调整的空间。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.money.neutral",
+      "summary": "财务保持稳定",
+      "detail": "完成日常检查、保持正常克制就够了，不必强行做出新的决定。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.energy.supportive",
+      "summary": "精力更容易集中",
+      "detail": "把清醒的时段留给费力任务，在专注变成疲惫之前及时停下来。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.energy.challenging",
+      "summary": "注意保护精力",
+      "detail": "注意力可能快速起落。减少不必要的切换，并给恢复留出空间。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.energy.transition",
+      "summary": "跟着状态调整节奏",
+      "detail": "一天里的状态未必平均。专注时处理难事，安静时段就真正放轻一点。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.domain.energy.neutral",
+      "summary": "状态保持平稳",
+      "detail": "平常的作息已经够用。保留一点空闲，不要把每个安静时段都塞满。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.peak.ahead",
+      "summary": "本周更忙的节点还在后面",
+      "detail": "节奏仍在增强，为后面要求更高的时段提前留出余地。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.peak.current",
+      "summary": "这是本周最忙的节点",
+      "detail": "守住最重要的任务，不要把注意力分散到太多事情上。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    },
+    {
+      "contentKey": "week.peak.passed",
+      "summary": "本周最忙的节点已经过去",
+      "detail": "节奏正在缓和，先完成已经启动的事情，再开启新的方向。",
+      "sourceRevision": "week-consumer-v1-2026-07-29",
+      "translationStatus": "approved"
+    }
+  ]
+}

@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-03T15:22:36.057Z",
+  "chartID": "modern.transit",
+  "fixedFixtureCount": 14,
+  "fixedFixtureIDs": [
+    "challenging-only",
+    "complete-paths-areas",
+    "disrupting-signal",
+    "empty",
+    "events-only",
+    "mixed-complete",
+    "neutral-only",
+    "no-window-signals",
+    "range-filter",
+    "returning-pass",
+    "same-theme-multi-signal",
+    "stabilizing-signal",
+    "supportive-only",
+    "windows-only"
+  ],
+  "realRunCount": 20,
+  "realRuns": [
+    {
+      "anchorTimestamp": 1769947200,
+      "requestCount": 11,
+      "scopeID": "62c036a2afba56fa",
+      "chartID": "real-chart-01"
+    },
+    {
+      "anchorTimestamp": 1777636800,
+      "requestCount": 11,
+      "scopeID": "f1cd99960d63b62c",
+      "chartID": "real-chart-01"
+    },
+    {
+      "anchorTimestamp": 1785672000,
+      "requestCount": 11,
+      "scopeID": "75dbee7ba5031aef",
+      "chartID": "real-chart-01"
+    },
+    {
+      "anchorTimestamp": 1793534400,
+      "requestCount": 11,
+      "scopeID": "b51ba65c7ed7568b",
+      "chartID": "real-chart-01"
+    },
+    {
+      "anchorTimestamp": 1769947200,
+      "requestCount": 11,
+      "scopeID": "e6e4fbd37662f9f0",
+      "chartID": "real-chart-02"
+    },
+    {
+      "anchorTimestamp": 1777636800,
+      "requestCount": 11,
+      "scopeID": "7af41fc917e36ff9",
+      "chartID": "real-chart-02"
+    },
+    {
+      "anchorTimestamp": 1785672000,
+      "requestCount": 11,
+      "scopeID": "d3508362acebb009",
+      "chartID": "real-chart-02"
+    },
+    {
+      "chartID": "real-chart-02",
+      "scopeID": "9097fbc1faff1a0f",
+      "anchorTimestamp": 1793534400,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-03",
+      "scopeID": "079ffdc5f481028a",
+      "anchorTimestamp": 1769947200,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-03",
+      "scopeID": "bf6f547f0c828f9a",
+      "anchorTimestamp": 1777636800,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-03",
+      "scopeID": "4330d775fe782036",
+      "anchorTimestamp": 1785672000,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-03",
+      "scopeID": "703d1e21673274f2",
+      "anchorTimestamp": 1793534400,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-04",
+      "scopeID": "4e46806740ede854",
+      "anchorTimestamp": 1769947200,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-04",
+      "scopeID": "9de0966136f52072",
+      "anchorTimestamp": 1777636800,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-04",
+      "scopeID": "3e010ab0628c7be3",
+      "anchorTimestamp": 1785672000,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-04",
+      "scopeID": "02ca221d3c4ef83b",
+      "anchorTimestamp": 1793534400,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-05",
+      "scopeID": "4cdd886d202e3013",
+      "anchorTimestamp": 1769947200,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-05",
+      "scopeID": "7342a7b80f956a87",
+      "anchorTimestamp": 1777636800,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-05",
+      "scopeID": "b1aba74e786dd947",
+      "anchorTimestamp": 1785672000,
+      "requestCount": 11
+    },
+    {
+      "chartID": "real-chart-05",
+      "scopeID": "f5a86272cea2cf25",
+      "anchorTimestamp": 1793534400,
+      "requestCount": 10
+    }
+  ],
+  "exhaustiveProbeCount": 4623,
+  "coverage": {
+    "cycleRole": [
+      "currentCycle",
+      "dailyCycle",
+      "longCycle"
+    ],
+    "signalRole": [
+      "disrupting",
+      "expanding",
+      "stabilizing",
+      "structuring",
+      "supporting"
+    ],
+    "integratedStory": [
+      "durable-structure",
+      "expansion-structure",
+      "focused-expansion",
+      "steady-realignment"
+    ],
+    "planetEvent": [
+      "houseIngress",
+      "signIngress",
+      "stationDirect",
+      "stationRetrograde"
+    ],
+    "houseIngress": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12"
+    ]
+  },
+  "sourceArtifact": "modern-transit-planner-observations.json"
+}

@@ -8,6 +8,7 @@ import {
   addAdmin,
   createAdminUser,
   deleteAdminUser,
+  getAdminMetrics,
   getAdminOverview,
   getAdminUsers,
   getAdmins,
@@ -25,13 +26,21 @@ import {
   type AdminAiModel,
   type AdminAiPrompt,
   type AdminAiProvider,
+  type AdminMetrics,
   type AdminOverview,
   type AdminUser,
   type UserStatus,
 } from "../lib/admin-api";
+import {
+  FeedbackApiError,
+  type FeedbackListResponse,
+  type FeedbackRecord,
+  listFeedback,
+  updateFeedbackStatus,
+} from "../lib/feedback-api";
 import styles from "./admin.module.css";
 
-type AdminTab = "overview" | "users" | "admins" | "ai";
+type AdminTab = "overview" | "users" | "admins" | "ai" | "feedback";
 type AccessState = "loading" | "ready" | "forbidden" | "unavailable" | "error";
 
 const statusLabels: Record<UserStatus, string> = {
@@ -85,6 +94,7 @@ export default function AdminPage() {
   const [access, setAccess] = useState<AccessState>("loading");
   const [tab, setTab] = useState<AdminTab>("overview");
   const [overview, setOverview] = useState<AdminOverview | null>(null);
+  const [serverMetrics, setServerMetrics] = useState<AdminMetrics | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [admins, setAdmins] = useState<AdminAccount[]>([]);
   const [providers, setProviders] = useState<AdminAiProvider[]>([]);
@@ -100,6 +110,9 @@ export default function AdminPage() {
   const [newProvider, setNewProvider] = useState({ id: "", displayName: "", baseUrl: "", apiKey: "", timeoutSeconds: 60 });
   const [providerKeys, setProviderKeys] = useState<Record<string, string>>({});
   const [newModels, setNewModels] = useState<Record<string, AdminAiModel>>({});
+  const [feedbackResponse, setFeedbackResponse] = useState<FeedbackListResponse | null>(null);
+  const [feedbackStatus, setFeedbackStatus] = useState<"pending" | "resolved" | null>(null);
+  const [feedbackBusy, setFeedbackBusy] = useState(false);
 
   const handleFailure = useCallback((reason: unknown) => {
     setNotice(null);
@@ -111,6 +124,11 @@ export default function AdminPage() {
     setError(null);
     try {
       setOverview(await getAdminOverview());
+      try {
+        setServerMetrics(await getAdminMetrics());
+      } catch (metricsReason) {
+        // Metrics are optional; do not block the overview if endpoint is not ready.
+      }
       setAccess("ready");
     } catch (reason) {
       if (reason instanceof AdminApiError && (reason.status === 401 || reason.status === 403)) setAccess("forbidden");
@@ -136,6 +154,16 @@ export default function AdminPage() {
         setProviders(providerResult.providers ?? []);
         setPrompt(promptResult);
         setPromptDraft(promptResult.platformPrompt ?? "");
+      }
+      if (next === "feedback") {
+        setFeedbackBusy(true);
+        try {
+          setFeedbackResponse(await listFeedback(feedbackStatus ?? undefined));
+        } catch (reason) {
+          handleFailure(reason);
+        } finally {
+          setFeedbackBusy(false);
+        }
       }
     } catch (reason) {
       handleFailure(reason);
@@ -192,6 +220,33 @@ export default function AdminPage() {
     }
   }
 
+
+
+  async function refreshFeedback(status?: "pending" | "resolved") {
+    setFeedbackBusy(true);
+    setError(null);
+    try {
+      setFeedbackResponse(await listFeedback(status));
+    } catch (reason) {
+      handleFailure(reason);
+    } finally {
+      setFeedbackBusy(false);
+    }
+  }
+
+  async function markFeedbackResolved(record: FeedbackRecord) {
+    if (!window.confirm(`将 #${record.id} 标记为已处理？`)) return;
+    setFeedbackBusy(true);
+    try {
+      await updateFeedbackStatus(record.id, "resolved");
+      await refreshFeedback(feedbackStatus ?? undefined);
+      setNotice(`反馈 #${record.id} 已标记为已处理。`);
+    } catch (reason) {
+      handleFailure(reason);
+    } finally {
+      setFeedbackBusy(false);
+    }
+  }
   async function requestDeleteUser(user: AdminUser) {
     if (!window.confirm(`确认将 ${user.email} 标记为待删除？此操作会撤销会话，并进入数据保留期。`)) return;
     setBusy(true);
@@ -406,6 +461,7 @@ export default function AdminPage() {
           ["users", "用户管理"],
           ["admins", "管理员"],
           ["ai", "AI 供应商与模型"],
+          ["feedback", "用户反馈"],
         ] as Array<[AdminTab, string]>).map(([id, label]) => (
           <button key={id} type="button" data-active={tab === id} onClick={() => void selectTab(id)}>{label}</button>
         ))}
@@ -414,7 +470,7 @@ export default function AdminPage() {
       {notice && <p className={styles.success}>{notice}</p>}
       {error && <p className={styles.error}>{error}</p>}
 
-      {tab === "overview" && overview && <OverviewView overview={overview} metrics={metrics} />}
+      {tab === "overview" && overview && <><OverviewView overview={overview} metrics={metrics} /><MetricsPanel metrics={serverMetrics} /></>}
       {tab === "users" && (
         <section className={styles.panel}>
           <header className={styles.panelHeader}><div><h2>用户管理</h2><p>状态操作会撤销或限制登录；流量与行为是运营监控，不是用户权限。</p></div></header>
@@ -451,7 +507,47 @@ export default function AdminPage() {
         </section>
       )}
 
-      {tab === "ai" && (
+            {tab === "feedback" && (
+        <section className={styles.panel}>
+          <header className={styles.panelHeader}>
+            <div><h2>用户反馈</h2><p>用户提交的 Bug、功能建议与问题。反馈是公开接口，无需登录即可提交。</p></div>
+          </header>
+          <div className={styles.toolbar}>
+            <label>
+              状态筛选
+              <select value={feedbackStatus ?? ""} onChange={(event) => { const value = event.target.value as "pending" | "resolved" | ""; setFeedbackStatus(value || null); void refreshFeedback(value || undefined); }}>
+                <option value="">全部</option>
+                <option value="pending">待处理</option>
+                <option value="resolved">已处理</option>
+              </select>
+            </label>
+            <button className={styles.primaryButton} type="button" disabled={feedbackBusy} onClick={() => void refreshFeedback(feedbackStatus ?? undefined)}>刷新</button>
+          </div>
+          <table className={styles.table}>
+            <thead>
+              <tr><th>ID</th><th>类型</th><th>内容</th><th>联系方式</th><th>用户邮箱</th><th>状态</th><th>时间</th><th>操作</th></tr>
+            </thead>
+            <tbody>
+              {(feedbackResponse?.items ?? []).length === 0 && <tr><td colSpan={8} style={{ textAlign: "center", padding: "24px" }}>暂无反馈</td></tr>}
+              {(feedbackResponse?.items ?? []).map((item) => (
+                <tr key={item.id}>
+                  <td>{item.id}</td>
+                  <td>{item.type === "bug" ? "Bug" : item.type === "feature" ? "功能建议" : "其他"}</td>
+                  <td className={styles.wrapCell} style={{ maxWidth: 320 }}>{item.content}</td>
+                  <td>{item.contact ?? "—"}</td>
+                  <td>{item.userEmail ?? "—"}</td>
+                  <td><span className={styles.badge} data-tone={item.status === "pending" ? "warning" : "active"}>{item.status === "pending" ? "待处理" : "已处理"}</span></td>
+                  <td>{formatDate(item.createdAt)}</td>
+                  <td>
+                    {item.status === "pending" && <button className={styles.button} type="button" disabled={feedbackBusy} onClick={() => void markFeedbackResolved(item)}>标记已处理</button>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
+{tab === "ai" && (
         <div className={styles.sectionStack}>
           <PromptPanel prompt={prompt} draft={promptDraft} busy={busy} onDraft={setPromptDraft} onSave={() => void persistPrompt()} onRestore={() => void restorePrompt()} />
           <section className={styles.panel}>
@@ -484,6 +580,12 @@ export default function AdminPage() {
   );
 }
 
+
+function MetricsPanel({ metrics }: { metrics: AdminMetrics | null }) {
+  if (!metrics) return null;
+  return <section className={styles.metricPanel}><header className={styles.panelHeader}><div><h2>运行指标</h2><p>服务器负载与使用概况（请求计数待接入）。</p></div></header><div className={styles.metricGrid}><article><span>CPU</span><b>{metrics.cpu_percent ? `${metrics.cpu_percent.toFixed(1)}%` : "—"}</b></article><article><span>内存</span><b>{metrics.memory_percent ? `${metrics.memory_percent.toFixed(1)}%` : "—"}</b></article><article><span>24h 活跃</span><b>{number(metrics.active_users_24h)}</b></article><article><span>24h AI 调用</span><b>{number(metrics.ai_calls_24h)}</b></article></div></section>;
+}
+
 function OverviewView({ overview, metrics }: { overview: AdminOverview; metrics: string[][] }) {
   return <><section className={styles.metricGrid}>{metrics.map(([label, value]) => <article className={styles.metric} key={label}><small>{label}</small><b>{value}</b></article>)}</section><section className={styles.activityPanel}><header className={styles.panelHeader}><div><h2>关键行为</h2><p>访问、分析、报告／导出和 AI 调用的运营记录，不采集按键内容或会话回放。</p></div></header><ul className={styles.activityList}>{(overview.recentActivity ?? []).length === 0 ? <li><b>暂无近期行为记录</b></li> : overview.recentActivity.map((item) => <li key={item.id}><span>{item.type}</span><b>{item.label}{item.actor ? ` · ${item.actor}` : ""}</b><time>{formatDate(item.createdAt)}</time></li>)}</ul></section></>;
 }
@@ -495,3 +597,4 @@ function PromptPanel({ prompt, draft, busy, onDraft, onSave, onRestore }: { prom
 function ModelEditor({ model, busy, isNew = false, onChange, onSave }: { model: AdminAiModel; busy: boolean; isNew?: boolean; onChange: (patch: Partial<AdminAiModel>) => void; onSave: () => void }) {
   return <section className={styles.modelCard}><header className={styles.modelHeading}><div><b>{isNew ? "新增模型" : model.displayName}</b><small>{model.modelId || "填写供应商模型 ID"}</small></div>{!isNew && <div className={styles.providerMeta}><span className={styles.badge} data-tone={model.enabled ? "active" : "warning"}>{model.enabled ? "已启用" : "已停用"}</span>{model.isDefault && <span className={styles.badge} data-tone="active">默认模型</span>}</div>}</header><div className={styles.modelForm}><label>模型 ID<input value={model.modelId} onChange={(event) => onChange({ modelId: event.target.value })} placeholder="deepseek-chat" /></label><label>显示名<input value={model.displayName} onChange={(event) => onChange({ displayName: event.target.value })} placeholder="DeepSeek Chat" /></label><label>用途<input value={model.purpose} onChange={(event) => onChange({ purpose: event.target.value })} /></label><label>超时（秒）<input type="number" min="5" max="600" value={model.timeoutSeconds ?? ""} onChange={(event) => onChange({ timeoutSeconds: event.target.value ? Number(event.target.value) : null })} /></label><label>Temperature<input type="number" min="0" max="2" step="0.1" value={model.temperature ?? ""} onChange={(event) => onChange({ temperature: event.target.value ? Number(event.target.value) : null })} /></label><label>最大输出 Tokens<input type="number" min="256" value={model.maxTokens ?? ""} onChange={(event) => onChange({ maxTokens: event.target.value ? Number(event.target.value) : null })} /></label><label className={styles.checkbox}><input type="checkbox" checked={model.enabled} onChange={(event) => onChange({ enabled: event.target.checked })} />启用模型</label><label className={styles.checkbox}><input type="checkbox" checked={model.isDefault} onChange={(event) => onChange({ isDefault: event.target.checked })} />设为默认</label><label className={`${styles.full}`}>模型专属前置提示覆盖<textarea value={model.promptOverride} onChange={(event) => onChange({ promptOverride: event.target.value })} placeholder="留空则只使用平台通用提示；不能覆盖安全边界。" /></label>{!isNew && <p className={`${styles.promptMeta} ${styles.full}`}>提示词版本 {model.promptVersion ?? "—"} · 最后修改者 {model.promptUpdatedBy ?? "—"} · {formatDate(model.promptUpdatedAt)}</p>}<div className={styles.modelFormActions}><button className={styles.primaryButton} disabled={busy} type="button" onClick={onSave}>{isNew ? "添加模型" : "保存模型"}</button></div></div></section>;
 }
+
